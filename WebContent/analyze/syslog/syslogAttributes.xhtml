@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+    <table class="width100" cellspacing="0" cellpadding="0">
+      <tr valign="top">
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['quickKey'].description)}"/>
+        </td>
+        <td >          
+          <t:inputText id="quickKey" styleClass="searchInputText inputWidth"
+            value="#{searchBean.inputs['quickKey'].value}" forceId="true">
+          </t:inputText>
+        </td>                
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['server'].description)}"/>
+        </td>
+        <td >          
+          <ui:include src="../suggestAttribute.xhtml">
+            <ui:param name="key" value="server"/>
+            <ui:param name="field" value="server"/>
+          </ui:include>
+        </td>
+      </tr>                
+      <tr valign="top">
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['eventLevel'].description)}"/>
+        </td>
+        <td >               
+          <ui:include src="../suggestAttribute.xhtml">
+            <ui:param name="key" value="eventLevel"/>
+            <ui:param name="field" value="eventLevel"/>
+          </ui:include>
+        </td>
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['username'].description)}"/>
+        </td>
+        <td>                    
+          <ui:include src="../suggestAttribute.xhtml">
+            <ui:param name="key" value="username"/>
+            <ui:param name="field" value="username"/>
+          </ui:include>
+        </td>
+      </tr>
+      <tr valign="top">
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['classname'].description)}"/>
+        </td>
+        <td>                         
+          <ui:include src="../suggestAttribute.xhtml">
+            <ui:param name="key" value="classname"/>
+            <ui:param name="field" value="classname"/>
+          </ui:include>
+        </td>
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['message'].description)}"/>
+        </td>
+        <td >          
+          <t:inputText id="message" styleClass="searchInputText inputWidth"
+            value="#{searchBean.inputs['message'].value}" forceId="true">
+          </t:inputText>
+        </td>                
+      </tr>
+      <tr>
+        <td colspan="4" style="border-bottom:1px #ccc solid">
+          <h:outputText value=" "/>
+        </td>
+      </tr>
+      <tr class="odd">
+        <td colspan="4">
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{msgs.label_filter_by_date}"/>
+        </td>
+      </tr>
+      <tr>
+        <td width="15%">
+            <h:outputText styleClass="font10" style="font-weight:bold" 
+              value="#{sp:localizeKey(searchBean.inputs['syslogStartDate'].description)}"/>
+            <input type="checkbox" id="syslogStartDateSelect" name="syslogStartDateSelect" style="margin:5px;vertical-align:middle"
+              onclick="SailPoint.Analyze.updateStartType(this, $('syslogSearchForm:syslogStartDateType'), $('syslogStartDateDiv'));"/>
+            <h:inputHidden id="syslogStartDateType" value="#{searchBean.inputs['syslogStartDate'].inputTypeValue}"/>
+        </td>
+        <td align="left" width="35%">
+          <div id="syslogStartDateDiv" class="font10" style="display:#{searchBean.inputs['syslogStartDate'].inputTypeValue == 'After' ? '' : 'none'}">
+            <sp:inputDate type="date" id="syslogStartDate" popupCalendar="true" ampm="true" timeZone="#{searchBean.userTimeZoneId}" addResources="false" 
+              value='#{searchBean.inputs["syslogStartDate"].objectDateValue}' imageLocation="/scripts/myfacescalendar" 
+              javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+          </div>
+        </td>                  
+        <td width="15%">
+            <h:outputText styleClass="font10" style="font-weight:bold" 
+              value="#{sp:localizeKey(searchBean.inputs['syslogEndDate'].description)}"/>
+            <input type="checkbox" id="syslogEndDateSelect" name="syslogEndDateSelect" style="margin:5px;vertical-align:middle"
+              onclick="SailPoint.Analyze.updateEndType(this, $('syslogSearchForm:syslogEndDateType'), $('syslogEndDateDiv'));"/>
+              <h:inputHidden id="syslogEndDateType" value="#{searchBean.inputs['syslogEndDate'].inputTypeValue}"/>
+        
+        </td>
+        <td align="left" width="35%">
+          <div id="syslogEndDateDiv" class="font10" style="display:#{searchBean.inputs['syslogEndDate'].inputTypeValue == 'Before'? '' : 'none'}">
+            <sp:inputDate type="date" id="syslogEndDate" popupCalendar="true" ampm="true" timeZone="#{searchBean.userTimeZoneId}" addResources="false" 
+             value='#{searchBean.inputs["syslogEndDate"].objectDateValue}' imageLocation="/scripts/myfacescalendar" 
+             javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </f:view>
+  <script type="text/javascript" defer="defer">
+    SailPoint.Utils.styleSelects();
+  </script>
+</ui:composition>
+</body>
+</html>

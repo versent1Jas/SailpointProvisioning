@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_edit_advanced_rule}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/assignmentRuleSelector.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/policy/SimulationWindows.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript">
+      // <![CDATA[
+      helpKey = 'ADVANCED_POLICY_CONSTRAINT';
+
+      Ext.onReady(function() {
+          if (#{manageRight == null || sp:hasRight(facesContext, manageRight)}) {
+             SailPoint.AssignmentRule.initializeSelectors();
+          }
+      });
+
+      //]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="mainForm">
+        <h:inputHidden id="isPolicy" name="isPolicy"/>
+
+          <div class="spContent">
+            <h:outputText styleClass="spContentTitle" value="#{msgs.advanced_rule}"/>
+
+            <div class="spBorderlessContentBody">
+              <ui:include src="simpleConstraint.xhtml">
+                <ui:param name="constraint" value="#{policy.session.constraint}" />
+              </ui:include>
+            </div>
+          </div>
+
+          <div class="spacerDiv"/>
+
+          <div class="spContent">
+            <h:outputText styleClass="spContentTitle" value="#{msgs.selection_method}"/>
+
+            <div class="spBorderlessContentBody">
+              <ui:include src="../../include/selector.xhtml">
+                <!-- prefix must be a letter followed by a numberic index -->
+                <ui:param name="prefix" value="S0"/>
+                <ui:param name="manageRight" value="ManagePolicy"/>
+                <ui:param name="selector" value="#{policy.session.constraint.left}" />
+                <ui:param name="listener" value="#{policy}" />
+                <ui:param name="ruleType" value="Policy" />
+              </ui:include>
+
+              <div class="buttonRow">
+                <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+                  <h:commandButton id="returnButton" action="#{policy.saveConstraintAction}" value="#{msgs.button_done}" styleClass="primaryBtn" />
+                </ui:fragment>
+                <h:commandButton action="#{policy.cancelConstraintAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn" immediate="true"/>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+              <button id="startSimulateRuleButton"
+                                type="button"
+                                onclick="SailPoint.Web.Define.Policy.SimulationWindows.displaySimulationDialoguePrompt(false); return false;"
+                                style="#{(empty policy.session.constraint.taskResultId) ? '': 'display:none'}"
+                                class="secondaryBtn" >#{msgs.button_simulation_run_simulation}
+              </button>
+              <button id="viewRuleResultsButton"
+                                type="button"
+                                onclick="SailPoint.Web.Define.Policy.SimulationWindows.displaySimulationResults('#{policy.session.constraint.name}','#{policy.session.constraintId}',false,'mainForm:simulateRuleButton'); return false;"
+                                style="#{(not empty policy.session.constraint.taskResultId) ? '' : 'display:none'}"
+                                class="secondaryBtn" >#{msgs.simulate_view_results}
+              </button>
+            </ui:fragment>
+            <h:commandButton style="display:none" id="simulateRuleButton" action="#{policy.saveAndSimulatePolicyRuleAction}" />
+
+              </div>
+            </div>
+          </div>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

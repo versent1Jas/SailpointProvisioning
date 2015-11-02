@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <div id="#{chartName}_chartOptionsTbl_#{reference.content.id}" style="display:none" >
+  
+  <ui:fragment rendered="#{!(hideOptions == 'true')}">
+  <table align="center" class="#{optionsTblStyle} width100 paddedTbl">  
+  
+    <tr>
+      <td valign="top"><h:outputText styleClass="font10 textBold" value="#{msgs.label_group}"/></td>
+      <td valign="top"><h:outputText styleClass="font10 textBold" value="#{msgs.label_value}"/></td>
+    </tr>
+    
+    <tr>
+      <td valign="top">
+        <span class="font10">
+            <select id="#{chartName}_groupOptions_#{reference.content.id}" class="font10 chartSelect"
+              onchange="updateChartGroupSuggest('#{chartName}','#{reference.content.id}', this.value);" >
+              <option value=" ">#{msgs.select_group}</option>
+              <ui:fragment rendered="#{groupFactoryList.factoryOptionsListEmpty}">
+                  <option value="">#{msgs.no_groups_avail}</option>
+              </ui:fragment>
+              
+              <ui:fragment rendered="#{!groupFactoryList.factoryOptionsListEmpty}">
+                <ui:repeat value="#{groupFactoryList.factoryOptionsList}" var="grp">
+                  <ui:fragment rendered="#{grp['key']==chartBean.gFName}">
+                    <option selected="true" value="#{grp['key']}">#{grp['value']}</option>
+                  </ui:fragment>
+                  <ui:fragment rendered="#{!(grp['key']==chartBean.gFName)}">
+                    <option value="#{grp['key']}">#{grp['value']}</option>
+                  </ui:fragment>
+                </ui:repeat>
+              </ui:fragment>
+            </select>
+          </span>
+      </td>
+      <td width="250" rowspan="5">       
+        <div id="#{chartName}_groupSuggest_#{reference.content.id}"></div>
+        <input type="hidden" id="#{chartName}_groupSuggest_#{reference.content.id}_multiData" name="#{chartName}_groupSuggest_#{reference.content.id}_multiData" value="#{sp:basicJSONDataConverted(reference.arguments['chartValue'],'GroupDefinitionListConverter')}"/>
+      </td>
+    </tr>    
+    <tr>
+      <td valign="top"><h:outputText styleClass="font10 textBold" value="#{msgs.label_chart_type}"/></td>
+    </tr>
+    <tr>
+      <td valign="top">
+        <select id="#{chartName}_typeOptions_#{reference.content.id}" class="font10 chartSelect">
+          <ui:repeat value="#{chartBean.chartTypeOptions}" var="type">
+            <ui:fragment rendered="#{type['key']==chartBean.chartType}">
+              <option selected="true" value="#{type['key']}">#{type['value']}</option>
+            </ui:fragment>
+            <ui:fragment rendered="#{!(type['key']==chartBean.chartType)}">
+              <option value="#{type['key']}">#{type['value']}</option>
+            </ui:fragment>
+          </ui:repeat>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><h:outputText styleClass="font10 textBold" value="#{msgs.label_date_range}"/></td>
+    </tr>
+    <tr>
+      <td valign="top">
+        <span class="font10">
+           <select id="#{chartName}_rangeOptions_#{reference.content.id}" class="font10 chartSelect">
+            <ui:repeat value="#{chartBean.dateRangeOptions}" var="date">
+                <ui:fragment rendered="#{date['key']==chartBean.dateRange}">
+                    <option selected="true" value="#{date['key']}">#{date['value']}</option>
+                </ui:fragment>
+                <ui:fragment rendered="#{!(date['key']==chartBean.dateRange)}">
+                    <option value="#{date['key']}">#{date['value']}</option>
+                </ui:fragment>
+            </ui:repeat>
+          </select>
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">
+        <input type="button" class="primaryBtn" onclick="reRenderChart('#{reference.content.id}',$('#{parentFormName}:#{chartName}_refreshBtn_#{reference.content.id}'),'#{chartName}', '#{parentFormName}')" value="#{msgs.button_refresh}"/>
+      </td>
+    </tr>
+  </table>  
+  
+  </ui:fragment>
+  </div>  
+  
+  <ui:fragment rendered="#{!(hideOptions == 'true')}">
+    <table class="width100" align="right" cellspacing="0" cellpadding="0"
+      style="height:22px;#{!chartBean.renderChart ? 'display:none' : ''}" >
+      <tr style="font-size:12px; font-weight:bold">
+        <td align="left" valign="middle">
+          <h:outputLink style="margin:2px;vertical-align:middle"
+            value="javascript:viewLargeChart('#{reference.content.id}', '#{chartName}', '#{parentFormName}');">
+            <h:graphicImage alt="expand" url="/images/icons/report_16px.png"/>
+            <h:outputText styleClass="font10" value=" #{msgs.expand_chart}"/>
+          </h:outputLink>
+        </td>
+        <td align="right"><div class="roundedBottom configLinkDiv">
+          <h:outputLink styleClass="disclosure"
+              onclick="showHideWithLock($('#{chartName}_chartOptionsTbl_#{reference.content.id}'),null,null,SailPoint.Dashboard.toggleDisclosure); renderChartGroupSuggest('#{chartName}', '#{reference.content.id}'); return false;">
+              <h:outputText value=" #{msgs.dashboard_configure}"/>
+          </h:outputLink></div>
+        </td>
+      </tr>
+    </table>
+  </ui:fragment>
+  <br/>
+  
+  <h:inputHidden id="#{chartName}_realReferenceIndex_#{reference.content.id}" value="#{reference.content.id}"/>
+  
+  <a4j:commandButton  id="#{chartName}_componentChoicesBtn_#{reference.content.id}" 
+                      style="display:none" 
+                      limitRender="true"
+                      action="#{chartBean.updateChoices}" 
+                      render="#{parentFormName}:#{chartName}_componentChoices_#{reference.content.id}"/>
+    
+  <a4j:commandButton  style="display:none" 
+                      id="#{chartName}_chartBtn_#{reference.content.id}" 
+                      value="#{msgs.button_refresh}"
+                      action="#{chartBean.viewChart}" 
+                      render="#{parentFormName}:#{chartName}_chart_#{reference.content.id}"/>
+                      
+  <a4j:commandButton  id="#{chartName}_viewLargeChartButton" 
+                      style="display:none"
+                      action="#{chart.viewLargeChart}"/>
+  
+
+</ui:composition>
+
+</body>
+
+</html>

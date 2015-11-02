@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+<!-- ========================================================================
+
+  An integration config that uses TraceExecutor which will print
+  messages to the console as it is called.  
+
+  It uses the special universalManager attribute to force
+  all application requests through it without having to 
+  name them all in the managed resources list.
+
+========================================================================= -->
+
+<IntegrationConfig name='Trace Integration'
+  executor='sailpoint.integration.TraceExecutor'
+  execStyle='synchronous'
+  roleSyncStyle='none'>
+
+  <Attributes>
+    <Map>
+      <entry key='universalManager' value='true'/>
+      <entry key='operations' value='Create,Modify,Delete,Enable,Unlock,SetPassword'/>
+    </Map>
+  </Attributes>
+
+</IntegrationConfig>
+
+<!-- ========================================================================
+
+  An integration config that sends everything to a JDBC database.
+
+  If you set the "url" attribute, that will be used to establish a
+  connection.  These connections will not be pooled.
+
+  If "url" is null, the integration will use the the database
+  configured for IIQ.
+
+========================================================================= -->
+
+<IntegrationConfig name='JDBC Integration'
+  executor='sailpoint.integration.JdbcExecutor'
+  execStyle='synchronous'
+  roleSyncStyle='it'>
+
+  <Attributes>
+    <Map>
+<!--
+      <entry key='universalManager' value='true'/>
+-->
+      <entry key='url' value='jdbc:mysql://localhost/identityiq?useServerPrepStmts=true&amp;tinyInt1isBit=true&amp;useUnicode=true&amp;characterEncoding=utf8'/>
+      <entry key='user' value='identityiq'/>
+      <entry key='password' value='identityiq'/>
+    </Map>
+  </Attributes>
+
+</IntegrationConfig>
+
+<!-- ========================================================================
+
+  An integration config that sends provisioning requests to a JMS
+  message queue, and formats the ProvisioningPlan as a custom XML string.
+
+========================================================================= -->
+
+<IntegrationConfig name='JMS Integration'
+  executor='sailpoint.integration.JmsExecutor'
+  execStyle='synchronous'>
+
+  <Attributes>
+    <Map>
+      <entry key='universalManager' value='true'/>
+
+      <entry key='trace' value='true'/>
+      <entry key='simulate' value='true'/>
+
+      <!-- Identifier of the destination queue.  
+           If jndiUrl is not set this is a topic or queue name.
+           If jndiUrl is set this is the JDNI name containing
+           a topic or queue name.
+           Whether this is a topic or queue depends on the pubSub argument.
+      -->
+
+      <!-- A queue name for non-JNDI testing -->
+      <entry key='destination' value='kelly_test'/>
+
+      <!-- A JNDI queue name for testing
+      <entry key='destination' vaule='cn=JMSDEMOQueue'/>
+      -->
+      <!-- A JNDI topic name for testing
+      <entry key='destination' vaule='cn=JMSDEMOTopic'/>
+      -->
+
+      <entry key='pubSub' value='false'/>
+      <entry key='receiveTimeout' value='0'/>
+
+      <!-- credentials for the message queue -->
+      <entry key='connectUser' value='Administrator'/>
+      <entry key='connectPassword' value='Fir3bird'/>
+
+      <!-- JNDI credentials and facotry lookup location.
+           If jndiUrl is null we use 'factory'.
+      <entry key='jndiUrl' value='ldap://skimmer.test.sailpoint.com/ou=mq,dc=example,dc=com'/>
+      -->
+      <entry key='jndiUser' value='cn=root,dc=example,dc=com'/>
+      <entry key='jndiPassword' value='secret'/>
+      <entry key='jndiFactory' value='cn=JMSDEMOCF'/>
+
+      <!-- alternative to using JNDI to lookup a ConnectionFactory -->
+      <entry key='factory'>
+        <value>
+          <Script>
+            <Source>
+              import com.ibm.mq.jms.JMSC;
+              import com.ibm.mq.jms.MQConnectionFactory;
+              import com.ibm.mq.jms.MQQueueConnectionFactory;
+              import com.ibm.mq.jms.MQTopicConnectionFactory;
+              import sailpoint.tools.Util;
+              MQConnectionFactory mqFactory = null;
+              if (Util.otob(pubSub))
+                mqFactory = new MQTopicConnectionFactory();
+              else
+                mqFactory = new MQQueueConnectionFactory();
+              mqFactory.setHostName("skimmer.test.sailpoint.com");
+              mqFactory.setPort(MQConnectionFactory.MQ_DEFAULT_PORT);
+              mqFactory.setTransportType(JMSC.MQJMS_TP_CLIENT_MQ_TCPIP);
+              mqFactory.setUseConnectionPooling(true);
+              return mqFactory;
+            </Source>
+          </Script>
+        </value>
+      </entry>
+
+      <!-- ProvisioningPlan rendering -->
+      <entry key='planRenderer'>
+        <value>
+          <Script>
+            <Source>
+              import sailpoint.tools.xml.XMLBuilder;
+              import sailpoint.tools.xml.StringXMLBuilder;
+              import sailpoint.integration.ProvisioningPlan;
+              import sailpoint.integration.ProvisioningPlan.AccountRequest;
+              import sailpoint.integration.ProvisioningPlan.AttributeRequest;
+
+              // TODO: Need to figure out where these come from
+              String eid = plan.getIdentity();
+              String mcid = plan.getIdentity();
+
+              /**
+               * Add a PersonEntitlement element containing one value.
+               */
+              void addEntitlementString(XMLBuilder b, String target, String name, 
+                                        String action, String value) {
+
+                  b.startElement("PersonEntitlement");
+                  b.startElement("Value");
+                  b.addContent(value);
+                  b.endElement("Value");
+                  // not currently defned in the schema!
+                  /*
+                  b.startElement("Name");
+                  b.addContent(name);
+                  b.endElement("Name");
+                  */
+                  b.startElement("Target");
+                  b.addContent(target);
+                  b.endElement("Target");
+                  b.startElement("Action");
+                  b.addContent(action);
+                  b.endElement("Action");
+                  b.endElement("PersonEntitlement");                                 
+              }
+
+              /**
+               * Add one or more PersonEntitlement elements for each value
+               * from an AttributeRequest.
+               */
+              void addEntitlement(XMLBuilder b, String target, String name, 
+                                  String action, Object value) {
+
+                  if (value instanceof List) {
+                      List list = (List)value;
+                      for (int i = 0 ; i &lt; list.size() ; i++) {
+                          Object el = list.get(i);
+                          if (el != null)
+                              addEntitlementString(b, target, name, action, el.toString());
+                      }
+                  }
+                  else 
+                      addEntitlementString(b, target, name, action, value.toString());
+              }
+
+              /**
+               * Body
+               */
+              XMLBuilder b = new StringXMLBuilder(null, null);
+              b.startElement("McDEnv");
+              b.startElement("Header");
+              b.startElement("Srce");
+              b.addAttribute("SrceSys", "ODS");
+              b.endElement("Srce");
+              b.startElement("Trgt");
+              b.addAttribute("TrgtSys", "SIM");
+              b.endElement("Trgt");
+              b.endElement("Header");
+              b.startElement("Data");
+              b.startElement("PersonRequest");
+              b.addAttribute("Status", "New");
+              b.startElement("PersonActionCode");
+              b.addContent("C");
+              b.endElement("PersonActionCode");
+              b.startElement("PersonEid");
+              b.addContent(eid);
+              b.endElement("PersonEid");
+              b.startElement("PersonMcid");
+              b.addContent(mcid);
+              b.endElement("PersonMcid");
+              b.startElement("PersonEntitlements");
+              
+              List accounts = plan.getAccountRequests();
+              if (accounts != null) {
+                  for (int i = 0 ; i &lt; accounts.size() ; i++) {
+                      AccountRequest account = (AccountRequest)accounts.get(i);
+                      String target = account.getApplication();
+                      List atts = account.getAttributeRequests();
+                      if (atts != NULL) {
+                          for (j = 0 ; j &lt; atts.size() ; j++) {
+                              AttributeRequest att = (AttributeRequest)atts.get(j);
+                              String name = att.getName();
+                              String op = att.getOperation();
+                              Object value = att.getValue();
+
+                              // IIQ op code are set, add, remove
+                              // SIM op codes are Add, Remove
+                              // Should see set but convert to add
+                              String action = "Add";
+                              if ("remove".equals(op)) action = "Remove";
+
+                              addEntitlement(b, target, name, action, value);
+                          }
+                      }
+                  }
+              }
+
+              b.endElement("PersonEntitlements");
+              b.endElement("PersonRequest");
+              b.endElement("Data");
+              b.endElement("McDEnv");                                       
+
+              return b.toXML();
+            </Source>
+          </Script>
+        </value>
+      </entry>
+
+    </Map>
+  </Attributes>
+
+</IntegrationConfig>
+
+</sailpoint>
+

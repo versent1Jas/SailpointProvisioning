@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Sigh, this just includes the common editing page but
+  we have to have a wrapper to write JSF nativation rules. 
+  JSF sucks.
+
+  I guess we can use it to make sure that the right ObjectConfigBean
+  subclass is passed down, but for attriute editing the default
+  would be fine.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+
+    <script type="text/javascript" defer="defer">
+    helpKey = 'ATTRIBUTE_CONFIG';
+    </script>
+
+    <ui:include src="objectAttribute.xhtml">
+      <ui:param name="config" value="#{applicationObjectConfig}"/>
+    </ui:include>
+</ui:composition>
+</body>
+</html>

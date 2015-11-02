@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputText value="#{msgs.activity_data_src_conf}"/>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>      
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/logFileCollectorConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION_EDIT_DATASOURCE';
+
+        function reapplyStyles() {}
+
+        function selectCollectorType(data){
+            if(data.status == "begin"){
+                $('editForm:selectTypeButton').click();
+            }
+        }
+
+        function initializeSelectedConfigPage() {
+            var collectorType = $('editForm:collectorType').value;
+
+            if (collectorType == 'JDBC Collector') {
+                displayAppropriatePane('connectionSettingsContent', 'button0');
+            } else if ( collectorType == 'Windows EventLog Collector') {
+                displayAppropriatePane('settingsContent', 'button0');
+            } else if ( collectorType == 'Log File') {
+                displayAppropriatePane('transportSettingsContent', 'button0');
+            } else if ( collectorType == 'CEF Log File') {
+                displayAppropriatePane('transportSettingsContent', 'button0');
+            } else if ( collectorType == 'RACF Audit Log Collector') {
+                displayAppropriatePane('transportSettingsContent', 'button0');
+            } else if ( collectorType == 'Symantec Enforce DLP') {
+                displayAppropriatePane('symantecDLPSettingsContent', 'button0');
+            } 
+        }
+
+       //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:form id="editForm">
+        <h:inputHidden id="id" value="#{applicationObject.objectId}"/>
+        <h:inputHidden id="type" value="#{applicationObject.object.type}"/>
+        <h:inputHidden id="selectedDSForApp" value="#{applicationObject.selectedDataSourceId}"/>
+        <ui:param name="activityDataSource" value="#{applicationObject.selectedDataSourceBean}"/>
+
+        <h:panelGroup>
+            <h:outputText styleClass="requiredText" value="*"/>
+            <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+        </h:panelGroup>
+
+        <a4j:outputPanel id="activityDataSourceRulesPanel">
+        <h:panelGrid columns="2" columnClasses="padded" rowClasses="padded">
+          <h:panelGroup>
+            <h:outputText escape="false" value="#{msgs.name}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+          <h:inputText id="dsName" value="#{activityDataSource.object.name}"
+                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+          <h:outputText value="#{msgs.description}"/>
+          <h:inputTextarea id="dsDescription" value="#{activityDataSource.object.description}" cols="40" rows="2"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+          <h:outputText value="#{msgs.transformation_rule}"/>
+          <h:panelGroup>
+              <h:selectOneMenu id="dsTransformationRule" value="#{activityDataSource.selectedTransformationRule}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{activityDataSource.transformationRules}"/>
+              </h:selectOneMenu>
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                  <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                         onclick="SailPoint.Rule.Editor.edit($('editForm:dsTransformationRule').value,
+                                 'ActivityTransformer',
+                                 $('editForm:refreshActivityDataSourceRulesButton'))" />
+              </ui:fragment>
+          </h:panelGroup>
+
+          <h:outputText value="#{msgs.correlation_rule}"/>
+          <h:panelGroup>
+              <h:selectOneMenu id="dsCorrelationRule" value="#{activityDataSource.selectedCorrelationRule}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{activityDataSource.correlationRules}"/>
+              </h:selectOneMenu>
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                  <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                         onclick="SailPoint.Rule.Editor.edit($('editForm:dsCorrelationRule').value,
+                                 'ActivityCorrelation',
+                                 $('editForm:refreshActivityDataSourceRulesButton'))" />
+              </ui:fragment>
+          </h:panelGroup>
+
+          <h:outputText value="#{msgs.activity_data_src_type}"/>
+          <h:panelGroup>
+            <a4j:outputPanel id="collectorSettings">
+              <h:selectOneMenu id="collectorType"
+                               value="#{activityDataSource.object.type}"
+                               rendered="#{empty activityDataSource.object.id}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:ajax event="change" 
+                        onevent="selectCollectorType"
+                        execute="@this dsTransformationRule dsCorrelationRule"
+                        render="dsTransformationRule dsCorrelationRule"
+                        listener="#{activityDataSource.handleCollectorTypeChange}" />
+                <f:selectItem itemValue="" itemLabel="#{msgs.select_collector_type}"/>
+                <f:selectItems value="#{activityDataSource.collectorTypes}"/>
+              </h:selectOneMenu>
+              <h:selectOneMenu id="fixedCollectorType" value="#{empty activityDataSource.object.type ? 'None' : activityDataSource.object.type}"
+                               rendered="#{not empty activityDataSource.object.id}"
+                               disabled="true"
+                               readonly="true">
+                <f:selectItem itemValue="#{empty activityDataSource.object.type ? 'None' : activityDataSource.object.type}"
+                              itemLabel="#{empty activityDataSource.object.type ? msgs.none : activityDataSource.object.type}"/>
+              </h:selectOneMenu>
+            </a4j:outputPanel>
+          </h:panelGroup>
+        </h:panelGrid>
+        </a4j:outputPanel>
+
+        <a4j:outputPanel id="configSettings">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+          <h:panelGroup  rendered="#{not empty activityDataSource.object.collector}">
+            <ui:include src="#{activityDataSource.configPage}"/>
+          </h:panelGroup>
+        </a4j:outputPanel>
+        <h:panelGroup>
+          <div class="buttonRow">
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+              <h:commandButton id="activityDataSourceSave" action="#{activityDataSource.saveAction}" value="#{msgs.button_save}" styleClass="primaryBtn"/>
+            </ui:fragment>
+            <h:commandButton id="activityDataSourceCancel" action="#{activityDataSource.cancelAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn"/>
+          </div>
+        </h:panelGroup>
+
+        <a4j:commandButton id="refreshActivityDataSourceRulesButton"
+                           style="display:none"
+                           immediate="true"
+                           render="activityDataSourceRulesPanel"/>
+
+        <a4j:commandButton id="selectTypeButton" action="#{activityDataSource.selectType}" style="display:none"
+                           render="configSettings, collectorSettings"
+                           oncomplete="initializeSelectedConfigPage();"/>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

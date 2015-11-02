@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+  <ui:composition>
+    <table class="width100" cellpadding="0" cellspacing="0">
+      <tr>
+        <td>
+          <div id="submenu-main">
+            <div id="submenu-tabs">
+              <ul id="submenu-links">
+                <li id="button0" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('connectionSettingsContent', 'button0')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.jdbc_conn_settings} </span>
+                </li>
+                <li id="button1" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('querySettingsContent', 'button1')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.query_settings} </span>
+                </li>
+                <li id="button2" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('targetsContent', 'button2')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.activity_targets} </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="connectionSettingsContent" class="submenuContentBox" style="border:0px">
+              <div class="spContent">
+                <div class="spTabledContent">
+                  <table class="spTable" cellspacing="0">
+                    <thead>
+                      <tr><th colspan="2"><h:outputText value="#{msgs.jdbc_conn_settings}"/></th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.connection_user}"/></td>
+                        <td>
+                          <h:inputText size="50" id="connectionUser" value="#{activityDataSource.object.configuration['user']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.connection_password}"/></td>
+                        <td>
+                          <sp:inputSecret size="50" id="connectionPassword" value="#{activityDataSource.object.configuration['password']}" redisplay="true"
+                                          autocomplete="off"
+                                          disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                          readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.database_url}"/></td>
+                        <td>
+                          <h:inputText size="50" id="database" value="#{activityDataSource.object.configuration['url']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.jdbc_driver}"/></td>
+                        <td>
+                          <h:inputText size="50" id="jdbcDriver" value="#{activityDataSource.object.configuration['driverClass']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+          </div>  <!-- connectionSettingsContent -->
+          
+          <div id="querySettingsContent" class="submenuContentBox" style="display:none; border:0px">
+              <div class="spContent">
+                <table class="width100">
+                  <tr>
+                    <td>
+                      <div class="spTabledContent">
+                        <table class="spTable" cellspacing="0">
+                          <thead>
+                            <tr><th colspan="2"><h:outputText value="#{msgs.query_settings}"/></th></tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td width="25%"><h:outputText value="#{msgs.sql_statement}"/></td>
+                              <td>
+                                <h:inputTextarea cols="50" value="#{activityDataSource.object.configuration['sql']}"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}" />
+                              </td>
+                            </tr>
+                            <tr>
+                              <td><h:outputText value="#{msgs.condition_builder}" /></td>
+                              <td>
+                                <h:selectOneMenu value="#{activityDataSource.object.configuration['conditionBuilderRule']}"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <f:selectItems value="#{activityDataSource.conditionBuilders}"/>
+                                </h:selectOneMenu>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td><h:outputText value="#{msgs.position_builder}" /></td>
+                              <td>
+                                <h:selectOneMenu value="#{activityDataSource.object.configuration['positionConfigBuilderRule']}"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <f:selectItems value="#{activityDataSource.positionBuilders}"/>
+                                </h:selectOneMenu>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+          </div>  <!-- querySettingsContent -->
+          
+          <div id="targetsContent" class="submenuContentBox" style="display:none; border:0px">
+            <ui:include src="activityTargets.xhtml"/>
+          </div> <!-- targetsContent -->          
+        </td>
+      </tr>
+    </table>
+  </ui:composition>
+</body>
+</html>

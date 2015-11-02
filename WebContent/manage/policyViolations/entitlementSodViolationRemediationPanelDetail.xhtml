@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+    <!--
+      param: 
+          entitlementViolations - PolicyTreeNode to render
+     -->
+    <body>
+        <ui:composition>
+                <!-- If passed parameter is a leaf display details -->
+                <c:if test="#{entitlementViolations.leaf}">
+                    <tr>
+                        <td>
+                          <h:selectBooleanCheckbox value="#{entitlementViolations.selected}" styleClass="BizRole" onclick="updateSubmitButton()"/>
+                        </td>
+                        <td>#{entitlementViolations.application}</td>
+                        <td>#{entitlementViolations.name}</td>
+                        <td>#{entitlementViolations.value}</td>
+                    </tr>
+                </c:if>
+                <!-- If passed parameter is a non-terminal node, add a nested table -->
+                <c:if test="#{!entitlementViolations.leaf}">
+                    <tr>
+                        <td>
+                            <table class="spTable" style="border-bottom:1px #cccccc solid">
+                                 <c:if test="#{entitlementViolations.andOp}">
+                                     <tr>
+                                         <th colspan="4">is and</th>
+                                     </tr>
+                                 </c:if>
+                                 <c:if test="#{!entitlementViolations.andOp}">
+                                     <tr>
+                                         <th colspan="4">is or</th>
+                                     </tr>
+                                 </c:if>
+                                 <c:forEach var="child" items="#{entitlementViolations.children}">
+                                     <ui:include src="/manage/policyViolations/entitlementSodViolationRemediationPanelDetail.xhtml">
+                                         <ui:param name="entitlementViolations" value="#{child}"/>
+                                     </ui:include>
+                                 </c:forEach>
+                             </table>
+                         </td>
+                    </tr>
+                </c:if>
+        </ui:composition>
+    </body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    
+  xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition>
+  <!--  Any page that includes this page must also include the compositeScoringConfig.js file! -->
+  <h:inputHidden id="category"/>
+
+  <table cellpadding="0" cellspacing="0" class="width100">
+    <tbody>
+      <tr><td>
+          <div class="paddedContainer">
+            <table class="width100" style="border:0" cellpadding="5">
+              <tr>
+                <td><h:outputText styleClass="spContentTitle" value="#{msgs.title_baseline_access_risk_overview}" /></td>
+              </tr>
+              <tbody>    
+                <tr>
+                  <td>
+                  <div class="spTabledContent">
+                    <t:dataTable styleClass="spTable"
+                      id="riskScoreBarOverviewTable"
+                      rowClasses="even,odd"
+                      value="#{riskScoreConfig.barWeights}" var="category"
+                      forceIdIndexFormula="#{category.scoreName}">
+            
+                      <h:column>
+                        <f:facet name="header">
+                          <h:outputText value="#{msgs.category}" />
+                        </f:facet>
+                        <a4j:commandLink id="categoryName" onclick="confirmSaveOrCancel('#{category.scoreName}', 'editForm:riskScoreBarOverviewTabl#{category.scoreName}:saveAndConfig', 'editForm:riskScoreBarOverviewTabl#{category.scoreName}:cancelAndConfig');">
+                          <h:outputText value="#{sp:localizeKey(category.type)}" />
+                        </a4j:commandLink>
+                        
+                        <h:commandButton id="saveAndConfig" style="display:none" action="#{riskScoreConfig.saveAndConfig}"/>
+                        <h:commandButton id="cancelAndConfig" style="display:none" action="#{riskScoreConfig.cancelAndConfig}"/>
+                      </h:column>
+            
+                      <h:column>
+                        <f:facet name="header">
+                          <h:outputText value="#{msgs.description}" />
+                        </f:facet>
+                        <h:outputText value="#{sp:localizeKey(category.description)}"/>
+                      </h:column>
+                    </t:dataTable>
+                  </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+      </td></tr>
+    </tbody>
+  </table>
+</ui:composition>
+
+</body>
+</html>

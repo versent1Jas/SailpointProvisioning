@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+  <ui:composition>
+    <c:if test='#{taskDefinition.displayArguments}'>
+      <table id="argumentTbl" class="argumentTbl argumentTblWithHelp customWidth paddedTbl" cellspacing="0">
+        <tr>
+          <td colspan="2">
+            <h:outputText styleClass="spContentTitle" value="#{taskDefinition.signatureName} #{msgs.options}"/>
+          </td>
+        </tr>
+        
+        <c:forEach var="argVal" items="#{taskDefinition.taskDefArgs}">
+          <tr>
+            <td>           
+              <sp:outputText value="#{argVal.argument.displayLabel}"/>
+              <h:outputText styleClass="requiredText" value="*" rendered="#{argVal.argument.required}"/>
+            </td>
+            <td><h:graphicImage id="imgHlpTaskDef#{argVal.argument.name}" 
+                rendered="#{argVal.argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[argVal.argument.helpKey]}"/>
+            </td>
+    
+            <td>
+              <c:choose>
+                <c:when test="#{argVal.argument.inputTemplate != null}">
+                  <ui:include src="#{argVal.argument.inputTemplate}">
+                    <ui:param name="argVal" value="#{argVal}"/>
+                    <ui:param name="taskDefinition" value="#{taskDefinition}"/>
+                  </ui:include>
+                </c:when>
+                
+                <c:when test="#{argVal.argument.type eq 'string'}">
+                  <c:if test="#{argVal.argument.multi}">
+                    <h:inputTextarea id="#{argVal.argument.name}_str" rows="6" cols="40" value="#{argVal.value}" required="#{argVal.argument.required}" />
+                  </c:if>
+                  <c:if test="#{!argVal.argument.multi}">
+                    <h:inputText id="#{argVal.argument.name}_str" size="40" value="#{argVal.value}" required="#{argVal.argument.required}" />
+                  </c:if>
+                  <a4j:outputPanel ajaxRendered="true">
+                    <br/><h:message styleClass="formError" for="#{argVal.argument.name}_str" />
+                  </a4j:outputPanel>                                           
+                </c:when>
+                
+                <c:when test="#{argVal.argument.type eq 'date'}">
+                  <h:selectBooleanCheckbox value="#{argVal.bound}"/>
+                  <sp:inputDate value="#{argVal.dateValue}" timeZone="#{base.userTimeZoneId}" popupCalendar="true" type="both" ampm="true" addResources="false" 
+                               imageLocation="/scripts/myfacescalendar"
+                               javascriptLocation="/scripts/myfacescalendar"
+                               styleLocation="/scripts/myfacescalendar"
+                               styleClass="tomahawkInputDate"/>
+                </c:when>
+                
+                <c:when test="#{argVal.argument.type eq 'boolean'}">
+                  <h:selectBooleanCheckbox value="#{argVal.booleanValue}" />
+                </c:when>
+                
+                <c:when test="#{argVal.argument.type eq 'int'}">
+                  <c:if test="#{argVal.argument.multi}">
+                    <h:inputTextarea id="#{argVal.argument.name}_int" rows="6" cols="6" value="#{argVal.value}" required="#{argVal.argument.required}" />
+                  </c:if>
+                  <c:if test="#{!argVal.argument.multi}">
+                    <h:inputText id="#{argVal.argument.name}_int" size="6" value="#{argVal.value}" required="#{argVal.argument.required}" />
+                  </c:if>
+                  <a4j:outputPanel ajaxRendered="true">
+                    <br/><h:message styleClass="formError" for="#{argVal.argument.name}_int" />
+                  </a4j:outputPanel>                                           
+                </c:when>
+    
+                <c:when test="#{argVal.sailPointType}">             
+                  <c:if test="#{argVal.application}">
+                    <ui:include src="/monitor/tasks/argTemplates/appSelect.xhtml">
+                      <ui:param name="argVal" value="#{argVal}"/>
+                      <ui:param name="taskDefinition" value="#{taskDefinition}"/>
+                    </ui:include>
+                  </c:if>
+                    
+                  <c:if test="#{argVal.identity}">
+                    <ui:include src="/monitor/tasks/argTemplates/identitySelect.xhtml">
+                      <ui:param name="argVal" value="#{argVal}"/>
+                      <ui:param name="taskDefinition" value="#{taskDefinition}"/>
+                    </ui:include>
+                  </c:if>
+                  
+                  <c:if test="#{argVal.group}">
+                    <ui:include src="/monitor/tasks/argTemplates/groupSelect.xhtml">
+                      <ui:param name="argVal" value="#{argVal}"/>
+                      <ui:param name="taskDefinition" value="#{taskDefinition}"/>
+                    </ui:include>
+                  </c:if>
+    
+                  <c:if test="#{!argVal.application and !argVal.identity and !argVal.group}">
+                    <c:if test="#{argVal.argument.multi}">
+                      <h:selectManyListbox id="#{argVal.argument.name}_select" value="#{argVal.objectListValue}" required="#{argVal.argument.required}" >
+                        <f:selectItems value="#{argVal.objectNames}" />
+                      </h:selectManyListbox>
+                    </c:if>
+    
+                    <c:if test="#{!argVal.argument.multi}"> 
+                      <h:selectOneMenu id="#{argVal.argument.name}_select" value="#{argVal.value}" required="#{argVal.argument.required}" >
+                        <f:selectItem itemLabel=" -- Select an Object -- " itemValue="" />
+                        <f:selectItems value="#{argVal.objectNames}" />
+                      </h:selectOneMenu>
+                    </c:if>
+                                         
+                    <a4j:outputPanel ajaxRendered="true">
+                      <br/><h:message styleClass="formError" for="#{argVal.argument.name}_select" />
+                    </a4j:outputPanel>  
+                  </c:if>
+                </c:when>
+              </c:choose>
+            </td>         
+          </tr>
+        </c:forEach>
+      </table>
+      <script defer="defer">
+         makeTableMulticolored($('argumentTbl'),true,false, "even", "odd" );
+      </script>
+    </c:if>
+  </ui:composition>
+</body>
+</html>

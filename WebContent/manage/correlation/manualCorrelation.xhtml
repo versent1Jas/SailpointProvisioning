@@ -1,0 +1,338 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+<ui:define name="title">#{msgs.identity_correlation_title}</ui:define>
+
+<ui:define name="headerItems">
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/LinkDetailPopup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src> 
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/correlation/IdentityCorrelationGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+<!--//--><![CDATA[//><!--
+
+helpKey = 'IDENTITY_CORRELATION';
+ 
+var sp = new SailPoint.state.StateProvider({
+stateIds: ['#{manualCorrelationLinkSearch.gridState.name}',
+           '#{manualCorrelationIdentitySearch.gridState.name}'
+],
+states:   ['#{manualCorrelationLinkSearch.gridState.state}',
+           '#{manualCorrelationIdentitySearch.gridState.state}'
+]
+});
+Ext.state.Manager.setProvider(sp);
+
+
+var debug = {};
+
+// ---------------------------------------------------------
+//  Configuration stuff from bean
+// ---------------------------------------------------------
+
+// List of filterable attributes listed in drop down menu on link grid.
+var accountFilterMenuOpts = #{manualCorrelationLinkSearch.accountTypeMenu};
+
+var linkGridColConf = #{manualCorrelationLinkSearch.linkGridColModel};
+var identityGridColConf = #{manualCorrelationIdentitySearch.identityGridColModel};
+
+// Extended identity attributes to be included in the identity grid advanced search
+var extendedAttrFields = #{manualCorrelationIdentitySearch.extendedSearchFormDefinition};
+
+
+// ---------------------------------------------------------
+//  Build the grids
+// ---------------------------------------------------------
+
+var linkGrid = null;
+var mainPanel = null;
+var identityGrid = null;
+
+Ext.onReady(function() {
+
+    Ext.QuickTips.init();
+
+    var linkStore = SailPoint.Store.createStore({
+        storeId:'linkGridStore',
+        fields: ['id', 'nativeIdentity', 'displayName', 'created', 'inactive', 'lastLogin', 'service', 'privileged'], // Should this be dynamic?
+        url: SailPoint.getRelativeUrl('/manage/correlation/linkSearch.json'),
+        remoteSort:true,
+        defaultSort:'displayName',
+        sorters:[{property: "displayName", direction: "ASC"}],
+        simpleSortMode : true
+    });
+
+    Ext.define('SailPoint.grid.ManualCorrelationLinkGrid', {
+        extend : 'SailPoint.grid.PagingCheckboxGrid',
+
+        initComponent : function(){
+            // create a local var that can be referenced in closures
+            var gridStore = this.getStore();
+
+            var appSuggest = new SailPoint.BaseSuggest({
+                storeId: 'appSuggestStore',
+                extraParams: {
+                    suggestType: 'application',
+                    showAuthoritative:'false',
+                    showComposite: 'false'
+                },
+                emptyText: "#{msgs.appsuggest_enter_app}",
+                loadingText: "#{msgs.appsuggest_finding_apps}",
+                listeners:{
+                    select : {
+                        fn: this.appSearch,
+                        scope:this
+                    },
+                    focus : SailPoint.Utils.emptyTextFocusListener
+                }
+            });
+
+            this.accountSearch = new Ext.app.SearchField ({
+                 store: gridStore,
+                 paramName: 'q_name',
+                 emptyText: '#{sp:escapeJavascript(msgs.identity_correlation_link_grid_label_name_filter)}',
+                 disabled: true
+            });
+
+             Ext.each(accountFilterMenuOpts, function(item) {
+
+                 gridStore.getProxy().extraParams[item.property] = item.checked;
+                 item.id = item.property;
+                 item.hideOnClick=true;
+                 item.listeners = {
+                     checkchange : {
+                         fn: function(menuItem, isChecked){
+                             linkGrid.store.getProxy().extraParams[menuItem.id] = isChecked;
+                             if (linkGrid.store.getProxy().extraParams['q_applicationId'] != undefined){
+                                 linkGrid.store.start = 0;
+                                 linkGrid.store.load();
+                             }
+                         },
+                         scope:this
+                     }
+                 }
+             });
+
+             if (accountFilterMenuOpts.length == 0){
+                 accountFilterMenuOpts.push({'text':'#{sp:escapeJavascript(msgs.identity_correlation_link_grid_type_filter_no_options)}'});
+             }
+
+             var accountTypeFilterMenu = new Ext.menu.Menu({
+                 id: 'columnMenu',
+                 items:accountFilterMenuOpts
+             });
+
+             this.tbar =[
+                 appSuggest, ' ', this.accountSearch, ' ' ,
+                 {
+                     text: '#{sp:escapeJavascript(msgs.identity_correlation_link_grid_label_type_filter)}',
+                     menu: accountTypeFilterMenu,
+                     scale: 'medium',
+                     dock: 'top'
+                 }
+             ];
+
+             this.callParent(arguments);
+        },
+
+        appSearch : function(combo, record, index){
+             this.selModel.deselectAll(true);
+             this.selModel.selected.deselectAll();
+             this.store.getProxy().extraParams['q_applicationId'] = record[0].internalId;
+             this.store.start = 0;
+             this.store.load();
+             this.accountSearch.setDisabled(false);
+         },
+
+         getMergeParams : function(){
+             var params = {
+                 selected : this.selModel.getSelectedIds().join(),
+                 selectAll : this.selModel.isAllSelected(),
+                 excluded : this.selModel.getExcludedIds().join()
+             };
+
+             for (var key in this.store.getProxy().extraParams){
+                 params[key] = this.store.getProxy().extraParams[key];
+             }
+
+             return params;
+         }
+     });
+    
+    var linkGrid = Ext.create('SailPoint.grid.ManualCorrelationLinkGrid', {
+       id: 'manualCorrelationLinkGrid',
+       title: '#{sp:escapeJavascript(msgs.identity_correlation_link_grid_title)}',
+       gridMetaData: linkGridColConf,
+       height: 300,
+       viewConfig: {
+           autoFill:true
+       },
+       store: linkStore,
+       selModel: new SailPoint.grid.CheckboxSelectionModel(),
+       frame: false,
+       stateId: 'manualCorrelationLinkGrid',
+       accountSearch: null
+
+    });
+    
+    
+    var ccList = linkGrid.query('checkcolumn');
+
+    if(ccList && ccList instanceof Array) {
+  		 for(var i = 0; i < ccList.length; ++i) {
+   			 var cc = ccList[i];
+             if (cc) {
+               // send an ajax request to update a given property when they click a checkbox
+               cc.on('checkchange',
+                 function(column, recordIndex, checked){
+                     var record = Ext.getCmp('manualCorrelationLinkGrid').store.getAt(recordIndex);
+                     Ext.Ajax.request({
+                        url: 'updateAttribute.json',
+                        success: function(){},
+                        failure: function(){alert('An error occurred connecting to the server')},
+                        params: { attribute: column.dataIndex, id:record.getId(), value : checked}
+                     });
+                 }
+               );
+             }
+         }
+    }
+
+    var panelWidth = Ext.get('mainPanel').getSize().width;
+
+    linkGrid.width = panelWidth;
+
+    // define grid columns and the first part of the toolbar.
+    // the toolbar should probly be defined in the class
+    identityGrid = new SailPoint.IdentityCorrelationGrid({
+        id: 'manualCorrelationIdentityGrid',
+        gridStateId: 'manualCorrelationIdentityGrid',
+        title: '#{sp:escapeJavascript(msgs.identity_correlation_identity_grid_title)}',
+        gridMetaData: identityGridColConf,
+        extAttrFields: extendedAttrFields,
+        width: panelWidth,
+        runInitialLoad: true
+    });
+
+    mainPanel = new Ext.Panel({
+        renderTo: 'mainPanel',
+        border:false,
+        bodyBorder:false,
+        width: panelWidth,
+        frame:false,
+        items:[
+            linkGrid,
+            {html:'&nbsp;', border:false, bodyBorder:false},
+            identityGrid
+        ],
+        buttons:[
+            {
+                handler : function(){
+
+                    var parms = linkGrid.getMergeParams();
+                    //Prevent submission if no source account is selected.
+                    if(parms.selected == "" && parms.selectAll == ""){
+                       SailPoint.EXCEPTION_ALERT('#{sp:escapeJavascript(msgs.identity_correlation_missing_account)}');
+                       return;
+                    }
+                    
+                    parms.target = identityGrid.selModel.getSelectedIds();
+                    //Prevent submission if no target identity is selected.
+                    if(parms.target.length == 0){
+                       SailPoint.EXCEPTION_ALERT('#{sp:escapeJavascript(msgs.identity_correlation_missing_target_identity)}');
+                       return;
+                    }
+
+                    Ext.Msg.wait('#{sp:escapeJavascript(msgs.identity_correlation_dialog_merging)}');
+
+                    Ext.Ajax.request({
+                       url: 'merge.json',
+                       success: function(response){
+                           var respObj = Ext.decode(response.responseText);
+                           if (!respObj.success && respObj.errorMsg && respObj.errorMsg !== ''){
+                               Ext.Msg.close();
+                               SailPoint.debug = respObj;
+                               SailPoint.EXCEPTION_ALERT(respObj.errorMsg);
+                           } else {
+                               linkGrid.deselectAll();
+                               identityGrid.deselectAll();
+                               linkGrid.reload();
+                               Ext.Msg.close();
+                               
+                               if (respObj.pendingApproval && respObj.pendingApproval !== '') {
+                                 Ext.Msg.alert('#{sp:escapeJavascript(msgs.label_pending_approval)}', '#{sp:escapeJavascript(msgs.label_request_pending_approval)}');
+                               }
+                           }
+                       },
+                       failure: function(response){
+                           Ext.Msg.close();
+                           if ((typeof response.request.timedout != "undefined") && response.request.timedout) {
+                               Ext.Msg.alert('#{sp:escapeJavascript(msgs.label_merge_timeout)}', '#{sp:escapeJavascript(msgs.label_request_merge_timeout)}');
+                           } else {
+                               alert('#{sp:escapeJavascript(msgs.label_merge_failed)}');
+                           }
+                       },
+                       timeout: 60000, // timeout of 60 seconds
+                       params: parms
+                    });
+                },
+                text:'#{sp:escapeJavascript(msgs.identity_correlation_button_merge)}'
+            }
+        ]
+
+    });
+
+});
+// END ONREADY -----------------
+
+
+//--><!]]>
+</script>
+
+</ui:define>
+
+
+
+<ui:define name="body">
+    <f:view>
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+        <div class="pageInfo">
+            <div class="instructions">#{msgs.identity_correlation_inst}</div>
+        </div>
+        <div class="paddedContainer">
+          <div id="mainPanel" style="width:97%"></div>
+        </div>
+
+    </f:view>
+</ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

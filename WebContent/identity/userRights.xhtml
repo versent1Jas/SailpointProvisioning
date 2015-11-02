@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <h:outputText styleClass="spContentTitle" value="#{msgs.header_user_rights}"/>
+  <br/>
+  <table class="width100 paddedTbl">
+    <tr>
+      <td style="padding:10px" valign="top">
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityCapability')}">                          
+          <!-- This can't go in identityAttributes, at least not
+                 as a read/write field.
+            -->
+          <h:outputText styleClass="spContentTitle" value="#{msgs.user_capabilities}"/><br/>
+          <!-- we can't use a c:foreach with f:selectItems due to the tab being loaded through ajax -->
+          
+          <ui:fragment rendered="#{!sp:hasRight(facesContext, 'SetIdentityCapability')}">
+            <select disabled="true" multiple="true" id="allcapabilities" size="18" 
+                onchange="updateCapabilities(this)">
+              <ui:repeat value="#{identity.capabilityHelper.allCapabilities}" var="item">
+                <option value="#{item.value}">#{item.label}</option>
+              </ui:repeat>
+            </select>
+          </ui:fragment> 
+          
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityCapability')}">
+            <select multiple="true" id="allcapabilities" size="18" onchange="updateCapabilities(this)">
+              <ui:repeat value="#{identity.capabilityHelper.allCapabilities}" var="item">
+                <option value="#{item.value}">#{item.label}</option>
+              </ui:repeat>
+            </select>
+          </ui:fragment> 
+          
+          <h:inputHidden value="#{identity.capabilityHelper.capabilities}" id="capabilityInput" converter="java.util.List"/>
+        </ui:fragment>
+      </td>
+      <td style="padding:10px" valign="top">
+      
+      
+        <ui:fragment rendered="#{identity.scopeHelper.showScopeControls and sp:hasRight(facesContext, 'SetIdentityControlledScope')}">
+          <div>
+            <h:outputText styleClass="spContentTitle"  value="#{msgs.id_assigned_scope}" />
+            <br/>
+            <h:outputText value="#{(identity.scopeHelper.assignedScope.displayableName == null) ? msgs.none : identity.scopeHelper.assignedScope.displayableName}" />
+          </div>
+          
+          <br/>
+          
+          <div>
+            <h:outputText styleClass="spContentTitle"  value="#{msgs.id_ctrls_assigned_scope}" />
+            <br/>
+            <h:selectOneMenu value="#{identity.scopeHelper.controlsAssignedScope}" >
+              <f:selectItems value="#{identity.scopeHelper.controlsAssignedScopeOptions}"/>
+            </h:selectOneMenu>
+          </div>
+  
+          <br/>
+
+          <h:outputText styleClass="spContentTitle" value="#{msgs.authorized_scopes}"/><br/>
+  
+          <div id="controlledScopesMultiSuggest"></div>
+          <t:inputHidden id="controlledScopes"                 
+                         value="#{identity.scopeHelper.controlledScopes}" converter="java.util.List" forceId="true">
+          </t:inputHidden>
+        </ui:fragment>
+      </td>
+    </tr>
+  </table>
+  <script>
+    initializeCapabilities();
+  </script>
+</ui:composition>
+
+</body>
+</html>
+  

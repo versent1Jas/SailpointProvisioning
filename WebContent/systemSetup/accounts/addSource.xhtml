@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <div id="addSourceDiv"/>
+  
+  <div id="addSourceContentsDiv" class="spAjaxContent" style="display:none">
+    <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+    <div id="errorMessages" class="formError" style="display:none"/>
+    <h:panelGrid styleClass="width100" columns="1" id="addSourcePanel" columnClasses="leftAlignedColumn">
+      <ui:include src="selectIdentitySource.xhtml">
+        <ui:param name="appBean" value="#{linkConfigEdit.editedAttribute.selectedSource}"/>
+      </ui:include>          
+    </h:panelGrid>
+  </div>
+  
+  <a4j:commandButton id="stealthAddSourceButton" style="display:none" action="#{linkConfigEdit.addSourceToAttributeAction}" render="sourceMappings,deleteSourcesPanel" 
+                     oncomplete="Ext.getCmp('addSourceWindow').hide();
+                                 clearAddSourceParams();
+                                 enableFormInputs();"/>      
+</ui:composition>
+
+</body>
+</html>

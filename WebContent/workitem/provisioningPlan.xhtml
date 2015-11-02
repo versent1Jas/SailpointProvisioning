@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+  <ui:composition>
+
+
+    <ui:fragment rendered="#{remediationEntityType eq null or remediationEntityType eq 'Identity'}">
+        <div class="sectionHeader">#{msgs.label_account_requests}</div>
+        <table class="spTable" width="#{tableWidth}">
+          <tr>
+            <th>#{msgs.label_operation}</th>
+            <th>#{msgs.application}</th>
+            <th>#{msgs.user_name}</th>
+          </tr>
+
+          <ui:repeat value="#{provisioningPlan.nonModifyAccountRequests}" var="accountRequest">
+            <tr>
+              <td valign="top">
+                <h:outputText value="#{accountRequest.operation}" />
+              </td>
+              <td valign="top">
+                <h:outputText value="#{accountRequest.application}" />
+              </td>
+              <td valign="top">
+                <h:outputText value="#{accountId.map[identity][accountRequest.application][accountRequest.nativeIdentity]}" />
+              </td>
+            </tr>
+          </ui:repeat>
+
+          <c:if test="#{empty provisioningPlan.nonModifyAccountRequests}">
+            <tr><td colspan="3">#{msgs.no_account_requests}</td></tr>
+          </c:if>
+        </table>
+
+        <div style="padding-top: 10px" class="sectionHeader">#{msgs.label_modification_requests}</div>
+        <table class="spTable" width="#{tableWidth}">
+          <tr>
+            <th>#{msgs.label_operation}</th>
+            <th>#{msgs.attribute}</th>
+            <th>#{msgs.label_value_or_values}</th>
+            <th>#{msgs.application}</th>
+            <th>#{msgs.instance}</th>
+            <th>#{msgs.user_name}</th>
+            <th>#{msgs.label_account}</th>
+          </tr>
+
+          <!-- Account Group Permission certs hold their info in object requests -->
+          <ui:repeat value="#{certType eq 'accountGroupPermissions' ? provisioningPlan.objectRequests : provisioningPlan.modifyAccountRequests}" var="accountRequest">
+            <ui:repeat value="#{accountRequest.attributeRequests}" var="attrRequest">
+              <tr>
+                <td valign="top">
+                  <h:outputText value="#{msgs[attrRequest.operation.messageKey]}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{attrRequest.name}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{sp:commify(attrRequest.value)}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{accountRequest.application}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{accountRequest.instance}" />
+                </td>
+                <td valign="top">
+                  <h:outputText rendered="#{sp:getDisplayNameForName('Identity', identity) != ''}"
+                                value="#{accountId.map[identity][accountRequest.application][accountRequest.nativeIdentity]}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{accountRequest.nativeIdentity}" />
+                </td>
+              </tr>
+            </ui:repeat>
+
+            <ui:repeat value="#{accountRequest.permissionRequests}" var="permRequest">
+              <tr>
+                <td valign="top">
+                  <h:outputText value="#{permRequest.operation}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{permRequest.target}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{sp:commify(permRequest.rightsList)}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{accountRequest.application}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{accountRequest.instance}" />
+                </td>
+                <td valign="top">
+                  <h:outputText rendered="#{sp:getDisplayNameForName('Identity', identity) != ''}"
+                                value="#{accountId.map[identity][accountRequest.application][accountRequest.nativeIdentity]}" />
+                </td>
+                <td valign="top">
+                  <h:outputText value="#{accountRequest.nativeIdentity}" />
+                </td>
+              </tr>
+            </ui:repeat>
+          </ui:repeat>
+
+          <c:if test="#{certType eq 'accountGroupPermissions' ? empty provisioningPlan.objectRequests : empty provisioningPlan.modifyAccountRequests}">
+            <tr><td colspan="7">#{msgs.no_modification_requests}</td></tr>
+          </c:if>
+
+        </table>
+    </ui:fragment>
+
+    <ui:fragment rendered="#{remediationEntityType eq 'BusinessRole' or remediationEntityType eq 'Profile'}">
+        <div style="padding-top: 10px" class="sectionHeader">#{msgs.label_biz_role_requests}</div>
+
+        <table class="spTable" width="#{tableWidth}">
+          <tr>
+            <th>#{msgs.label_biz_role_name}</th>
+            <th>#{msgs.label_operation}</th>
+            <th>#{msgs.workitem_component_name}</th>
+          </tr>
+
+          <ui:repeat value="#{provisioningPlan.objectRequests}" var="objRequest">
+              <ui:repeat value="#{objRequest.attributeRequests}" var="attrRequest">
+                <tr>
+                  <td valign="top">
+                    #{objRequest.nativeIdentity}
+                  </td>
+                  <td valign="top">
+                    <ui:fragment rendered="#{attrRequest.operation eq 'Remove'}">
+                        #{msgs.provisioning_plan_op_remove}
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{remediationEntityType eq 'Profile'}">
+                        #{msgs.profile}
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{attrRequest.name eq 'children'}">
+                        #{msgs.cert_item_type_biz_role_hier}
+                    </ui:fragment>
+                                       
+                    <ui:fragment rendered="#{attrRequest.name eq 'permittedRole'}">
+                        #{msgs.cert_item_type_permitted_role}
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{attrRequest.name eq 'requiredRole'}">
+                     #{msgs.cert_item_type_required_role}
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{attrRequest.name eq 'roleGrantedScope'}">
+                     #{msgs.cert_item_type_granted_iiq_scope}
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{attrRequest.name eq 'roleGrantedCapability'}">
+                     #{msgs.cert_item_type_granted_iiq_capability}
+                    </ui:fragment>
+
+                  </td>
+                  <td valign="top">
+	                <ui:fragment rendered="#{remediationEntityType eq 'Profile'}">
+                    <c:choose>
+                      <c:when test="attrRequest.arguments['profileOrdinal'] == 0">
+                        <h:outputFormat value="#{msgs.profile_for_named_entity}" >
+                          <f:param value="#{attrRequest.displayValue}" />
+                        </h:outputFormat>
+                      </c:when>
+                      <c:otherwise>
+                        <h:outputFormat value="#{msgs.profile_with_ord_for_named_entity}" >
+                          <f:param value="#{attrRequest.arguments['profileOrdinal']}" />
+                          <f:param value="#{attrRequest.displayValue}" />
+                        </h:outputFormat>
+                      </c:otherwise>
+                    </c:choose>
+	                </ui:fragment>
+                    
+                    <ui:fragment rendered="#{remediationEntityType ne 'Profile'}">
+                      #{attrRequest.value.name}
+                    </ui:fragment>
+                  
+                  </td>
+                </tr>
+            </ui:repeat>
+          </ui:repeat>
+
+         </table>
+     </ui:fragment>
+
+  </ui:composition>
+
+</body>
+</html>

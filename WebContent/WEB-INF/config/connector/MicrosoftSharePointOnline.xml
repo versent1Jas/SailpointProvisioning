@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.O365SharepointOnlineConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH, NO_PERMISSIONS_PROVISIONING, UNSTRUCTURED_TARGETS" icon="internetIcon" name="Microsoft SharePoint Online" type="Microsoft SharePoint Online">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="SPOnlineAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="Name" identityAttribute="LoginName" nativeObjectType="user" objectType="account">
+        <AttributeDefinition name="LoginName" type="string">
+          <Description>Login Name of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UserName" type="string">
+          <Description>User Name of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Name" type="string">
+          <Description>Display Name of user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Email" type="string">
+          <Description>E-mail address of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="IsSiteAdmin" type="boolean">
+          <Description>Whether or not user is Site Administrator</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="FirstName" type="string">
+          <Description>First name of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LastName" type="string">
+          <Description>Last Name of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PreferredName" type="string">
+          <Description>Preferred name of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ID" type="string">
+          <Description>Member ID for the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WorkPhone" type="string">
+          <Description>Office phone number of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="Groups" schemaObjectType="group" type="string">
+          <Description>It specifies all the groups to which user belongs to.</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="Name" featuresString="PROVISIONING, NO_PERMISSIONS_PROVISIONING" identityAttribute="Name" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="Name" type="string">
+          <Description>Display name of the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Description" type="string">
+          <Description>Description of the group"</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OwnerID" type="string">
+          <Description>Owner Id of the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ID" type="string">
+          <Description>Identifier (ID) for the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OwnerIsUser" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_spol_UserName" helpKey="help_con_prov_policy_spol_UserName" name="UserName" required="true" type="string"/>
+      </Template>
+      <Template name="DeleteAccount" schemaObjectType="account" usage="Delete">
+        <Field displayName="con_prov_policy_spol_RemoveLicense" helpKey="help_con_prov_policy_spol_RemoveLicense" name="RemoveSharePointLicense" reviewRequired="true" section="" type="boolean" value="false"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_spol_GroupName" name="Name" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_spol_DefaultUser" helpKey="help_con_prov_policy_spol_DefaultUser" name="DefaultUser" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_spol_Permission" multi="true" name="Permission" section="" type="string">
+          <AllowedValues>
+            <String>View Only</String>
+            <String>Read</String>
+            <String>Design</String>
+            <String>Contribute</String>
+            <String>Full Control</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_spol_GroupOwner" name="Owner" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_spol_OwnerType" name="OwnerIsUser" required="true" section="" type="string" value="USER">
+          <AllowedValues>
+            <String>USER</String>
+            <String>GROUP</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_spol_Description" name="Description" section="" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_spol_ID" name="ID" readOnly="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_spol_Description" name="Description" readOnly="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_spol_OwnerID" name="OwnerID" readOnly="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_spol_OwnerType" name="OwnerIsUser" readOnly="true" reviewRequired="true" section="" type="string">
+          <AllowedValues>
+            <String>USER</String>
+            <String>GROUP</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

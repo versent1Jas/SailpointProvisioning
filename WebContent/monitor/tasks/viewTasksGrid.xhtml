@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+        
+    <script>
+    var stateIds = ['#{definitionListBean.objectsGridState.name}',
+     '#{scheduleListBean.gridState.name}',
+     '#{resultsListBean.gridState.name}'
+    ];
+    var sp = new SailPoint.state.StateProvider({
+		stateIds: stateIds,
+		states: ['#{definitionListBean.objectsGridState.state}',
+		         '#{scheduleListBean.gridState.state}',
+		         '#{resultsListBean.gridState.state}'
+		        ]
+    });
+    Ext.state.Manager.setProvider(sp);
+
+    var defListMetaData = #{definitionListBean.columnJSON};
+
+    var scheduleListMetaData = #{scheduleListBean.columnJSON};
+    
+    var resultsListMetaData = #{resultsListBean.columnJSON};
+
+    var fields = [];
+    fields.push(defListMetaData.fields);
+    fields.push(scheduleListMetaData.fields);
+    fields.push(resultsListMetaData.fields);  
+
+    var rComboData = [
+      <c:forEach items="#{taskResult.resultOptions}" var="option" varStatus="vStatus">
+      <h:outputText rendered="#{!vStatus.first}" value=","/>
+      {key:'#{option.value}', value:'#{option.label}'}
+      </c:forEach>  
+    ];
+    
+    var resultsComboStore = SailPoint.Store.createStore({
+        model: 'SailPoint.model.KeyValue',
+        autoLoad: true,
+        data : rComboData
+    });
+  
+    var sComboData = [
+      <c:forEach items="#{taskResult.resultOptions}" var="option" varStatus="vStatus">
+      <h:outputText rendered="#{!vStatus.first}" value=","/>
+      {key:'#{option.value}', value:'#{option.label}'}
+      </c:forEach>  
+    ];
+    
+    var scheduleComboStore = SailPoint.Store.createStore({
+        model: 'SailPoint.model.KeyValue',
+        autoLoad: true,
+        data : sComboData
+    });
+    
+    var executeInForegroundOption = #{definitionListBean.executeInForegroundOption};
+    
+    <!--//--><![CDATA[//><!--
+    var gridState;
+    var sInfo = [{property: 'name', direction: 'ASC' }];
+    if(gridState && gridState._getValue('sortColumn')){
+      sInfo = [{property: gridState._getValue('sortColumn'), direction: gridState._getValue('sortOrder') }];
+    }
+    Ext.onReady(function(){
+    
+      Ext.QuickTips.init();
+      
+      SailPoint.userHasTaskWriteAccess = #{sp:hasRight(facesContext, 'FullAccessTask')};
+      
+      var activeTab = '#{sp:escapeJavascript(state.activeTab)}';
+      var hash = window.location.hash;
+      if (hash && (hash.trim().length) > 1) {
+          // adding an underscore at the beginning of the hash so it doesn't match the id of a div
+          // and therefore cause a scroll to.
+    	  activeTab = hash.substring(2);
+      }
+      var tabPanel = SailPoint.Monitor.Grid.Tasks.createPanel(activeTab, stateIds, fields, defListMetaData.columns, resultsListMetaData.columns, scheduleListMetaData.columns, sInfo, scheduleComboStore, resultsComboStore);
+      
+      var viewport = SailPoint.getViewport({
+          bodyContent: tabPanel,
+          title: "#{msgs.tasks}",
+          subtitleId: 'editForm:createTaskSelect'
+      });
+      viewport.doLayout();
+    });
+    //--><!]]> 
+    </script>
+   
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    
+  <div style="margin-top:10px; margin-bottom:10px">
+  <script type="text/javascript">
+    //<![CDATA[
+
+      function addGridFilter()
+      {
+          $('#{formName}:certificationSearchGroupFilterAddBtn').click();
+      }
+
+      function removeGridFilter(filterId)
+      {
+          $('#{formName}:certificationSearchGroupSelectedFilter').value = filterId;
+          $('#{formName}:certificationSearchGroupFilterRemoveBtn').click();
+      }
+
+      function updateGroupFilterDefinition(filterId, val) {
+        var input = $('groupDefinitionInput_'+filterId).firstChild;
+        input.value = val;
+        SailPoint.Utils.styleSelects();
+      }
+
+      function maskDefinitionSelect(id) {
+        $('groupDefinitionSelect_'+id).style.display = 'none';
+        $('groupDefinitionLabel_'+id).style.display = 'none';
+        $('groupDefinitionLoading_'+id).style.display = '';
+      }
+    //]]>
+  </script>    
+  
+  <a4j:outputPanel id="certificationSearchGroupFilter">
+  
+    <table class="paddedTbl">
+    
+    <t:dataList value="#{searchBean.groupFilter.filters}" var="filter">
+      <tr>
+        <td style="text-align: right; width:45px">
+          <h:outputText value="#{msgs.group}" styleClass="textBold" />
+        </td>
+        <td align="left">
+          <h:selectOneMenu id="groupFactorySelect_#{filter.id}" value="#{filter.factory}">
+            <f:selectItems value="#{groupFactoryList.factoryOptions}" />
+            <a4j:ajax event="change" 
+                         listener="#{searchBean.groupFilter.updateFilter}" 
+                         onsubmit="maskDefinitionSelect('#{filter.id}')" 
+                         render="certificationSearchGroupFilter"
+                         oncomplete="updateGroupFilterDefinition('#{filter.id}', $('groupDefinitionSelect_#{filter.id}').value)"/>         
+          </h:selectOneMenu>
+        </td>
+        <td style="text-align: right; width:45px">
+            <span id="groupDefinitionLoading_#{filter.id}" style="display:none">
+                <h:graphicImage url="/images/progress.gif" style="padding:5px;vertical-align:middle"/>
+                  #{msgs.loading_data}
+            </span>
+            <span class="textBold" id="groupDefinitionLabel_#{filter.id}">#{msgs.label_value}</span>
+        </td>
+        <td style="vertical-align: middle; text-align: right;">
+          <!-- PH: have to do an old-fashioned select.  Ajax-built f:selectItems dont pass validation -->
+          <select name="groupDefinitionSelect_#{filter.id}" id="groupDefinitionSelect_#{filter.id}"
+                  onchange="updateGroupFilterDefinition('#{filter.id}', this.value)">
+            
+            <t:dataList value="#{filter.definitionChoices}" var="choice">
+              <ui:fragment rendered="#{filter.definition eq choice.value}">
+                <option selected="selected" value="#{choice.value}">#{choice.label}</option>
+              </ui:fragment>
+              <ui:fragment rendered="#{!(filter.definition eq choice.value)}">
+                <option value="#{choice.value}">#{choice.label}</option>
+              </ui:fragment>
+            </t:dataList>
+            
+          </select>
+        </td>
+        <td style="vertical-align: middle; text-align: left;">
+          <!--  PH: Have to wrap the input with a span so that we can find it by its id.  h:inputText ids
+          are assigned before the ui:repeat runs in ajax -->
+          <span id="groupDefinitionInput_#{filter.id}">
+            <h:inputHidden value="#{filter.definition}" />
+          </span>
+          <span>
+            <h:graphicImage url="/images/icons/plus.png"
+                            height="20" width="20"
+                            class="pointer"
+                            onclick="addGridFilter();" />
+          </span>
+          <span>
+            <h:graphicImage url="/images/icons/minus.png"
+                            height="20" width="20"
+                            style="#{(filter.id eq '0') ? 'visibility:hidden' : ''}"
+                            class="pointer" 
+                            onclick="removeGridFilter('#{filter.id}');" />
+          </span>
+        </td>
+      </tr>
+    </t:dataList>
+      <tr>
+        <td style="vertical-align: top; text-align: center" colspan="3">
+           
+          <a4j:commandButton  id="certificationSearchGroupFilterAddBtn"
+                              style="display:none"
+                              action="#{searchBean.groupFilter.addFilter}"
+                              render="certificationSearchGroupFilter"
+                              oncomplete="SailPoint.Utils.styleSelects();"/>
+                              
+          <a4j:commandButton  id="certificationSearchGroupFilterResetBtn"
+                              style="display:none"
+                              action="#{searchBean.groupFilter.reset}"
+                              render="certificationSearchGroupFilter"
+                              oncomplete="SailPoint.Utils.styleSelects();"/>
+                              
+          <a4j:commandButton  id="certificationSearchGroupFilterRemoveBtn"
+                              style="display:none"
+                              action="#{searchBean.groupFilter.removeFilter}"
+                              render="certificationSearchGroupFilter"
+                              oncomplete="SailPoint.Utils.styleSelects();"/>
+                              
+          <h:inputHidden id="certificationSearchGroupSelectedFilter" value="#{searchBean.groupFilter.selectedFilterId}" />
+        </td>
+      </tr>
+    </table>
+  </a4j:outputPanel>
+  </div>
+</ui:composition>
+
+</body>
+</html>

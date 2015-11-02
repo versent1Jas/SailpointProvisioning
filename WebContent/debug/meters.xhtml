@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Call Timings</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_BEANS';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <h:dataTable value="#{debug.meters}" var="meter"
+                 columnClasses=",rightAlignedColumn,rightAlignedColumn,rightAlignedColumn,rightAlignedColumn,rightAlignedColumn,rightAlignedColumn"
+                 rowClasses="odd,even">
+	  <h:column>
+        <f:facet name="header">
+          <h:outputText value="Name"/>
+        </f:facet>
+        <h:outputText value="#{meter.name}"/>
+      </h:column>
+      <h:column>
+        <f:facet name="header">
+          <h:outputText value="Hits"/>
+        </f:facet>
+        <h:outputText value="#{meter.entries}"/>
+      </h:column>
+      <h:column>
+        <f:facet name="header">
+          <h:outputText value="Errors"/>
+        </f:facet>
+        <h:outputText value="#{meter.errors}"/>
+      </h:column>
+      <h:column>
+        <f:facet name="header">
+          <h:outputText value="Min"/>
+        </f:facet>
+        <h:outputText value="#{meter.min} ms"/>
+      </h:column>
+      <h:column>
+        <f:facet name="header">
+          <h:outputText value="Max"/>
+        </f:facet>
+        <h:outputText value="#{meter.max} ms"/>
+      </h:column>
+      <h:column>
+        <f:facet name="header">
+          <h:outputText value="Total"/>
+        </f:facet>
+        <h:outputText value="#{meter.total} ms"/>
+      </h:column>
+      <h:column>
+        <f:facet name="header">
+          <h:outputText value="Average"/>
+        </f:facet>
+        <h:outputText value="#{meter.average} ms"/>
+      </h:column>
+    </h:dataTable>
+
+    <h:form>
+      <h:commandButton action="#{debug.resetMetersAction}" value="Reset Meters" />
+    </h:form>
+
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

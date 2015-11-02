@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  This is used by 'iiq upgrade' to drive upgrading the schema and data between
+  revisions.  
+
+  There are two files that define the upgrade: upgrade.xml and 
+  upgradeObjects.xml.  If you have LCM enabled, there are two additional
+  files, upgrade-lcm.xml and upgradeObjects-lcm.xml.
+
+  upgrade.xml and upgrade-lcm.xml are processed in a special way before
+  Hibernate is started so that changes can be made at the JDBC level.
+  These files should only contain <ImportAction> elements that use the
+  "execute" command to  call upgrader classes.  
+  *DO NOT PUT STATIC XML OBJECTS IN UPGRADE.XML OR UPGRADE-LCM.XML* 
+
+  upgradeObjects.xml and upgradeObjects-lcm.xml are
+  included by upgrade.xml and will be imported after Hibernate is started.
+  Any changes to objects that can be respesented as static XML or as
+  ImportActions with the "merge" command must go in these files to ensure
+  that they are parsed after Hibernate has been started so that
+  references can be resolved.  
+
+  Like upgrade.xml, each action should have a revision attribute 
+  specified,  which will be checked while upgrading to make sure that
+  upgrades aren't run multiple times.  
+
+  First the upgraders that are marked as pre-Hibernate are run, then Hibernate
+  is started, then the ones marked as post-Hibernate are run.
+
+  After all the upgraders are run and Hibernate is started, 
+  the upgradeObjects-lcm.xml file is imported.  
+-->
+<sailpoint>
+
+  
+    <!-- DO NOT REMOVE - THIS SHOULD BE IMPORTED FOR EVERY RELEASE. -->
+  <ImportAction name='include' value='WEB-INF/config/upgradeObjects-lcm.xml' />
+
+
+
+</sailpoint>

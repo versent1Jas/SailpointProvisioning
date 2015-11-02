@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.create_batch_req_title}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/batchRequests/BatchRequestsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/batchRequests/batchrequests.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+    </sp:script>
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css"
+      rel="stylesheet"
+      type="text/css" />
+
+    <script type="text/javascript" >
+        helpKey = 'BATCHREQUEST_FILE_FORMAT';
+
+
+     Ext.onReady(function(){
+        
+        if (!#{batchSchedule.runNow}) 
+          $('runDateInput').show();
+        else
+          $('runDateInput').hide();
+
+        if (!#{batchSchedule.ignoreErrors}) 
+          $('numErrorsInput').show();
+        else
+          $('numErrorsInput').hide();
+      }); // Ext.onReady
+
+    </script>
+
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError"/>
+      <h:form id="editForm" enctype="multipart/form-data" >
+        <h:panelGrid id="createBatchForm" styleClass="paddedTbl" columns="2">
+          <h:panelGroup style="text-align: right; display:block;">
+            <h:outputLabel for="uploadedBatchFile" value="#{msgs.choose_batch_file}" />
+            <h:graphicImage id="imgHlpBatchFile" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_batch_batch_file}"/>
+          </h:panelGroup>
+
+          <h:panelGroup>
+            <t:inputFileUpload id="uploadedBatchFile" storage="memory" value="#{batchSchedule.batchFile}" required="true" />
+          </h:panelGroup>
+
+          <h:panelGroup>
+          </h:panelGroup>
+
+          <h:panelGroup>
+            <h:outputText value="#{msgs.batch_file_help_refer}" />
+          </h:panelGroup>
+
+          <h:panelGroup style="text-align: right; display:block;">
+            <h:outputLabel for="errorHandling" value="#{msgs.batch_error_handling_option}" />
+            <h:graphicImage id="imgHlpErrorHandling" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_batch_error_handling}"/>
+          </h:panelGroup>
+
+          <h:panelGroup>
+            <h:selectOneRadio layout="pageDirection" onclick="toggleStopOnErrors(this)" id="errorHandling" value="#{batchSchedule.ignoreErrors}">
+              <f:selectItem id="ignoreErrors" itemLabel="#{msgs.batch_option_ignore_errors}" itemValue="#{true}" />
+              <f:selectItem id="stopErrors" itemLabel="#{msgs.batch_option_stop_on_errors}" itemValue="#{false}" />
+            </h:selectOneRadio>
+            <div style="margin: 5px 0 0 22px" id="numErrorsInput" >
+              <h:outputLabel for="stopOnNumErrors" value="#{msgs.batch_stop_on_errors}" />
+              <h:inputText style="margin-left: 10px" size="3" id="stopOnNumErrors" value="#{batchSchedule.stopNumber}" />    
+            </div>
+          </h:panelGroup>
+
+          <h:panelGroup style="text-align: right; display:block;">
+            <h:outputLabel for="policyChecking" value="#{msgs.batch_policy_option}" />
+            <h:graphicImage id="imgHlpPolicyChecking" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_batch_policy_scheme}"/>
+          </h:panelGroup>
+
+          <h:panelGroup>
+            <h:selectOneRadio layout="pageDirection" id="policyChecking" value="#{batchSchedule.policyScheme}">
+              <f:selectItem id="disablePolicy" itemLabel="#{msgs.batch_policy_option_disable_label}" itemValue="none" />
+              <f:selectItem id="failPolicy" itemLabel="#{msgs.batch_policy_option_fail_label}" itemValue="fail" />
+            </h:selectOneRadio>
+          </h:panelGroup>
+
+          <h:panelGroup style="text-align: right; display:block;">
+            <h:outputLabel for="runNow" value="#{msgs.batch_schedule_option}" />
+            <h:graphicImage id="imgHlpRunNow" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_batch_run_now}"/>
+          </h:panelGroup>
+
+          <h:panelGroup>
+            <h:selectOneRadio layout="pageDirection" onclick="toggleRunDateInput(this)" id="runNow" value="#{batchSchedule.runNow}">
+              <f:selectItem id="now" itemLabel="#{msgs.batch_schedule_run_now}" itemValue="#{true}" />
+              <f:selectItem id="later" itemLabel="#{msgs.batch_schedule_run_later}" itemValue="#{false}" />
+            </h:selectOneRadio>
+            <div style="margin: 5px 0 0 22px" id="runDateInput" >
+              <h:outputLabel for="runDate" value="#{msgs.batch_schedule_run_date}" />
+              <sp:inputDate value="#{batchSchedule.runDate}" type="both" 
+                           id="runDate" popupCalendar="true" 
+                           imageLocation="/scripts/myfacescalendar" 
+                           javascriptLocation="/scripts/myfacescalendar"
+                           styleLocation="/scripts/myfacescalendar" 
+                           ampm="true" 
+                           timeZone="#{batchSchedule.userTimeZoneId}"
+                           styleClass="tomahawkInputDate"/>
+            </div>
+          </h:panelGroup>
+
+          <h:panelGroup style="text-align: right; display:block;">
+            <h:outputLabel for="manualInput" value="#{msgs.batch_manual_form_option}" />
+            <h:graphicImage id="imgHlpManualInput" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_batch_manual_input}"/>
+          </h:panelGroup>
+
+          <h:panelGroup>
+            <h:selectOneRadio layout="pageDirection" id="manualInput" value="#{batchSchedule.skipProvisioningForms}">
+              <f:selectItem id="skipProvForms" itemLabel="#{msgs.batch_manual_form_option_skip}" itemValue="#{true}" />
+              <f:selectItem id="provForms" itemLabel="#{msgs.batch_manual_form_option_create}" itemValue="#{false}" />
+            </h:selectOneRadio>
+          </h:panelGroup>
+
+          <h:panelGroup style="text-align: right; display:block;">
+            <h:outputLabel for="manualWorkItems" value="#{msgs.batch_work_item_option}" />
+            <h:graphicImage id="imgHlpWorkItems" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_batch_work_items}"/>
+          </h:panelGroup>
+          <h:panelGroup>
+            <h:selectOneRadio layout="pageDirection" id="manualWorkItems" value="#{batchSchedule.skipManualWorkItems}">
+              <f:selectItem id="skipWorkItems" itemLabel="#{msgs.batch_work_item_option_skip}" itemValue="#{true}" />
+              <f:selectItem id="workItems" itemLabel="#{msgs.batch_work_item_option_create}" itemValue="#{false}" />
+            </h:selectOneRadio>
+          </h:panelGroup>
+
+          <h:panelGroup style="text-align: right; display:block;">
+            <h:outputLabel for="handleExistingCreate" value="#{msgs.batch_handle_create_option}" />
+            <h:graphicImage id="imgHlpHandleExisting" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_batch_handle_existing}"/>
+          </h:panelGroup>
+
+          <h:selectBooleanCheckbox value="#{batchSchedule.handleExistingCreate}" id="handleExistingCreate"/>
+
+          <h:panelGroup style="text-align: right; display:block;">
+            <h:outputLabel for="generateIdentityRequests" value="#{msgs.batch_generate_identity_request_option}" />
+            <h:graphicImage id="imgHlpGenerateIdentityRequest" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_batch_identity_request}"/>
+          </h:panelGroup>
+
+          <h:selectBooleanCheckbox value="#{batchSchedule.generateIdentityRequests}" id="generateIdentityRequests"/>
+
+          <h:panelGroup styleClass="buttonRow">
+            <h:commandButton value="#{msgs.button_submit}" action="#{batchSchedule.save}" styleClass="primaryBtn"/>
+            <h:commandButton immediate="true" value="#{msgs.button_cancel}" action="#{batchSchedule.cancel}" styleClass="secondaryBtn"/>
+          </h:panelGroup>
+        </h:panelGrid>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

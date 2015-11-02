@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <script>
+    function gotoPrevIdentity() {
+        $('editForm:id').value = $('editForm:prevIdentityId').value;
+        $('editForm:prevBtn').click();          
+      }
+      
+      function gotoNextIdentity() {
+        $('editForm:id').value = $('editForm:nextIdentityId').value;
+        $('editForm:nextBtn').click();          
+      }
+  </script>
+<div style="float:right;text-align:right; margin-top: 15px; margin-right: 15px;">
+  <table class="paddedTbl">
+    <tr>
+      <td>
+        
+        <ui:fragment rendered="#{!(null == prevIdentityId)}">
+          <div class="pagingButton previousButton" 
+               onclick="gotoPrevIdentity()"  />            
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{(null == prevIdentityId)}">
+          <div class="pagingButton previousButton pagingButtonDisabled" />
+        </ui:fragment>
+      </td>
+      
+      <td>
+        <h:outputFormat value="#{msgs.nav_current_object}" styleClass="pagingInfo">
+          <f:param value="#{msgs.identity}" />
+          <f:param value="#{currentIdentityIndex}" />
+          <f:param value="#{totalIdentities}"/>
+        </h:outputFormat>
+      </td>
+      
+      <td>
+        
+        <ui:fragment rendered="#{!(null == nextIdentityId)}">
+          <div class="pagingButton nextButton"
+               onclick="gotoNextIdentity()"/>
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{(null == nextIdentityId)}">
+          <div class="pagingButton nextButton pagingButtonDisabled"/>
+        </ui:fragment>            
+      </td>
+    </tr>
+  </table>
+</div>
+</ui:composition>
+
+</body>
+</html>

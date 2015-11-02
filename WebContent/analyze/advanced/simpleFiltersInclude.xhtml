@@ -1,0 +1,104 @@
+<!--
+  ~ (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved.
+  -->
+
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<!-- 
+  Parameters (not a complete list):
+    - manageRight: The optional name of the SPRight required to edit the filters.
+ -->
+
+<ui:composition>
+  <table class="dashWidth100 paddedTbl" cellpadding="5">
+    <tr>
+      <td colspan="2">
+        <div class="pageInfo" style="#{(hideHelp eq 'true') ? 'display:none' : ''}">
+          <div class="instructions">
+            <h:outputFormat value="#{backingBean.simpleInstructions}">
+            </h:outputFormat>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><h:outputFormat styleClass="spContentTitle" value="#{msgs.role_simple_count_of_entitlements}">
+          <f:param value="#{backingBean.filterCount}"/>
+          </h:outputFormat>
+      </td>
+    </tr>
+  </table>
+
+
+  <ui:fragment>
+    <div id="#{prefix}filterListTbl">
+      <table class="dashWidth100 paddedTbl" cellpadding="5">
+        <tr>
+          <td colspan="2">
+            <div class="#{prefix}spTabledAjaxContent" id="#{prefix}filterBeanListDiv">
+              
+              <a4j:commandButton id="#{prefix}updateOp" action="#{backingBean.updateGlobalOp}" 
+                      render="#{prefix}filterSrcArea" style="display:none"/>
+            
+              <table class="spTable width100" id="#{prefix}filterBeanListTbl">
+                <tr>
+                  <ui:fragment rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}">
+                    <th width="5%"></th>
+                  </ui:fragment>
+                  <th><h:outputText styleClass="font10" value="#{msgs.field}"/></th>
+                  <th><h:outputText styleClass="font10" value="#{msgs.search_type}"/></th>
+                  <th><h:outputText styleClass="font10" value="#{msgs.value}"/></th>
+                </tr>
+                <t:dataList id="${prefix}filterBeans" value="#{backingBean.filterBeans}" var="filterBean">
+                
+                  <ui:fragment rendered="#{filterBean.displayable}">
+                  <tr>   
+                    <ui:fragment rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}">
+                      <td>
+                        <h:selectBooleanCheckbox id="#{prefix}selectFilter" value="#{filterBean.selected}"/>
+                      </td>
+                    </ui:fragment>
+                    
+                    <ui:fragment rendered="#{!filterBean.composite}">
+                      <ui:include src="leafFilterInclude.xhtml">
+                        <ui:param name="filter" value="#{filterBean}"/>
+                        <ui:param name="prefix" value="#{prefix}"/>
+                      </ui:include>
+                    </ui:fragment>
+                    
+                  </tr>
+                  </ui:fragment>
+                </t:dataList>
+              </table>
+            </div>
+          </td>
+        </tr>
+        <ui:fragment rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}">
+          <tr>
+            <td align="right" style="padding-bottom:15px">
+              <a4j:commandButton action="#{backingBean.removeFilters}" 
+                value="#{msgs.button_remove_selected}" styleClass="secondaryBtn" render="#{prefix}filterPnl"
+                oncomplete="window.#{prefix}FiltersPage.reRoundTable('#{prefix}filterBeanListDiv'); window.#{prefix}FiltersPage.onChangeFilter();"/>
+            </td>
+          </tr>
+        </ui:fragment>
+      </table>
+    </div>
+  </ui:fragment>  
+  
+  <h:inputText value="#{backingBean.compilationError}" id="#{prefix}compilationError" style="display:none"/>
+  <h:inputHidden value="#{backingBean.filterString}" id="#{prefix}filterSourceInput"/>
+</ui:composition>
+
+</body>
+</html>

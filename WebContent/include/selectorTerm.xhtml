@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <td width="100"><h:outputText value="#{matchTerm.permission ? msgs.permission : msgs.attribute}" /></td>
+  <td><h:outputText value="#{matchTerm.applicationName}" /></td>
+  <ui:fragment rendered="#{!matchTerm.permission}">
+    <td><h:selectOneMenu value="#{matchTerm.name}" id="#{prefix}SelectorName" class="#{prefix}attrSelect" disabled="#{readOnly == true}">
+      <f:selectItems value="#{matchTerm.allowedNames}" />
+    </h:selectOneMenu></td>
+  </ui:fragment>
+  <ui:fragment rendered="#{matchTerm.permission}">
+    <td><h:inputText value="#{matchTerm.name}" size="20" disabled="#{readOnly == true}" /></td>
+  </ui:fragment>
+  <td>
+    <ui:fragment rendered='#{matchTerm.applicationId == "IIQ" }'>
+  		<h:inputText value="#{matchTerm.value}" size="60" class="matchListValue" disabled="#{readOnly || matchTerm.isNull}" />
+    </ui:fragment>
+  	<ui:fragment rendered='#{matchTerm.applicationId != "IIQ" and (matchTerm.permission or !enableValueSelect)}'>
+  		<h:inputText value="#{matchTerm.value}" size="60" class="matchListValue" disabled="#{readOnly || matchTerm.isNull}" />
+  	</ui:fragment>
+  	<ui:fragment rendered='#{matchTerm.applicationId != "IIQ" and (!matchTerm.permission and enableValueSelect)}'>  	
+  	    <div class="#{prefix}attrValueSelect" applicationId="#{matchTerm.applicationId}" defaultDisplayValue="#{matchTerm.displayValue}"></div>
+  		<h:inputHidden value="#{matchTerm.value}" disabled="#{matchTerm.isNull}"/>
+  	</ui:fragment>
+  </td>
+  <td width="50" align="center"><h:selectBooleanCheckbox value="#{matchTerm.isNull}" onclick="#{prefix}disableAssociatedTextBox(this)" class="#{prefix}nullCheck" disabled="#{readOnly == true}" /> </td>
+</ui:composition>
+
+</body>
+</html>

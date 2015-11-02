@@ -1,0 +1,74 @@
+<tabset type="tabs" class="bg-light" justified="true" ng-class="{ 'hide-tab-header': !isRoleRequest() }">
+  <tab heading="{{ 'ui_my_approvals_item_detail_tab_details' | spTranslate }}">
+    <ul class="list-group no-radius">
+      <li class="list-group-item">
+        <strong>{{ 'ui_my_approvals_item_detail_action' | spTranslate }}:</strong>
+        {{ getOperation() | operation : isNewAccount() }}
+      </li>
+
+      <li class="list-group-item" ng-show="isEntitlementRequest()">
+        <strong>{{ 'ui_my_approvals_item_detail_attribute' | spTranslate }}:</strong>
+        {{ getAttribute() }}
+      </li>
+
+      <li class="list-group-item" ng-show="isEntitlementRequest()">
+        <strong>{{ 'ui_my_approvals_item_detail_value' | spTranslate }}:</strong>
+        {{ getDisplayValue() }}
+      </li>
+
+      <li class="list-group-item" ng-show="isEntitlementRequest() || isAccountRequest()">
+        <strong>{{ 'ui_item_detail_account_name' | spTranslate }}:</strong>
+        {{ getAccountDisplayName() }}
+      </li>
+
+      <li class="list-group-item" ng-show="isEntitlementRequest() || isAccountRequest()">
+        <strong>{{ 'ui_item_detail_application' | spTranslate }}:</strong>
+        {{ getApplication() }}
+      </li>
+
+      <li class="list-group-item" ng-show="isRoleRequest()">
+        <strong>{{ 'ui_item_detail_role' | spTranslate }}:</strong>
+        {{ getDisplayValue() }}
+      </li>
+
+      <li class="list-group-item" ng-show="hasSunrise() || hasSunset()">
+        <strong>{{ 'ui_my_approvals_item_detail_dates' | spTranslate }}:</strong>
+
+        <span ng-show="hasSunrise() &amp;&amp; !hasSunset()">{{ 'ui_start' | spTranslate }}</span>
+        <span ng-show="!hasSunrise() &amp;&amp; hasSunset()">{{ 'ui_end' | spTranslate }}</span>
+
+        <span ng-show="hasSunrise()">{{ getSunrise() | date:'shortDate' }}</span>
+        <span ng-show="hasSunrise() &amp;&amp; hasSunset()">{{ 'ui_to' | spTranslate }}</span>
+        <span ng-show="hasSunset()">{{ getSunset() | date:'shortDate' }}</span>
+      </li>
+
+      <li class="list-group-item" ng-show="hasOwner()">
+        <strong ng-if="isEntitlementRequest()">{{ 'ui_my_approvals_item_detail_ent_owner' | spTranslate }}:</strong>
+        <strong ng-if="isRoleRequest()">{{ 'ui_my_approvals_item_detail_role_owner' | spTranslate }}:</strong>
+        <strong ng-if="isAccountRequest()">{{ 'ui_my_approvals_item_detail_app_owner' | spTranslate }}:</strong>
+        {{ getOwnerName() }}
+      </li>
+
+      <li class="list-group-item" ng-show="getAssignmentNote()">
+        <label for="assignmentNote">{{ 'ui_my_approvals_item_detail_assign_note' | spTranslate }}</label>
+        <article class="line-breaks" id="assignmentNote" ng-bind-html="getAssignmentNote()"></article>
+      </li>
+    </ul>
+  </tab>
+
+  <tab select="loadTargetAccounts()"
+       ng-show="isRoleRequest()"
+       heading="{{ 'ui_my_approvals_item_detail_tab_account_details' | spTranslate }}">
+    <div role="presentation" sp-loading-mask="targetAccounts.$resolved">
+      <sp-target-accounts accounts="targetAccounts" />
+    </div>
+  </tab>
+
+  <tab select="loadRoleEntitlements()"
+       ng-if="isRoleRequest()"
+       heading="{{ 'ui_access_item_detail_tab_entitlements' | spTranslate }}">
+    <span sp-loading-mask="roleEntitlements">
+      <sp-role-entitlements entitlements="roleEntitlements" total-count="totalRoleEntitlementsCount"/>
+    </span>
+  </tab>
+</tabset>

@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  
+  <a4j:outputPanel id="applicationRisk_chart_#{reference.content.id}">
+  
+    <c:choose>
+      <!-- This fragment will be rendered on the dashboard -->
+      <c:when test="#{viewLarge == null}">
+      
+      <ui:include src="chartOptionsInclude.xhtml">
+        <ui:param name="chartBean" value="#{applicationRiskScoreChart}"/>
+        <ui:param name="chartName" value="applicationRisk"/> 
+        <ui:param name="reference" value="#{reference}"/>     
+        <ui:param name="hideOptions" value="true"/>  
+        <ui:param name="optionsTblStyle" value="spSolidBlue"/>
+      </ui:include>
+      
+      <div id="chartSection">
+        <table class="width100" cellspacing="0" cellpadding="3">
+          <tr style="height:#{sp:getChartHeight(reference.region)}px">
+            <td align="center" valign="middle">
+              
+              <ui:fragment rendered="#{!applicationRiskScoreChart.renderChart}">
+                <div class="alert_message" id="runningText" style="padding-top:50px">
+                  <span> #{msgs.msg_loading_chart}</span>
+                </div> 
+                <div id="modal_dialog_progress" class="alert_progress"></div>
+                
+                <script defer="defer">
+                  setTimeout('reRenderChart(\'#{reference.content.id}\', $(\'dashboardForm:applicationRisk_chartBtn_#{reference.content.id}\'),\'applicationRisk\', \'#{parentFormName}\')',250);     
+                </script>
+              </ui:fragment>
+              <a4j:outputPanel id="applicationRiskChartPanel_#{reference.content.id}">
+                <ui:fragment rendered="#{applicationRiskScoreChart.renderChart}">
+            
+                <a href="#{base.requestContextPath}/manage/riskScores/appRiskScores.jsf">
+                  
+                  <sp:chart id="applicationRiskCategoryChart_#{reference.content.id}" 
+                    datasource="#{applicationRiskScoreChart.applicationRiskScoreDataSource}"
+                    colors="#{scoreCategoryList.colorsAsString}" 
+                    title="#{msgs.chart_app_risk_scores_title}"
+                    type="#{reference.arguments['chartType']}" 
+                    is3d="#{reference.arguments['chartIs3d']}" 
+                    orientation="#{sp:getChartOrientation(reference.region)}" 
+                    alpha="75" 
+                    startAngle="0" 
+                    antialias="true" 
+                    legend="true" 
+                    height="#{sp:getChartHeight(reference.region)}" 
+                    storeOnSession="false"
+                    width="#{sp:getChartWidth(reference.region)}" 
+                    labels="true" 
+                    outline="false">
+                  </sp:chart>
+                  
+                </a>
+                </ui:fragment>
+                
+                <a4j:commandButton style="display:none" id="applicationRisk_refreshBtn_#{reference.content.id}" value="#{msgs.button_refresh}" limitRender="true"
+                action="#{applicationRiskScoreChart.refreshChart}" onclick="this.disabled=true" render="applicationRiskChartPanel_#{applicationRiskScoreChart.referenceIndex}"/>
+              </a4j:outputPanel>
+                    
+            </td>
+          </tr>
+        </table>
+      </div> 
+    
+    </c:when>
+      <c:otherwise>
+      <!-- This fragment will be rendered on the view large chart page -->
+      <ui:include src="chartInclude.xhtml">
+        <ui:param name="chartBean" value="#{applicationRiskScoreChart}"/>
+        <ui:param name="chartName" value="applicationRisk"/> 
+        <ui:param name="reference" value="#{reference}"/>      
+        <ui:param name="optionsTblStyle" value="spSolidBlue"/>
+        <ui:param name="chartColors" value="#{scoreCategoryList.colorsAsString}"/>
+        <ui:param name="javascript" value="#{(applicationRiskScoreChart.dateRange=='Current') ? 'SailPoint.Dashboard.jsRiskScores' : ''}"/>
+        <ui:param name="chartTitle" value="Application Risk Scores"/>
+      </ui:include>
+     </c:otherwise>
+    </c:choose>  
+    
+  </a4j:outputPanel>
+  
+  <h:inputHidden id="applicationRisk_referenceIndex"     value="#{applicationRiskScoreChart.referenceIndex}"/>
+  <h:inputHidden id="applicationRisk_selectedChartType"  value="#{applicationRiskScoreChart.chartType}"/>
+  <h:inputHidden id="applicationRisk_selectedDateRange"  value="#{applicationRiskScoreChart.dateRange}"/>
+  <h:inputHidden id="applicationRisk_selectedGroup"      value="#{applicationRiskScoreChart.gFName}"/>
+  <h:inputHidden id="applicationRisk_selectedValues"     value="#{applicationRiskScoreChart.gDNames}" 
+    converter="java.util.List"/>
+  
+</ui:composition>
+</body>
+</html>

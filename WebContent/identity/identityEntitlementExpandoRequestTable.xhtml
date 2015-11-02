@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+<ui:composition>
+
+ <ui:fragment rendered='#{requestSummaryBean == null}'>
+   <div style="margin: 5px 5px 5px 5px;">     
+     <table>  
+      <tr>
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold; width:200px;" valign="top">             
+           #{notFoundMsg}  
+        </td>              
+      </tr>
+     </table>
+   </div>          
+ </ui:fragment>
+
+ <ui:fragment rendered='#{requestSummaryBean != null}'>
+
+ <div style="border:1px #ccc solid;margin: 5px 5px 5px 5px;">
+   <table class="spTable">   
+     <tr>
+       <th valign="top">
+         <h:outputFormat  value="#{title}">
+              <f:param value="#{entitlementDetails.name}"/>
+              <f:param value="#{entitlementDetails.displayValue}"/>
+            </h:outputFormat> 
+       </th>  
+     </tr>
+   </table>
+   
+   <table>
+       <tr>
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold; width:200px;" valign="top">
+          #{msgs.date}
+        </td>           
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+          #{requestSummaryBean.date}
+        </td>
+       </tr>
+       <tr>
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold; width:200px;" valign="top">
+          #{msgs.dash_access_req_col_status}
+        </td>           
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+          #{requestSummaryBean.executionStatus}
+        </td>
+       </tr>
+       
+       <tr>           
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+           #{msgs.identity_entitlements_request_id}
+         </td>
+        
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+           <h:outputLink value="javascript: SailPoint.Manage.Grid.AccessRequests.viewRequestDetails('#{requestSummaryBean.requestId}');" >
+             <h:outputText  value="#{requestSummaryBean.trimmedRequestId}"/>                 
+           </h:outputLink>  
+         </td>         
+       </tr>          
+       <tr>
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+          #{msgs.label_operation}
+        </td>
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+          #{requestSummaryBean.op}
+         </td>
+       </tr>
+       <tr>
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+           #{msgs.label_requester}
+         </td>
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+          #{requestSummaryBean.requester}
+         </td>
+       </tr>
+
+   </table>     
+ </div>
+ 
+ </ui:fragment> 
+  
+</ui:composition>
+</body>
+</html>

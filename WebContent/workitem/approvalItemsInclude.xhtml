@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <h:panelGroup>
+    <table cellspacing="5" >
+      <ui:fragment rendered="#{workItem.targetIdentityBean.object.id != null}">
+        <tr>
+          <td>
+            <table>
+              <tr>
+                <td align='left'>
+                  <p class="viewIdentityDetails">
+                    <a href="javascript:SailPoint.IdentityDetailPopup.showForWorkItem('#{workItem.targetIdentityBean.object.id}', '#{workItem.targetIdentityBean.object.name}', '#{workItem.objectId}')">
+                      <h:outputFormat value="#{msgs.lcm_view_identity_details_for}">
+                         <f:param value="#{workItem.attributes['identityDisplayName']}"/>
+                      </h:outputFormat>
+                    </a>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </ui:fragment>
+      <tr>
+        <ui:fragment rendered="#{title == null}">
+          <td>
+            <h:outputFormat rendered="#{violationReview != 'true'}" value="#{msgs.approvalitem_items_title}" styleClass="titleColumn">
+                <f:param value="#{workItem.attributes['identityDisplayName']}"/>
+            </h:outputFormat>
+
+            <ui:fragment rendered="#{violationReview =='true'}">
+                <div style="padding:5px;margin:5px">
+                <h:outputText  value="#{msgs.approvalitem_violation_review_title }"/>
+                </div>
+            </ui:fragment>
+
+
+          </td>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{title != null}">
+          <td>
+            <h:outputText value='#{title}' styleClass="titleColumn"/> 
+          </td>
+        </ui:fragment>
+
+      </tr>
+    </table>
+
+    <ui:fragment rendered="#{not disableDecisionColumn or violationReview}">
+      <ui:include src="approvalDecisionsLegend.xhtml"/>
+    </ui:fragment>
+
+    <a4j:outputPanel id="approvalItemsPanel">
+
+      <a4j:commandButton id="addApprovalItemComment" style="display:none" render="approvalItemsPanel" action="#{workItem.addApprovalItemComment}" />
+      <table class="spTable"  id='approvalItemsTable' cellspacing="1" width="90%">
+        <ui:fragment rendered="#{workItem.approvalSet != null}">
+          <tr>
+            <ui:fragment rendered="#{not disableDecisionColumn}">
+              <th colspan="2">#{msgs.approvalitem_decision}</th>
+            </ui:fragment>
+             <ui:fragment rendered="#{violationReview}">
+              <th colspan="2"></th>
+            </ui:fragment>
+            <th>#{msgs.application}</th>
+            <ui:fragment rendered="#{workItem.approvalSet.showAccountColumn}">
+              <th>#{msgs.approvalitem_account_name}</th>
+            </ui:fragment>
+            <th>#{msgs.label_operation}</th>
+  
+            <ui:fragment rendered="#{workItem.approvalSet.hasAttribute}">
+              <th>#{msgs.attribute}</th>
+            </ui:fragment>
+  
+            <ui:fragment rendered="#{workItem.approvalSet.hasAttributeValue}">
+              <th>#{msgs.approvalitem_values}</th>
+            </ui:fragment>
+  
+            <ui:fragment rendered="#{workItem.approvalSet.hasDateAssigned}">
+              <th>#{msgs.approvalitem_activation_dates}</th>
+            </ui:fragment>
+  
+            <ui:fragment rendered="#{(workItem.approvalSet.hasRequesterComments)}">
+              <th>#{msgs.approvalitem_requester_comments}</th>
+            </ui:fragment>
+  
+            <ui:fragment rendered="#{(workItem.attributes['showOwner'] != null)}">
+              <th>#{msgs.approvalitem_owner}</th>
+            </ui:fragment>
+
+            <th>#{msgs.approvalitem_completion_comments}</th>
+          </tr>
+
+          <c:forEach items="#{workItem.approvalSet.items}" var="item">
+            <tr>
+              <ui:fragment rendered="#{not disableDecisionColumn and not violationReview}">
+                <td colspan='2'>
+                   <div id="decision_#{item.id}">
+                     <sp:imageRadio id='decision_#{item.id}'
+                                    value="#{item.object.state}"
+                                    onclick="SailPoint.web.workitem.handleItemStateChange('#{item.id}', ImageRadio.getRadio(this).value);"
+                                    converter="sailpoint.object.Enum"
+                                    disabled="#{not workItem.editable}">
+                       <f:selectItems value="#{item.statusChoices}" />
+                     </sp:imageRadio>
+                   </div>
+                </td>
+              </ui:fragment>
+              <ui:fragment rendered="#{violationReview}">
+                <td colspan='2'>
+                   <div id="decision_#{item.id}">
+                     <sp:imageRadio id='violation_decision_#{item.id}'
+                                    value="#{item.object.state}"
+                                    onclick="SailPoint.web.workitem.toggleItemState('#{item.id}', ImageRadio.getRadio(this).value);"
+                                    converter="sailpoint.object.Enum"
+                                    disabled="#{not workItem.editable}">
+                       <f:selectItems value="#{item.violationReviewStatusChoices}" />
+                     </sp:imageRadio>
+                   </div>
+                </td>
+              </ui:fragment>
+  
+              <td>
+                <h:outputText value="#{item.applicationDisplayName}"/>                      
+                <ui:fragment rendered="#{!(item.object.instance eq null)}">
+                  <h:outputText value=" (#{item.object.instance})"/>
+                </ui:fragment>
+              </td>
+
+              <ui:fragment rendered="#{!(item.object.nativeIdentity eq null) or item.create}">
+              <td>
+                <ui:fragment rendered="#{!(item.object.nativeIdentity eq null)}">
+                  #{item.object.nativeIdentity}
+                </ui:fragment>
+                <ui:fragment rendered="#{(item.object.nativeIdentity eq null) and item.create}">
+                  <div class="lcmNewAccount">#{msgs.lcm_request_entitlements_summary_new_account}</div>
+                </ui:fragment>
+              </td>
+              </ui:fragment>
+              
+              <td>
+                <h:outputText value="#{item.object.operation}"/>                      
+
+                <ui:fragment rendered="#{item.forceNewAccount}">
+                  (#{msgs.lcm_workitem_new_account_requested})
+                </ui:fragment>
+              </td>
+  
+              <ui:fragment rendered="#{!(item.object.displayName eq null) || !(item.object.name eq null)}">
+                <td>
+                  <ui:fragment rendered="#{!(item.object.displayName eq null)}">
+                    <h:outputText value="#{sp:localizeKey(item.object.displayName)}"/>
+                  </ui:fragment>
+                  <ui:fragment rendered="#{(item.object.displayName eq null)}">
+                    <h:outputText value="#{item.object.name}"/>                      
+                 </ui:fragment>
+                </td>
+              </ui:fragment>
+              <ui:fragment rendered="#{ ( (item.object.displayName eq null) and (item.object.name eq null) and ( workItem.approvalSet.hasAttribute ) )}">
+                <td> </td>
+              </ui:fragment>
+
+              <ui:fragment rendered="#{!(item.object.displayValue eq null) || !(item.value eq null)}">
+                <td>
+                  <div style="width:200pt; word-wrap: break-word;">
+                    <ui:fragment rendered="#{(item.object.displayValue eq null)}">
+                    <c:forEach items="#{item.value}" var="val">
+                      <c:choose>
+                        <c:when test="#{item.role==true}">
+                          <a href="javascript: SailPoint.RoleDetailPanel.window('#{item.object.assignmentId}', '#{sp:getIdForName('Bundle', val)}', '#{workItem.targetIdentityBean.object.id}', false)">
+                          <h:outputText value="#{val}"/>
+                          </a>  
+                        </c:when>
+                        <c:otherwise>
+                          <h:outputText value="#{sp:translateApprovalItemValue(facesContext, val)}"/> 
+                            <img src="#{base.requestContextPath}/images/icons/dashboard_help_12.png" 
+                                class="descriptionHelp" 
+                                alt="#{sp:localizedEntitlementDescription(facesContext, item.applicationDisplayName, item.object.name, val)}"/>
+                        </c:otherwise>
+                      </c:choose>
+                      <br/>
+                    </c:forEach>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{!(item.object.displayValue eq null)}">
+                      <h:outputText value="#{item.object.displayValue}"/>
+                      
+                      <ui:fragment rendered="#{!(sp:asList(item.value) eq null)}"> 
+                         <img src="#{base.requestContextPath}/images/icons/dashboard_help_12.png"  
+                              class="descriptionHelp"  
+                              alt="#{sp:localizedEntitlementDescription(facesContext, item.applicationDisplayName, item.object.name, sp:asList(item.value)[0])}"/> 
+                      </ui:fragment>                      
+                    </ui:fragment>
+                  </div>
+                </td>
+              </ui:fragment>
+
+              <ui:fragment rendered="#{ ( (item.value eq null) and ( workItem.approvalSet.hasAttributeValue) )}">
+                <td></td>
+              </ui:fragment>
+  
+              <ui:fragment rendered="#{!(item.object.startDate eq null) || !(item.object.endDate eq null)}">
+                <td>
+                  <div class="activationNotice nowrap">
+                    <ui:fragment rendered="#{!(item.object.startDate eq null)}">
+                      <h:outputText styleClass="label green" value="#{msgs.active_on}: "/>
+                      <ui:fragment rendered="#{not workItem.editable}">
+                        <h:outputText value="#{item.object.startDate}">
+                          <f:convertDateTime type="date" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                        </h:outputText>
+                      </ui:fragment>
+                      <ui:fragment rendered="#{workItem.editable}">
+                        <div id="sunriseDiv_#{item.id}"></div>
+                        <h:inputHidden id="sunrise_#{item.id}" value='#{item.object.startDate}' converter="sailpoint.object.Date"/>
+                        <script type="text/javascript">
+                            SailPoint.web.workitem.renderApprovalItemCalendar('sunriseCalendar_#{item.id}', 
+                                                                              'editForm:sunrise_#{item.id}', 
+                                                                              'sunriseDiv_#{item.id}');
+                        </script>
+                      </ui:fragment>
+                    </ui:fragment>
+                        
+                    <ui:fragment rendered="#{!(item.object.endDate eq null)}">
+                      <h:outputText styleClass="label red" value="#{msgs.inactive_on}: "/>
+                      <ui:fragment rendered="#{not workItem.editable}">
+                        <h:outputText value="#{item.object.endDate}">
+                          <f:convertDateTime type="date" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                        </h:outputText>
+                      </ui:fragment>
+                      <ui:fragment rendered="#{workItem.editable}">
+                        <div id="sunsetDiv_#{item.id}"></div>
+                        <h:inputHidden id="sunset_#{item.id}" value='#{item.object.endDate}' converter="sailpoint.object.Date"/>
+                        <script type="text/javascript">
+                            SailPoint.web.workitem.renderApprovalItemCalendar('sunsetCalendar_#{item.id}', 
+                                                                              'editForm:sunset_#{item.id}', 
+                                                                              'sunsetDiv_#{item.id}');
+                        </script>
+                      </ui:fragment>
+                    </ui:fragment>                      
+                    <div class="vis-clear"></div>
+                  </div>
+                </td>
+              </ui:fragment>
+              <ui:fragment rendered="#{ ((item.object.startDate eq null) and (item.object.endDate eq null) and (workItem.approvalSet.hasDateAssigned))}">
+                <td></td>
+              </ui:fragment>
+
+              <ui:fragment rendered="#{(workItem.approvalSet.hasRequesterComments)}">
+                <td> 
+                  <div style="width:200pt; word-wrap: break-word;">
+                    <h:outputText value="#{item.object.requesterComments}"/> 
+                  </div>
+                </td>
+              </ui:fragment>
+  
+              <td>
+                <table cellspacing="0">
+                  <tr>
+                    <td>
+                      <ui:fragment rendered="#{workItem.editable and violationReview != 'true'}">
+                        <h:graphicImage styleClass="dashContentExpandBtn"
+                          url="/images/icons/add.png"
+                          style="float:none"
+                          onclick="SailPoint.web.workitem.addApprovalItemComment('#{workItem.object.id}','itemComment_#{sp:escapeHTMLElementId(item.object.id)}', 'editForm:addApprovalItemComment', '#{sp:escapeJavascript(msgs.approvalitem_save_comment)}', '#{sp:escapeJavascript(msgs.approvalitem_add_completion_comment)}')"
+                          id="approvalItemCommentBtn_#{item.object.id}"/>
+                      </ui:fragment>
+                    </td>
+                    <td>
+                      <div style="width:300pt; word-wrap: break-word;">
+                        <ui:include src="/workitem/commentsList.xhtml">
+                          <ui:param name="commentsList" value="#{item.object.comments}" />
+                        </ui:include>
+                      </div>
+                    </td>
+                    <h:inputHidden id="itemComment_#{sp:escapeHTMLElementId(item.object.id)}" value='#{item.completionComments}'/>
+                  </tr>
+                </table>
+              </td>
+  
+              <ui:fragment rendered="#{(workItem.attributes['showOwner'] != null)}">
+                <td> <h:outputText value="#{item.object.owner}"/> </td>
+              </ui:fragment>
+  
+            </tr>
+          </c:forEach>
+        </ui:fragment>
+
+        <script type="text/javascript" defer="defer">
+          makeTableMulticolored($('approvalItemsTable'), true, true, 'odd', 'even');
+        </script>
+      </table>
+
+    <!-- 
+      This is a convention recognized by viewResult
+     -->
+    <h:inputHidden id="TaskResultId" value="#{workItem.taskResultId}"/>
+   </a4j:outputPanel>
+
+  </h:panelGroup>
+<script type="text/javascript" defer="defer">
+Ext.onReady(function() {
+	Ext.QuickTips.init();
+	//There may be more than one help icon
+	Ext.select(".descriptionHelp").each(function(helpIcon) {
+		Ext.QuickTips.register({
+			target: helpIcon,
+			text: helpIcon.dom.alt
+		});
+	});
+});
+</script>
+</ui:composition>
+</body>
+</html>

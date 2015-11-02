@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+           // hide sections that don't apply to the currently 
+           initializeForm();
+        });
+
+       function deriveDivId(field, field2) {
+           var tokens = field.split("_"); 
+           // we want the last token may be null
+           var nameSpace = tokens[tokens.length - 1];
+           return field2 + nameSpace;
+       }
+
+       function hideDiv(divId) {
+           var delimitedField = $(divId);
+           if ( delimitedField ) {
+               delimitedField.style.display = "none";
+           }
+       }
+
+       function showDiv(divId) {
+           var delimitedField = $(divId);
+           if ( delimitedField ) {
+               delimitedField.style.display = "";
+           }
+       }
+
+       function setRadioInput(inputID, value) {
+         var radioInputs = $(document.getElementsByName(inputID));
+         var selectedInput;
+         for (i = 0; i < radioInputs.length && !selectedInput; ++i) {
+           var inputElement = radioInputs.item(i);
+           if ( inputElement.value == value ) {
+             inputElement.checked = true;
+           } else {
+             inputElement.checked = false;
+           }
+         }
+         return selectedInput;
+       }
+
+       function initializeForm() {
+          var parsingMethod = getSelectedRadioInput("editForm:parseType_");
+          if ( parsingMethod == null ) {
+              var regularExpression = $('editForm:regularExpression_');
+              if ( (regularExpression != null ) && 
+                   ( regularExpression.value ) ) {
+                  parsingMethod = "regexp";
+              } else {
+                  parsingMethod = "delimited";
+              }
+              setRadioInput("editForm:parseType_", parsingMethod);
+          }
+          toggleParsingSections("editForm:parseType_",parsingMethod);
+
+          var transport = getSelectedRadioInput("editForm:transport_");
+          toggleCredentialsSection("editForm:transport_",transport);
+       }
+
+       function changeParsingType(select) {
+         if ( select ) {
+           var name = select.name;
+           if ( name ) {
+             var parsingMethod = getSelectedRadioInput(name);
+//alert('name['+name+'] method['+parsingMethod+']');
+             toggleParsingSections(name,parsingMethod);
+           }
+         }
+       }
+
+       function toggleParsingSections(name, parsingMethod) {
+         var regexps = deriveDivId(name, "regexps_")
+         var delimited = deriveDivId(name, "delimited_")
+         if ( parsingMethod == "delimited" ) {
+           hideDiv(regexps);
+           showDiv(delimited);
+         } else {
+           showDiv(regexps);
+           hideDiv(delimited);
+         }
+       }
+
+       function changeTransport(select) {
+         if ( select ) {
+           var name = select.name;
+           if ( name ) {
+             var transport = getSelectedRadioInput(name);
+             toggleCredentialsSection(name, transport);
+           }
+         }
+       }
+
+       function toggleCredentialsSection(name, transport) {
+         var credentials = deriveDivId(name, "transportCredentials_")
+         if ( transport == "local" ) {
+           hideDiv(credentials);
+         } else {
+           showDiv(credentials);
+         }
+       }
+       //--><!]]>
+    </script>
+    <f:view>
+        <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_accountSettings}"/>
+
+        <br/><br/>
+        <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_section_file}"/><br/>
+        <!-- file info -->
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_file}"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpFile_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_file}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="filename_${nameSpace}"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'file')]}"
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              <h:outputText style="color: red;" value="*"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_encoding}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpFileEncoding_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_encoding}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'fileEncoding')]}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+        </table>
+
+        <!-- FileTransport this is a global setting so don't show it on the groups page -->
+        <ui:fragment >
+          <br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_transport}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_delimited_fileTransport}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpFileTransport_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_filetransport}"/>
+              </td>
+              <td>
+                <h:selectOneRadio id="transport_#{nameSpace}" 
+                                  onclick="changeTransport(this);" 
+                                  value="#{applicationObject.attributes[sp:concat(schemaType,'filetransport')]}">
+                  <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportLocal}" itemValue="local"/>
+                  <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportFTP}" itemValue="ftp"/>
+                  <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportSCP}" itemValue="scp"/>
+                </h:selectOneRadio>
+              </td>
+            </tr>
+          </table>
+
+          <div id='transportCredentials_#{nameSpace}'>
+  
+            <table class="spTable" style="border:0px" cellspacing="0">
+
+              <tr>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_transportHost}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpHost_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_transportHost}"/>
+                </td>
+                <td>
+                  <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'host')]}"
+                               size="40"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+              <tr>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_transportUser}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpUser_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_transportUser}"/>
+                </td>
+                <td>
+                  <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'transportUser')]}"
+                               size="40"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+              <tr>
+                  <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_transportPw}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpPw_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_transportPw}"/>
+                </td>
+                <td>
+                  <sp:inputSecret value="#{applicationObject.attributes['transportUserPassword']}"
+                                  size="40" redisplay="true"
+                                  autocomplete="off"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </ui:fragment>
+
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

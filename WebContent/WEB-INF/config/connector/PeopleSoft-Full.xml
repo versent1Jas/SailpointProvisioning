@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD, GROUP_PROVISIONING" icon="enterpriseIcon" name="PeopleSoft Full Template" type="PeopleSoft - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="PSoft"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <ClusterScript>
+        <Source>
+                                String cluster = null;
+                                 Object host = application.getAttributeValue("host");
+                                 Object port = application.getAttributeValue("port");
+                                 if (host != null) {
+                                    cluster = host.toString();
+                                    if (port != null)
+                                        cluster += ":" + port.toString();
+                                 }
+                                 return cluster;
+                      </Source>
+      </ClusterScript>
+      <PlanInitializerScript>
+        <Source>
+                                import sailpoint.object.*;
+                                import sailpoint.object.ProvisioningPlan.AccountRequest;
+                                
+                                import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                                import sailpoint.object.ProvisioningPlan;
+                                import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                                import sailpoint.object.ProvisioningPlan.ObjectRequest;
+
+                            
+                                
+List groupsPsoft = plan.getObjectRequests();
+if (groupsPsoft != null){
+    for (ObjectRequest req : groupsPsoft ){
+        ObjectOperation op = req.getOp();
+        if(op == ObjectOperation.Create){
+            String groupId = req.getNativeIdentity();
+            if (groupId != null) {
+                req.setNativeIdentity(groupId);
+            }
+        }
+    }
+}
+
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" type="string"/>
+        <AttributeDefinition displayName="ID Types and Values" multi="true" name="USER_TYPES" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Symbolic ID" name="SYMBOLIC_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Email Address" name="EMAIL_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Navigator Homepage" name="NAVIG_HOME_PAGE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Primary" name="PRIMARY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Row Security" name="ROW_SEC" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Process Profile" name="PROC_PROFILE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Multi Language Enabled" name="MULTI_LANG_EN" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Language Code" name="LANG_CODE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Email Addresses" multi="true" name="EMAIL_ID_LIST" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="UserIDAlias" name="USERIDALIAS" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Role Active" name="ROLE_ACTIVE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Permisions List" multi="true" name="PERM_LIST" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Dynamic Members" multi="true" name="DYN_MEMBERS" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Grantees" multi="true" name="GRANTEES" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Grantors" multi="true" name="GRANTORS" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" helpKey="The user name" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="ID Types and Values" helpKey="Format to enter value (Attribute Name#Attribute Value)" multi="true" name="USER_TYPES" required="true" section="" type="string"/>
+        <Field displayName="Description" name="DESCRIPTION" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group ID" helpKey="Group name for creting Role on PeopleSoft server" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="DESCRIPTION" helpKey="Description of the Role" name="DESCRIPTION" required="true" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="DESCRIPTION" helpKey="Description of the Role" name="DESCRIPTION" reviewRequired="true" type="string"/>
+        <Field displayName="Permission List" helpKey="List of permissions for the Role" multi="true" name="PERM_LIST" reviewRequired="true" type="string"/>
+        <Field displayName="Grantees" helpKey="List of Grantees for this Role" multi="true" name="GRANTEES" reviewRequired="true" type="string"/>
+        <Field displayName="Grantors" helpKey="List of Grantors for this Role" multi="true" name="GRANTORS" reviewRequired="true" type="string"/>
+        <Field displayName="Dynamic Members" helpKey="List of Dynamic members" multi="true" name="DYN_MEMBERS" readOnly="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

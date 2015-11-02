@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  
+  <f:view>
+    <table class="width100" cellspacing="3" cellpadding="0">
+      <tr>
+        <td valign="top">
+          <h:outputText styleClass="sectionHeader" value="#{msgs.standard_attrs}"/>
+          <table class="width100 nowrap">
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold"
+                              value="#{sp:localizeKey(searchBean.inputs['accountGroup.name'].description)}"/>
+              </td>
+              <td colspan="2">
+                <h:inputText id="accountGroupName" styleClass="inputWidth"
+                             value="#{searchBean.inputs['accountGroup.name'].value}"/>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold"
+                              value="#{sp:localizeKey(searchBean.inputs['accountGroup.owner'].description)}"/>
+              </td>
+              <td colspan="2">
+                <div id="accountGroupOwnerSuggestDiv"></div>
+                <t:inputHidden id="accountGroupOwner" value="#{searchBean.inputs['accountGroup.owner'].value}" forceId="true">
+                </t:inputHidden>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold"
+                              value="#{sp:localizeKey(searchBean.inputs['accountGroup.nativeIdentity'].description)}"/>
+              </td>
+              <td colspan="2">
+                <ui:include src="../suggestAttribute.xhtml">
+                  <ui:param name="key" value="accountGroup.displayableName"/>
+                  <ui:param name="field" value="nativeIdentity"/>
+                </ui:include>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold"
+                              value="#{sp:localizeKey(searchBean.inputs['accountGroup.application'].description)}"/>
+              </td>
+              <td>
+                <div id="accountGroupApplicationSuggest"></div>
+                <t:inputHidden id="accountGroupApplication" value="#{searchBean.inputs['accountGroup.application'].value}" forceId="true">
+                </t:inputHidden>
+              </td>
+            </tr>
+            <tr>
+                <td>
+                    <h:outputText styleClass="font10" style="font-weight:bold" value="#{sp:localizeKey(searchBean.inputs['accountGroup.typeFilter'].description)}"/>
+                </td>
+                <td>
+                    <div id="accountGroupTypeComboBox"/>
+                    <t:inputHidden id="accountGroupTypeFilter" value="#{searchBean.inputs['accountGroup.typeFilter'].value}" forceId="true">
+                    </t:inputHidden>
+                </td>
+            </tr>
+          </table>
+        </td>
+        <td>
+          <br/>
+          <h:outputText styleClass="textBold" value="#{msgs.account_group_permissions}"/>
+          <div class="spTabledContent groupPermissionsSearchFields"
+               style="padding:8px;">
+            <table class="width100">
+              <tr>
+                <td>
+                  <h:outputText styleClass="textBold"
+                                value="#{sp:localizeKey(searchBean.inputs['accountGroup.target'].description)}"/>
+                </td>
+                <td colspan="2">
+                  <h:inputText id="accountGroupTarget" styleClass="inputWidth"
+                               value="#{searchBean.inputs['accountGroup.target'].value}"/>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <h:outputText styleClass="textBold"
+                                value="#{sp:localizeKey(searchBean.inputs['accountGroup.rights'].description)}"/>
+                </td>
+                <td colspan="2">
+                  <h:inputText id="accountGroupRights" styleClass="inputWidth" 
+                               value="#{searchBean.inputs['accountGroup.rights'].value}"/>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <h:outputText styleClass="textBold"
+                                value="#{sp:localizeKey(searchBean.inputs['accountGroup.annotation'].description)}"/>
+                </td>
+                <td colspan="2">
+                  <h:inputText id="accountGroupAnnotation" styleClass="inputWidth"
+                               value="#{searchBean.inputs['accountGroup.annotation'].value}"/>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+
+      </tr>
+
+      <ui:fragment rendered="#{null != searchBean.extendedAttributeKeys}">
+        <tr>
+          <td>&nbsp;<br/></td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <h:outputText styleClass="sectionHeader" value="#{msgs.searchable_attrs}"/>
+            <table id="extendedAttributesTbl" cellpadding="5" cellspacing="0" class="width100">
+              <t:dataList value="#{searchBean.extendedAttributeKeys}" var="key">
+                <tr>
+                  <td valign="top">
+                    <h:outputText styleClass="textBold"
+                                  value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+                  </td>
+
+                  <ui:fragment rendered="#{searchBean.extendedAttributes[key].type eq 'boolean'}">
+                    <!--  Boolean -->
+                    <td>
+                        <h:selectOneMenu
+                            id="managedAttribute#{sp:buildValidComponentIdIgnoringNulls(key, true)}Boolean"
+                            value="#{searchBean.inputs[key].value}">
+                          <f:selectItem itemLabel="" itemValue=""/>
+                          <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true"/>
+                          <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false"/>
+                        </h:selectOneMenu>
+                    </td>
+                  </ui:fragment>
+
+                  <ui:fragment rendered="#{searchBean.extendedAttributes[key].type eq 'date'}">
+                    <!--  Date -->
+                    <td>
+                      <div class="managedAttributeDateField"
+                           id="dateAttribute#{sp:escapeHTMLElementId(key)}Date"></div>
+                      <h:inputHidden id="dateAttribute#{sp:buildValidComponentIdIgnoringNulls(key, true)}"
+                                     value="#{searchBean.inputs[key].value}"></h:inputHidden>
+
+                      <div id="dateAttribute#{sp:escapeHTMLElementId(key)}Val"
+                           style="display:none">#{searchBean.inputs[key].value}</div>
+                    </td>
+                  </ui:fragment>
+
+                  <ui:fragment rendered="#{!(searchBean.extendedAttributes[key].type eq 'boolean')
+                                    and !(searchBean.extendedAttributes[key].type eq 'date')}">
+                    <!--  String/Long/Int...values -->
+                    <td>
+                      <ui:fragment rendered="#{!(searchBean.inputs[key].suggestType eq 'none')}">
+                        <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Suggest"></div>
+                        <h:inputHidden
+                            id="managedAttribute#{sp:buildValidComponentIdIgnoringNulls(key, true)}"
+                            value="#{searchBean.inputs[key].value}">
+                          <f:attribute name="forceId" value="true"/>
+                        </h:inputHidden>
+
+                        <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Val" style="display:none"
+                             class="managedAttribute">#{searchBean.inputs[key].value}</div>
+                        <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Nbr"
+                             style="display:none">#{searchBean.extendedAttributes[key].name}</div>
+                        <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Type"
+                             style="display:none">#{searchBean.extendedAttributes[key].type}</div>
+                      </ui:fragment>
+
+                      <ui:fragment rendered="#{searchBean.inputs[key].suggestType eq 'none'}">
+                        <h:inputText
+                            id="extendedAttribute#{sp:buildValidComponentIdIgnoringNulls(key,true)}"
+                            styleClass="searchInputText inputWidth"
+                            value="#{searchBean.inputs[key].value}"/>
+                      </ui:fragment>
+                    </td>
+                  </ui:fragment>
+
+                </tr>
+              </t:dataList>
+            </table>
+          </td>
+        </tr>
+      </ui:fragment>
+    </table>
+
+  </f:view>
+    <script type="text/javascript" defer="defer">
+      SailPoint.Utils.styleSelects();
+    </script>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    <script>
+      Ext.onReady(function () {
+        var proxy = Ext.get('lcmConfigForm:#{type}ManageAccountsAllowAdditionalAccountRequestsProxy');
+        var val = Ext.get('lcmConfigForm:#{type}ManageAccountsAllowAdditionalAccountRequests');
+        if (proxy.getValue() == 'true') {
+          val.set({'checked':'true'});
+        }
+        else {
+          val.dom.removeAttribute('checked');
+        }
+      });
+    </script>
+  <div class="paddedContainer">
+    <div style="padding:5px">
+      <table class="width100"><tr>
+        <td><h:outputText styleClass="spContentTitle" value="#{panelTitle}"/>
+            <h:graphicImage id="imgHlp#{type}Title" width="12px" 
+                            alt="#{panelHelp}"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" />
+        </td>
+        <td style="text-align:right">
+          <h:graphicImage id="#{type}Expando" class="dashContentExpandBtn"
+                            url="/images/icons/minus.png"
+                            onclick="var collapsibleSection = Ext.get('#{type}CollapsibleSection');
+                                     if (collapsibleSection.isVisible()) {
+                                         collapsibleSection.slideOut('t', { 
+                                             block: true, 
+                                             callback: function() {
+                                                 var lifecycleActionsPanel = Ext.getCmp('lifecycleActionsPanel');
+                                                 flipImage('/images/icons/plus.png', '/images/icons/minus.png', $('lcmConfigForm:#{type}Expando'), $('#{type}CollapsibleSection'));
+                                                 lifecycleActionsPanel.setPaddedHeight(lifecycleActionsPanel);
+                                             },
+                                             duration: 0.5,
+                                             useDisplay: true
+                                         });
+                                     } else {
+                                         collapsibleSection.slideIn('t', { 
+                                             block: true, 
+                                             callback: function() {
+                                                 var lifecycleActionsPanel = Ext.getCmp('lifecycleActionsPanel');
+                                                 flipImage('/images/icons/plus.png', '/images/icons/minus.png', $('lcmConfigForm:#{type}Expando'), $('#{type}CollapsibleSection'));
+                                                 lifecycleActionsPanel.setPaddedHeight(lifecycleActionsPanel);
+                                            },
+                                             duration: 0.5,
+                                             useDisplay: true
+                                         });
+                                     }"/>
+         </td>
+       </tr>
+     </table>
+      <div id="#{type}CollapsibleSection"> 
+      <div style="padding:8px">
+      
+        <table id="#{type}ActionsTable" class="spTable width100">
+          <tr>
+            <th colspan="3"><h:outputText value="#{msgs.sys_config_lifecycle_actions}"/></th>
+          </tr>
+          
+          
+          <!-- Request Access -->
+          <tr>
+            <td style="width:200px; text-align:right"><h:outputText value="#{msgs.quicklink_request_access}"/></td>
+            <td style="width:30px">
+              <h:graphicImage id="imgHlp#{type}RequestAccess" width="12px" 
+                              alt="#{help.help_lcm_request_access}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td style="text-align:left">
+              <h:selectBooleanCheckbox id="#{type}RequestAccess" 
+                                       styleClass="quickLinkCheckbox"
+                                       value="#{actionMap['Request Access'].selected}"
+                                       onclick="var control = Ext.getCmp('#{type}Controls');
+                                                control.applyPopulationDisplayControl();
+                                                control.applyRuleSelectorControls();
+                                                control.requestAccessToggled(this);"/>
+              <span id="#{type}RequestAccessWarning" class="formError" style="display: none">#{msgs.lcm_request_access_no_options_selected_warning}</span>
+            </td>
+          </tr>
+          <tr id="#{type}RequestAccessSuboptions" style="display: #{(actionMap['Request Access'].selected) ? '' : 'none'}">
+              <td colspan="2">&nbsp;</td>
+              <td>
+              <table class="spTable width100">
+               <thead>
+                 <tr>
+                   <th colspan="3">#{msgs.sys_config_lifecycle_request_access_top_options}</th>
+                 </tr>
+               </thead>
+               <tbody>
+                <!--  Request Roles -->
+                <tr>
+                  <td style="width:5%; text-align:right; white-space: nowrap"><h:outputText value="#{msgs.quicklink_request_roles}"/></td>
+                  <td style="width:1%">
+                    <h:graphicImage id="imgHlp#{type}RequestRoles" width="12px" 
+                                    alt="#{help.help_lcm_request_roles}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td style="text-align:left">
+                    <h:selectBooleanCheckbox id="#{type}RequestRoles"                                             
+                                             value="#{actionMap['Request Roles'].selected}"
+                                             onclick="var control = Ext.getCmp('#{type}Controls');                                                     
+                                                      control.applyRuleSelectorControls();
+                                                      control.requestRolesToggled(this);"/>
+                  </td>
+                </tr>
+                <tr id="#{type}RequestRolesSuboptions" style="display: #{(actionMap['Request Roles'].selected) ? '' : 'none'}">
+                  <td colspan="2">&nbsp;</td>
+                  <td>
+                    <table class="spTable width100">
+                      <thead>
+                        <tr>
+                          <th colspan="3">#{msgs.sys_config_lifecycle_request_access_options}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                            <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_request_roles_allow_addt_acct_requests}"/></td>
+                            <td style="width: 1%">
+                                <h:graphicImage id="imgHlp#{type}RequestRolesAllowAdditionalAccountRequests" width="12px"
+                                                alt="#{help.help_lcm_request_roles_allow_addt_acct_requests}"
+                                                height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                                url="/images/icons/dashboard_help_16.png" />
+                            </td>
+                            <td style="width: 95%">
+                                <h:selectBooleanCheckbox id="#{type}RequestRolesAllowAdditionalAccountRequests" value="#{requestControls['allowRequestRolesAdditionalAccountRequests']}" />
+                            </td>
+                        </tr>
+                        <tr>
+                          <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_request_roles_allow_show_population_percents}"/></td>
+                          <td style="width: 1%">
+                            <h:graphicImage id="imgHlp#{type}RequestRolesAllowShowPopulation" width="12px"
+                                            alt="#{help.help_lcm_request_roles_show_population}"
+                                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                            url="/images/icons/dashboard_help_16.png" />
+                          </td>
+                          <td style="width: 95%">
+                            <h:selectBooleanCheckbox id="#{type}RequestRolesAllowShowPopulation" value="#{requestControls['allowRequestRolesShowPopulation']}" />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                
+                
+                <!-- Request Entitlements -->
+                <tr>
+                  <td style="width:5%; text-align:right; white-space: nowrap"><h:outputText value="#{msgs.quicklink_request_entitlements}"/></td>
+                  <td style="width:1%">
+                    <h:graphicImage id="imgHlp#{type}RequestEntitlements" width="12px" 
+                                    alt="#{help.help_lcm_request_entitlements}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td style="text-align:left">
+                    <h:selectBooleanCheckbox id="#{type}RequestEntitlements"                                          
+                                             value="#{actionMap['Request Entitlements'].selected}"
+                                             onclick="Ext.getCmp('#{type}Controls').requestEntitlementsToggled(this);"/>
+                  </td>
+                </tr>
+                <tr id="#{type}RequestEntitlementsSuboptions" style="display: #{(actionMap['Request Entitlements'].selected) ? '' : 'none'}">
+                  <td colspan="2">&nbsp;</td>
+                  <td>
+                    <table class="spTable width100">
+                      <thead>
+                        <tr>
+                          <th colspan="3">#{msgs.sys_config_lifecycle_request_entitlements_options}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_request_entitlements_allow_addt_acct_requests}"/></td>
+                          <td style="width: 1%">
+                            <h:graphicImage id="imgHlp#{type}RequestEntitlementsAllowAdditionalAccountRequests" width="12px" 
+                                            alt="#{help.help_lcm_request_entitlements_allow_addt_acct_requests}"
+                                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                            url="/images/icons/dashboard_help_16.png" />
+                          </td>
+                          <td style="width: 95%">
+                            <h:selectBooleanCheckbox id="#{type}RequestEntitlementsAllowAdditionalAccountRequests" value="#{requestControls['allowRequestEntitlementsAdditionalAccountRequests']}" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_request_entitlements_allow_show_population_percents}"/></td>
+                          <td style="width: 1%">
+                            <h:graphicImage id="imgHlp#{type}RequestEntitlementsAllowShowPopulation" width="12px" 
+                                            alt="#{help.help_lcm_request_entitlements_show_population}"
+                                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                            url="/images/icons/dashboard_help_16.png" />
+                          </td>
+                          <td style="width: 95%">
+                            <h:selectBooleanCheckbox id="#{type}RequestEntitlementsAllowShowPopulation" value="#{requestControls['allowRequestEntitlementsShowPopulation']}" />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3">
+                    <table class="width100">
+                      <tr>
+                        <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_config_allow_remove_request_roles}"/></td>
+                        <td style="width: 1%">
+                          <h:graphicImage id="imgHlp#{type}RequestRolesAllowRemove" width="12px"
+                                          alt="#{help.help_lcm_config_allow_remove_roles}" height="12px"
+                                          style="cursor: pointer;padding: 0px 7px 0px 7px;"
+                                          url="/images/icons/dashboard_help_16.png" />
+                        </td>
+                        <td style="width: 95%">
+                          <h:selectBooleanCheckbox id="#{type}RequestRolesAllowRemove" value="#{requestControls['allowRequestRolesRemove']}" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_config_allow_remove_request_entitlements}"/></td>
+                        <td style="width: 1%">
+                          <h:graphicImage id="imgHlp#{type}RequestEntitlementsAllowRemove" width="12px"
+                                          alt="#{help.help_lcm_config_allow_remove_entitlements}"
+                                          height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                          url="/images/icons/dashboard_help_16.png" />
+                        </td>
+                        <td style="width: 95%">
+                          <h:selectBooleanCheckbox id="#{type}RequestEntitlementsAllowRemove" value="#{requestControls['allowRequestEntitlementsRemove']}" />
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+               </tbody>
+              </table>
+            </td>
+          </tr>
+          
+          
+          
+          
+          
+          
+          <tr>
+           <td style="text-align:right"><h:outputText value="#{msgs.quicklink_manage_accounts}"/></td>
+           <td>
+             <h:graphicImage id="imgHlp#{type}ManageAccounts" width="12px" 
+                              alt="#{help.help_lcm_manage_accounts}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+           
+           </td>
+           <td style="text-align:left">
+             <h:selectBooleanCheckbox id="#{type}ManageAccounts" 
+                                      styleClass="quickLinkCheckbox"
+                                      value="#{actionMap['Manage Accounts'].selected}"
+                                      onclick="Ext.getCmp('#{type}Controls').manageAccountsToggled(this)"/>
+             <span id="#{type}ManageAccountsWarning" class="formError" style="display: none">#{msgs.lcm_manage_accounts_no_options_selected_warning}</span>
+                                      
+           </td>
+          </tr>
+          <tr id="#{type}ManageAccountsSuboptions" style="display: #{(actionMap['Manage Accounts'].selected) ? '' : 'none'}">
+            <td colspan="2">&nbsp;</td>
+            <td>
+              <table class="width100 spTable">
+                <thead>
+                  <tr>
+                    <th colspan="3">#{msgs.sys_config_lifecycle_manage_accounts_options}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_manage_accounts_allow_manage_existing_accounts}"/></td>
+                    <td style="width: 1%">
+                      <h:graphicImage id="imgHlp#{type}AllowManageExistingAccounts" width="12px" 
+                                      alt="#{help.help_lcm_manage_accounts_allow_manage_existing_accounts}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td style="width: 95%">
+                      <h:selectBooleanCheckbox id="#{type}AllowManageExistingAccounts"
+                                               onclick="Ext.getCmp('#{type}Controls').manageExistingAccountsToggled()"
+                                               value="#{requestControls['allowManageExistingAccounts']}" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_manage_accounts_allow_account_only_requests}"/></td>
+                    <td style="width: 1%">
+                      <h:graphicImage id="imgHlp#{type}AllowAccountOnlyRequests" width="12px" 
+                                      alt="#{help.help_lcm_manage_accounts_allow_account_only_requests}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td style="width: 95%">
+                      <h:selectBooleanCheckbox id="#{type}AllowAccountOnlyRequests"
+                                               onclick="Ext.getCmp('#{type}Controls').allowAccountOnlyRequestsToggled(this)"
+                                               value="#{requestControls['allowAccountOnlyRequests']}" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: right; width: 5%; white-space: nowrap"><h:outputText value="#{msgs.lcm_manage_accounts_allow_addt_acct_requests}"/></td>
+                    <td style="width: 1%">
+                      <h:graphicImage id="imgHlp#{type}ManageAccountsAllowAdditionalAccountRequests" width="12px" 
+                                      alt="#{help.help_lcm_manage_accounts_allow_addt_acct_requests}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td style="width: 95%">
+                      <h:inputHidden id="#{type}ManageAccountsAllowAdditionalAccountRequestsProxy" value="#{requestControls['allowManageAccountsAdditionalAccountRequests']}"/>
+                      <h:selectBooleanCheckbox id="#{type}ManageAccountsAllowAdditionalAccountRequests"
+                                               disabled="#{requestControls['allowAccountOnlyRequests'] != true}"
+                                               onclick="Ext.getCmp('#{type}Controls').setManageAccountsAdditionalAccountRequestProxy(this)"/>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+           <td style="text-align:right"><h:outputText value="#{msgs.quicklink_manage_passwords}"/></td>
+           <td>
+             <h:graphicImage id="imgHlp#{type}ManagePasswords" width="12px" 
+                              alt="#{help.help_lcm_manage_passwords}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+           
+           </td>
+           <td style="text-align:left">
+            <h:selectBooleanCheckbox id="#{type}ManagePasswords" 
+                                     styleClass="quickLinkCheckbox"
+                                     value="#{actionMap['Manage Passwords'].selected}"
+                                     onclick="Ext.getCmp('#{type}Controls').applyPopulationDisplayControl();"/>
+           </td>
+          </tr>
+          <tr>
+            <td style="text-align:right"><h:outputText value="#{msgs.quicklink_edit_identity}"/></td>
+            <td>
+              <h:graphicImage id="imgHlp#{type}EditIdentity" width="12px" 
+                              alt="#{help.help_lcm_edit_identity}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td style="text-align:left">
+              <h:selectBooleanCheckbox id="#{type}EditIdentity" 
+                                       styleClass="quickLinkCheckbox"
+                                       value="#{actionMap['Edit Identity'].selected}"
+                                       onclick="Ext.getCmp('#{type}Controls').applyPopulationDisplayControl();"/>
+            </td>
+          </tr>
+          <ui:fragment rendered="#{type != 'selfService'}">
+            <tr>
+              <td style="text-align:right"><h:outputText value="#{msgs.quicklink_create_identity}"/></td>
+              <td>
+                <h:graphicImage id="imgHlp#{type}CreateIdentity" width="12px" 
+                                alt="#{help.help_lcm_create_identity}"
+                                height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/dashboard_help_16.png" />
+              </td>
+              <td style="text-align:left">
+                <h:selectBooleanCheckbox id="#{type}CreateIdentity" 
+                                         styleClass="quickLinkCheckbox"
+                                         value="#{actionMap['Create Identity'].selected}"
+                                         onclick="Ext.getCmp('#{type}Controls').applyPopulationDisplayControl();"/>
+              </td>
+            </tr>
+          </ui:fragment>
+          <tr>
+            <td style="text-align:right"><h:outputText value="#{msgs.quicklink_view_identity}"/></td>
+            <td>
+              <h:graphicImage id="imgHlp#{type}ViewIdentity" width="12px" 
+                              alt="#{help.help_lcm_view_identity}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td style="text-align:left">
+              <h:selectBooleanCheckbox id="#{type}ViewIdentity" 
+                                       styleClass="quickLinkCheckbox"
+                                       value="#{actionMap['View Identity'].selected}"
+                                       onclick="Ext.getCmp('#{type}Controls').applyPopulationDisplayControl();"/>
+            </td>
+          </tr>
+        </table>
+      </div>
+    
+      <ui:fragment rendered="#{type != 'selfService'}">
+      <div style="padding:8px">
+        <table id="#{type}RequestControlsTable" class="spTable width100">
+          <tr><th colspan="3"><h:outputText value="#{requestControlsTitle}"/><h:outputText styleClass="requiredText" value="*"/></th></tr>
+
+          <tr>
+            <td colspan="3">
+              <h:selectOneRadio id="#{type}PopulationDefinitionType" layout="pageDirection" value="#{requestControls['populationDefinitionType']}" styleClass="radioSelect"
+                onclick="Ext.getCmp('#{type}Controls').applyAllowAll();">
+                <f:selectItems value="#{lcmConfig.populationDefinitionTypes}"/>            
+              </h:selectOneRadio>
+            </td>
+          </tr>
+                    
+          <tr>
+            <td colspan="3" style="width:100%">
+              <table id="#{type}RequestControlOptionsTbl" class="spLightBlueTable width100">
+                <tr>
+                  <th style="width:250px; text-align:right">
+                    <h:selectOneMenu id="#{type}MatchAnyOrAll" value="#{requestControls['matchAnyOrAll']}">
+                      <f:selectItems value="#{lcmConfig.matchAnyOrAllOptions}" />
+                    </h:selectOneMenu>
+                  </th>
+                  <th style="width:30px">
+                    <h:graphicImage id="imgHlp#{type}MatchAnyOrAll" width="12px" 
+                                    alt="#{help.help_lcm_match_any_or_all}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </th>
+                  <th/>
+                </tr>
+                <tr>
+                  <td style="width:250px; text-align:right">
+                    <div><h:outputText value="#{msgs.lcm_request_controls_shared_attributes}"/></div>
+                  </td>
+                  <td style="width:30px">
+                    <h:graphicImage id="imgHlp#{type}EnableAttributeControl" width="12px" 
+                                    alt="#{help.help_lcm_enable_attribute_control}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td style="width:75%; text-align:left">
+                    <h:selectBooleanCheckbox id="#{type}EnableAttributeControl" value="#{requestControls['enableAttributeControl']}"
+                                             onclick="Ext.getCmp('#{type}Controls').applyAttributeControl();"/>
+                  </td>
+                </tr>
+                <tr id="#{type}AttributeSelectorRow">
+                  <td colspan="3">
+                    <div id="#{type}AttributeSelectorPanel" class="eraseTdPadding" style="margin-left:30px"/>
+                    <div id="#{type}AttributeSelectorErrors"  style="margin-left:30px"/>
+                    <h:inputHidden id="#{type}AttributeControlFilter" value="#{requestControls['attributeFilterControl']}"/>
+                  </td>
+                </tr>
+                <ui:fragment rendered="#{includeManagerControls}">
+                  <tr class="continuedRow">
+                    <td style="width:200px; text-align:right">
+                      <div><h:outputText value="#{msgs.lcm_request_controls_subordinate}"/></div>
+                    </td>
+                    <td>
+                      <h:graphicImage id="imgHlp#{type}EnableSubordinateControl" width="12px" 
+                                      alt="#{help.help_lcm_enable_subordinate_control}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td style="width:75%; text-align:left">
+                      <h:selectBooleanCheckbox id="#{type}EnableSubordinateControl" value="#{requestControls['enableSubordinateControl']}"
+                                               onclick="Ext.getCmp('#{type}Controls').applySubordinateControl();"/>
+                    </td>
+                  </tr>
+                  <tr id="#{type}SubordinateChoicesRow" class="continuationRow">
+                    <td/>
+                    <td>
+                      <h:graphicImage id="imgHlp#{type}SubordinateChoices" width="12px" 
+                                      alt="#{help.help_lcm_subordinate_choices}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td>
+                      <div id="#{type}SubordinateChoices">
+                        <h:selectOneRadio id="#{type}SubordinateChoice" layout="pageDirection" value="#{requestControls['subordinateChoice']}" styleClass="radioSelect"
+                                          onclick="Ext.getCmp('#{type}Controls').applySubordinateControl();">
+                          <f:selectItems value="#{lcmConfig.subordinateChoiceOptions}"/>
+                        </h:selectOneRadio>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <tr id="#{type}SubordinateHierarchyLevelRow" class="continuationRow">
+                    <td/>
+                    <td>
+                      <h:graphicImage id="imgHlp#{type}SubordinateHierarchyLevelRow" width="12px" 
+                                      alt="#{help.help_lcm_subrodinate_hierarchy_level}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td>
+                      <h:outputText value="#{msgs.lcm_request_controls_max_hierarchy_level}"/>
+                      <span style="padding-left:5px; padding-right:5px">&nbsp;</span>
+                      <h:inputText id="#{type}SubordinateMaxHierarchy" size="2" value="#{requestControls['maxHierarchyDepth']}"/>
+                    </td>
+                  </tr>
+                </ui:fragment>
+                <tr class="continuedRow">
+                  <td style="width:200px; text-align:right">
+                    <div><h:outputText value="#{msgs.lcm_request_controls_custom}"/></div>
+                  </td>
+                  <td>
+                    <h:graphicImage id="imgHlp#{type}EnableCustomControl" width="12px" 
+                                    alt="#{help.help_lcm_enable_custom_control}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td style="width:75%; text-align:left">
+                    <h:selectBooleanCheckbox id="#{type}EnableCustomControl" value="#{requestControls['enableCustomControl']}"
+                                             onclick="Ext.getCmp('#{type}Controls').applyCustomControl();"/>
+                  </td>
+                </tr>
+                <tr id="#{type}CustomFilterRow" class="continuationRow">
+                  <td colspan="2"/>
+                  <td style="padding-bottom:5px">
+                    <div id="#{type}CustomFilter">
+                      <h:inputTextarea id="#{type}CustomFilterInput" cols="80" rows="5" value="#{requestControls['customControl']}"/>
+                    </div>
+                    <div class="formError" style="display:none" id="#{type}CustomFilterError"/>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <tr>
+            <td style="width:30px">
+              <h:selectBooleanCheckbox id="#{type}IgnoreIIQScoping" value="#{requestControls['ignoreIIQScoping']}"/>
+            </td>
+            <td style="width:30px">
+              <h:graphicImage id="imgHlp#{type}IgnoreIIQScoping" width="12px" 
+                              alt="#{help.help_lcm_ignore_iiq_scoping}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td style="width:100%; text-align:left">
+              <h:outputText value="#{msgs.lcm_request_controls_ignore_iiq_scoping}"/> 
+            </td>
+          </tr>
+          
+        </table>
+      </div>
+      </ui:fragment>
+      <div style="padding:8px">
+        <table id="#{type}ObjectControlsTable" class="spTable width100">
+          <tr><th style="width:100%" colspan="3"><h:outputText value="#{msgs.lcm_object_request_controls}"/></th></tr>
+          <tr class="#{type}RoleControlsTable">
+            <td style="width:200px; text-align:right">
+              <h:outputText value="#{roleRequestControlsTitle}"/>
+              <h:graphicImage id="imgHlp#{type}RoleRequestControls" width="12px" 
+                              alt="#{help.help_lcm_role_request_controls}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+              
+            </td>
+            <td>
+              <div id="#{type}RoleSelectorRuleDiv"/>
+              <h:inputHidden id="#{type}RoleSelectorRule" value="#{requestControls['roleSelectorRule']}"/>
+              <h:inputHidden id="#{type}RoleSelectorRuleName" value="#{requestControls['roleSelectorRuleName']}"/>
+            </td>
+            <td style="width:50%">
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('lcmConfigForm:#{type}RoleSelectorRule').value, 
+                                                       'RequestObjectSelector',
+                                                       $('lcmRuleEditorForm:refreshRulesButton'));" />
+            </td>
+          </tr>
+          <tr class="#{type}EntitlementControlsTable">
+            <td style="width:200px; text-align:right">
+              <h:outputText value="#{entitlementRequestControlsTitle}"/>
+              <h:graphicImage id="imgHlp#{type}EntitlementRequestControls" width="12px" 
+                              alt="#{help.help_lcm_entitlement_request_controls}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+              
+            </td>
+            <td>
+              <div id="#{type}ApplicationSelectorRuleDiv"/>
+              <h:inputHidden id="#{type}ApplicationSelectorRule" value="#{requestControls['applicationSelectorRule']}"/>
+              <h:inputHidden id="#{type}ApplicationSelectorRuleName" value="#{requestControls['applicationSelectorRuleName']}"/>
+            </td>
+            <td style="width:50%">
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('lcmConfigForm:#{type}ApplicationSelectorRule').value, 
+                                                       'RequestObjectSelector',
+                                                       $('lcmRuleEditorForm:refreshRulesButton'));" />
+            </td>
+          </tr>
+          <tr class="#{type}EntitlementControlsTable">
+            <td style="width:200px; text-align:right">
+              <h:outputText value="#{entitlementRequestManagedAttributeControlsTitle}"/>
+              <h:graphicImage id="imgHlp#{type}EntitlementRequestManagedAttributeControls" width="12px" 
+                              alt="#{help.help_lcm_entitlement_request_managed_attribute_controls}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+              
+            </td>
+            <td>
+              <div id="#{type}ManagedAttributeSelectorRuleDiv"/>
+              <h:inputHidden id="#{type}ManagedAttributeSelectorRule" value="#{requestControls['managedAttributeSelectorRule']}"/>
+              <h:inputHidden id="#{type}ManagedAttributeSelectorRuleName" value="#{requestControls['managedAttributeSelectorRuleName']}"/>
+            </td>
+            <td style="width:50%">
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('lcmConfigForm:#{type}ManagedAttributeSelectorRule').value, 
+                                                       'RequestObjectSelector',
+                                                       $('lcmRuleEditorForm:refreshRulesButton'));" />
+            </td>
+          </tr>
+        </table>
+      </div>
+      </div>
+    </div>
+  </div>
+</ui:composition>
+
+</body>
+</html>

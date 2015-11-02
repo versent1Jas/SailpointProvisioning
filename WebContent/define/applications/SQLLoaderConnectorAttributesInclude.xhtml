@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    <script type="text/javascript">
+      helpKey = 'APPLICATION';
+      Ext.onReady(function () {
+         Ext.QuickTips.init();
+         
+         var spNamespace = '#{nameSpace}', isCollapsed = false, cmp;
+         
+         Ext.create('SailPoint.define.applications.FacesMultiSuggest', {
+             id: 'id_indexColumnsMain_' + spNamespace,
+             spNamespace: spNamespace,
+             renderTo: 'indexColumnsMain_' + spNamespace,
+             jsonData: #{jdbcDTO.indexColumn},
+             inputFieldName: 'indexColumns_',
+             objectType: '#{jdbcDTO.schemaDTO.objectType}'
+         });
+         
+         Ext.create('SailPoint.define.applications.FacesMultiSuggest', {
+             id: 'id_mergeColumnsMain_' + spNamespace,
+             spNamespace: spNamespace,
+             renderTo: 'mergeColumnsMain_' + spNamespace,
+             jsonData: #{jdbcDTO.mergeColumn},
+             inputFieldName: 'mergeColumns_',
+             objectType: '#{jdbcDTO.schemaDTO.objectType}'
+         });
+  
+         // save the collapse state of the component before destroying
+         cmp = Ext.getCmp(SailPoint.define.applications.ApplicationObjectPanel.createId(spNamespace));
+         if (cmp) {
+             isCollapsed = cmp.getCollapsed();
+             cmp.destroy(true);
+         }
+         
+         Ext.create('SailPoint.define.applications.SQLLoaderPanel', {
+           spNamespace: spNamespace,
+           title: '#{msgs.app_object_type_panel_header} #{jdbcDTO.schemaDTO.objectType}',
+           renderTo: 'sqlLoaderPanelDiv_' + spNamespace,
+           collapsed: isCollapsed
+         });
+  
+      });      
+
+    </script>
+    <f:view>
+        <div id="sqlLoaderPanelDiv_#{nameSpace}" class="marDown"/>
+        
+        <!-- Settings -->
+        <div id="tabSettings_#{nameSpace}" class="spContent">
+        <h:outputText styleClass="sectionHeader" value="#{msgs.sqLoader_conn_settings}"/><br/>
+        
+
+        <!-- connection info -->
+        <ui:remove>
+        <!-- 
+          This is weirdness, so let's try and explain. Though these fields aren't displayed, the value of the user
+          field is still used in the connector. If a value of the user argument doesn't exist JDBCConnector will
+          blow up trying to get the required field 'user'. I would like to remove these fields, but can't because
+          of this reason. 
+        -->
+        </ui:remove>
+        <div style="display:none">
+          <h:inputText id="user_${nameSpace}"
+                       value="#{applicationObject.attributes[sp:concat(schemaType,'user')]}"
+                       size="50"
+                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+          <sp:inputSecret id="password_#{nameSpace}"
+                       value="#{applicationObject.attributes[sp:concat(schemaType,'password')]}" redisplay="true"
+                       size="50"
+                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </div>
+        <ui:remove>
+        <!-- End of weirdness -->
+        </ui:remove>                  
+        
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumnLeftAlign certScheduleTitleCol'>
+              <h:outputText rendered='#{ !jdbcDTO.schemaDTO.group }' style="color: red;" value="*"/> 
+              <h:outputText style='padding:5px' value="#{msgs.jdbc_filepath}"/>
+              <h:graphicImage id="imgHlpFilePath_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_sqloader_folderPath_type}"/>
+            </td>
+          </tr>
+          <tr>
+            <td valign="center">
+              <h:inputText id="folderPath_#{nameSpace}"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'folderPath')]}"
+                           size="100"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>                                                
+            </td>
+          </tr>
+        <tr>
+            <td class='titleColumnLeftAlign certScheduleTitleCol'>
+              <h:outputText rendered='#{ !jdbcDTO.schemaDTO.group }' style="color: red;" value="*"/>   
+              <h:outputText style='padding:5px' value="#{msgs.sqloader_delimiter_type}"/>
+              <h:graphicImage id="imgHlpDelimiter_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_sqloader_delimiter_type}"/>
+            </td>
+        </tr>
+        <tr>
+            <td valign="center">
+              <h:inputText id="delimiterType_#{nameSpace}"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'delimiterType')]}"
+                           size="15"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>                 
+            </td>
+          </tr>	            
+          <tr>
+            <td class='titleColumnLeftAlign certScheduleTitleCol'>
+              <h:outputText rendered='#{ !jdbcDTO.schemaDTO.group }' style="color: red;" value="*"/>
+              <h:outputText style='padding:5px' value="#{msgs.database_url}"/>
+                            <h:graphicImage id="imgHlpUrl_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_jdbc_url_of_database}"/>
+            </td>
+          </tr>
+          <tr>
+            <td valign="center">
+              <h:inputText id="url_#{nameSpace}"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'url')]}"
+                           size="100"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>         
+            </td>   
+          </tr>
+          
+           <tr>
+             <td class='titleColumnLeftAlign certScheduleTitleCol'>
+               <h:outputText rendered='#{ !jdbcDTO.schemaDTO.group }' style="color: red;" value="*"/>
+               <h:outputText style='padding:5px' value="#{msgs.jdbc_driver}"/>
+               <h:graphicImage id="imgHlpDriver_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                 alt="#{msgs.help_con_form_jdbc_driver}"/>
+             </td>
+           </tr>
+           <tr>
+            <td valign="center">
+              <h:inputText id="driverClass_#{nameSpace}"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'driverClass')]}"
+                           size="100"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+        </table>
+ 
+        <!-- query settings -->
+        <br/><h:outputText styleClass="sectionHeader" value="#{msgs.query_settings}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumnLeftAlign certScheduleTitleCol'>
+              <h:outputText rendered='#{ !jdbcDTO.schemaDTO.group }' style="color: red;" value="*"/>
+              <h:outputText style='padding:5px' value="#{msgs.sql_statement}"/>
+              <h:graphicImage id="imgHlpSQL_#{nameSpace}" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_jdbc_sql_statement}"/>
+            </td>
+          </tr>
+          <tr>
+            <td valign="center">
+              <h:inputTextarea id="SQL_#{nameSpace}"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'SQL')]}"
+                           rows="6" cols="100"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+         <tr>
+           <td class="titleColumnLeftAlign certScheduleTitleCol" >
+             <h:outputText style='padding:5px' value="#{msgs.sql_getObjectSQL}"/>
+             <h:graphicImage id="imgHlpGetObjectSQL_#{nameSpace}"
+                             styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                             alt="#{msgs.help_con_form_jdbc_object_sql_statement}"/>
+           </td>
+         </tr>
+         <tr>
+           <td valign="center">
+             <h:inputTextarea value="#{applicationObject.attributes[sp:concat(schemaType,'getObjectSQL')]}"
+                              rows="6" cols="100"
+                              disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                              readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>  
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumnLeftAlign certScheduleTitleCol'>
+              <h:selectBooleanCheckbox value="#{applicationObject.attributes[sp:concat(schemaType,'useExecuteQuery')]}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              <h:outputText style='padding:5px' value="#{msgs.sql_useExecuteQuery}"/>
+              <h:graphicImage id="imgHlpUseExecuteQuery_#{nameSpace}" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_jdbc_use_execute_query}"/>
+            </td>
+          </tr>
+        </table>
+
+        
+        <!-- Permission query settings -->
+     
+          <table class="spTable" style="border:0px" cellspacing="0">  
+            <tr>
+              <td class='titleColumnLeftAlign certScheduleTitleCol'>
+                <h:selectBooleanCheckbox id='checkBoxPmExecuteQuery_#{nameSpace}' onclick='Ext.getCmp("#{nameSpace}" + "Tab").togglePermissionQuery();'
+                                         value="#{applicationObject.attributes[sp:concat(schemaType,'isPermissionEnabled')]}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                <h:outputText style='padding:5px' value="#{msgs.con_jdbc_direct_permission_execute_query}"/>
+                <h:graphicImage id="imgHlpDPermissionMode_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_jdbc_direct_permission}"/>
+              </td>
+            </tr>   
+              <tr id='getDirectPermObjectSQL_#{nameSpace}'>
+                <td class='titleColumnLeftAlign certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_jdbc_direct_permission_object_sql}"/>
+                  <h:graphicImage id="imgHlpDPermissionStatements_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.help_con_form_direct_permission_sql_query}"/>
+                  <div>
+                    <h:inputTextarea id='impPermissionQuery_#{nameSpace}'
+                                     value="#{applicationObject.attributes[sp:concat(schemaType,'getDirectPermObjectSQL')]}"
+                                     rows="6" cols="100"
+                                     disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                     readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                  </div>
+                </td>
+              </tr>           
+        </table>
+        </div>
+        
+
+        <!--  Partitioning Config -->
+        <ui:fragment rendered='#{ !jdbcDTO.schemaDTO.group }'>
+          <div id="tabIteration_#{nameSpace}" class='spContent'>
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumnLeftAlign certScheduleTitleCol'>
+                <h:selectBooleanCheckbox id='partitionMode_#{nameSpace}' onclick='Ext.getCmp("#{nameSpace}" + "Tab").togglePartitioning();'
+                                         value="#{applicationObject.attributes[sp:concat(schemaType,'partitionMode')]}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_partitioningMode}"/>
+                <h:graphicImage id="imgHlpPartitioningMode_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_jdbc_partitionEnable}"/>
+              </td>
+            </tr>
+              <tr id='partitionsRow_#{nameSpace}'>
+                <td class='titleColumnLeftAlign certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_jdbc_partition_statements}"/>
+                  <h:graphicImage id="imgHlpPartitioningStatements_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.help_con_form_jdbc_partitions}"/>
+                </td>
+                <td valign="center">              
+                  <h:inputTextarea id='partitions_#{nameSpace}'
+                                   converter="NewLineList"
+                                   value="#{applicationObject.attributes[sp:concat(schemaType,'partitionStatements')]}"
+                                   rows="6" cols="100"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>            
+            </table>
+            </div>
+        </ui:fragment>            
+
+             
+			  <!-- Merging --> 
+			  <div id="tabMerging_#{nameSpace}" class='spContent'>
+          <table class="spTable" style="border:0px" cellspacing="0">   
+        
+            <tr>
+              <td class='titleColumnLeftAlign certScheduleTitleCol'>
+                <h:selectBooleanCheckbox id='mergeRows_#{nameSpace}' onclick='Ext.getCmp("#{nameSpace}" + "Tab").toggleMerging();'
+                                         value="#{applicationObject.attributes[sp:concat(schemaType,'mergeRows')]}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_toMerge}"/>
+                <h:graphicImage id="imgHlpMergeRows_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{msgs.con_help_delimited_mergeRows}"/>
+              </td>
+            </tr>   
+        </table>    
+		
+        <!-- Merging config -->
+
+        
+        <table id="indexRowsTable_#{nameSpace}" class="spTable" style="border:0px" cellspacing="0">   
+          <tr>
+            <td class='titleColumnLeftAlign certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_indexCol}"/>
+              <h:graphicImage id="imgHlpIndexCols_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_indexColumn}"/>
+            </td>
+            <td valign="center">
+                   <div id="indexColumnsMain_#{nameSpace}"></div>
+                   <t:inputHidden id="indexColumns_#{nameSpace}"
+                                  value="#{applicationObject.indexColumns[nameSpace]}">
+                                 <sp:convertList />
+                   </t:inputHidden>
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumnLeftAlign certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_mergeCols}"/>
+              <h:graphicImage id="imgHlpMergeCols_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_mergeColumns}"/>
+            </td>
+            <td valign="center">
+                   <div id="mergeColumnsMain_#{nameSpace}"></div>
+                   <t:inputHidden id="mergeColumns_#{nameSpace}"
+                                  value="#{applicationObject.mergeColumns[nameSpace]}">
+                                 <sp:convertList />
+                   </t:inputHidden>
+            </td>
+          </tr>
+        </table>             
+      </div>
+      
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

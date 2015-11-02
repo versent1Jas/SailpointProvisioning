@@ -1,0 +1,107 @@
+KG - I modified the typeahead directive to allow setting the min-length to -1 to
+show the matches when the dropdown arrow is clicked on our IdentitySuggestDirective.
+
+diff --git a/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js b/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.
+index bcca1cd..dae652f 100644
+--- a/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js
++++ b/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js
+@@ -3600,7 +3600,10 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
+
+         hasFocus = true;
+
+-        if (inputValue && inputValue.length >= minSearch) {
++        // KG - Removed check that requires inputValue to be truthy.  This allows
++        // empty strings to trigger the matches if min-length is 0 or less.
++        //if (inputValue && inputValue.length >= minSearch) {
++        if ((inputValue === '') || (inputValue && inputValue.length >= minSearch)) {
+           if (waitTime > 0) {
+             if (timeoutPromise) {
+               $timeout.cancel(timeoutPromise);//cancel previous timeout
+
+
+Patrick Jeong - modified typeahead select function so that it does not set element focus in timeout for ios. bug23725
+
+diff --git a/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js b/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js
+index 804c3e8..c17e4ed 100644
+--- a/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js
++++ b/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js
+@@ -3452,8 +3452,8 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
+   };
+ }])
+
+-  .directive('typeahead', ['$compile', '$parse', '$q', '$timeout', '$document', '$position', 'typeaheadParser',
+-    function ($compile, $parse, $q, $timeout, $document, $position, typeaheadParser) {
++  .directive('typeahead', ['$compile', '$parse', '$q', '$timeout', '$document', '$position', 'typeaheadParser', 'browserSniffer',
++    function ($compile, $parse, $q, $timeout, $document, $position, typeaheadParser, browserSniffer) {
+
+   var HOT_KEYS = [9, 13, 27, 38, 40];
+
+@@ -3678,7 +3678,10 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
+
+         //return focus to the input element if a match was selected via a mouse click event
+         // use timeout to avoid $rootScope:inprog error
+-        $timeout(function() { element[0].focus(); }, 0, false);
++        // pjeong: disabling this for ios because it causes keyboard issues on ipad
++        if (!browserSniffer.isIOS()) {
++          $timeout(function() { element[0].focus(); }, 0, false);
++        }
+       };
+
+Peter Holcomb - modified typeahead popup to allow it to show 'No Results' when no results are returned Bug21020
+diff --git a/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js b/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.
+
+index c17e4ed..f4cc2bf 100644
+--- a/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js
++++ b/web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js
+@@ -3515,6 +3515,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
+         active: 'activeIdx',
+         select: 'select(activeIdx)',
+         query: 'query',
++        open: 'open',
+         position: 'position'
+       });
+       //custom item template
+@@ -3524,6 +3525,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
+
+       var resetMatches = function() {
+         scope.matches = [];
++        scope.open = false;
+         scope.activeIdx = -1;
+         element.attr('aria-expanded', false);
+       };
+@@ -3578,6 +3580,8 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
+             } else {
+               resetMatches();
+             }
++            // Even if there are no matches, we want to open the popup so we can display the 'no results' message
++            scope.open = true;
+           }
+           if (onCurrentRequest) {
+             isLoadingSetter(originalScope, false);
+@@ -3750,6 +3754,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
+       scope:{
+         matches:'=',
+         query:'=',
++        open:'=',
+         active:'=',
+         position:'=',
+         select:'&'
+@@ -3760,10 +3765,17 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
+
+         scope.templateUrl = attrs.templateUrl;
+
++        /* PH - change the isOpen function to react to open property on scope
++        and add scope.isEmpty function for displaying no results message
++         */
+         scope.isOpen = function () {
+-          return scope.matches.length > 0;
++          return scope.open;
+         };
+
++        scope.isEmpty = function() {
++            return scope.matches.length===0;
++        }
++
+         scope.isActive = function (matchIdx) {
+           return scope.active == matchIdx;
+         };

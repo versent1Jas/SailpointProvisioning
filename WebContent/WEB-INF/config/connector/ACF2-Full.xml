@@ -1,0 +1,910 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD" icon="mainframeIcon" name="ACF2" type="ACF2 - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="ACF2"/>
+        <entry key="fieldDelimiter" value="#"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="listDelimiter" value=";"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="splAceAttributes">
+          <value>
+            <Map>
+              <entry key="ACCESS" value="false"/>
+              <entry key="ACTIVE" value="false"/>
+              <entry key="ALLOC" value="false"/>
+              <entry key="DATA" value="false"/>
+              <entry key="DDN" value="false"/>
+              <entry key="EXEC" value="false"/>
+              <entry key="FOR" value="false"/>
+              <entry key="LIB" value="false"/>
+              <entry key="NEXTKEY" value="false"/>
+              <entry key="PGM" value="false"/>
+              <entry key="READ" value="false"/>
+              <entry key="RECCHECK" value="false"/>
+              <entry key="RESMASK" value="false"/>
+              <entry key="SERVICE" value="false"/>
+              <entry key="SHIFT" value="false"/>
+              <entry key="SOURCE" value="false"/>
+              <entry key="UID" value="false"/>
+              <entry key="UNTIL" value="false"/>
+              <entry key="VERIFY" value="false"/>
+              <entry key="VOL" value="false"/>
+              <entry key="WRITE" value="false"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="splResourceAttributes">
+          <value>
+            <Map>
+              <entry key="CHANGE" value="true"/>
+              <entry key="COPYRES" value="false"/>
+              <entry key="DATELAST" value="false"/>
+              <entry key="DATEUSER" value="false"/>
+              <entry key="MODE" value="false"/>
+              <entry key="NEXTKEYS" value="true"/>
+              <entry key="NOSORT" value="false"/>
+              <entry key="OWNER" value="false"/>
+              <entry key="PREFIX" value="false"/>
+              <entry key="RCHANGE" value="true"/>
+              <entry key="RECNAME" value="false"/>
+              <entry key="RESMODEL" value="false"/>
+              <entry key="RESOWNER" value="false"/>
+              <entry key="USERDATA" value="false"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="splTargetPermissionsInterestingKwds">
+          <value>
+            <Map>
+              <entry key="ACCESS" value="false"/>
+              <entry key="ACTIVE" value="false"/>
+              <entry key="ALLOC" value="false"/>
+              <entry key="DATA" value="false"/>
+              <entry key="DDN" value="false"/>
+              <entry key="EXEC" value="false"/>
+              <entry key="FOR" value="false"/>
+              <entry key="LIB" value="false"/>
+              <entry key="NEXTKEY" value="false"/>
+              <entry key="PGM" value="false"/>
+              <entry key="READ" value="false"/>
+              <entry key="RECCHECK" value="false"/>
+              <entry key="RESMASK" value="false"/>
+              <entry key="SERVICE" value="false"/>
+              <entry key="SHIFT" value="false"/>
+              <entry key="SOURCE" value="false"/>
+              <entry key="UID" value="false"/>
+              <entry key="UNTIL" value="false"/>
+              <entry key="VERIFY" value="false"/>
+              <entry key="VOL" value="false"/>
+              <entry key="WRITE" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+                        import java.util.*;
+                        import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                        import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                        import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                        import sailpoint.object.ProvisioningPlan.AccountRequest;
+                        import sailpoint.object.ProvisioningPlan.GenericRequest;
+                        List accounts = plan.getAccountRequests();
+                        if (accounts != null) {
+                        for (AccountRequest req : accounts) {
+                          AccountRequest.Operation op = req.getOperation();
+                          if (op == AccountRequest.Operation.Enable) {
+                            AttributeRequest att = new AttributeRequest("REVOKE_TYPE", "SUSPEND");
+                            req.add(att);
+                          }
+                          if (op == AccountRequest.Operation.Disable) {
+                            AttributeRequest att = new AttributeRequest("REVOKE_TYPE", "SUSPEND");
+                            req.add(att);
+                          }
+                        }
+                      }
+                      List groups = plan.getObjectRequests();
+                      if (groups != null) {
+                            for (ObjectRequest req : groups) {
+                                ObjectOperation op = req.getOp();
+                                if (op == ObjectOperation.Create){
+                                    String groupId = req.getNativeIdentity();
+                                    if (groupId != null){
+                                        req.setNativeIdentity(groupId.toUpperCase());
+                                    }
+                                }
+                                List attrRequests=req.getAttributeRequests() ;
+                                if(attrRequests != null){
+                                    for (AttributeRequest attrreq : attrRequests) {
+                                        if(attrreq.getValue() instanceof java.lang.String){
+                                        attrreq.setValue(attrreq.getValue().toUpperCase());
+                                        }                                               }
+                                }
+                            }
+                      }
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="USER_ID" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="USER_ID" required="true" type="string">
+          <Description>ACF2 ID of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" required="true" schemaObjectType="group" type="string">
+          <Description>List of groups this user belongs to</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.ASSIZE" required="true" type="string">
+          <Description>Max address space size - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.CPUTIME" required="true" type="string">
+          <Description>Max cputime for a dubbed process - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.FILEPROC" required="true" type="string">
+          <Description>Max files per process - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.HOME" required="true" type="string">
+          <Description>Home-directory - defines the pathname of the initial directory used when a user enters the OMVS command or enters the ISPF shell - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.MEMLIMIT" required="true" type="string">
+          <Description>Maximum number of bytes of non-shared memory space that can be allocated by the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.SHMEMMAX" required="true" type="string">
+          <Description>Maximum number of bytes of shared memory space that can be allocated by the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.MMAPAREA" required="true" type="string">
+          <Description>Max-data-space pages-for-HFS-mappings - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.OMVSPGM" required="true" type="string">
+          <Description>OMVS shell program started when the OMVS command is entered or when an OMVS batch job is started using the BPXBATCH program - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.PROCUSER" required="true" type="string">
+        <Description>Max number of processes - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.THREADS" required="true" type="string">
+        <Description>Max number of pthread created threads - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.UID" required="true" type="string">
+        <Description>User identification - OMVS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS.OPIDENT" required="true" type="string">
+        <Description>Operator ID - CICS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS.OPPRTY" required="true" type="string">
+        <Description>Operator priority - CICS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS.TIMEOUT" required="true" type="string">
+        <Description>Idle time value - CICS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS.FORCE" required="true" type="string">
+        <Description>Indicates whether the user is signed off (FORCE) or not signed off (NOFORCE) when an XRF takeover occurs. - CICS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="CICS.OPCLASS" required="true" type="string">
+        <Description>Operator class values - CICS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.AUTOLOG" required="true" type="string">
+        <Description>User should be automatically signed on to OMVS DCE - DCE user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.UUID" required="true" type="string">
+        <Description>UUID 36 characters - DCE user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.HOMEUUID" required="true" type="string">
+        <Description>Home cell UUID - DCE user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.HOMECELL" required="true" type="string">
+        <Description>Home cell name- DCE user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.DCENAME" required="true" type="string">
+        <Description>Principal name of the user - DCE user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERB.KERBNAME" required="true" type="string">
+        <Description>Kerberos-principal-name - KERB user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERB.MAXTKTLF" required="true" type="string">
+        <Description>Maximum ticket life in seconds - KERB user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERB.KERB_VIO" required="true" type="string">
+        <Description>Number of Kerberos key violations for user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERB.DES" required="true" type="string">
+        <Description>DES encryption type is set for this logonid - KERB user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERB.DES3" required="true" type="string">
+        <Description>DES3 encryption type is set for this logonid - KERB user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERB.DESD" required="true" type="string">
+        <Description>DESD encryption type is set for this logonid - KERB user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LANGUAGE.PRIMARY" required="true" type="string">
+        <Description>Three-character language code for the primary language of user - LANGUAGE user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LANGUAGE.SECONDRY" required="true" type="string">
+        <Description>Three-character language code for the secondary language of user - LANGUAGE user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LNOTES.SNAME" required="true" type="string">
+        <Description>Application-user-id - LNOTES user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NDS.UNAME" required="true" type="string">
+        <Description>Application-user-id - NDS user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.STORAGE" required="true" type="string">
+        <Description>Amount of storage in MB to be used for message queuing - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.AUTH" required="true" type="string">
+        <Description>Authority level to issue console commands (MASTER,ALL,SYSTEM,IO,CONSOLE,INFO) - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.AUTO" required="true" type="string">
+        <Description>Indicates whether to receive unsolicited messages - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.MFORM" required="true" type="string">
+        <Description>Message-format (TIME,SYSID,JOBNAME,MESSAGE,EXEMPT) - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.MONITOR" required="true" type="string">
+        <Description>Options when monitoring jobs, TSO users or data set status (JOBNAMES,TSOSESS,TSOTIME,STATUS) - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.ROUTCODE" required="true" type="string">
+        <Description>routing codes or ranges associated with this console session - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.LOGCMD" required="true" type="string">
+        <Description>Whether command responses are to be logged in the hard copy log - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.MIGID" required="true" type="string">
+        <Description>Whether a one-byte migration ID is to be assigned to this console - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.DOM" required="true" type="string">
+        <Description>Delete-operator-message (NORMAL,ALL,NONE) - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.UD" required="true" type="string">
+        <Description>Whether undelivered messages are to be received - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.KEY" required="true" type="string">
+        <Description>console-key - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.CMDSYS" required="true" type="string">
+        <Description>System name to which commands issued from this console are to be sent - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.ALTGROUP" required="true" type="string">
+        <Description>Console group to be used in recovery - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.OPERMSCP" required="true" type="string">
+        <Description>A list of system names from which this console can receive messages that are not directed to a specific console - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.MSGLEVEL" required="true" type="string">
+        <Description>Messages to be received by this console (OPER REPLY,IMMEDIATE, CRITICAL EVENTUAL, EVENTUAL, INFO, NO BROADCAST, ALL) - OPERPARM user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WANAME" required="true" type="string">
+        <Description>User name - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WABLDG" required="true" type="string">
+        <Description>Building name - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WADEPT" required="true" type="string">
+        <Description>Department name - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAROOM" required="true" type="string">
+        <Description>Room name - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAADDR1" required="true" type="string">
+        <Description>Address line 1 - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAADDR2" required="true" type="string">
+        <Description>Address line 2 - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAADDR3" required="true" type="string">
+        <Description>Address line 3 - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAADDR4" required="true" type="string">
+        <Description>Address line 4 - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAACCNT" required="true" type="string">
+        <Description>Account number - WORKATTR user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.IC" required="true" type="string">
+        <Description>The initial command to be executed when the user signs on - NETVIEW user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.CONSNAME" required="true" type="string">
+        <Description>Default zOS console identifier - NETVIEW user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.SECCTL" required="true" type="string">
+        <Description>Security check indicator - NETVIEW user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.MSGRECVR" required="true" type="string">
+        <Description>Indicates whether the user can receive unsolicited messages - NETVIEW user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.NGMFADMN" required="true" type="string">
+        <Description>Indicates whether the user has administrative authority to the Graphic Monitor Facility - NETVIEW user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="NETVIEW.NTVCLASS" required="true" type="string">
+        <Description>A list of scope classes - NETVIEW user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="NETVIEW.DOMAINS" required="true" type="string">
+        <Description>A list of program identifiers in another domain to which the user has authority - NETVIEW user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSORGN" required="true" type="string">
+        <Description>Default TSO region size in kilobytes</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSOSIZE" required="true" type="string">
+        <Description>Maximum TSO region size</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="REVOKE_TYPE" required="true" type="string">
+        <Description>Revoke type (SUSPEND, CANCEL, Both) of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NAME" required="true" type="string">
+        <Description>Name of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PHONE" required="true" type="string">
+        <Description>Telephone number of a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UID" required="true" type="string">
+        <Description>UID pseudo field, concatenation of selected logonid fields</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UIDX" required="true" type="string">
+        <Description>Multiple values UID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="GROUP" required="true" type="string">
+        <Description>Default group name for a logonid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SEC_VIO" required="true" type="string">
+        <Description>Number of cumulative security violations for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UPD_TOD" required="true" type="string">
+        <Description>Date and time that this logonid record was last updated (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="HOMENODE" required="true" type="string">
+        <Description>Node name where this logonid record is stored in a Logonid database in a distributed database network (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MONITOR" required="true" type="string">
+        <Description>Whether a message is sent to the security console and to a designated person each time this user enters the system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TRACE" required="true" type="string">
+        <Description>Whether CA ACF2 creates SMF loggings for all data set and resource access attempts made by this user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MON_LOG" required="true" type="string">
+        <Description>Whether an SMF record is written (for the Invalid Password - Authority Log, ACFRPTPW) each time this user enters the system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO_TRC" required="true" type="string">
+        <Description>Whether CA ACF2 traces all TSO commands issued by this user for the Command Statistics Report (ACFRPTCR)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ACTIVE" required="true" type="string">
+        <Description>Activates the logonid one minute after midnight on the date contained in this field</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="EXPIRE" required="true" type="string">
+        <Description>When the privileges for this logonid will expire</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CSDATE" required="true" type="string">
+        <Description>Date that the CANCEL, SUSPEND, MON-LOG, or MONITOR field was set for this user (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CSWHO" required="true" type="string">
+        <Description>Logonid of the user who set the CANCEL, SUSPEND, MON-LOG, or MONITOR field for this user (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SECURITY" required="true" type="string">
+        <Description>User is a security administrator</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ACCOUNT" required="true" type="string">
+        <Description>User can insert, list, change, and delete logonid records</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LEADER" required="true" type="string">
+        <Description>User can display and alter certain fields of logonid records for other users.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUDIT" required="true" type="string">
+        <Description>User can display the records and parameters of the CA ACF2 system.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CONSULT" required="true" type="string">
+        <Description>User can display other logonid records</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="REFRESH" required="true" type="string">
+        <Description>User can issue the F ACF2,REFRESH operator command to update GSO</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="READALL" required="true" type="string">
+        <Description>User has read and execute access to all data sets at the site</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROGRAM" required="true" type="string">
+        <Description>Program (name or mask) must be used to submit jobs for this logonid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SCPLIST" required="true" type="string">
+        <Description>Scope record that restricts accesses for this privileged user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO" required="true" type="string">
+        <Description>User can log on to TSO</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="JOB" required="true" type="string">
+        <Description>Batch or background jobs can use this logonid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="STC" required="true" type="string">
+        <Description>Logonid is for use by started tasks only</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS" required="true" type="string">
+        <Description>User can sign on to CICS</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="IMS" required="true" type="string">
+        <Description>user can sign on to IMS</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="BDT" required="true" type="string">
+        <Description>Address space for this logonid belongs to the Bulk Data Transfer (BDT) product</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TAPE_BLP" required="true" type="string">
+        <Description>User can use full bypass label processing (BLP) when accessing tape data sets</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TAPE_LBL" required="true" type="string">
+        <Description>User has limited bypass label processing authority when using tapes</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SUBAUTH" required="true" type="string">
+        <Description>Jobs that specify this logonid can be submitted only through APF-authorized programs</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="JOBFROM" required="true" type="string">
+        <Description>User can use //*JOBFROM control statements</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LOGSHIFT" required="true" type="string">
+        <Description>User can access the system outside of the time period specified in the SHIFT field of the logonid record</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTODUMP" required="true" type="string">
+        <Description>CA ACF2 takes an SVC dump whenever a data set or resource violation occurs</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DUMPAUTH" required="true" type="string">
+        <Description>User can generate a dump, even in an execute-only environment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="RESTRICT" required="true" type="string">
+        <Description>Logonid is for production use only. A restricted logonid does not require a password for user verification</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="RULEVLD" required="true" type="string">
+        <Description>Access rule must authorize any data set accesses that a user makes</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NO_STORE" required="true" type="string">
+        <Description>User cannot store or delete rule sets</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NO_INH" required="true" type="string">
+        <Description>Network job cannot inherit this logonid from its submitter</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NO_SMC" required="true" type="string">
+        <Description>User can bypass step-must-complete (SMC) controls</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MAINT" required="true" type="string">
+        <Description>A logonid can access data sets without CA ACF2 rule validation or loggings by means of a specified program executed from a specified library</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NON_CNCL" required="true" type="string">
+        <Description>A user with the NON-CNCL privilege defined in their logonid record has full access to any data set or resource despite any security violations that can occur during the access attempt</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PPGM" required="true" type="string">
+        <Description>User can execute the protected programs specified in the GSO PPGM record</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SYNCNODE" required="true" type="string">
+        <Description>Name of the node where the synchronized logonid for a user resides. This node name is the logical node name as defined by a NETNODE record.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CMD_PROP" required="true" type="string">
+        <Description>user can use the SET TARGET command or the TARGET parameter on the INSERT, CHANGE, LIST, and DELETE commands to override the global CPF target list</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ACC_CNT" required="true" type="string">
+        <Description>System accesses counter made by this logonid since it was created (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ACC_DATE" required="true" type="string">
+        <Description>The date of the last system access by this user (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ACC_SRCE" required="true" type="string">
+        <Description>Logical or physical input source name or source group name from which this user last accessed the system. (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ACC_TIME" required="true" type="string">
+        <Description>Time of the last system access by this user (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_EXP" required="true" type="string">
+        <Description>Password has been manually expired</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_TOD" required="true" type="string">
+        <Description>Date and time when a password was last changed</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_DAT" required="true" type="string">
+        <Description>Date of the last invalid password or password phrase attempt (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_TIM" required="true" type="string">
+        <Description>last time a user entered an invalid password (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_SRC" required="true" type="string">
+        <Description>Logical or physical input source name or source group name from which a user last entered an invalid password (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_INV" required="true" type="string">
+        <Description>Number of password violations that occurred since the last successful logon (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_VIO" required="true" type="string">
+        <Description>Number of password violations that occurred on PSWD_DAT</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MAXDAYS" required="true" type="string">
+        <Description>Maximum number of days permitted between password changes before the password expires</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MINDAYS" required="true" type="string">
+        <Description>Minimum number of days that must elapse before a user can change their password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFT_DEST" required="true" type="string">
+        <Description>Default remote destination for TSO-spun SYSOUT data sets</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFT_PFX" required="true" type="string">
+        <Description>Default TSO prefix that is set in the user profile at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFT_SOUT" required="true" type="string">
+        <Description>Default TSO SYSOUT class</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFT_SUBC" required="true" type="string">
+        <Description>Default TSO submit class</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFT_SUBH" required="true" type="string">
+        <Description>Default TSO submit hold class</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFT_SUBM" required="true" type="string">
+        <Description>Default TSO submit message class</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_ACCT" required="true" type="string">
+        <Description>Permission to specify an account number at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PMT_ACCT" required="true" type="string">
+        <Description>CA ACF2 requires a user to specify an account number at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_PROC" required="true" type="string">
+        <Description>Permission to specify the TSO procedure name at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PMT_PROC" required="true" type="string">
+        <Description>CA ACF2 requires a user to specify a TSO procedure name at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_RCVR" required="true" type="string">
+        <Description>Permission to use the recover option of the TSO</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_SIZE" required="true" type="string">
+        <Description>User is authorized to specify any region size at logon time (overriding TSOSIZE)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_TIME" required="true" type="string">
+        <Description>Permission to specify the TSO session time limit at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_UNIT" required="true" type="string">
+        <Description>Permission to specify the TSO unit name at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_DEST" required="true" type="string">
+        <Description>Permission to specify a remote output destination at TSO logon that overrides the value specified in the DFT-DEST field</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_MSG" required="true" type="string">
+        <Description>User has permission to specify a message class at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LGN_PERF" required="true" type="string">
+        <Description>permission to specify a performance group at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MODE" required="true" type="string">
+        <Description>User wants to receive modal messages from TSO</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERATOR" required="true" type="string">
+        <Description>User has TSO operator privileges</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CONSOLE" required="true" type="string">
+        <Description>Permits user to access the TSO CONSOLE facility</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PAUSE" required="true" type="string">
+        <Description>User wants a program to pause when a multilevel message is issued by a command executed in a CLIST</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROMPT" required="true" type="string">
+        <Description>CA ACF2 prompts a user for missing or incorrect parameters</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MOUNT" required="true" type="string">
+        <Description>Permission to issue mounts for devices</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="RECOVER" required="true" type="string">
+        <Description>User can specify the recover option of the TSO</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSOACCT" required="true" type="string">
+        <Description>Default TSO logon account</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSOCMDS" required="true" type="string">
+        <Description>TSO command list module name that contains the list of commands that this user is authorized to use</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSOFSCRN" required="true" type="string">
+        <Description>User can use the full-screen logon display</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSOPERF" required="true" type="string">
+        <Description>Default TSO performance group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSOPROC" required="true" type="string">
+        <Description>Default TSO procedure name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSORBA" required="true" type="string">
+        <Description>Mail Index Record Pointer (MIRP) for this user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSOTIME" required="true" type="string">
+        <Description>Default TSO time parameter, which is the CPU time limit (in minutes) associated with the TSO session</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSOUNIT" required="true" type="string">
+        <Description>Default TSO unit name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WTP" required="true" type="string">
+        <Description>CA ACF2 displays write-to-programmer messages</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INTERCOM" required="true" type="string">
+        <Description>User is willing to accept messages from other users through the TSO SEND command</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="JCL" required="true" type="string">
+        <Description>Indicates the ability to submit batch jobs from TSO and to use SUBMIT, STATUS, CANCEL, and OUTPUT commands</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MAIL" required="true" type="string">
+        <Description>User can receive mail messages from TSO at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NOTICES" required="true" type="string">
+        <Description>User can receive TSO notices at logon time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LINE" required="true" type="string">
+        <Description>TSO line-delete character</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CHAR" required="true" type="string">
+        <Description>TSO character-delete character for this user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ATTR2" required="true" type="string">
+        <Description>Enables a site to do TSO command limiting when you use SYS1.UADS instead of the Logonid database</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CMD_LONG" required="true" type="string">
+        <Description>CA ACF2 should bypass the TSO command list feature for this user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="VLD_ACCT" required="true" type="string">
+        <Description>CA ACF2 validates the TSO account number of a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="VLD_PROC" required="true" type="string">
+        <Description>CA ACF2 validates the TSO procedure name of a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MSGID" required="true" type="string">
+        <Description>User wants TSO messages to have message IDs prefixed</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ACCTPRIV" required="true" type="string">
+        <Description>User has TSO accounting privileges</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ALLCMDS" required="true" type="string">
+        <Description>Indicates the ability to bypass the CA ACF2 restricted command lists by entering a special prefix character</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ACF2CICS" required="true" type="string">
+        <Description>CA ACF2 CICS security is to be initialized in any CICS region running with this address space logonid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICSCL" required="true" type="string">
+        <Description>CICS operator class</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICSID" required="true" type="string">
+        <Description>CICS operator ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICSPRI" required="true" type="string">
+        <Description>CICS operator priority</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICSRSL" required="true" type="string">
+        <Description>CICS resource access key</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="IDLE" required="true" type="string">
+        <Description>Maximum time permitted (in minutes) between terminal transactions for this user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MUSDLID" required="true" type="string">
+        <Description>Default logonid for a multiple-user single address space system (MUSASS) address space</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MUSID" required="true" type="string">
+        <Description>Multiple-user single address space ID (MUSASS)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MUSUPDT" required="true" type="string">
+        <Description>A MUSASS logonid with this privilege has the authority to make calls on behalf of users who are updating the databases</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SOURCE" required="true" type="string">
+        <Description>Logical or physical input source name or source group name from which a user must access the system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SHIFT" required="true" type="string">
+        <Description>Shift record name that defines the period during which a user can log on to the system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ZONE" required="true" type="string">
+        <Description>Zone record name that defines the time zone from which this logonid normally accesses the system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PREFIX" required="true" type="string">
+        <Description>Prefix key of the rule used to validate access to a data set</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHSUP1" required="true" type="string">
+        <Description>Extended user authentication (EUA) routine for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHSUP2" required="true" type="string">
+        <Description>Extended user authentication (EUA) routine for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHSUP3" required="true" type="string">
+        <Description>Extended user authentication (EUA) routine for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHSUP4" required="true" type="string">
+        <Description>Extended user authentication (EUA) routine for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHSUP5" required="true" type="string">
+        <Description>Extended user authentication (EUA) routine for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHSUP6" required="true" type="string">
+        <Description>Extended user authentication (EUA) routine for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHSUP7" required="true" type="string">
+        <Description>Extended user authentication (EUA) routine for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHSUP8" required="true" type="string">
+        <Description>Extended user authentication (EUA) routine for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SMSINFO" required="true" type="string">
+        <Description>CONTROL(SMS) record name that contains the default storage management class values for a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="RSRCVLD" required="true" type="string">
+        <Description>Resource rule must authorize any resource accesses that a user makes</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PRIV_CTL" required="true" type="string">
+        <Description>Logonid is valid for dynamic logonid privileges</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_UPP" required="true" type="string">
+        <Description>New password is to be upper-case</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_MIX" required="true" type="string">
+        <Description>Current password is case-sensitive</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LDS" required="true" type="string">
+        <Description>Whether logonid administrative changes for this user were propagated to all active Lightweight-Directory Access Protocol (LDAP) servers in the network</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MUSASS" required="true" type="string">
+        <Description>Logonid is for a multiple-user single address space system, such as CICS or IMS</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MUSIDINF" required="true" type="string">
+        <Description>MUSID field should be used to restrict access to a MUSASS region for CA ACF2 Info type system entry calls</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NOMAXVIO" required="true" type="string">
+        <Description>Prevents the user violation counter from incrementing and MAXVIO processing from occurring</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NO_OMVS" required="true" type="string">
+        <Description>User cannot use any z/OS UNIX System Services</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NO_STATS" required="true" type="string">
+        <Description>Last access statistics on a successful full validation (ACVAMVAL) MUSASS signon request are bypassed</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PP_TRC" required="true" type="string">
+        <Description>Whether CA ACF2 creates SMF loggings that contain the Active Library List for all data set access attempts made by this logonid in a batch job</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PP_TRCV" required="true" type="string">
+        <Description>Whether CA ACF2 creates SMF loggings that contain the Active Library List for all data set access violations made by this logonid in a batch job</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PSWD_XTR" required="true" type="string">
+        <Description>Password for the logonid is halfway encrypted and can be extracted by an APF-authorized program</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PTICKET" required="true" type="string">
+        <Description>Passticket can be used with a userid that has the RESTRICT attribute</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SYSPEXCL" required="true" type="string">
+        <Description>When the system is active in a sysplex enivronment, this logonid record should not be written to the structure</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TDISKVLD" required="true" type="string">
+        <Description>Access rules must exist for all data on temporary disks that this user accesses</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UNICNTR" required="true" type="string">
+        <Description>User also resides on the CA Common Services (CCS) platform</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="VLDRSTCT" required="true" type="string">
+        <Description>PROGRAM and SUBAUTH are to be validated even when this RESTRICTed logonid is inherited</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROXY.BINDDN" required="true" type="string">
+        <Description>Distinguished name (DN) which will be used in conjunction with the BIND password if the LDAP Server needs to supply an administrator or user identity to BIND with another LDAP server - PROXY user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROXY.BINDPTOD" required="true" type="string">
+        <Description>Date and time the BINDPW field was last changed - PROXY user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROXY.BINDPW" required="true" type="string">
+        <Description>Password for the DN defined in the BINDDN parameter - PROXY user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROXY.LDAPHOST" required="true" type="string">
+        <Description>URL of the LDAP server that the zOS LDAP Server will contact when acting as a proxy on behalf of a requester - PROXY user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LINUX.AUTOUIDL" required="true" type="string">
+        <Description>Automatically assigns a LINUXUID value when there is an active GSO AUTOIDLX record that specifies ASSIGNU - LINUX user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LINUX.LINUXGRP" required="true" type="string">
+        <Description>Name of the LINUX group profile record - LINUX user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LINUX.LINUXHOM" required="true" type="string">
+        <Description>Pathname of the Initial Directory when a user enters a Linux command or the ISPF shell - LINUX user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LINUX.LINUXNAM" required="true" type="string">
+        <Description>LINUX Application User Identity - LINUX user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LINUX.LINUXPGM" required="true" type="string">
+        <Description>LINUX Service Shell Program when Linux command is first entered - LINUX user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LINUX.LINUXUID" required="true" type="string">
+        <Description>LINUX uid - LINUX user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KEYRING.DEFAULT" required="true" type="string">
+        <Description>Record key of a CERTDATA certificate record that is to be used as the default certificate for this key ring</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KEYRING.RINGNAME" required="true" type="string">
+        <Description>Key ring name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.ACTIVE" required="true" type="string">
+        <Description>Date when the profile record associating the user to the certificate becomes active - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.CERTID" required="true" type="string">
+        <Description>Serial number and certification authority's distinguished name as extracted from the certificate - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.DSA" required="true" type="string">
+        <Description>Key pair has been generated using the Digital Signature Algorithm instead of the RSA algorithm - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.DSN" required="true" type="string">
+        <Description>zOS data set that contains the digital certificate that is inserted into a CERTDATA profile record - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.EXPIRE" required="true" type="string">
+        <Description>Date which gives the security administrator the ability to specify when the profile record associating the user to the certificate expires - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.HITRUST" required="true" type="string">
+        <Description>Certificate is both highly trusted and trusted - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.ICSF" required="true" type="string">
+        <Description>Private key for the certificate is placed in ICSF - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.LABEL" required="true" type="string">
+        <Description>Label to be associated with the certificate - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.PCICC" required="true" type="string">
+        <Description>PCICC was specified on the GENCERT or INSERT command - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.SUBJDN" required="true" type="string">
+        <Description>Subject distinguished name as extracted from the certificate - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CERTDATA.TRUST" required="true" type="string">
+        <Description>Certificate is trusted - CERTDATA user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERBCUR" required="true" type="string">
+        <Description>Current Kerberos key</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERBCURV" required="true" type="string">
+        <Description>Current Kerberos key version</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERBPRE" required="true" type="string">
+        <Description>Previous Kerberos key</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERBPREV" required="true" type="string">
+        <Description>Previous Kerberos key version</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERBLINK.KBLKNAME" required="true" type="string">
+        <Description>Userid that is to be associated with the foreign principal - KERBLINK user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PASSWORD.@PSWDCNT" required="true" type="string">
+        <Description>Number of previous passwords stored in the record for extended password history - PASSWORD user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PASSWORD.@PWD_TOD" required="true" type="string">
+        <Description>Date and time of the user current password - PASSWORD user profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CRE_TOD" required="true" type="string">
+        <Description>Date and time that a logonid record was created (read only)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="KERB_VIO" required="true" type="string">
+        <Description>Number of Kerberos key violations</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PWP_VIO" required="true" type="string">
+        <Description>Number of password phrase violations that occurred on PSWD-DAT</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="GROUP_ID" featuresString="PROVISIONING" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="GROUP_ID" required="true" type="string">
+        <Description>ACF2 ID of the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="DESCRIPTION" required="true" type="string">
+        <Description>Description of Group (free text)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="UIDMASKS" required="true" type="string">
+        <Description>UID mask which defines this Group. (All users matching this UID mask belong to this group)</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Create Account" schemaObjectType="account" usage="Create">
+        <Field displayName="User ID" name="USER_ID" required="true" type="string"/>
+        <Field displayName="Password" name="password" required="true" section="" type="secret"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="UIDMASKS" name="UIDMASKS" required="true" section="" type="string"/>
+        <OwnerDefinition value=""/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field name="DESCRIPTION" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

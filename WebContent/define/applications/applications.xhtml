@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+    
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_define_apps}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/ApplicationsGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" >
+    helpKey = 'APPLICATIONS';
+    
+    var sp = new SailPoint.state.StateProvider({
+      stateIds: ['#{applicationList.gridState.name}'],
+      states:   ['#{applicationList.gridState.state}']
+    });
+    Ext.state.Manager.setProvider(sp);  
+
+    function initGrid() {
+      var canEdit = #{sp:hasRight(facesContext, 'ManageApplication')};
+      gridStateStr = '#{applicationList.gridState.JSON}';
+      
+      var appGridColConf = #{applicationList.columnJSON};
+
+      return SailPoint.Define.Grid.Application.createGrid(appGridColConf, gridStateStr, #{applicationList.gridState.pageSize}, '#{applicationList.gridState.name}', canEdit); 
+    }
+    
+    Ext.onReady(function(){
+      var grid = initGrid();
+      
+      var bodyItems = [];
+      
+      grid.region = 'center';
+      bodyItems.push(grid);
+      
+      <c:if test="#{!applicationList.authoritativeAppDefined}">
+          var warningDiv = {
+              region: 'north',
+              html: '<div class="formWarn">#{msgs.identitizer_noauthapp_warn}</div>',
+              border: false
+          };
+          
+          bodyItems.push(warningDiv);
+      </c:if>
+      
+      var bodyPanel = new Ext.Panel({
+          border: false,
+          layout: 'border',
+          items: bodyItems 
+      });
+
+      var viewport = SailPoint.getViewport({
+          bodyContent: bodyPanel,
+          title: "#{msgs.title_define_apps}"
+      });
+      
+      viewport.doLayout();
+
+      if(!#{sp:hasRight(facesContext, 'ManageApplication')}) {
+        Ext.getCmp('newApplicationBtn').hide();
+      }
+    }); // Ext.onReady
+  
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+  
+    <f:view>
+ 
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError"/>
+
+      <h:form styleClass="form" id="editForm">
+      
+        <h:panelGrid id="applicationsTbl" rendered="true" styleClass="width100" columns="1">
+      
+          <h:inputHidden id="currentDefinitionId" 
+                         value="#{applicationList.selectedId}"/>
+
+          <h:commandButton style="display:none"
+                           action="#{applicationList.select}" 
+                           id="editButton"/>
+                           
+          <h:commandButton style="display:none" action="delete"
+                           actionListener="#{applicationList.deleteObject}"
+                           id="deleteButton" />
+
+          <h:commandButton action="#{applicationList.newApplication}" style="display:none"
+                           value="#{msgs.button_new_app}" id="newApplicationHiddenBtn"
+                           rendered="#{sp:hasRight(facesContext, 'ManageApplication')}" />
+                           
+          <t:saveState value="#{applicationList.gridState}" />
+          <h:inputHidden id="sortColumn" value="#{applicationList.gridState.sortColumn}" />
+          <h:inputHidden id="sortOrder" value="#{applicationList.gridState.sortOrder}" />
+          <h:inputHidden id="firstRow" value="#{applicationList.gridState.firstRow}" />
+          <h:inputHidden id="pageSize" value="#{applicationList.gridState.pageSize}" />
+
+        </h:panelGrid>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

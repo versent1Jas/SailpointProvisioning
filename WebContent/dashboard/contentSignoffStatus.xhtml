@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+  <c:choose>
+    <c:when test="#{signoffList.count gt 0}">
+ 
+  
+    <div id="signoffStatus-grid" style="width:100%"></div>
+    <script type="text/javascript">
+       
+      Ext.onReady(function(){
+      
+        var gridWidth = $('signoffStatus-grid').clientWidth;
+        var taskResult;
+        Ext.QuickTips.init();
+        
+        var signoffFilterForm = new Ext.Panel({
+          id:'signoffFilterForm',
+          region: 'north',
+          frame:false,
+          collapsed: true,
+          bodyStyle:'padding:5px',
+          cls:'x-panel-no-border',
+          width: gridWidth,
+          items: [{
+            layout:'column',
+            items:[{
+              columnWidth:.4,              
+              items:[{
+                xtype:'label',
+                text: '#{msgs.start_date} '
+              },
+              new Ext.form.DateField({
+                  fieldLabel: '#{sp:escapeJavascript(msgs.start_date)}', 
+                  id: 'signoffFrmStartDate',
+                  name: 'frmStartDate'
+                })
+              ]
+            },{
+              columnWidth:.6,
+              items:[{
+                xtype:'label',
+                text: '#{msgs.end_date} '
+              },
+              new Ext.form.DateField({
+                  fieldLabel: '#{sp:escapeJavascript(msgs.end_date)}', 
+                  name: 'frmEndDate',
+                  id: 'signoffFrmEndDate'
+                })]
+            }]
+          }],
+          buttons: [{
+              text:'#{sp:escapeJavascript(msgs.button_filter)}',
+              handler:function(){
+                signoffGrid.getStore().getProxy().extraParams['name'] = Ext.getCmp('signoffSearchField').getValue();
+                
+                if(Ext.getCmp('signoffFrmStartDate').getValue()) 
+                  signoffGrid.getStore().getProxy().extraParams['creationStartDate'] = Ext.getCmp('signoffFrmStartDate').getValue().getTime(); 
+                if(Ext.getCmp('signoffFrmEndDate').getValue()) 
+                  signoffGrid.getStore().getProxy().extraParams['creationEndDate'] = Ext.getCmp('signoffFrmEndDate').getValue().getTime(); 
+                  
+                signoffGrid.getStore().load({params:{start:0,limit:10}});
+              }
+          },{
+              text: '#{sp:escapeJavascript(msgs.button_reset)}',
+              cls : 'secondaryBtn',
+              handler: function(){
+                Ext.getCmp('signoffFrmStartDate').reset();
+                Ext.getCmp('signoffFrmEndDate').reset();
+                Ext.getCmp('signoffSearchField').reset();                
+                signoffGrid.getStore().getProxy().extraParams['startDate'] = ''; 
+                signoffGrid.getStore().getProxy().extraParams['endDate'] = ''; 
+                signoffGrid.getStore().load({params:{start:0, limit:10}});
+              }
+          }]
+        });
+        
+        var signoffFilter = new Ext.Action({
+            text: '#{sp:escapeJavascript(msgs.advanced_search)}',
+            scale: 'medium',
+            handler: function(){  
+              signoffFilterForm.toggleCollapse();
+            }
+        });
+        
+        function viewWorkItemOrCert(workItemId) {
+          viewWorkItemListItem(gDbId, gIsCertification);
+        }
+    
+        function forwardFromMenu() {
+          forwardWorkItem(gDbId, null, 'viewDashboard');
+        }
+        
+        function emailOwner(item, e) {
+            SailPoint.EmailWindow.open(ownerId, '', gDbId);
+        }
+        
+        function gridClicked(gridView, record, HTMLitem, index, e, eOpts){
+          gDbId = record.getId();
+          gIsCertification = (record.get('isCertification') == 'true');
+          viewWorkItemListItem(gDbId, gIsCertification);
+        }
+        
+        function viewTaskResult() {
+          $('dashboardForm:taskResultId').value = taskResult;
+          $('dashboardForm:viewResultBtn').click();
+        }
+        
+        function contextMenu(gridView, record, HTMLitem, index, e, eOpts){
+          var contextMenu = new Ext.menu.Menu();
+          gDbId = record.getId();
+          ownerId = record.get('owner-id');
+          gIsCertification = (record.get('isCertification') == 'true');
+          gMenu = contextMenu;
+          taskResult = record.get('targetId');
+  
+          contextMenu.add(
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.edit)}', handler: viewWorkItemOrCert, iconCls: 'editBtn'}),
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_forward)}', handler: forwardFromMenu, iconCls: 'forwardBtn'}),
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.dash_button_email_owner)}', handler: emailOwner, iconCls: 'emailBtn'}),
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.dash_button_view_task_result)}', handler: viewTaskResult, iconCls: 'viewDetailsBtn'})
+          );          
+            
+          e.stopEvent();
+          contextMenu.showAt(e.xy);
+        }  
+          
+        var gridMetaData = #{signoffList.columnJSON};
+        
+        var signoffStore = SailPoint.Store.createStore({                
+          url: CONTEXT_PATH + '/dashboard/contentSignoffStatusDatasource.json',
+          root: 'results',
+          fields: gridMetaData.fields,
+          remoteSort: true
+        });
+        
+        
+        // create the grid
+        var signoffGrid = new Ext.grid.Panel({
+          id: '#{signoffList.gridState.name}',
+          stateId: '#{signoffList.gridState.name}',
+          stateful: true,
+          store: signoffStore,
+          cls: 'smallFontGrid selectableGrid wrappingGrid',
+          columns : gridMetaData.columns,
+          listeners: { itemclick: gridClicked, itemcontextmenu: contextMenu},
+          viewConfig: {
+            scrollOffset: 0,        
+            stripeRows:true
+          },
+          renderTo:'signoffStatus-grid',
+          width:gridWidth-5,
+          height:400,
+          bbar: {
+              xtype : 'pagingtoolbar',
+              pageSize: 10,
+              store: signoffStore,
+              displayInfo: true,
+              displayMsg: 'Displaying results {0} - {1} of {2}',
+              emptyMsg: "No results to display"
+              
+          }
+        });
+        
+        var ct = new Ext.Panel({
+          renderTo:'signoffStatus-grid',
+          width:gridWidth,
+          items: [signoffFilterForm, signoffGrid],
+          tbar: [{
+              xtype : 'searchfield',
+              id:'signoffSearchField',
+              store:signoffStore,
+              paramName:'name',
+              emptyText:'#{sp:escapeJavascript(msgs.label_filter_by_item_name_or_id)}',
+              width:250,
+              storeLimit:10
+            }, ' ',
+            signoffFilter              
+          ]
+        });
+
+        signoffGrid.getStore().load({params:{start:0, limit:10}});     
+    });
+        
+    </script>
+    </c:when>
+    <c:otherwise>
+      <table class="width100" cellpadding="0" cellspacing="0">
+        <tr>
+          <td class="lightBlueBoxHeading" align="center"><h:outputText value="#{msgs.chart_signoff_status_no_signoffs_found}" />
+          </td>
+        </tr>
+      </table>
+    </c:otherwise>
+  </c:choose>
+</ui:composition>
+
+</body>
+</html>

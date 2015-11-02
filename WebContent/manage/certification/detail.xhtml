@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:t="http://myfaces.apache.org/tomahawk"
+        xmlns:a4j="http://richfaces.org/a4j"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:c="http://java.sun.com/jstl/core"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{msgs.access_cert_rept}"/>
+    </ui:define>
+
+    <ui:define name="body">
+        <f:view>
+            <a4j:outputPanel ajaxRendered="true" id="errorPanel">
+                <div id="errors">
+                    <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                </div>
+            </a4j:outputPanel>
+            <h:form styleClass="form" id="editForm">
+               <ui:fragment rendered="#{certEntityView.certificationId == null}">
+                   <div>
+                   #{msgs.inst_no_cert}
+                       <div>
+                         <h:commandButton action="cancel" immediate="true" value="#{msgs.button_return_to_dashboard}" styleClass="secondaryBtn"/>
+                       </div>
+                   </div>
+               </ui:fragment>
+               <c:if test="#{certEntityView.certificationId != null}">
+
+               <ui:include src="detailViewInclude.xhtml">
+                  <ui:param name="entityBean" value="#{certEntityView}"/>
+                  <ui:param name="certificationBeanParam" value="#{certification}"/>
+                  <ui:param name="worksheetBean" value="#{worksheetView}"/>
+               </ui:include>
+
+               <ui:fragment rendered="#{certEntityView.displayStartUpHelpCertificationEntityView}">
+                   <ui:include src="startupHelpCertificationEntity.xhtml"/>
+               </ui:fragment>
+               </c:if>
+
+            </h:form>
+        </f:view>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

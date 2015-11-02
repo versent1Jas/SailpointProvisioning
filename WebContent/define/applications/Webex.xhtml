@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+                   
+        	   var siteName = getFieldValue('editForm:siteName');
+               Validator.validateNonBlankString(siteName, "Site Name cannot be null!");
+
+               var xmlURL = getFieldValue('editForm:xmlURL');
+               Validator.validateNonBlankString(xmlURL, "XML URL cannot be null!");
+               
+               var password = getFieldValue('editForm:password');
+               Validator.validateNonBlankString(password, "Password cannot be null!");
+               
+               var siteID = getFieldValue('editForm:siteID');
+               Validator.validateNonBlankString(siteID, "Site ID cannot be null!");               
+               
+               var webexID = getFieldValue('editForm:webexID');
+               Validator.validateNonBlankString(webexID, "Webex ID cannot be null!");
+               
+               var pageSize = getFieldValue('editForm:pageSize');
+               Validator.validateNonBlankString(pageSize, "Page Size cannot be null!");
+               
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="Webex Settings"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_webex_site_name}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpSiteName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_webex_site_name}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="siteName"
+              			   value="#{applicationObject.attributes['siteName']}"
+                           size="80"                          
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_webex_xml_url}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpXMLURL" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_webex_xml_url}"/>
+            </td>
+            <td>
+              <h:inputText id="xmlURL"
+              			   value="#{applicationObject.attributes['xmlURL']}"
+                           size="20"                           
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_webex_site_ID}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpSiteID" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_webex_site_ID}"/>
+            </td>
+            <td>
+              <h:inputText id="siteID"
+              			   value="#{applicationObject.attributes['siteID']}"
+                           size="20"                      
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_webex_partner_ID}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPartnerID" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_webex_partner_ID}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes['partnerID']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_webex_webex_ID}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpWebexID" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_webex_webex_ID}"/>
+            </td>
+            <td>
+              <h:inputText id="webexID"
+              		       value="#{applicationObject.attributes['webexID']}"
+                           size="20"                   
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+           <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_webex_password}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_webex_password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="password"
+               				   size="50"                				 
+                               value="#{applicationObject.attributes['password']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+          </tr>
+       
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_webex_page_size}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPageSize" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_webex_page_size}"/>
+            </td>
+            <td>
+              <h:inputText id="pageSize"
+                           value="#{applicationObject.attributes['pageSize']}"               			   
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"                          
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                           <f:validateLongRange minimum="1" maximum="500"/>
+                           </h:inputText>
+            </td>
+            </tr>
+            <tr>
+             <td class='titleColumn certScheduleTitleCol'>
+             <h:outputText style='padding:5px' value="#{msgs.con_form_webex_manage_disabled_accounts}"/>
+             </td>
+              <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpDisabled" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_webex_manage_disabled_accounts}"/>
+            </td>
+             <td>
+              <h:selectBooleanCheckbox id="disabled"
+                                       value="#{applicationObject.attributes['disabled']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+           
+           
+          </tr>
+
+        </table>
+
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

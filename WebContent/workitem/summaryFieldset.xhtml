@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+
+  <ui:fragment rendered="#{workItem.archive and workItem.electronicallySigned}">
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+
+      Ext.onReady(function() {
+          SailPoint.Utils.setupESigTooltip(
+              'esigned',
+              '#{sp:escapeJavascript(workItem.signoffHistory.signerDisplayName)}',
+              '#{sp:escapeJavascript(workItem.signoffHistory.account)}',
+              '#{sp:escapeJavascript(sp:formatDateTime(workItem.signoffHistory.date))}',
+              '#{sp:escapeJavascript(workItem.signoffHistory.application)}',
+              '#{sp:escapeJavascript(workItem.signoffHistory.text)}'
+          );
+      });
+
+      //--><!]]>
+    </script>
+  </ui:fragment>
+
+  <div class="spTabledContent" style="margin:5px">
+    <table class="spTable" cellspacing="0">
+      <tr>
+        <th><h:outputText value="#{msgs.title_summary}"/></th>
+      </tr>
+      <tr>
+        <td>
+          <h:panelGrid class="width100" columns="2" columnClasses="titleColumn,noClass">
+            <h:outputText value="#{msgs.label_work_item_id}" />
+            <h:outputText value="#{sp:stripLeadingZeroes(workItem.object.name)}" />
+
+            <c:if test="#{null != workItem.object.identityRequestId}">
+                <h:outputText value="#{msgs.label_access_request_id}" rendered="#{null != workItem.object.identityRequestId}" />
+                <ui:fragment rendered="#{!workItem.archive}">
+                    <h:commandLink value="#{sp:stripLeadingZeroes(workItem.object.identityRequestId)}" action="#{workItem.viewAccessRequest}" rendered="#{workItem.accessRequestViewable}" />
+                    <h:outputText value="#{sp:stripLeadingZeroes(workItem.object.identityRequestId)}" rendered="#{!workItem.accessRequestViewable}" />
+                </ui:fragment>
+                <ui:fragment rendered="#{workItem.archive}">
+                    <h:outputText value="#{sp:stripLeadingZeroes(workItem.object.identityRequestId)}" />
+                </ui:fragment>
+            </c:if>
+
+            <c:if test="#{workItem.archive and null != workItem.object.completer}">
+                <h:outputText value="#{msgs.label_completed_by}"/>
+                <ui:fragment>
+                  <h:outputText value="#{workItem.object.completer}" style="float: left;"/>
+                  <ui:fragment rendered="#{workItem.electronicallySigned}">
+                    <span id="esigned" style="float: left; margin: 1px 0px 0px 3px;">
+                      <h:graphicImage value="/images/icons/esigned-16px.png" />
+                    </span>
+                  </ui:fragment>
+
+                </ui:fragment>
+            </c:if>
+            
+            <h:outputText value="#{msgs.label_requester}" />
+            <h:outputText value="#{workItem.requester}" />
+
+            <c:if test="#{workItem.archive}">
+                <h:outputText value="#{msgs.label_owner}" rendered="#{not empty workItem.object.ownerName}" />
+                <h:outputText value="#{workItem.object.ownerName}" rendered="#{not empty workItem.object.ownerName}" />
+            </c:if>
+            <c:if test="#{!workItem.archive}">
+                <h:outputText value="#{msgs.label_owner}" rendered="#{not empty workItem.object.owner}"/>
+                <h:outputText value="#{workItem.object.owner.displayableName}" rendered="#{not empty workItem.object.owner}"/>
+            </c:if>
+            
+            <c:if test="#{not empty workItem.object.assignee}">
+                <h:outputText value="#{msgs.label_assignee}" rendered="#{not empty workItem.object.assignee}"/>
+                <ui:fragment rendered="#{!workItem.archive}">
+                    <h:outputText value="#{workItem.object.assignee.displayableName}" rendered="#{not empty workItem.object.assignee}"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{workItem.archive}">
+                    <h:outputText value="#{workItem.object.assignee}" rendered="#{not empty workItem.object.assignee}"/>
+                </ui:fragment>
+            </c:if>
+
+            <h:outputText value="#{msgs.label_description}" />
+            <h:outputText value="#{workItem.object.description}" />
+
+            <h:outputText value="#{msgs.created}" />
+            <h:outputText value="#{workItem.object.created}">
+                <f:convertDateTime timeZone="#{workItem.userTimeZone}" type="both" />
+            </h:outputText>
+            
+            <h:outputText value="#{msgs.next_event_date}" rendered="#{not empty workItem.object.wakeUpDate}"/>
+            <h:outputText value="#{workItem.object.wakeUpDate}" rendered="#{not empty workItem.object.wakeUpDate}">
+                <f:convertDateTime timeZone="#{workItem.userTimeZone}" type="both" />
+            </h:outputText>
+
+            <h:outputText value="#{msgs.label_expiration}" rendered="#{workItem.object.expiration != null}"/>
+            <h:outputText value="#{workItem.object.expiration}" rendered="#{workItem.object.expiration != null}">
+                <f:convertDateTime timeZone="#{workItem.userTimeZone}" type="both" />
+            </h:outputText>
+
+            <c:if test="#{workItem.archive}">
+                <h:outputText value="#{msgs.archived}" rendered="#{not empty workItem.object.archived}" />
+                <h:outputText value="#{workItem.object.archived}" rendered="#{not empty workItem.object.archived}">
+                    <f:convertDateTime timeZone="#{workItem.userTimeZone}" type="both" />
+				</h:outputText>
+            </c:if>
+
+            <h:outputText value="#{msgs.priority}" />
+            <ui:fragment rendered="#{!workItem.archive and workItem.priorityEditingAllowed}">
+              <h:selectOneMenu id="prioritySelection" value="#{workItem.priority}">
+                <f:selectItems value="#{workItem.prioritySelectItems}"/>
+              </h:selectOneMenu>
+            </ui:fragment>
+            <ui:fragment rendered="#{workItem.archive or not workItem.priorityEditingAllowed}">
+                <h:outputText value="#{sp:localizeKey(workItem.object.level.messageKey)}" rendered="#{workItem.object.level != null}"/>
+            </ui:fragment>
+            
+            <c:if test="#{workItem.archive}">
+                <h:outputText value="#{msgs.label_type}" rendered="#{not empty workItem.object.type}" />
+                <h:outputText value="#{sp:localizeKey(workItem.object.type.messageKey)}" rendered="#{not empty workItem.object.type}" />
+                
+                <h:outputText value="#{msgs.label_status}" rendered="#{not empty workItem.object.state}" />
+                <h:outputText value="#{sp:localizeKey(workItem.object.state.messageKey)}" rendered="#{not empty workItem.object.state}" />
+                
+                <h:outputText value="#{msgs.label_target}" rendered="#{not empty workItem.object.targetName}" />
+                <h:outputText value="#{workItem.object.targetName}" rendered="#{not empty workItem.object.targetName}" />
+            </c:if>
+
+            <h:outputText value="#{msgs.label_history}" />
+            <ui:fragment rendered="#{empty workItem.object.ownerHistory}">
+              <h:outputText value="#{msgs.none}"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{not empty workItem.object.ownerHistory}">
+              <a onclick="showHideWithLock($('workItemHistory'), null, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'workItemHistory'}));"
+                 title="#{msgs.click_to_see_history_work_item}"
+                 class="disclosure">
+                #{sp:size(workItem.object.ownerHistory)} #{(1 eq sp:size(workItem.object.ownerHistory)) ? msgs.item : msgs.items}
+              </a>
+            </ui:fragment>
+
+          </h:panelGrid>
+
+          <div id="workItemHistory" style="display: none">
+            <div class="detailsPanel">
+              <div class="detailsPanelTitleBar">
+                <h:graphicImage alt="#{msgs.button_click_to_close}"
+                                title="#{msgs.button_click_to_close}"
+                                value="/images/icons/CloseDelete.png"
+                                onclick="showHideWithLock($('workItemHistory'));"
+                                styleClass="detailsPanelClose"/>
+                #{msgs.history}
+              </div>
+              <div class="detailsPanelContent">
+                <ui:repeat value="#{workItem.object.ownerHistory}" var="ownerHistory">
+                  <div class="commentHeader">
+
+                      <h:outputFormat value="#{msgs.forward_history_desc}">
+                          <f:param value="#{ownerHistory.oldOwnerDisplayName}"/>
+                          <f:param value="#{ownerHistory.newOwnerDisplayName}"/>
+                          <f:param value="#{ownerHistory.startDate}"/>
+                      </h:outputFormat>
+                  </div>
+                  <div class="commentBody">
+                    <pre><h:outputText escape="false" value="#{sp:escapeHTML(sp:wrapText(ownerHistory.comment, 80), true)}" /></pre>
+                  </div>
+                </ui:repeat>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+</ui:composition>
+
+</body>
+</html>

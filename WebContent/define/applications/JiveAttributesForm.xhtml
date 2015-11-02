@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(fieldname) {
+            var val = null;
+            var field = $(fieldname);
+            if ( field ) {
+               val = field.value;
+            }
+            return val;
+        }      
+        
+      
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+           
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+        	   
+               var jiveurl = getFieldValue('editForm:host');
+               Validator.validateNonBlankString(jiveurl, "Jive URL cannot be null!");
+               
+               var jiveuser = getFieldValue('editForm:username');
+               Validator.validateNonBlankString(jiveuser, "Jive User cannot be null!");
+               
+               var jivepassword = getFieldValue('editForm:password');
+               Validator.validateNonBlankString(jivepassword, "Jive User Password cannot be null!");
+           
+               
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               
+               return true;
+           });
+           
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{applicationObject.type} #{msgs.con_form_jive_config_title}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+      
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+
+	  
+	    <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_jive_url}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpUrl" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="E.g http://demo.jivesoftware.com"/>
+            </td>
+            <td>
+              <h:inputText id="host"
+                           value="#{applicationObject.attributes['host']}"
+                           size="40"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>	  
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_jive_user}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpUser" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="Enter JIVE Admin"/>
+            </td>
+            <td>
+              <h:inputText id="username"
+                           value="#{applicationObject.attributes['people']}"
+                           size="40"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_jive_password}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="Enter Jive Admin Password"/>
+            </td>
+            <td>
+              <sp:inputSecret id="password"
+                              value="#{applicationObject.attributes['password']}"
+                              size="40"
+                              redisplay="true"
+                              autocomplete="off"
+                              disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                              readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>       
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_jive_page_size}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPageSize" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="The maximum size of each data set when querying over large number of objects default and max value is 100."/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes['pageSize']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                           <f:validateLongRange minimum = "1" maximum = "100"> 
+                           </f:validateLongRange>			   
+			   </h:inputText>
+            </td>
+          </tr>
+             
+        </table>
+      </div>
+     <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+</body>
+</html>

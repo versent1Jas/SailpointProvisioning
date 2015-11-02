@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui"
+      >
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_edit_population}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/groups/EditPopulations.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      helpKey = 'EDIT_POPULATION';
+      
+      var sp = new SailPoint.state.StateProvider({
+        stateIds: ['#{groupDefinition.gridState.name}'],
+        states:   ['#{groupDefinition.gridState.state}']
+      });
+      Ext.state.Manager.setProvider(sp);
+        
+      Ext.onReady(function(){
+    	var gridMetaData = #{groupDefinition.columnJSON};
+        var gridStateStr = '#{groupDefinition.gridState.JSON}';
+        var gridState = new SailPoint.GridState(JSON.parse(gridStateStr));
+        var gridWidth = $('populations-display').clientWidth;
+        var stateID = '#{groupDefinition.gridState.name}';
+        var popId = '#{groupDefinition.objectId}';
+        
+        Ext.QuickTips.init();
+        
+        // from EditPopulations.js
+        var grid = SailPoint.Define.Grid.Population.createPopulationEditGrid(gridMetaData, gridStateStr, gridState, gridWidth, stateID, popId);
+        
+        if (#{groupDefinition.showAssignedScopeControl}) {
+	      var scopeSuggest = new SailPoint.ScopeSuggest({
+		            renderTo: 'assignedScopeSuggest',
+		            binding: 'assignedScope',
+		            width: 200,
+		            listConfig : {width : 300}
+		            });
+	      
+	      scopeSuggest.setRawValue('#{groupDefinition.object.assignedScope.displayName}');
+        }      
+        // suggest component for owner
+        var ownerSuggest = new SailPoint.IdentitySuggest({
+          id: 'editPopulationOwnerSuggestCmp',
+          renderTo: 'groupOwnerSuggest', 
+          disabled: #{!sp:hasRight(facesContext, 'FullAccessGroup')},
+          binding: 'groupOwner',
+          width: 300
+        });
+        
+        var iVal = '#{sp:escapeJavascript(groupDefinition.object.owner.displayName)}'; 
+        if(iVal != ''){
+        	ownerSuggest.setRawValue(iVal);
+            SailPoint.Suggest.IconSupport.setIconDiv(ownerSuggest, 'userIcon');
+        }
+      });
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="editForm">
+        <h:inputHidden id="id" value="#{groupDefinition.object.id}"/>
+        <h:inputHidden id="activeTab" value="popsGrid"/>
+
+          <div class="spContent">
+            <h:outputText value="#{msgs.population}" styleClass="spContentTitle"/>
+
+            <table class="paddedTbl">
+              <tr>
+                <td class="">
+                  <h:panelGrid columns="3">
+
+                    <h:outputText style="font-weight:bold"  value="#{msgs.name}"/>
+                    <h:inputText id="name" value="#{groupDefinition.object.name}" size="40"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+                    <h:message for="name" styleClass="formError"/>
+
+                    <h:outputText style="font-weight:bold"  value="#{msgs.description}"/>
+                    <h:inputTextarea id="description" value="#{groupDefinition.object.description}" cols="60" rows="4"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+                    <h:message for="description" styleClass="formError"/>
+
+                    <h:outputText style="font-weight:bold" value="#{msgs.private}"/>
+                    <h:panelGroup>
+                      <h:selectBooleanCheckbox id="private" value="#{groupDefinition.object.private}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+                    </h:panelGroup>
+                    <h:message for="private" styleClass="formError"/>
+
+                    <h:outputText style="font-weight:bold" value="#{msgs.enabled}"/>
+                    <h:panelGroup>
+                      <h:selectBooleanCheckbox id="enabled" value="#{groupDefinition.object.indexed}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+                    </h:panelGroup>
+                    <h:message for="enabled" styleClass="formError"/>
+
+                    <h:outputText rendered="#{groupDefinition.showAssignedScopeControl}" style="font-weight:bold" value="#{msgs.label_scope}"/>
+                    <h:panelGroup rendered="#{groupDefinition.showAssignedScopeControl}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}">
+                        <div id="assignedScopeSuggest"></div>
+	                    <t:inputHidden id="assignedScope"            
+	                                   value="#{groupDefinition.object.assignedScope}"
+	                                   rendered="#{groupDefinition.showAssignedScopeControl}" forceId="true">     
+	                      <sp:convertScope />
+	                    </t:inputHidden>
+	                </h:panelGroup>
+                    <h:message rendered="#{groupDefinition.showAssignedScopeControl}" for="assignedScope" styleClass="formError"/>
+
+                    <h:outputText style="font-weight:bold" value="#{msgs.owner}"/>
+                    <h:panelGroup>
+                      <div id="groupOwnerSuggest"></div>
+                      <t:inputHidden id="groupOwner" value="#{groupDefinition.object.owner}" forceId="true">
+                        <sp:convertIdentity />
+                      </t:inputHidden>
+                    </h:panelGroup>
+                    <h:message for="groupOwner" styleClass="formError"/>
+                  </h:panelGrid>
+
+                </td>
+               </tr>
+            </table>
+          </div>
+
+
+          <div class="spContent">
+            <h:outputFormat styleClass="spContentTitle" value="#{msgs.population_identity_count}">
+                <f:param value="#{groupDefinition.count}"/>
+            </h:outputFormat>
+            <br/>
+            <br/>
+            <div id="populations-display" class="width100"></div>
+          </div>
+
+        <div class="buttonRow">
+          <h:commandButton id="saveButton" action="#{groupDefinition.saveAction}" value="#{msgs.button_save}" styleClass="primaryBtn"                          
+	                   disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                       readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" /> 
+          <h:commandButton id="cancelButton" action="#{groupDefinition.cancelAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+        </div>
+        
+        <t:saveState value="#{groupDefinition.gridState}" />
+        <h:inputHidden id="sortColumn" value="#{groupDefinition.gridState.sortColumn}" />
+        <h:inputHidden id="sortOrder" value="#{groupDefinition.gridState.sortOrder}" />
+        <h:inputHidden id="firstRow" value="#{groupDefinition.gridState.firstRow}" />
+        
+        <h:inputHidden id="currentObjectId" value="#{groupDefinition.selectedIdentityId}"/>
+        
+        <h:commandButton  action="#{groupDefinition.selectIdentity}"
+                          style="display:none"
+                          onclick="var gridState = Ext.getCmp('popsState');
+                                   if (null != gridState) gridState.encodeGridState('editForm:');"
+                          id="editButton"/> 
+
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

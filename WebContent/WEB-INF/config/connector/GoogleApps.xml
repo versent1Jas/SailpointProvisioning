@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="GROUP_PROVISIONING, PROVISIONING, SYNC_PROVISIONING, AUTHENTICATE, PASSWORD, ENABLE, SEARCH, UNSTRUCTURED_TARGETS" icon="internetIcon" name="GoogleApps" type="GoogleApps">
+    <Attributes>
+      <Map>
+        <entry key="authSearchAttributes">
+          <value>
+            <List>
+              <String>UserID</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="connectorClass" value="openconnector.connector.GoogleApps"/>
+        <entry key="formPath" value="GoogleApps.xhtml"/>
+        <entry key="DeprecatedConnector" value="true"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="UserID" groupAttribute="Groups" identityAttribute="UserID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="UserID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="GivenName" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="FamilyName" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="Email" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition multi="true" name="Nickname" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="Groups" remediationModificationType="None" type="string"/>
+      </Schema>
+      <Schema displayAttribute="GroupName" identityAttribute="GroupEmail" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="GroupName" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="GroupEmail" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="GroupDescription" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="GroupPermission" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="GroupRole" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition multi="true" name="GroupOwners" remediationModificationType="None" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" name="UserID" required="true" section="" type="string"/>
+        <Field displayName="Given Name" name="GivenName" required="true" section="" type="string"/>
+        <Field displayName="Family Name" name="FamilyName" required="true" section="" type="string"/>
+        <Field displayName="Password" name="password" required="true" section="" type="secret"/>
+        <Field displayName="Admin Privileges" name="AdminPrivileges" reviewRequired="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Email Quota in MBs (for custom domains)" name="quota" reviewRequired="true" section="" type="int" value="0"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="GroupName" helpKey="Name of the group" name="GroupName" required="true" section="" type="string"/>
+        <Field displayName="GroupDescription" helpKey="Description of the group" name="GroupDescription" section="" type="string"/>
+      </Template>
+      <Template name="Group Creation" schemaObjectType="group" usage="Create">
+        <Field displayName="GroupEmail" helpKey="Email of the group for e.g. if the email is abc@xyz.com then provide the email value as abc" name="GroupEmail" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

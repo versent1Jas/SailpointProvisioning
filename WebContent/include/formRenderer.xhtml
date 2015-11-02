@@ -1,0 +1,129 @@
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:sp="http://sailpoint.com/ui">
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    <ui:remove><!--
+
+        Expected params:
+
+            form: instance of sailpoint.web.FormBean
+            renderInViewport : true if the content should create a viewPort
+            wizardPanelTitle : String - title of the center pane when using a wizard form
+            submitButton: ID of a button which may be clicked to submit the form.
+            persistEvent: Name of Page event which should cause this form to persist itself
+                          to it's backing hidden input. For example you could pass in 'beforeSave'
+                          and execute the following code in your onclick event - "Page.fireEvent('beforeSave')"
+            formStyle: the style to apply to the div where the form is rendered
+            showPreviousValue: If true the previousValue of any field will be displayed to the right
+                               of the field on the form
+            hideMessage: whether to prevent the messages tag from rendering (in case this page is included in a page that
+                          already renders message).
+            containerFormName: the name of the form that will prefix all hidden inputs
+            formsPerPage: when including multiple forms on page, expecting a number (default : 1)
+            panelGroupIndex: Unique index to give to the panelGroup to prevent duplicate ids. This panel group is used to refresh the formRenderer hidden data
+
+    --></ui:remove>
+    <f:view>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+      <src>form-panel.css</src>
+    </sp:style>
+    <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/FormUtils.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/FormPanel.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/RadioGroup.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/Secret.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/DateField.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/BooleanCheckbox.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/DateTimeField.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlTemplate.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/DataTable.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/DynamicComboBox.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/DynamicMultiSuggest.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/ext-4.1.0/ux/form/MultiSelect.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/ext-4.1.0/ux/form/ItemSelector.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/SortInput.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/DateRange.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiText.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/ExtendedAttributeFilter.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/BooleanRadioGroup.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/EntitlementSelector.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/SuggestTemplates.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/ElectronicSignaturePopup.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+    </sp:script>
+<!-- PageName: formRenderer.xhtml -->
+    <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+
+        // todo: this will only work with one form on the page.
+        SailPoint.jump = function(count, pages){
+           var form = Ext.getCmp('#{form.id}');
+           form.navigate(count);
+        }
+
+        // This is used to coordinate when multiple forms
+        // exist on the same page
+        if (!SailPoint.activeForms)
+          SailPoint.activeForms = [];
+
+         Ext.onReady(function(){
+
+             var f = SailPoint.form.Util.updateFormPanel({
+                 formId : "#{form.id}",
+                 containerFormName : "#{containerFormName}",
+                 formsPerPage : #{formsPerPage != null ? formsPerPage : 1},
+                 renderInViewport : #{renderInViewport == true ? 'true' : 'false'},
+                 persistEvent : #{persistEvent != null ? sp:singleQuoteCommify(persistEvent) : 'undefined'},
+                 afterLayoutEvent : #{afterLayoutEvent != null ?  afterLayoutEvent : 'undefined'},
+                 showPreviousValue : #{showPreviousValue != null ? sp:singleQuoteCommify(showPreviousValue) : 'undefined'},
+                 meaning : "#{meaning}",
+                 oAuthId : "#{oAuthId}",
+                 nAuthId : "#{nAuthId}",
+                 objId : "#{objId}",
+                 objType: "#{objType}",
+                 wizardPanelTitle : "#{wizardPanelTitle}",
+                 clearListenersOnInit: #{clearListenersOnInit != null ? clearListenersOnInit : true}
+                });
+             
+             // activeForm length is checked near FormPanel.js line 1046 so we can seed this with any value on initial page load
+             var activeFormId = (f && !Ext.isEmpty(f.getId())) ? f.getId() : 'seeded-form-id';
+             SailPoint.activeForms.push(activeFormId);
+
+         }); // onready
+
+    //--><!]]>
+    </script>
+
+    <h:panelGroup id="formRenderer-#{panelGroupIndex}">
+        <h:panelGroup id="form-ct-#{form.id}" style="margin-bottom:30px">
+             <h:messages rendered="#{!hideMessages}"/>
+             <h:outputText id="form-config-#{form.id}" value="#{sp:xss(form.formJson)}" style="display:none"/>
+             <h:inputText styleClass="form-data" style="display:none" value="#{form.dataJson}"/>
+             <h:inputText styleClass="form-errors" style="display:none" value="#{form.errorMessageJson}"/>
+             <h:inputText styleClass="form-validation" style="display:none" value="#{form.fieldValidationJson}"/>
+             <h:inputText styleClass="form-action" style="display:none" value="#{form.action}"/>
+             <h:inputText styleClass="form-actionParameter" style="display:none" value="#{form.actionParameter}"/>
+             <h:inputText styleClass="form-actionParameterValue" style="display:none" value="#{form.actionParameterValue}"/>
+             <h:inputText styleClass="form-currentField" style="display:none" value="#{form.currentField}"/>
+             <h:inputText styleClass="form-tabDir" style="display:none" value="#{form.tabDir}"/>
+             <button class="form-submit" style="display:none" onclick="$('#{submitButton}').click();return false;"></button>
+             <div id="form-div-#{form.id}" style="#{empty formStyle ? 'width:768px;' : formStyle}"  class="form-renderer" />
+
+         </h:panelGroup>
+     </h:panelGroup>
+
+    </f:view>
+
+</html>

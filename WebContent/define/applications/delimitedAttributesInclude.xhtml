@@ -1,0 +1,398 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+<script type="text/javascript">
+
+    helpKey = 'APPLICATION';
+    Ext.onReady(function () {
+        Ext.QuickTips.init();
+
+        var spNamespace = '#{nameSpace}', isCollapsed = false, cmp;
+
+        // save the collapse state of the component before destroying
+        cmp = Ext.getCmp(SailPoint.define.applications.ApplicationObjectPanel.createId(spNamespace));
+        if (cmp) {
+            isCollapsed = cmp.getCollapsed();
+            cmp.destroy(true);
+        }
+        
+        Ext.create('SailPoint.define.applications.DelimitedPanel', {
+            spNamespace: spNamespace,
+            title: '#{msgs.app_object_type_panel_header} #{schemaDTO.objectType}',
+            renderTo: 'delimitedPanelDiv_' + spNamespace,
+            parseType: "#{applicationObject.attributes[sp:concat(schemaType,'parseType')]}",
+            partitionType: "#{applicationObject.attributes[sp:concat(schemaType,'partitionMode')]}",
+            transportType: "#{applicationObject.attributes[sp:concat(schemaType,'filetransport')]}",
+            collapsed: isCollapsed
+        });
+    });
+
+</script>
+<f:view>
+
+<div id="delimitedPanelDiv_#{nameSpace}" class="marDown"/>
+
+<!-- file info -->
+<div id='tabFile_#{nameSpace}' class="spContent">
+    <table class="spTable" style="border:0px" cellspacing="0">
+
+    <tr>
+        <td class="certScheduleTitleCol">
+            <ui:remove>FILENAME</ui:remove>
+            <div>
+              <div>
+                <h:outputText style="color: red;" value="*"/>&nbsp;
+                <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_file}"/>
+                <h:graphicImage id="imgHlpFile_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{msgs.con_help_delimited_file}"/>
+              </div>
+              <h:inputText id="filename_${nameSpace}"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'file')]}"
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </div>
+            
+            <ui:remove>ENCODING</ui:remove>
+            <div>
+              <div>
+                <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_encoding}"/>
+                <h:graphicImage id="imgHlpFileEncoding_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{msgs.con_help_delimited_encoding}"/>
+              </div>
+              <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'fileEncoding')]}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </div>
+            
+            <ui:remove>FILETRANSPORT THIS IS A GLOBAL SETTING SO DON'T SHOW IT ON THE GROUPS PAGE</ui:remove>
+            <div id="sectionTransport_#{nameSpace}">
+            <ui:fragment rendered='#{nameSpace == ""}'>
+                <table class="spTable" style="border:0px" cellspacing="0">
+                    <tr>
+                        <td class="certScheduleTitleCol">
+                              <h:outputText class="titleColumnLeftAlign"  value="#{msgs.con_form_delimited_fileTransport}"/>
+                              <h:graphicImage id="imgHlpFileTransport_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                              alt="#{msgs.con_help_delimited_filetransport}"/>
+                        </td>
+                        <td>
+                            <h:selectOneRadio id="transport_#{nameSpace}"
+                                              onclick='Ext.getCmp("#{nameSpace}" + "Tab").toggleTransport();'
+                                              value="#{applicationObject.attributes[sp:concat(schemaType,'filetransport')]}">
+                                <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportLocal}" itemValue="local"/>
+                                <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportFTP}" itemValue="ftp"/>
+                                <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportSCP}" itemValue="scp"/>
+                            </h:selectOneRadio>
+                        </td>
+                    </tr>
+                </table>
+
+                <div id='transportCredentials_#{nameSpace}'>
+                  <div>
+                  <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_transportHost}"/>
+                  <h:graphicImage id="imgHlpHost_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                  alt="#{msgs.con_help_delimited_transportHost}"/>
+                  </div>
+                  <div>
+                  <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'host')]}"
+                               size="40"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                  </div>
+                  <div>
+                  <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_transportUser}"/>
+                  <h:graphicImage id="imgHlpUser_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                  alt="#{msgs.con_help_delimited_transportUser}"/>
+                  </div>
+                  <div>
+                  <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'transportUser')]}"
+                               size="40"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                  </div>
+                  <div>
+                  <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_transportPw}"/>
+                  <h:graphicImage id="imgHlpPw_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                  alt="#{msgs.con_help_delimited_transportPw}"/>
+                  </div>
+                  <div>
+                  <sp:inputSecret value="#{applicationObject.attributes['transportUserPassword']}"
+                                  size="40" redisplay="true"
+                                  autocomplete="off"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                  </div>
+                </div>
+            </ui:fragment> <!-- end file transport -->
+            </div>
+        
+        </td>
+        <td class="certScheduleTitleCol">
+        
+          <ui:remove>PARSING TYPE</ui:remove>
+          <ui:fragment rendered='#{nameSpace == ""}'>
+              <div id="sectionParsing_#{nameSpace}" style="padding:0px">
+                  <table class="spTable" style="border:0px;padding:0px" cellspacing="0">
+                      <tr>
+                          <td class="certScheduleTitleCol">
+                              <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_parsingMethod}"/>
+                              <h:graphicImage id="imgHlpParsingMethod_#{nameSpace}" styleClass="helpIcon"
+                                              url="/images/icons/dashboard_help_16.png"
+                                              alt="#{msgs.con_help_delimited_method}"/>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              <h:selectOneRadio id="parseType_#{nameSpace}"
+                                                onclick='Ext.getCmp("#{nameSpace}" + "Tab").toggleParsing();'
+                                                value="#{applicationObject.attributes[sp:concat(schemaType,'parseType')]}">
+                                  <f:selectItem itemLabel="#{msgs.con_form_delimited_delimitedType}" itemValue="delimited"/>
+                                  <f:selectItem itemLabel="#{msgs.con_form_delimited_regexpType}" itemValue="regexp"/>
+                              </h:selectOneRadio>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+          </ui:fragment>
+          
+          <ui:remove>DELIMITED INFO</ui:remove>
+          <div id='delimited_#{nameSpace}'>
+            <div>
+              <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_delimiter}"/>
+              <h:graphicImage id="imgHlpDelimiter_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                              alt="#{msgs.con_help_delimited_delimiter}"/>
+            </div>
+              <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'delimiter')]}"
+                           size="5"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+          </div>
+          
+          <ui:remove>REGULAR EXPRESSION SETTINGS</ui:remove>
+          <div id='regexps_#{nameSpace}'>
+            <div>
+              <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_regexp}"/>
+              <h:graphicImage id="imgHlpRegEx_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                              alt="#{msgs.con_help_delimited_regexp}"/>
+            </div>
+              <h:inputText id='regularExpression_#{nameSpace}' size="80"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'regularExpression')]}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+          </div>
+          
+          <ui:remove>DELIMITED BOOLEAN CHECKBOXES</ui:remove>
+          <div id="sectionDelimitedBoolean_#{nameSpace}" style="padding:0px">
+              <div>
+                <h:selectBooleanCheckbox value="#{applicationObject.attributes[sp:concat(schemaType,'hasHeader')]}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_hasHeader}"/>
+                <h:graphicImage id="imgHlpHasHeader_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{msgs.con_help_delimited_hasHeader}"/>
+              </div>
+              <div>
+                <h:selectBooleanCheckbox value="#{applicationObject.attributes[sp:concat(schemaType,'stopIfLineHasWrongColumnLength')]}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_failOnCol}"/>
+                <h:graphicImage id="imgHlpStopOnWrongLen_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{msgs.con_help_delimited_stopOnWrongLength}"/>
+              </div>
+          </div>
+        </td>
+        <td class="certScheduleTitleCol">
+          <div>
+            <h:outputText class="titleColumnLeftAlign" value="#{msgs.con_form_delimited_cols}"/>
+            <h:graphicImage id="imgHlpColumns_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_columns}"/>
+          </div>
+            <ui:remove>COLUMM LIST FIELD APPLIES TO BOTH</ui:remove>
+            <div id='columns_#{nameSpace}'>
+                <h:inputTextarea converter="NewLineList"
+                                 value="#{applicationObject.attributes[sp:concat(schemaType,'columnNames')]}"
+                                 rows="8" cols="10"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </div>
+        </td>
+    </tr>
+
+  </table> <!--  end file info -->
+</div>
+
+<!-- Filtering -->
+<div id='tabFiltering_#{nameSpace}' class="spContent">
+<table class="spTable" style="border:0px" cellspacing="0">
+    <tr>
+        <td class="titleColumnLeftAlign">
+            <h:outputText value="#{msgs.con_form_delimited_linesToSkip}"/>
+            <h:graphicImage id="imgHlpSkip_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_skipLines}"/>
+        </td>
+        <td>
+            <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'numberOfLinesToSkip')]}"
+                         size="3"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="titleColumnLeftAlign">
+            <h:outputText value="#{msgs.con_form_delimited_filterEmpty}"/>
+            <h:graphicImage id="imgHlpFilterEmpty_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_filterEmpty}"/>
+        </td>
+        <td>
+            <h:selectBooleanCheckbox value="#{applicationObject.attributes[sp:concat(schemaType,'filterEmptyRecords')]}"
+                                     disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="titleColumnLeftAlign">
+            <h:outputText value="#{msgs.con_form_delimited_commentCharacter}"/>
+            <h:graphicImage id="imgHlpComment_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_commentChar}"/>
+        </td>
+        <td>
+            <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'commentCharacter')]}"
+                         size="1"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="titleColumnLeftAlign">
+            <h:outputText value="#{msgs.con_form_delimited_filterString}"/>
+            <h:graphicImage id="imgHlpFilter_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_filterString}"/>
+        </td>
+        <td>
+            <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'filterString')]}"
+                         size="80"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </td>
+    </tr>
+</table>
+</div>
+
+<!-- Merging config -->
+<div id='tabMerging_#{nameSpace}' class="spContent">
+<table class="spTable" style="border:0px" cellspacing="0">
+    <tr>
+        <td class="titleColumnLeftAlign">
+            <h:outputText value="#{msgs.con_form_delimited_toMerge}"/>
+            <h:graphicImage id="imgHlpMergeRows_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_mergeRows}"/>
+        </td>
+        <td>
+            <h:selectBooleanCheckbox value="#{applicationObject.attributes[sp:concat(schemaType,'mergeRows')]}"
+                                     disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="titleColumnLeftAlign">
+            <h:outputText value="#{msgs.con_form_delimited_indexCol}"/>
+            <h:graphicImage id="imgHlpIndexCols_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_indexColumn}"/>
+        </td>
+        <td>
+            <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'indexColumn')]}"
+                         size="80"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="titleColumnLeftAlign">
+            <h:outputText value="#{msgs.con_form_delimited_sorted}"/>
+            <h:graphicImage id="imgHlpIndexSorted_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_sortedIndexColumn}"/>
+        </td>
+        <td>
+            <h:selectBooleanCheckbox value="#{applicationObject.attributes[sp:concat(schemaType,'isSortedByIndexColumn')]}"
+                                     disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="titleColumnLeftAlign">
+            <h:outputText value="#{msgs.con_form_delimited_mergeCols}"/>
+            <h:graphicImage id="imgHlpMergeCols_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.con_help_delimited_mergeColumns}"/>
+        </td>
+        <td>
+            <h:inputTextarea converter="NewLineList"
+                             value="#{applicationObject.attributes[sp:concat(schemaType,'mergeColumns')]}"
+                             rows="8" cols="10"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+        </td>
+    </tr>
+
+</table>
+</div>
+
+<ui:fragment rendered='#{nameSpace == ""}'>
+<div id='tabIteration_#{nameSpace}' class="spContent">
+    <!-- Partition config -->
+    <div id="sectionPartitioning_#{nameSpace}">
+    <table class="spTable" style="border:0px" cellspacing="0">
+        <tr>
+            <td class="titleColumnLeftAlign">
+                <h:outputText style="titleColumnLeftAlign" value="#{msgs.con_form_delimited_partitionConfig}"/>
+                <h:graphicImage id="imgHlpPartitionOption_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{msgs.con_help_delimited_partitionConfig}"/>
+            </td>
+            <td>
+                <h:selectOneRadio id="partitionOption_#{nameSpace}"
+                                  onclick='Ext.getCmp("#{nameSpace}" + "Tab").togglePartitioning();'
+                                  value="#{applicationObject.attributes[sp:concat(schemaType,'partitionMode')]}">
+                    <f:selectItem itemLabel="#{msgs.con_form_delimited_Auto}" itemValue="auto"/>
+                    <f:selectItem itemLabel="#{msgs.con_form_delimited_UserDefined}" itemValue="manual"/>
+                </h:selectOneRadio>
+            </td>
+        </tr>
+    </table>
+    </div>
+    <div id='partitionSizeConfig_#{nameSpace}' style="display:none">
+        <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+                <td class="titleColumnLeftAlign">
+                    <h:outputText style="titleColumnLeftAlign" value="#{msgs.con_form_delimited_objectCount}"/>
+                    <h:graphicImage id="imgHlpPartitionObjectCount_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                    alt="#{msgs.con_help_delimited_partitionObjectCount}"/>
+                </td>
+                <td>
+                    <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'partitionObjectCount')]}"
+                                 id="partitionObjectCount_${nameSpace}"
+                                 size="10"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</ui:fragment>
+
+</f:view>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <h:form id="identitySearchForm">
+    <input name="searchType" type="hidden" value="Identity"/>
+    
+    <div style="display:none" class="width100" id="IdentityError"></div>
+    
+    <a4j:outputPanel ajaxRendered="true">
+      <ui:fragment rendered="#{(analyzeController.searchBean.mySearchItemsByType!=null) and (!empty analyzeController.searchBean.mySearchItemsByType)}">
+        <div class="paddedContainer">
+          <table class="width100" style="margin:5px"><tr><td>
+          <ui:include src="../searchUserItems.xhtml">
+            <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+            <ui:param name="formName" value="identitySearchForm"/>
+            <ui:param name="loadBtnName" value="identityLoadBtn"/>
+          </ui:include>
+          </td></tr>
+          </table>
+        </div>
+      </ui:fragment>
+    </a4j:outputPanel>
+    
+    <a4j:outputPanel id="identityReRenderOnClear">
+      <div class="paddedContainer" id="attributes">  
+        <table class="width100" cellpadding="4" cellspacing="0" style="margin:5px">
+          <tr>
+            <td width="70%">
+              <div>
+                <h:outputText value="#{msgs.identity_search_section_search_criteria}" styleClass="spContentTitle"/>
+                <h:graphicImage id="imgHlpIdentitySearchCriteria" 
+                                alt="#{analyzeController.searchBean.criteriaHelpMsg}"
+                                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/dashboard_help_16.png" />
+              </div>
+            </td>
+            <td width="30%">
+              <div>
+                <h:outputText value="#{msgs.identity_search_section_fields_to_display}" styleClass="spContentTitle"/>
+                <h:graphicImage id="imgHlpIdentitySearchDisplayFields" 
+                                alt="#{analyzeController.searchBean.displayHelpMsg}"
+                                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/dashboard_help_16.png" />
+              </div>
+            </td>
+          </tr>
+          <tr valign="top">
+            <td>
+              <a4j:outputPanel id="identitySearchCriteria">
+                <div id="identityAttributesContent" class="spTabledContent" >
+                  <a4j:outputPanel id="identityAttributesToRerender">
+                    <table id="identityAttributesTbl" class="spTable width100" cellspacing="0">
+                      <tr>
+                        <th>
+                          <h:outputText value="#{msgs.identity_search_section_identity_attributes}"/>
+                        </th>
+                      </tr>
+                      <tr>
+                        <td colspan="2">
+                          <div id="identityAttributes">
+                            <ui:include src="identityAttributes.xhtml">
+                              <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+                              <ui:param name="appDisplay" value=""/>
+                              <ui:param name="jfDisplay" value=""/>
+                            </ui:include>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </a4j:outputPanel>
+                </div><br/>
+
+                <div id="identityIdentityEntitlementsContent" class="spTabledContent" >
+                  <table id="identityIdentityEntitlementsTbl" class="spTable width100" cellspacing="0">
+                    <tr>
+                      <th>
+                        <h:outputText value="#{msgs.identity_search_section_entitlements}"/>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                        <div id="identityEntitlements">
+                          <ui:include src="identityEntitlementsSearch.xhtml">
+                            <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+                            <ui:param name="jfDisplay" value=""/>
+                            <ui:param name="bpDisplay" value=""/>
+                          </ui:include>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </div><br/>
+
+                <ui:fragment rendered="#{(!empty analyzeController.searchBean.multiValuedIdentityAttributeKeys) or (!empty analyzeController.searchBean.multiValuedLinkAttributeKeys)}">
+                  <div id="identityMultiValuedAttributesContent" class="spTabledContent" >
+                    <table id="identityMultiValuedAttributesTbl" class="spTable width100" cellspacing="0">
+                      <tr>
+                        <th colspan="2">
+                          <h:outputText value="#{msgs.identity_search_section_multi_valued}"/>
+                        </th>
+                      </tr>
+                      <tr>
+                        <td colspan="2">
+                          <div id="multiValuedIdentityAttributes">
+                            <ui:include src="multiIdentityAttributes.xhtml">
+                              <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+                              <ui:param name="jfDisplay" value=""/>
+                              <ui:param name="bpDisplay" value=""/>
+                            </ui:include>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div><br/>
+                </ui:fragment>
+
+                <div id="identityRiskAttributesContent" class="spTabledContent" >
+                  <table id="identityRiskAttributesTbl" class="spTable width100" cellspacing="0">
+                    <tr>
+                      <th>
+                        <h:outputText value="#{msgs.identity_search_risk_attributes}"/>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                        <div id="riskAttributes">
+                          <ui:include src="riskAttributes.xhtml">
+                            <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+                          </ui:include>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </a4j:outputPanel>
+            </td>
+            <td >
+              <ui:include src="../searchDisplayFields.xhtml">
+                <ui:param name="searchType" value="identity" />
+                <ui:param name="searchBean" value="#{analyzeController.searchBean}" />
+              </ui:include>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <table>
+                <tr>
+                  <td/>
+                  <td align="left"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </a4j:outputPanel>
+
+    <input style="display:none" type="button" id="preSearchBtn" value="#{msgs.identity_search_button_run_search}" onclick="preSearchBtn.disabled=true;SailPoint.Analyze.validateSearch('identitySearchForm', 'identity');"/>
+    <h:commandButton id="searchBtn" style="display:none" action="#{analyzeController.searchBean.runQueryAction}"/>
+    <input style="display:none" type="button" id="clearBtn" value="#{msgs.identity_search_button_clear_search}" onclick="$('editForm:resetBtn').click()"/>
+    <a4j:commandButton style="display:none" 
+                       action="#{analyzeController.searchBean.runQueryAction}"
+                       id="ajaxSearchBtn"
+                       render="resultsCountSection"
+                       onclick="SailPoint.Analyze.setButtonsDisabled('preIdentitySearchBtn', 'clearBtn', true);"
+                       oncomplete="var gridPanel = Ext.getCmp('identitySearchResultsGrid');
+                                   gridPanel.isRefresh = true;
+                                   Ext.MessageBox.wait('#{sp:escapeJavascript(msgs.loading_data)}');
+                                   gridPanel.getStore().loadPage(1, {
+                                       params: {start:0},
+                                       callback: SailPoint.Identity.Search.displaySearchResults
+                                   });
+                                   SailPoint.Analyze.setButtonsDisabled('preIdentitySearchBtn', 'clearBtn', false);"/>    
+    <a4j:commandButton  style="display:none" 
+                        immediate="true" 
+                        action="#{analyzeController.searchBean.clearSearchItem}"
+                        id="resetBtn"
+                        render="identitySearchCriteria"
+                        onclick="SailPoint.Analyze.setButtonsDisabled('preIdentitySearchBtn', 'clearBtn', true);
+                                 Ext.fly('identitySearchContents').mask('#{msgs.clearing_data}');"
+                        oncomplete="SailPoint.Analyze.resetSearchName('identitySearchForm');
+                                    SailPoint.Analyze.Identity.initializeAttributes();
+                                    SailPoint.Identity.Search.clearSearchFields();
+                                    SailPoint.Analyze.setButtonsDisabled('preIdentitySearchBtn', 'clearBtn', false);
+                                    Ext.fly('identitySearchContents').unmask();"/>
+    <a4j:commandButton id="rerenderSearchItemsBtn" action="none" render="" style="display:none"/>
+  </h:form>
+</ui:composition>
+
+</body>
+</html>

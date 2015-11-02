@@ -1,0 +1,856 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:c="http://java.sun.com/jstl/core"      
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/electronicSignatures.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">  
+      <!--//--><![CDATA[//><!--
+        function syncAllowExceptionDisabledState() {
+            var checkbox = $('certificationScheduleForm:enableAllowException');
+            var listViewAllowExceptionCheckbox = $('certificationScheduleForm:enableListViewBulkAllowException');
+
+            if (checkbox && listViewAllowExceptionCheckbox && !continuousReadOnly) {
+                listViewAllowExceptionCheckbox.disabled = !checkbox.checked;
+            }
+        }
+
+        function syncBulkAccountRevocationState() {
+            // Don't show bulk account revoke options if
+            // general account revoke is disabled
+            var accountRevokeEnabledCheckbox = $('certificationScheduleForm:enableAccountRevoke');
+            var bulkAccountRevoke1 = $('certificationScheduleForm:enableListBulkAccountRevocation');
+            var bulkAccountRevoke2 = $('certificationScheduleForm:enableEntityBulkAccountRevocation');
+
+            if (accountRevokeEnabledCheckbox && bulkAccountRevoke1 && bulkAccountRevoke2 && !continuousReadOnly) {
+                bulkAccountRevoke2.disabled = bulkAccountRevoke1.disabled = !accountRevokeEnabledCheckbox.checked;
+                //uncheck if field is disabled
+                if (bulkAccountRevoke1.disabled) {
+                	bulkAccountRevoke1.checked = false;
+                }
+                //uncheck if field is disabled
+                if (bulkAccountRevoke2.disabled) {
+                	bulkAccountRevoke2.checked = false;
+                }
+            }
+        }
+
+        function syncAutoSignOffState() {
+            var autoSignOffWhenNothing = $('certificationScheduleForm:autoSignOffWhenNothingToCertify').checked;
+            var supressNotificationWhenNothing = $('certificationScheduleForm:suppressEmailWhenNothingToCertify').checked;
+            var requireSubordinateSignOff = $('certificationScheduleForm:completeCertificationHierarchy').checked;
+            /* Auto Sign Off When Nothing To Certify and Require Subordinate Sign Off are mutually exclusive options.
+             * The suppress notification option is dependent on the Auto Sign Off option. */
+            if( !requireSubordinateSignOff && !autoSignOffWhenNothing) { 
+                $('certificationScheduleForm:autoSignOffWhenNothingToCertify').disabled = false;
+                $('certificationScheduleForm:suppressEmailWhenNothingToCertify').checked = false;
+                $('certificationScheduleForm:suppressEmailWhenNothingToCertify').disabled = true;
+                $('certificationScheduleForm:completeCertificationHierarchy').disabled = false;
+            } else if( requireSubordinateSignOff ) {
+            	$('certificationScheduleForm:autoSignOffWhenNothingToCertify').checked = false;
+                $('certificationScheduleForm:autoSignOffWhenNothingToCertify').disabled = true;
+                $('certificationScheduleForm:suppressEmailWhenNothingToCertify').checked = false;
+                $('certificationScheduleForm:suppressEmailWhenNothingToCertify').disabled = true;
+                $('certificationScheduleForm:completeCertificationHierarchy').disabled = false;
+            } else {
+                $('certificationScheduleForm:autoSignOffWhenNothingToCertify').disabled = false;
+                $('certificationScheduleForm:suppressEmailWhenNothingToCertify').disabled = false;
+                $('certificationScheduleForm:completeCertificationHierarchy').checked = false;
+                $('certificationScheduleForm:completeCertificationHierarchy').disabled = true;
+            }
+        }
+        
+        function initAccountReassign() {
+            if (#{certificationSchedule.enableReassignAccount}) {
+                var defaultAssigneeSuggest = new SailPoint.IdentitySuggest({
+                    id: 'defaultAssigneeSuggestComp',
+                    renderTo: 'defaultAssigneeSuggest',
+                    binding: 'defaultAssigneeInput',
+                    baseParams: {context: 'Owner'},
+                    readOnly: #{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)},
+                    disabled: #{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}
+                });
+
+                defaultAssigneeSuggest.loadValueByName('#{certificationSchedule.editedCertificationSchedule.defaultAssignee.name}');
+            }
+        }
+        
+        function syncAccountReassign() {
+            var reassignCheckbox = $('certificationScheduleForm:enableAccountReassign');
+            if (reassignCheckbox && !reassignCheckbox.checked) {
+                var cmp = Ext.getCmp('defaultAssigneeSuggestComp');
+                if (cmp) {
+                    cmp.clearValue();
+                }
+            }
+        }
+
+        function onLimitReassignmentsChanged(el) {
+            var elLimit = $('certificationScheduleForm:reassignmentLimit');
+            if (elLimit) {
+                elLimit.disabled = !el.checked;
+                SailPoint.toggleClass('.notLimit', 'disabled', !el.checked);
+            }
+        }
+
+        Ext.onReady(function() {
+            if (#{!(certificationSchedule.existingCertGroup or (not certificationSchedule.editable))}) {	
+                syncAllowExceptionDisabledState();
+                syncAutoSignOffState();
+
+                SailPoint.CertificationScheduleForm.updateAutoSignoffOption();
+                SailPoint.CertificationScheduleForm.toggleIncludeAccessOptionsDisableFields(#{certificationSchedule.editedCertificationSchedule.certifyAccounts});
+
+                //called after toggleIncludeAccessOptionsDisableFields() since this one can override disbaled attribute
+                syncBulkAccountRevocationState();
+            }
+
+            initMeaningsComboBox('#{certificationSchedule.editedCertificationSchedule.electronicSignatureName}',
+                #{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)},
+                #{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)},
+                'certificationScheduleForm:electronicSignatureName');
+
+            var el = $('certificationScheduleForm:limitReassignments');
+            if (el) {
+                if (!#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}) {
+                    onLimitReassignmentsChanged(el);
+                }
+            }
+
+            initAccountReassign();
+        });
+
+      //--><!]]>
+  </script>
+
+    <table class="customWidth paddedTbl" border="0" cellpadding="5" cellspacing="0" style="background-color:#ffffff">
+      <tbody>
+
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_behavior_presentation_properties}</td></tr>
+        <tr>
+            <td class="titleColumn certScheduleTitleCol">
+                <h:outputText value="#{msgs.system_config_cert_page_list_detailed_view}" />
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpListDetailedView"
+                width="12px" height="12px" alt="#{help.help_system_config_cert_page_list_detailed_view}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="4"><h:selectOneRadio layout="lineDirection" id="listOrDetailed" disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" 
+                value="#{certificationSchedule.editedCertificationSchedule.certificationDetailedView}" onclick="">
+                  <f:selectItem id="systemConfigCertList" itemLabel="#{msgs.label_list}" itemValue="false" itemDisabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                  <f:selectItem id="systemConfigCertDetailed" itemLabel="#{msgs.label_detailed}" itemValue="true" itemDisabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                  </h:selectOneRadio>
+              </td>
+        </tr>
+        <tr>
+            <td  class="titleColumn certScheduleTitleCol">
+                <h:outputText value="#{msgs.system_config_cert_page_list_items_view}" />
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpCertPageListItems"
+                width="12px" height="12px" alt="#{help.help_system_config_cert_page_list_items_view}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="4"><h:selectOneRadio layout="lineDirection" id="certPageListItems"  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" 
+                value="#{certificationSchedule.editedCertificationSchedule.certPageListItems}" onclick="">
+                  <f:selectItem id="systemConfigCertListWorkSheetView" itemLabel="#{msgs.label_worksheet_view}" itemValue="true" itemDisabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                  <f:selectItem id="systemConfigCertListIdentityView" itemLabel="#{msgs.label_identity_view}" itemValue="false" itemDisabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                </h:selectOneRadio></td>
+        </tr>
+
+        <tr>
+            <td  class="titleColumn certScheduleTitleCol">#{msgs.sys_config_cert_entitlement_display}</td>
+            <td class="certScheduleHelpCol">
+             <h:graphicImage id="imgHlpExcludeEntsDisplay" width="12px"
+                height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_cert_entitlement_display}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="4">
+                <h:selectOneRadio value="#{certificationSchedule.editedCertificationSchedule.displayEntitlementDescriptions}" onclick="" disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" >
+                  <f:selectItem itemLabel="#{msgs.sys_config_cert_entitlement_display_val}" itemValue="false" itemDisabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"  />
+                  <f:selectItem itemLabel="#{msgs.sys_config_cert_entitlement_display_desc}" itemValue="true" itemDisabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"  />
+                </h:selectOneRadio>
+            </td>
+        </tr>
+
+
+        <!-- ======================================== -->
+        <!-- Certification Behavior Options           -->
+        <!-- ======================================== -->
+  
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_behavior_behavior_properties}</td></tr>
+        <tr id="autoSignoffPopupOption" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+            <td  class="titleColumn certScheduleTitleCol">
+              <h:outputText value="#{msgs.label_automate_signoff_popup}" /></td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpAutomateSignoffPopup"
+                width="12px" height="12px" alt="#{help.help_sched_cert_automate_signoff_popup}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left"><h:selectBooleanCheckbox
+                id="promptForSignoff"
+                value="#{certificationSchedule.editedCertificationSchedule.automateSignoffPopup}"
+                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+            </td>
+        </tr>
+
+        <tr id="eSigOption" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+            <td class="titleColumn certScheduleTitleCol">#{msgs.sys_config_default_electronic_signature_enabled}</td>
+            <td class="certScheduleHelpCol">
+             <h:graphicImage id="imgHlpDefaultESigEnabled" width="12px"
+                height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_default_electronic_signature_enabled}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <h:selectBooleanCheckbox
+                id="eSigEnabledSelect"
+                value="#{certificationSchedule.editedCertificationSchedule.electronicSignatureRequired}"
+                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                onclick="showHideWithLock($('eSigConfig'), this, null, null); SailPoint.CertificationScheduleForm.toggleRequireElectronicSignature(this);"/>
+            </td>
+        </tr>
+        <tr id="eSigConfig" style="display: #{(certificationSchedule.editedCertificationSchedule.electronicSignatureRequired) ? '' : 'none'}">
+          <td colspan="2"></td>
+          <td colspan="6">
+            <table class="width100" cellpadding="5" cellspacing="0">
+            <thead>
+              <tr>
+                <th colspan="3" class="dashContentHeader">
+                  <h:outputText value="#{msgs.sys_config_default_electronic_signature_config_header}" />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td align="right" class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.sys_config_default_electronic_signature_config_text}" /></td>
+                <td class="certScheduleHelpCol">
+                   <span id="imgHlpESigComboBox"/>
+                </td>
+                <td class="certScheduleOptionCol">
+                   <span id="eSigComboBox"/>
+                   <h:inputHidden id="electronicSignatureName" value="#{certificationSchedule.editedCertificationSchedule.electronicSignatureName}"/>
+                </td>
+              </tr>
+            </tbody>
+            </table>
+          </td>
+        </tr>
+
+        <tr id="requireSubordinateCompletionOption" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+            <td  class="titleColumn certScheduleTitleCol">
+              <h:outputText value="#{msgs.label_require_subordinate_completion}" /></td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpCompleteHierarchy"
+                width="12px" height="12px" alt="#{help.help_sched_cert_sub_complete}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left"><h:selectBooleanCheckbox
+                id="completeCertificationHierarchy"
+                value="#{certificationSchedule.editedCertificationSchedule.completeCertificationHierarchy}"
+                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                onclick="syncAutoSignOffState()"/>
+            </td>
+        </tr>
+
+        <tr id="autoSignOffWhenNothingToCertifyRow" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+          <td  class="titleColumn certScheduleTitleCol">
+            <h:outputText value="#{msgs.label_enable_auto_sign_off_when_nothing_to_certify}" /></td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpAutoSignOffWhenNothingToCertify"
+              width="12px" height="12px" alt="#{help.help_sched_cert_enable_auto_sign_off_when_nothing_to_certify}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left"><h:selectBooleanCheckbox
+              id="autoSignOffWhenNothingToCertify"
+              value="#{certificationSchedule.editedCertificationSchedule.autoSignOffWhenNothingToCertify}"
+              disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              onclick="syncAutoSignOffState()" />
+          </td>
+        </tr>
+
+        <tr id="suppressEmailWhenNothingToCertifyRow">
+          <td  class="titleColumn certScheduleTitleCol">
+            <h:outputText value="#{msgs.label_suppress_email_when_nothing_to_certify}" /></td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpSupressEmailWhenNothingToCertify"
+              width="12px" height="12px" alt="#{help.help_sched_cert_suppress_email_when_nothing_to_certify}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left"><h:selectBooleanCheckbox
+              id="suppressEmailWhenNothingToCertify"
+              disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value="#{certificationSchedule.editedCertificationSchedule.suppressEmailWhenNothingToCertify}"
+              onclick="syncAutoSignOffState()" />
+          </td>
+        </tr>
+
+        <tr id="requireReassignmentCompletionRow" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+          <td  class="titleColumn certScheduleTitleCol">
+            <h:outputText value="#{msgs.label_require_reassignment_completion}" /></td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpCompleteReassignments"
+              width="12px" height="12px" alt="#{help.help_sched_cert_require_reassignment_completion}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left"><h:selectBooleanCheckbox
+              id="completeReassignments"
+              value="#{certificationSchedule.editedCertificationSchedule.requireReassignmentCompletion}"
+              disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              onclick="SailPoint.CertificationScheduleForm.updateAutoSignoffOption();"/>
+          </td>
+        </tr>
+
+        <tr id="returnReassignmentsToOriginalRow" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+          <td  class="titleColumnWithWrap certScheduleTitleCol">
+            <h:outputText value="#{msgs.label_assimilate_bulk_reassignments}" /></td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpAssimBulkReassign"
+              width="12px" height="12px" alt="#{help.help_sched_cert_assimilate_bulk_reassignments}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left"><h:selectBooleanCheckbox
+              id="assimilateBulkReassignments"
+              value="#{certificationSchedule.editedCertificationSchedule.assimilateBulkReassignments}"
+              disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              onclick="SailPoint.CertificationScheduleForm.updateAutoSignoffOption();"/>
+          </td>
+        </tr>
+
+        <tr id="autoSignOffRow" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+          <td  class="titleColumn certScheduleTitleCol">
+            <h:outputText value="#{msgs.label_enable_auto_signoff_on_reassignment}" /></td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpEnableAutoSignofff"
+              width="12px" height="12px" alt="#{help.help_sched_cert_enable_auto_signoff_on_reassignment}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left"><h:selectBooleanCheckbox
+              id="autoSignOffOnReassignments"
+              value="#{certificationSchedule.editedCertificationSchedule.automateSignOffOnReassignment}"
+              disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable) or certificationSchedule.editedCertificationSchedule.requireReassignmentCompletion or certificationSchedule.editedCertificationSchedule.assimilateBulkReassignments ? 'true' : 'false'}"
+              readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+          </td>
+        </tr>
+
+        <!-- Delegation review required. -->
+        <tr>
+          <td class="titleColumn certScheduleTitleCol">
+            <h:outputText value="#{msgs.cert_sched_adv_label_del_review_req}"/>
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpDelReviewReq" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_del_review_req}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+            <h:selectBooleanCheckbox value="#{certificationSchedule.editedCertificationSchedule.certificationDelegationReviewRequired}"
+                                     disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                     readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+          </td>
+        </tr>
+
+        <!-- Approval comments -->
+        <tr >
+          <td class="titleColumnWithWrap certScheduleTitleCol">
+            <h:outputText value="#{msgs.cert_sched_adv_require_approval_comments}"/>
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpRequireApprovalComments" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_cert_sched_require_approval_comments}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+            <h:selectBooleanCheckbox value="#{certificationSchedule.editedCertificationSchedule.requireApprovalComments}"
+                          disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                          readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+          </td>
+       </tr>
+       
+        <!-- Mitigation comments -->
+        <tr >
+          <td class="titleColumnWithWrap certScheduleTitleCol">
+            <h:outputText value="#{msgs.cert_sched_adv_require_mitigation_comments}"/>
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpRequireMitigationComments" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_cert_sched_require_exception_comments}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+            <h:selectBooleanCheckbox id="requireMitigationComments" 
+                          value="#{certificationSchedule.editedCertificationSchedule.requireMitigationComments}"
+                          disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                          readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                          onclick=""/>
+          </td>
+       </tr>
+
+       <tr>
+         <td class="titleColumnWithWrap certScheduleTitleCol">
+            <h:outputText value="#{msgs.sys_config_require_bulk_certify_confirm}" />
+         </td>
+         <td width="15px">
+           <h:graphicImage id="imgHlpReqBulkCertConfirm"
+             width="12px" height="12px" alt="#{help.help_system_config_require_bulk_certify_confirm}"
+             style="cursor:pointer;padding: 0px 7px 0px 7px"
+             url="/images/icons/dashboard_help_16.png"/>
+         </td>
+         <td colspan="4" class="certScheduleOptionCol" >
+           <h:selectBooleanCheckbox id="requireBulkCertifyConfirm"
+                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.requireBulkCertifyConfirmation}' />
+         </td>
+       </tr>
+
+       <!-- Forward Action on Delegated work Item -->
+       <tr>
+         <td class="titleColumnWithWrap certScheduleTitleCol">
+            <h:outputText value="#{msgs.sys_config_disable_delegation_forwarding}" />
+         </td>
+         <td width="15px">
+           <h:graphicImage id="imgHlpDiableForwardAction"
+             width="12px" height="12px" alt="#{help.help_system_config_disable_delegation_forwarding}"
+             style="cursor:pointer;padding: 0px 7px 0px 7px"
+             url="/images/icons/dashboard_help_16.png"/>
+         </td>
+         <td colspan="4" class="certScheduleOptionCol" >
+           <h:selectBooleanCheckbox id="diableForwardAction"
+                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.delegationForwardingDisabled}' />
+         </td>
+       </tr>
+
+       <!-- Limit Reassignments -->
+       <tr>
+        <td class="titleColumnWithWrap certScheduleTitleCol">
+          <h:outputText value="#{msgs.sys_config_limit_reassignment}" />
+        </td>
+        <td width="15px">
+          <h:graphicImage id="imgHlpLimitReassignments"
+            width="12px" height="12px" alt="#{help.help_system_config_limit_reassignment}"
+            style="cursor:pointer;padding: 0px 7px 0px 7px"
+            url="/images/icons/dashboard_help_16.png"/>
+        </td>
+        <td colspan="4">
+          <h:selectBooleanCheckbox id="limitReassignments"
+            value='#{certificationSchedule.editedCertificationSchedule.limitReassignments}'
+            onchange="onLimitReassignmentsChanged(this);" 
+            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" >
+          </h:selectBooleanCheckbox>
+          <h:outputText value="#{msgs.sys_config_reassignment_limit}" style="margin-left:10px; padding:2px" styleClass="notLimit"/>
+          <h:graphicImage id="imgHlpReassignmentLimit"
+            width="12px" height="12px" alt="#{help.help_system_config_reassignment_limit}"
+            style="cursor:pointer;padding: 0px 7px 0px 7px;margin-left:10px;"
+            url="/images/icons/dashboard_help_16.png"/>
+          <h:inputText id="reassignmentLimit"
+                       value='#{certificationSchedule.editedCertificationSchedule.reassignmentLimit}'
+                       disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                       readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                       style="margin-left:10px; padding:2px"
+                       required="true"
+                       requiredMessage="#{msgs.sys_config_err_reassignment_limit_empty}"
+                       validatorMessage="#{msgs.sys_config_err_reassignment_limit_not_valid}"
+                       size="4">
+            <f:validateLongRange minimum="1" maximum="9999" />
+          </h:inputText>
+        </td>
+      </tr>
+
+        <!-- ======================================== -->
+        <!-- Bulk behavior Options           -->
+        <!-- ======================================== -->
+ 
+
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_behavior_decision_properties}</td></tr>
+ 
+           <tr >
+             <td class="titleColumnWithWrap certScheduleTitleCol">
+               <h:outputText value="#{msgs.cert_sched_adv_allow_provisioning}"/>
+             </td>
+             <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpAllowProv" styleClass="helpIcon"
+                 url="/images/icons/dashboard_help_16.png" alt="#{help.help_cert_sched_adv_allow_provisioning}"/>
+             </td>
+             <td class="certScheduleOptionCol" colspan="6" align="left">
+               <h:selectBooleanCheckbox value="#{certificationSchedule.editedCertificationSchedule.allowProvisioningRequirements}"
+                             disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                             readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+             </td>
+           </tr>
+  
+           <tr>
+             <td class="titleColumnWithWrap certScheduleTitleCol">
+                 <h:outputText value="#{msgs.sys_config_enable_line_item_delegate}" />
+             </td>
+             <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpEnableLine" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_enable_item_delegation}"/>
+             </td>
+             <td colspan="4" class="certScheduleOptionCol">
+                 <h:selectBooleanCheckbox id="enableItemDelegation" 
+                             disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                             readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                 value='#{certificationSchedule.editedCertificationSchedule.allowItemDelegation}' />
+             </td>
+           </tr>
+
+           <tr>
+             <td class="titleColumnWithWrap certScheduleTitleCol">
+               <h:outputText value="#{msgs.sys_config_enable_entity_delegate}" />
+             </td>
+             <td width="15px">
+               <h:graphicImage id="imgHlpEnableEntityDelegation"
+               width="12px" height="12px" alt="#{help.help_system_config_enable_entity_delegation}"
+               style="cursor:pointer;padding: 0px 7px 0px 7px"
+               url="/images/icons/dashboard_help_16.png"/>
+             </td>
+             <td colspan='4'>
+               <h:selectBooleanCheckbox id="enableEntityDelegation"
+                             disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                             readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+               value='#{certificationSchedule.editedCertificationSchedule.allowEntityDelegation}' />
+             </td>
+           </tr>
+
+           <ui:fragment rendered="#{certificationSchedule.enableApproveAccount}">
+             <tr>
+               <td class="titleColumnWithWrap certScheduleTitleCol">
+                   <h:outputText value="#{msgs.sys_config_enable_approve_account}" />
+               </td>
+               <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpEnableAcctApproval" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_enable_approve_account}"/>
+               </td>
+               <td class="certScheduleOptionCol" colspan="4">
+                   <h:selectBooleanCheckbox id="enableApproveAccount" 
+                               disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                               readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                     value="#{certificationSchedule.editedCertificationSchedule.allowApproveAccounts}" />
+               </td>
+             </tr>
+           </ui:fragment>
+
+           <ui:fragment rendered="#{certificationSchedule.enableRevokeAccount}">
+             <tr>
+               <td class="titleColumnWithWrap certScheduleTitleCol">
+                   <h:outputText styleClass="required" value="#{msgs.sys_config_enable_revoke_account}" />
+               </td>
+               <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpEnableAcctRevoke" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_enable_revoke_account}"/>
+               </td>
+               <td colspan="4">
+                   <h:selectBooleanCheckbox id="enableAccountRevoke" 
+                               disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                               readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                     value="#{certificationSchedule.editedCertificationSchedule.allowAccountRevocation}" 
+                      onclick="syncBulkAccountRevocationState();"/>
+               </td>
+             </tr>
+           </ui:fragment>
+
+           <ui:fragment rendered="#{certificationSchedule.enableReassignAccount}">
+           <tr>
+            <td class="titleColumn certScheduleTitleCol">#{msgs.sys_config_enable_reassign_account}</td>
+            <td class="certScheduleHelpCol">
+             <h:graphicImage id="imgHlpEnableAcctReassign" width="12px"
+                height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_enable_reassign_account}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <h:selectBooleanCheckbox
+                        id="enableAccountReassign"
+                        value="#{certificationSchedule.editedCertificationSchedule.enableReassignAccount}"
+                        disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                        readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                        onclick="showHideWithLock($('accountReassignConfig'), this, null, null); syncAccountReassign();"/>
+            </td>
+           </tr>
+           <tr id="accountReassignConfig" style="display: #{(certificationSchedule.editedCertificationSchedule.enableReassignAccount) ? '' : 'none'}">
+             <td colspan="2"></td>
+             <td colspan="6">
+               <table class="width100" cellpadding="5" cellspacing="0">
+               <thead>
+                 <tr>
+                   <th colspan="3" class="dashContentHeader">
+                     <h:outputText value="#{msgs.sys_config_reassign_account_config_header}" />
+                   </th>
+                 </tr>
+               </thead>
+               <tbody>
+                 <tr>
+                   <td align="right" class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.sys_config_reassign_account_config_text}" /></td>
+                   <td class="certScheduleHelpCol">
+                   </td>
+                   <td class="certScheduleOptionCol">
+                      <div id="defaultAssigneeSuggest"/>
+                      <t:inputHidden id="defaultAssigneeInput"
+                                     value="#{certificationSchedule.editedCertificationSchedule.defaultAssignee}" forceId="true">
+                          <sp:convertIdentity />
+                      </t:inputHidden>
+                   </td>
+                 </tr>
+               </tbody>
+               </table>
+             </td>
+           </tr>
+           </ui:fragment>
+                      <tr>
+                          <td class="titleColumnWithWrap certScheduleTitleCol">
+                          <h:outputText value="#{msgs.sys_config_enable_override_violation_default_remediator}" /></td>
+                          <td width="15px">
+                              <h:graphicImage id="imgHlpOverridDefRemed" width="12px"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" alt="#{help.help_sys_config_enable_override_violation_default_remediator}"/>
+                          </td>
+                          <td colspan="4" class="certScheduleOptionCol">
+                              <h:selectBooleanCheckbox
+                                  id="enableOverrideViolationDefaultRemediator"
+                                  value="#{certificationSchedule.editedCertificationSchedule.enableOverrideViolationDefaultRemediator}"
+                                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                  onclick=""/>
+                          </td>
+                      </tr>
+           <tr>
+             <td class="titleColumnWithWrap certScheduleTitleCol">
+                <h:outputText value="#{msgs.sys_config_enable_allow_exceptions}" /></td>
+             <td width="15px">
+               <h:graphicImage id="imgHlpEnableAllowException"
+                 width="12px" height="12px" alt="#{help.help_system_config_enable_allow_exception}"
+                 style="cursor:pointer;padding: 0px 7px 0px 7px"
+                 url="/images/icons/dashboard_help_16.png"/>
+             </td>
+             <td colspan="4" class="certScheduleOptionCol">
+               <h:selectBooleanCheckbox
+                 id="enableAllowException"
+                             disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                             readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                 value="#{certificationSchedule.editedCertificationSchedule.allowExceptions}">
+                 <a4j:ajax event="click" onbeforesubmit="syncAllowExceptionDisabledState();" render="mitigationExpirationEmailTemplatePanel"/>
+               </h:selectBooleanCheckbox>
+             </td>
+           </tr>
+           <tr>
+             <td class="titleColumn certScheduleTitleCol">
+                <h:outputText value="#{msgs.sys_config_enable_allow_exception_popup}" /></td>
+             <td width="15px">
+               <h:graphicImage id="imgHlpEnableAllowExceptionPopup"
+                 width="12px" height="12px" alt="#{help.help_system_config_enable_allow_exception_popup}"
+                 style="cursor:pointer;padding: 0px 7px 0px 7px"
+                 url="/images/icons/dashboard_help_16.png"/>
+             </td>
+             <td colspan="4" class="certScheduleOptionCol" ><h:selectBooleanCheckbox
+                 id="enableAllowDefaultExceptionPopup"
+                             disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                             readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                 value="#{certificationSchedule.editedCertificationSchedule.allowExceptionPopup}"
+                 onclick="" /></td>
+           </tr>
+
+           <tr>
+               <td class="titleColumn certScheduleTitleCol">
+                 <h:outputText value="#{msgs.sys_config_default_allow_exception_duration}" />
+               </td>
+               <td width="15px">
+                 <h:graphicImage id="imgHlpEnableAllowExceptionDefaultDuration"
+                   width="12px" height="12px" alt="#{help.help_system_config_default_allow_exception_duration}"
+                   style="cursor:pointer;padding: 0px 7px 0px 7px"
+                   url="/images/icons/dashboard_help_16.png"/>
+               </td>
+               <td width="50px">
+                 <h:inputText 
+                        disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                        readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                        id="allowExceptionPeriodAmount" value="#{certificationSchedule.editedCertificationSchedule.allowExceptionDurationAmount}" size="3" ></h:inputText>
+               </td>
+               <td>  
+                 <h:selectOneListbox
+                  id="allowExceptionDurationScale"
+                  size="1"
+                  converter="sailpoint.object.Enum"
+                  value="#{certificationSchedule.editedCertificationSchedule.allowExceptionDurationScale}"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" >
+                <f:selectItems value="#{certificationSchedule.durationScales}" />
+                </h:selectOneListbox>
+               </td>
+           </tr>
+
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_behavior_bulk_behavior_properties}</td></tr>
+
+        <tr>
+            <td colspan='2'></td>
+            <td width="80px" class="titleColumn" style='text-align:center'>
+                <h:outputText value="#{msgs.cert_sched_behavior_bulk_actions_grid_header}" />
+            </td>
+            <td width="80px" colspan="2" class="titleColumn" style='text-align:center'>
+                <h:outputText value="#{msgs.cert_sched_behavior_bulk_actions_details_header}" />
+            </td>
+            <td width="35%"><!-- padding --></td>
+        </tr>
+
+        <tr>
+            <td class="titleColumnWithWrap certScheduleTitleCol">
+                <h:outputText value="#{msgs.sys_config_enable_bulk_approve}" /></td>
+            <td width="15px">
+              <h:graphicImage id="imgHlpEnableListBulkApprove"
+                width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_approve}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td align="center">
+              <h:selectBooleanCheckbox id="enableListViewBulkApprove"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.allowListBulkApprove}' />
+            </td>
+            <td colspan="2" align="center">
+              <h:selectBooleanCheckbox id="enableEntityBulkApprove"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.allowEntityBulkApprove}' />
+            </td>
+        </tr> <tr>
+            <td class="titleColumnWithWrap certScheduleTitleCol">
+                <h:outputText value="#{msgs.sys_config_enable_bulk_revoke}" /></td>
+            <td width="15px">
+              <h:graphicImage id="imgHlpEnableListBulkRevoke"
+                width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_revoke}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td align="center">
+              <h:selectBooleanCheckbox id="enableListViewBulkRevoke"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.allowListBulkRevocation}' />
+            </td>
+            <td colspan="2" align="center">
+              <h:selectBooleanCheckbox id="enableEntityBulkRevoke"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.allowEntityBulkRevocation}' />
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumnWithWrap certScheduleTitleCol">
+                <h:outputText value="#{msgs.sys_config_enable_bulk_allow_exception}" /></td>
+            <td width="15px">
+              <h:graphicImage id="imgHlpEnableListBulkAllowException"
+                width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_allow_exception}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td align="center">
+              <h:selectBooleanCheckbox id="enableListViewBulkAllowException"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.allowListBulkMitigate}' />
+            </td>
+            <td colspan="2" align="center">
+                <!-- This option does not exist at the moment -->
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumnWithWrap certScheduleTitleCol">
+                <h:outputText value="#{msgs.sys_config_enable_bulk_reassign}" /></td>
+            <td width="15px">
+              <h:graphicImage id="imgHlpEnableListBulkReassign"
+                width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_reassign}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td align="center">
+              <h:selectBooleanCheckbox id="enableListViewBulkReassign"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.allowListBulkReassign}' />
+            </td>
+            <td colspan="2" align="center">
+                <!-- This option does not exist at the moment -->
+            </td>
+        </tr>
+
+        <ui:fragment rendered="#{certificationSchedule.enableRevokeAccount}">
+          <tr>
+              <td class="titleColumnWithWrap certScheduleTitleCol">
+                  <h:outputText value="#{msgs.sys_config_enable_bulk_revoke_account}" /></td>
+              <td width="15px">
+                <h:graphicImage id="imgHlpEnableEntityBulkAccountRevocation"
+                  width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_account_revocation}"
+                  style="cursor:pointer;padding: 0px 7px 0px 7px"
+                  url="/images/icons/dashboard_help_16.png"/>
+              </td>
+              <td align="center">
+                <h:selectBooleanCheckbox id="enableListBulkAccountRevocation"
+                    disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                    readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                value='#{certificationSchedule.editedCertificationSchedule.allowListBulkAccountRevocation}' />
+              </td>
+              <td colspan="2" align="center">
+                <h:selectBooleanCheckbox id="enableEntityBulkAccountRevocation"
+                    disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                    readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                value='#{certificationSchedule.editedCertificationSchedule.allowEntityBulkAccountRevocation}' />
+              </td>
+          </tr>
+        </ui:fragment>
+
+        <tr>
+            <td class="titleColumnWithWrap certScheduleTitleCol">
+                <h:outputText value="#{msgs.sys_config_enable_bulk_clear_decisions}" /></td>
+            <td width="15px">
+              <h:graphicImage id="imgHlpEnableEntityBulkCancelDecisions"
+                width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_clear_decisions}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td align="center">
+              <h:selectBooleanCheckbox id="enableListBulkClearDecisions"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.allowListBulkClearDecisions}' />
+            </td>
+            <td colspan="2" align="center">
+              <h:selectBooleanCheckbox id="enableEntityBulkAccountClearDecisions"
+                  disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                  readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+              value='#{certificationSchedule.editedCertificationSchedule.allowEntityBulkClearDecisions}' />
+            </td>
+        </tr>
+
+      </tbody>
+    </table>
+    
+</ui:composition>
+
+</body>
+</html>

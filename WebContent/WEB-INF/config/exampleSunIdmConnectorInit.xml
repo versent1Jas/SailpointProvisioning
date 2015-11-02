@@ -1,0 +1,255 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Waveset PUBLIC 'waveset.dtd' 'waveset.dtd'>
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<Waveset>
+
+<!--
+   This is an example file of the various object necessary 
+   on the IDM side for our IDM connector to work properly.
+   
+   The first thing is to define your new objectclass(es) 
+   in the SPML Configuration object. This will define 
+   the IDM object type and forms that will drive the objects
+   returned via the SPML interface. 
+ 
+   Here are two examples that can be used to aggregate User
+   objects ( the waveset view only ) and the Admin Role 
+   objects.
+
+   <Object name='customIIQUser'>
+     <Attribute name='form' value='customIIQUserForm'/>
+     <Attribute name='identifier' value='waveset.accountId'/>
+     <Attribute name='multiValuedAttributes'>
+       <List>
+         <String>waveset.resources</String>
+         <String>waveset.roles</String>
+         <String>waveset.applications</String>
+         <String>waveset.adminroles</String>
+         <String>waveset.capabilities</String>
+       </List>
+     </Attribute>
+     <Attribute name='targetResources'>
+       <List></List>
+     </Attribute>
+     <Attribute name='type' value='User'/>
+   </Object>
+
+   <Object name='customIIQAdminRole'>
+     <Attribute name='default' value='true'/>
+     <Attribute name='form' value='customIIQAdminRoleForm'/>
+     <Attribute name='identifier' value='name'/>
+     <Attribute name='type' value='AdminRole'/>
+   </Object>
+
+   <Object name='customIIQUserList'>
+     <Attribute name='type' value='none'/>
+     <Attribute name='form' value='customIIQUserListForm'/>
+   </Object>
+
+   <Object name='customIIQAdminRoleList'>
+     <Attribute name='type' value='none'/>
+     <Attribute name='form' value='customIIQAdminRoleListForm'/>
+   </Object>
+
+   When we define an Application on the IdentityIQ side these objecttypes
+   should be placed in the nativeObjectType attribute of the 
+   corresponding schema object.
+
+   Once we have defined the object classes, we also have to 
+   define the attributes that will be returned and we can 
+   do that by using a custom form.
+
+   Since this data is one-way ( read ) all we have to define
+   in the form are Derivations. Otherwise we'd also have to 
+   include reverse transformations.
+-->
+
+<!--
+  - This is a custom form that is executed when 
+  - we ask for customIIQUser objects
+  -->
+<Configuration name='customIIQUserForm'>
+  <Extension>
+    <Form>
+
+      <Field name='firstname'>
+        <Derivation>
+          <ref>global.firstname</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='lastname'>
+        <Derivation>
+          <ref>global.lastname</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='fullname'>
+        <Derivation>
+          <ref>global.fullname</ref> 
+        </Derivation>
+      </Field>
+
+      <Field name='email'>
+        <Derivation>
+          <ref>global.email</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='accountId'>
+        <Derivation>
+          <ref>waveset.accountId</ref> 
+        </Derivation>
+      </Field>
+
+      <Field name='dbId'>
+        <Derivation>
+          <ref>waveset.id</ref> 
+        </Derivation>
+      </Field>
+
+      <Field name='controlledOrganizations'>
+        <Derivation>
+          <ref>waveset.controlledOrganizations</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='organization'>
+        <Derivation>
+          <ref>waveset.organization</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='capabilities'>
+        <Derivation>
+          <ref>waveset.capabilities</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='adminRoles'>
+        <Derivation>
+          <ref>waveset.adminRoles</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='resources'>
+        <Derivation>
+          <ref>waveset.resources</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='resourceAssignments'>
+        <Derivation>
+          <ref>waveset.resourceAssignments</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='roles'>
+        <Derivation>
+          <ref>waveset.roles</ref>
+        </Derivation>
+      </Field>
+
+    </Form>
+  </Extension>
+</Configuration> 
+
+<!--
+  - This is a custom form that is executed when 
+  - we ask for customIIQAdminRole objects
+  -->
+<Configuration name='customIIQAdminRoleForm'>
+  <Extension>
+    <Form>
+
+      <Field name='dbId'>
+        <Derivation>
+          <ref>id</ref> 
+        </Derivation>
+      </Field>
+
+      <Field name='roleName'>
+        <Derivation>
+          <ref>name</ref> 
+        </Derivation>
+      </Field>
+
+      <Field name='assigners'>
+        <Derivation>
+          <ref>assigners</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='controlledOrganizations'>
+        <Derivation>
+          <ref>controlledOrganizations</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='controlledOrganizationsRule'>
+        <Derivation>
+          <ref>controlledOrganizationsRule</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='organization'>
+        <Derivation>
+          <ref>memberOrganizations</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='capabilities'>
+        <Derivation>
+          <ref>capabilities</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='capabilitiesRule'>
+        <Derivation>
+          <ref>capabilitiesRule</ref>
+        </Derivation>
+      </Field>
+
+      <Field name='type'>
+        <Derivation>
+          <ref>type</ref>
+        </Derivation>
+      </Field>
+
+    </Form>
+  </Extension>
+</Configuration> 
+
+<Configuration name='customIIQUserListForm'>
+  <Extension>
+    <Form>
+      <Field name='objectList'>
+        <Default>
+          <invoke name='getObjectNames' class='com.waveset.ui.FormUtil'>
+            <ref>:display.session</ref>
+            <s>USER</s>
+          </invoke>
+        </Default>
+      </Field>
+    </Form>
+  </Extension>
+</Configuration>
+
+<Configuration name='customIIQAdminRoleListForm'>
+  <Extension>
+    <Form>
+      <Field name='objectList'>
+        <Default>
+          <invoke name='getObjectNames' class='com.waveset.ui.FormUtil'>
+            <ref>:display.session</ref>
+            <s>ADMINROLE</s>
+          </invoke>
+        </Default>
+      </Field>
+    </Form>
+  </Extension>
+</Configuration>
+
+</Waveset>

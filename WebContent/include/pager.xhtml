@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:remove><!--
+  Include a pager that can page through a list.  Required params:
+  
+   - pagerParam:  The Pager object.
+   - reRender:    The ID or ID's of elements to re-render after going to the
+                  next or previous page.
+   - onClick:     Javascript to run when the button is clicked.
+   - onComplete:  Javascript to run when the AJAX request completes.
+ --></ui:remove>
+
+<ui:composition>
+
+  <ui:fragment rendered="#{pagerParam.pagingRequired}">
+    <table class="pagerTable spTable width100">
+      <tr>
+        <th class="pagerPage">
+          #{pagerParam.total} #{msgs.pager_items} - #{msgs.pager_showing} #{pagerParam.startIndex}-#{pagerParam.endIndex}
+
+          <f:verbatim>&amp;nbsp;&amp;nbsp;</f:verbatim>#{msgs.pager_page}<f:verbatim>&amp;nbsp;</f:verbatim>
+          <h:inputText size="1"
+                       class="pagerGotoPageText"
+                       onfocus="SailPoint.Pager.initJumpToPageSubmitOnEnter(this);"
+                       value="#{pagerParam.currentPage}" />
+          <a4j:commandButton actionListener="#{pagerParam.refresh}"
+                             render="#{reRender}"
+                             oncomplete="#{onComplete}"
+                             onclick="#{onClick}"
+                             style="display: none" />
+        </th>
+
+        <th>
+          <a4j:commandButton actionListener="#{pagerParam.prevPage}"
+                             render="#{reRender}"
+                             style="display: none"
+                             oncomplete="#{onComplete}" />
+          <!--
+            Note that we are adding the 'bntClicked' class name to prevent double-clicks.
+            Also, using previousSiblings() so we don't have to have a unique id for the button.
+          -->
+          <div class="pagerBtn #{(pagerParam.hasPrev) ? '' : 'pagerBtnDisabled '}pagerBtnPrev"
+               onclick="if (!#{pagerParam.hasPrev} || Ext.get(this).hasCls('btnClicked')) return false; Ext.get(this).addCls('btnClicked'); Ext.get(this).prev().dom.click(); #{onClick}"/>
+        </th>
+
+        <th>
+          <a4j:commandButton actionListener="#{pagerParam.nextPage}"
+                             render="#{reRender}"
+                             style="display: none"
+                             oncomplete="#{onComplete}" />
+          <!--
+            Note that we are adding the 'bntClicked' class name to prevent double-clicks.
+            Also, using previousSiblings() so we don't have to have a unique id for the button.
+          -->
+          <div class="pagerBtn #{(pagerParam.hasNext) ? '' : 'pagerBtnDisabled '}pagerBtnNext"
+               onclick="if (!#{pagerParam.hasNext} || Ext.get(this).hasCls('btnClicked')) return false; Ext.get(this).addCls('btnClicked'); Ext.get(this).prev().dom.click(); #{onClick}"/>
+        </th>
+      </tr>
+    </table>
+  </ui:fragment>
+
+</ui:composition>
+</body>
+</html>

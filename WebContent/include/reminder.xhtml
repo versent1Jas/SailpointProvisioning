@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+  <h:head>
+      <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+      <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+  </h:head>
+<body>
+<sp:messages name='notificationMessages'/>
+<table class="table-1">
+  <tr>
+    <td class="titleColumnWithWrap certScheduleTitleCol">#{msgs.notification_send_first_reminder}</td>
+    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpReminderStart"
+      styleClass="helpIcon"
+      url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_notifications_first_reminder}"/>
+    </td>
+    <td class="certScheduleOptionCol">
+      <table>
+        <tr>
+          <td rowspan="2"><input type="text" class="reminder-text-box" id="reminderStartHowManyDaysText" name="reminderStartHowManyDaysText"></input> #{msgs.notification_days}</td>
+          <td rowspan="2"><span id="reminderStartHowManyDaysErrorLabel" class="error-text"></span></td>
+          <td><input type="radio" name="afterOrBeforeRadio" id="reminderAfterRadio" class="margin-left-10" ></input> <h:outputText class="margin-left-5" value="#{msgs.notification_after_start}"/></td>
+        </tr>
+        <tr>
+          <td><input type="radio" name="afterOrBeforeRadio" id="reminderBeforeRadio" class="margin-left-10" ></input> <h:outputText class="margin-left-5" value="#{msgs.notification_before_expiration}"/></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="titleColumnWithWrap certScheduleTitleCol">#{msgs.notification_remind}</td>
+    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpReminderRemind"
+      styleClass="helpIcon"
+      url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_notifications_remind}"/>
+    </td>
+    <td class="certScheduleOptionCol">
+      <table>
+        <tr>
+          <td><input type="radio" name="reminderFrequencyRadio" id="reminderFrequencyOnceRadio"></input><h:outputText class="margin-left-5" value="#{msgs.notification_once}"/></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><input type="radio" name="reminderFrequencyRadio" id="reminderFrequencyOnceEveryRadio"></input><h:outputText class="margin-left-5" value="#{msgs.notification_once} #{msgs.notification_every}"/> <input type="text" class="reminder-text-box" id="reminderOnceEveryText" name="reminderOnceEveryText"></input> #{msgs.notification_days}</td>
+          <td><span id="reminderFrequencyErrorLabel" class="error-text" style="display:none;"></span></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="titleColumnWithWrap certScheduleTitleCol"><h:outputText
+      value="#{msgs.notification_email_template}" /></td>
+    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpReminderTemplate"
+     styleClass="helpIcon"
+      url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_notifications_email_template}"/>
+    </td>
+    <td class="certScheduleOptionCol"><h:selectOneMenu id="emailTemplateSelect"
+             disabled="#{certificationSchedule.continuousHasLaunched}"
+             readonly="#{certificationSchedule.continuousHasLaunched}">
+        <f:selectItems value="${util.emailTemplates}" />
+      </h:selectOneMenu>
+
+    </td>
+  </tr>
+</table>
+<fieldset class="additional-fieldset" id="additionalFieldset">
+  <legend class="additional-legend"><input type="checkbox" id="additionalRecipientsCheckbox" name="additionalRecipientsCheckbox"></input> #{msgs.notification_additional_email_recipients}</legend>
+  <div class="additional-container" id="additionalContainer" style="display:none;">
+    <table class="table-2">
+      <tr>
+        <td class="titleColumnWithWrap certScheduleTitleCol">#{msgs.notification_recipients}</td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpReminderAdditionalRecipients"
+         styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_notifications_additional_recipients}"/>
+        </td>
+        <td class="certScheduleOptionCol">
+          <div id="recipientsMultiSuggest"></div>
+          <t:inputHidden id="recipients"
+                         value=""
+                         forceId="true">
+              <sp:convertList />
+          </t:inputHidden>
+        </td>
+      </tr>
+      <tr>
+        <td class="titleColumnWithWrap certScheduleTitleCol">#{msgs.notification_recipients_rule}</td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpReminderRecipientsRule"
+         styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_notifications_additional_recipients_rule}"/>
+        </td>
+        <td class="certScheduleOptionCol">
+          <a4j:outputPanel id="recipientsRulePanel">
+          <h:selectOneMenu id="recipientsRuleSelect"
+                           disabled="false"
+                           rendered="true">
+            <f:selectItems value="${util.emailRecipientRules}">
+            </f:selectItems>
+          </h:selectOneMenu>
+  
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                   onclick="SailPoint.Rule.Editor.edit($('recipientsRuleSelect').value,
+                                                       'EmailRecipient',
+                                                       $('refreshRecipientsRuleButton'));">
+              <f:attribute name="disabled" value="disabled" rendered="true"/>
+            </input>
+          </ui:fragment>
+          </a4j:outputPanel>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="text-align: center;"><span id="additionalRecipientsErrorLabel" class="error-text" style="display:none;"/></td>
+      </tr>
+    </table>
+  </div>
+</fieldset>
+
+<a4j:commandButton id="refreshRecipientsRuleButton"
+                   style="display:none"
+                   immediate="true"
+                   render="recipientsRulePanel"/>
+
+  <div class="buttonRow button-container">
+    <input type="button" value="Add" id="actionButton" class="primaryBtn"></input>
+    <input type="button" value="#{msgs.notification_cancel}" class="secondaryBtn" id="cancelButton"></input>
+  </div>
+</body>
+</html>
+  

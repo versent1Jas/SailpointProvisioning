@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/commonCertificationReportArgs.js?#{debug.revision}</src>
+	</sp:script>
+
+    <script type="text/javascript">;
+
+        Ext.onReady(function () {
+            var managersMultiSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'managersMultiSuggest',
+                suggestType: 'manager',
+                jsonData: #{sp:basicJSONDataConverted(
+                   taskDefinition.argMap['managers'].objectListValue,
+                   'IdentityListConverter')},
+                inputFieldName: 'managers',
+                baseParams: {'type': 'manager', context: 'Manager'},
+                contextPath: CONTEXT_PATH
+            });     
+            SailPoint.Report.Certification.initializeCommonArgs();           
+        });   
+    </script>
+
+<table class="width100" cellspacing="0" cellpadding="3">
+<ui:fragment render='#{taskDefinition.argValues != null}'>
+
+<!-- Add common fields - dates, tags, etc... -->
+<ui:include src="certificationReportCommonArgs.xhtml" />
+
+<tr>
+
+     <td width="45%" valign="top">
+        <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+                <tr>
+                    <th><sp:outputText value="#{msgs.report_filter_mgrs}"/></th>
+                </tr>
+                <tr>
+                    <td><sp:outputText style="font-size:11px"
+                                      value='#{taskDefinition.argMap["managers"].argument.description}'/></td>
+                </tr>
+                <tr>
+                    <td>
+                      <div id="managersMultiSuggest"></div>
+                      <t:inputHidden id="managers"
+                                     value="#{taskDefinition.argMap['managers'].objectListValue}" forceId="true">
+                          <sp:convertList />
+                      </t:inputHidden>                    
+
+                        <h:inputHidden id="certificationType" value='#{taskDefinition.argMap["certificationType"].value}'/>
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </td>
+
+    <td valign="top">&nbsp;</td>
+
+</tr>
+
+</ui:fragment>
+</table>
+
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<!-- djs: work in progress. -->
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title"><h:outputFormat value="#{msgs.lcm_violation_review_title}">
+      <f:param value="#{workItem.object.attributes['identityDisplayName']}"/>
+    </h:outputFormat>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>image-radio.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/roles">
+      <src>roles.css</src>  
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/lcmWorkItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/lcmWorkItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRadio.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/approvalItemsBulkDecision.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+
+        Ext.onReady(function () {
+            makeTableMulticolored($('approvalItemsTable'), true, true, 'odd', 'even');
+        });
+
+        //------------------------------------------------------
+        // ** EVENTS **
+        //------------------------------------------------------
+
+        Page.addEvents(
+          /**
+           * @event beforeSave
+           * Fires when the save or complete button is clicked.
+           */
+          'beforeSave'
+        );
+
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+          <h:inputHidden id="decisions" value="#{workItem.decisions}"/>
+          <h:inputHidden id="bulkDecision" value="#{workItem.bulkDecision}" />
+          <h:inputHidden id="requireIgnoreComments" value="#{workItem.attributes['requireViolationReviewComments']}"/>
+          <h:inputHidden id="violationReviewComments" value="#{workItem.newComment}"/>
+          <h:inputHidden id="violationReviewDecision" value="#{workItem.object.attributes['violationReviewDecision']}"/>
+
+
+          <div class="formWarn">
+              <ui:fragment rendered="#{workItem.attributes['violationReviewDecision'] != 'remediate' and workItem.attributes['allowRequestsWithViolations']}">
+                <h:outputText value="#{msgs.lcm_violation_review_intro}"/>
+              </ui:fragment>
+              <ui:fragment rendered="#{workItem.attributes['violationReviewDecision'] != 'remediate' and !workItem.attributes['allowRequestsWithViolations']}">
+                <h:outputText value="#{msgs.lcm_violation_review_intro_disallow_violations}"/>
+              </ui:fragment>
+              <ui:fragment rendered="#{workItem.attributes['violationReviewDecision'] == 'remediate'}">
+                <h:outputText value="#{msgs.lcm_violation_review_submitted}"/>
+              </ui:fragment>
+          </div>
+
+          <ui:fragment rendered="#{workItem.attributes['policyViolations'] != null}">
+            <ui:include src="lcmApprovalViolations.xhtml">
+              <ui:param name="workitemId" value="#{workItem.objectId}" />
+              <ui:param name="violationReview" value="#{true}" />
+            </ui:include>
+          </ui:fragment>
+
+
+           <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.lcm_violation_review_items_section}"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <ui:include src="approvalItemsBulkDecisionInclude.xhtml">
+                    <ui:param name='disableSummary' value='true'/>
+                    <ui:param name='disableDecisionColumn' value='true'/>
+                    <ui:param name="violationReview" value="true" />
+                  </ui:include>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+
+          <script type="text/javascript">
+
+              SailPoint.submitViolationReview = function(action){
+                $('editForm:violationReviewDecision').value=action;
+                Page.fireEvent('beforeSave');
+
+                if (action != 'ignore'){
+                  var decisions = SailPoint.DecisionTracker;
+//                  var itemCount = Object.keys(decisions).length;
+                  var itemCount = Ext.getCmp('approvalcheckboxgrid').store.getTotalCount();
+                  var rejectedCount = 0;
+                  for (itemId in decisions) {
+                    if (decisions[itemId] == 'Rejected') {
+                      rejectedCount++;
+                    }
+                  }
+
+                    if (rejectedCount === 0) {
+                        if(itemCount > 0) {
+                            Ext.Msg.show({
+                                title:"#{msgs.lcm_summary_must_reject_some_items_title}",
+                                msg: "#{msgs.lcm_summary_must_reject_some_items_desc}",
+                                buttons: Ext.Msg.OK,
+                                icon: Ext.MessageBox.ERROR
+                            });
+                            return false;
+                        }
+                    }
+                  if (itemCount == rejectedCount) {
+                    Ext.Msg.show({
+                      title:"#{msgs.lcm_summary_allrejected_cart_title}",
+                      msg: "#{msgs.lcm_summary_allrejected_cart_descr}",
+                      buttons: Ext.Msg.OK,
+                      icon: Ext.MessageBox.ERROR
+                    });  
+
+                    return false;
+                  }
+
+                  $('editForm:completeBtn').click();
+                } else if ($('editForm:requireIgnoreComments').value == 'true'){
+
+                    var win = new Ext.Window({
+                        title:'#{msgs.lcm_violation_review_comment_description}',
+                        width:500,
+                        height:280,
+                        modal:true,
+                        bodyStyle:'background-color:#FFF;padding:10px',
+                        closable: false,
+                        items:[
+                            new Ext.form.Panel({
+                                hideLabel:true,
+                                bodyBorder:false, border:false,
+                                items:[
+                                    new Ext.form.TextArea({
+                                        id :'violationReviewComments',
+                                        hideLabel:true,
+                                        allowBlank:false,
+                                        msgTarget:'under',
+                                        width:455,
+                                        height:170
+                                    })
+                                ]
+                            })
+                        ],
+                        buttons : [
+							{
+							    text:"#{msgs.button_submit}",
+							    handler: function(){
+							        var comments = Ext.getCmp('violationReviewComments');
+							        if (comments.validate()){
+							            $('editForm:violationReviewComments').value = comments.getValue();
+							            $('editForm:completeBtn').click();
+							            win.close();
+							        }
+							    }
+							},
+							{
+	                            text:"#{msgs.button_cancel}",
+                              cls : 'secondaryBtn',
+	                            handler: function(){
+	                                win.close();
+	                            }
+	                        }
+                        ]
+                    });
+
+                    win.show();
+                }
+                return false;
+              };
+
+          </script>
+
+        <div class="buttonRow">
+          <h:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" onclick="SailPoint.workitem.ApprovalItemGrid.persistDecisions( '#{workItem.object.id}', SailPoint.DecisionTracker, SailPoint.BulkDecision.decision ); return true;"/>
+
+          <ui:fragment rendered="#{workItem.editable}">
+
+            <h:commandButton onclick="return SailPoint.submitViolationReview('remediate');"
+                             value="#{msgs.lcm_violation_review_button_resubmit}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton onclick="return SailPoint.submitViolationReview('ignore');"
+                             rendered="#{workItem.attributes['allowRequestsWithViolations']}"
+                             value="#{msgs.lcm_violation_review_button_ignore}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton action="#{workItem.cancelRequest}" 
+                             value="#{msgs.lcm_violation_review_button_cancel}"
+                             styleClass="secondaryBtn"/>
+          </ui:fragment>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

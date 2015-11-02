@@ -1,0 +1,758 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        Ext.onReady(function () {
+          Ext.QuickTips.init();
+          if ($('identitySelector')) {
+              var identitySelect = new SailPoint.IdentitySuggest({
+                  id: 'accountCorrelationIdentity',
+                  renderTo: 'identitySelector',
+                  binding: 'selectedIdentity',
+                  baseParams: {context: 'Global'},
+                  disabled: #{!sp:hasRight(facesContext, 'ManageApplication')},
+                  width: 300
+              });
+              
+              var iVal = '#{sp:escapeJavascript(applicationObject.accountCorrelationBean.newDirect.object.identity.displayName)}';
+              if(iVal != ''){
+            	  identitySelect.setRawValue(iVal);
+                  SailPoint.Suggest.IconSupport.setIconDiv(identitySelect, 'userIcon'); 
+              }
+          }
+        });
+     //--><!]]>
+    </script>
+
+    <f:view>
+
+      <div id="MainCorrelationDiv" class="spBorderlessContentBody">
+        <div class="spContentTitle">
+          <h:outputText value="#{msgs.corwiz_account_correlation_subtitle}"/>
+        </div>
+        <div class="greyborder paddedContainer" id="CurrentAccountConfig">
+
+          <a4j:outputPanel ajaxRendered="true" id="currentConfigPanel">
+
+            <script type="text/javascript">
+
+                /*
+                    List of existing correlation configs. This is used to validate that
+                    a duplicate name is not selected when creating a new config obj.
+                    The definition is placed inside the a4j panel so it gets refreshed
+                    when new configs are added in the UI.
+                */
+
+                var existingCorrelationConfigs = #{applicationObject.accountCorrelationBean.correlationConfigObjectsJson};
+
+            </script>
+
+            <table>
+              <tr>
+                <td>
+                  <div style="margin-top:10px; margin-bottom:10px;">
+                    <ui:fragment rendered='#{applicationObject.accountCorrelationConfig == null}'>
+                      <h:outputText value="#{msgs.corwiz_current_noconfig}"/>
+                    </ui:fragment>
+                    <ui:fragment rendered='#{applicationObject.accountCorrelationConfig != null}'>
+                      <h:outputText value="#{msgs.corwiz_current_edit}"/>
+                    </ui:fragment>
+                  </div>
+                </td>
+              </tr>
+            </table>
+            <table>
+              <tr>
+                <td style="padding-right: 10px">
+                  <h:selectOneMenu id="currentConfigSelection" value="#{applicationObject.accountCorrelationConfig}" onchange="$('editForm:switchConfig').click();">
+                      <f:selectItems value="#{applicationObject.accountCorrelationBean.correlationConfigObjects}"/>
+                  </h:selectOneMenu>
+                </td>
+                <td align="left">
+                  <h:inputHidden id="itemToMove" value="#{applicationObject.accountCorrelationBean.itemToMove}"/>
+                  <button onclick="startWizard(true);" type="button" class="primaryBtn" id="editWizardButton">#{msgs.corwiz_edit}</button>
+                  <button onclick="startWizard(false);" type="button" class="primaryBtn" id="newWizardButton">#{msgs.corwiz_new}</button>
+                  <a4j:commandButton action="#{applicationObject.switchCorrelationConfig}" style="display:none"
+                                      render="directSummary,currentConfigPanel,dynamicsTable,directConditionsTable,nameTable"
+                                     id="switchConfig"  oncomplete="Page.fireEvent('correlationReloaded', 0)"/>
+                  <a4j:commandButton style="display:none" id="refreshAll"
+                                     render="directSummary,currentConfigPanel,dynamicsTable,directConditionsTable,nameTable"/>
+                  <a4j:commandButton style="display:none" action="#{applicationObject.accountCorrelationBean.addDirect}"
+                                     id="addDirectButton" render="directSummary"/>
+                  <a4j:commandButton style="display:none" id="saveConfigButton"
+                                     render="currentConfigPanel"
+                                     action="#{applicationObject.saveAccountCorrelation}"/>
+                  <a4j:commandButton style="display:none" id="clearState"
+                                     render="directSummary,currentConfigPanel,dynamicsTable,directConditionsTable,,nameTable"
+                                     action="#{applicationObject.switchCorrelationConfig}"/>
+                  <input style="display:none" id="editMode" name="editMode" />
+                </td>
+              </tr>
+            </table>
+            <ui:fragment rendered='#{applicationObject.accountCorrelationConfig != null}'>
+              <table class="width100">
+                <tbody>
+                  <tr>
+                    <td>
+                      <div style="margin-top:20px">
+                        <table style="width: 70%">
+                          <tr>
+                            <td>
+                              <h:outputText styleClass="sectionHeader" value="#{msgs.corwiz_att_title}"/>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <t:dataTable styleClass="spTable" id="dynamicAssignments"
+                                 rowClasses="even, odd"
+                                 value="#{applicationObject.accountCorrelationBean.dynamic}" var="dynamic">
+                                <h:column>
+                                  <f:facet name="header">
+                                    <h:outputText value="#{msgs.corwiz_appattr}"/>
+                                  </f:facet>
+                                  <h:outputText value="#{dynamic.object.value}"/>
+                                </h:column>
+                                <h:column>
+                                  <f:facet name="header">
+                                    <h:outputText value="#{msgs.corwiz_identityattr}" />
+                                  </f:facet>
+                                  <h:outputText value="#{dynamic.object.property}"/>
+                                </h:column>
+                              </t:dataTable>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="margin-top:20px">
+                        <table style="width: 70%;">
+                          <tr>
+                            <td>
+                              <h:outputText styleClass="sectionHeader" value="#{msgs.corwiz_cond_title}"/>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <t:dataTable styleClass="spTable" id="directMapping"
+                                   rowClasses="even, odd"
+                                   value="#{applicationObject.accountCorrelationBean.direct}" var="direct">
+                                <h:column>
+                                  <f:facet name="header">
+                                    <h:outputText value="#{msgs.corwiz_cond_identity}"/>
+                                  </f:facet>
+                                  <h:outputText value="#{direct.object.identity.displayableName}"/>
+                                </h:column>
+                                <h:column>
+                                  <f:facet name="header">
+                                    <h:outputText value="#{msgs.corwiz_cond_conditions}" />
+                                  </f:facet>
+                                  <h:outputText value="#{direct.filterExpression}"/>
+                                </h:column>
+                              </t:dataTable>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="margin-top:30px"/>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui:fragment>
+          </a4j:outputPanel>
+        </div>
+
+        <div class="spContentTitle">
+          <h:outputText value="#{msgs.corwiz_manager_correlation_subtitle}"/>
+        </div>
+        <div class="paddedContainer greyborder" id="CurrentManagerConfig">
+          <table class="width100" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <div style="margin-top:10px; margin-bottom:10px;">
+                  <h:outputText value="#{msgs.corwiz_manager_edit}"/>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="width:70%" class="spTabledContent">
+                  <table class="spTable" cellspacing="0">
+                    <thead>
+                      <tr>
+                        <th><h:outputText value="#{msgs.corwiz_appattr}"/></th>
+                        <th style="text-align:left"><h:outputText value="#{msgs.corwiz_identityattr}"/></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style="padding: 10px">
+                          <h:selectOneMenu value="#{applicationObject.managerCorrelationFilter.value}">
+                            <f:selectItem itemLabel="#{msgs.corwiz_select_attribute}" itemValue=""/>
+                            <f:selectItems value="#{applicationObject.accountAttributeNames}"/>
+                          </h:selectOneMenu>
+                        </td>
+                        <td style="padding: 10px">
+                          <h:selectOneMenu value="#{applicationObject.managerCorrelationFilter.property}" >
+                            <f:selectItem itemLabel="#{msgs.corwiz_select_attribute}" itemValue=""/>
+                            <f:selectItems value="#{applicationObject.accountCorrelationBean.searchableAttributes}"/>
+                          </h:selectOneMenu>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:none; border:0px">
+        <div id="WelcomePage" style="margin-top:20px">
+          <div class="spBorderlessContentBody">
+            <table style="width:670px">
+              <tr>
+                <td align="left">
+                  <h:outputText styleClass="sectionHeader" value="#{msgs.corwiz_welcome}"/>
+                </td>
+              </tr>
+              <tr>
+                <td align="left">
+                  <div style="margin-top:10px">
+                    <h:outputText value="#{msgs.corwiz_welcome_intro}"/>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td align="left">
+                  <div style="margin-top:50px">
+                    <h:outputText value="#{msgs.corwiz_next}"/>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div id="CollectName" style="margin-top:20px">
+          <a4j:outputPanel id="nameTable">
+          <div class="spBorderlessContentBody">
+            <div id="errorDiv" class="formError" style="display:none"/>
+            <table style="width:670px">
+              <tr>
+                <td align="left">
+                  <h:outputText value="#{msgs.corwiz_name_intro}"/>
+                </td>
+              </tr>
+            </table>
+            <table style="width:670px">
+              <tr>
+                <td align="left">
+		  <div style="margin-top:50px">
+                    <h:outputText value="#{msgs.corwiz_name_label}"/>
+                  </div>
+                </td>
+                <td align="left">
+		  <div style="margin-top:50px">
+                     <h:inputText id="configurationName" size="30" value="#{applicationObject.accountCorrelationBean.object.name}"/>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td align="left">
+                  <div style="margin-top:50px">
+                    <h:outputText value="#{msgs.corwiz_next}"/>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+          </a4j:outputPanel>
+        </div>
+
+        <div id='IntroAttributeBasedCorrelation' style="margin-top:20px">
+          <div class="spBorderlessContentBody">
+            <table style="width:670px">
+              <tr>
+                <td>
+                  <h:outputText value="#{msgs.corwiz_att_intro}"/>
+               </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="margin-top:10px">
+                    <h:outputText value="#{msgs.corwiz_att_example}"/>
+                  </div>
+               </td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="margin-top:50px">
+                    <h:outputText value="#{msgs.corwiz_att_next}"/>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div id='CurrentAttributeBasedCorrelation'>
+          <div class="spBorderlessContentBody" style="margin-top:20px">
+            <a4j:outputPanel id="dynamicsTable">
+              <table style="width:670px" cellpadding="0" cellspacing="0">
+                <tr>
+                  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                </tr>
+                <tr><h:outputText styleClass="sectionHeader" value="#{msgs.corwiz_att_summary}"/></tr>
+                <tr>
+                  <td>
+                    <div class="spTabledContent">
+                      <table class="spTable" cellspacing="0">
+                        <thead>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <th style="text-align:center"><h:selectBooleanCheckbox id="selectAllToggleDynamic" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/>
+                              </th>
+                              <th/>
+                            </ui:fragment>
+                            <th><h:outputText value="#{msgs.corwiz_appattr}"/></th>
+                            <th style="text-align:left"></th>
+                            <th style="text-align:left"><h:outputText value="#{msgs.corwiz_identityattr}"/></th>
+                          </tr>
+                        </thead>
+                        <tfoot>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <td class="spDataTableHeader centeredColumn">
+                                <a4j:commandButton styleClass="secondaryBtn" id="foo" value="#{msgs.button_delete}" action="#{applicationObject.accountCorrelationBean.removeDynamic}" render="dynamicsTable"/>
+                              </td>
+                              <td class="spDataTableHeader centeredColumn">
+                                <a4j:commandButton styleClass="secondaryBtn" value="#{msgs.button_add}" action="#{applicationObject.accountCorrelationBean.addDynamic}" render="dynamicsTable"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                <h:selectOneMenu id="applicationAttributeSelection" value="#{applicationObject.accountCorrelationBean.newDynamic.object.value}">
+                                  <f:selectItem itemLabel="#{msgs.corwiz_select_attribute}" itemValue=""/>
+                                  <f:selectItems id="applicationAttributes" value="#{applicationObject.accountAttributeNames}"/>
+                                </h:selectOneMenu>
+                              </td>
+                              <td class="spDataTableHeader">
+                                <h:outputText value="#{msgs.corwiz_equals}"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                <h:selectOneMenu id="extendedAttributeSelection" value="#{applicationObject.accountCorrelationBean.newDynamic.object.property}">
+                                  <f:selectItem itemLabel="#{msgs.corwiz_select_attribute}" itemValue=""/>
+                                  <f:selectItems id="extendedAttributes" value="#{applicationObject.accountCorrelationBean.searchableAttributes}"/>
+                                </h:selectOneMenu>
+                              </td>
+                            </ui:fragment>
+                          </tr>
+                        </tfoot>
+                        <tbody>
+                          <ui:repeat value="#{applicationObject.accountCorrelationBean.dynamic}" var="dynamic">
+                            <tr>
+                              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+
+                                <td class="centeredColumn">
+                                  <h:selectBooleanCheckbox styleClass="toggleable" id="#{dynamic.id}checkbox"
+                                                           value="#{applicationObject.accountCorrelationBean.selectedDynamic[dynamic.id]}"/>
+                                </td>
+                                <td>
+                                   <table>
+                                     <tr>
+                                       <td align="left">
+                                         <ui:fragment rendered="#{not sp:isFirstElement(dynamic,applicationObject.accountCorrelationBean.dynamic)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_up_20.png"
+                                                              onclick="$('editForm:itemToMove').value='#{dynamic.id}'"
+                                                              action="#{applicationObject.accountCorrelationBean.moveDynamicUp}" render="dynamicsTable"/>
+                                         </ui:fragment>
+                                         <ui:fragment rendered="#{sp:isFirstElement(dynamic,applicationObject.accountCorrelationBean.dynamic)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_up_disabled_20.png"/>
+                                         </ui:fragment>
+                                       </td>
+                                       <td align="right">
+                                         <ui:fragment rendered="#{not sp:isLastElement(dynamic,applicationObject.accountCorrelationBean.dynamic)}">
+                                           <a4j:commandButton id="imgMoveDown"
+                                                              image="/images/icons/arrow_button_down_20.png"
+                                                              onclick="$('editForm:itemToMove').value='#{dynamic.id}'"
+                                                              action="#{applicationObject.accountCorrelationBean.moveDynamicDown}" render="dynamicsTable"/>
+                                         </ui:fragment>
+                                         <ui:fragment rendered="#{sp:isLastElement(dynamic,applicationObject.accountCorrelationBean.dynamic)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_down_disabled_20.png"/>
+                                         </ui:fragment>
+                                       </td>
+                                     </tr>
+                                   </table>
+                                </td>
+
+                              </ui:fragment>
+                              <td>
+                                <h:selectOneMenu id="applicationAttributeSelection" value="#{dynamic.object.value}"
+                                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <f:selectItem itemLabel="#{msgs.corwiz_select_attribute}" itemValue=""/>
+                                  <f:selectItems id="applicationAttributes" value="#{applicationObject.accountAttributeNames}"/>
+                                </h:selectOneMenu>
+                              </td>
+                              <td>
+                                <h:outputText value="#{msgs.corwiz_equals}"/>
+                              </td>
+                              <td>
+                                <h:selectOneMenu value="#{dynamic.object.property}"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <f:selectItem itemLabel="#{msgs.corwiz_select_attribute}" itemValue=""/>
+                                  <f:selectItems id="extendedAttributes" value="#{applicationObject.accountCorrelationBean.searchableAttributes}"/>
+                                </h:selectOneMenu>
+                              </td>
+                            </tr>
+                          </ui:repeat>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="margin-top:5px;width:620px">
+                      <h:outputText value="#{msgs.corwiz_att_new}"/>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </a4j:outputPanel>
+          </div>
+          <div class="spTabledContent" style="margin-top:10px">
+            <table cellpadding="0" cellspacing="0" class="width100">
+              <tr>
+                <td>
+                  <h:outputText value="#{msgs.corwiz_att_note}"/>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div id="AskConditionBasedCorrelation">
+          <div class="spBorderlessContentBody" style="margin-top:20px">
+             <table style="width:670px">
+              <tr>
+                <td align="left" colspan="2">
+                  <h:outputText value="#{msgs.corwiz_cond_intro}"/>
+                </td>
+              </tr>
+              <tr>
+                <td align="left" colspan="2">
+                  <div style="margin-top:10px">
+                    <h:outputText value="#{msgs.corwiz_cond_example}"/>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td align="left" colspan="2">
+                   <div style="margin-top:20px">
+                     <h:outputText value="#{msgs.corwiz_cond_ask}"/>
+                   </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="spTable" style="border:0px;" align="center" colspan="1">
+                  <h:selectOneRadio id="AskDirectYesNo" value="yes">
+                    <f:selectItem itemLabel="#{msgs.corwiz_yes}" itemValue="yes"/>
+                    <f:selectItem itemLabel="#{msgs.corwiz_no}" itemValue="no"/>
+                  </h:selectOneRadio>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div id='AddConditionBasedCorrelation'>
+          <div class="spBorderlessContentBody" style="margin-top:20px">
+            <a4j:outputPanel id="directConditionsTable">
+              <table style="width:670px" cellpadding="0" cellspacing="0">
+                <tr>
+                  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                </tr>
+                <tr><h:outputText styleClass="sectionHeader" value="#{msgs.corwiz_cond_current}"/></tr>
+                <tr>
+                  <td>
+                    <div class="spTabledContent">
+                      <table class="spTable" cellspacing="0">
+                        <thead>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <th style="text-align:center"><h:selectBooleanCheckbox id="selectAllToggleConditions" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/>
+                              </th>
+                              <th/>
+                            </ui:fragment>
+                            <th><h:outputText value="#{msgs.corwiz_appattr}"/></th>
+                            <th style="text-align:left"></th>
+                            <th style="text-align:left"><h:outputText value="#{msgs.corwiz_value}"/></th>
+                          </tr>
+                        </thead>
+                        <tfoot>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <td class="spDataTableHeader centeredColumn">
+                                <a4j:commandButton styleClass="secondaryBtn" value="#{msgs.button_delete}" action="#{applicationObject.accountCorrelationBean.removeCondition}" render="directConditionsTable,directSummary"/>
+                              </td>
+                              <td class="spDataTableHeader centeredColumn">
+                                <a4j:commandButton styleClass="secondaryBtn" value="#{msgs.button_add}" oncomplete="enterKeyCheck();" action="#{applicationObject.accountCorrelationBean.addCondition}" render="directConditionsTable,directSummary"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                <h:selectOneMenu id="directApplicationAttributeSelection" value="#{applicationObject.accountCorrelationBean.newDirect.newFilter.object.property}">
+                                  <f:selectItem itemLabel="#{msgs.corwiz_select_attribute}" itemValue=""/>
+                                  <f:selectItems id="directappAttributes" value="#{applicationObject.accountAttributeNames}"/>
+                                </h:selectOneMenu>
+                              </td>
+                              <td class="spDataTableHeader">
+                                <h:selectOneMenu id="directOperator" value="#{applicationObject.accountCorrelationBean.newDirect.newFilter.operator}">
+				                  <f:selectItem itemLabel="#{msgs.corwiz_condition_select}" itemValue=""/>
+                                  <f:selectItems value="#{applicationObject.accountCorrelationBean.operators}"/>
+                                </h:selectOneMenu>
+                              </td>
+                              <td class="spDataTableHeader">
+                                <h:inputText id="newFilterValue" size="30" value="#{applicationObject.accountCorrelationBean.newDirect.newFilter.object.value}" />
+                              </td>
+                            </ui:fragment>
+                          </tr>
+                        </tfoot>
+                        <tbody>
+                          <ui:repeat value="#{applicationObject.accountCorrelationBean.newDirect.conditions}" var="filter">
+                            <tr>
+                              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                <td class="centeredColumn">
+                                  <h:selectBooleanCheckbox styleClass="toggleable" id="#{filter.id}checkbox" value="#{applicationObject.accountCorrelationBean.selectedConditions[filter.id]}"/>
+                                </td>
+                                <td>
+                                   <table>
+                                     <tr>
+                                       <td>
+                                         <ui:fragment rendered="#{not sp:isFirstElement(filter,applicationObject.accountCorrelationBean.newDirect.conditions)}">
+                                            <a4j:commandButton image="/images/icons/arrow_button_up_20.png"
+                                                              onclick="$('editForm:itemToMove').value='#{filter.id}'"
+                                                              action="#{applicationObject.accountCorrelationBean.moveConditionUp}" render="directConditionsTable"/>
+                                         </ui:fragment>
+                                         <ui:fragment rendered="#{sp:isFirstElement(filter,applicationObject.accountCorrelationBean.newDirect.conditions)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_up_disabled_20.png"/>
+                                         </ui:fragment>
+                                       </td>
+                                       <td>
+                                         <ui:fragment rendered="#{not sp:isLastElement(filter,applicationObject.accountCorrelationBean.newDirect.conditions)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_down_20.png"
+                                                              onclick="$('editForm:itemToMove').value='#{filter.id}'"
+                                                              action="#{applicationObject.accountCorrelationBean.moveConditionDown}" render="directConditionsTable"/>
+                                         </ui:fragment>
+                                         <ui:fragment rendered="#{sp:isLastElement(filter,applicationObject.accountCorrelationBean.newDirect.conditions)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_down_disabled_20.png"/>
+                                         </ui:fragment>
+                                       </td>
+                                     </tr>
+                                   </table>
+                                </td>
+                              </ui:fragment>
+                              <td>
+                                <h:selectOneMenu value="#{filter.object.property}">
+                                  <f:selectItem itemLabel="#{msgs.corwiz_select_attribute}" itemValue=""/>
+                                  <f:selectItems id="directappAttributes" value="#{applicationObject.accountAttributeNames}"/>
+                                </h:selectOneMenu>
+                              </td>
+                              <td>
+                                <h:selectOneMenu value="#{filter.operator}">
+				  <f:selectItem itemLabel="#{msgs.corwiz_condition_select}" itemValue=""/>
+                                  <f:selectItems value="#{applicationObject.accountCorrelationBean.operators}"/>
+                                </h:selectOneMenu>
+                              </td>
+                              <td>
+                                <h:inputText value="#{filter.object.value}" size="30"
+                                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                              </td>
+                            </tr>
+                          </ui:repeat>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+                </table>
+              </a4j:outputPanel>
+              <table>
+                <tr>
+                  <td>
+                    <div class="spBorderlessContentBody" style="margin-top:5px">
+                      <h:panelGrid columns="2" columnClasses="nowrap vertical-align, none">
+                        <h:panelGroup>
+                          <h:outputText styleClass="sectionHeader" value="#{msgs.corwiz_target_identity}"/>
+                          <h:outputText styleClass="requiredText" value="*"/>
+                        </h:panelGroup>
+                        <h:panelGroup>
+                          <div id="identitySelector"/>
+                          <t:inputHidden id="selectedIdentity"
+                                         value="#{applicationObject.accountCorrelationBean.newDirect.object.identity}" forceId="true">
+                            <sp:convertIdentity />
+                          </t:inputHidden>
+                        </h:panelGroup>
+                      </h:panelGrid>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            <div class="spBorderlessContentBody" style="margin-top:10px">
+              <table style="width:660px">
+                <tr>
+                  <td>
+                    <div style="margin-top:5px">
+                      <h:outputText value="#{msgs.corwiz_cond_new}"/>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div class="spTabledContent" style="margin-top:10px">
+              <table class="width100">
+                <tr>
+                  <td>
+                    <h:outputText value="#{msgs.corwiz_cond_note}"/>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id='CurrentConditionBasedCorrelation'>
+          <div class="spBorderlessContentBody" style="margin-top:20px; margin-bottom:10px">
+            <a4j:outputPanel id="directSummary">
+              <table style="width:670px" cellpadding="0" cellspacing="0">
+                <tr>
+                  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                </tr>
+                <tr><h:outputText styleClass="sectionHeader" value="#{msgs.corwiz_cond_summary}"/></tr>
+                <tr>
+                  <td>
+                    <div class="spTabledContent">
+                      <table class="spTable" cellspacing="0">
+                        <thead>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <th style="text-align:center"><h:selectBooleanCheckbox id="selectAllToggleDirect" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/>
+                              </th>
+                              <th/>
+                            </ui:fragment>
+                            <th><h:outputText value="Identity"/></th>
+                            <th style="text-align:left"><h:outputText value="Conditions"/></th>
+                          </tr>
+                        </thead>
+                        <tfoot>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <td class="spDataTableHeader centeredColumn">
+                                <a4j:commandButton styleClass="secondaryBtn" value="#{msgs.button_delete}" action="#{applicationObject.accountCorrelationBean.removeDirect}" render="directSummary"/>
+                              </td>
+                              <td class="spDataTableHeader centeredColumn" colspan="1">
+                                <a4j:commandButton styleClass="secondaryBtn" value="#{msgs.button_add}" oncomplete="gotoPage(5);" render="directConditionsTable,directSummary"/>
+                              </td>
+                              <td class="spDataTableHeader centeredColumn" colspan="2"/>
+                            </ui:fragment>
+                          </tr>
+                        </tfoot>
+                        <tbody>
+                          <ui:repeat value="#{applicationObject.accountCorrelationBean.direct}" var="direct">
+                            <tr>
+                              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                <td class="centeredColumn">
+                                  <h:selectBooleanCheckbox styleClass="toggleable" id="#{direct.id}checkbox" value="#{applicationObject.accountCorrelationBean.selectedDirect[direct.id]}"/>
+                                </td>
+
+                                <td>
+                                   <table>
+                                     <tr>
+                                       <td>
+                                         <a4j:commandButton styleClass="secondaryBtn" value="#{msgs.button_edit}" onclick="$('editForm:itemToMove').value='#{direct.id}';gotoPage(5);" action="#{applicationObject.accountCorrelationBean.editDirect}" render="directConditionsTable"/>
+                                       </td>
+                                       <td>
+                                         <ui:fragment rendered="#{not sp:isFirstElement(direct,applicationObject.accountCorrelationBean.direct)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_up_20.png"
+                                                              onclick="$('editForm:itemToMove').value='#{direct.id}'"
+                                                              action="#{applicationObject.accountCorrelationBean.moveDirectUp}" render="directSummary"/>
+                                         </ui:fragment>
+                                         <ui:fragment rendered="#{sp:isFirstElement(direct,applicationObject.accountCorrelationBean.direct)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_up_disabled_20.png"/>
+                                         </ui:fragment>
+                                       </td>
+                                       <td>
+                                         <ui:fragment rendered="#{not sp:isLastElement(direct,applicationObject.accountCorrelationBean.direct)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_down_20.png"
+                                                              onclick="$('editForm:itemToMove').value='#{direct.id}'"
+                                                              action="#{applicationObject.accountCorrelationBean.moveDirectDown}" render="directSummary"/>
+                                         </ui:fragment>
+                                         <ui:fragment rendered="#{sp:isLastElement(direct,applicationObject.accountCorrelationBean.direct)}">
+                                           <a4j:commandButton image="/images/icons/arrow_button_down_disabled_20.png"/>
+                                         </ui:fragment>
+                                       </td>
+                                     </tr>
+                                   </table>
+                                </td>
+
+                              </ui:fragment>
+                              <td><h:outputText value="#{direct.object.identity.displayableName}"
+                                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                              </td>
+                              <td>
+                                <h:outputText value="#{direct.filterExpression}"
+                                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                              </td>
+                            </tr>
+                          </ui:repeat>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </a4j:outputPanel>
+
+            <table style="width:670px">
+              <tr>
+                <td>
+                  <div style="margin-top:30px">
+                    <h:outputText value="#{msgs.corwiz_tosave}"/>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+      </div>
+      
+    </f:view>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+  <body>
+
+  <ui:composition>
+      <div id="deleteSourceDiv"/>
+    
+      <div id="deleteSourceContentsDiv" class="spAjaxContent" style="display:none">
+        <a4j:outputPanel id="deleteSourcesPanel">
+          <t:dataTable id="deleteSourceTable" 
+            rowClasses="even,odd"
+            styleClass="spTable" 
+            style="width:98%"
+            value="#{identityConfigEdit.editedAttribute.mappedSources}" 
+            var="source"
+            forceIdIndexForumula="#{source.index}">
+        
+              <h:column>
+                <h:selectBooleanCheckbox id="deleteCheckbox" value="#{source.checked}"/>
+              </h:column>
+              
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText value="#{msgs.sourceApplication}"/>
+                </f:facet>
+                <h:outputText value="#{source.application}"/>
+              </h:column>
+              
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText value="#{msgs.sourceAttribute}"/>
+                </f:facet>
+                <h:outputText value="#{source.text}"/>
+              </h:column>
+
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText value="#{msgs.selection_type_of_source}"/>
+                </f:facet>
+                <h:outputText value="#{sp:localizeKey(source.sourceTypeEnum.messageKey)}"/>
+              </h:column>
+
+
+            </t:dataTable>
+          </a4j:outputPanel>
+        </div>
+        
+        <a4j:commandButton id="stealthDeleteSourcesButton" style="display:none" 
+                           action="#{linkConfigEdit.deleteSources}" 
+                           render="sourceMappings, deleteSourcesPanel" 
+                           oncomplete="var popup = Ext.getCmp('deleteSourcesWindow');
+                                       if (popup)
+                                           popup.hide();
+                                       "/>
+        <a4j:commandButton id="stealthCancelDeleteSourcesButton" style="display:none" action="#{identityConfigEdit.cancelDeleteSources}"/>
+    </ui:composition>
+  </body>
+</html>

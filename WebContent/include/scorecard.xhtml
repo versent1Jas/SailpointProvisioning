@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:remove><!--
+   General purpose scorecard viewer.
+   Required arguments:
+
+     scorecard
+       an instanceof ScorecardBean
+
+--></ui:remove>
+
+<body>
+<ui:composition>
+
+  <ui:include src="/include/scorecardCategories.xhtml">
+      <ui:param name="scorecard" value="#{scorecard}"/>
+  </ui:include>         
+
+  <!-- Table of Composite score explanations -->
+
+  <ui:fragment rendered="#{!(empty scorecard.scoreItems)}">
+
+    <table cellspacing="0" cellpadding="2" class="width100 customWidth">
+      <tr>
+        <td>
+          <h:outputText styleClass="spContentTitle" value="#{msgs.title_label_top_composite_score_cont}"/>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="paddedContainer">
+            <table id="riskExplanationTbl" class="spTable" cellspacing="0">
+              <tr>
+                <th>#{msgs.label_score_category}</th>
+                <th>#{msgs.label_contributor}</th>
+                <th>#{msgs.label_score}</th>
+                <th>#{msgs.label_percent_composite_score}</th>
+              </tr>
+              <ui:repeat value="#{scorecard.scoreItems}" var="item" varStatus="status">
+                <tr class="#{status.even ? 'even' : 'odd'}">
+                  <td align="left">
+                    <h:outputText value="#{sp:localizeKey(item.typeName)}"/>
+                  </td>
+                  <td align="left">
+                    <h:outputText value="#{sp:localize(item.targetMessage)}"/>
+                  </td>
+                  <td align="left">
+                    <h:outputText value="#{item.score}"/>
+                  </td>
+                  <td align="left">
+                    <h:outputText value="#{item.compositePercentage}%"/>
+                  </td>
+                </tr>
+              </ui:repeat>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </ui:fragment>
+  
+</ui:composition>
+
+</body>
+</html>

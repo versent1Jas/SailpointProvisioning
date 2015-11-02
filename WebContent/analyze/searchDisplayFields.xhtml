@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+    <div id="#{searchType}fieldContainer" style="margin:5px">
+	    <div id="#{searchType}AccordionDiv"></div>
+	    
+	    <ui:fragment rendered="#{searchType == 'identity' || searchType == 'advancedIdentity'}">
+	      <div id="#{searchType}identityFieldsTab" class="x-panel">
+	        <div id="identityFieldsContent" class="x-panel-body lightAccordionTabContentBox">
+	          <h:selectManyCheckbox styleClass="font10 paddedTbl" enabledClass="font10" layout="pageDirection"
+	            id="identityColumnList" value="#{searchBean.selectedIdentityFields}">
+	            <f:selectItems value="#{searchBean.identityFieldList}"/>
+	          </h:selectManyCheckbox>
+	        </div>
+	      </div>
+          <div id="#{searchType}riskFieldsTab" class="x-panel">
+            <div id="riskFieldsContent" class="x-panel-body lightAccordionTabContentBox">
+              <h:selectManyCheckbox styleClass="font10 paddedTbl" enabledClass="font10" layout="pageDirection" 
+                id="riskColumnList" value="#{searchBean.selectedRiskFields}">
+                <f:selectItems value="#{searchBean.riskFieldList}"/>
+              </h:selectManyCheckbox>
+            </div>
+          </div>
+	    </ui:fragment>
+	    
+	    <ui:fragment rendered="#{searchType == 'activity'}">
+	      <div id="activityFieldsTab" class="x-panel">
+	        <div id="activityFieldsContent" class="x-panel-body lightAccordionTabContentBox">
+	          <h:selectManyCheckbox styleClass="font10 paddedTbl" enabledClass="font10" layout="pageDirection" 
+	            id="activityColumnList" value="#{searchBean.selectedActivityFields}">
+	            <f:selectItems value="#{searchBean.activityFieldList}"/>
+	          </h:selectManyCheckbox>
+	        </div>
+	      </div>
+	    </ui:fragment>
+      
+        <ui:fragment rendered="#{searchType == 'role'}">
+          <div id="roleFieldsTab" class="x-panel">
+            <div id="roleFieldsContent" class="x-panel-body lightAccordionTabContentBox">
+              <h:selectManyCheckbox styleClass="font10 paddedTbl" enabledClass="font10" layout="pageDirection" 
+                id="roleColumnList" value="#{searchBean.selectedRoleFields}">
+                <f:selectItems value="#{searchBean.roleFieldList}"/>
+              </h:selectManyCheckbox>
+            </div>
+          </div>
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{searchType == 'accountGroup'}">
+          <div id="accountGroupFieldsTab" class="x-panel">
+            <div id="accountGroupFieldsContent" class="x-panel-body lightAccordionTabContentBox">
+              <h:selectManyCheckbox styleClass="font10 paddedTbl" enabledClass="font10" layout="pageDirection" 
+                id="accountGroupColumnList" value="#{searchBean.selectedAccountGroupFields}">
+                <f:selectItems value="#{searchBean.accountGroupFieldList}"/>
+              </h:selectManyCheckbox>
+            </div>
+          </div>
+        </ui:fragment>
+	    
+	    <ui:fragment rendered="#{searchType == 'certification'}">
+	      <div id="certificationFieldsTab" class="x-panel">
+	        <div id="certificationFieldsContent" class="x-panel-body lightAccordionTabContentBox">
+	          <h:selectManyCheckbox styleClass="font10 paddedTbl" enabledClass="font10" layout="pageDirection" 
+	            id="certificationColumnList" value="#{searchBean.selectedCertificationFields}">
+	            <f:selectItems value="#{searchBean.certificationFieldList}"/>
+	          </h:selectManyCheckbox>
+	          
+	          <a4j:outputPanel id="searchTypeFields">
+	            <ui:fragment rendered="#{!(searchBean.searchTypeFieldList eq null)}">
+	              <hr/>
+                  <b>#{msgs[searchBean.certificationSearchTypeLabel]}</b>
+	              <h:selectManyCheckbox styleClass="font10 paddedTbl" onchange="SailPoint.Analyze.SearchDisplayFields.copyToSearchTypeInput()"
+	                enabledClass="font10" layout="pageDirection" 
+	                id="certificationTypeColumnList" value="#{searchBean.selectedSearchTypeFields}">
+	                <f:selectItems value="#{searchBean.searchTypeFieldList}"/>
+	              </h:selectManyCheckbox>
+	            </ui:fragment>
+	          </a4j:outputPanel>
+	          
+	          <h:inputHidden id="certificationTypeColumnListInput" 
+	            value="#{searchBean.selectedSearchTypeFields}" converter="java.util.List"/>
+	        </div>
+	      </div>
+	    </ui:fragment>
+	    
+    </div>
+            
+  </f:view>
+</ui:composition>
+</body>
+</html>

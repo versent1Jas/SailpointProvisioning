@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+      helpKey = 'APPLICATION';
+
+      function getFieldValue(fieldname) {
+          var val = null;
+          var field = $(fieldname);
+          if ( field ) {
+              val = field.value;
+          }
+          return val;
+      }
+
+      Ext.onReady(function () {
+          Ext.QuickTips.init();
+          // This is our validation hook
+          Page.on('beforeSave', function() {
+              var errors = Validator.getErrors();
+              if (errors && errors.length > 0) {
+                  var errorDivTop = $('formErrorsTop');
+                  var errorDivBottom = $('formErrorsBottom');
+                  Validator.displayErrors(errorDivBottom); 
+                  Validator.displayErrors(errorDivTop); 
+                  return false;
+              }
+              return true;
+          });
+      });
+
+      //--><!]]>
+    </script>
+    <f:view>
+
+    <h:outputText styleClass="sectionHeader" value="#{applicationObject.type} Setting"/><br/><br/>
+    <div id='formErrorsTop' class="formError" style="display:none"/>
+
+    <div id="accountSettings" class='spContent'>
+      <table class="spTable" style="border:0px" cellspacing="0">
+        <tr>
+          <td class='titleColumn certScheduleTitleCol'>
+            <h:outputText style='padding:5px' value="#{msgs.con_duo_api_host_name}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpUrl" 
+                            styleClass="helpIcon" 
+                            url="/images/icons/dashboard_help_16.png" 
+                            alt="#{help.help_con_duo_api_host_name}"/>
+          </td>
+          <td>
+            <h:inputText id="host"
+                         value="#{applicationObject.attributes['host']}"
+                         size="40"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+          </td>
+        </tr>
+        <tr>
+          <td class='titleColumn certScheduleTitleCol'>
+            <h:outputText style='padding:5px' value="#{msgs.con_duo_integration_key}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpUser" 
+                            styleClass="helpIcon" 
+                            url="/images/icons/dashboard_help_16.png" 
+                            alt="#{help.help_con_duo_integration_key}"/>
+          </td>
+          <td>
+            <h:inputText id="integrationKey"
+                         value="#{applicationObject.attributes['integrationKey']}"
+                         size="40"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+          </td>
+        </tr>
+        <tr>
+          <td class='titleColumn certScheduleTitleCol'>
+            <h:outputText style='padding:5px' value="#{msgs.con_duo_secret_key}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpPassword" 
+                            styleClass="helpIcon" 
+                            url="/images/icons/dashboard_help_16.png" 
+                            alt="#{help.help_con_duo_secret_key}"/>
+          </td>
+          <td>
+            <sp:inputSecret id="secretKey"
+                            value="#{applicationObject.attributes['password']}"
+                            size="40"
+                            redisplay="true"
+                            autocomplete="off"
+                            disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                            readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+</body>
+</html>

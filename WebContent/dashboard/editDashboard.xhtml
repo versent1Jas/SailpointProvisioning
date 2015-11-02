@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_add_dashboard_content}</ui:define>
+  
+  <ui:define name="headerItems">
+  
+  
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web">
+      <src>dashboard.css</src>
+    </sp:style>
+    
+  	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/dashboard.js?#{debug.revision}</src>
+  	</sp:script>
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'EDIT_DASHBOARD';
+        Ext.onReady(function () {
+          SailPoint.Dashboard.initializeEditDashboard();
+        });
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:form id="contentForm">
+      
+      <div class="pageInfo">
+        <div class="instructions">
+          <h:outputText value="#{msgs.inst_dash_edit}" />
+        </div>
+      </div>
+      
+          <div class="spContent">
+            <!-- Dash Layout Choices -->
+            <h:outputText class="spContentTitle" value="#{msgs.header_dashboard_layout_choices}"/><br/>
+            
+            <div class="spTabledContent">
+              <table id="layoutTable" cellspacing="0" class="spTable">
+                  <tr>
+                    <th colspan="4">#{msgs.header_layout_type}</th>
+                  </tr>
+                  <tr class="pointer">
+                  
+                  <ui:repeat value="#{dashboard.systemLayouts}" var="systemLayout">
+                    <td width="25%" class="#{(systemLayout.type == dashboard.myDashboard.layout.type) ? 'selectedYellow' : ''}" 
+                      align="center" id="#{systemLayout.type}" 
+                      onclick="SailPoint.Dashboard.selectLayout(this, 'contentForm:layoutSelected')">
+                      <h:outputText style="font-weight:bold" value="#{sp:localizeKey(systemLayout.type.messageKey)}"/>
+                      <br/><br/>
+                      <h:graphicImage url="/images/#{systemLayout.name}.jpg"/>
+                    </td>
+                  </ui:repeat>
+                  
+                  </tr>
+              </table>
+            </div>
+          </div>
+          
+          <div class="spContent">
+            <!-- Dash Content Choices -->
+            <h:outputText class="spContentTitle" value="#{msgs.header_dashboard_content}"/><br/>
+            <div class="spTabledContent">
+              <table class="spTable">
+                <tr>
+                	<th width="50%">
+                 	  <h:outputText value="#{msgs.header_available_content}" />
+                 	</th>            
+                 	<th width="50%">
+                    <h:outputText value="#{msgs.header_your_content}" />
+                  </th>
+                </tr>
+                
+                <tr>
+                  <td colspan="2">
+                  <div id="dashboard">
+                    <table id="dashTable" class="dashTable dashChoices" >
+                      <tr>
+                        <td>
+                            
+                        <!-- Choices Column -->            
+                          <t:div styleClass="dashColumn dMedium1" id="dashContentChoices">
+                            <c:forEach items="#{dashboard.allDashItems}" var="allContentItem">
+                            <c:if test="#{!(allContentItem.selected)}">
+                              <div class="dUnselected dashContentItem" id="dashContentChoices_#{allContentItem.content.id}">
+                                <table class="width100">
+                                  <tr>
+                                    <td class="handle">
+                                      <h:outputText value="#{sp:localizeKey(allContentItem.content.effectiveTitle)}" />
+                                    </td>
+                                    <td width="16px">
+                                      <h:graphicImage style="cursor:pointer" id="imgHlp_#{allContentItem.content.id}"
+                                      width="12px" height="12px" url="/images/icons/dashboard_help_16.png" 
+                                      alt="#{sp:localizeKey(allContentItem.content.description)}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                            </c:if>
+                            </c:forEach> 
+                          </t:div> 
+                        
+                        <!-- Chosen Column -->
+                        
+                          <t:div styleClass="dashColumn dMedium2" id="dashContentChosen">
+                            <c:forEach items="#{dashboard.myDashboard.references}" var="myContentItem">
+                              <div class="dSelected #{(myContentItem.content.required) ? 'dashContentItemRequired' : 'dashContentItem'}" 
+                                   id="dashContentChosen_#{myContentItem.content.id}">
+                                <table class="width100">
+                                  <tr>
+                                 	  <td class="handle">
+                                      <h:outputText value="#{sp:localizeKey(myContentItem.content.effectiveTitle)}" />
+                                      <h:outputText styleClass="italic" rendered="#{myContentItem.content.required}" value=" (#{msgs.required})"/>
+                                    </td>
+                                    <td width="16px">
+                                      <h:graphicImage style="cursor:pointer" id="imgHlp_my_#{myContentItem.content.id}"
+                                        width="12px" height="12px" url="/images/icons/dashboard_help_16.png" 
+                                        alt="#{sp:localizeKey(myContentItem.content.description)}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                            </c:forEach>
+                          </t:div>                      
+                                    
+                        </td>
+                      </tr>
+                    </table>   
+                  </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+        <div class="buttonRow">
+          <h:commandButton value="#{msgs.button_save}" id="saveLayoutButton" styleClass="primaryBtn" 
+            onclick="SailPoint.Dashboard.addRequiredContent($('contentForm:contentSelected'));" action="#{dashboard.saveMyLayout}"/>
+          <input type="button" value="#{msgs.button_cancel}" class="secondaryBtn" onclick="window.location='../dashboard.jsf'"/>
+        </div>
+
+        <h:inputHidden id="contentSelected" value="#{dashboard.selectedContent}" />
+        <h:inputHidden id="layoutSelected" value="#{dashboard.myLayoutString}" />
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

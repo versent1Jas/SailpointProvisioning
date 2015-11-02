@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+   <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+      <src>lcm.css</src>
+   </sp:style>
+   <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/RowExpander.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/NameWithTooltip.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/accessRequests/AccessRequestsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/AccessRequestStatusGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/GroupFactorySelector.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateRange.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/TableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CellActionPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/CancelWorkflowDialog.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+    </sp:script>
+
+
+  <script type="text/javascript">
+   var myRequestsDashWidget = null;
+   var myRequestsColConf = #{gridConfigBean.uiConfigJson['dashboardMyAccessRequestGridColumns']}.columns;
+   
+   if(#{not lcmConfig.showExternalTicketId}) {
+       for(var i=0; i &lt; myRequestsColConf.length; i++) {
+           if(myRequestsColConf[i].dataIndex == "externalTicketId") {
+               myRequestsColConf.splice(i, 1);
+               break;
+           }
+       }
+     }
+
+   //pass these to advanced search fields defined in AccessRequestStatusGrid.js
+   var jsonFilterRequesterIdentity = null;
+   var jsonFilterRequesteeIdentity = null;
+
+   Ext.onReady(function(){
+      var oldWidget;
+      var oldStore;
+      oldWidget = Ext.getCmp('dashMyAccessRequestGrid');
+      if (oldWidget) {
+          // No sense in building a store if we already have one -- save it for reuse
+          oldStore = oldWidget.getStore();
+          // Destroy the widget so that a copy of it can be reapplied to the 
+          // potentially re-rendered DIV -- Bug 18658
+          oldWidget.destroy();
+          // TODO: Do we really have to rerender the grid's container?
+          // It would be better to simply expand/collapse with built-in
+          // ExtJS methods rather than by doing a full AJAX rerender.
+          // Is this done just for consistency with other dashboard widgets?
+          // --Bernie
+      }
+
+      myRequestsDashWidget = new SailPoint.dashboard.AccessRequestStatusGrid({
+          id:'dashMyAccessRequestGrid',
+          stateId: 'dashMyAccessRequestGrid2',
+          stateful: true,
+          columns: myRequestsColConf,
+          showAdvancedSearch:false,
+          requester:SailPoint.CURR_USER_NAME,
+          showViewAccessRequestLink:true,
+          showExternalTicketSearch: #{lcmConfig.showExternalTicketId},
+          store: oldStore
+      });
+
+      var panelWidth = Ext.get('myRequestStatusGridMain').getSize().width;
+
+      var wrapperPanel = new Ext.Panel({
+           layout:'fit',
+           width:panelWidth - 15,
+           height:300,
+           items:[myRequestsDashWidget]
+      });
+
+
+      myRequestsDashWidget.on('afterToggleExpando', function(isExpanding){
+          var curHeight = this.getSize().height;
+          this.setHeight(isExpanding ? curHeight + 220 : curHeight - 220);
+      }, wrapperPanel);
+
+      wrapperPanel.render('myRequestStatusGridMain');
+
+      myRequestsDashWidget.load();
+    });
+  </script>
+
+
+  <div id="myRequestStatusGridMain" style="width:100%"></div>
+  <h:inputHidden id="requestId" />
+  <h:inputHidden id="workItemId" />
+  <h:commandButton id="viewWorkItem" style="display:none" action="#{dashboard.viewWorkItem}">
+  </h:commandButton>
+  <h:commandButton id="viewRequestDetails" style="display:none" action="#{dashboard.viewIdentityRequestDetail}">
+  </h:commandButton>
+
+</body>
+</html>

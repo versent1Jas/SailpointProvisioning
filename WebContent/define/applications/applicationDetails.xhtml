@@ -1,0 +1,286 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    <f:view>
+
+      <div id="detailsContent" class="submenuContentBox x-hidden" style="border:0px">
+
+          <h:panelGroup>
+            <h:outputText styleClass="requiredText" value="*"/>
+            <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+          </h:panelGroup>
+
+          <h:panelGrid columns="2" columnClasses="nowrap vertical-align, none" styleClass="paddedTbl topAlignTbl appInfoTable">
+            <h:panelGroup>
+              <h:outputText styleClass="requiredText" value="*"/>            
+              <h:outputText styleClass="titleColumn" value="#{msgs.name}"/>
+              <h:graphicImage id="imgHlpName" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_app_name}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+              <h:outputText styleClass="titleColumn" value="#{msgs.remediator}"/>
+              <h:graphicImage id="imgHlpRemediator" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_app_remediator}"/>
+            </h:panelGroup>
+            
+            <h:inputText id="appName" name="appName" value="#{applicationObject.object.name}"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}" />
+            <h:panelGroup>
+              <div id="remediationSuggest"/>
+              <t:inputHidden id="remediator"
+                             name="remediator"
+                             value="#{applicationObject.remediator}"
+                             forceId="true">
+                <sp:convertIdentity />
+              </t:inputHidden>
+              <h:message styleClass="formError" for="remediator" />
+            </h:panelGroup>
+            
+            <h:panelGroup>
+              <h:outputText styleClass="requiredText" value="*"/>
+              <h:outputText styleClass="titleColumn" value="#{msgs.owner}"/>
+              <h:graphicImage id="imgHlpOwner"  
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_app_owner}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+              <h:outputText styleClass="titleColumn" value="#{msgs.label_application_proxy}"/>
+              <h:graphicImage id="imgHlpProxy" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_app_proxy}"/>
+            </h:panelGroup>
+                             
+            <h:panelGroup>            
+                <div id="appOwnerSuggest"></div>
+                
+                <t:inputHidden id="appOwner"
+                             value="#{applicationObject.object.owner}" forceId="true">
+                    <sp:convertIdentity />
+                </t:inputHidden>
+                <h:message styleClass="formError" for="appOwner" />
+            </h:panelGroup>
+            <h:panelGroup>
+                <div id="proxySuggest"></div>
+                <t:inputHidden id="proxy" value="#{applicationObject.object.proxy}" forceId="true">
+                    <sp:convertApplication />
+                </t:inputHidden>
+            </h:panelGroup>
+                         
+            <h:panelGroup>
+              <h:outputText styleClass="requiredText" value="*"/>
+              <h:outputText styleClass="titleColumn" value="#{msgs.application_type}"/>
+              <h:graphicImage id="imgHlpAppType" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_app_type}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+              <h:outputText styleClass="titleColumn" id="appProfileClass" value="#{msgs.profile_class}"/>
+              <h:graphicImage id="imgHlpProfileClass" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_app_profile}"/>
+            </h:panelGroup>
+            
+            <h:panelGroup>
+              <h:selectOneMenu id="connector"
+                               name="connector"
+                               value="#{applicationObject.object.type}"
+                               rendered="#{empty applicationObject.object.id or empty applicationObject.object.type}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               onchange="changeType(this);">
+                <f:selectItem itemValue="" itemLabel="#{msgs.select_one}"/>
+                <f:selectItems value="#{applicationObject.applicationTypes}"/>
+              </h:selectOneMenu>
+              <h:selectOneMenu id="appType"
+                               name="appType"
+                               value="#{applicationObject.type}"
+                               rendered="#{not empty applicationObject.object.id and not empty applicationObject.object.type}"
+                               disabled="true"
+                               readonly="true">
+                <f:selectItem itemValue="#{applicationObject.type}"
+                              itemLabel="#{applicationObject.type}"/>
+              </h:selectOneMenu>
+            </h:panelGroup>
+            <h:inputText id="profileClassInput" name="profileClassInput" value="#{applicationObject.object.profileClass}" size="40"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            
+            <h:panelGroup>
+              <h:outputText styleClass="titleColumn" id="appDescription" value="#{msgs.description}"/>
+              <h:graphicImage id="imgHlpDescription" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_app_description}"/>
+            </h:panelGroup>
+            <h:panelGroup/>
+            
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+              <div id="appDescriptionHTML"></div>
+              <h:inputHidden value="#{applicationObject.descriptionsJSON}" id="appDescriptionsJSON" name="appDescriptionsJSON"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <h:outputText escape="false" value="#{applicationObject.object.description}"/>
+            </ui:fragment>
+            <h:panelGrid>
+
+              <h:panelGroup rendered="#{applicationObject.showAssignedScopeControl}">
+                <h:outputText styleClass="titleColumn" value="#{msgs.label_scope}"/>
+                <h:graphicImage id="imgHlpAssignedScope" 
+                                rendered="#{applicationObject.showAssignedScopeControl}"
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_app_assigned_scope}"/>
+              </h:panelGroup>
+              <h:panelGroup rendered="#{applicationObject.showAssignedScopeControl}">
+                  <div id="assignedScopeSuggest"></div>
+                  <t:inputHidden id="assignedScope" value="#{applicationObject.object.assignedScope}" forceId="true">
+                      <sp:convertScope />
+                  </t:inputHidden>
+              </h:panelGroup>
+  
+  
+              <h:panelGroup>
+                <h:selectBooleanCheckbox value="#{applicationObject.object.authoritative}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                <h:outputText styleClass="titleColumn" id="appAuthoritiveFlag" value="#{msgs.auth_application}"/>
+                <h:graphicImage id="imgHlpAuthorativeApp" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_app_auth_app}"/>
+              </h:panelGroup>
+              
+  
+                           
+              <h:panelGroup>
+                <h:selectBooleanCheckbox value="#{applicationObject.object.caseInsensitive}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                <h:outputText styleClass="titleColumn" id="appCaseFlag" value="#{msgs.app_case_insensitive}"/>                           
+                <h:graphicImage id="imgHlpAppCase" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_app_case_sensitivity}"/>                         
+              </h:panelGroup>
+              
+              
+                           
+              <h:panelGroup>
+                <h:selectBooleanCheckbox id='nativeChangeEnableCheckbox'
+                                         onclick="changeNativeDetectionEnablement();" 
+                                         value="#{applicationObject.object.nativeChangeDetectionEnabled}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>                                     
+                <h:outputText styleClass="titleColumn" id="appChangeDetectionFlag" 
+                              value="#{msgs.app_native_change_enabled}"/>
+                <h:graphicImage id="imgHlpAppChangeDetection" 
+                                  styleClass="helpIcon" 
+                                  url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{help.help_app_enable_change_detection}"/>                         
+              </h:panelGroup>
+              <h:panelGroup>
+                <div id="nativeChangeOptions" style="margin:0px 0px 0px 15px;display:none">                             
+                <h:panelGrid columns="3">
+                    
+                    <h:outputText styleClass="titleColumn" id="nativeChangeOps" value="#{msgs.app_native_change_operations}"/>           
+                       <h:graphicImage id="imgHlpNativeChangeOperations" 
+                                    styleClass="helpIcon" 
+                                    url="/images/icons/dashboard_help_16.png" 
+                                    alt="#{help.help_app_native_change_operations}"/>
+                   
+                    <h:selectManyCheckbox id="selectedOperations" value="#{applicationObject.object.nativeChangeOperations}" layout="pageDirection">
+                      <f:selectItem itemLabel="#{msgs.app_native_change_operation_create}" itemValue="Create"/>
+                      <f:selectItem itemLabel="#{msgs.app_native_change_operation_update}" itemValue="Modify"/>
+                      <f:selectItem itemLabel="#{msgs.app_native_change_operation_delete}" itemValue="Delete"/>
+                    </h:selectManyCheckbox>
+      
+                    
+                    <h:outputText styleClass="titleColumn" id="nativeChangeAttributes" value="#{msgs.app_native_change_attributes}"/>   
+                    <h:graphicImage id="imgHlpNativeChangeAttributes" 
+                                    styleClass="helpIcon" 
+                                    url="/images/icons/dashboard_help_16.png" 
+                                    alt="#{help.help_app_native_change_attributes}"/>
+                  
+                    
+                    <h:selectOneRadio id="nativeChangeAttributeSelection"
+                                        onclick="changeNativeChangeAttributeSelection();"
+                                        value="#{applicationObject.nativeChangeAttributeScope}">                                  
+                      <f:selectItem itemLabel="#{msgs.app_nc_select_entitlement_attributes}" itemValue="entitlements"/>
+                      <f:selectItem itemLabel="#{msgs.app_nc_select_user_defined}" itemValue="userDefined"/>
+                    </h:selectOneRadio>              
+                     
+                  </h:panelGrid>
+                  <h:panelGrid columns="3">               
+                    <h:panelGroup>
+                      <div id="nativeChangesUserDefinedAttributes" style="margin: 0px 0px 0px 15px;display:none">       
+                                                           
+                            <h:outputText styleClass="titleColumn" style="vertical-align: top;" value="#{msgs.app_native_change_attributes_title}" />
+                            <h:graphicImage id="imgHlpUserDefined" 
+                                            styleClass="helpIcon" 
+                                            style="vertical-align: top;"
+                                            url="/images/icons/dashboard_help_16.png" 
+                                            alt="#{help.help_app_user_defined_attributes}"/>
+                     
+                            <h:inputTextarea id='nativeChangesUserDefinedAttributesTextArea'
+                                             name='nativeChangesUserDefinedAttributesTextArea'
+                                             converter="NewLineList"
+                                             value="#{applicationObject.object.nativeChangeAttributes}"
+                                             rows="6" cols="40"
+                                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                    
+                                      
+                      </div> 
+                    </h:panelGroup>
+                  </h:panelGrid>                         
+                </div>
+              </h:panelGroup>
+            
+            </h:panelGrid>
+                         
+          </h:panelGrid>
+           
+          <br/>
+
+        
+          <div class="spContentTitle">#{msgs.define_app_extended_attributes}</div>
+          <div class="paddedTbl topAlignTbl appInfoTable">
+            <ui:include src="/include/attributeEditor.xhtml">
+              <ui:param name="tableId" value="applicationAttributeEditorTable"/>
+              <ui:param name="formName" value="editForm"/>
+              <ui:param name="attributeEditor" value="#{applicationObject.attributeEditor}" />
+              <ui:param name="leftColumnClass" value="titleColumn"/>
+              <ui:param name="rightColumnClass" value="wide"/>
+              <ui:param name="errorColumnClass" value="dSmall1 nowrap"/>
+            </ui:include>
+          </div>
+  
+      </div>
+
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

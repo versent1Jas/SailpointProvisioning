@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_tasks}</ui:define>
+
+  <ui:define name="headerItems">
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/monitor/tasks">
+      <src>tasks.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>menuButton.css</src>
+    </sp:style>
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/tasks.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/DefaultGrouping.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/monitor/TasksGrids.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/menuButton.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+      var templateStore = [
+          <c:forEach items="#{taskDefinitions.templates}" var="template" varStatus="vStatus">
+          <h:outputText rendered="#{!vStatus.first}" value=","/>
+          {text: '#{template.key}', value:'#{template.value}'}
+          </c:forEach>
+      ];
+
+      <!--//--><![CDATA[//><!--
+        helpKey = 'TASKS';
+      Ext.onReady(function() {
+        if(#{sp:hasRight(facesContext, 'FullAccessTask')}) {
+          SailPoint.Component.MenuButton.renderMenuButton('#{msgs.select_create_new_task}', templateStore, newTask, 'newTaskButton');
+        }
+      });
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="subtitle">
+    <div id="subtitle" class="highlight">
+    </div>
+  </ui:define>
+  <ui:define name="body">
+    <f:view>
+      <h:form styleClass="form" id="editForm">
+        <script type="text/javascript" defer="defer">
+          // <![CDATA[
+
+          function getCancelButtonName() {
+              return 'editForm:cancelViewResultButton';
+          }
+          //]]>
+        </script>
+        
+        <!-- 
+        Force StateBean to be instantiated when the form is submitted so that
+        tab state is preserved correctly.
+         -->
+        <h:inputHidden value="#{state.name}" />
+        <input type="hidden" id="activeTab" name="activeTab" value="" />
+
+        <ui:include src="/monitor/tasks/viewTasksGrid.xhtml">
+          <ui:param name="definitionListBean" value="#{taskDefinitions}"/>
+          <ui:param name="resultsListBean" value="#{taskResults}"/>
+          <ui:param name="scheduleListBean" value="#{taskSchedules}"/>
+        </ui:include>
+        
+        <ui:include src="/monitor/tasks/taskDefinitionInclude.xhtml">
+          <ui:param name="definitionListBean" value="#{taskDefinitions}"/>
+        </ui:include>
+        
+        <ui:include src="/monitor/tasks/taskResultInclude.xhtml">
+          <ui:param name="resultsListBean" value="#{taskResults}"/>
+        </ui:include>
+        
+        <ui:include src="/monitor/tasks/taskScheduleInclude.xhtml">
+          <ui:param name="scheduleListBean" value="#{taskSchedules}"/>
+        </ui:include>
+        
+        <br/>
+        
+        <h:inputHidden id="newDefId" value="#{taskDefinitions.newDefId}"/>
+        <h:commandButton style="display:none"
+                         action="#{taskDefinitions.newTask}"
+                         id="createTaskButton" />
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

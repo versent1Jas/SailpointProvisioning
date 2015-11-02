@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+  <div class="#{certificationBean.expirationStyle}">
+    <table class="paddedTbl width100">
+      <tr>
+        <th colspan="4" class="pointer" onclick="SailPoint.Dashboard.viewCertificationItem('#{certificationBean.certification.id}');">
+          <h:outputText value="#{certificationBean.shortName}"/>
+          <ui:fragment rendered="#{certificationBean.daysUntilExpiration le 7}">
+            <br/>
+			<h:outputFormat
+           		rendered="#{certificationBean.daysUntilExpiration ge 0}"
+				value="#{msgs.days_until_expiration}">
+				<f:param value="#{certificationBean.daysUntilExpiration}"/>
+			</h:outputFormat>
+			<h:outputFormat
+           		rendered="#{certificationBean.daysUntilExpiration lt 0}"
+				value="#{msgs.days_after_expired}">
+				<f:param value="#{certificationBean.daysUntilExpiration * -1}"/>
+			</h:outputFormat>
+          </ui:fragment>
+        </th>
+        <th valign="middle" align="right" width="22px">
+          <h:outputLink value="javascript:forwardCertificationWorkItem('#{certificationBean.certification.id}', 'viewDashboard')">
+            <h:graphicImage url="/images/icons/delegate.gif" style="margin:3px"/>
+          </h:outputLink>
+        </th>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <h:outputText styleClass="font10 textBold" value="#{msgs.label_percentage_complete} "/>
+          <h:outputText value="#{sp:round(certificationBean.certification.itemPercentComplete)}%"/>
+        </td>
+        <td colspan="2">
+          <h:outputText rendered="#{certificationBean.expiration != null}" styleClass="font10 textBold" 
+          value="#{msgs.chart_my_certs_label_expiration} "/>
+          <h:outputText value="#{certificationBean.expiration}">
+            <f:convertDateTime type="date" dateStyle="short" timeZone="#{certificationPercentList.userTimeZone}"/>
+          </h:outputText>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <h:outputText styleClass="font10 textBold" value="#{msgs.label_cert_current_phase} "/>
+          <h:outputText value="#{certificationBean.certification.phase}"/>
+        </td>
+        <td colspan="2">
+          <ui:fragment rendered="#{certificationBean.certification.remediationsKickedOff gt 0}">
+            <h:outputLink styleClass="font10" value="javascript:showRemediationGrid('#{certificationBean.certification.id}')">
+              <h:outputText styleClass="font10 textBold" value="#{msgs.label_cert_remed_complete}"/>
+              <h:outputText value="#{sp:round(certificationBean.certification.remediationPercentComplete)}%"/>
+            </h:outputLink>
+          </ui:fragment>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan="5">
+          <table width="100%">
+            <tr>
+              <td>
+                <h:outputText styleClass="completedItem font10 textBold" value="#{msgs.label_task_completed} "/>
+                <h:outputText value="#{certificationBean.certification.completedItems}"/>
+              </td>
+              <td>
+                <h:outputText styleClass="openItem font10 textBold" value="#{msgs.label_open} "/>
+                <h:outputText value="#{certificationBean.certification.openItems - certificationBean.certification.overdueItems}"/>
+              </td>
+              <td>
+                <h:outputText styleClass="overdueItem font10 textBold" value="#{msgs.label_overdue} "/>
+                <h:outputText value="#{certificationBean.certification.overdueItems}"/>
+              </td>      
+              <td>
+                <h:outputText styleClass="font10 textBold" value="#{msgs.label_total} "/>
+                <h:outputText value="#{certificationBean.certification.totalItems}"/>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputFormat value="#{msgs.app_title}">
+      <f:param value="#{applicationObject.object.name ne null ? applicationObject.object.name : ''}"/>
+    </h:outputFormat>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+      <src>html-editor-counter-plugin.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/applications">
+        <src>applications.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/include/template">
+      <src>template-editor.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/checkboxSelector.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/DateTimeInput.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/attributeEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Store.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleCombo.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/FormGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/RowExpander.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/RowExpandoGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/CompositeDefinitionPanelStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/CompositeDefinitionPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/FieldQuerier.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/ApplicationPage.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/ActivityDataSourcesGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/unstructuredTargetsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/model/TemplateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateBooleanValue.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateFieldEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditorWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/EditorTextArea.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowScriptRadio.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ApprovalPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ReferenceFormPopup.js</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiText.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditorCounterPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiLanguageHtmlEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/accountsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/AppConnectorDebugWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/AttributeDefinitionSchema.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/ApplicationObjectPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/MainPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/FacesMultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/JDBCPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/DelimitedPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/applications/SQLLoaderPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        // True if this is an editable composite. If it's not editable,
+        // none of the composite UI elements will show.
+        Page.isCompositeApp = #{applicationObject.allowTiersEdit ? true : false};
+        Page.supportsUnstructuredTargets = #{applicationObject.supportsUnstructuredTargets ? true : false};
+        Page.initialAccountRule = "#{applicationObject.compositeAccountRule}";
+        Page.initialRemediationRule = "#{applicationObject.compositeRemediationRule}";
+
+        Ext.onReady(function () {
+
+           Ext.QuickTips.init();
+           
+           var hasManageAppRight = #{!sp:hasRight(facesContext, 'ManageApplication')};
+           
+           // suspending layouts resolves height issue on details panel causing second vertical scroll bar to appear, ugly yes...  
+           Ext.suspendLayouts();
+           
+           ApplicationPage.initAppOwner([#{sp:buildJSONFromIdentity(applicationObject.object.owner.id)}], hasManageAppRight);
+           ApplicationPage.initAppDescription(#{sp:getSystemConfigurationValue("enableLocalizeApplicationDescriptions", false)}, '#{applicationObject.locale}');
+           ApplicationPage.initRevoker([#{sp:buildJSONFromIdentity(applicationObject.remediator.id)}], hasManageAppRight);
+           ApplicationPage.initScope('#{applicationObject.object.assignedScope.name}', #{applicationObject.showAssignedScopeControl}, hasManageAppRight);
+           ApplicationPage.initProxyApp('#{sp:escapeJavascript(applicationObject.object.proxy.name)}', hasManageAppRight);
+
+            // Load up the composite defintion data if needed
+           if (Page.isCompositeApp){
+               ApplicationPage.getCompositeStore();
+           }
+
+           initExtTabs();
+           configureExtTabs("#{applicationObject.object.type}");
+           initializeNativeChangeFields("#{applicationObject.object.nativeChangeDetectionEnabled}");
+           enterKeyCheck();
+
+           initSchemaTab();
+
+           SailPoint.initAttributeEditor('applicationAttributeEditorTable');
+           
+           Ext.resumeLayouts(true);
+        });
+
+        //--><!]]>
+    </script>
+
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:form styleClass="form" id="editForm">
+        <!--
+            Serialized JSON containing the composite definition is this app is a Composite.
+        -->
+        <h:inputHidden id="currentTierApp" name="currentTierApp" value="#{applicationObject.currentTier}"/>
+        <h:inputHidden id="compositeDefinition" name="compositeDefinition" value="#{applicationObject.compositeDefinitionJson}" />
+        <h:inputHidden id="logicalConfigDirty" name="logicalConfigDirty" value="#{applicationObject.logicalConfigDirty}"/>
+
+        <a4j:outputPanel id="errorPanel" ajaxRendered="true">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+
+        <h:inputHidden id="templateChoice" name="templateChoice" value="#{applicationObject.templateChoice}"/>
+        <h:inputHidden id="appReconfigMode" name="appReconfigMode" value="#{applicationObject.appReconfMode}"/>
+        <h:inputHidden id="isSchemaMappingSaved" name="isSchemaMappingSaved" value="#{applicationObject.schemaMappingSaved}"/>
+        <h:commandButton style="display:none" id="updateProvisionPolicyBtn" action="#{applicationObject.updateProvPolicies}"/>
+        <h:inputHidden id="id" name="id" value="#{applicationObject.objectId}"/>
+        <h:inputHidden id="type" name="type" value="#{applicationObject.object.type}"/>
+        <h:inputHidden id="selectedDSForApp" name="selectedDSForApp" value="#{applicationObject.selectedDataSourceId}"/>
+        <h:inputHidden id="selectedTargetsForApp" name="selectedTargetsForApp" value="#{applicationObject.selectedTargetSourceId}"/>
+        <h:inputHidden id="currentTab" name="currentTab" value="#{applicationObject.currentTab}"/>
+        <h:inputHidden id="schemaLoaded" name="schemaLoaded" value="#{applicationObject.schemaLoaded}"/>
+        <div id="applicationAccountGridMetadata" style="display:none">#{gridConfigBean.uiConfigJson['applicationAccountsTableColumns']}</div>
+        <div id="hasIdentityViewRight" style="display:none">#{sp:hasRight(facesContext, 'ViewIdentity')}</div>
+
+        <a4j:commandButton id="attributePanelBtn"
+                           render="attributePanel"
+                           style="display:none"
+                           oncomplete="javascript:doAttributesContentOnComplete('attributesContent')"/>
+                           
+        <a4j:commandButton id="tabUpdateBtn"
+                           render="schemaPanel,errorPanel"
+                           style="display:none"
+                           oncomplete="hideLoadingDiv()"/>
+
+        <a4j:commandButton id="compositeTabUpdateBtn"
+                           render="compositeSchemaPanel"
+                           style="display:none"
+                           oncomplete="hideLoadingDiv()"/>
+
+        <a4j:commandButton id="updatePasswordPanelBtn"
+                           render="passwordPanel"
+                           style="display:none"
+                           oncomplete="hideLoadingDiv()"/>
+
+        <a4j:commandButton id="connectorDebugBtn" action="#{applicationObject.prepareConnectorDebugSession}"
+                                   style="display:none"
+                                   oncomplete="SailPoint.completeConnectorDebug()"/>
+
+
+        <h:panelGroup id="applicationEditing" layout="block">
+          <h:commandButton style="display:none" id="changeTypeButton"
+                           action="#{applicationObject.changeType}"/>
+
+          <h:panelGroup>
+
+            <div id="applicationExtTabs"/>
+
+            <table class="applicationTabPanelBody" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <ui:fragment rendered="#{applicationObject.allowTiersEdit}">
+                    <div id="compositeTiers" class="submenuContentBox x-hidden" style="border:0px">
+                      <div class="spContent">
+                          <ui:include src="compositeTiers.xhtml"/>
+                      </div>
+                    </div>
+                  </ui:fragment>
+                 
+                  <ui:include src="applicationDetails.xhtml"/>
+
+                  <ui:include src="applicationConfig.xhtml"/>
+
+                  <ui:include src="applicationRule.xhtml"/>
+
+                  <div id="riskContent" class="submenuContentBox x-hidden" style="border:0px">
+                    <ui:include src="/include/scorecard.xhtml">
+                      <ui:param name="scorecard" value="#{applicationObject.scorecard}"/>
+                    </ui:include>
+                  </div> <!-- riskContent -->
+
+                  <div id="dataSourcesContent" class="submenuContentBox x-hidden" style="border:0px">
+                    <ui:include src="activityDataSources.xhtml"/>
+                  </div> <!-- dataSourcesContent -->
+
+                  <div id="unstructuredContent" class="submenuContentBox x-hidden" style="border:0px">
+                    <ui:include src="unstructuredTargets.xhtml"/>
+                  </div> <!-- unstructuredContent -->
+
+                  <div id="correlationContent" class="submenuContentBox x-hidden" style="border:0px">
+                    <ui:include src="correlationConfig.xhtml"/>
+                  </div> <!-- correlationContent -->
+                  
+                  <div id="accountsGridContent" class="submenuContentBox x-hidden" style="border:0px">
+                    <div id="accountsGrid"></div>
+                  </div> <!-- accountsGridContent -->
+
+                  <div id="passwordContent" class="submenuContentBox x-hidden" style="border:0px">
+                    <div class="spContentTitle">
+                      <h:outputText value="#{msgs.password_policies}"/>
+                    </div>
+                    <a4j:outputPanel id="passwordPanel">
+                      <ui:include src="passwordPolicy.xhtml"/>
+                    </a4j:outputPanel>
+                  </div> <!-- passwordContent -->
+
+                </td>
+              </tr>
+            </table>
+            
+            <!-- correlation wizard -->
+            <div id="wizardRenderToDiv"></div>
+          </h:panelGroup>
+
+          <h:panelGroup>
+            <div class="buttonRow">
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                <h:commandButton rendered="#{!applicationObject.appReconfMode}" 
+                                 styleClass="primaryBtn" id="saveAppBtn" action="#{applicationObject.saveAction}" value="#{msgs.button_save}"
+                                 onclick="return isSaveOk(this);"/>
+                <!-- This save button will displayed only during Application reconfiguration task and its used due to the 
+                asynchrounous nature of messagebox which does not pause the code flow. 
+                We also have made sure that we dont harm the existing functionality.-->
+                <h:commandButton rendered="#{applicationObject.appReconfMode}" 
+                                 styleClass="primaryBtn" id="saveReconfigureAppBtn" value="#{msgs.button_save}"
+                                 onclick="saveReconfAppConfirmation(this); return false;"/>
+                <h:commandButton id="hiddenSaveAppReconfBtn" style="display:none" action="#{applicationObject.saveAction}"/>
+              </ui:fragment>
+              <h:commandButton styleClass="secondaryBtn" id="cancelAppBtn" action="#{applicationObject.cancelAction}" value="#{msgs.button_cancel}" immediate="true"/>
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                <h:commandButton rendered="#{not empty applicationObject.object.id and not empty applicationObject.object.type}" 
+                          styleClass="secondaryBtn" 
+                          id="reconfApplicationBtn" 
+                          onclick="enableApplicationReconfig('#{applicationObject.applicationTypesJsonString}');return false;" 
+                          disabled="#{applicationObject.appReconfMode}"
+                          value = "#{msgs.app_reconf_btn_value}" />
+               </ui:fragment>
+            </div>
+          </h:panelGroup>
+        </h:panelGroup>
+
+
+      </h:form>
+      
+      <h:form styleClass="form" id="viewIdentityForm">
+        <h:inputHidden id="identityToView" value="#{applicationObject.identityToView}"/>
+        <h:inputHidden id="applicationId" value="#{applicationObject.objectId}"/>
+        <h:inputHidden id="currentTab" value="#{applicationObject.currentTab}"/>
+        <h:commandButton id="viewIdentityBtn" style="display:none" action="#{applicationObject.viewIdentity}"/>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

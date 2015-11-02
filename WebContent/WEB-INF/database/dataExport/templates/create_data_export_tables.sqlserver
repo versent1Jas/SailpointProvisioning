@@ -1,0 +1,318 @@
+use identityiq;
+create table identityiq.sptr_export (
+    task_def_id nvarchar(128) not null,
+    class_name nvarchar(256)  not null,
+    start_dt numeric(19,0) not null,
+    end_dt numeric(19,0) not null
+);
+GO
+create index sptr_idx_export_task on identityiq.sptr_export (task_def_id);
+GO
+create index sptr_idx_export_class on identityiq.sptr_export (class_name);
+GO
+
+create table identityiq.sptr_identity (
+    id nvarchar(128) not null,
+    created numeric(19,0),
+    created_dt datetime,
+    export_date numeric(19,0),
+    name nvarchar(128),
+    display_name nvarchar(128),
+    firstname nvarchar(128),
+    lastname nvarchar(128),
+    email nvarchar(128),
+    manager nvarchar(128),
+    manager_display_name nvarchar(128),
+    manager_status tinyint null,
+    inactive tinyint null,
+    correlated tinyint null,
+    primary key (id)
+);
+GO
+
+create index sptr_idx_ident_name on identityiq.sptr_identity (name);
+GO
+create index sptr_idx_ident_fname on identityiq.sptr_identity (firstname);
+GO
+create index sptr_idx_ident_lname on identityiq.sptr_identity (lastname);
+GO
+create index sptr_idx_ident_email on identityiq.sptr_identity (email);
+GO
+create index sptr_idx_ident_manager on identityiq.sptr_identity (manager);
+GO
+
+create table identityiq.sptr_identity_scorecard (
+    id nvarchar(128) not null,
+    identity_id nvarchar(128) not null,
+    composite_score int default 0,
+    business_role_score int default 0,
+    raw_business_role_score int default 0,
+    entitlement_score int default 0,
+    raw_entitlement_score int default 0,
+    policy_score int default 0,
+    raw_policy_score int default 0,
+    certification_score int default 0,
+    total_violations int default 0,
+    total_remediations int default 0,
+    total_delegations int default 0,
+    total_mitigations int default 0,
+    total_approvals int default 0,
+    primary key (id)
+);
+
+create index sptr_idx_ident_score_ident_id on identityiq.sptr_identity_scorecard (identity_id);
+GO
+
+create table identityiq.sptr_identity_attr (
+    object_id nvarchar(128) not null,
+    attr_name nvarchar(128) not null,
+    attr_value nvarchar(@IdentityAttrColLength)
+);
+GO
+
+create index sptr_idx_ident_attr_id on identityiq.sptr_identity_attr (object_id);
+GO
+create index sptr_idx_ident_attr_name on identityiq.sptr_identity_attr (attr_name);
+GO
+
+create table identityiq.sptr_identity_entitlements (
+    id nvarchar(128) not null,
+    identity_id nvarchar(128) not null,
+    native_identity nvarchar(256),
+    display_name nvarchar(128),
+    application_id nvarchar(128),
+    application_name nvarchar(256),
+    application_instance nvarchar(128),
+    type nvarchar(128) not null,
+    description nvarchar(255) not null,
+    value nvarchar(2048),
+    export_date numeric(19,0)
+);
+GO
+
+create index sptr_idx_ident_ents_id on identityiq.sptr_identity_entitlements (id);
+GO
+create index sptr_idx_ident_ents_ident_id on identityiq.sptr_identity_entitlements (identity_id);
+GO
+create index sptr_idx_ident_ents_app_id on identityiq.sptr_identity_entitlements (application_id);
+GO
+create index sptr_idx_ident_ents_exp_dt on identityiq.sptr_identity_entitlements (export_date);
+GO
+
+create table identityiq.sptr_account (
+    id nvarchar(128) not null,
+    native_identity nvarchar(256),
+    display_name nvarchar(128),
+    application_id nvarchar(128),
+    application_name nvarchar(128),
+    application_instance nvarchar(128),
+    identity_id nvarchar(128),
+    identity_name nvarchar(128),
+    identity_display_name nvarchar(128),
+    composite tinyint null,
+    manually_correlated tinyint null,
+    created numeric(19,0),
+    created_dt datetime,
+    export_date numeric(19,0),
+    entitlements tinyint not null default 0,
+    primary key (id)
+);
+GO
+
+create index sptr_idx_account_nat_id on identityiq.sptr_account (native_identity);
+GO
+create index sptr_idx_account_app_id on identityiq.sptr_account (application_id);
+GO
+create index sptr_idx_account_ident_id on identityiq.sptr_account (identity_id);
+GO
+create index sptr_idx_account_ident_name on identityiq.sptr_account (identity_name);
+GO
+create index sptr_idx_account_exp_dt on identityiq.sptr_account (export_date);
+GO
+
+create table identityiq.sptr_account_attr (
+    object_id nvarchar(128) not null,
+    attr_name nvarchar(128) not null,
+    attr_value nvarchar(@LinkAttrColLength)
+);
+GO
+
+create index sptr_idx_acct_attr_id on identityiq.sptr_account_attr (object_id);
+GO
+create index sptr_idx_acct_attr_name on identityiq.sptr_account_attr (attr_name);
+GO
+
+create table identityiq.sptr_certification (
+    id nvarchar(128) not null,
+    name nvarchar(256),
+    short_name nvarchar(255),
+    description nvarchar(1024),
+    type nvarchar(128),
+    target_name nvarchar(255),
+    target_display_name nvarchar(255),
+    continuous tinyint null,
+    phase nvarchar(255),
+    parent_certification_id nvarchar(128),
+    created numeric(19,0),
+    created_dt datetime,
+    finished numeric(19,0),
+    finished_dt datetime,
+    signed numeric(19,0),
+    signed_dt datetime,
+    expiration numeric(19,0),
+    expiration_dt datetime,
+    export_date numeric(19,0),
+    creator_name nvarchar(128),
+    creator_display_name nvarchar(128),
+    item_percent_complete int not null default 0,
+    cert_grp_id nvarchar(128),
+    cert_grp_name nvarchar(256),
+    cert_grp_owner nvarchar(256),
+    cert_grp_owner_display_name nvarchar(256),
+    automatic_closing_date numeric(19,0),
+    total_accounts int default 0,
+    accounts_allowed int default 0,
+    accounts_remediated int default 0,
+    accounts_approved int default 0,
+    roles_allowed int not null,
+    exceptions_allowed int not null,
+    excluded_entities int null,
+    excluded_items int null,
+    primary key (id)
+);
+GO
+
+create index sptr_idx_cert_type on identityiq.sptr_certification (type);
+GO
+create index sptr_idx_cert_target on identityiq.sptr_certification (target_name);
+GO
+create index sptr_idx_cert_exp_dt on identityiq.sptr_certification (export_date);
+GO
+create index sptr_idx_cert_sign_dt on identityiq.sptr_certification (signed);
+GO
+create index sptr_idx_cert_expiration on identityiq.sptr_certification (expiration);
+GO
+create index sptr_idx_cert_creator on identityiq.sptr_certification (creator_name);
+GO
+create index sptr_idx_cert_grp on identityiq.sptr_certification (cert_grp_name);
+GO
+create index sptr_idx_cert_grp_owner on identityiq.sptr_certification (cert_grp_owner);
+GO
+create index sptr_idx_cert_auto_close_date on identityiq.sptr_certification (automatic_closing_date);
+GO
+create table identityiq.sptr_certification_attr (
+    object_id nvarchar(128) not null,
+    attr_name nvarchar(128) not null,
+    attr_value nvarchar(450)
+);
+GO
+
+create index sptr_idx_cert_attr_id on identityiq.sptr_certification_attr (object_id);
+GO
+create index sptr_idx_cert_attr_name on identityiq.sptr_certification_attr (attr_name);
+GO
+
+create table identityiq.sptr_cert_item (
+    id nvarchar(128) not null,
+    certification_id nvarchar(128),
+    target nvarchar(128),
+    target_display_name nvarchar(256),
+    target_type nvarchar(255),
+    type nvarchar(255),
+    role nvarchar(255),
+    violationSummary nvarchar(256),
+    decision nvarchar(255),
+    actor_name nvarchar(128),
+    actor_display_name nvarchar(128),
+    decision_comments nvarchar(max),
+    bulk_decision tinyint,
+    mitigation_expiration numeric(19,0),
+    mitigation_expiration_dt datetime,
+    remediation_kicked_off tinyint,
+    remediation_completed tinyint,
+    delegation tinyint,
+    challenge_decision nvarchar(255),
+    challenge_decision_maker nvarchar(128),
+    challenge_comments nvarchar(max),
+    exclusion_reason  nvarchar(255),
+    exclusion_explanation nvarchar(max),
+    created numeric(19,0),
+    created_dt datetime,
+    export_date numeric(19,0),
+    completed tinyint,
+    manager nvarchar(128),
+    manager_display_name nvarchar(128),
+    summary_status nvarchar(128),
+    primary key (id)
+);
+GO
+
+create index sptr_idx_cert_item_certid on identityiq.sptr_cert_item (certification_id);
+GO
+create index sptr_idx_cert_item_type on identityiq.sptr_cert_item (type);
+GO
+create index sptr_idx_cert_item_target on identityiq.sptr_cert_item (target);
+GO
+create index sptr_idx_cert_item_target_type on identityiq.sptr_cert_item (target_type);
+GO
+create index sptr_idx_cert_item_exp_dt on identityiq.sptr_cert_item (export_date);
+GO
+
+
+create table identityiq.sptr_cert_item_attr (
+    object_id nvarchar(128) not null,
+    attr_name nvarchar(128) not null,
+    attr_value nvarchar(450)
+);
+GO
+
+create index sptr_idx_item_attr_id on identityiq.sptr_cert_item_attr (object_id);
+GO
+create index sptr_idx_item_attr_name on identityiq.sptr_cert_item_attr (attr_name);
+GO
+
+create table identityiq.sptr_cert_item_entitlements (
+    certification_item_id nvarchar(128) not null,
+    certification_id nvarchar(128) not null,
+    native_identity nvarchar(256),
+    display_name nvarchar(128),
+    application_id nvarchar(128),
+    application_name nvarchar(256),
+    application_instance nvarchar(128),
+    type nvarchar(128) not null,
+    description nvarchar(255) not null,
+    value nvarchar(2048),
+    export_date numeric(19,0),
+    account_only tinyint not null default 0
+);
+GO
+
+create index sptr_idx_ents_item_id on identityiq.sptr_cert_item_entitlements (certification_item_id);
+GO
+create index sptr_idx_ents_cert_id on identityiq.sptr_cert_item_entitlements (certification_id);
+GO
+create index sptr_idx_ents_app_id on identityiq.sptr_cert_item_entitlements (application_id);
+GO
+create index sptr_idx_ents_exp_dt on identityiq.sptr_cert_item_entitlements (export_date);
+GO
+
+create table identityiq.sptr_tag (
+    id nvarchar(128) not null,
+    name nvarchar(128) not null,
+    primary key (id)
+);
+GO
+
+create index sptr_idx_tag_name on identityiq.sptr_tag (name);
+GO
+
+create table identityiq.sptr_certification_tag (
+    certification_id nvarchar(128) not null,
+    tag_id nvarchar(128) not null,
+    idx numeric(5,0) not null,
+    primary key (certification_id, idx)
+);
+GO
+
+create index sptr_idx_cert_tag_cert_id on identityiq.sptr_certification_tag (certification_id);
+GO

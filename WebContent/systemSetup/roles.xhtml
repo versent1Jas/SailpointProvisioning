@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+    <ui:composition>
+
+        <table class="paddedTbl" style="margin: 5px">
+            <tr class="padBottom">
+                <td colspan="2"><h:outputText
+                        styleClass="spContentTitle"
+                        value="#{msgs.sys_config_role_sun_dates}" /></td>
+            </tr>
+
+            <tr>
+                <td align="right"><h:outputText
+                        value="#{msgs.sys_config_enable_role_sun_date_assign}  " />
+                </td>
+                <td align="left"><h:selectBooleanCheckbox
+                        id="enableRoleSunAssign"
+                        value="#{systemConfig.object.attributes['enableRoleSunAssign']}"
+                        onclick="makePageDirty();" /></td>
+            </tr>
+            <tr>
+                <td align="right"><h:outputText
+                        value="#{msgs.sys_config_enable_role_sun_date_activate}  " />
+                </td>
+                <td align="left"><h:selectBooleanCheckbox
+                        id="enableRoleSunActivate"
+                        value="#{systemConfig.object.attributes['enableRoleSunActivate']}"
+                        onclick="makePageDirty();" /></td>
+            </tr>
+
+
+
+        </table>
+        
+        <!-- Global rule mappings for the System Setup pages -->
+        <table style="margin: 5px" class="paddedTbl">
+        
+        
+            <tr class="padBottom padTopHi">
+                <td colspan="2"><h:outputText
+                        styleClass="spContentTitle"
+                        value="#{msgs.title_workflows}" /></td>
+            </tr>
+            
+            <tr>
+                <td align="right"><h:outputText
+                        value="#{msgs.sys_config_workflow_role}" /></td>
+                <td width="15px"><h:graphicImage id="imgHlpRole"
+                        width="12px" height="12px"
+                        alt="#{help.help_sys_config_workflow_role}"
+                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                        url="/images/icons/dashboard_help_16.png" /></td>
+                <td><h:selectOneMenu
+                        value='#{systemConfig.object.attributes["workflowRoleApproval"]}'
+                        onchange="makePageDirty();">
+                        <f:selectItems
+                            value="#{systemConfig.roleWorkflows}" />
+                    </h:selectOneMenu></td>
+            </tr>
+            <tr>
+                <td align="right"><h:outputText
+                        value="#{msgs.sys_config_workflow_scheduled_role_activation}" /></td>
+                <td width="15px"><h:graphicImage
+                        id="imgHlpActivation" width="12px" height="12px"
+                        alt="#{help.help_sys_config_workflow_scheduled_role_activation}"
+                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                        url="/images/icons/dashboard_help_16.png" /></td>
+                <td><h:selectOneMenu
+                        value='#{systemConfig.object.attributes["workflowScheduledRoleActivation"]}'
+                        onchange="makePageDirty();">
+                        <f:selectItems
+                            value="#{systemConfig.activationWorkflows}" />
+                    </h:selectOneMenu></td>
+            </tr>
+
+            <tr>
+                <td align="right"><h:outputText
+                        value="#{msgs.sys_config_workflow_scheduled_assignment}" /></td>
+                <td width="15px"><h:graphicImage
+                        id="imgHlpAssignment" width="12px"
+                        height="12px"
+                        alt="#{help.help_sys_config_workflow_scheduled_assignment}"
+                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                        url="/images/icons/dashboard_help_16.png" /></td>
+                <td><h:selectOneMenu
+                        value='#{systemConfig.object.attributes["workflowScheduledAssignment"]}'
+                        onchange="makePageDirty();">
+                        <f:selectItems
+                            value="#{systemConfig.assignmentWorkflows}" />
+                    </h:selectOneMenu></td>
+            </tr>
+
+        </table>
+
+        <table class="paddedTbl" style="margin: 5px">
+            <tr class="padBottom padTopHi">
+                <td colspan="3">
+                    <h:outputText
+                        styleClass="spContentTitle"
+                        value="#{msgs.sys_config_additional_role_options}"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td><h:outputText value="#{msgs.label_show_ui_option_multiple_application_accounts}  "/></td>
+                <td width="15px">
+                  <h:graphicImage
+                      id="imgHlpAllowMultipleApplicationAccounts" width="12px"
+                      height="12px"
+                      alt="#{help.help_system_config_allow_multiple_application_accounts}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td align="left">
+                    <h:selectBooleanCheckbox
+                        id="allowDuplicateAccounts"
+                        value="#{systemConfig.allowDuplicateAccounts}"
+                        onclick="makePageDirty();"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td><h:outputText value="#{msgs.label_show_ui_option_multiple_assignments}"/></td>
+                <td width="15px">
+                    <h:graphicImage
+                        id="imgHlpEnableMultipleAssignments" width="12px"
+                        height="12px"
+                        alt="#{help.help_system_config_enable_multiple_assignments}"
+                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                        url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td align="left">
+                    <h:selectBooleanCheckbox
+                        id="enableModelerMultipleRoleAssignments"
+                        value="#{systemConfig.enableModelerMultipleRoleAssignments}"
+                        onclick="makePageDirty();"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h:outputText value="#{msgs.label_global_multiple_role_assignments}"/>
+                </td>
+                <td width="15px">
+                    <h:graphicImage
+                        id="imgHlpAllowMultipleAssignments" width="12px"
+                        height="12px"
+                        alt="#{help.help_system_config_allow_multiple_assignments}"
+                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                        url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                    <h:selectBooleanCheckbox
+                        id="allowMultipleRoleAssignments"
+                        value="#{systemConfig.allowMultipleRoleAssignments}"
+                        onclick="makePageDirty();"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                    <h:outputText value="#{msgs.label_allow_propagation_of_role_changes}"/>
+                </td>
+                <td width="15px">
+                    <h:graphicImage
+                        id="imgHlpAllowRolePropagation" width="12px"
+                        height="12px"
+                        alt="#{help.help_system_config_allow_role_propagation}"
+                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                        url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                    <h:selectBooleanCheckbox
+                        id="allowRolePropagation"
+                        value="#{systemConfig.allowRolePropagation}"
+                        onclick="makePageDirty();"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h:outputText value="#{msgs.label_retain_assigned_entitlements_detected}"/>
+                </td>
+                <td width="15px">
+                    <h:graphicImage
+                        id="imgHlpRetainAssignedEntitlementsDetected" width="12px"
+                        height="12px"
+                        alt="#{help.help_system_config_retain_assigned_entitlements_detected}"
+                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                        url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                    <h:selectBooleanCheckbox
+                        id="removeAssignedEntitlementsDetected"
+                        value="#{systemConfig.retainAssignedEntitlementsDetected}"
+                        onclick="makePageDirty();"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h:outputText value="#{msgs.label_retain_assigned_entitlements_assigned}"/>
+                </td>
+                <td width="15px">
+                    <h:graphicImage
+                            id="imgHlpRetainAssignedEntitlementsAssigned" width="12px"
+                            height="12px"
+                            alt="#{help.help_system_config_retain_assigned_entitlements_assigned}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                    <h:selectBooleanCheckbox
+                            id="removeAssignedEntitlementsAssigned"
+                            value="#{systemConfig.retainAssignedEntitlementsAssigned}"
+                            onclick="makePageDirty();"/>
+                </td>
+            </tr>
+        </table>
+
+        <a4j:commandButton id="refreshApproverRulesButton"
+            style="display:none" render="approverRulePanel" />
+
+    </ui:composition>
+</body>
+</html>

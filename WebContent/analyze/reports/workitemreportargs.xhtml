@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+	</sp:script>
+    
+    <script type="text/javascript">;
+
+        Ext.onReady(function () {
+            var ownersMultiSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'ownersMultiSuggest',
+                suggestType: 'identity',
+                jsonData: #{sp:basicJSONDataConverted(
+                   taskDefinition.argMap['owners'].objectListValue,
+                   'IdentityListConverter')},
+                inputFieldName: 'owners',
+                id: 'workItemReportsOwnersFilter',
+                baseParams: {context: 'Owner'},
+                contextPath: CONTEXT_PATH
+                });                
+
+            var requestersMultiSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'requestersMultiSuggest',
+                suggestType: 'identity',
+                jsonData: #{sp:basicJSONDataConverted(
+                   taskDefinition.argMap['requesters'].objectListValue,
+                   'IdentityListConverter')},
+                inputFieldName: 'requesters',
+                contextPath: CONTEXT_PATH
+                });                
+        });   
+    </script>
+
+  <table class="width100" cellspacing="0" cellpadding="3">
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <tr>
+        <td colspan="3" width="30%">
+          <sp:outputText styleClass="spContentTitle" value="#{msgs.work_item_report_options}"/>
+        </td>
+      </tr>
+      <tr>
+        <td width="33%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_owners}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["owners"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <div id="ownersMultiSuggest"></div>
+                  <t:inputHidden id="owners"
+                                 value="#{taskDefinition.argMap['owners'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+        <td width="33%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th colspan="2"><sp:outputText  value="#{msgs.report_filter_exp_date}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["expirationDate"].argument.description}'/></td>
+                <td>
+                  <h:selectBooleanCheckbox id="inputDateSelect" value="#{taskDefinition.argMap['expirationDate'].bound}" 
+                    onclick="toggleDateDisplay($('inputDateDiv'), !(this.checked));" />
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" align="left">
+                  <div id="inputDateDiv">
+                    <table>
+                      <tr>
+                        <td align="left">
+                          <h:selectOneMenu value="#{taskDefinition.argMap['expirationDateType'].value}">
+                            <f:selectItem itemLabel="#{msgs.before}" itemValue="Before" />
+                            <f:selectItem itemLabel="#{msgs.after}" itemValue="After" />
+                          </h:selectOneMenu>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="left">
+                        <sp:inputDate timeZone="#{base.userTimeZoneId}" type="date" id="inputDate" popupCalendar="true"  ampm="true"
+                                     addResources="false" imageLocation="/scripts/myfacescalendar"
+                                     javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                     value='#{taskDefinition.argMap["expirationDate"].dateValue}' styleClass="tomahawkInputDate"/>
+                        </td>
+                      </tr>
+                    </table>
+                    <table style="margin-top:5px">
+                      <tr><td>
+                          <sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["noExpirationDate"].argument.description}'/>
+                        </td><td>
+                          <h:selectBooleanCheckbox value='#{taskDefinition.argMap["noExpirationDate"].booleanValue}'/>
+                      </td></tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <a4j:outputPanel ajaxRendered="true">
+                    <h:message for="inputDate" styleClass="formError"/>
+                  </a4j:outputPanel>
+                </td>
+              </tr>
+            </table>
+          </div>      
+        </td>
+        <td width="33%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_work_item_type}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["types"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectManyListbox value='#{taskDefinition.argMap["types"].objectListValue}'>
+                    <f:selectItems value='#{taskDefinition.workItemTypes}'/>
+                  </h:selectManyListbox>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+      </tr>
+      <tr>
+        <td width="33%"  valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_requesters}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["requesters"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <div id="requestersMultiSuggest"></div>
+                  <t:inputHidden id="requesters"
+                                 value="#{taskDefinition.argMap['requesters'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>
+                </td>
+              </tr>
+            </table>
+          </div>
+        
+                    
+        </td>
+        <td width="33%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_work_item_state}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["states"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectManyListbox value='#{taskDefinition.argMap["states"].objectListValue}'>
+                    <f:selectItems value='#{taskDefinition.workItemStates}'/>
+                  </h:selectManyListbox>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+        <td width="33%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText style="font-weight:bold" value="#{msgs.report_filter_reminders}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["reminders"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <sp:outputText style="font-weight:bold" value="#{msgs.report_filter_num_reminders} "/>
+                  <h:inputText id="numReminders" value='#{taskDefinition.argMap["reminders"].value}' size='3'>
+                    <f:validateLongRange minimum="0" maximum="999" />
+                  </h:inputText>
+                  <a4j:outputPanel ajaxRendered="true">
+                    <h:message styleClass="formError" for="numReminders"/>
+                  </a4j:outputPanel>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+      </tr>
+      <tr>
+        <td width="33%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_work_item_level}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["[levels]"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectManyListbox value='#{taskDefinition.argMap["levels"].objectListValue}'>
+                    <f:selectItems value='#{taskDefinition.workItemPriorities}'/>
+                  </h:selectManyListbox>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+        <td width="33%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_work_item_status_option}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["[statusOptions]"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectManyListbox value='#{taskDefinition.argMap["statusOptions"].objectListValue}'>
+                    <f:selectItems value='#{taskDefinition.workItemStatusOptions}'/>
+                  </h:selectManyListbox>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+        <td/>
+      </tr>
+    </ui:fragment>
+  </table>
+  <script defer="defer">
+      <!--//--><![CDATA[//><!--
+      var checkBox = $('editForm:inputDateSelect');
+      toggleDisplay($('inputDateDiv'), !(checkBox.checked));
+      //--><!]]>
+    </script>
+</ui:composition>
+</body>
+</html>

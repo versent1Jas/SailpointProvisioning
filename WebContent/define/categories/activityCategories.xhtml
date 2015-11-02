@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/extAppPage.xhtml">
+  <ui:define name="title">#{msgs.title_activity_target_categories}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/ActivityCategoriesGrid.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript">
+    helpKey = 'CATEGORIES';
+
+    var sp = new SailPoint.state.StateProvider({
+      stateIds: ['#{activityCategoryList.gridState.name}'],
+      states:   ['#{activityCategoryList.gridState.state}']
+    });
+    Ext.state.Manager.setProvider(sp);  
+        
+    Ext.onReady(function(){
+        grid = SailPoint.Define.Grid.ActivityCategories.createGrid('#{activityCategoryList.gridState.name}');
+
+        var viewport = SailPoint.getViewport({
+            bodyContent: grid,
+            title: "#{msgs.title_activity_target_categories}",
+            instructions: "#{msgs.inst_activity_target_categories}"
+        });
+        viewport.doLayout();
+        
+    }); // Ext.onReady
+  
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form styleClass="form" id="editForm">        
+
+
+        <h:inputHidden id="deletedCategoryId"/>
+        <h:inputHidden id="editedCategoryId" value="#{editedCategory.objectId}"/>
+        <h:commandButton style="display:none" action="#{activityCategoryList.editCategoryAction}" id="editButton"/>
+        <h:commandButton style="display:none" action="#{activityCategoryList.deleteCategoryAction}" id="deleteButton" />
+        <h:commandButton style="display:none" action="#{activityCategoryList.editCategoryAction}" id="newCategoryButton"/>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

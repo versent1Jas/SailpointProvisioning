@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+<!-- 
+ Expected parameters:
+   - daysRemaining: The number of days remaining
+   - overdueText: The text for a negative days remaining.
+   - todayText: The text for 0 days remaining.
+   - futureText: The text for a positive days remaining.
+ -->
+<ui:composition>
+  <ui:fragment rendered="#{daysRemaining lt 0}">
+    <span class="overdueTxt">
+      (<h:outputText value="#{0 - daysRemaining} #{(daysRemaining eq -1) ? msgs.day : msgs.days_lcase}" /> #{overdueText})
+    </span>
+  </ui:fragment>
+  <ui:fragment rendered="#{daysRemaining eq 0}">
+    (<span class="dueTodayTxt">#{todayText}</span>)
+  </ui:fragment>
+  <ui:fragment rendered="#{daysRemaining gt 0}">
+    <span class="beforeDueTxt">
+      (<h:outputText value="#{daysRemaining} #{(daysRemaining eq 1) ? msgs.day : msgs.days_lcase}" /> #{futureText})
+    </span>
+  </ui:fragment>
+</ui:composition>
+
+</body>
+</html>

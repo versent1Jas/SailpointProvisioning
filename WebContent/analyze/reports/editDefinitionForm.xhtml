@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.edit_report}</ui:define>
+
+  <ui:define name="headerItems">
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+    </sp:script>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/analyze/reports">
+      <src>reports.css</src>
+    </sp:style>
+
+    <script type="text/javascript" >
+    helpKey = 'REPORT_FORM_EDIT';
+
+    /**
+     * Creating a ViewPort pulls the form fields out of
+     * their parent field. This hack gets them back to the
+     * form so they will be submitted correctly.
+     */
+    SailPoint.fixWorkItemConfig = function(){
+        var form = $('editForm');
+        var workItemConfig = $('workItemConfig');
+        form.appendChild(workItemConfig);
+    }
+
+    SailPoint.layoutWorkitemConfig = function(){
+         var workItemOwners = Ext.getCmp('workItemOwners');
+         workItemOwners.show();
+         workItemOwners.updateLayout();
+         var form = Ext.getCmp("#{reportDefinition.definitionForm.id}");
+         form.updateLayout();
+    };
+
+    Ext.onReady(function(){
+
+      // This makes sure that the div holding the work item config
+      // section is resized when the escalation mode changes
+      // so that all items are visible
+      Page.on('resizeWorkItemConfig', function(){
+          var form = Ext.getCmp("#{reportDefinition.definitionForm.id}");
+          form.updateLayout();
+      });
+
+      // This ensures that suggests in the work item config section
+      // render correctly.
+      Page.on('workItemOwnersRendered', SailPoint.layoutWorkitemConfig);
+      Page.on('formNavigate', SailPoint.layoutWorkitemConfig);
+
+    }); // Ext.onReady
+
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <sp:sailpointForm styleClass="form" id="editForm" forceEncodedURL="true">
+
+          <h:inputHidden id="id" value="#{reportDefinition.taskDefinitionId}"/>
+          <h:inputHidden value="#{reportDefinition.createNew}"/>
+          <h:commandButton style="display: none" id="submitButton"
+                action="#{reportDefinition.submitForm}" onclick="SailPoint.fixWorkItemConfig()" />
+
+          <ui:include src='../../include/formRenderer.xhtml'>
+             <ui:param name='form' value='#{reportDefinition.definitionForm}'/>
+             <ui:param name='submitButton' value='editForm:submitButton'/>
+             <ui:param name='wizardPanelTitle' value='#{msgs.rept_edit_center_panel_title}'/>
+             <ui:param name="renderInViewport" value="#{true}"/>
+          </ui:include>
+
+          <div id="workItemConfig">
+             <ui:include src="../../include/workItemConfig.xhtml">
+                 <ui:param name="mainForm" value="editForm" />
+                 <ui:param name="config" value="#{reportDefinition.signoff}" />
+                 <ui:param name="title" value="#{msgs.label_signoff_properties}" />
+                 <ui:param name="ownerTitle" value="#{msgs.label_signers}" />
+                 <ui:param name="ownerHelp" value="#{help.task_signoff_owner}" />
+                 <ui:param name="tableCls" value="customWidth paddedTbl"/>
+             </ui:include>
+          </div>
+      </sp:sailpointForm>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

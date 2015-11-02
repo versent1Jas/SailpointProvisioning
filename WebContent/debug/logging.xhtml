@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Logging</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_LOGGING';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+
+      <h:messages infoClass="formInfo" warnClass="formWarn"
+                  errorClass="formError" fatalClass="formError" />
+
+      <h:form styleClass="form" id="editForm">
+        <p>
+          <h:panelGrid columns="2">
+            <h:outputText styleClass="sectionHeader" value="Server File Path&nbsp;&nbsp;" />
+            <h:inputText value="#{debug.logConfigFile}" size="100" />
+          </h:panelGrid>
+        </p>
+
+        <h:commandButton action="#{debug.reloadLogConfigAction}"
+	                       value="Reload Logging Configuration" styleClass="primaryBtn" />
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>
+

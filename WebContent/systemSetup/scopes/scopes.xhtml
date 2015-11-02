@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_scopes}</ui:define>
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>paging-tree.css</src>
+    </sp:style>       
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/systemSetup">
+      <src>system-setup.css</src>    
+    </sp:style>
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/PagingTreeStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/scopes/scopes.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+    helpKey = 'SCOPES';
+	</script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <a4j:outputPanel ajaxrendered="true">
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      </a4j:outputPanel>
+      <h:form styleClass="form" id="editForm">
+        <input type="hidden" id="editForm:enableScopes" name="editForm:enableScopes" value="${scopeTree.manageScopeRight}"/>
+        <!-- Fields for moving a scope. -->
+        <h:inputHidden id="movedScopeId" value="#{scopeTree.movedScopeId}" />
+        <h:inputHidden id="oldParentScopeId" value="#{scopeTree.oldParentScopeId}" />
+        <h:inputHidden id="newParentScopeId" value="#{scopeTree.newParentScopeId}" />
+        <h:commandButton id="moveScopeBtn"
+                           style="display: none"
+                           action="#{scopeTree.moveScopeAction}" />
+
+        <!-- Fields for creating a new scope. -->
+        <h:inputHidden id="parentId" value="#{scopeTree.parentId}" />
+        <h:commandButton id="newScopeBtn"
+                         style="display: none"
+                         action="#{scopeTree.newScope}" />
+
+        <!-- Fields for editing a scope. -->
+        <h:inputHidden id="selectedScopeId" value="#{scopeTree.selectedScopeId}" />
+        <h:commandButton id="editScopeBtn"
+                         style="display: none"
+                         action="#{scopeTree.editScope}" />
+
+        <!-- Fields for deleting a scope. -->
+        <h:commandButton id="deleteScopeBtn"
+                         style="display: none"
+                         action="#{scopeTree.deleteScope}" />
+
+          <div class="spContent">
+            <h:graphicImage rendered="#{!scopeTree.scopingEnabled}" 
+                          style="padding-right: 7px"
+                          value="/images/icons/dialogue_error_16.png"/>
+            <h:outputText rendered="#{!scopeTree.scopingEnabled}" value="#{scopeTree.disabledScopesMsg}"/>
+            
+            <div style="padding:10px" id="contentDiv">
+              <div id="treePanel"/>
+            </div>
+  
+            <div>
+              <h:commandLink value="#{msgs.configure_scopes}" action="#{scopeTree.configureScopes}" />
+            </div>
+          </div>
+        
+        <div class="buttonRow">
+          <h:commandButton id="backButton" styleClass="secondaryBtn" action="backToSystemSetup" value="#{msgs.button_return_to_system_setup}" />
+        </div>
+        
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

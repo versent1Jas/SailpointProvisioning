@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+      <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+      <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+<h:head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=8,10" />
+<c:if test="#{!(base.pinchZoomEnabled)}">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+</c:if>
+  <title>
+    <ui:insert name="title">#{msgs.sailpoint_iiq}</ui:insert>
+  </title>
+  <link rel="SHORTCUT ICON"
+        href="#{base.requestContextPath}/images/icons/sailpoint.ico"/>
+
+  <ui:remove><!-- **** Style Sheets **** --></ui:remove>
+
+  <sp:style serveOffset="#{base.requestContextPath}/css">
+    <src>reset.css</src>
+    <src>common.css</src>
+    <src>tag-override.css</src>
+    <src>rounded.css</src>
+    <src>sp-components.css</src>
+    <src>CheckHeader.css</src>
+  </sp:style>
+
+  <ui:remove><!-- TODO: reference this only in the work item pages.--></ui:remove>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/workitem">
+    <src>work-item.css</src>
+  </sp:style>    
+
+  <sp:style serveOffset="#{base.requestContextPath}/scripts/ext-4.1.0/resources/css">
+    <src>iiq-extjs.css</src>
+  </sp:style>
+  
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint">
+    <src>base.css</src>
+    <src>menu.css</src>
+    <src>shared-icons.css</src>
+    <src>buttons.css</src>
+    <src>suggest.css</src>
+  </sp:style>
+  
+  <ui:remove><!-- Overrides and custom should come after whatever they are overriding. --></ui:remove>
+  <sp:style serveOffset="#{base.requestContextPath}/css/brand">
+    <src>style.css</src>
+  </sp:style>
+
+  <sp:style serveOffset="#{base.requestContextPath}/css">
+    <src>ext4-overrides.css</src>
+    <src>iiq-custom.css</src>
+  </sp:style>
+
+  <ui:remove><!-- **** End Style Sheets **** --></ui:remove>
+
+  <script>
+    <!--//--><![CDATA[//><!--
+      var CONTEXT_PATH = '#{base.requestContextPath}';
+
+      // default value that should get overwridden in each page that
+      // uses this template
+      var helpKey = 'MAIN';
+    //--><!]]>
+  </script>
+
+  <ui:include src="../include/extjs.xhtml" />
+
+  <sp:script enabled="false">
+    <src>#{base.requestContextPath}/scripts/prototype.js?#{debug.revision}</src>
+  </sp:script>
+
+  <sp:script enabled="false">
+  	<src>#{base.requestContextPath}/scripts/scriptaculous-js-1.7.0/src/scriptaculous.js?#{debug.revision}</src>
+  </sp:script>
+
+  <ui:include src="../include/iiqScriptBase.xhtml" />
+
+  <sp:script>
+    <src>#{base.requestContextPath}/ui/js/shared/util.js?#{debug.revision}</src>
+  	<src>#{base.requestContextPath}/scripts/menu.js?#{debug.revision}</src>
+  	<src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+  	<src>#{base.requestContextPath}/scripts/validation.js?#{debug.revision}</src>
+  	<src>#{base.requestContextPath}/scripts/sailpoint/web/startUpHelp.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/custom.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/platform.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/ui/js/shared/help.js?#{debug.revision}</src>
+  </sp:script>
+
+  <ui:insert name="headerItems" />
+
+  <c:if test="#{base.mobile}">
+    <sp:style serveOffset="#{base.requestContextPath}/css/">
+      <src>mobile.css</src>
+    </sp:style>
+  </c:if>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/appPageBegin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/external/registration.js?#{debug.revision}</src>
+  </sp:script>
+
+</h:head>
+
+<body>
+
+<h:form id="navigationForm">
+  <ui:remove><!-- Hidden buttons used to manipulate navigation history. --></ui:remove>
+  <a4j:commandButton id="saveHistoryBtn"
+                     actionListener="#{navigationHistory.save}"
+                     style="display: none" />
+  <a4j:commandButton id="backBtn"
+                     actionListener="#{navigationHistory.back}"
+                     style="display: none" />
+  <a4j:commandButton id="homeBtn"
+                     action="#{navigationHistory.home}"
+                     style="display: none" />
+  <h:inputHidden id="beanName" value="#{navigationHistory.beanName}" />
+  <h:inputHidden id="objectId"/>
+
+</h:form>
+
+<table id="appTable" width="100%" cellspacing="0" cellpadding="0">
+
+  <tr>
+    <td width="5">&nbsp;</td>
+    <td width="20">&nbsp;</td>
+
+      <td colspan="1" align="right" height="35px">
+          <table width="100%" cellpadding="0" cellspacing="0">
+              <tr >
+                  <td align="left" valign="baseline">
+              <span class="topLeftLogo" >
+                <img src="#{base.requestContextPath}/images/TopLogo1.png" alt="" />
+              </span>
+                  </td>
+                  <td align="right" valign="top">
+                      <!-- disable help for external pages -->      
+                      <!-- 
+                      <div id="headerText">
+                          <h:form id="headerForm">
+                              <h:outputLink onclick="javascript:SailPoint.launchHelp(CONTEXT_PATH, helpKey); return false;">
+                                  <h:outputText value="#{msgs.help}"/>
+                              </h:outputLink>
+                          </h:form>
+                      </div>
+                      -->
+                      <div class="logoholder">
+                          <img style="" src="#{base.requestContextPath}/images/LogoHeader.png" alt="Header Logo" />
+                      </div>
+                  </td>
+              </tr>
+          </table>
+
+      </td>
+    <td width="20">&nbsp;</td>
+    <td width="5">&nbsp;</td>
+  </tr>
+
+  <tr valign="top">
+    <td width="5">&nbsp;</td>
+    <td width="20">&nbsp;</td>
+    <td colspan="1" id="bodyContentTd">
+      <div id="bodyDiv" class="bodyDiv">
+        <div id="bodyDivContent" class="bodyDivContent">
+          <div id="SailPointLogDiv" style="display: none"></div>
+
+          <div class="vis-clear"></div>
+
+          <div id="bodyDivTitle">
+                      <h1><ui:insert name="title"></ui:insert></h1>
+                      <ui:insert name="underTitle"></ui:insert>
+                    </div>
+
+
+          <div class="vis-clear"></div>
+          <ui:insert name="body">&nbsp;</ui:insert>
+        </div>
+      </div>
+    </td>
+    <td width="20">&nbsp;</td>
+    <td width="5">&nbsp;</td>
+  </tr>
+
+  <tr valign="bottom">
+    <td width="5">&nbsp;</td>
+    <td width="20">&nbsp;</td>
+    <td colspan="1" id="bodyBottomTd" class="roundedBottom">
+      <div id="bodyBottom">
+        <div id="bodyDivFooter" class="bodyDivFooter">
+            <!-- this div is needed as a holder for rounded styles because we do not want them on the <span> -->
+          <div>
+            <span>&#169; #{msgs.copy_right}</span>
+            <span id="unsupportedBrowserNotice" class="unsupportedBrowser" style="cursor:help"></span>
+          </div>
+        </div>
+      </div>
+    </td>
+    <td width="20">&nbsp;</td>
+    <td width="5">&nbsp;</td>
+  </tr>
+
+  <tr>
+     <td height="10" colspan="6">&nbsp;</td>
+  </tr>
+
+</table>
+
+<sp:script>
+  <src>#{base.requestContextPath}/scripts/sailpoint/web/appPageEnd.js?#{debug.revision}</src>
+</sp:script>
+
+<script type="text/javascript" defer="defer">
+Ext.onReady( function() {
+    if(#{base.showUnsupportedNotification}) {
+        Ext.defer(SailPoint.Utils.checkUnsupportedBrowser, 500);
+    }
+});
+</script>
+
+<!-- Client locale: #{base.locale} -->
+<!-- Build: #{debug.fullVersion} -->
+
+</body>
+
+</html>

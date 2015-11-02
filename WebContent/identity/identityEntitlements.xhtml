@@ -1,0 +1,75 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <ui:fragment rendered="#{!(empty identity.entitlementsHelper.exceptions)}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.additional_entitlements}"/>
+    <br/><br/>
+    <div class="spTabledAjaxContent">
+      <table id="additionalEntTbl" cellspacing="0" class="spTable">
+        <tr>
+          <th>#{msgs.application}</th>
+          <ui:fragment rendered="#{identity.linksHelper.linkInstances}">
+            <th>#{msgs.instance}</th>
+          </ui:fragment>
+          <th>#{msgs.account_name}</th>
+        </tr>
+
+        <ui:repeat value="#{identity.entitlementsHelper.exceptions}" var="item">
+          <tr>
+            <td valign="top">
+              <a onclick="showHideWithLock($('entitlementDetails_#{item.id}', null, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'entitlementDetails_#{item.id}'})));"
+               title="#{msgs.info_app_account_details}"
+               class="disclosure">
+                <h:outputText value="#{item.application.name}" />
+              </a>
+            </td>
+
+            <ui:fragment rendered="#{identity.linksHelper.linkInstances}">
+              <td valign="top"><h:outputText value="#{item.instance}"/></td>
+            </ui:fragment>
+
+            <td valign="top">
+              <h:outputText value="#{item.nativeIdentity}" />
+            </td>
+
+          </tr>
+          <tr id="entitlementDetails_#{item.id}" >
+            <td valign="top" colspan="3">
+              <ui:include src="/identity/entitlementsList.xhtml">
+                <ui:param name="entitlement" value="#{item.entitlements}" />
+                <ui:param name="showWrapper" value="true" />
+                <ui:param name="isExceptional" value="false" />
+                <ui:param name="applicationName" value="#{item.application.name}" />
+                <ui:param name="instance" value="#{item.instance}" />
+                <ui:param name="descriptionMap" value="#{item.entitlementDescriptionsMap}" />  
+                <ui:param name="showEntitlementDescription" value="#{showEntitlementDescription}"/>
+              </ui:include>
+            </td>
+          </tr>
+        </ui:repeat>
+
+      </table>
+      <script>
+        makeTableMulticolored($('additionalEntTbl'), true, false, 'even', 'odd', 'skip');
+      </script>
+    </div>
+  </ui:fragment>
+
+  <ui:fragment rendered="#{empty identity.entitlementsHelper.exceptions}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_no_additional_entitlements}"/>
+    <br/><br/>        
+  </ui:fragment>
+</ui:composition>
+
+</body>
+
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        function togglePartitioning() {
+            var pdiv = $('partitionsRow_');
+            var pdiv1  = $('radioButtonPartitionsRow_');
+            
+            // If the checkbox is enabled show the div for partitions
+            var partitioningEnabled = $('editForm:partitionMode_');
+            if ( partitioningEnabled && partitioningEnabled.checked == true) {
+                if ( pdiv && pdiv1) {                   
+                    pdiv.style.display = "";
+                    pdiv1.style.display = "";
+                }              
+            } else {               
+                pdiv.style.display = "none";
+                pdiv1.style.display = "none";
+            }
+            
+            //
+            // Must resize the mainpanel because the hidden div
+            // has a big old text area on it
+            //
+            var mainPanel = Ext.getCmp("mainPanel");
+            if ( mainPanel ) {
+                mainPanel.doLayout();
+            }
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           var partitionOption = getSelectedRadioInput("editForm:partitionOption_");
+           // first time (for new application) partitionOption will 
+           // be false (will enter the if block below) so setting this 
+           // programatically, for existing app it will take previous saved radioButton
+           if (!partitionOption) {
+                var radioInputs = $(document.getElementsByName("editForm:partitionOption_"));
+                //selects LastName button by default, here item[1] implies LastName.
+                radioInputs.item(1).checked = true
+           }
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+                   
+               var partitionValue = getFieldValue('editForm:partitions_');
+               if($('editForm:partitionMode_').checked == true) {
+                   Validator.validateNonBlankString(partitionValue, "Partitioning Statement can not be null if Partitioning is enabled");
+               }
+
+               var targetID = getFieldValue('editForm:targetID');
+               Validator.validateNonBlankString(targetID, "TargetID cannot be null!");
+
+               var url = getFieldValue('editForm:url');
+               Validator.validateNonBlankString(url, "Cerner URL cannot be null!");
+
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+           togglePartitioning();
+        });
+
+       //--><!]]>
+    </script>
+
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_cerner_settings}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+
+        <table class="spTable" style="border:0px" cellspacing="0">
+            
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_cerner_url}"/>
+                          <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpHostName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_cerner_url}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="url"
+                           value="#{applicationObject.attributes['url']}"
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                        required="true"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_Cerner_targetID}"/>
+                      <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_target_ID}"/>
+            </td>
+             <td>
+               <sp:inputSecret size="20" 
+                               id="targetID"
+                               value="#{applicationObject.attributes['targetID']}" redisplay="true"
+                               autocomplete="off"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}" 
+                                                                       required="true"/>
+             </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_isActive}"/>
+            </td>
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpIsActive" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_isActive}"/>
+            </td>
+            <td>
+              <h:selectBooleanCheckbox id="isActive"
+                                       value="#{applicationObject.attributes['isActive']}" redisplay="true"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                     readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+<!--
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_cerner_search_firstName}"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpFirstNameSearch" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_cerner_search_firstName}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="searchStringUsingFirstName"
+                           value="#{applicationObject.attributes['searchStringUsingFirstName']}"
+                           size="10"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           />
+            </td>
+          </tr>
+      <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_cerner_search_lastName}"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlplastNameSearch" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_cerner_search_lastName}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="searchStringUsingLastName"
+                           value="#{applicationObject.attributes['searchStringUsingLastName']}"
+                           size="10"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           />
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_cerner_timeout}"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpCustTimeour" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_cerner_timeout}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="custTimeout"
+                           value="#{applicationObject.attributes['custTimeout']}"
+                           size="10"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           />
+            </td>
+          </tr>
+-->
+        </table>
+     <ui:fragment>
+          <!--  Partitioning Config -->
+          <br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_partitioning}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_partitioningMode}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpPartitioningMode_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_jdbc_partitionEnable}"/>
+              </td>
+              <td width="100%">
+                <h:selectBooleanCheckbox id='partitionMode_' onclick='togglePartitioning()'
+                                         value="#{applicationObject.attributes['partitionMode']}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+            <tr id='radioButtonPartitionsRow_'>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_delimited_partitionConfig}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpPartitionOption_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_Cerner_partitionConfig}"/>
+              </td>
+              <td>
+                <h:selectOneRadio id="partitionOption_" 
+                                  
+                                  value="#{applicationObject.attributes[sp:concat(schemaType,'partitionModeRadio')]}">
+                  <f:selectItem itemLabel="#{msgs.con_form_partition_statement_FirstName}" itemValue="FirstName"/>
+                  <f:selectItem itemLabel="#{msgs.con_form_partition_statement_LastName}" itemValue="LastName"/>
+                </h:selectOneRadio>
+              </td>
+            </tr>
+              
+               <tr id='partitionsRow_'>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_jdbc_partition_statements}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpPartitioningStatements_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.help_con_form_Cerner_partitionstmt}"/>
+                </td>
+                <td>              
+                  <h:inputTextarea id='partitions_'
+                                   converter="NewLineList"
+                                   value="#{applicationObject.attributes['partitionStatements']}"
+                                   rows="5" cols="10"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+             </table>
+        </ui:fragment>
+       </div>
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

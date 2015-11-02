@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+             
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+
+<ui:composition>
+
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+
+
+
+            <div style="padding-bottom: 10px;">
+                <table border="0">
+                    <ui:repeat value="#{identity.attributesHelper.attributes}" var="attr">
+                        <tr>
+                            <td style="padding: 2px; padding-right: 5px; width: 100px; font-weight:bold" class="attributeTitleColumn">
+                                <h:outputText value="#{sp:localizeKey(attr.displayName)}"/>
+                            </td>
+                            <td style="padding: 2px" class="wide">
+                              <ui:fragment rendered="#{!attr.multi}">
+                                <h:outputText value="#{identity.attributesHelper.proxy[attr.name]}" />
+                              </ui:fragment>
+                              <ui:fragment rendered="#{attr.multi}">
+                                <ui:repeat value="#{identity.attributesHelper.proxy[attr.name]}" var="multiVal">
+                                  <div><h:outputText value="#{multiVal}"/></div>
+                                </ui:repeat>
+                              </ui:fragment>
+                            </td>
+                        </tr>
+                    </ui:repeat>
+                </table>
+            </div>
+
+
+</ui:composition>
+</body>
+</html>

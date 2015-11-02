@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+    <f:view>   
+      
+      <!-- Used for saving grid state between posts. -->
+      <t:saveState value="#{searchBean.gridState}" />
+      <h:inputHidden id="sortColumn" value="#{searchBean.gridState.sortColumn}" />
+      <h:inputHidden id="sortOrder" value="#{searchBean.gridState.sortOrder}" />
+      <h:inputHidden id="firstRow" value="#{searchBean.gridState.firstRow}" />
+      <h:inputHidden id="pageSize" value="#{searchBean.gridState.pageSize}" />
+      <h:inputHidden value="#{searchBean.reportName}"/>
+      
+      <h:inputHidden id="searchItemName" value="#{searchBean.searchItemName}"/>
+      <h:inputHidden id="searchItemDescription" value="#{searchBean.searchItemDescription}"/>
+      <h:inputHidden id="searchType" value="#{searchBean.searchType}" />
+
+      <!-- For running actions on the search itself -->
+      <h:commandButton  style="display:none" 
+                          id="saveQueryAsIpop" 
+                          action="#{searchBean.saveAsIpopAction}"/>
+      
+      <!-- Making this an h button to attempt to prevent LazilyLoadedException -->                
+      <a4j:commandButton  style="display:none" 
+                          id="saveQueryAsReport" 
+                          value="Save Query as Report" 
+                          action="#{searchBean.saveAsReportAction}"/>
+      
+      <!-- Making this an h button to attempt to prevent LazilyLoadedException -->               
+      <a4j:commandButton  style="display:none" 
+                          id="rememberQuery" 
+                          action="#{searchBean.saveQueryAction}"/>
+                          
+      <a4j:commandButton  style="display:none" 
+                          id="rememberQueryAsIdentity" 
+                          action="#{searchBean.saveQueryActionForIdentitySearch}"/>
+                          
+      <a4j:commandButton  style="display:none" 
+                          id="entitlementsBtn" 
+                          oncomplete="$('entitlementBreakdownProgress').style.display='none';
+                                      buildTooltips($('entitlementProfileResultsDiv'));"
+                          action="#{searchBean.showEntitlementBreakdown}" 
+                          render="entitlementBreakdown"/>
+      
+      <a4j:outputPanel ajaxRendered="true">
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      </a4j:outputPanel>
+      
+      <div id="identitiesErrorDiv" style="display:none" class="formError"/>
+
+      <div id="searchResults" style="#{(base.errorMessage) ? 'display:none' : ''}">
+      <div id="roleSearchResultsHeader" class=""></div>
+      <div class="spBackground" id="spBackground">
+        <div id="searchResultsContent" class="spContent">
+          <table class="customWidth" cellspacing="0" cellpadding="0">
+            <tr>
+              <td>
+                <a4j:outputPanel id="resultsCountSection">
+                   <h:outputFormat styleClass="spContentTitle" value="#{msgs.search_results_returned}" >
+                     <f:param value="#{totalRows}"/>
+                   </h:outputFormat>
+                 </a4j:outputPanel>
+              </td>
+              <td align="right" width="25%" >
+
+                <div id="resultsExportButtonsDiv" style="display:#{totalRows > 0 ? '' : 'none'}">
+                  
+                  <a href="javascript:SailPoint.Analyze.exportReport('pdf')">
+                    <img style="padding-right:5px; vertical-align: middle" 
+                      src="#{base.requestContextPath}/images/pdf.gif"/>
+                  </a>
+
+                  
+                  <a href="javascript:SailPoint.Analyze.exportReport('csv')">
+                    <img style="padding-right:5px; vertical-align: middle" 
+                      src="#{base.requestContextPath}/images/icons/export_csv.png"/>
+                  </a>
+                  
+                  <a href="javascript:SailPoint.Analyze.exportReport('cef')">
+                    <img style="padding-right:5px; vertical-align: middle" 
+                      src="#{base.requestContextPath}/images/icons/export_cef.png"/>
+                  </a>
+
+                  <h:commandButton id="pdf" style="display:none"
+                    action="#{searchBean.exportToPDF}"/>
+                  
+                  
+                  <h:commandButton id="csv" style="display:none"
+                    action="#{searchBean.exportToCSV}"/>
+                    
+                  <h:commandButton id="cef" style="display:none"
+                    action="#{searchBean.exportToCEF}"/>
+
+                </div>
+              </td>
+            </tr>
+          </table>
+          <br/>
+          
+
+          <div id="example-grid" class="customWidth">&nbsp;</div>
+          <ui:fragment rendered="#{totalRows > 0}">
+            <ui:include src="#{gridPage}"/>
+          </ui:fragment>
+          
+          <ui:fragment rendered="#{searchType == 'Identity' and totalRows > 0}">
+            
+            <table class="customWidth" style="display:none;margin-top:10px; border:1px #ccc dashed" id="entitlementBreakdownProgress">
+              <tr>
+                <td><h:graphicImage alt="progress" url="/images/progress.gif"/></td>
+                <td><h:outputText styleClass="spContentTitle" value="#{msgs.loading_entitlement_breakdown}"/></td>
+              </tr>
+            </table>
+
+            <a4j:outputPanel id="entitlementBreakdown">
+              <ui:fragment rendered="#{searchBean.searchComplete}">
+                <br/>
+                <table class="dashWidth100" cellpadding="4" cellspacing="0" id="entitlementTbl">
+                  <tr>
+                    <td style="padding-right: 10px">
+                      <h:outputText styleClass="spContentTitle" value="#{msgs.identity_search_section_entitlement_breakdown}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <ui:include src="/define/roles/modeler/entitlementProfileResultsEntitlementsInclude.xhtml">
+                        <ui:param name="miningBean" value="#{searchBean.miningBean}"/>
+                        <ui:param name="showSelectOptions" value="false"/>
+                      </ui:include>
+                    </td>
+                  </tr>
+                </table>
+            </ui:fragment>
+          </a4j:outputPanel>
+
+        </ui:fragment>
+        </div>
+
+        <div id="searchResultsOptionsContent" class="spContent">
+          <table class="customWidth" cellpadding="4" cellspacing="0" style="margin:5px">
+            <tr>
+              <td style="padding-right: 10px">
+                <ui:fragment rendered="#{totalRows > 0}">
+                  <h:outputText styleClass="spContentTitle" value="#{msgs.label_search_options}"/>
+                  <h:selectOneMenu id="searchOption" value="" onchange="SailPoint.Analyze.searchOption();">
+                    <f:selectItem itemValue="select" itemLabel="#{msgs.choose_search_option}"/>
+                    <c:choose>
+                      <c:when test="#{(searchBean.selectedSearchItemName!=null)}">
+                        <f:selectItem itemValue="saveQuery" itemLabel="Update '#{searchBean.searchItem.name}' Search"/>
+                      </c:when>
+                      <c:otherwise>
+                        <f:selectItem itemValue="saveQuery" itemLabel="#{msgs.save_search}"/>
+                      </c:otherwise>
+                    </c:choose>
+                    <c:if test="#{(searchBean.supportsConversionToIdentity)}">
+                    	<f:selectItem itemValue="saveQueryAsIdentity" itemLabel="#{msgs.save_search_as_identity_search}"/>
+                    </c:if>
+                    <c:choose>
+                      <c:when test="#{(searchBean.reportDef!=null)}">
+                        <f:selectItem itemValue="saveReport" itemLabel="Update '#{searchBean.reportDef.name}' Report"/>
+                      </c:when>
+                      <c:otherwise>
+                        <f:selectItem itemValue="saveReport" itemLabel="#{msgs.save_search_as_report}"/>
+                      </c:otherwise>
+                    </c:choose>
+                    <c:choose>
+                      <c:when test="#{searchType == 'Identity'}">
+                        <f:selectItem itemValue="saveIpop" itemLabel="#{msgs.save_identities_as_population}"/>
+                        <f:selectItem itemValue="showEntitlements" itemLabel="#{msgs.show_entitlements}"/>
+                      </c:when>
+                    </c:choose>
+                  </h:selectOneMenu>
+                </ui:fragment>
+              </td>
+              <td align="right">
+                <div class="buttonRow">
+                  <ui:fragment rendered="#{empty isAjax || !isAjax}">
+                    <h:commandButton id="refineSearchBtn" action="searchAgain" value="#{msgs.button_refine_search}" immediate="true" styleClass="primaryBtn"/>
+                  </ui:fragment>
+                  <ui:fragment rendered="#{isAjax}">
+                    <input id="refineSearchAjax" type="button" value="#{msgs.button_refine_search}" onclick="SailPoint.Role.Search.displaySearchContents();" class="primaryBtn"/>
+                  </ui:fragment>
+                </div>
+              </td>
+            </tr>
+          </table>
+      </div>
+
+    </div>
+    <div id="roleSearchResultsFooter" ></div>
+    </div>
+
+    
+
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+      $('#{formName}:searchType').value = '#{searchType}';
+      
+      function onShowMenu(cell, onBlankRow) {
+        return false;
+      }
+      //--><!]]>
+    </script>
+
+
+  </f:view>
+
+</ui:composition>
+
+</body>
+</html>
+
+
+

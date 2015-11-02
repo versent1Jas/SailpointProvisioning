@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/expandingPanel.xhtml">
+
+  <ui:define name="panelTitle">#{msgs.filter}</ui:define>
+
+  <ui:define name="panelBody">
+    <table class="paddedTbl width100">
+      <tr>
+        <td width="40%" valign="middle">
+            <span style="white-space: nowrap;">
+              <b>#{msgs.label_group_filter_by} </b>
+              <h:selectOneMenu id="groupSelect" value="#{scoreCategoryList.groupChoice}">
+                <f:selectItems value="#{groupFactoryList.factoryOptions}" />
+                <a4j:ajax event="change" listener="#{scoreCategoryList.updateChoices}" render="componentSelect"/>
+              </h:selectOneMenu>
+            </span>
+        </td>
+        <td width="40%" valign="middle">
+        	<div>
+            <span style="white-space: nowrap">
+              <b>#{msgs.label_value} </b>
+              <h:selectOneMenu id="componentSelect" value="#{scoreCategoryList.componentChoice}">
+                <f:selectItems value="#{scoreCategoryList.componentOptions}" />
+              </h:selectOneMenu>
+            </span>
+          </div>
+        </td>
+        <td align="right">
+          <table>
+            <tr class="buttonRow">
+              <td style="padding:0">
+                <h:commandButton id="applyBtn" styleClass="primaryBtn" action="#{scoreCategoryList.applyFilter}" value="#{msgs.filter}" />
+              </td>
+              <td style="padding:0">
+                <h:commandButton id="clearBtn" styleClass="secondaryBtn" action="#{scoreCategoryList.reset}" value="#{msgs.nav_reset}" />
+              </td>
+            </tr>
+          </table>         
+        </td>
+      </tr>
+      <tr style="#{scoreCategoryList.filterName == null ? 'display:none' : ''}">
+        <td align="center" colspan="3" class="loadedFilter">
+          <h:outputText value="Identities Filtered by: #{scoreCategoryList.filterName}"/>
+        </td>
+      </tr>
+    </table>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

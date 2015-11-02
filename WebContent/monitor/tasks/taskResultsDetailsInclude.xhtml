@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition template="/expandingPanel.xhtml">        
+
+<ui:define name="panelTitle">#{msgs.title_details}</ui:define>
+
+  <ui:define name="panelBody">
+    <h:commandButton style="display:none" action="#{taskResult.refreshResult}" id="refreshButton" />
+
+    <h:inputHidden id="workItemId" value="#{taskResult.workItemId}"/>
+
+    <div id="taskResultsDetailsDiv" style="margin-top: 5px;">
+        <table class="width100 customWidth paddedTbl lightBorder"  style="background:white">
+          <tr>
+            <td width="10%" class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_name}"/></td>
+            <td width="40%"><h:outputText value="#{taskResult.object.name}"/></td>
+            <td width="10%" class="spLightGray lrBorder"><h:outputText styleClass="textBold" value="#{msgs.started_by}"/></td>
+            <td width="40%"><h:outputText value="#{taskResult.launcher}"/></td>
+          </tr>
+
+          <tr>
+            <td class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_task_type}"/></td>
+            <td><h:outputText value="#{sp:localizeKey(taskResult.object.type.messageKey)}"/></td>
+            <td class="spLightGray lrBorder"><h:outputText styleClass="textBold" value="#{msgs.started}"/></td>
+            <td>
+              <h:outputText value="#{taskResult.object.launched}">
+                <f:convertDateTime type="both" dateStyle="short" timeStyle="medium" timeZone="#{taskResult.userTimeZone}"/>
+              </h:outputText>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_description}"/></td>
+            <td><h:outputText value="#{taskResult.object.definitionDescription}"/></td>
+            <td class="spLightGray lrBorder"><h:outputText styleClass="textBold" value="#{msgs.label_task_completed}"/></td>
+            <td>
+              <h:outputText value="#{taskResult.object.completed}">
+                <f:convertDateTime type="both" dateStyle="short" timeStyle="medium" timeZone="#{taskResult.userTimeZone}"/>
+              </h:outputText>
+            </td>
+          </tr>
+
+         <tr>
+           
+            <td class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_status}"/></td>
+            <td class="rBorder">
+              <t:div rendered="#{null != taskResult.object.completionStatus}">
+                <div class="textBold #{(taskResult.object.error ? 'failBox' : ((taskResult.object.warning || taskResult.object.terminated) ? 'warnBox' : 'successBox'))}">
+                  <h:outputText value="#{sp:localizeKey(taskResult.object.completionStatus.messageKey)}"/></div>                   
+              </t:div>
+  
+              <t:div rendered="#{null == taskResult.object.completionStatus}">
+                <h:outputText value="#{msgs.label_task_pending}"/>
+              </t:div>
+            </td>
+            <ui:fragment rendered='#{!(taskResult.reportsProgress)}'>
+              <td class="spLightGray lrBorder"></td>
+              <td></td>
+            </ui:fragment>
+            <ui:fragment rendered='#{taskResult.reportsProgress}'>
+              <td class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_progress}"/></td>
+              <td><div id="progress"/> </td>
+            </ui:fragment>           
+        </tr>
+
+         <ui:fragment rendered='#{ taskResult.reportsPercentageComplete &amp;&amp; !taskResult.object.complete }'>
+          <tr>
+            <td class="spLightGray rBorder">
+               <h:outputText styleClass="textBold" value="#{msgs.label_percentage_complete}"/>
+            </td>
+            <td class="rBorder" style="height: 40px">
+              <sp:progressBar id="taskProgressBar" 
+                  percentComplete="#{taskResult.object.percentComplete}" 
+                  remainingClass="progressBarRemainingDarkGray"
+                  updateMethodName="updateProgressBar"> 
+              </sp:progressBar>
+            </td>
+            <td class="spLightGray lrBorder"></td>
+            <td></td>
+          </tr>
+         </ui:fragment>
+        </table>  
+          <ui:fragment rendered="#{taskResult.workItemId == null and !(taskResult.fromDashboard) and (!hideReturnButton)}">
+           <input type="button" value="#{msgs.button_return_to} #{objects}" onclick="goBackToList()" style="margin:5px" class="secondaryBtn"/>
+         </ui:fragment>
+
+         <ui:fragment rendered="#{taskResult.workItemId != null and !(taskResult.fromDashboard) and (!hideReturnButton)}">
+           <input type="button" value="#{msgs.button_return_to_workitem}" onclick="goBackToWorkItem()" style="margin:5px" class="secondaryBtn"/>
+         </ui:fragment>
+         
+         <ui:fragment rendered="#{taskResult.fromDashboard and (!hideReturnButton)}">
+           <input type="button" value="#{msgs.button_return_to_dashboard}" onclick="goBackToDashboard()" style="margin:5px" class="secondaryBtn"/>
+         </ui:fragment>
+        </div>
+
+        <!-- 
+          This simply doesn't work if you try to wrapp it in a ui:fragment
+          and put it into the table like the Return to List button above.  
+          It will render but the action handler is never called.  Someone 
+          with more hard liquor than I do can try to figure out why...
+        -->
+        <h:commandButton id="workItemActionButton" style="display:none"
+            action="#{taskResult.workItemAction}" />
+
+        <script defer="defer">
+          function goBackToList() {
+            window.location = '#{returnPage}';
+          }
+          
+          function goBackToDashboard() {
+            window.location = '#{base.requestContextPath}/dashboard.jsf';
+          }
+
+          function goBackToWorkItem() {
+            $('editForm:workItemActionButton').click();
+          }
+
+          function checkProgress() {
+            Ext.Ajax.request({
+              url : '#{base.requestContextPath}/taskProgress',
+              method : 'POST',
+              params : {taskResultId : '#{taskResult.object.id}'},
+              success : processProgress,
+              failure : stopPeriodicExecution,
+              timeout : 60*5*1000
+            });                            
+          }
+
+          function processProgress(request) {
+            var returnedXml = request.responseXML;
+            var response = returnedXml.getElementsByTagName("ajax-response");
+
+            if ( (response == null ) || ( response.length == 0 ) ) {
+              return;
+            }
+            processAjaxResponse(response[0]);
+          }
+
+          var pe;
+          var reportsProgress;
+          var reportsProgressPercentage;
+
+          function startIt() {
+            reportsProgress = #{taskResult.reportsProgress};
+            reportsProgressPercentage = #{taskResult.reportsPercentageComplete};
+            if ( reportsProgress ) {
+              var complete = #{taskResult.complete};
+              if ( !complete ) {
+                if ($('progress') &amp;&amp; $('progress').update) {
+                  $('progress').update('#{msgs.task_result_progress_executing}');
+                }
+                // call it initally to avoid waiting an interval
+                checkProgress();
+                pe = new PeriodicalExecuter(checkProgress, 5);
+              } else {
+                if ($('progress') &amp;&amp; $('progress').update) {
+                  $('progress').update('#{msgs.label_task_completed}');
+                }
+              }
+            }
+          }
+
+          function processAjaxResponse(xmlElement) {
+            if (xmlElement != null ) {
+              var element =  xmlElement.getElementsByTagName("TaskProgress");
+              var completed = element[0].getAttribute("completed");
+              var percentComplete =element[0].getAttribute("percentComplete");
+              if (  completed == "false" ) {
+                var progress = element[0].getAttribute("progress");
+                if ($('progress') &amp;&amp; $('progress').update) {
+                  $('progress').update(progress);
+                }
+                if ( reportsProgressPercentage ) {
+                  // this method is generated by the sp:progressBar tag
+                  updateProgressBar(percentComplete);
+                }
+                
+                //refresh the partitioned reslut grid and statistics table
+                reloadPartitionGridAndStatsTable();
+              } else {
+                stopPeriodicExecution();
+                if ($('progress') &amp;&amp; $('progress').update) {
+                  $('progress').update('#{msgs.label_task_completed}');
+                }
+                if ( reportsProgressPercentage ) {
+                  // this method is generated by the sp:progressBar tag
+                  updateProgressBar(100);
+                }
+                // refresh the page
+                $('editForm:refreshButton').click();
+              }
+            } 
+          }
+
+          function reloadPartitionGridAndStatsTable() {
+        	  var statsButton = $('editForm:statsTablePanelRefreshButton');
+              if ( statsButton != null) {
+            	  statsButton.click();
+              }
+
+              var partitionedGrid = Ext.getCmp('partitionedResultsGrid');
+              if ( partitionedGrid != null) {
+                partitionedGrid.reload(); 
+              } else {
+                  var gridButton = $('editForm:partitionGridPanelRefreshButton');
+                  if ( gridButton != null) {
+                    gridButton.click();
+                  }
+              }
+          }
+          
+          function stopPeriodicExecution() {
+            if ( pe != null )  pe.stop();
+          }
+
+          Ext.onReady(function(){
+              if(startIt) {
+                  startIt();
+              }
+          });
+
+        </script>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

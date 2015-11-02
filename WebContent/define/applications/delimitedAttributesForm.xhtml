@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    <script type="text/javascript">
+        <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        Ext.onReady(function () {
+            Ext.QuickTips.init();
+
+            var spNamespace = '#{nameSpace}';
+
+            // This is our validation hook
+            Page.on('beforeSave', function() {
+                // appears we are only validating the account object type attributes so just get the Tab account component
+                var extCmp = Ext.getCmp('Tab'), fileName, preIterateRule, partitionOptionArray, partitionOption, partitionObjectCount;
+                
+                // we would have liked to move this block of code to the DelimitedPanel object, however
+                // sp:escapeJavascript doesn't get evaluated on *.js files
+                if (extCmp && '#{nameSpace}' == '') {
+                  fileName = extCmp.getFieldValue('filename_', '#tabFile_');
+                  preIterateRule = ($('editForm:preiterateRule')) ? $('editForm:preiterateRule').value : undefined;
+
+                  // djs: Many times the preiterate returns a stream so file name is unused
+                  // be tolerant of situations where there is no filename but there is
+                  // a pre-iterate.
+                  if ( !preIterateRule || preIterateRule == "" || preIterateRule.length == 0 ) {
+                      Validator.validateNonBlankString(fileName, '#{sp:escapeJavascript(msgs.con_form_error_no_filename)}');
+                  }
+
+                  // Validate that if we are using manual mode the number of objects per partition is valid integer greater then zero
+                  partitionOptionArray = extCmp.getFields("partitionOption_", '#tabIteration_', 'input[type="radio"]');
+                  // little more work here to get the value of the checked radio
+                  Ext.each(partitionOptionArray, function(item, index, allItems) {
+                      if (item.checked) {
+                          partitionOption = item.value
+                      }
+                  }, this);
+                  if ( partitionOption != null && partitionOption === "manual" ) {
+                      partitionObjectCount = extCmp.getField("partitionObjectCount_", '#tabIteration_', 'input[type="text"]');
+                      Validator.validateGreaterThanOrEqual(partitionObjectCount.id, 1, '#{sp:escapeJavascript(msgs.con_form_error_partition_size_to_small)}');
+                      Validator.validateLength(partitionObjectCount.value, 10, '#{sp:escapeJavascript(msgs.con_form_error_partition_size_to_large)}');
+                  }
+                }
+                  
+                errors = Validator.getErrors();
+                if (errors && errors.length > 0) {
+                    Validator.displayErrors($('formErrorsTop'));
+                    Validator.displayErrors($('formErrorsBottom'));
+                    return false;
+                }
+                
+                //return false will kill cancel the save
+                return true;
+            });
+
+            Ext.create('SailPoint.define.applications.MainPanel', {id: 'mainPanel'});
+
+            //Used to resize the tab Panel when Config tab is shown
+            Page.on('configSettingsLoaded', function() {
+                // first update application object type panels registered to main panel
+                Ext.getCmp('mainPanel').updatePanelLayout();
+                // next do mainPanel layout which adjusts whitespace in the surrounding border at the bottom
+                // of the panel
+                Ext.getCmp('mainPanel').doComponentLayout();
+                // remove some scroll bar ghosting when expand/collapsing JDBC attribute panels
+                Ext.getCmp('appTab').queryById('attributesContent').setAutoScroll(false);
+            });
+
+        });
+
+        //--><!]]>
+    </script>
+    <f:view>
+
+        <div id="formErrorsTop" class="formError" style="display:none"/>
+
+        <a4j:commandButton id="addObjectTypeBtn"
+                           style="display:none;"
+                           action="#{applicationObject.addGroupSchemaAction}"
+                           render="attributesOutputPanel, schemaData, errorPanel, templatesList"
+                           oncomplete="refreshTabPanel();ApplicationPage.scrollToAnchor('delimitedPanelDiv_');">
+            <a4j:param name="schemaObjectType" noEscape="true" value="$('editForm:hiddenSchemaObjectType').value" assignTo="#{applicationObject.schemaObjectType}" />
+        </a4j:commandButton>
+        <h:inputHidden id="hiddenSchemaObjectType"/>
+
+        <div id='tabedConfigPanelDiv'/>
+
+        <a4j:outputPanel id="attributesOutputPanel">
+            <div id="delimitedSettingsDiv">
+                <t:dataList value="#{applicationObject.schemaDTOs}" var="schemaDTO" rowKey="#{schemaDTO.objectType}">
+                    <div id="#{schemaDTO.objectType}Settings">
+                        <ui:include src="delimitedAttributesInclude.xhtml">
+                            <ui:param name="nameSpace" value="#{schemaDTO.objectType eq 'account' ? '' : schemaDTO.objectType}"/>
+                            <ui:param name="schemaType" value="#{schemaDTO.objectType eq 'account' ? '' : sp:concat(schemaDTO.objectType, '.')}"/>
+                            <ui:param name="delimitedDTO" value="#{schemaDTO}"/>
+                        </ui:include>
+                    </div>
+                </t:dataList>
+            </div>
+        </a4j:outputPanel>
+
+        <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

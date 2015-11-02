@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Database Properties</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_DATABASE';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      
+      <a4j:outputPanel id="dataSourcePanel">
+        <h:dataTable value="#{debug.dataSourcePropertyNames}" var="propName"
+                     styleClass="horizPaddedTbl" rowClasses="odd,even">
+          <h:column>
+            <f:facet name="header">
+              <h:outputText styleClass="spContentTitle2" value="Property"/>
+            </f:facet>
+            <h:outputText value="#{propName}"/>
+          </h:column>
+          <h:column>
+            <f:facet name="header">
+              <h:outputText styleClass="spContentTitle2" value="Value"/>
+            </f:facet>
+            <h:outputText value="#{debug.dataSourceProperties[propName]}"/>
+          </h:column>
+        </h:dataTable>
+      </a4j:outputPanel>
+      
+      <h:form>
+        <a4j:commandButton value="Refresh"
+                           action="#{debug.refreshDataSourcePropertiesAction}"
+                           render="dataSourcePanel" styleClass="primaryBtn" />
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

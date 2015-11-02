@@ -1,0 +1,44 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:ui="http://java.sun.com/jsf/facelets">
+  <h:head>
+    <ui:composition>
+      <script type="text/javascript">
+        var SailPoint = SailPoint || {};
+        SailPoint.CONTEXT_PATH = '#{base.requestContextPath}';
+        SailPoint.SESSION_TIMEOUT = #{login.sessionTimeout};
+        SailPoint.XSRF_TOKEN = '#{base.csrfToken}';
+      </script>
+
+      <ui:fragment rendered="#{base.loggedIn}">
+        <script type="text/javascript">
+          //Create the configData object to store config values
+          SailPoint.configData = {};
+          // Stored here so it can be easily accessed globally
+          SailPoint.CURR_DISPLAYABLE_USER_NAME = '#{sp:escapeJavascript(base.loggedInUser.displayableName)}';
+          SailPoint.CURR_USER_NAME = '#{sp:escapeJavascript(base.loggedInUserName)}';
+          SailPoint.CURR_USER_ID = '#{base.loggedInUser.id}';
+          SailPoint.CURR_USER_LOCALE = '#{base.locale}';
+          SailPoint.SYSTEM_LOCALE = '#{base.defaultLanguage}';
+          SailPoint.SYSTEM_ADMIN = '#{base.systemAdmin}';
+
+          SailPoint.ORIGINAL_AUTH_ID = '#{sp:escapeJavascript(base.originalAuthId)}';
+          SailPoint.ORIGINAL_NATIVE_ID = '#{sp:escapeJavascript(base.originalNativeId)}';
+          SailPoint.SSO_AUTHENTICATED = #{base.ssoAuthenticated};
+
+          SailPoint.ALLOW_REQUEST_FOR_OTHERS = #{uiDashboard.allowRequestForOthers};
+          SailPoint.ALLOW_REQUEST_FOR_SELF = #{uiDashboard.allowRequestForSelf};
+
+          SailPoint.DASHBOARD_CARDS = #{uiDashboard.dashboardCardsJSON};
+
+          SailPoint.LCM_ENABLED = #{uiDashboard.lcmEnabled};
+          SailPoint.configData.ALLOW_REQUEST_FOR_OTHERS = #{uiDashboard.allowRequestForOthers};
+          SailPoint.configData.ALLOW_REQUEST_FOR_SELF = #{uiDashboard.allowRequestForSelf};
+        </script>
+      </ui:fragment>
+    </ui:composition>
+  </h:head>
+</html>

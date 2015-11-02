@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.link_search_results}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/analyze.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/ExtendedPagingToolbar.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/baseGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'LINK_SEARCH_RESULTS';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages errorClass="formError" infoClass="formInfo"/>
+      <h:form styleClass="form" id="editForm">
+      
+        <script type="text/javascript">
+        <!--//--><![CDATA[//><!--    
+          function handleClick (grid, rowIndex, columnIndex, e) {
+           e.stopEvent();
+          } 
+          function contextMenu(grid, rowIndex, e) {
+            return;
+          }  
+        
+          Ext.onReady(function() {
+              SailPoint.BaseGrid.initGrid('#{base.requestContextPath}/analyze/link/linkDataSource.json', 'linkSearchResultsGrid', 25, false);
+              var grid = Ext.getCmp('linkSearchResultsGrid');
+              grid.render();
+              grid.getStore().load({params:{start:0, limit:25}});
+          });
+        //--><!]]>
+        </script>
+        
+        <ui:include src="../searchResultsInclude.xhtml">
+          <ui:param name="gridPage" value="baseGrid.xhtml"/>
+          <ui:param name="ajaxUrl" value="#{base.requestContextPath}/analyze/link/linkDataSource.json" />
+          <ui:param name="totalRows" value="#{linkSearch.count}"/>
+          <ui:param name="searchType" value="Link"/>
+          <ui:param name="searchBean" value="#{linkSearch}"/>
+          <ui:param name="formName" value="editForm"/>
+        </ui:include>
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var clientID = getFieldValue('editForm:clientID');
+               Validator.validateNonBlankString(hostName, "Client ID cannot be null!");
+
+               var clientSecret = getFieldValue('editForm:clientSecret');
+               Validator.validateNonBlankString(adminName, "Client Secret cannot be null!");
+               
+               var refreshToken = getFieldValue('editForm:refreshToken');
+               Validator.validateNonBlankString(password, "Refresh Token cannot be null!");                             
+               
+               var domainName = getFieldValue('editForm:domainName');
+               Validator.validateNonBlankString(domainName, "Domain Name cannot be null!");                             
+               
+               var groupDetails = getFieldValue('editForm:groupDetails');
+               Validator.validateNonBlankString(domainName, "Choose a value for Read Group Details!");                             
+                             
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{applicationObject.type} #{msgs.label_configuration}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+        
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_GAR_client_ID}"/>   
+              <h:outputText styleClass="requiredText" value="*"/>           
+            </td>
+
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpClientID" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_GAR_client_ID}"/>
+
+            </td>
+            <td>
+              <h:inputText id="clientID"
+                           value="#{applicationObject.attributes['clientID']}"                           
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+           <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_GAR_client_secret}"/>
+              <h:outputText styleClass="requiredText" value="*"/>           
+            </td>
+
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpClientSecret" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_GAR_client_secret}"/>
+            </td>
+            <td>
+              <h:inputText id="clientSecret"
+                           value="#{applicationObject.attributes['clientSecret']}"                           
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_GAR_refresh_token}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpRefreshToken" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_GAR_refresh_token}"/>
+            </td>
+             <td>
+               <sp:inputSecret id = "refreshToken"
+                               size = "50"                                
+                               value="#{applicationObject.attributes['refreshToken']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+          </tr>          
+
+
+		<tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_GAR_domain_name}"/>
+               <h:outputText styleClass="requiredText" value="*"/>   
+            </td>
+             <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpDomainName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_GAR_domain_name}"/>
+
+            </td>
+            <td>
+              <h:inputText id = "domainName"
+                                   value="#{applicationObject.attributes['domainName']}"                                 
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                           </h:inputText>
+            </td>
+        </tr>    
+        
+        <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_GAR_group_details}"/>
+              <h:outputText styleClass="requiredText" value="*"/>           
+            </td>
+
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpIndexGDetails" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_GAR_group_details}"/>
+            </td>
+            <td>
+            <h:selectOneMenu id="groupDetails" 
+                                value="#{applicationObject.attributes['groupDetails']}"                               
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                  <f:selectItem itemValue="Y" itemLabel="Y"/>
+                  <f:selectItem itemValue="N" itemLabel="N"/>
+              </h:selectOneMenu>  
+              </td>
+          </tr>                                          
+          
+		<tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_page_size}"/>
+            </td>
+             <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPageSize" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_page_size}"/>
+
+            </td>
+            <td>
+              <h:inputText id = "pageSize"
+                                   value="#{applicationObject.attributes['pageSize']}"                                 
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                           <f:validateLongRange minimum="1" maximum="500"/>
+                           </h:inputText>
+            </td>
+            </tr>     
+            
+                    
+
+        </table>
+
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

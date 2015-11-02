@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<!--
+  WorkItem details renderer for items that have a Form.
+  This also implies that they are managed by Workflower, but I guess
+  that shouldn't matter here.  The JSF shell should do as little as possible.
+-->
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{workItemForm.pageTitle}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+    </sp:script>
+<!-- PageName: workItemForm.xhtml -->
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <sp:sailpointForm styleClass="form" id="editForm" forceEncodedURL="true">
+
+          <h:inputHidden id="id" value="#{workItemForm.object.id}"/>
+          <h:inputHidden id="signatureAuthId" value="#{workItemForm.signatureAuthId}"/>
+          <h:inputHidden id="signaturePass" value="#{workItemForm.signaturePass}"/>
+          
+          <a4j:commandButton id="submitButton" action="#{workItemForm.submit}" style="display: none"
+            render="formRenderer-" oncomplete="SailPoint.form.Util.updateFormPanel({formId:'#{workItemForm.formBean.id}',meaning: '#{sp:escapeJavascript(workItemForm.signatureMeaning)}', oAuthId: '#{sp:escapeJavascript(workItemForm.originalAuthId)}', nAuthId: '#{sp:escapeJavascript(workItemForm.nativeAuthId)}', objId: '#{id}', objType: 'workitem'});"/>
+
+          <ui:include src='../include/formRenderer.xhtml'>
+             <ui:param name='form' value='#{workItemForm.formBean}'/>
+             <ui:param name='meaning' value="#{sp:escapeJavascript(workItemForm.signatureMeaning)}"/>
+             <ui:param name='oAuthId' value="#{sp:escapeJavascript(workItemForm.originalAuthId)}"/>
+             <ui:param name='nAuthId' value="#{sp:escapeJavascript(workItemForm.nativeAuthId)}"/>
+             <ui:param name='objId' value="#{sp:escapeJavascript(workItemForm.object.id)}"/>
+             <ui:param name='objType' value="workitem" />
+             <ui:param name='submitButton' value='editForm:submitButton'/>
+          </ui:include>
+
+      </sp:sailpointForm>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

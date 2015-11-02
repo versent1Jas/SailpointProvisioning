@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<!-- 
+  Parameters (not a complete list):
+    - manageRight: The optional name of the SPRight required to edit the filters
+ -->
+<ui:composition>
+
+  <h:inputHidden id="#{prefix}initComplete" value="#{backingBean.initializationComplete}"/>
+
+  <ui:fragment rendered="#{isRendered}">
+    <ui:fragment rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}">
+      <div id="filterCriteria" class="paddedContainer">
+        <table class="dashWidth100 paddedTbl">
+          <tr>
+            <td>
+              <h:outputText styleClass="spContentTitle" value="#{msgs.add_filter}"/>
+              <ui:fragment rendered="#{prefix == 'advancedSearch'}">
+                <h:graphicImage id="imgHlp#{prefix}SearchCriteria" 
+                  alt="#{analyzeController.searchBean.criteriaHelpMsg}"
+                  style="cursor:pointer;padding: 0px 7px 0px 7px"
+                  url="/images/icons/dashboard_help_16.png" />
+              </ui:fragment>
+            </td>
+          </tr>                
+          <tr>
+            <td>
+              <a4j:outputPanel id="#{prefix}operationsChoices">
+                <input type="hidden" id="#{prefix}applicationId" name="#{prefix}applicationId" value="#{backingBean.applicationId}" />
+                <input type="hidden" id="#{prefix}integerFilter" name="#{prefix}integerFilter" value="#{backingBean.integerFilter}" />
+                <input type="hidden" id="#{prefix}entitlementFilter" name="#{prefix}entitlementFilter" value="#{backingBean.entitlementFilter}" />
+                <input type="hidden" id="#{prefix}entitlementMultiFilter" name="#{prefix}entitlementMultiFilter" value="#{backingBean.entitlementMultiFilter}" />
+              
+                <div id="#{prefix}operationsChoicesDiv" class="#{prefix}spTabledAjaxContent">
+                  <table id="#{prefix}newFilterTable" class="spTable width100 paddedTbl">
+                    <tr>
+                      <th><h:outputText value="#{msgs.field}"/></th>
+                      <th><h:outputText value="#{msgs.search_type}"/></th>
+                      <th><h:outputText value=" #{msgs.value}" style="#{backingBean.filterLogicalOp == 'ISNULL' or backingBean.filterLogicalOp == 'NOTNULL' ? 'visibility:hidden' : 'visibility:visible'}"/></th>
+                      <th><h:outputText value="#{msgs.ignore_case}" style="#{backingBean.filterLogicalOp == 'ISNULL' or backingBean.filterLogicalOp == 'NOTNULL' ? 'visibility:hidden' : 'visibility:visible'}"/></th>
+                    </tr>
+                    <tr>
+                      <td>
+                        <h:selectOneMenu value="#{backingBean.filterField}"
+                          id="#{prefix}searchFieldList"
+                          onchange="var typeChoices = $('#{formName}:#{prefix}inputTypeChoices');
+                                    SailPoint.clearMultiSelections(typeChoices);
+                                    var firstOption = Ext.DomQuery.selectNode('option', typeChoices);
+                                    firstOption.selected = true;
+                                    window.#{prefix}FiltersPage.changeField(this);">
+                          <f:selectItems value="#{backingBean.availableItemNames}"/>
+                        </h:selectOneMenu>
+                      </td>
+                      <td>
+                          <h:selectOneMenu id="#{prefix}inputTypeChoices" value="#{backingBean.filterLogicalOp}" onchange="window.#{prefix}FiltersPage.changeField(this);">
+                            <f:selectItems value="#{backingBean.inputTypeChoices}"/>
+                          </h:selectOneMenu>
+                        <div style="#{backingBean.likeOperation ? 'display:block' : 'display:none'}">
+                          <h:selectOneMenu id="#{prefix}matchMode" value="#{backingBean.filterMatchMode}">
+                            <f:selectItems value="#{backingBean.matchModeValues}"/>
+                          </h:selectOneMenu>
+                        </div>
+                      </td>
+                      <td>
+                      
+                      <div id="#{prefix}textFilter" style="display:#{backingBean.textFilter ? 'block' : 'none'}">
+                        <h:inputText value="#{backingBean.filterValue}"  
+                          onkeypress="return window.#{prefix}FiltersPage.handleEnter(this, event);" id="#{prefix}filterValue" 
+                          style="#{backingBean.filterLogicalOp == 'ISNULL' or backingBean.filterLogicalOp == 'NOTNULL' ? 'visibility:hidden' : 'visibility:visible'}"
+                          styleClass="inputWidth"/>
+                      </div>
+                      
+                      <div id="#{prefix}integerFilterContainer" style="display:#{backingBean.integerFilter ? 'block' : 'none'}">
+                          <div id="#{prefix}integerFilterDiv"/>
+                          <h:inputHidden value="#{backingBean.integerFilterValue}" id="#{prefix}integerFilterValue"/>
+                      </div>
+                      
+                      <div id="#{prefix}boolFilter" style="display:#{backingBean.boolFilter ? 'block' : 'none'}">
+                        <h:selectOneMenu value="#{backingBean.booleanFilterValue}" id="#{prefix}filterBoolValue">
+                          <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true"/>
+                          <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false"/>
+                        </h:selectOneMenu>
+                      </div>
+                      
+                      <div id="#{prefix}multiFilter" style="display: #{backingBean.multiFilter ? 'block' : 'none'}">
+                        <h:inputTextarea id="#{prefix}filterListValue" value="#{backingBean.filterListValue}" styleClass="inputWidth" rows="5"
+                          style="#{backingBean.filterLogicalOp == 'ISNULL' or backingBean.filterLogicalOp == 'NOTNULL' ? 'visibility:hidden' : 'visibility:visible'}"/>
+                      </div>
+                      
+                      <div id="#{prefix}entitlementFilter" style="display: #{backingBean.entitlementFilter ? 'block' : 'none'}">
+                        <div id="#{prefix}entitlementFilterSelect"></div>
+                        <h:inputHidden value="#{backingBean.entitlementFilterValue}" id="#{prefix}entitlementFilterValue" />
+                      </div>
+                      
+                      <div id="#{prefix}entitlementMultiFilter" style="display: #{backingBean.entitlementMultiFilter ? 'block' : 'none'}">
+                        <div id="#{prefix}entitlementMultiFilterSelect"></div>
+                        <h:inputHidden value="#{backingBean.entitlementMultiFilterValue}" id="#{prefix}entitlementMultiFilterValue" />
+                      </div>
+                      
+                      </td>
+                      <td class="centeredColumn">
+                        <h:selectBooleanCheckbox id="#{prefix}ignoreCase" value="#{backingBean.filterIgnoreCase}"
+                          style="#{backingBean.filterLogicalOp == 'ISNULL' or backingBean.filterLogicalOp == 'NOTNULL' ? 'visibility:hidden' : 'visibility:visible'}"/>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+          
+          
+            
+            <tr>
+              <td>
+              <a4j:outputPanel id="#{prefix}filterErrorPnl">
+              <ui:fragment rendered="#{!(backingBean.filterError eq null)}">
+                <div class="formError">
+                  <h:outputText value="#{backingBean.filterError}"/>
+                </div>
+              </ui:fragment>
+              </a4j:outputPanel>
+              </td>
+              
+            </tr>
+            
+          
+          
+          <tr>
+            <td>
+              <a4j:commandButton action="#{backingBean.newFilter}" value="#{msgs.filter_add}" styleClass="primaryBtn"
+                id="#{prefix}addFilterBtn" render="#{prefix}filterPnl,#{prefix}filterErrorPnl" 
+                onclick="window.#{prefix}FiltersPage.commit();"
+                oncomplete="window.#{prefix}FiltersPage.reRoundTable('#{prefix}filterBeanListDiv'); 
+                            window.#{prefix}FiltersPage.onAddFilter($('#{formName}:#{prefix}addFilterBtn'));
+                            if ($('stateForm')) {
+                                $('stateForm:searchType').value = 'advancedIdentity';
+                            }"/>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </ui:fragment>
+
+    <div class="paddedContainer">
+      <a4j:outputPanel id="#{prefix}filterPnl">
+        <ui:include src="filtersInclude.xhtml">
+          <ui:param name="backingBean" value="#{backingBean}"/>
+          <ui:param name="formName" value="#{formName}"/>
+          <ui:param name="errorDivId" value="#{errorDivId}"/>
+          <ui:param name="prefix" value="#{prefix}"/>
+          <ui:param name="hideHelp" value="true"/>
+          <ui:param name="manageRight" value="#{manageRight}" />
+        </ui:include>
+      </a4j:outputPanel>                
+    </div>
+    
+    <a4j:commandButton id="#{prefix}refreshOperationChoices"
+                       style="display:none"
+                       action="#{backingBean.refreshOperationsAction}"
+                       render="#{prefix}operationsChoices"
+                       oncomplete="window.#{prefix}FiltersPage.reRoundTable('#{prefix}operationsChoicesDiv'); 
+                                   window.#{prefix}FiltersPage.createFilterInputs();
+                                   SailPoint.Utils.styleSelects();"/>
+  </ui:fragment>
+
+  <ui:fragment rendered="#{not isRendered}">
+    <div class="paddedContainer">
+      <h:outputText value="#{notRenderedBecause}"/>
+    </div>
+  </ui:fragment>
+
+
+</ui:composition>
+
+</body>
+</html>

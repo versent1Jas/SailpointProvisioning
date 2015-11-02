@@ -1,0 +1,21 @@
+<section>
+  <sp-aria-errors></sp-aria-errors>
+  
+  <div class="text h4 text-info m-t-sm">
+    <b>{{ 'ui_my_approvals_assigned_to' | spTranslate }}</b> {{ getCurrentAssignee() }}
+  </div>
+
+  <div class="form-group m-t-lg">
+    <label for="approvalAssigneeSuggest">{{ 'ui_my_approvals_assign_to' | spTranslate }}</label>
+    <div sp-identity-suggest=""
+           sp-identity-suggest-id="approvalAssigneeSuggest"
+           sp-identity-suggest-context="WorkgroupMembers"
+           sp-identity-suggest-limit="5"
+           sp-identity-suggest-params="{{suggestParams}}"
+           ng-model="assignmentModel.selectedIdentity">
+    </div>
+    <div aria-hidden="true" class="text-danger reader-error" ng-show="missingAssignment">
+      {{ 'ui_my_approvals_workgroup_assignment_assignee_required' | spTranslate }}
+    </div>
+  </div>
+</section>

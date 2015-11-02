@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      ng-app="sailpoint.reset">
+
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+<h:head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <title ng-bind-template="{{title}}"></title>
+  <link rel="shortcut icon" href="#{base.requestContextPath}/ui/images/favicon.ico"/>
+
+  <ui:remove><!-- removing font-awesome from packtagged sp:style as it does not render in IE9 --></ui:remove>
+  <link rel="stylesheet" href="#{base.requestContextPath}/ui/css/font-awesome.min.css" type="text/css"/>
+  <!-- split up css because IE9 can only handle ~4k rules per file -->
+  <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+    <src>theme.css?#{debug.revision}</src>
+  </sp:style>
+  <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+    <src>application.css?#{debug.revision}</src>
+  </sp:style>
+  <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+    <src>animate.css?#{debug.revision}</src>
+    <src>fuelux.css?#{debug.revision}</src>
+    <src>login.css?#{debug.revision}</src>
+    <src>ui-custom.css?#{debug.revision}</src>
+  </sp:style>
+
+  <ui:remove><!-- This must come before the scripts. --></ui:remove>
+  <ui:include src="../scriptData.xhtml"/>
+
+  <sp:script serveOffset="#{base.requestContextPath}/ui/js">
+    <src>lib/ie/phoneCompat.js?#{debug.revision}</src>
+    <src>lib/jquery/jquery.min.js?#{debug.revision}</src>
+    <src>lib/bootstrap/bootstrap.js?#{debug.revision}</src>
+    <src>lib/angular/angular.js?#{debug.revision}</src>
+    <src>lib/angular/angular-route.js?#{debug.revision}</src>
+    <src>lib/angular/angular-cookies.js?#{debug.revision}</src>
+    <src>lib/angular/i18n/angular-locale_#{base.localeTag}.js?#{debug.revision}</src>
+    <src>lib/angular/angular-sanitize.js?#{debug.revision}</src>
+    <src>lib/angular-translate/angular-translate.js?#{debug.revision}</src>
+    <src>lib/angular-translate/loader-url.js?#{debug.revision}</src>
+    <src>lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js?#{debug.revision}</src>
+    <src>lib/fuelux/fuelux.js?#{debug.revision}</src>
+
+    <src>shared/util.js?#{debug.revision}</src>
+    <src>shared/androidTablet.js?#{debug.revision}</src>
+
+    <src>common/directive/DirectiveModule.js?#{debug.revision}</src>
+    <src>common/directive/LoadingMaskDirective.js?#{debug.revision}</src>
+    <src>common/directive/ConfigurableDetailsDirective.js?#{debug.revision}</src>
+    <src>common/error/ErrorHandler.js?#{debug.revision}</src>
+    <src>common/form/FormModule.js?#{debug.revision}</src>
+    <src>common/form/DatepickerDirective.js?#{debug.revision}</src>
+    <src>common/form/RadioDirective.js?#{debug.revision}</src>
+    <src>common/i18n/i18nModule.js?#{debug.revision}</src>
+    <src>common/i18n/TranslateFilter.js?#{debug.revision}</src>
+    <src>common/util/SortOrder.js?#{debug.revision}</src>
+    <src>common/util/UtilModule.js?#{debug.revision}</src>
+    <src>common/util/BrowserSniffer.js?#{debug.revision}</src>
+    <src>common/util/ui-bootstrap-override.js?#{debug.revision}</src>
+    <src>common/modal/ModalModule.js?#{debug.revision}</src>
+    <src>common/modal/SpModalService.js?#{debug.revision}</src>
+    <src>csrf/CsrfModule.js?#{debug.revision}</src>
+    <src>csrf/CsrfCookieInitializerService.js?#{debug.revision}</src>
+    <src>reset/ResetModule.js?#{debug.revision}</src>
+    <src>reset/ResetDataService.js?#{debug.revision}</src>
+    <src>reset/SMSMessagingService.js?#{debug.revision}</src>
+    <src>reset/RoutingService.js?#{debug.revision}</src>
+    <src>reset/ChangePasswordService.js?#{debug.revision}</src>
+    <src>reset/AuthAnswerModel.js?#{debug.revision}</src>
+    <src>reset/AuthAnswerFactory.js?#{debug.revision}</src>
+    <src>reset/AuthQuestionFilter.js?#{debug.revision}</src>
+    <src>reset/AuthQuestionService.js?#{debug.revision}</src>
+    <src>reset/UnlockAccountService.js?#{debug.revision}</src>
+    <src>reset/PasswordConfirmDirective.js?#{debug.revision}</src>
+    <src>reset/SelectionCtrl.js?#{debug.revision}</src>
+    <src>reset/SMSResetCtrl.js?#{debug.revision}</src>
+    <src>reset/AuthQuestionCtrl.js?#{debug.revision}</src>
+    <src>reset/LoginRedirectCtrl.js?#{debug.revision}</src>
+  </sp:script>
+
+  <f:verbatim>
+    <!--[if lte IE 9]>
+        <script src="#{base.requestContextPath}/ui/js/lib/ie/respond.min.js?#{debug.revision}"></script>
+        <script src="#{base.requestContextPath}/ui/js/lib/ie/html5.js?#{debug.revision}"></script>
+        <script src="#{base.requestContextPath}/ui/js/lib/jquery-placeholder/jquery.placeholder.js?#{debug.revision}"></script>
+        <script src="#{base.requestContextPath}/ui/js/lib/es5-shim/es5-shim.js?#{debug.revision}"></script>
+        <script type="text/javascript">
+        $(function() {
+            $('input').placeholder();
+        });
+        </script>
+    <![endif]-->
+  </f:verbatim>
+
+  <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+    if (#{!base.allowXFrameOptions}) {
+      if (top.location != window.location) {
+        top.location.replace(window.location);
+      }
+    }
+
+    SailPoint.ErrorHandler.init($, document);
+    //--><!]]>
+  </script>
+
+</h:head>
+<h:body>
+  <header class="header bg-info dk">
+    <div class="navbar-header">
+      <div class="nav-brand">
+        <img src="#{base.requestContextPath}/ui/images/logo.png"/>
+      </div>
+    </div>
+  </header>
+
+  <section id="content" class="m-t-lg animated fadeInUp">
+    <div class="row m-n">
+      <div class="col-sm-6 col-sm-offset-3 m-t-lg">
+        <div ng-view=""></div>
+      </div>
+    </div>
+    <div class="text text-center text-muted v-bottom m-t-sm hidden-xs" aria-hidden="true">
+      &#xA0; &#169; #{msgs.copy_right}
+    </div>
+  </section>
+
+  <!-- Client locale: #{base.locale} -->
+  <!-- Build: #{debug.fullVersion} -->
+
+</h:body>
+</html>

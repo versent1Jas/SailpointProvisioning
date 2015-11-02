@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        function togglePartitioning() {
+            var pdiv = $('partitionsRow_');
+            
+            // If the checkbox is enabled show the div for partitions
+            var partitioningEnabled = $('editForm:partitionMode_');
+            if ( partitioningEnabled && partitioningEnabled.checked == true) {
+                if ( pdiv ) {                   
+                    pdiv.style.display = "";
+                }               
+            } else {               
+                pdiv.style.display = "none";
+            }
+            
+            //
+            // Must resize the mainpanel because the hidden div
+            // has a big old text area on it
+            //
+            var mainPanel = Ext.getCmp("mainPanel");
+            if ( mainPanel ) {
+                mainPanel.doLayout();
+            }
+         }
+        
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+             /*  var domain = getFieldValue('editForm:domain');
+               Validator.validateNonBlankString(domain, "Domain cannot be null!");
+    
+               var email = getFieldValue('editForm:email');
+               Validator.validateNonBlankString(email, "Admin Email cannot be null!");*/
+               
+               
+            // Validate the partition data is non null and that there aren't any lines 
+               // in the partition line that evaluate to null.
+               var partitioningEnabled = $('editForm:partitionMode_');
+               if ( partitioningEnabled && partitioningEnabled.checked == true) {
+                 var partitions = getFieldValue('editForm:partitions_');                 
+                 // Split partitions "string" on new lines so we can look for empty
+                 var lines = partitions.split(/\r\n|\r|\n/g);
+                 var partitionsNew = '';
+                 if ( lines ) {
+                   for ( var i=0; i<lines.length ; i++ ) {
+                     var line = lines[i];
+                     if ( line && line.length > 0 ) {
+                       partitionsNew += line + '\n';                        
+                     } 
+                   }
+                 }                 
+                 $('editForm:partitions_').value = partitionsNew;
+                 Validator.validateNonBlankString(partitionsNew, "Partitioning is enabled, but there are no partitions defined. Please define at least one partition or disable partitioning.");
+               }
+               
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+           togglePartitioning(); });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_TAM_settings}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_TAM_admin}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHladminname" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="ID of Tivoli Access Manager Admin"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="admin_name"
+                           value="#{applicationObject.attributes['admin_name']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_TAM_admin_password}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpAdminPassword" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="Password for Tivoli Access Manager Admin"/>
+            </td>
+            <td>
+              <sp:inputSecret id="admin_password"
+              			   value="#{applicationObject.attributes['admin_password']}" redisplay="true"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>          
+          
+ 		  <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_TAM_domain}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpdomain" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="Domain for Tivoli Access Manager"/>
+            </td>
+            <td>
+              <h:inputText id="domain"
+              			   value="#{applicationObject.attributes['domain']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>   
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_TAM_config_url}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpConfigUrl" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="e.g c:\configfile. URL formatted location of configuration file created via svrsslcfg"/>
+            </td>
+            <td>
+              <h:inputText id="config_url"
+              			   value="#{applicationObject.attributes['config_url']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>          
+          </table>
+        <ui:fragment>
+          <!--  Partitioning Config -->
+          <br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_partitioning}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_partitioningMode}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpPartitioningMode_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_jdbc_partitionEnable}"/>
+              </td>
+              <td width="100%">
+                <h:selectBooleanCheckbox id='partitionMode_' onclick='togglePartitioning()'
+                                         value="#{applicationObject.attributes['partitionMode']}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+              <tr id='partitionsRow_'>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_jdbc_partition_statements}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpPartitioningStatements_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.help_con_form_erp_partitions}"/>
+                </td>
+                <td>              
+                  <h:inputTextarea id='partitions_'
+                                   converter="NewLineList"
+                                   value="#{applicationObject.attributes['partitionStatements']}"
+                                   rows="5" cols="10"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>            
+            </table>
+        </ui:fragment>
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

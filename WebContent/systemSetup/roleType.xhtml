@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Include to edit one RoleTypeDefinitionDTO.
+
+  Required arguments:
+
+    config
+      an instanceof RoleObjectConfigBean, with a selected attribute
+
+  There is stuff in here for editing Identity attribute but the migration
+  is not yet complete.  This will not be used.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+    <script type="text/javascript" defer="defer">
+    helpKey = 'EDIT_ROLE_TYPE';
+    </script>
+
+  <ui:param name="type" value="#{roleObjectConfig.session.type}"/>    
+
+  <ui:define name="title">#{msgs.oconfig_title_role_type}</ui:define>
+
+<ui:define name="headerItems">
+  <ui:fragment rendered="#{roleObjectConfig.attributeCount > 0}">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/roleTypeIncludedAttributes.js?#{debug.revision}</src>
+    </sp:script>
+  </ui:fragment>
+
+  <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+      /**
+       * Only enable the "no detection unless assigned" option if detection is
+       * enabled.
+       */
+      function syncDetectionCheckboxes() {
+          var noDetection = $('mainForm:noDetection');
+          var noDetectionUnlessAssigned = $('mainForm:noDetectionUnlessAssigned');
+          noDetectionUnlessAssigned.disabled = noDetection.checked;
+      }
+
+      Ext.onReady(function() {
+          syncDetectionCheckboxes();
+      });
+    //--><!]]>
+  </script>
+
+</ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="mainForm">
+ 
+        <h:inputHidden id="id" value="#{roleObjectConfig.object.id}"/>
+
+        <div class="spTabledContent">
+          <table class="width100 spTable">
+            <thead><tr><th colspan="2">
+              <h:outputText value="#{msgs.oconfig_section_role_type}"/>
+            </th></tr></thead>
+            <tbody>
+
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_type_name}"/>
+                </td>
+                <td><h:inputText id="name" value="#{type.name}"/></td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_display_name}"/>
+                </td>
+                <td><h:inputText id="displayName" value="#{type.displayName}"/></td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_description}"/>
+                </td>
+                <td>
+                  <h:inputTextarea value="#{type.description}" cols="60" rows="4"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_icon}"/>
+                </td>
+                <td><h:inputText id="icon" value="#{type.icon}"/></td>
+              </tr>
+
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_supers}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noSupers" value="#{type.noSupers}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_subs}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noSubs" value="#{type.noSubs}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_detection}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox onclick="syncDetectionCheckboxes();" id="noDetection" value="#{type.noDetection}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_detection_unless_assigned}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noDetectionUnlessAssigned" value="#{type.noDetectionUnlessAssigned}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_profiles}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noProfiles" value="#{type.noProfiles}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_auto_assignment}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noAutoAssignment" value="#{type.noAutoAssignment}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_assignment_selector}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noAssignmentSelector" value="#{type.noAssignmentSelector}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_manual_assignment}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noManualAssignment" value="#{type.noManualAssignment}"/>
+                </td>
+              </tr>
+
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_permits}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noPermits" value="#{type.noPermits}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_not_permittable}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="notPermittable" value="#{type.notPermittable}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_requirements}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noRequirements" value="#{type.noRequirements}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_not_required}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="notRequired" value="#{type.notRequired}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_no_iiq}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="noIIQ" value="#{type.noIIQ}"/>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <ui:fragment rendered="#{roleObjectConfig.attributeCount > 0}">
+          <ui:include src="roleTypeIncludedAttributes.xhtml"/>
+        </ui:fragment>
+
+        <div class="spFooter"></div>
+        <div class="spacerDiv"/>
+
+        <h:panelGroup styleClass="certificationSaveBtnRow buttonRow">
+          <h:commandButton styleClass="primaryBtn" id="saveButton" action="#{roleObjectConfig.saveTypeAction}" value="#{msgs.button_save}" />
+          <h:commandButton styleClass="secondaryBtn" id="cancelButton" action="#{roleObjectConfig.cancelTypeAction}" value="#{msgs.button_cancel}" />
+        </h:panelGroup>
+  
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

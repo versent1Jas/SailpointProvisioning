@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+    
+    <table class="width100" cellspacing="0" cellpadding="0">
+      <tr>
+        <td>          
+          <table class="width100">            
+
+            <tr>
+              <td>                
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs['certification.name'].description)}"/>
+              </td>
+              <td>
+                <h:inputText id="certName" class="searchInputText inputWidth" value="#{searchBean.inputs['certification.name'].value}" />
+              </td>
+
+              <td colspan="2" rowspan="5" valign="top" style="padding: 6px">
+                <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['SPT_tags.id'].description)}"/><br/>
+                
+                <div id="tagsMultiSuggest"></div>
+                <t:inputHidden id="tagsSuggest"
+                               value="#{searchBean.inputs['SPT_tags.id'].objectListValue}" forceId="true">
+                    <sp:convertList />
+                </t:inputHidden>
+                
+                <div id="tagsMultiSuggestData" style="display:none">
+                  #{sp:basicJSONDataConverted(
+                    searchBean.inputs['SPT_tags.id'].objectListValue,
+                    'TagListConverter')}
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>                
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs['certification.certifier'].description)}"/>
+              </td>
+              <td>
+                <div id="certifierSuggest"></div>
+                <t:inputHidden id="certifier" value="#{searchBean.inputs['certification.certifier'].value}" forceId="true">
+                </t:inputHidden>           
+              </td>
+            </tr>
+
+            <tr>
+              <td>                
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs['certification.member'].description)}"/>
+              </td>
+              <td>
+                <div id="memberSuggest"></div>
+                <t:inputHidden id="member" value="#{searchBean.inputs['certification.member'].value}" forceId="true">
+                </t:inputHidden>
+              </td>
+            </tr>
+            
+            <tr>
+              <td>                
+                <h:outputText styleClass="textBold"
+                  value="#{sp:localizeKey(searchBean.inputs['certification.type'].description)}"/>
+              </td>
+              <td>
+                <h:selectOneMenu id="certTypes" styleClass="searchInputSelect" value="#{searchBean.inputs['certification.type'].value}">
+                  <f:selectItem itemLabel="" itemValue=""/>
+                  <f:selectItems value="#{certificationScheduleList.certTypes}" />
+                  <a4j:ajax event="change" render="searchTypePanel,searchTypeFields"
+                    oncomplete="SailPoint.Analyze.Certification.renderTypeAttributes()"/>
+                </h:selectOneMenu>
+              </td>
+              
+            </tr>
+            <tr>
+              <td>                
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs['certification.phase'].description)}"/>
+              </td>
+              <td>
+                <h:selectOneMenu id="certPhases" styleClass="searchInputSelect" value="#{searchBean.inputs['certification.phase'].value}">
+                  <f:selectItem itemLabel="" itemValue=""/>
+                  <f:selectItems value="#{certificationScheduleList.certPhases}" />          
+                </h:selectOneMenu>
+              </td>
+            </tr>
+            
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold"
+                  value="#{sp:localizeKey(searchBean.inputs['certification.percentComplete'].description)}"/>
+              </td>
+              <td colspan="2">
+                <table class="searchInputPairTable">
+                  <tr>
+                    <td>
+                      <h:selectOneMenu id="certPercentComplete" styleClass="searchInputSelect"
+                        value="#{searchBean.inputs['certification.percentComplete'].inputTypeValue}">
+                        <f:selectItems value="#{searchBean.amountInputTypeChoices}"/>
+                      </h:selectOneMenu>
+                    </td>
+                    <td>
+                      <h:inputText styleClass="searchInputText inputNumberWidth"
+                        value="#{searchBean.inputs['certification.percentComplete'].value}" id="percentComplete">
+                        <f:validateLongRange minimum="0" maximum="100" />
+                      </h:inputText>%
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <a4j:outputPanel id="searchTypePanel">
+                  <ui:fragment rendered="#{searchBean.certificationSearchType eq 'Manager'}">
+                    <ui:include src="certificationManagerAttributes.xhtml"/>
+                  </ui:fragment>
+                  
+                  <ui:fragment rendered="#{searchBean.certificationSearchType eq 'ApplicationOwner' or searchBean.certificationSearchType eq 'DataOwner'}">
+                    <ui:include src="certificationApplicationAttributes.xhtml"/>
+                  </ui:fragment>
+
+                  <ui:fragment rendered="#{searchBean.certificationSearchType eq 'BusinessRoleMembership' or searchBean.certificationSearchType eq 'BusinessRoleComposition'}">
+                    <ui:include src="certificationRoleAttributes.xhtml"/>
+                  </ui:fragment>
+                  
+                  <ui:fragment rendered="#{searchBean.certificationSearchType eq 'AccountGroupMembership' or searchBean.certificationSearchType eq 'AccountGroupPermissions'}">
+                    <ui:include src="certificationAccountGroupAttributes.xhtml"/>
+                  </ui:fragment>
+                </a4j:outputPanel> 
+              </td>
+            </tr>
+
+            <!-- Group attributes -->
+            <tr>
+              <td colspan="4" style="border-bottom:1px #ccc solid">
+                <h:outputText value=" "/>
+              </td>
+            </tr>
+            <tr class="odd">
+              <td colspan="4">
+                <h:outputText styleClass="textBold" 
+                  value="#{msgs.label_filter_by_group}"/>
+              </td>
+            </tr>
+            <tr>              
+              <td colspan="4">
+                <ui:include src="certificationSearchGroupFilter.xhtml"/>
+              </td>
+            </tr>
+
+            <!-- Date filters -->
+            <tr>
+              <td colspan="4" style="border-bottom:1px #ccc solid">
+                <h:outputText value=" "/>
+              </td>
+            </tr>
+            <tr class="odd">
+              <td colspan="4">
+                <h:outputText styleClass="textBold" 
+                  value="#{msgs.label_filter_by_date}"/>
+              </td>
+            </tr>
+            <tr>
+              <td width="15%">
+                  <h:outputText styleClass="textBold" 
+                    value="#{sp:localizeKey(searchBean.inputs['certification.date'].description)}"/>
+              </td>
+              <td colspan="3">
+                  <h:selectOneMenu styleClass="searchInputSelect"
+                    id="certificationDates" value="#{searchBean.inputs['certification.date'].value}">
+                    <f:selectItems value="#{searchBean.dateOptions}"/>
+                  </h:selectOneMenu>
+              </td>
+            </tr>
+            <tr>
+              <td width="15%">
+                  <h:outputText styleClass="textBold" 
+                    value="#{sp:localizeKey(searchBean.inputs['certification.startDate'].description)}"/>
+                  <input type="checkbox" id="certificationStartDateSelect" name="certificationStartDateSelect" style="margin:5px;vertical-align:middle"
+                    onclick="SailPoint.Analyze.updateStartType(this, $('certificationSearchForm:certificationStartDateType'), $('certificationStartDateDiv'));"/>
+                  <h:inputHidden id="certificationStartDateType" value="#{searchBean.inputs['certification.startDate'].inputTypeValue}"/>
+              </td>
+              <td align="left" width="35%">
+                <div id="certificationStartDateDiv" style="display:#{search.inputs['certification.startDate'].inputTypeValue == 'After' ? '' : 'none'}">
+                  <sp:inputDate type="date" id="certificationStartDate" popupCalendar="true"  ampm="true" timeZone="#{taskSchedule.userTimeZoneId}" addResources="false" 
+                               imageLocation="/scripts/myfacescalendar" javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" 
+                               value='#{searchBean.inputs["certification.startDate"].objectDateValue}' styleClass="tomahawkInputDate"/>
+                </div>
+              </td>                  
+              <td width="15%">
+                  <h:outputText styleClass="textBold" 
+                    value="#{sp:localizeKey(searchBean.inputs['certification.endDate'].description)}"/>
+                  <input type="checkbox" id="certificationEndDateSelect" name="certificationEndDateSelect" style="margin:5px;vertical-align:middle"
+                    onclick="SailPoint.Analyze.updateEndType(this, $('certificationSearchForm:certificationEndDateType'), $('certificationEndDateDiv'));"/>
+                  <h:inputHidden id="certificationEndDateType" value="#{searchBean.inputs['certification.endDate'].inputTypeValue}"/>
+              
+              </td>
+              <td align="left" width="35%">
+                <div id="certificationEndDateDiv" style="display:#{search.inputs['certification.endDate'].inputTypeValue == 'Before'? '' : 'none'}">
+                  <sp:inputDate type="date" id="certificationEndDate" popupCalendar="true"  ampm="true" timeZone="#{searchBean.userTimeZoneId}" addResources="false" 
+                               imageLocation="/scripts/myfacescalendar" javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"  
+                               value='#{searchBean.inputs["certification.endDate"].objectDateValue}' styleClass="tomahawkInputDate"/>
+                </div>
+              </td>
+            </tr>
+            
+            <!-- Signed/Unsigned Status -->
+            <tr>
+              <td colspan="4" style="border-bottom:1px #ccc solid">
+                <h:outputText value=" "/>
+              </td>
+            </tr>            
+            <tr class="odd">
+              <td colspan="4">
+                <h:outputText styleClass="textBold" 
+                  value="#{msgs.label_filter_by_status}"/>
+              </td>
+            </tr>
+            <tr>
+              <td width="15%">
+                  <h:outputText styleClass="textBold" 
+                    value="#{sp:localizeKey(searchBean.inputs['certification.status'].description)}"/>
+              </td>
+              <td colspan="3">
+                  <h:selectOneMenu styleClass="searchInputSelect"
+                    id="certificationStates" value="#{searchBean.inputs['certification.status'].value}">
+                    <f:selectItems value="#{searchBean.statusOptions}"/>
+                  </h:selectOneMenu>
+              </td>
+            </tr>
+            
+            <tr>
+              <td width="15%">
+                  <h:outputText styleClass="textBold" 
+                    value="#{sp:localizeKey(searchBean.inputs['certification.electronicallySigned'].description)}"/>
+              </td>
+              <td colspan="3">
+                  <h:selectOneMenu styleClass="searchInputSelect"
+                    id="certificationESigned" value="#{searchBean.inputs['certification.electronicallySigned'].value}">
+                    <f:selectItems value="#{searchBean.esignedOptions}"/>
+                  </h:selectOneMenu>
+              </td>
+            </tr>
+
+            <tr>
+                <td width="15%">
+                    <h:outputText styleClass="textBold"
+                        value="#{sp:localizeKey(searchBean.inputs['certification.signOffHistory.signerId'].description)}" />
+                </td>
+                <td colspan="3">
+                    <div id="certificationESignedSuggest"></div>
+                </td>
+            </tr>
+
+      </table>
+        </td>
+      </tr>
+    </table>
+    
+    <!--  These are here because they cannot be rendered through ajax.  If they are rendered
+    through ajax, their values are not bound on the first execution of the form - PH -->
+    <t:inputHidden id="certificationApplication" value="#{searchBean.inputs['certification.applicationId'].value}" forceId="true">
+    </t:inputHidden>
+    <t:inputHidden id="certificationManager" value="#{searchBean.inputs['certification.manager'].value}" forceId="true">
+    </t:inputHidden>
+    <t:inputHidden id="certificationAccountGroup" value="#{searchBean.inputs['certification.accountGroup'].value}" forceId="true">
+    </t:inputHidden>
+    <t:inputHidden id="certificationAccountGroupApplication" value="#{searchBean.inputs['certification.accountGroupApplicationId'].value}" forceId="true">
+    </t:inputHidden>
+    <t:inputHidden id="certificationRole" value="#{searchBean.inputs['certification.role'].value}" forceId="true">
+    </t:inputHidden>
+    <t:inputHidden id="certificationESigned" value="#{searchBean.inputs['certification.signOffHistory.signerId'].value}" forceId="true">
+    </t:inputHidden>
+    
+    <input type="hidden" id="certificationRoleName" name="certificationRoleName" value="#{sp:getDisplayNameForId('Bundle', searchBean.inputs['certification.role'].value)}"/>
+    <input type="hidden" id="certificationApplicationName" name="certificationApplicationName" value="#{sp:getDisplayNameForId('Application', searchBean.inputs['certification.applicationId'].value)}"/>
+    <input type="hidden" id="certificationAccountGroupAppName" name="certificationAccountGroupAppName" value="#{sp:getDisplayNameForId('Application', searchBean.inputs['certification.accountGroupApplicationId'].value)}"/>
+  </f:view>
+  <script type="text/javascript" defer="defer">
+    SailPoint.Utils.styleSelects();
+  </script>
+</ui:composition>
+</body>
+</html>

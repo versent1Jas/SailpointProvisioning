@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition >
+
+    <f:view>
+
+        <ui:fragment >
+          <div class="roundedPageInfo" align="center">
+          
+          <table class="width100" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="left" width="275px">
+              <a4j:outputPanel id="buttons" layout="block">
+                <h:panelGrid id="nav" styleClass="paddedTbl"
+                  columns="5" rendered="#{taskResult.totalPages > 1}">
+
+                  <a4j:commandButton
+                    rendered="#{taskResult.currentPage+1 != 1}"
+                    render="reportBody,buttons"
+                    action="#{taskResult.firstPage}" id="first"
+                    value="#{msgs.nav_first}"
+                    styleClass="pagingButton"
+                    onclick="this.disabled='true';SailPoint.resetTimeout();"/>
+  
+                  <a4j:commandButton
+                    rendered="#{taskResult.currentPage+1 == 1}"
+                    render="reportBody,buttons" disabled="true"
+                    id="first_grey"
+                    value="#{msgs.nav_first}"
+                    styleClass="pagingButton"
+                    onclick="this.disabled='true';SailPoint.resetTimeout();"/>
+  
+                  <a4j:commandButton
+                    rendered="#{taskResult.currentPage+1 != 1}"
+                    render="reportBody,buttons"
+                    action="#{taskResult.decrementPage}" id="previous"
+                    image="/images/icons/BlkArrowLeft.png"
+                    styleClass="pagingButton previousButton" 
+                    onclick="this.disabled='true';SailPoint.resetTimeout();"/>
+  
+                  <a4j:commandButton
+                    rendered="#{taskResult.currentPage+1 == 1}"
+                    render="reportBody,buttons" id="previous_grey"
+                    disabled="true"
+                    image="/images/icons/BlkArrowLeft.png"
+                    styleClass="pagingButton previousButton"
+                    onclick="this.disabled='true';SailPoint.resetTimeout();"/>
+
+                  <h:outputFormat value="#{msgs.rept_current_page_all}" styleClass="pagingInfo">
+                      <f:param value="#{taskResult.currentPage+1}"/>
+                      <f:param value="#{taskResult.totalPages}"/>
+                  </h:outputFormat>
+
+                  <a4j:commandButton render="reportBody,buttons"
+                    rendered="#{taskResult.currentPage+1 != taskResult.totalPages}"
+                    action="#{taskResult.incrementPage}" id="next"
+                    image="/images/icons/BlkArrowRight.png"
+                    styleClass="pagingButton nextButton"
+                    onclick="this.disabled='true';SailPoint.resetTimeout();"/>
+
+                  <a4j:commandButton render="reportBody,buttons"
+                    disabled="true"
+                    rendered="#{taskResult.currentPage+1 == taskResult.totalPages}"
+                    id="next_grey"
+                    image="/images/icons/BlkArrowRight.png"
+                    styleClass="pagingButton nextButton" 
+                    onclick="this.disabled='true';SailPoint.resetTimeout();"/>
+
+                  <a4j:commandButton render="reportBody,buttons"
+                    rendered="#{taskResult.currentPage+1 != taskResult.totalPages}"
+                    action="#{taskResult.lastPage}" 
+                    id="last"
+                    value="#{msgs.nav_last}"
+                    styleClass="pagingButton" 
+                    onclick="this.disabled='true';SailPoint.resetTimeout();"/>
+
+                  <a4j:commandButton render="reportBody,buttons"
+                    disabled="true"
+                    rendered="#{taskResult.currentPage+1 == taskResult.totalPages}"
+                    id="last_gray"
+                    value="#{msgs.nav_last}"
+                    styleClass="pagingButton"
+                    onclick="this.disabled='true';SailPoint.resetTimeout();"/>
+
+                  </h:panelGrid>
+                </a4j:outputPanel></td>
+                
+                <td align="left">
+                  <h:panelGrid columns="3" 
+                    rendered="#{taskResult.totalPages > 0}">
+                  <h:commandButton id="pdf" action="#{taskResult.exportToPDF}"
+                    image="/images/pdf.gif" />
+                  <h:commandButton id="csv" action="#{taskResult.exportToCSV}"
+                    rendered="#{taskResult.gridReport}"
+                    image="/images/icons/export_csv.png" />
+                  <h:commandButton id="cef" action="#{taskResult.exportToCEF}"
+                    rendered="#{taskResult.archSightReport}"
+                    image="/images/icons/export_cef.png" />
+                  </h:panelGrid>
+                </td>
+              </tr>
+            </table>
+            </div>
+          </ui:fragment>
+                  
+          <ui:fragment rendered='#{taskResult.totalPages lt 1}'>
+           <span style="text-align: center"><h:outputText styleClass="spContentTitle" value="#{msgs.msg_no_results_returned}"/></span>
+          </ui:fragment>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

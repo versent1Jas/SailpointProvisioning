@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.SybaseDirectConnector" featuresString="PROVISIONING, PASSWORD, SYNC_PROVISIONING, SEARCH, UNLOCK, ENABLE, DIRECT_PERMISSIONS" icon="databaseIcon" name="Sybase - Direct" type="Sybase - Direct">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="SybaseDirectConnector.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="native_identity" identityAttribute="native_identity" includePermissions="true" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="name" minable="true" name="name" required="true" type="string">
+          <Description> Login user name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="server_user_id" minable="true" name="server_user_id" required="true" type="string">
+          <Description> Server User ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="user_id" minable="true" name="user_id" required="true" type="string">
+          <Description> User ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="default_database" minable="true" name="default_database" required="true" type="string">
+          <Description> Default database</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="default_language" minable="true" name="default_language" required="true" type="string">
+          <Description> Default language</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="full_name" minable="true" name="full_name" required="true" type="string">
+          <Description> Full name of login user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="create_date" minable="true" name="create_date" required="true" type="string">
+          <Description> Date on which login user is created</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="lock_date" minable="true" name="lock_date" required="true" type="string">
+          <Description> Date on which login user got locked</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="password_chg_date" minable="true" name="password_chg_date" required="true" type="string">
+          <Description> Date on which password got changed</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="last_login_date" minable="true" name="last_login_date" required="true" type="string">
+          <Description> Last login date of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="user_type" minable="true" name="user_type" required="true" type="string">
+          <Description> Type of User: Login or Database user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="native_identity" minable="true" name="native_identity" required="true" type="string">
+          <Description> Native identity is an attribute which act like primary key</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="status" minable="true" name="status" required="true" type="string">
+          <Description>Status of login user like enable/disable</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="db_user_name_detail" minable="true" multi="true" name="db_user_name_detail" required="true" type="string">
+          <Description> DB User associated with Login User</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="roles" remediationModificationType="None" schemaObjectType="group" type="string">
+          <Description> Roles associated with login user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="groupname" remediationModificationType="None" type="string">
+          <Description>Database user's group name</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="native_identity" featuresString="PROVISIONING" identityAttribute="native_identity" includePermissions="true" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="server_role_id" minable="true" name="server_role_id" required="true" type="string">
+          <Description>ID of the server Role</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="native_identity" name="native_identity" type="string">
+          <Description>Native identity is an attribute which act like primary key during aggregation</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="Role Name" minable="true" name="name" required="true" type="string">
+          <Description>Name of the Role</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="password_chg_date" minable="true" name="password_chg_date" type="string">
+          <Description>Date on which password got changed</Description>
+        </AttributeDefinition>
+        <AttributeDefinition displayName="member_roles" minable="true" multi="true" name="member_roles" type="string">
+          <Description>Roles which are present under the hierarchy of the main role</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Create Account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_sybase_user_name" helpKey="help_con_form_sybase_user_name" name="native_identity" required="true" type="string"/>
+        <Field displayName="con_prov_policy_sybase_password" helpKey="help_con_form_sybase_password" name="password" required="true" type="secret"/>
+        <Field displayName="con_prov_policy_sybase_default_database" helpKey="help_con_form_sybase_default_database" name="default_database" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_sybase_default_language" helpKey="help_con_form_sybase_default_language" name="default_language" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_sybase_full_name" helpKey="help_con_form_sybase_full_name" name="full_name" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_sybase_db_user_name_detail" helpKey="help_con_form_sybase_db_user_name_detail" multi="true" name="db_user_name_detail" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_sybase_role_name" helpKey="help_con_form_sybase_role_name" name="native_identity" required="true" type="string"/>
+        <Field displayName="con_prov_policy_sybase_role_password" helpKey="help_con_form_sybase_password" name="password" reviewRequired="true" type="secret"/>
+        <Field displayName="con_prov_policy_sybase_role_member_roles" helpKey="help_con_form_sybase_member_roles" multi="true" name="member_roles" readOnly="true" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_sybase_update_member_roles" helpKey="help_con_form_sybase_member_roles" multi="true" name="member_roles" reviewRequired="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

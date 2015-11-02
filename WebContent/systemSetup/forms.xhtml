@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<h:head>
+  <title>#{msgs.form_configure}</title>
+</h:head>
+
+<body>
+  <ui:composition template="/appPage.xhtml">
+    <ui:define name="title">#{msgs.form_title}</ui:define>
+
+    <ui:define name="headerItems">
+      <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+        <src>form-editor.css</src>
+      </sp:style> 
+      <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/workflow">
+         <src>workflow-editor.css</src>
+      </sp:style>
+      <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/FormTypeDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/EditorTextArea.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/FormUtils.js?load=#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/FormGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleCombo.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/ScriptEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/model/TemplateField.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateButtonEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateFieldEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditorWindow.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateBooleanValue.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/template/RestfulTemplateEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/ApprovalPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowScriptRadio.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowFormEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/RestfulWorkflowFormEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/FormTypeDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiText.js?#{debug.revision}</src>
+      </sp:script>
+      <script type="text/javascript">
+        <!--//--><![CDATA[//><!--
+        helpKey = 'FORM_SETTINGS';
+
+        Ext.onReady(function() {
+            var formsGrid = Ext.create('SailPoint.grid.FormGrid', {
+                id: 'formGrid',
+                cls : 'selectableGrid',
+                stateful : true,
+                renderTo: formContent,
+                filters: {type: null},
+                isRef: false,
+                viewConfig : {
+                    stripeRows : true,
+                    scrollOffset : 0
+                }
+            }); // create()
+        }); // onReady()
+
+        //--><!]]>
+      </script>
+    </ui:define>
+
+    <ui:define name="body">
+      <f:view>
+        <h:form styleClass="form" id="editForm">
+          <div class="spContent">
+            <div id="errorMessages" class="formError" style="margin-left:10px; margin-right:10px; display:none"/>
+
+            <div id="formContent" style="margin: 15px 10px 20px 10px;">
+              <div id="templateDisplay" >
+                <ui:include src="/include/template/templateEditorInclude.xhtml"/>
+              </div>
+            </div>
+          </div>
+
+          <h:commandButton id="backButton" styleClass="secondaryBtn" value="#{msgs.button_return_to_system_setup}" action="backToSystemSetup" />
+        </h:form>
+      </f:view>
+    </ui:define>
+  </ui:composition>
+</body>
+</html>

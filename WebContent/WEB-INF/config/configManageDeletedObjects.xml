@@ -1,0 +1,477 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <!-- ========================================================================= 
+    Quick link to restore the deleted AD accounts and groups for a given AD application. 
+  ========================================================================= -->
+
+  <DynamicScope name="SystemAdministrator">
+    <Selector>
+      <IdentitySelector>
+        <MatchExpression>
+          <MatchTerm name="capabilities" value="SystemAdministrator" />
+        </MatchExpression>
+      </IdentitySelector>
+    </Selector>
+  </DynamicScope>
+
+  <QuickLink name="RecycleBin" category="Access"
+    messageKey="quicklink_manage_recycle_bin" action="recyclebinAction" ordering="9">
+    <Attributes>
+      <Map>
+        <entry key="displayText" value="true" />
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="SystemAdministrator" />
+    </DynamicScopes>
+  </QuickLink>
+
+  <!--========================================================================= 
+    Column Configs for account and group grid having deleted AD accounts/groups 
+    ========================================================================= -->
+
+  <ImportAction name="merge">
+    <UIConfig name='UIConfig'>
+      <Attributes>
+        <Map>
+          <entry key="sailpoint.web.lcm.ManageDeletedObjectsBean">
+            <value>
+              <List>
+                <ColumnConfig dataIndex="nativeIdentity" headerKey="Native Identity" percentWidth="70" property="nativeIdentity" sortProperty="nativeIdentity" />
+                <ColumnConfig dataIndex="name" headerKey="Display Name" percentWidth="20" property="name" sortProperty="name" sortable="true" />
+                <ColumnConfig dataIndex="id" headerKey="Restore" percentWidth="10" property="id" renderer="SailPoint.LCM.ManageDeletedObjects.DisplayDeletedObjects.restoreButtonRenderer" />
+                <ColumnConfig fieldOnly="true" property="objectType" />
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.ManageDeletedObjectsBean_groups">
+            <value>
+              <List>
+                <ColumnConfig dataIndex="nativeIdentity" headerKey="Native Identity" percentWidth="70" property="nativeIdentity" sortProperty="nativeIdentity" sortable="true" />
+                <ColumnConfig dataIndex="name" headerKey="Display Name" percentWidth="20" property="name" sortProperty="name" sortable="true" />
+                <ColumnConfig dataIndex="id" headerKey="Restore" percentWidth="10" property="id" renderer="SailPoint.LCM.ManageDeletedObjects.DisplayDeletedObjects.restoreButtonRenderer" />
+                <ColumnConfig fieldOnly="true" property="objectType" />
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </UIConfig>
+  </ImportAction>
+  
+  <!--========================================================================= 
+    Workflow to restore the deleted AD accounts/groups for a given AD application. 
+    ========================================================================= -->
+
+  <Workflow name="Restore Deleted Objects" libraries="Identity">
+
+  <!--
+    Configuration Variables
+  -->
+  <Variable initializer="false" name="trace">
+    <Description>Enable this to see stuff spit out to stdout</Description>
+  </Variable>
+
+  <Variable name='disableIdentityRequests' input='true' initializer='true' >
+    <Description>
+      May be passed by the calling workflow to disable processing of
+      IdentityRequest objects after provisioning.  This option should
+      be passed by any workflow that is not used by LCM and does not
+      maintain the IdentityRequest model.  This avoids logging a warning
+      when the IdentityRequest is not found.
+    </Description>
+  </Variable>
+
+  <Variable name='foregroundProvisioning' editable='true' initializer='true' input='true'>
+    <Description>
+      Normally provisioning is done in a step that uses the "background"
+      option to force the workflow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintenance task to 
+      see the results of the request.
+    </Description>
+  </Variable>
+
+  <!--
+    Input Variables
+  -->
+  <Variable input="true" name="applicationName" required="true">
+    <Description>
+        Name of the Application where the restore operation
+        is detected.
+    </Description>
+  </Variable>
+  
+  <Variable input="true" name="nativeIdentity" required="true">
+    <Description>
+        Name of the account/group on the Application where the
+        restore operation was detected.
+    </Description>
+  </Variable>
+  
+  <Variable input="true" name="objectType" required="true">
+    <Description>
+        Object type, whether account or group
+    </Description>
+  </Variable>
+  
+  <Variable input="true" name="objectGuid" required="true">
+    <Description>
+        Object Guid of the account/group on the Application for which the
+        restore operation was detected.
+    </Description>
+  </Variable>
+  
+  <Variable input="true" name="deletedObjId" required="true">
+    <Description>
+        ID of the account or group which is to be restored.
+    </Description>
+  </Variable>
+  
+  <!--
+    Internal variables
+  -->
+
+  <Variable initializer="dummyIdentity" input="true" name="identityName">
+    <Description>
+        The name of the identity we're supposed to update. This is required
+        by the provisioner.
+        We will use the temporary dummy identity as we don't want it to appear
+        any where in IIQ. 
+    </Description>
+  </Variable>
+  
+  <Variable input="true" name="plan">
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+  
+  <Variable input="true" name="provisiongErrors">
+    <Description>Provisioning errors, if any,  after restore.</Description>
+  </Variable>
+  
+  <Variable name="project">
+    <Description>
+        A ProvisionignProject compiled from the target list.
+    </Description>
+  </Variable>
+  
+  <Step icon="Start" name="start" posX="28" posY="10">
+    <Transition to="Create Plan"/>
+  </Step>
+  
+  <Step name="Create Plan" posX="119" posY="10" resultVariable="plan">
+    <Description>
+        Create the plan for the account/group for which restore is underway.
+    </Description>
+    <Arg name="deletedObjId" value="ref:deletedObjId"/>
+    <Arg name="nativeID" value="ref:nativeIdentity"/>
+    <Arg name="objectGuid" value="ref:objectGuid"/>
+    <Arg name="objectType" value="ref:objectType"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Script>
+        <Source>
+            import java.util.List;
+            import sailpoint.object.Application;
+            import sailpoint.object.DeletedObject;
+            import sailpoint.object.ProvisioningPlan;
+            import sailpoint.object.ProvisioningPlan.AbstractRequest;
+            import sailpoint.object.ProvisioningPlan.AttributeRequest;
+            import sailpoint.object.ProvisioningPlan.AccountRequest;
+            import sailpoint.object.ProvisioningPlan.ObjectRequest;
+            import sailpoint.object.ProvisioningPlan.ObjectOperation;
+            import sailpoint.object.ProvisioningProject;
+            import sailpoint.object.Permission;
+            import sailpoint.object.Attributes;
+            import sailpoint.api.Provisioner;
+            import sailpoint.api.SailPointContext;
+          
+            SailPointContext spc = wfcontext.getSailPointContext();
+            DeletedObject deletedObj = spc.getObjectById(DeletedObject.class, deletedObjId);
+            
+            ProvisioningPlan plan = new ProvisioningPlan();
+            sailpoint.object.Identity ident = new sailpoint.object.Identity();
+            ident.setDisplayName(identityName);
+            plan.setIdentity(ident);
+            
+            AbstractRequest req = null;
+            if(objectType.equalsIgnoreCase("account")) {
+                req = new AccountRequest();
+            } else {
+                req = new ObjectRequest();
+            }
+            
+            Application app = deletedObj.getApplication();
+            if ( Util.otob(trace) ) {
+                  System.out.println("Create Account request for: " + app.getName());
+            }
+            if(app != null) {
+                if(app.getType().equalsIgnoreCase("Active Directory - Direct")) {
+                    req.setApplication(app.getName());
+                    req.setNativeIdentity(nativeID);
+                    req.setOp(ObjectOperation.Modify);
+                    req.setType(objectType);
+                    plan.addRequest(req);
+                    
+                    AttributeRequest areq = new AttributeRequest();
+                    areq.setName("IIQRestore");
+                    areq.setOperation(ProvisioningPlan.Operation.Set);
+                    areq.setValue("true");
+                    Map map = new HashMap();
+                    map.put("objectguid", objectGuid.substring(1, (objectGuid.length() - 1)));
+                    map.put("noLinkNeeded", "true");
+                    areq.setArgs(new sailpoint.object.Attributes(map));
+                    req.add(areq);
+                }
+            }
+            if ( Util.otob(trace) ) {
+              System.out.println("Plan: " + plan.toXml());
+            }
+            return plan ;
+        </Source>
+    </Script>
+    <Transition to="Empty Project" when="plan == null"/>
+    <Transition to="Examine Plan"/>
+  </Step>
+  
+  <!--  -->
+  <Step name="Examine Plan" posX="185" posY="175" resultVariable="summaryName">
+    <Description>
+        Derive a single string we can use as the name, of the deleted object
+        needed to be restored, in logging.
+    </Description>
+    <Arg name="applicationName" value="ref:applicationName"/>
+    <Arg name="nativeIdentity" value="ref:nativeIdentity"/>
+    <Script>
+      <Source>
+          String name = "unknown";
+          name = applicationName + ": " + nativeIdentity;
+          return name;
+        </Source>
+    </Script>
+    <Transition to="Compile Project"/>
+  </Step>
+  
+  <Step action="call:compileProvisioningProject" name="Compile Project" posX="321" posY="175" resultVariable="project">
+    <Description>
+        Compile the provisioning plan into a provisioning project using the function
+        present in the Identity Library.
+    </Description>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="requester" value="ref:launcher"/>
+    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+    <Arg name="identityNotRequired" value="true"/>
+    <Transition to="Provision"/>
+  </Step>
+
+  
+  <Step name="Provision" icon="Provision" posX="449" posY="175">
+    <Description>
+      Provision what remains in the project using the subprocess.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Provision with retries'/>
+    </WorkflowRef>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="background" value="!ref:foregroundProvisioning"/>
+    <Arg name="disableIdentityRequests" value="ref:disableIdentityRequests"/>
+    <Arg name='trace' value='ref:trace'/>
+    <Arg name="project">
+      <Script>
+          <Source>
+            // Add the identity to project if missing
+            import sailpoint.object.ProvisioningProject;
+            
+            ProvisioningProject modifiedProject = project;
+            if(modifiedProject.getIdentity() == null) {
+                modifiedProject.setIdentity(identityName);
+            }
+            return modifiedProject;
+          </Source>
+      </Script>
+    </Arg>
+    <Return name='retries' to='retries'/>
+    <Return name='project' to='project'/>
+    <Transition to="Check Provisioning Errors"/>
+  </Step>
+  
+  <Step name="Check Provisioning Errors" posX="448" posY="80" resultVariable="provisiongErrors">
+    <Description>
+      Place holder for custom logging or other actions.  
+      If there were group provisioning errors, provisionGroupProject
+      will have left them in the WorkflowCase.messages list.
+    </Description>
+    <Script>
+      <Source>
+        import sailpoint.tools.Message;
+        if ( Util.otob(trace) ) {
+            System.out.println("Checking provisioning errors...");
+        }
+        List errors = wfcontext.getWorkflowCase().getErrors();
+        if (errors != null) {
+            for (Message error : errors) {
+                //Ignore the object not found exception to run through targeted aggregation
+                if((errors.size() == 1)) {
+                    if( error.toString().contains("ObjectNotfound Exception")) {
+                      if ( Util.otob(trace) ) {
+                          System.out.println("Found Only ObjectNotfound Exception ");
+                      }
+                      errors = null;
+                      break;
+                    }
+                }
+                if ( Util.otob(trace) ) {
+                    System.out.println("*** " + error.toString());
+                }
+            }
+        }
+        return errors;
+      </Source>
+    </Script>
+    <Transition to="Targeted Aggregation" when="provisiongErrors == null"/>
+    <Transition to="end"/>
+  </Step>
+  
+  <Step name="Targeted Aggregation" posX="612" posY="181">
+    <Description>
+        Get the RO of the account with the objectGuid after restore, as that will
+        remain same even after restore. 
+        Do the targeted aggregation so that the account which was restored from deleted
+        state, is updated (deleted) in spt_deleted_table 
+    </Description>
+    <Arg name="applicationName" value="ref:applicationName"/>
+    <Arg name="nativeIdentity" value="ref:nativeIdentity"/>
+    <Arg name="objectType" value="ref:objectType"/>
+    <Arg name="objectGuid" value="ref:objectGuid"/>
+    <Script>
+      <Source>
+        import sailpoint.object.Application;
+        import sailpoint.object.Attributes;
+        import sailpoint.object.Filter;
+        import sailpoint.object.Identity;
+        import sailpoint.object.DeletedObject;
+        import sailpoint.object.QueryOptions;
+        import sailpoint.object.ResourceObject;
+        import sailpoint.object.TaskResult;
+        import sailpoint.connector.ADLDAPConnector;
+        import sailpoint.api.Aggregator;
+        import sailpoint.api.SailPointContext;
+        
+        if ( Util.otob(trace) ) {
+            System.out.println("Application Name is: " + applicationName);
+            System.out.println("Native Identity is: " + nativeIdentity);
+        }
+        String appName = applicationName;
+        String nativeIdentityName = nativeIdentity;
+        
+        SailPointContext context = wfcontext.getSailPointContext();
+        Application app = context.getObject(Application.class, appName);
+        if (null == app) {
+            String errMsg = "ERROR: Failed to find application named: " + appName;
+            if ( Util.otob(trace) ) {
+                System.out.println(errMsg);
+           }
+           return;
+        }
+        
+        ADLDAPConnector connector = new sailpoint.connector.ADLDAPConnector(app);  
+        if (null == connector) {
+            String errMsg = "ERROR: Failed to get connector for application: " + appName;
+            if ( Util.otob(trace) ) {
+                System.out.println(errMsg);
+           }
+           return;
+        }
+        //Get the object using objectGuid. But the connector expects the DN as i uses the
+        //DN to get the relevant context in forest environment. So pass the DN in the options
+        Map options = new HashMap();
+        options.put("distinguishedName", nativeIdentityName);
+        ResourceObject rObj = connector.getObject(objectType, objectGuid, options);
+        if (null == rObj) {
+            String errMsg = "ERROR: Could not get ResourceObject for account: " + nativeIdentityName;
+            if ( Util.otob(trace) ) {
+                System.out.println(errMsg);
+            }
+           return;
+        }
+        if ( Util.otob(trace) ) {
+            System.out.println("Got resourceObject: " + rObj.toXml());
+        }
+        
+        // Create an arguments map for the aggregation task. 
+        // To change this (if you need to), the map contains aggregation options and is the same as the 
+        // arguments to the account aggregation tasks.  Some suggested defaults are:
+        Attributes argMap = new Attributes();
+        argMap.put("promoteAttributes",       "true");
+        argMap.put("correlateEntitlements",   "true");
+        argMap.put("noOptimizeReaggregation", "true");  // Note: Set to false to disable re-correlation.
+        if(objectType.equalsIgnoreCase("group")) {
+           argMap.put("aggregationType",objectType);
+        }
+        // Construct an aggregator instance.
+        Aggregator agg = new Aggregator(context, argMap);
+        if (null == agg) {
+            String errMsg = "ERROR: Null Aggregator returned from constructor.";
+            if ( Util.otob(trace) ) {
+                System.out.println(errMsg);
+            }
+            return;
+        }
+        
+        // Invoke the aggregation task by calling the aggregate() method.
+        // Note: the aggregate() call may take several seconds to complete.
+        if ( Util.otob(trace) ) {
+            System.out.print("Calling aggregate() method... ");
+        }
+        
+        TaskResult taskResult = agg.aggregate(app, rObj);
+        if ( Util.otob(trace) ) {
+            System.out.println("aggregation complete.");
+        }
+        
+        if (null == taskResult) {
+            String errMsg = "ERROR: Null taskResult returned from aggregate() call.";
+            if ( Util.otob(trace) ) {
+                System.out.println(errMsg);
+            }
+            return;
+        }
+
+        if ( Util.otob(trace) ) {
+            System.out.println("TaskResult details: " + taskResult.toXml());
+        }
+        
+        return;
+
+      </Source>
+    </Script>
+    <Transition to="end"/>
+  </Step>
+  
+  <Step name="Empty Project" posX="314" posY="6">
+    <Description>
+        Here if there wasn't enough to build a project.
+    </Description>
+    <Script>
+      <Source>
+        if ( Util.otob(trace) ) {
+          System.out.println("Empty restore project");
+        }
+      </Source>
+    </Script>
+    <Transition to="end"/>
+  </Step>
+  
+  <Step icon="Stop" name="end" posX="612" posY="7"/>
+  
+</Workflow>
+
+</sailpoint>

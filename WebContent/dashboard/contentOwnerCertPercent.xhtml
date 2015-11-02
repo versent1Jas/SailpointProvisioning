@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+  <table class="dashWidth100"><tr><td>
+    <a4j:outputPanel id="contentOwnerCerts">
+      <ui:param name="ownerCertPercentages" value="#{certificationPercentList.ownerCertPercentages}"/>
+      
+      <t:div id="emptyCertContents" rendered="#{empty ownerCertPercentages}">
+        <table style="margin:5px">
+          <tr><td style="text-align:center"><h:outputText class="progressText" value="#{certificationPercentList.noCertsMessage}"/></td></tr>
+        </table>
+      </t:div>
+    
+      <t:div id="populatedCertContents" rendered="#{!empty ownerCertPercentages}">
+        <table class="spTable dashWidth100" id="certStatusTbl" style="margin:5px; border:1px #ccc solid">
+          <thead>
+            <tr>
+              <th></th>
+              <th width="30%" >
+                <h:outputText styleClass="font10" value="#{msgs.name}" />
+              </th>
+              <th colspan="2" width="70%">
+                <h:outputText styleClass="font10" value="#{msgs.percentage_complete}" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <ui:include src="certPercentageRows.xhtml">
+              <ui:param name="certPercentageRows" value="#{certificationPercentList.ownerCertPercentages}"/>
+              <ui:param name="showCertPercentageRows" value="true"/>
+              <ui:param name="certsPanel" value="contentOwnerCerts"/>
+            </ui:include>
+              <ui:fragment rendered="#{certificationPercentList.ownerInCharge and certificationPercentList.numSubordinates gt 0 and !certificationPercentList.showSubordinates}">
+                <tr>
+                  <td onclick="$('dashboardForm:showSubordinates').click();">
+                    <h:graphicImage styleClass="dashContentExpandBtn"
+                                    url="/images/icons/plus.png"
+                                    style="float:none" />
+                  </td>
+                  <td colspan="3" onclick="$('dashboardForm:showSubordinates').click();">
+          					<h:outputFormat styleClass="fakeLink font10" style="cursor:pointer" value="#{msgs.show_subordinate_cert_status}">
+          						<f:param value="#{certificationPercentList.ownerDisplayName}"/>
+          					</h:outputFormat>
+                  </td>
+                </tr>
+              </ui:fragment>
+              <ui:fragment rendered="#{certificationPercentList.ownerInCharge and certificationPercentList.showSubordinates and certificationPercentList.numSubordinates gt 0}">
+                <tr style="display: #{certificationPercentList.ownerInCharge and certificationPercentList.showSubordinates ? '' : 'none'}">
+                  <td onclick="$('dashboardForm:hideSubordinates').click();">
+                    <h:graphicImage styleClass="dashContentExpandBtn"
+                                      url="/images/icons/minus.png"
+                                      style="float:none" />
+                  </td>
+                  <td colspan="3" onclick="$('dashboardForm:hideSubordinates').click();">
+          					<h:outputFormat styleClass="fakeLink font10" style="cursor:pointer" value="#{msgs.hide_subordinate_cert_status}">
+          						<f:param value="#{certificationPercentList.ownerDisplayName}"/>
+          					</h:outputFormat>
+                  </td>
+                </tr>
+              </ui:fragment> 
+
+              <ui:fragment rendered="#{certificationPercentList.showSubordinates and certificationPercentList.numSubordinates gt 0}">
+                  <tr>
+                    <td>
+                        <ui:fragment rendered="#{certificationPercentList.subordinateGridStart > 0}">
+                            <h:graphicImage style="cursor:pointer;" 
+                                        url="/images/icons/left_circle_blue_16.png"
+                                        onclick="$('dashboardForm:prevSubordinatesPage').click();" />
+                        </ui:fragment>                        
+                    </td>
+                    <td colspan="2">
+                        <span style="font-weight: bold;">
+	                        <h:outputFormat value="Showing {0}-{1} of {2}">
+	                            <f:param value="#{certificationPercentList.subordinateGridStart + 1}" />
+	                            <f:param value="#{certificationPercentList.subordinateGridEnd}" />
+	                            <f:param value="#{certificationPercentList.numSubordinates}" />
+	                        </h:outputFormat>
+                        </span>
+                    </td>
+                    <td>
+                        <ui:fragment rendered="#{certificationPercentList.subordinateGridStart + 10 lt certificationPercentList.numSubordinates}">
+                        <h:graphicImage style="cursor:pointer;" 
+                                        url="/images/icons/right_circle_blue_16.png"
+                                        onclick="$('dashboardForm:nextSubordinatesPage').click();" /> 
+                        </ui:fragment>
+                    </td>
+                  </tr>
+              </ui:fragment>   
+              <ui:include src="certPercentageRows.xhtml">
+                <ui:param name="certPercentageRows" value="#{certificationPercentList.subordinateCertPercentages}"/>
+                <ui:param name="showCertPercentageRows" value="#{certificationPercentList.showSubordinates}"/>
+                <ui:param name="certsPanel" value="contentOwnerCerts"/>
+              </ui:include>  
+	          
+          </tbody>
+        </table>
+        <script>
+          makeTableMulticolored($('certStatusTbl'), true, false, 'even', 'odd');
+        </script>
+      </t:div>
+      <h:inputHidden id="showSubordinatesInput" value="#{certificationPercentList.showSubordinates}"/>
+      <h:inputHidden id="subordinateGridStartInput" value="#{certificationPercentList.subordinateGridStart}"/>
+      <h:inputHidden id="certPercentToLoad" value="#{certificationPercentList.certPercentToLoad}"/>
+    </a4j:outputPanel>
+  </td></tr></table>
+  <a4j:commandButton id="showSubordinates" style="display:none" onclick="$('dashboardForm:showSubordinatesInput').value = true;" limitRender="true" render="contentOwnerCerts"/>
+  <a4j:commandButton id="hideSubordinates" style="display:none" onclick="$('dashboardForm:showSubordinatesInput').value = false;" limitRender="true" render="contentOwnerCerts"/>
+  <a4j:commandButton id="nextSubordinatesPage" style="display:none" onclick="$('dashboardForm:subordinateGridStartInput').value = parseInt($('dashboardForm:subordinateGridStartInput').value) + 10;" limitRender="true" render="contentOwnerCerts" />
+  <a4j:commandButton id="prevSubordinatesPage" style="display:none" onclick="$('dashboardForm:subordinateGridStartInput').value = parseInt($('dashboardForm:subordinateGridStartInput').value) - 10;" limitRender="true" render="contentOwnerCerts" />
+  
+</ui:composition>
+
+</body>
+</html>

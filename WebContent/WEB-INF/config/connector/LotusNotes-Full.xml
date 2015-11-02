@@ -1,0 +1,548 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="GROUP_PROVISIONING, PROVISIONING, SYNC_PROVISIONING, SEARCH, ENABLE" icon="directory2Icon" name="Lotus Notes Template" type="Lotus Notes - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="Notes"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+
+                         import sailpoint.object.ProvisioningPlan.AccountRequest;
+                         import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                         import sailpoint.api.*;
+                         import sailpoint.object.*;
+                         import sailpoint.tools.Util;
+                         import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                         import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                         import sailpoint.object.ProvisioningPlan.GenericRequest;        
+                         
+                          List groups = plan.getObjectRequests();
+                          if (groups != null) 
+                          {
+                                        for (ObjectRequest req : groups) 
+                                        {
+                                             ObjectOperation op = req.getOp();
+                                             if ((op == ObjectOperation.Modify) || (op == ObjectOperation.Create)) 
+                                             {
+                                                   AttributeRequest systemPriv = req.getAttributeRequest("GROUPTYPE");
+                                                   if (systemPriv != null) {
+                                                   String privString = systemPriv.getValue();                                                       
+                                                   String newValue = "0";
+                                                   if (privString.equalsIgnoreCase("0 - Multi-Purpose"))
+                                                   {                                                                
+                                                                                        newValue = "0";
+                                                   }
+                                                   else if(privString.equalsIgnoreCase("1 - Mail Only"))
+                                                   {
+                                                                                        newValue = "1";
+                                                   }
+                                                   else if(privString.equalsIgnoreCase("2 - Access Control List Only"))
+                                                   {
+                                                                                        newValue = "2";
+                                                   } 
+                                                   else if(privString.equalsIgnoreCase("3 - Deny List Only"))
+                                                   {
+                                                                                        newValue = "3";
+                                                   } 
+                                                   else if(privString.equalsIgnoreCase("4 - Servers Only"))
+                                                   {
+                                                                                        newValue = "4";
+                                                   }                                                                                                          
+                                                   systemPriv.setValue(newValue);
+                                               }
+                                             }                                                                      
+                                        }   
+                                    }
+                         
+                            List accounts = plan.getAccountRequests();
+                            if (accounts != null) 
+                            {
+                                    for (AccountRequest req : accounts) 
+                                    {
+                                            AccountRequest.Operation op = req.getOperation();
+                                    if (op == AccountRequest.Operation.Delete) 
+                                            {
+                                                    // find the Link for this account
+                                                    Application app = context.getObject(Application.class, req.getApplication());
+                                                    if (app == null) 
+                                                    {
+                                                            // should never happen, the plan has an error
+                                                         
+                                                    }
+                                                    else 
+                                                    {
+                                                            Link link = identity.getLink(app, req.getNativeIdentity());
+                                                            if (link == null) 
+                                                            {
+                                                                    // should never happen, on an Operation.Delete
+                                                                    //print("Missing link!");
+                                                            }
+                                                            else 
+                                                            {
+                                                                    String attname = "@NoteID";
+                                                                    Object value = link.getAttribute(attname);
+                                                                    AttributeRequest att = new AttributeRequest(attname, value);
+                                                                    req.add(att);
+                                                     }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                            List accountRequests = plan.getAccountRequests();
+                                            if(accountRequests != null)
+                                            {
+                                             for (AccountRequest ar : accountRequests) 
+                                             {
+                                           //System.out.println("  ================== AccountRequest =================== ");
+                                               AttributeRequest systemPriv = ar.getAttributeRequest("REG_TYPE");
+                                               if (systemPriv != null) {
+                                                   String privString = systemPriv.getValue();
+                                                   //System.out.println ("REG_TYPE " + privString);
+                                                   String newValue;
+                                                   if (privString.equals("Flat"))
+                                                   {
+                                                                                        newValue = "0";
+                                                   }
+                                                   else if(privString.equals("Standard"))
+                                                   {
+                                                                                        newValue = "1";
+                                                   }
+                                                   else
+                                                   {
+                                                                                        newValue = "2";
+                                                   }
+                                                   //System.out.println("REG_TYPE value" + newValue);
+                                                   systemPriv.setValue(newValue);
+                                               }
+                                               
+
+                                                                   systemPriv = ar.getAttributeRequest("MAILSYSTEM");
+                                               if (systemPriv != null) {
+                                                   String privString = systemPriv.getValue();
+                                                   //System.out.println ("MAILSYSTEM " + privString);
+                                                   if (privString.equals("Notes"))
+                                                   {
+                                                                                        newValue = "1";
+                                                   }
+                                                   else if(privString.equals("CC:mail user"))
+                                                   {
+                                                                                        newValue = "2";
+                                                   }
+                                                                           else if (privString.equals("Other"))
+                                                   {
+                                                                                        newValue = "3";
+                                                   }
+                                                   else if(privString.equals("X.400"))
+                                                   {
+                                                                                        newValue = "4";
+                                                   }
+                                                                           else if (privString.equals("Internet"))
+                                                   {
+                                                                                        newValue = "5";
+                                                   }
+                                                   else if(privString.equals("POP3"))
+                                                   {
+                                                                                        newValue = "6";
+                                                   }
+                                                   else if (privString.equals("None"))
+                                                   {
+                                                                                        newValue = "100";
+                                                   }
+                                                   else if(privString.equals("Unknown"))
+                                                   {
+                                                                                        newValue = "101";
+                                                   }
+                                                   
+                                                   //System.out.println("MAILSYSTEM value" + newValue);
+                                                   systemPriv.setValue(newValue);
+                                               }
+                                              
+
+
+                                                                   systemPriv = ar.getAttributeRequest("REG_MAILSYSTEM");
+                                               if (systemPriv != null) {
+                                                   String privString = systemPriv.getValue();
+                                                   //System.out.println ("REG_MAILSYSTEM " + privString);
+                                                   if (privString.equals("Notes mail user"))
+                                                   {
+                                                                                        newValue = "0";
+                                                   }
+                                                   else if(privString.equals("CC:mail user"))
+                                                   {
+                                                                                        newValue = "1";
+                                                   }
+                                                                           else if (privString.equals("VIM mail user"))
+                                                   {
+                                                                                        newValue = "2";
+                                                   }
+                                                   else if(privString.equals("No mail system"))
+                                                   {
+                                                                                        newValue = "3";
+                                                   }
+                                                                        
+                                                   
+                                                   //System.out.println("REG_MAILSYSTEM value" + newValue);
+                                                   systemPriv.setValue(newValue);
+                                               }
+                                               
+
+                                                                   systemPriv = ar.getAttributeRequest("REG_MAILOWNERACCESS");
+                                               if (systemPriv != null) {
+                                                   String privString = systemPriv.getValue();
+                                                   //System.out.println ("REG_MAILOWNERACCESS " + privString);
+                                                   if (privString.equals("Manager"))
+                                                   {
+                                                                                        newValue = "0";
+                                                   }
+                                                   else if(privString.equals("Designer"))
+                                                   {
+                                                                                        newValue = "1";
+                                                   }
+                                                                           else if (privString.equals("Editor"))
+                                                   {
+                                                                                        newValue = "2";
+                                                   }
+                                                   
+                                                   //System.out.println("REG_MAILOWNERACCESS value" + newValue);
+                                                   systemPriv.setValue(newValue);
+                                               }
+                                               
+
+                                                                   systemPriv = ar.getAttributeRequest("CHECKPASSWORD");
+                                               if (systemPriv != null) {
+                                                   String privString = systemPriv.getValue();
+                                                   //System.out.println ("CHECKPASSWORD " + privString);
+                                                   if (privString.equals("Don't check password"))
+                                                   {
+                                                                                        newValue = "0";
+                                                   }
+                                                   else if(privString.equals("Check password"))
+                                                   {
+                                                                                        newValue = "1";
+                                                   }
+                                                                           else if (privString.equals("Lockout ID"))
+                                                   {
+                                                                                        newValue = "2";
+                                                   }
+                                                   
+                                                   //System.out.println("CHECKPASSWORD value" + newValue);
+                                                   systemPriv.setValue(newValue);
+                                               }
+                                               
+                                           
+                                                                        systemPriv = ar.getAttributeRequest("RoamCleanSetting");
+                                               if (systemPriv != null) {
+                                                   String privString = systemPriv.getValue();
+                                                   System.out.println ("RoamCleanSetting " + privString);
+                                                   if (privString.equals("Do not clean-up"))
+                                                   {
+                                                                                        newValue = "0";
+                                                   }
+                                                   else if(privString.equals("Clean-up periodically"))
+                                                   {
+                                                                                        newValue = "1";
+                                                   }
+                                                                           else if (privString.equals("Clean-up at Notes shutdown"))
+                                                   {
+                                                                                        newValue = "2";
+                                                   }
+                                                                           else if (privString.equals("Prompt user for clean-up"))
+                                                   {
+                                                                                        newValue = "3";
+                                                   }
+                                                   
+                                                   //System.out.println("RoamCleanSetting value" + newValue);
+                                                   systemPriv.setValue(newValue);
+                                               }                                                                                
+                                          }
+                                     }
+                   
+                                </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User name" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Certifier" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Admin Type" name="USER_ADMIN" required="true" type="string"/>
+        <AttributeDefinition displayName="User Status" name="USER_STA" required="true" type="string"/>
+        <AttributeDefinition displayName="Certifier" multi="true" name="per_list" required="true" type="string"/>
+        <AttributeDefinition displayName="Certifier" multi="true" name="per_list_1" required="true" type="string"/>
+        <AttributeDefinition displayName="Roaming User" name="RoamingUser" required="true" type="string"/>
+        <AttributeDefinition displayName="Roaming Server" name="RoamSrvr" required="true" type="string"/>
+        <AttributeDefinition displayName="Roaming Replica Server" multi="true" name="RoamRplSrvrs" required="true" type="string"/>
+        <AttributeDefinition displayName="Roaming Databases" name="RoamSubdir" required="true" type="string"/>
+        <AttributeDefinition displayName="Job Title" name="JOBTITLE" required="true" type="string"/>
+        <AttributeDefinition displayName="Company Name" name="COMPANYNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Department" name="DEPARTMENT" required="true" type="string"/>
+        <AttributeDefinition displayName="Employee ID" name="EMPLOYEEID" required="true" type="string"/>
+        <AttributeDefinition displayName="Location" name="LOCATION" required="true" type="string"/>
+        <AttributeDefinition displayName="Manager" name="MANAGER" required="true" type="string"/>
+        <AttributeDefinition displayName="Office Phone" name="OFFICEPHONENUMBER" required="true" type="string"/>
+        <AttributeDefinition displayName="Office FAX Phone" name="OFFICEFAXPHONENUMBER" required="true" type="string"/>
+        <AttributeDefinition displayName="Cell Phone" name="CELLPHONENUMBER" required="true" type="string"/>
+        <AttributeDefinition displayName="Pager Number" name="PHONENUMBER_6" required="true" type="string"/>
+        <AttributeDefinition displayName="Assistant" name="ASSISTANT" required="true" type="string"/>
+        <AttributeDefinition displayName="Office Street Address" name="OFFICESTREETADDRESS" required="true" type="string"/>
+        <AttributeDefinition displayName="OfficeCity" name="OFFICECITY" required="true" type="string"/>
+        <AttributeDefinition displayName="Office State" name="OFFICESTATE" required="true" type="string"/>
+        <AttributeDefinition displayName="Office Zip" name="OFFICEZIP" required="true" type="string"/>
+        <AttributeDefinition displayName="Office Country" name="OFFICECOUNTRY" required="true" type="string"/>
+        <AttributeDefinition displayName="Office Number" name="OFFICENUMBER" required="true" type="string"/>
+        <AttributeDefinition displayName="HTDOCExecute" name="REG_HTDocExecute" required="true" type="string"/>
+        <AttributeDefinition displayName="Recertify User" name="REGF_RECERTIFY_USER" required="true" type="string"/>
+        <AttributeDefinition displayName="Accessed" name="@Accessed" required="true" type="string"/>
+        <AttributeDefinition displayName="Author" name="@Author" required="true" type="string"/>
+        <AttributeDefinition displayName="NoteID" name="@NoteID" required="true" type="string"/>
+        <AttributeDefinition displayName="Type" name="TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="First Name" name="FIRSTNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Middle Initial" name="MIDDLEINITIAL" required="true" type="string"/>
+        <AttributeDefinition displayName="Last Name" name="LASTNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Policy" name="REG_POLICY" required="true" type="string"/>
+        <AttributeDefinition displayName="Alternate Name" name="REG_ALTERNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Alternate Language" name="REG_ALTLANGUAGE" required="true" type="string"/>
+        <AttributeDefinition displayName="Alternate Server Name" name="ASERVERNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Network" multi="true" name="NETWORK" required="true" type="string"/>
+        <AttributeDefinition displayName="Domain" name="DOMAIN" required="true" type="string"/>
+        <AttributeDefinition displayName="Server Title" name="SERVERTITLE" required="true" type="string"/>
+        <AttributeDefinition displayName="Comment" multi="true" name="COMMENT" required="true" type="string"/>
+        <AttributeDefinition displayName="Full Name" multi="true" name="FULLNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Full Name" multi="true" name="REG_FULLNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Short Name" name="SHORTNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Internet Address" name="INTERNETADDRESS" required="true" type="string"/>
+        <AttributeDefinition displayName="Owner" multi="true" name="OWNER" required="true" type="string"/>
+        <AttributeDefinition displayName="Local Admin" multi="true" name="LOCALADMIN" required="true" type="string"/>
+        <AttributeDefinition displayName="Administrator" multi="true" name="ADMINISTRATOR" required="true" type="string"/>
+        <AttributeDefinition displayName="Mail Domain" name="MAILDOMAIN" required="true" type="string"/>
+        <AttributeDefinition displayName="Mail System" name="MAILSYSTEM" required="true" type="string"/>
+        <AttributeDefinition displayName="Mail Address" name="MAILADDRESS" required="true" type="string"/>
+        <AttributeDefinition displayName="Mail File" name="MAILFILE" required="true" type="string"/>
+        <AttributeDefinition displayName="CC Mail User Name" name="CCMAILUSERNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Mail Server" name="MAILSERVER" required="true" type="string"/>
+        <AttributeDefinition displayName="Check PAssword" name="CHECKPASSWORD" required="true" type="string"/>
+        <AttributeDefinition displayName="Password Change Interval" name="PASSWORDCHANGEINTERVAL" required="true" type="string"/>
+        <AttributeDefinition displayName="Password Grace Period" name="PASSWORDGRACEPERIOD" required="true" type="string"/>
+        <AttributeDefinition displayName="Certifier ID Password" name="REGC_CERT_ID_PASSWORD" required="true" type="string"/>
+        <AttributeDefinition displayName="New Expiration Date" name="REG_NEW_EXPIRATION_DATE" required="true" type="string"/>
+        <AttributeDefinition displayName="Use Default Certifier" name="REGF_USE_DEFAULT_CERT" required="true" type="string"/>
+        <AttributeDefinition displayName="Rename USer" name="REGF_RENAME_USER" required="true" type="string"/>
+        <AttributeDefinition displayName="Use Default Certifier while renaming" name="REGF_RENM_USE_DEFAULT_CERT" required="true" type="string"/>
+        <AttributeDefinition displayName="Certificate Expiration" name="REG_CERT_EXPIRATION" required="true" type="string"/>
+        <AttributeDefinition displayName="New First Name" name="REG_NEW_FIRST_NAME" required="true" type="string"/>
+        <AttributeDefinition displayName="New Middle Name" name="REG_NEW_MIDDLE_NAME" required="true" type="string"/>
+        <AttributeDefinition displayName="New Last Name" name="REG_NEW_LAST_NAME" required="true" type="string"/>
+        <AttributeDefinition displayName="New Organization Name" name="REG_NEW_ORG" required="true" type="string"/>
+        <AttributeDefinition displayName="Complete Move Operation" name="REGF_MOVE_COMPLETE" required="true" type="string"/>
+        <AttributeDefinition displayName="New Name" name="77SANewName" required="true" type="string"/>
+        <AttributeDefinition displayName="New OE Name" name="77SANewOEName" required="true" type="string"/>
+        <AttributeDefinition displayName="Move Certifier Path" name="REG_MOVE_COMP_CERT_PATH" required="true" type="string"/>
+        <AttributeDefinition displayName="Move Destination Organization Unit" name="REG_MOVE_COMP_DEST_ORGUNIT" required="true" type="string"/>
+        <AttributeDefinition displayName="RoamAB" name="RoamAB" required="true" type="string"/>
+        <AttributeDefinition displayName="BkmksFile" name="BkmksFile" required="true" type="string"/>
+        <AttributeDefinition displayName="JrnlFile" name="JrnlFile" required="true" type="string"/>
+        <AttributeDefinition displayName="RoamCleanSetting" name="RoamCleanSetting" required="true" type="string"/>
+        <AttributeDefinition displayName="RoamCleanPer" name="RoamCleanPer" required="true" type="string"/>
+        <AttributeDefinition displayName="Deny Group" name="REG_CHOOSE_DENY_GRP" required="true" type="string"/>
+        <AttributeDefinition displayName="SMTP Full Host Domain" name="SMTPFullHostDomain" required="true" type="string"/>
+        <AttributeDefinition displayName="Server Platform" name="ServerPlatform" required="true" type="string"/>
+        <AttributeDefinition displayName="Server Directory Name" name="ServerDirectoryName" required="true" type="string"/>
+        <AttributeDefinition displayName="Server Build Number" name="ServerBuildNumber" required="true" type="string"/>
+        <AttributeDefinition displayName="Net Address" name="NetAddresses" required="true" type="string"/>
+        <AttributeDefinition displayName="MajVer" name="MajVer" required="true" type="string"/>
+        <AttributeDefinition displayName="Mail Server" name="MailServer" required="true" type="string"/>
+        <AttributeDefinition displayName="Level0" name="Level0" required="true" type="string"/>
+        <AttributeDefinition displayName="HTTP Password Change Date" name="HTTPPasswordChangeDate" required="true" type="string"/>
+        <AttributeDefinition displayName="Password Change Date" name="PasswordChangeDate" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group Name" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Certifier" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Group" name="GROUP_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="List Owner" name="ListOwner" required="true" type="string"/>
+        <AttributeDefinition displayName="Local Admin" multi="true" name="LocalAdmin" required="true" type="string"/>
+        <AttributeDefinition displayName="NoteID" name="@NoteID" required="true" type="string"/>
+        <AttributeDefinition displayName="List Name" name="LISTNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Type" name="GROUPTYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="List Description" name="LISTDESCRIPTION" required="true" type="string"/>
+        <AttributeDefinition displayName="Members" multi="true" name="MEMBERS" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="LNAdd" usage="Create">
+        <Field displayName="Mail Server" helpKey="Mail Server of the User for e.g. LOTUS/NOTES" name="REG_MAILSERVER" required="true" section="" type="string"/>
+        <Field displayName="UserID" helpKey="Name of the user.  It should be of the form Name/Certifier for e.g. FirstName LastName/CertifierName" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" helpKey="Password of the user&apos;s id file" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Parent Certifier" helpKey="Parent Certifier of the user for e.g. /ABC" name="USER_OE_PR" required="true" section="" type="string"/>
+        <Field displayName="Type" helpKey="Specifies if the document is of a Person or a Server" name="TYPE" required="true" reviewRequired="true" section="" type="string" value="Person">
+          <AllowedValues>
+            <String>Person</String>
+            <String>Server</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Last Name" helpKey="Last Name of the user" name="LASTNAME" required="true" section="" type="string"/>
+        <Field displayName="ID Type" helpKey="Registration Type of the user" name="REG_TYPE" required="true" reviewRequired="true" section="" type="string" value="Derived">
+          <AllowedValues>
+            <String>Flat</String>
+            <String>Standard</String>
+            <String>Derived</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Create ID File" helpKey="Specifies if you want to create an id file for the user" name="REGF_CREATE_IDFILE" required="true" reviewRequired="true" section="" type="string" value="Y">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Save ID File to Disk" helpKey="Specifies if you want to save the id file of the user to disk" name="REGF_SAVE_ID_TO_DISK" required="true" reviewRequired="true" section="" type="string" value="Y">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="ID File Path" helpKey="ID file path for e.g. c:\id\idfilename.id" name="REG_ID_FILEPATH" required="true" section="" type="string"/>
+        <Field displayName="Overwrite ID File" helpKey="Specifies if ID file should be overwritten if already exists" name="REGF_OVERWRITE_IDFILE" required="true" reviewRequired="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Minimum Password Length" helpKey="Specifies the minimum length of the password" name="REG_MIN_PWD_LEN" required="true" reviewRequired="true" section="" type="string" value="8"/>
+        <Field displayName="HTTP Password" helpKey="Specifies if you want to set the internet password.  " name="REGF_HTTP_PASSWORD" required="true" reviewRequired="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Should be set for all ID&apos;s being created for use in the US or Canada" name="REGF_USA_OR_CANADA" required="true" reviewRequired="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Should be set to create or modify an Address book or Domino Directory entry" name="REGF_CREATE_ADDR" required="true" reviewRequired="true" section="" type="string" value="Y">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Overwrite addressbook entry" name="REGF_OVERWRITE_ADDR" required="true" reviewRequired="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Create a Lotus Notes Mail user" name="REGF_CREATE_EXPRESS_ID" required="true" reviewRequired="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Create a Lotus Notes Desktop user" name="REGF_CREATE_DESKTOP_ID" required="true" reviewRequired="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Mail Sytem" helpKey="Specifies the type of Mail System" name="MAILSYSTEM" required="true" reviewRequired="true" section="" type="string" value="Notes">
+          <AllowedValues>
+            <String>Notes</String>
+            <String>CC:mail user</String>
+            <String>Other</String>
+            <String>X.400</String>
+            <String>Internet</String>
+            <String>POP3</String>
+            <String>None</String>
+            <String>Unknown</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Mail User Type" name="REG_MAILSYSTEM" required="true" reviewRequired="true" section="" type="string" value="Notes mail user">
+          <AllowedValues>
+            <String>Notes mail user</String>
+            <String>CC:mail user</String>
+            <String>VIM mail user</String>
+            <String>No mail system</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Create Mail File" helpKey="Specifies if you want to create a mail file or not" name="REGF_CREATE_MAILFILE" required="true" reviewRequired="true" section="" type="string" value="Y">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Mail File Path" helpKey="Specifies the mail file path for e.g. mail/fileName.nsf" name="REG_MAILFILE" required="true" reviewRequired="true" section="" type="string" value="mail/"/>
+        <Field displayName="Mail Owner Access" helpKey="Specifies the Mail Owner Access Rights" name="REG_MAILOWNERACCESS" required="true" reviewRequired="true" section="" type="string" value="Manager">
+          <AllowedValues>
+            <String>Manager</String>
+            <String>Designer</String>
+            <String>Editor</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Check Password" name="CHECKPASSWORD" required="true" reviewRequired="true" section="" type="string" value="Don&apos;t check password">
+          <AllowedValues>
+            <String>Don't check password</String>
+            <String>Check password</String>
+            <String>Lockout ID</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Password Change Interval" name="PASSWORDCHANGEINTERVAL" required="true" reviewRequired="true" section="" type="string" value="0"/>
+        <Field displayName="Password Grace Period" name="PASSWORDGRACEPERIOD" required="true" reviewRequired="true" section="" type="string" value="0"/>
+        <Field displayName="Certifier ID File" helpKey="Certifier id file to be used to register the user for e.g. c:\id\cert.id" name="REGC_CERT_ID_FILE" required="true" section="" type="string"/>
+        <Field displayName="Certifier ID File Password" name="REGC_CERT_ID_PASSWORD" required="true" section="" type="secret"/>
+        <Field displayName="Certificate Expiration Date" name="REG_EXPIRATION" required="true" reviewRequired="true" section="" type="string" value="20200101000000"/>
+        <Field displayName="Use different Certifier ID File " name="REGF_CREATE_CERT_ID_FILE" required="true" section="" type="string" value="Y">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Use Default Certifier" name="REGF_USE_DEFAULT_CERT" required="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Roaming User - Clean-up Setting" name="RoamCleanSetting" required="true" reviewRequired="true" section="" type="string" value="Do not clean-up">
+          <AllowedValues>
+            <String>Do not clean-up</String>
+            <String>Clean-up periodically</String>
+            <String>Clean-up at Notes shutdown</String>
+            <String>Prompt user for clean-up</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Roaming User - Clean-up Period  " helpKey="Number of days (0 to 365) - Default 0" name="RoamCleanPer" required="true" reviewRequired="true" section="" type="string" value="0"/>
+        <Field displayName="ESS Choose" helpKey="Set as N" name="ESS_CHOOSE" required="true" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Group Update" schemaObjectType="group" usage="Update">
+        <Field displayName="GroupType" helpKey="Type of the group" name="GROUPTYPE" required="true" section="" type="string" value="0 - Multi-Purpose">
+          <AllowedValues>
+            <String>0 - Multi-Purpose</String>
+            <String>1 - Mail Only</String>
+            <String>2 - Access Control List Only</String>
+            <String>3 - Deny List Only</String>
+            <String>4 - Servers Only</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="GroupDescription" helpKey="Description of the group" name="LISTDESCRIPTION" section="" type="string"/>
+        <Field displayName="ListOwner" helpKey="Owner of the group" name="ListOwner" section="" type="string"/>
+        <Field displayName="LocalAdmin" helpKey="Owner of the group" name="LocalAdmin" section="" type="string"/>
+      </Template>
+      <Template name="Group Creation" schemaObjectType="group" usage="Create">
+        <Field displayName="GroupName" helpKey="Name of the Group" name="GROUP_ID" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

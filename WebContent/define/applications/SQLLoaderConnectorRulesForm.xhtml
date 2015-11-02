@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <f:view>
+    <div class="spContentTitle">
+      <span class="textBold"><h:outputText class="sectionHeader" value="#{msgs.con_form_delimited_rules}"/></span>
+    </div>
+    <div class="spContent">   
+      <a4j:outputPanel id="connectorRulesPaneGeneralRule">
+      <table class="paddedTbl" cellpadding="5" cellspacing="0">
+        <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_delimited_buildMap}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpParsingBuildMap_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_delimited_buildMap}"/>
+
+          </td>
+          <td>
+            <h:selectOneMenu id="buildMapRule" style="width:300px"
+                             value="#{applicationObject.attributes['buildMapRule']}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.JDBCBuildMapRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:buildMapRule').value, 
+                                                         'JDBCBuildMap',
+                                                         $('editForm:refreshConnectorRulesButton'))" />
+          </td>
+          </ui:fragment>
+        </tr>
+        <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_delimited_transformation}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpMapToObjectRule_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_delimited_transformation}"/>
+          </td>
+          <td>
+            <h:selectOneMenu id="transformationRule" style="width:300px"
+                               value="#{applicationObject.attributes['mapToResourceObjectRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.transformationRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:transformationRule').value, 
+                                                         'Transformation',
+                                                         $('editForm:refreshConnectorRulesButton'))" />
+          </td>
+          </ui:fragment>
+        </tr>
+        <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_delimited_mergeMaps}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpMergeMapsRule_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_delimited_mergeMaps}"/>
+          </td>
+          <td>
+            <h:selectOneMenu id="mergeMapsRule" style="width:300px"
+                               value="#{applicationObject.attributes['mergeMapsRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.mergeMapsRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:mergeMapsRule').value, 
+                                                         'MergeMaps',
+                                                         $('editForm:refreshConnectorRulesButton'))" />
+          </td>
+          </ui:fragment>
+        </tr>
+         </table>
+             <a4j:commandButton id="refreshConnectorRulesButton"
+                         style="display:none"
+                         immediate="true"
+                         render="connectorRulesPaneGeneralRule"/>
+          </a4j:outputPanel>    
+          
+          
+          
+          <a4j:outputPanel id="connectorRulesPanelRadioButton">
+          <table class="paddedTbl" cellpadding="5" cellspacing="0">
+            <tr>
+              <td> 
+                 <span class="textBold"><h:outputText value="#{msgs.con_form_jdbc_provision_type}"/></span>   
+              </td>
+              <td>
+                <h:graphicImage id="imgHlpJDBCModifyProvisioningRuleType_#{nameSpace}"
+                                styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_jdbc_provisionRuleType}"/>
+              </td>
+              <td colspan="2">
+                <h:selectOneRadio id="sQLLoaderparseType_#{nameSpace}" style="width:400px"
+                                  onclick="ApplicationPage.changeParsingType(this, 'globalRule', 'operationRule');" 
+                                  value="#{applicationObject.attributes[sp:concat(schemaType,'provisionRule')]}">
+                  <f:selectItem itemLabel="#{msgs.con_form_globalRule_provisionRuleType}" itemValue="globalRule"/>
+                  <f:selectItem itemLabel="#{msgs.con_form_operationRule_provisionRuleType}" itemValue="operationRule"/>
+                </h:selectOneRadio>
+              </td>
+            </tr>
+          </table>                   
+      </a4j:outputPanel>    
+        
+
+   <a4j:outputPanel id="connectorRulesPanelGlobalRule">     
+     <div id='globalRule_#{nameSpace}'>    
+       <table class="paddedTbl" style="border:0px" cellspacing="0">
+         <tr>
+           <td>
+             <span class="textBold"><h:outputText value="#{msgs.con_form_jdbc_provision}"/></span>
+           </td>
+           <td>
+             <h:graphicImage id="imgHlpProvisionRuleGL_#{nameSpace}"
+                             styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                             alt="#{msgs.con_help_jdbc_provision}"/>
+           </td>
+           <td>
+             <h:selectOneMenu id="jdbcProvisionRule" style="width:300px"
+                               value="#{applicationObject.attributes['jdbcProvisionRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+               <f:selectItems value="#{applicationObject.JDBCProvisionRules}" />
+             </h:selectOneMenu>
+           </td>
+           <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+             <td>
+               <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:jdbcProvisionRule').value, 
+                                                       'JDBCProvision',
+                                                       $('editForm:refreshConnectorRulesButtonGL'))" />
+             </td>
+           </ui:fragment>
+         </tr>
+       </table>
+     </div> 
+     <a4j:commandButton id="refreshConnectorRulesButtonGL"
+                         style="display:none"
+                         immediate="true"
+                         render="connectorRulesPanelGlobalRule"/>
+   </a4j:outputPanel>
+     
+  <a4j:outputPanel id="connectorRulesPanelOperationRule">   
+    <div id='operationRule_#{nameSpace}'>      
+         <table class="paddedTbl" style="border:0px" cellspacing="0">
+         <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_jdbc_operation_provisioning_Enable}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpJDBCEnableProvisioningRule_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_jdbc_operation_provisioning}"/>
+          </td>
+          <td>
+            <h:selectOneMenu id="jdbcEnableProvisioningRule" style="width:300px"
+                               value="#{applicationObject.attributes['jdbcEnableProvisioningRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.JDBCEnableProvisioningRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:jdbcEnableProvisioningRule').value, 
+                                                         'JDBCOperationProvisioning',
+                                                         $('editForm:refreshConnectorRulesButtonOL'))" />
+          </td>
+          </ui:fragment>
+        </tr>   
+        <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_jdbc_operation_provisioning_Disable}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpJDBCDisableProvisioningRule_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_jdbc_operation_provisioning}"/>
+          </td>
+          <td>
+            <h:selectOneMenu id="jdbcDisableProvisioningRule" style="width:300px"
+                               value="#{applicationObject.attributes['jdbcDisableProvisioningRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.JDBCDisableProvisioningRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:jdbcDisableProvisioningRule').value, 
+                                                         'JDBCOperationProvisioning',
+                                                         $('editForm:refreshConnectorRulesButtonOL'))" />
+          </td>
+          </ui:fragment>
+        </tr>   
+        <!-- Delete Operation -->
+        <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_jdbc_operation_provisioning_Delete}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpJDBCDeleteProvisioningRule_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_jdbc_operation_provisioning}"/>
+          </td>
+          <td>
+            <h:selectOneMenu id="jdbcDeleteProvisioningRule" style="width:300px"
+                               value="#{applicationObject.attributes['jdbcDeleteProvisioningRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.JDBCDeleteProvisioningRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:jdbcDeleteProvisioningRule').value, 
+                                                         'JDBCOperationProvisioning',
+                                                         $('editForm:refreshConnectorRulesButtonOL'))" />
+          </td>
+          </ui:fragment>
+        </tr>
+        <!-- Unlock Operation -->
+        <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_jdbc_operation_provisioning_Unlock}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpJDBCUnlockProvisioningRule_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_jdbc_operation_provisioning}"/>
+          </td>
+          <td>
+            <h:selectOneMenu id="jdbcUnlockProvisioningRule" style="width:300px"
+                               value="#{applicationObject.attributes['jdbcUnlockProvisioningRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.JDBCUnlockProvisioningRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:jdbcUnlockProvisioningRule').value, 
+                                                         'JDBCOperationProvisioning',
+                                                         $('editForm:refreshConnectorRulesButtonOL'))" />
+          </td>
+          </ui:fragment>
+        </tr> 
+        <!-- Create Operation -->
+        <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_jdbc_operation_provisioning_Create}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpJDBCCreateProvisioningRule_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_jdbc_operation_provisioning}"/>
+          </td>
+          <td>
+            <h:selectOneMenu id="jdbcCreateProvisioningRule" style="width:300px"
+                               value="#{applicationObject.attributes['jdbcCreateProvisioningRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.JDBCCreateProvisioningRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:jdbcCreateProvisioningRule').value, 
+                                                         'JDBCOperationProvisioning',
+                                                         $('editForm:refreshConnectorRulesButtonOL'))" />
+          </td>
+          </ui:fragment>
+        </tr> 
+        <!-- Modify Operation -->
+        <tr>
+          <td>
+            <span class="textBold"><h:outputText value="#{msgs.con_form_jdbc_operation_provisioning_Modify}"/></span>
+          </td>
+          <td>
+            <h:graphicImage id="imgHlpJDBCModifyProvisioningRule_#{nameSpace}"
+                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                            alt="#{msgs.con_help_jdbc_operation_provisioning}"/>
+          </td>
+          <td>
+            <h:selectOneMenu id="jdbcModifyProvisioningRule" style="width:300px"
+                               value="#{applicationObject.attributes['jdbcModifyProvisioningRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.JDBCModifyProvisioningRules}" />
+            </h:selectOneMenu>
+          </td>
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <td>
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('editForm:jdbcModifyProvisioningRule').value, 
+                                                         'JDBCOperationProvisioning',
+                                                         $('editForm:refreshConnectorRulesButtonOL'))" />
+          </td>
+          </ui:fragment>
+        </tr>       
+      </table>
+     </div>  
+     <a4j:commandButton id="refreshConnectorRulesButtonOL"
+                         style="display:none"
+                         immediate="true"
+                         render="connectorRulesPanelOperationRule"/>
+       <!-- <a4j:ajax event="onchange" render="connectorRulesPanel" /> -->
+     </a4j:outputPanel>
+     </div>
+  </f:view>
+</ui:composition>
+
+</body>
+</html>

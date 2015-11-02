@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+  <script defer="defer">
+    var identityWin;
+
+    <!--//--><![CDATA[//><!--
+    function agIdentityGridClicked(grid, rowIndex, columnIndex, e) {
+      return;
+    }
+    
+    //--><!]]>
+    function agIdentityContextMenu(grid, rowIndex, e) {
+      return;
+    } 
+    function showAccountGroupIdentityGrid(accountGroupId) {
+      // data store
+      
+      var gridMetaData = #{accountGroup.columnJSON};
+
+      
+      identityStore = SailPoint.Store.createStore({
+          autoLoad: false,
+          url: CONTEXT_PATH + '/define/groups/accountGroupMembersDataSource.json?id='+accountGroupId,
+          root: 'members',
+          fields: gridMetaData.fields,
+          remoteSort: true,
+          pageSize: 20
+      });
+     
+
+      // create the grid
+      grid = new Ext.grid.Panel({
+          store: identityStore,
+          cls: 'smallFontGrid selectableGrid',
+          columns : gridMetaData.columns,
+          viewConfig: {
+            scrollOffset: 1,
+            stripeRows:true
+          },
+          bbar: {
+              xtype : 'pagingtoolbar',
+              store: identityStore,
+              displayInfo: true
+          }
+      });
+      
+      identityWin = new Ext.Window({
+          title: "#{sp:localizeKey('members')}",
+          closeAction : 'hide',
+          width:768,
+          height:400,
+          autoScroll:true,
+          plain:true,
+          layout:'fit',
+          items: [grid]
+      });
+      grid.addListener('cellclick', agIdentityGridClicked);
+      grid.addListener('itemcontextmenu', agIdentityContextMenu);
+      identityWin.show();
+      grid.render();
+      identityStore.load({params:{start:0, limit:20}});
+    }
+    </script>
+  
+  </f:view>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  
+  <a4j:outputPanel id="policy_chart_#{reference.content.id}">
+    <c:choose>
+      <!-- This fragment will be rendered on the dashboard -->
+      <c:when test="#{viewLarge == null}">
+        <ui:include src="chartOptionsInclude.xhtml">
+          <ui:param name="chartBean" value="#{policyViolationChart}"/>
+          <ui:param name="chartName" value="policy"/> 
+          <ui:param name="reference" value="#{reference}"/>
+          <ui:param name="optionsTblStyle" value="spSolidLightGray"/>
+        </ui:include>
+        <br/>
+        
+        <div id="chartSection">
+          <table class="width100" cellspacing="0" cellpadding="3">
+            <tr style="height:#{sp:getChartHeight(reference.region)}px">
+              <td align="center" valign="middle">
+      
+                <ui:include src="chartBodyInclude.xhtml">
+                  <ui:param name="chartBean" value="#{policyViolationChart}"/>
+                  <ui:param name="chartName" value="policy"/> 
+                  <ui:param name="reference" value="#{reference}"/>
+                  <ui:param name="chartColors" value="#B40B0E, #F3B833, #F45D14"/>
+                  <ui:param name="javascript" value=""/>
+                  <ui:param name="chartTitle" value=""/>
+                  <ui:param name="chartHeight" value="#{sp:getChartHeight(reference.region)}"/>
+                  <ui:param name="chartWidth" value="#{sp:getChartWidth(reference.region)}"/>
+                  <ui:param name="chartSize" value="small"/>
+                  <ui:param name="chartOrientation" value="#{sp:getChartOrientation(reference.region)}"/>
+                </ui:include>
+                      
+              </td>
+            </tr>
+          </table>
+        </div>
+      </c:when>
+      <c:otherwise>
+      <!-- This fragment will be rendered on the view large chart page -->
+        <ui:include src="chartInclude.xhtml" >
+          <ui:param name="chartBean" value="#{policyViolationChart}"/>
+          <ui:param name="chartName" value="policy"/> 
+          <ui:param name="reference" value="#{reference}"/>
+        </ui:include>
+      </c:otherwise>
+    </c:choose>
+  </a4j:outputPanel>  
+  
+  <h:inputHidden id="policy_referenceIndex"     value="#{policyViolationChart.referenceIndex}"/>
+  <h:inputHidden id="policy_selectedChartType"  value="#{policyViolationChart.chartType}"/>
+  <h:inputHidden id="policy_selectedDateRange"  value="#{policyViolationChart.dateRange}"/>
+  <h:inputHidden id="policy_selectedGroup"      value="#{policyViolationChart.gFName}"/>
+  <h:inputHidden id="policy_selectedValues"     value="#{policyViolationChart.gDNames}" 
+    converter="java.util.List"/>
+  
+</ui:composition>
+</body>
+</html>

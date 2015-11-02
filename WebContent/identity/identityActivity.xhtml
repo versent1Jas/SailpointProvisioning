@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  
+  <ui:fragment rendered="#{!empty identity.activityHelper.activities}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_recent_activity}"/>
+    <br/>
+    <div class="spTabledContent">
+      <table id="rcntActivityTbl" class="spTable" cellspacing="0">
+        <tr>
+          <th>#{msgs.date}</th>
+          <th>#{msgs.action}</th>
+          <th>#{msgs.target}</th>
+          <th>#{msgs.application}</th>
+          <th>#{msgs.result}</th>
+        </tr>
+
+        <ui:repeat value="#{identity.activityHelper.activities}" var="activity">
+          <tr>
+            <td align="left">
+              <a href="javascript: viewActivity('#{activity.id}');" title="#{msgs.info_click_to_view_activity_details}">
+                <h:outputText value="#{activity.timeStamp}">
+                  <f:convertDateTime type="both" dateStyle="short" timeStyle="long" timeZone="#{identity.userTimeZone}"/>
+                 </h:outputText> 
+               </a>
+            </td>
+            <td align="left">
+              <h:outputText value="#{activity.action}" /> 
+              </td>
+            <td align="left">
+              <h:outputText value="#{activity.target}" /> 
+            </td>
+            <td align="left"> 
+              <h:outputText value='#{activity.sourceApplication}'/>  
+            </td>
+            <td align="left">
+              <h:outputText value="#{activity.result}" />
+            </td>
+          </tr>
+        </ui:repeat>
+      </table>
+      <script>
+        makeTableMulticolored($('rcntActivityTbl'), true, false, 'even', 'odd');
+      </script>
+      <h:commandButton id="moreActivities" rendered="#{identity.activityHelper.moreActivities}" action="#{identity.activityHelper.seeMoreActivities}" value="#{msgs.info_see_all_activity}" styleClass="secondaryBtn" />
+    </div>
+  </ui:fragment>
+    
+  <ui:fragment rendered="#{empty identity.activityHelper.activities}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_no_recent_activity}"/>
+    <br/><br/>
+  </ui:fragment>
+</ui:composition>
+
+</body>
+</html>
+  

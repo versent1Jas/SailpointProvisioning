@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+               <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, AUTHENTICATE, PASSWORD, ENABLE, SEARCH, DIRECT_PERMISSIONS, NO_PERMISSIONS_PROVISIONING" icon="internetIcon" name="GE Centricity" type="GE Centricity">
+    <Attributes>
+      <Map>
+        <entry key="CAConnector" value="true"/>
+        <entry key="connectorClass" value="openconnector.connector.GECentricity"/>
+        <entry key="formPath" value="GECentricityForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="Key" identityAttribute="Key" includePermissions="true" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="Key" remediationModificationType="None" type="string">
+        <Description>User Id of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Name" remediationModificationType="None" type="string">
+        <Description>User full name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Email" remediationModificationType="None" type="string">
+        <Description>Define User department</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PasswordExpired" remediationModificationType="None" type="string">
+        <Description>Flag that indicates if the user password expired</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PasswordFailures" remediationModificationType="None" type="string">
+        <Description>Indicates of user failure attempts</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PasswordLastChanged" remediationModificationType="None" type="string">
+        <Description>Date timestamp of user last password changed</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PasswordNeverExpires" remediationModificationType="None" type="string">
+        <Description>Flag indicates the user neverexpires password</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DefaultSystemID" remediationModificationType="None" type="string">
+        <Description>Default System of user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LastLogin" remediationModificationType="None" type="string">
+        <Description>Date timestamp of user last login</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LastFailedLogin" remediationModificationType="None" type="string">
+        <Description>Date timestamp of user last failed login</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Authentication" remediationModificationType="None" type="string">
+        <Description>Authentication name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="UserSystems" remediationModificationType="None" type="string">
+        <Description>User system connections</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="UserSystemApplications" remediationModificationType="None" type="string">
+        <Description>User application connections</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DefaultRoleKey" remediationModificationType="None" type="string">
+        <Description>Default role of user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition managed="true" multi="true" name="Rights" remediationModificationType="None" type="string">
+        <Description>List of rights defined for user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="Roles" schemaObjectType="group" type="string">
+        <Description>List of roles</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="Key" identityAttribute="Key" includePermissions="true" nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="Key" type="string">
+        <Description>Role Id</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Name" type="string">
+        <Description>Name of the Role</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ProductID" type="string">
+        <Description>Name of the Product mapped to Role</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ApplicationID" type="string">
+        <Description>ApplicationID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ID" type="string">
+        <Description>Represents the unique Role</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Description" type="string">
+        <Description>Detail description of Roles</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="VTBMenuKey" type="string">
+        <Description>Menukey which is mapped to each Role</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+      <Templates>
+    <Template name="account" schemaObjectType="account" usage="Create">
+      <Field displayName="con_prov_policy_GEKey" helpKey="help_con_prov_policy_GEKey" name="Key" required="true" reviewRequired="true" type="string">
+        <Script>
+          <Source>
+                            return identity.getName();
+                          </Source>
+        </Script>
+      </Field>
+      <Field displayName="con_prov_policy_Password" helpKey="help_con_prov_policy_Password" name="password" required="true" reviewRequired="true" type="secret"/>
+      <Field displayName="con_prov_policy_Name" helpKey="help_con_prov_policy_Name" name="Name" required="true" reviewRequired="true" type="string"/>
+      <Field displayName="con_prov_policy_DefaultSystem" helpKey="help_con_prov_policy_DefaultSystem" name="DefaultSystemID" required="true" reviewRequired="true" type="string"/>
+      <Field defaultValue="false" displayName="con_prov_policy_Active" helpKey="help_con_prov_policy_Active" name="IIQ_DISABLED" required="true" reviewRequired="true" type="string" value="N">
+        <AllowedValues>
+          <String>Y</String>
+          <String>N</String>
+        </AllowedValues>
+      </Field>
+      <Field defaultValue="true" displayName="con_prov_policy_PasswordNeverExpires" helpKey="help_con_prov_policy_PasswordNeverExpires" name="PasswordNeverExpires" reviewRequired="true" type="string" value="Y">
+        <AllowedValues>
+          <String>Y</String>
+          <String>N</String>
+        </AllowedValues>
+      </Field>
+     <Field displayName="con_prov_policy_PasswordChange" helpKey="help_con_prov_policy_PasswordChange" name="PasswordExpired" reviewRequired="true" type="string" value="N">
+        <AllowedValues>
+          <String>Y</String>
+          <String>N</String>
+        </AllowedValues>
+      </Field>
+      <Field displayName="con_prov_policy_Email" helpKey="help_con_prov_policy_Email" name="Email" reviewRequired="true" type="string"/>
+      <Field displayName="con_prov_policy_DefaultRole" helpKey="help_con_prov_policy_DefaultRole" name="DefaultRoleKey" reviewRequired="true" type="string"/>
+    </Template>
+   </Templates>
+  </Application>
+</ImportAction>

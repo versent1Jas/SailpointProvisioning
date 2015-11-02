@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, ENABLE, UNLOCK, SEARCH, UNSTRUCTURED_TARGETS, PASSWORD, CURRENT_PASSWORD" icon="enterpriseIcon" name="AIX - Direct" type="AIX - Direct">
+    <Attributes>
+      <Map>
+        <entry key="NoOutput" value="none"/>
+        <entry key="PasswdBasicErrors">
+          <value>
+            <Map>
+              <entry key="You are not authorized to change" value="You are not authorized to change password"/>
+              <entry key="passwd:  not found." value="passwd:  not found."/>
+              <entry key="sudo:  not found." value="sudo:  not found."/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="PasswdErrors">
+          <value>
+            <Map>
+              <entry key="BAD PASSWORD: is too similar to the old one" value="BAD PASSWORD: Password is too similar to the old one."/>
+              <entry key="BAD PASSWORD: it is based on a dictionary word" value="BAD PASSWORD: Password is based on a dictionary word."/>
+              <entry key="Error changing password" value="Error changing password."/>
+              <entry key="Password read timed out." value="Password read timed out."/>
+              <entry key="Sorry, passwords do not match." value="Passwords do not match."/>
+              <entry key="Sorry, try again." value="Invalid sudo user password."/>
+              <entry key="is not in the sudoers file.  This incident will be reported." value="sudo user not configured."/>
+              <entry key="passwd: Authentication token manipulation error" value="Invalid current user password."/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="PasswdPrompts">
+          <value>
+            <Map>
+              <entry key="0">
+                <value>
+                  <Map>
+                    <entry key="Old password:" value="CurrentPassword"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="1">
+                <value>
+                  <Map>
+                    <entry key="New password:" value="NewPassword"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="2">
+                <value>
+                  <Map>
+                    <entry key="Enter the new password again:" value="NewPassword"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="3">
+                <value>
+                  <Map>
+                    <entry key="new password:" value="NewPassword"/>
+                  </Map>
+                </value>
+              </entry>
+            </Map>
+          </value>
+        </entry>
+        <entry key="PasswdSuccess">
+          <value>
+            <List>
+              <String>none</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="Prompt" value="SAILPOINT&gt;"/>
+        <entry key="SSHLoginTimeout" value="1000"/>
+        <entry key="SetPrompt" value="PS1='SAILPOINT&gt;'"/>
+        <entry key="SudoBasicError" value="sudo: Command not found."/>
+        <entry key="SudoBasicErrorCode" value="127"/>
+        <entry key="SudoError" value="Sorry, try again."/>
+        <entry key="SudoErrorCode" value="1"/>
+        <entry key="aggregation.account" value="lsuser -R files ALL &gt; user.txt"/>
+        <entry key="aggregation.group" value="lsgroup -R files ALL &gt; group.txt"/>
+        <entry key="changepassword" value="passwd"/>
+        <entry key="chmod g-">
+          <value>
+            <Map>
+              <entry key="flags">
+                <value>
+                  <Map>
+                    <entry key="execute" value="x"/>
+                    <entry key="read" value="r"/>
+                    <entry key="write" value="w"/>
+                  </Map>
+                </value>
+              </entry>
+            </Map>
+          </value>
+        </entry>
+        <entry key="chmod u-">
+          <value>
+            <Map>
+              <entry key="flags">
+                <value>
+                  <Map>
+                    <entry key="execute" value="x"/>
+                    <entry key="read" value="r"/>
+                    <entry key="write" value="w"/>
+                  </Map>
+                </value>
+              </entry>
+            </Map>
+          </value>
+        </entry>
+        <entry key="connect" value="ssh"/>
+        <entry key="connectorClass" value="openconnector.connector.unix.AIXConnector"/>
+        <entry key="create.account" value="mkuser"/>
+        <entry key="create.group" value="mkgroup"/>
+        <entry key="delete.account" value="userdel"/>
+        <entry key="delete.group" value="rmgroup"/>
+        <entry key="disable.account" value="chuser account_locked=true"/>
+        <entry key="echo 'TestConnection'">
+          <value>
+            <Map>
+              <entry key="exitsts">
+                <value>
+                  <Map>
+                    <entry key="Success" value="TestConnection"/>
+                  </Map>
+                </value>
+              </entry>
+            </Map>
+          </value>
+        </entry>
+        <entry key="enable.account" value="chuser account_locked=false"/>
+        <entry key="formPath" value="UnixAttributesForm.xhtml"/>
+        <entry key="get.oldaccountval" value="lsuser -a"/>
+        <entry key="get.oldgroupval" value="lsgroup -a"/>
+        <entry key="modify.account" value="chuser"/>
+        <entry key="modify.group" value="chgroup"/>
+        <entry key="read.account" value="lsuser"/>
+        <entry key="remove.account.permission" value="chmod u-"/>
+        <entry key="remove.group.permission" value="chmod g-"/>
+        <entry key="remove.remotefile" value="\rm -f"/>
+        <entry key="retryableErrors">
+          <value>
+            <List>
+              <String>Login failed</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="setDelay" value="1"/>
+        <entry key="sshTimeOut" value="120000"/>
+        <entry key="sshWaitTime" value="500"/>
+        <entry key="testconnection" value="echo 'TestConnection'"/>
+        <entry key="unlock.account" value="chuser unsuccessful_login_count=0"/>
+        <entry key="userdel">
+          <value>
+            <Map>
+              <entry key="exitsts">
+                <value>
+                  <Map>
+                    <entry key="10" value="Cannot update the /etc/group or /etc/user_attr file but the login is removed from the /etc/passwd file."/>
+                    <entry key="12" value="Cannot remove or otherwise modify the home directory."/>
+                    <entry key="2" value="Invalid command syntax. A usage message for the userdel command is displayed."/>
+                    <entry key="6" value="The account to be removed does not exist."/>
+                    <entry key="8" value="The account to be removed is in use."/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="flags">
+                <value>
+                  <Map>
+                    <entry key="removeHome" value="-r"/>
+                  </Map>
+                </value>
+              </entry>
+            </Map>
+          </value>
+        </entry>
+        <entry key="encrypted" value="SudoUserPassword,PassphraseForPrivateKey"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="User Name" identityAttribute="User Name" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="User Name" remediationModificationType="None" required="true" type="string">
+          <Description>Name of User</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="id" remediationModificationType="None" required="true" type="string">
+          <Description>User Id</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="pgrp" remediationModificationType="None" type="string">
+          <Description>Primary Group of the User</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="home" remediationModificationType="None" type="string">
+          <Description>Home Directory</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="gecos" remediationModificationType="None" type="string">
+          <Description>Description</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="shell" remediationModificationType="None" type="string">
+          <Description>Shell</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="login" remediationModificationType="None" type="string">
+          <Description>Indicates whether the user can log in to the system with the login command</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="su" remediationModificationType="None" required="true" type="string">
+          <Description>Indicates whether another user can switch to the specified user account with the su command</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="rlogin" remediationModificationType="None" required="true" type="string">
+          <Description>Permits access to the account from a remote location with the telnet or rlogin commands</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="daemon" remediationModificationType="None" required="true" type="string">
+          <Description>Indicates whether the user specified by the Name parameter can run programs using the cron daemon or the src (system resource controller) daemon</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="dce_export" remediationModificationType="None" required="true" type="string">
+          <Description>Allows the DCE registry to overwrite the local user information with the DCE user information during a DCE export operation</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="admin" remediationModificationType="None" required="true" type="string">
+          <Description>Administrative status of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="sugroups" remediationModificationType="None" required="true" type="string">
+          <Description>Defines the groups that can use the su command to switch to the specified user account</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="admgroups" remediationModificationType="None" required="true" type="string">
+          <Description>Defines the groups that the user administrates</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="tpath" remediationModificationType="None" required="true" type="string">
+          <Description>Indicates the user's trusted path status</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="ttys" remediationModificationType="None" required="true" type="string">
+          <Description>Defines the terminals that can access the account specified by the Name parameter</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="expires" remediationModificationType="None" type="string">
+          <Description>Identifies the expiration date of the account</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="auth1" remediationModificationType="None" type="string">
+          <Description>Defines the primary methods for authenticating the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="auth2" remediationModificationType="None" type="string">
+          <Description>Defines the secondary methods used to authenticate the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="umask" remediationModificationType="None" type="string">
+          <Description>Determines file permissions</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="registry" remediationModificationType="None" type="string">
+          <Description>Registry</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SYSTEM" remediationModificationType="None" type="string">
+          <Description>SYSTEM</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="logintimes" remediationModificationType="None" type="string">
+          <Description>Defines the days and times that the user is allowed to access the system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="loginretries" remediationModificationType="None" type="string">
+          <Description>Defines the number of unsuccessful login attempts allowed after the last successful login before the system locks the account</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="pwdwarntime" remediationModificationType="None" type="string">
+          <Description>Defines the number of days before the system issues a warning that a password change is required</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="account_locked" remediationModificationType="None" type="string">
+          <Description>Indicates if the user account is locked</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="minage" remediationModificationType="None" type="string">
+          <Description>Defines the minimum age (in weeks) a password must be before it can be changed</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="maxage" remediationModificationType="None" type="string">
+          <Description>Defines the maximum age (in weeks) of a password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="maxexpired" remediationModificationType="None" type="string">
+          <Description>Defines the maximum time (in weeks) beyond the maxage value that a user can change an expired password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="minalpha" remediationModificationType="None" type="string">
+          <Description>Defines the minimum number of alphabetic characters that must be in a new password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="minother" remediationModificationType="None" type="string">
+          <Description>Defines the minimum number of non-alphabetic characters that must be in a new password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="mindiff" remediationModificationType="None" type="string">
+          <Description>Defines the minimum number of characters required in a new password that were not in the old password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="maxrepeats" remediationModificationType="None" type="string">
+          <Description>Defines the maximum number of times a character can be repeated in a new password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="minlen" remediationModificationType="None" type="string">
+          <Description>Defines the minimum length of a password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="histexpire" remediationModificationType="None" type="string">
+          <Description>Defines the period of time (in weeks) that a user cannot reuse a password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="histsize" remediationModificationType="None" type="string">
+          <Description>Defines the number of previous passwords a user cannot reuse</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="pwdchecks" remediationModificationType="None" type="string">
+          <Description>Defines the password restriction methods enforced on new passwords</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="dictionlist" remediationModificationType="None" type="string">
+          <Description>Defines the password dictionaries</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="default_roles" remediationModificationType="None" type="string">
+          <Description>Specifies the default roles for the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="fsize" remediationModificationType="None" type="string">
+          <Description>Defines the soft limit for the largest file a user's process can create or extend</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="cpu" remediationModificationType="None" type="string">
+          <Description>Identifies the soft limit for the largest amount of system unit time (in seconds) that a user's process can use</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="data" remediationModificationType="None" type="string">
+          <Description>Specifies the soft limit for the largest data segment for a user's process</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="stack" remediationModificationType="None" type="string">
+          <Description>Specifies the soft limit for the largest process stack segment for a user's process</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="core" remediationModificationType="None" type="string">
+          <Description>Specifies the soft limit for the largest core file a user's process can create</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="rss" remediationModificationType="None" type="string">
+          <Description>The soft limit for the largest amount of physical memory a user's process can allocate</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="nofiles" remediationModificationType="None" type="string">
+          <Description>Defines the soft limit for the number of file descriptors a user process may have open at one time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="stack_hard" remediationModificationType="None" type="string">
+          <Description>Specifies the largest process stack segment of a user's process</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="time_last_login" remediationModificationType="None" type="string">
+          <Description>Specifies the number of seconds since the epoch (00:00:00 GMT, January 1, 1970) since the last successful login</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="tty_last_login" remediationModificationType="None" type="string">
+          <Description>Specifies the terminal on which the user last logged in</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="host_last_login" remediationModificationType="None" type="string">
+          <Description>Specifies the host from which the user last logged in</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="unsuccessful_login_count" remediationModificationType="None" type="string">
+          <Description>Specifies the number of unsuccessful login attempts since the last successful login</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="roles" remediationModificationType="None" type="string">
+          <Description>The administrative roles for this user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" schemaObjectType="group" type="string">
+          <Description>Identifies the groups to which user belongs</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="Group Name" featuresString="PROVISIONING" identityAttribute="Group Name" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="Group Name" remediationModificationType="None" type="string">
+          <Description>Name of Group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="admin" remediationModificationType="None" type="string">
+          <Description>Defines the administrative status of the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="id" remediationModificationType="None" type="string">
+          <Description>The group ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="registry" remediationModificationType="None" type="string">
+          <Description>Registry</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="users" remediationModificationType="None" required="true" type="string">
+          <Description>A list of one or more users in the form: User1,User2,...,Usern. Separate group member names with commas</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_form_aix_direct_username" helpKey="help_con_aix_direct_username" name="User Name" required="true" type="string"/>
+        <Field displayName="con_form_aix_direct_userid" helpKey="help_con_aix_direct_userid" name="id" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_password" helpKey="help_con_aix_direct_password" name="password" reviewRequired="true" type="secret"/>
+        <Field displayName="con_form_aix_direct_group" helpKey="help_con_aix_direct_group" name="pgrp" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_home" helpKey="help_con_aix_direct_home" name="home" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_shell" helpKey="help_con_aix_direct_shell" name="shell" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_description" helpKey="help_con_aix_direct_descrp" name="gecos" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_login" helpKey="help_con_aix_direct_login" name="login" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_rlogin" helpKey="help_con_aix_direct_rlogin" name="rlogin" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_su" helpKey="help_con_aix_direct_su" name="su" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_admin" helpKey="help_con_aix_direct_admin" name="admin" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_sugroups" helpKey="help_con_aix_direct_sugroup" multi="true" name="sugroups" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_admgroups" helpKey="help_con_aix_direct_admgrp" multi="true" name="admgroups" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_umask" helpKey="help_con_aix_direct_umask" name="umask" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_default_roles" helpKey="help_con_aix_direct_role" multi="true" name="default_roles" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_form_aix_direct_groupname" helpKey="help_con_aix_direct_grpname" name="Group Name" required="true" type="string"/>
+        <Field displayName="con_form_aix_direct_groupid" helpKey="help_con_aix_direct_grpid" name="id" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_users" helpKey="help_con_aix_direct_users" multi="true" name="users" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_form_aix_direct_groupid" helpKey="help_con_aix_direct_grpid" name="id" reviewRequired="true" type="string"/>
+        <Field displayName="con_form_aix_direct_users" helpKey="help_con_aix_direct_users" multi="true" name="users" reviewRequired="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

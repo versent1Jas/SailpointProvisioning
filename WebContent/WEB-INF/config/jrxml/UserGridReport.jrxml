@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="UserGridReport" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="782" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<property name="ireport.scriptlethandling" value="0"/>
+	<property name="ireport.encoding" value="UTF-8"/>
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="52"/>
+	<property name="ireport.y" value="0"/>
+	<import value="sailpoint.reporting.datasource.*"/>
+	<import value="net.sf.jasperreports.engine.*"/>
+	<import value="java.util.*"/>
+	<import value="net.sf.jasperreports.engine.data.*"/>
+	<style name="title" isBlankWhenNull="true" fontName="Arial" fontSize="20" isBold="true"/>
+	<style name="bandedText" mode="Opaque" forecolor="#000000" backcolor="#FFFFFF" isBlankWhenNull="true" fontName="Arial" fontSize="12">
+		<box>
+			<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#DDDDDD"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue() % 2 == 0)]]></conditionExpression>
+			<style backcolor="#EEEEEE"/>
+		</conditionalStyle>
+	</style>
+	<style name="spBlue" mode="Opaque" forecolor="#FFFFFF" backcolor="#1A7182" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="spLightBlue" mode="Opaque" forecolor="#333333" backcolor="#C2DCE0" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="spGreen" mode="Opaque" forecolor="#FFFFFF" backcolor="#5A8429" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="spLightGreen" mode="Opaque" forecolor="#333333" backcolor="#CFDCBF" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="spOrange" mode="Opaque" forecolor="#FFFFFF" backcolor="#F45D14" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="spLightOrange" mode="Opaque" forecolor="#333333" backcolor="#F4C3AB" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="spYellow" mode="Opaque" forecolor="#333333" backcolor="#F3B833" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="spLightYellow" mode="Opaque" forecolor="#333333" backcolor="#F3DDAA" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="spRed" mode="Opaque" forecolor="#FFFFFF" backcolor="#B40B0E" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="body" mode="Transparent" forecolor="#000000" backcolor="#FFFFFF" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12"/>
+	<style name="bodySmall" mode="Transparent" forecolor="#000000" backcolor="#FFFFFF" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="10"/>
+	<style name="bodyGray" mode="Opaque" forecolor="#000000" backcolor="#DDDDDD" markup="none" isBlankWhenNull="true" fontName="Arial" fontSize="12"/>
+	<style name="footer" forecolor="#000000" fontName="Arial" fontSize="10"/>
+	<parameter name="reportDefName" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="UserGridBusinessRoleReport" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false">
+		<parameterDescription><![CDATA[UserGridBusinessRoleReport]]></parameterDescription>
+	</parameter>
+	<parameter name="UserGridLinksReport" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false">
+		<parameterDescription><![CDATA[UserGridLinksReport]]></parameterDescription>
+	</parameter>
+	<parameter name="whereClause" class="java.lang.String">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="renderType" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<field name="id" class="java.lang.String"/>
+	<field name="name" class="java.lang.String"/>
+	<field name="created" class="java.lang.Long"/>
+	<field name="firstname" class="java.lang.String"/>
+	<field name="lastname" class="java.lang.String"/>
+	<field name="manager" class="java.lang.String"/>
+	<field name="businessRoleMapList" class="java.util.List"/>
+	<field name="applicationMapList" class="java.util.List"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="35" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField-7" style="title" x="0" y="0" width="777" height="30" forecolor="#525759">
+					<printWhenExpression><![CDATA[new Boolean($P{reportDefName}!=null)]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA[msg($R{rept_usr_grid_title}, $P{reportDefName})]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement key="textField-9" style="spBlue" isPrintRepeatedValues="false" x="0" y="0" width="100" height="25" isPrintWhenDetailOverflows="true"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" pdfEncoding="Cp1250" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{rept_usr_grid_username}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement key="textField-10" style="spBlue" isPrintRepeatedValues="false" x="100" y="0" width="100" height="25" isPrintWhenDetailOverflows="true"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" pdfEncoding="Cp1250" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{rept_usr_grid_last_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement key="textField-11" style="spBlue" isPrintRepeatedValues="false" x="200" y="0" width="100" height="25" isPrintWhenDetailOverflows="true"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" pdfEncoding="Cp1250" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{rept_usr_grid_first_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement key="textField-12" style="spBlue" isPrintRepeatedValues="false" x="300" y="0" width="100" height="25" isPrintWhenDetailOverflows="true"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" pdfEncoding="Cp1250" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{rept_usr_grid_manager}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement key="textField-13" style="spBlue" isPrintRepeatedValues="false" x="400" y="0" width="200" height="25" isPrintWhenDetailOverflows="true"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" pdfEncoding="Cp1250" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{rept_usr_grid_roles}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement key="textField-14" style="spBlue" isPrintRepeatedValues="false" x="600" y="0" width="180" height="25" isPrintWhenDetailOverflows="true"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" pdfEncoding="Cp1250" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{rept_usr_grid_app}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Prevent">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement key="textField" style="bodySmall" x="300" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="3" leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font fontName="Arial" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{manager}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement key="textField" style="bodySmall" x="0" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="3" leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<subreport isUsingCache="false">
+				<reportElement key="applications" mode="Transparent" x="600" y="1" width="180" height="20" isPrintWhenDetailOverflows="true"/>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$F{id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="rowcount">
+					<subreportParameterExpression><![CDATA[$V{REPORT_COUNT}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[( $P{renderType} == "csv" )
+   ?  (JRRewindableDataSource) new MapCollectionAttributeFlattener($F{applicationMapList},"appName")
+   :  (JRRewindableDataSource) new JRMapCollectionDataSource($F{applicationMapList})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{UserGridLinksReport}]]></subreportExpression>
+			</subreport>
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField" style="bodySmall" x="100" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="3" leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$F{lastname}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField-1" style="bodySmall" x="200" y="1" width="100" height="20" isPrintWhenDetailOverflows="true"/>
+				<box topPadding="3" leftPadding="5">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$F{firstname}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement key="line-2" x="0" y="0" width="780" height="1" forecolor="#CCCCCC"/>
+			</line>
+			<subreport isUsingCache="false">
+				<reportElement key="businessRoles" mode="Transparent" x="400" y="1" width="200" height="20" isPrintWhenDetailOverflows="true"/>
+				<subreportParameter name="id">
+					<subreportParameterExpression><![CDATA[$F{id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="rowcount">
+					<subreportParameterExpression><![CDATA[$V{REPORT_COUNT}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[( $P{renderType} == "csv" )
+   ?  (JRRewindableDataSource) new MapCollectionAttributeFlattener($F{businessRoleMapList},"bundleName")
+   :  (JRRewindableDataSource) new JRMapCollectionDataSource($F{businessRoleMapList})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{UserGridBusinessRoleReport}]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="21" splitType="Stretch">
+			<line>
+				<reportElement key="line-1" x="0" y="2" width="780" height="1"/>
+			</line>
+			<textField isStretchWithOverflow="true" evaluationTime="Report" pattern="EEEEE dd MMMMM yyyy hh:mm a" isBlankWhenNull="false">
+				<reportElement key="textField-4" style="footer" x="0" y="5" width="290" height="14"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Page" pattern="" isBlankWhenNull="false">
+				<reportElement key="textField-14" style="footer" x="600" y="4" width="80" height="14"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Bottom"/>
+				<textFieldExpression><![CDATA[msg($R{rept_current_page}, $V{PAGE_NUMBER})]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report" isBlankWhenNull="false">
+				<reportElement key="textField-15" x="685" y="4" width="50" height="14"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[msg($R{rept_current_page_of}, $V{PAGE_NUMBER})]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

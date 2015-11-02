@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <!-- For selecting an individual identity from the list - redirects to edit role page -->
+  <h:inputHidden id="currentObjectId" value="#{roleSearch.selectedId}"/>
+   
+  <h:commandButton  action="#{roleSearch.select}"
+                    style="display:none" 
+                    id="editButton"/>
+                    
+  <input id="ajaxEditButton" type="button" style="display:none" 
+         onclick="Ext.getCmp('roleTabPanel').setActiveTab('roleViewerPanel');
+                  var selModel = Ext.getCmp('roleSearchResultsGrid').getSelectionModel();
+                  var record = selModel.getSelection();
+                  SailPoint.Role.forceSelection(selModel, record[0], 0);
+                  Ext.getCmp('roleTabPanel').doLayout();"/>
+         
+  <ui:include src="../searchResultsInclude.xhtml">
+    <ui:param name="gridPage" value="baseGrid.xhtml"/>
+    <ui:param name="totalRows" value="#{roleSearch.count}"/>
+    <ui:param name="searchType" value="Role"/>
+    <ui:param name="searchBean" value="#{roleSearch}"/>
+    <ui:param name="formName" value="#{formName}"/>
+    <ui:param name="isAjax" value="#{isAjax}"/>
+  </ui:include>
+</ui:composition>
+
+</body>
+</html>

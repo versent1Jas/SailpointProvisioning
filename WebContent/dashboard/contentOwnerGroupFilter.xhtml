@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    
+  <div style="margin-top:10px; margin-bottom:10px">
+  <script type="text/javascript">
+    //<![CDATA[
+
+      function addGridFilter()
+      {
+          $('dashboardForm:contentOwnerGroupFilterAddBtn').click();
+      }
+
+      function removeGridFilter(filterId)
+      {
+          $('dashboardForm:contentOwnerGroupSelectedFilter').value = filterId;
+          $('dashboardForm:contentOwnerGroupFilterRemoveBtn').click();
+      }
+
+      function updateGroupFilterDefinition(filterId, val) {
+    	  input = $('groupDefinitionInput_'+filterId).firstChild;
+        input.value = val;
+      }
+
+      function maskDefinitionSelect(id) {
+        $('groupDefinitionSelect_'+id).style.display = 'none';
+        $('groupDefinitionLabel_'+id).style.display = 'none';
+        $('groupDefinitionLoading_'+id).style.display = '';
+      }
+    //]]>
+  </script>    
+  <a4j:outputPanel id="contentOwnerCertsGroupFilter">
+    <table class="dashWidth100 paddedTbl">
+    <ui:repeat value="#{certificationPercentList.groupFilter.filters}" var="filter">
+      <tr>
+        <td style="text-align: right; width:45px">
+          <h:outputText value="#{msgs.group}" styleClass="font10 textBold" />
+        </td>
+        <td align="left" style="width:155px">
+          <h:selectOneMenu id="groupFactorySelect_#{filter.id}" value="#{filter.factory}" style="width:150px">
+            <f:selectItems value="#{groupFactoryList.factoryOptions}" />   
+            <a4j:ajax event="change" listener="#{certificationPercentList.groupFilter.updateFilter}" onsubmit="maskDefinitionSelect('#{filter.id}')" render="contentOwnerCertsGroupFilter"/>         
+          </h:selectOneMenu>
+        </td>
+        <td style="vertical-align: middle; text-align: right;">
+          
+          <span id="groupDefinitionLoading_#{filter.id}" style="display:none">
+          <h:graphicImage url="/images/progress.gif" style="padding:5px;vertical-align:middle"/>
+                        #{msgs.loading_data}
+          </span>
+          
+          <span class="font10 textBold" id="groupDefinitionLabel_#{filter.id}">#{msgs.label_value}</span>
+          <!-- PH: have to do an old-fashioned select.  Ajax-built f:selectItems dont pass validation -->
+          <select name="groupDefinitionSelect_#{filter.id}" id="groupDefinitionSelect_#{filter.id}" style="width:190px"
+                  onchange="updateGroupFilterDefinition('#{filter.id}', this.value)">
+            
+            <ui:repeat value="#{filter.definitionChoices}" var="choice">
+              <ui:fragment rendered="#{filter.definition eq choice.value}">
+                <option selected="selected" value="#{choice.value}">#{choice.label}</option>
+              </ui:fragment>
+              <ui:fragment rendered="#{!(filter.definition eq choice.value)}">
+                <option value="#{choice.value}">#{choice.label}</option>
+              </ui:fragment>
+            </ui:repeat>
+            
+          </select>
+          
+          <!--  PH: Have to wrap the input with a span so that we can find it by its id.  h:inputText ids
+          are assigned before the ui:repeat runs in ajax -->
+          <span id="groupDefinitionInput_#{filter.id}">
+            <h:inputHidden value="#{filter.definition}" />
+          </span>
+          <span>
+            <h:graphicImage url="/images/icons/plus.png"
+                            height="12" width="12"
+                            class="pointer" 
+                            onclick="addGridFilter();" />
+          </span>
+          <span>
+            <h:graphicImage url="/images/icons/minus.png"
+                            height="12" width="12"
+                            style="#{(filter.id eq '0') ? 'visibility:hidden' : ''}"
+                            class="pointer" 
+                            onclick="removeGridFilter('#{filter.id}');" />
+          </span>
+        </td>
+      </tr>
+    </ui:repeat>
+      <tr>
+        <td style="vertical-align: top; text-align: center" colspan="3">
+          <a4j:commandButton  id="contentOwnerGroupFilterBtn" 
+                              styleClass="primaryBtn"
+                              style="margin:0 5px; padding:3px" 
+                              onclick="SailPoint.Dashboard.displayLoadingMessage('OwnerGroup');" 
+                              action="#{certificationPercentList.groupFilter.buildFilter}" 
+                              value="#{msgs.dash_comp_content_owner_filter_button_show_certs}"
+                              oncomplete="$('dashboardForm:contentOwnerPanelRefreshBtn').click()"/>
+                              
+          <a4j:commandButton  id="contentOwnerGroupResetBtn" 
+                              styleClass="secondaryBtn" 
+                              style="margin:0 5px; padding:3px"
+                              action="#{certificationPercentList.groupFilter.reset}"
+                              value="#{msgs.button_reset}"
+                              render="contentOwnerCertsGroupFilter"
+                              oncomplete="$('dashboardForm:contentOwnerPanelRefreshBtn').click()"/>
+                              
+          <a4j:commandButton  id="contentOwnerPanelRefreshBtn"
+                              action="#{certificationPercentList.refreshOwnerGroups}"
+                              style="display:none"
+                              oncomplete="$('dashboardForm:contentOwnerPanelPostRefreshBtn').click()"/>
+          
+          <a4j:commandButton  id="contentOwnerPanelPostRefreshBtn"
+                              render="#{contentOwnerPanel}" 
+                              style="display:none"
+                              oncomplete="SailPoint.Dashboard.hideLoadingMessage('OwnerGroup');setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500);"/>
+                              
+          <a4j:commandButton  id="contentOwnerGroupFilterAddBtn" 
+                              style="display:none"
+                              action="#{certificationPercentList.groupFilter.addFilter}"
+                              value="Add Filter"
+                              render="contentOwnerCertsGroupFilter"/>
+                              
+         <a4j:commandButton  id="contentOwnerGroupFilterRemoveBtn" 
+                              style="display:none"
+                              action="#{certificationPercentList.groupFilter.removeFilter}"
+                              value="Remove Filter"
+                              render="contentOwnerCertsGroupFilter"/>
+          <h:inputHidden id="contentOwnerGroupSelectedFilter" value="#{certificationPercentList.groupFilter.selectedFilterId}" />
+        </td>
+      </tr>
+    </table>
+  </a4j:outputPanel>
+  </div>  
+</ui:composition>
+
+</body>
+</html>

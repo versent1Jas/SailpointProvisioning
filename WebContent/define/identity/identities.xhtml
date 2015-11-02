@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_define_identities}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/IdentitiesGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" >
+    helpKey = 'IDENTITIES';
+    var debug; 
+    var sp = new SailPoint.state.StateProvider({
+      stateIds: ['#{identityList.gridState.name}'],
+      states:   ['#{identityList.gridState.state}']
+    });
+    Ext.state.Manager.setProvider(sp);
+    
+    function initGrid() {
+        gridStateStr = '#{identityList.gridState.JSON}';
+        
+        // Not sure why we now have a firstRow of 1 when saving/canceling, but we shouldn't ever start with 1.
+        var gssObj = Ext.JSON.decode(gridStateStr);
+        if(gssObj.firstRow === 1){
+            gssObj.firstRow = -1;
+            gridStateStr = Ext.JSON.encode(gssObj);
+        }
+        
+        var gridMetaData = #{identityList.columnJSON};
+        
+        // the data fields list requires an extra element that's not in 
+        // the column data in order to render the scorecard risk color
+        gridMetaData.fields.push('scorecard-color');
+        
+        return SailPoint.Define.Grid.Identity.createGrid(gridMetaData, gridStateStr, #{identityList.gridState.pageSize}, '#{identityList.gridState.name}');
+    }
+    
+    Ext.onReady(function() {
+        var grid = initGrid();
+        
+        var viewport = SailPoint.getViewport({
+            bodyContent: grid,
+            title: "#{msgs.title_define_identities}"
+        });
+
+        viewport.doLayout();
+    }); // Ext.onReady
+
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form styleClass="form" id="editForm">
+
+
+        <!-- Be sure to put this after the refresh command button.  If
+           you hit return in a text field it will post the form, but since
+           no button action will be posted, JSF just picks the first button
+           on the form.
+         -->
+          <h:inputHidden id="currentDefinitionId" value="#{identityList.selectedId}"/>
+          <t:saveState value="#{identityList.gridState}" />
+          <h:inputHidden id="sortColumn" value="#{identityList.gridState.sortColumn}" />
+          <h:inputHidden id="sortOrder" value="#{identityList.gridState.sortOrder}" />
+          <h:inputHidden id="firstRow" value="#{identityList.gridState.firstRow}" />
+          <h:inputHidden id="pageSize" value="#{identityList.gridState.pageSize}" />
+          <h:inputHidden id="scrollPosition" value="#{identityList.gridState.scrollPosition}"/>
+          <h:commandButton style="display:none"
+                           action="#{identityList.selectIdentity}"
+                           id="editButton"/>
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

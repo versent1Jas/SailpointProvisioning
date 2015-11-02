@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+xmlns="http://www.w3.org/1999/xhtml"
+xmlns:sp="http://sailpoint.com/ui"
+xmlns:a4j="http://richfaces.org/a4j"
+xmlns:c="http://java.sun.com/jstl/core"
+xmlns:ui="http://java.sun.com/jsf/facelets"
+xmlns:t="http://myfaces.apache.org/tomahawk"
+xmlns:f="http://java.sun.com/jsf/core"
+xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+
+<ui:composition>
+
+        <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+        <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+        <div style="margin:7px">
+          <ui:fragment rendered="#{empty roleDetails.accountDetails}">
+            <h:outputText escape="false" value="#{msgs.account_details_not_available}" style="font-weight:bold"/>
+          </ui:fragment>
+                      
+          <ui:fragment rendered="#{not empty roleDetails.accountDetails}">
+            <t:dataTable styleClass="spTable" 
+                           rowClasses="even,odd"
+                           value="#{roleDetails.accountDetails}"
+                           var="target"
+                           >
+          
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText value="#{msgs.role}"/>
+                </f:facet>
+                
+                <h:outputText escape="false" value="#{target['roleName']}"/>
+              </h:column>
+          
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText value="#{msgs.label_application}"/>
+                </f:facet>
+                
+                <h:outputText escape="false" value="#{target['appName']}"/>
+              </h:column>
+          
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText value="#{msgs.label_account}"/>
+                </f:facet>
+                
+                <h:outputText value="#{target['accountName']}"/>
+              </h:column>
+          
+            </t:dataTable>
+          </ui:fragment>
+       </div>
+
+</ui:composition>
+</body>
+</html>

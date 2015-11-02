@@ -1,0 +1,297 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/expandingPanelPersistState.xhtml">
+ 
+ <ui:param name="styleOverride" value="overflow:visible" />
+ <ui:param name="displaySummaryStyle" value="#{certificationBeanParam.displaySummaryStyle}" /> 
+ <ui:define name="panelTitle">#{certificationBeanParam.object.name}</ui:define>
+ <ui:define name="panelBody">
+ 
+ <script type="text/javascript">  
+  Ext.onReady(function() {
+	  var signOffHistoryJSON = #{certificationBeanParam.signOffHistoryJSON};
+	  
+	  if (signOffHistoryJSON &amp;&amp; signOffHistoryJSON.electronicSignedOff) {
+	  
+		  Ext.each(signOffHistoryJSON.items, function(item) {
+			    SailPoint.Utils.setupESigTooltip(item.id + '-eSigTip', item.signerDisplayName, item.account, item.date, item.application, item.text);
+	      });
+	  }
+  });
+ function toggleAccessReviewDisclosure() {
+     var scd = Ext.get('subCertsDiv');
+     if (scd) {
+         var target = Ext.DomQuery.selectNode('a.disclosure', Ext.getDom('editForm:certificationSummaryPanel'));
+         SailPoint.Utils.toggleDisclosureLink(target, scd.isVisible());
+     }
+ }
+ </script>
+   <h:inputHidden id="trackLastStateMinimized" value="#{certificationBeanParam.trackSummaryLastStateMinimized}" />
+   <a4j:commandButton style="display: none"
+                      id="persistLastStateMinimizedBtn"
+                      action="#{certificationBeanParam.saveDisplaySummaryLastState}"/>
+
+    <a4j:outputPanel id="certificationSummaryPanel">
+      <div class="content">
+        <div class="content">
+          <table class="width100 lightBorder"  style="background:white">
+
+            <!-- Put everything in a two column row to keep the continuous cert details right-aligned. -->
+            <tr class="vertical-align">
+
+              <!-- Column #1: most certification details. -->
+              <td width="99%">
+                <table class="paddedTbl width100">
+                  <ui:fragment rendered="#{not certificationBeanParam.object.continuous}">
+                    <tr>
+                        <ui:fragment rendered="#{null == certificationBeanParam.object.signed}">
+                          <td>
+                            <b class="nowrap" style="margin-right:6px">#{msgs.label_due_on}</b>
+                          </td>
+                        
+                          <td>
+                          <ui:fragment rendered="#{null != certificationBeanParam.expirationDate}">
+                            <h:outputText value="#{certificationBeanParam.expirationDate}">
+                              <f:convertDateTime type="date" dateStyle="short" timeZone="#{certificationBeanParam.userTimeZone}"/>
+                            </h:outputText>
+                            <ui:include src="daysRemaining.xhtml">
+                              <ui:param name="daysRemaining" value="#{certificationBeanParam.daysRemaining}" />
+                              <ui:param name="overdueText" value="#{msgs.overdue_lcase}" />
+                              <ui:param name="todayText" value="#{msgs.due_today_lcase}" />
+                              <ui:param name="futureText" value="#{msgs.remaining_lcase}" />
+                            </ui:include>
+                          </ui:fragment>
+                          <h:outputText value="#{msgs.not_applicable}" rendered="#{null == certificationBeanParam.expirationDate}"/>
+                          </td>
+                        </ui:fragment>
+                        
+                        <ui:fragment rendered="#{null != certificationBeanParam.object.signed}">
+                          <td>
+                            <b class="nowrap" style="margin-right:6px">#{msgs.label_cert_signed_off_on}</b>
+                          </td>
+                          <td>
+                            <h:outputText value="#{certificationBeanParam.object.signed}">
+                              <f:convertDateTime type="date" dateStyle="short" timeZone="#{certificationBeanParam.userTimeZone}"/>
+                            </h:outputText>
+                          </td>
+                        </ui:fragment>
+            
+                      <td class="nowrap">
+                          <b class="nowrap">#{msgs.label_cert_current_phase} </b>
+                      </td>
+                      <td>
+                        <ui:fragment rendered="#{null != certificationBeanParam.object.phase}">
+                          <h:outputText value="#{sp:localizeKey(certificationBeanParam.object.phase.messageKey)}" />
+          
+                          <ui:fragment rendered="#{null != certificationBeanParam.object.nextPhaseTransition}">
+                            <ui:include src="daysRemaining.xhtml">
+                              <ui:param name="daysRemaining" value="#{certificationBeanParam.daysRemainingInPhase}" />
+                              <ui:param name="overdueText" value="#{msgs.ago_lcase}" />
+                              <ui:param name="todayText" value="#{msgs.ends_today_lcase}" />
+                              <ui:param name="futureText" value="#{msgs.remaining_lcase}" />
+                            </ui:include>
+                          </ui:fragment>
+                        </ui:fragment>
+                        <h:outputText value="#{msgs.not_applicable}" rendered="#{null == certificationBeanParam.object.phase}"/>
+                      </td>
+                    </tr>
+                  </ui:fragment>
+                  
+                  <tr>
+                  <!-- Certifiers --> 
+                      <ui:fragment rendered="#{1 eq sp:size(certificationBeanParam.certifiersDisplayNames)}">
+                        <td><b class="nowrap">#{msgs.owner} </b></td>
+                        <td><h:outputText value="#{certificationBeanParam.certifiersDisplayNames[0]}" /></td>
+                      </ui:fragment>
+          
+                      <ui:fragment rendered="#{sp:size(certificationBeanParam.certifiersDisplayNames) gt 1}">
+                        <td><b class="nowrap">#{msgs.owners} </b></td>
+                        <td>
+                        <ui:repeat value="#{certificationBeanParam.certifiersDisplayNames}" var="certifier">
+                          <h:outputText value="#{(not sp:isFirstElement(certifier, certificationBeanParam.certifiersDisplayNames)) ? ', ' : ''}" />
+                          <h:outputText value="#{certifier}" />
+                        </ui:repeat>
+                        </td>
+                      </ui:fragment>
+                    <td><b class="nowrap">#{msgs.label_per_complete} </b></td>
+                    <td id="progressBarContainer">
+                      <!-- List Items -->
+                      <sp:progressBar
+                        rendered="#{!entityList and certificationBeanParam.object.continuous}"
+                        percentComplete="#{certificationBeanParam.object.itemPercentComplete}"
+                        completedNum="#{certificationBeanParam.object.completedItems}"
+                        totalNum="#{certificationBeanParam.object.totalItems}"
+                        greenNum="#{certificationBeanParam.object.certifiedItems}"
+                        yellowNum="#{certificationBeanParam.object.certificationRequiredItems}"
+                        redNum="#{certificationBeanParam.object.overdueItems}">
+                      </sp:progressBar>
+                      
+                      <sp:progressBar   
+                        rendered="#{!entityList and !(certificationBeanParam.object.continuous)}"
+                        totalNum="#{certificationBeanParam.object.totalItems}"
+                        completedNum="#{certificationBeanParam.object.completedItems}"
+                        remainingClass="progressBarRemainingDarkGray"
+                        percentComplete="#{certificationBeanParam.object.itemPercentComplete}">
+                      </sp:progressBar>
+                      
+                      <!-- List Entities -->
+                      <sp:progressBar
+                        rendered="#{entityList and certificationBeanParam.object.continuous}"
+                        percentComplete="#{certificationBeanParam.object.percentComplete}"
+                        completedNum="#{certificationBeanParam.object.completedEntities}"
+                        totalNum="#{certificationBeanParam.object.totalEntities}"
+                        greenNum="#{certificationBeanParam.object.certifiedEntities}"
+                        yellowNum="#{certificationBeanParam.object.certificationRequiredEntities}"
+                        redNum="#{certificationBeanParam.object.overdueEntities}">
+                      </sp:progressBar>
+                      
+                      <sp:progressBar   
+                        rendered="#{entityList and !(certificationBeanParam.object.continuous)}"
+                        totalNum="#{certificationBeanParam.object.totalEntities}"
+                        completedNum="#{certificationBeanParam.object.completedEntities}"
+                        remainingClass="progressBarRemainingDarkGray"
+                        percentComplete="#{certificationBeanParam.object.percentComplete}">
+                      </sp:progressBar>
+                    </td>
+          
+                  </tr>
+      
+                  <tr class="vertical-align">
+	                  <!-- Signed By -->
+	                  <ui:fragment rendered="#{not certificationBeanParam.object.continuous and null != certificationBeanParam.object.signed}">
+	                          <td><b class="nowrap" style="margin-right:6px">#{msgs.label_signed_by}</b></td>
+	                          <td style="padding: 0px">
+	                           <table>
+	                             <ui:repeat value="#{certificationBeanParam.object.signOffHistory}" var="signer">
+	                             <ui:fragment rendered="#{certificationBeanParam.electronicSignedOff}">
+	                             <tr>
+	                               <td><div><h:outputText value="#{signer.signerDisplayableName}"/><span id="#{signer.id}-eSigTip" class="eSigTipSpan"/></div></td>
+	                             </tr>
+	                             </ui:fragment>
+	                             <ui:fragment rendered="#{not certificationBeanParam.electronicSignedOff}">
+	                             <tr>
+	                               <td><h:outputText value="#{signer.signerDisplayableName}"/></td>
+	                             </tr>
+	                             </ui:fragment>
+	                             </ui:repeat>
+	                           </table>
+	                          </td>
+	                  </ui:fragment>
+	                  <ui:fragment rendered="#{not certificationBeanParam.object.continuous and null == certificationBeanParam.object.signed}">
+	                   <td colspan="2"/>
+	                  </ui:fragment>
+                      <!-- Remediation -->
+                      <td>
+                      <div style="display: #{(certificationBeanParam.showRemediationCompletion) ? '' : 'none'}">
+                        <ui:include src="/certification/remediationGrid.xhtml">
+                          <ui:param name="forwardPage" value="viewCertifications"/>
+                        </ui:include>
+                        <b>#{msgs.label_cert_remed_complete} </b>
+                      </div>
+                      </td>
+                      <td>
+                      <div style="display: #{(certificationBeanParam.showRemediationCompletion) ? '' : 'none'}">
+                        <sp:progressBar
+                          percentComplete="#{certificationBeanParam.object.remediationPercentComplete}"
+                          completedNum="#{certificationBeanParam.object.remediationsCompleted}"
+                          totalNum="#{certificationBeanParam.object.remediationsKickedOff}"
+                          detailsLink="javascript:showRemediationGrid('#{certificationBeanParam.object.id}');" >
+                        </sp:progressBar>
+                      </div>
+                      </td>
+                  </tr>
+
+                  <!-- Tags - only displayed if there are tags. -->
+                  <ui:fragment rendered="#{not empty certificationBeanParam.object.tags}">
+                    <tr>
+                      <td colspan="3">
+                        <b class="nowrap">#{msgs.cert_tags} </b>
+                        <ui:repeat value="#{certificationBeanParam.object.tags}" var="tag">
+                          <h:outputText value="#{(not sp:isFirstElement(tag, certificationBeanParam.object.tags)) ? ', ' : ''}" />
+                          <h:outputText value="#{tag.name}" />
+                        </ui:repeat>
+                      </td>
+                    </tr>
+                  </ui:fragment>
+                </table>
+              </td>
+
+              <!-- Column #2: The continuous state durations and legend. -->
+              <ui:fragment rendered="#{certificationBeanParam.object.continuous}">
+                <td>
+                  <table class="lightBorder paddedTbl" style="margin: 4px 4px 4px 0px">
+                    <tr>
+                      <td><div class="continuousStateCertifiedText tenPxBox"></div></td>
+                      <td class="nowrap">#{msgs.cert_item_state_certified} <span style="font-size: 8pt">(#{certificationBeanParam.certifiedDuration})</span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="continuousStateCertificationRequiredText tenPxBox"></div></td>
+                      <td class="nowrap">#{msgs.cert_item_state_certification_required} <span style="font-size: 8pt">(#{certificationBeanParam.certificationRequiredDuration})</span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="continuousStateOverdueText tenPxBox"></div></td>
+                      <td class="nowrap">#{msgs.cert_item_state_overdue} <span style="font-size: 8pt">(N/A)</span></td>
+                    </tr>
+                  </table>
+                </td>
+              </ui:fragment>
+            </tr>
+          </table>
+        </div>
+  
+        <div class="instructions">
+          <!-- The instructions are rendered centered if displaying the sign off button. -->
+          <ui:fragment rendered="#{certificationBeanParam.editable}">
+            <div id="signoffContainer" style="#{certificationBeanParam.readyForSignOff ? '' : 'display:none'}">
+              <div style="text-align: center">#{msgs.inst_sign_off_to_complete}</div>
+              <div style="text-align: center;">
+                <button class="bigCertificationSignOffButton primaryBtn" onclick="showSignCertificationWindow('#{certificationBeanParam.object.id}', '#{sp:escapeJavascript(certificationBeanParam.signatureMeaning)}', '#{sp:escapeJavascript(certificationBeanParam.originalAuthId)}', '#{sp:escapeJavascript(certificationBeanParam.nativeAuthId)}'); return false;">
+                  <h:outputText value="#{msgs.inst_sign_off_button}"/>
+                </button>
+              </div>
+            </div>
+          </ui:fragment>
+    
+          <!-- Not showing the sign off button, just show the message. -->
+          <ui:fragment rendered="#{!(certificationBeanParam.editable and certificationBeanParam.readyForSignOff) and (null != certificationBeanParam.instructionText)}">
+            <div id="instructionsContainer">
+              #{certificationBeanParam.instructionText}
+            </div>
+          </ui:fragment>
+        </div>
+        
+        <ui:fragment rendered="#{certificationBeanParam.parent}">
+          <ui:include src="certificationSubCerts.xhtml">
+            <ui:param name="certification" value="#{certificationBeanParam}" />
+            <ui:param name="entityList" value="#{entityList}"/>
+          </ui:include>
+        </ui:fragment>
+      </div>
+      
+      <div id="promptForSignOff" style="display:none">#{certificationBeanParam.promptForSignOff}</div>
+
+  </a4j:outputPanel>
+
+  <a4j:commandButton render="certificationSummaryPanel"
+                     style="display: none"
+                     id="rerenderCertificationSummaryBtn"/>
+
+ </ui:define>
+
+</ui:composition>
+</body>
+</html>

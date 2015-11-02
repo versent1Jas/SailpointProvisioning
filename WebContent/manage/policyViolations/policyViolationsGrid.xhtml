@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/policyViolations/policyViolationsGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+  <script>
+    var sp = new SailPoint.state.StateProvider({
+      stateIds: ['policyViolationListGridState'],
+      states:   ["#{gridConfigBean.gridStateConfig['policyViolationListGridState'].state}"]
+    });
+    Ext.state.Manager.setProvider(sp);  
+
+    function initGrid() {
+      var gridStateStr = '#{policyViolations.gridState.JSON}';
+      var gridWidth = $('policyViolations-grid').clientWidth;
+      
+      var typeStore = 
+      [
+        <c:forEach items="#{policies.policyTypes}" var="type" varStatus="vStatus">
+        <h:outputText rendered="#{!vStatus.first}" value=","/>
+        ['#{type.value}', '#{type.label}']
+        </c:forEach>
+      ];
+      
+      var statusStore = 
+      [
+        <c:forEach items="#{policyViolations.policyStatuses}" var="type" varStatus="vStatus">
+        <h:outputText rendered="#{!vStatus.first}" value=","/>
+        ['#{type.value}', '#{sp:localizeKey(type.label)}']
+        </c:forEach>  
+      ];
+      
+      
+      var gridMetaData = #{policyViolations.columnJSON};
+      
+      
+      return SailPoint.Manage.Grid.PolicyViolation.createGrid(gridMetaData.fields, gridMetaData.columns, gridStateStr, #{policyViolations.gridState.pageSize}, '#{policyViolations.gridState.name}', statusStore, typeStore, gridWidth);
+    }
+    
+    Ext.onReady(function(){
+      var grid = initGrid();
+
+      var viewport = SailPoint.getViewport({
+          bodyContent: grid,
+          title: "#{msgs.title_policy_violations}"
+      });
+      viewport.doLayout();
+      
+      var violationSearch = "#{policyViolations.searchParamMap['username']}";
+      var violationType = "#{policyViolations.searchParamMap['policyType']}";
+      var violationStatus = "#{policyViolations.searchParamMap['violationStatus']}";
+    
+      Ext.getCmp('violationType').setValue(violationType);
+      Ext.getCmp('violationSearchField').setValue(violationSearch);
+      Ext.getCmp('violationStatus').setValue(violationStatus);
+    
+      Ext.getCmp('violationSearchButton').fireEvent('click', '');
+    });
+  </script>
+  
+  <div id="policyViolations-grid" style="width:100%"></div>
+
+  </f:view>
+</ui:composition>
+</body>
+</html>

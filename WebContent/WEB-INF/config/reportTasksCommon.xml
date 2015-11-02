@@ -1,0 +1,1029 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Initialization file for new SailPoint repositories.
+-->
+<sailpoint>
+
+    <TaskDefinition name="Search Report" executor="sailpoint.reporting.SearchReport"
+                    formPath="/analyze/reports/searchreportargs.xhtml" resultAction="Rename"
+                    hidden="true" subType="Search" template="true" type="GridReport">
+        <Description>
+            Report created by the user from the analyze identities page.
+        </Description>
+        <Attributes>
+          <Map>
+            <entry key="jasperTemplate" value="SearchReport"/>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="columns" type="string">
+                    <Description>rept_input_search_report_columns</Description>
+                </Argument>
+                <Argument multi="true" name="filters" type="Filter">
+                    <Description>rept_input_search_report_filters</Description>
+                </Argument>
+                <Argument name="searchItem" type="SearchItem"/>
+                <Argument name="resultScope" type="Scope">
+                    <Description>rept_input_result_scope</Description>
+                </Argument>
+                <Argument name="emailIdentities" type="Identity" multi="true">
+                    <Description>rept_input_email_recips</Description>
+                </Argument>
+                <Argument name="REPORT_MAX_COUNT" type="int">
+                    <Description>rept_input_max_rows</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Uncorrelated Accounts Report" resultAction="Rename"
+                    executor="sailpoint.reporting.LiveReportExecutor"
+                    subType="Identity and User Reports"
+                    template="true" type="LiveReport"
+                    progressMode="Percentage">
+        <Description>A detailed view of the uncorrelated user accounts in the system.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessUncorrelatedIdentitiesReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+              <value>
+                <LiveReport title="Uncorrelated Accounts Report">
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Uncorrelated Accounts Report Form"/>
+                  </ReportForm>
+                  <DataSource objectType="sailpoint.object.Link" type="Filter">
+                     <QueryParameters>
+                      <Parameter argument="correlatedApps" property="application.id"/>
+                      <Parameter defaultValue="false" property="identity.correlated" valueClass="boolean"/>
+                      <Parameter defaultValue="false" property="application.authoritative" valueClass="boolean"/>
+                      <Parameter defaultValue="false" property="application.logical" valueClass="boolean"/>
+                    </QueryParameters>
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig field="identity" header="rept_uncorrelated_ids_grid_identity" property="identity.name" sortable="true"/>
+                    <ReportColumnConfig field="account" header="rept_uncorrelated_ids_grid_account" property="nativeIdentity" sortable="true"/>
+                    <ReportColumnConfig field="firstName" header="rept_uncorrelated_ids_grid_firstName" property="identity.firstname" sortable="true"/>
+                    <ReportColumnConfig field="lastName" header="rept_uncorrelated_ids_grid_lastName" property="identity.lastname" sortable="true"/>
+                    <ReportColumnConfig field="applicationName" header="rept_uncorrelated_ids_grid_appName" property="application.name" sortable="true"/>
+                  </Columns>
+                  <Chart category="application.name" groupBy="application.name" title="rept_uncorrelated_ids_chart_title" type="pie" value="count(*)"/>
+                  <ReportSummary title="Uncorrelated Account Details">
+                    <Values>
+                      <LiveReportSummaryValue name="sources" label="rept_uncorrelated_ids_grid_label_auth_sources"/>
+                      <LiveReportSummaryValue name="correlatedIdentities" label="rept_uncorrelated_ids_summary_correlated"/>
+                      <LiveReportSummaryValue name="uncorrelatedIdentities" label="rept_uncorrelated_ids_summary_uncorrelated"/>
+                      <LiveReportSummaryValue name="totalIdentities" label="rept_uncorrelated_ids_summary_total_ids"/>
+                      <LiveReportSummaryValue name="percentCorrelated" label="rept_uncorrelated_ids_summary_percent"/>
+                    </Values>
+                    <DataSourceScript>
+                      <Source>
+                        <![CDATA[
+                        import java.util.*;
+                        import sailpoint.tools.Util;
+                        import java.lang.Math;
+                        import sailpoint.object.*;
+                        import sailpoint.api.ObjectUtil;
+
+                        QueryOptions ops = new QueryOptions();
+                        ops.addGroupBy("correlated");
+
+                        String sources = "";
+                        if (reportArgs.containsKey("correlatedApps")){
+                           List apps = reportArgs.getList("correlatedApps");
+                           if (apps != null){
+                             ops.addFilter(Filter.in("links.application.id", apps));
+                             List appNames = ObjectUtil.convertIdsToNames(context, Application.class, apps);
+                             sources = Util.listToCsv(appNames);
+                           }
+                        }
+
+                        List fields = new ArrayList();
+                        fields.add("correlated");
+                        fields.add("count(distinct id)");
+
+                        int correlated = 0;
+                        int uncorrelated = 0;
+                        Iterator results = context.search(Identity.class, ops, fields);
+                        while(results.hasNext()){
+                            Object[] row = results.next();
+                            int count = Util.otoi(row[1]);
+                            if ((Boolean)row[0]){
+                                correlated += count;
+                            } else {
+                                uncorrelated += count;
+                            }
+                        }
+
+                        int totalIdentities =  correlated + uncorrelated;
+                        float percent =  totalIdentities != 0 ? (float)uncorrelated/totalIdentities : 0;
+                        String percentString = ((int)Math.floor(percent * 100)) +  "%";
+
+                        Map map = new HashMap();
+                        map.put("sources", sources);
+                        map.put("correlatedIdentities", correlated);
+                        map.put("uncorrelatedIdentities", uncorrelated);
+                        map.put("totalIdentities", totalIdentities);
+                        map.put("percentCorrelated", percentString);
+
+                        return map;
+                        ]]>
+                      </Source>
+                    </DataSourceScript>
+                  </ReportSummary>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="correlatedApps" type="Application">
+                    <Prompt>report_input_correlated_apps</Prompt>
+                    <Description>rept_input_uncorrelated_ident_report_correlated_apps</Description>
+                </Argument>
+                <Argument name="resultScope" type="Scope">
+                    <Description>rept_input_result_scope</Description>
+                </Argument>
+                <Argument name="emailIdentities" type="Identity" multi="true">
+                    <Description>rept_input_email_recips</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Risky Accounts Report"
+                    executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename" subType="Risk Reports" template="true" type="LiveReport"
+                    progressMode="String">
+        <Description>A summary view of risky accounts in the system and the causes of their risk.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessIdentityApplicationRiskReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+                <value>
+                    <LiveReport title="Risky Accounts Report" disablePreview="true">
+                      <DataSource dataSourceClass="sailpoint.reporting.datasource.RiskyAccountsDataSource" type="Java">
+                          <QueryParameters>
+                              <Parameter argument="applications" property="application.id"/>
+                          </QueryParameters>
+                      </DataSource>
+                      <Columns>
+                          <ReportColumnConfig field="application" header="rept_risky_accounts_grid_col_app" property="application.name" sortable="false"/>
+                          <ReportColumnConfig field="username" header="rept_risky_accounts_grid_col_username" property="identity.name" sortable="false"/>
+                          <ReportColumnConfig field="firstname" header="rept_risky_accounts_grid_col_firstname" property="identity.firstname" sortable="false"/>
+                          <ReportColumnConfig field="lastname" header="rept_risky_accounts_grid_col_lastname" property="identity.lastname" sortable="false"/>
+                          <ReportColumnConfig field="issues" header="rept_risky_accounts_grid_col_issues" property="id" sortable="false"/>
+                          <ReportColumnConfig field="accoundId" header="rept_risky_accounts_grid_col_account_id" property="nativeIdentity" sortable="false"/>
+                      </Columns>
+                    </LiveReport>
+                </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" type="Application">
+                    <Prompt>rept_risky_accounts_arg_correlated_apps</Prompt>
+                    <Description>rept_input_identity_app_risk_report_correlated_apps</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Users by Application Report" executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename" progressMode="Percentage" subType="Identity and User Reports"
+                    template="true" type="LiveReport">
+        <Description>A detailed view of the users in the system categorized by the applications that they belong to.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessApplicationUserReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+             <entry key="report">
+              <value>
+                <LiveReport title="Users by Application Report">
+                  <DataSource objectType="Link" type="Filter">
+                    <QueryParameters>
+                      <Parameter argument="applications" property="application.id"/>
+                    </QueryParameters>
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig field="application" header="rept_users_by_app_col_app" property="application.name" sortable="true"/>
+                    <ReportColumnConfig field="identityDisplayName" header="rept_users_by_app_col_identity_display" property="identity.displayName" sortable="true"/>
+                    <ReportColumnConfig field="identityName" header="rept_users_by_app_col_identity" property="identity.name" sortable="true"/>
+                    <ReportColumnConfig field="account" property="nativeIdentity" header="rept_users_by_app_col_account_id" sortable="true"/>
+                    <ReportColumnConfig field="accountDisplayName" header="rept_users_by_app_col_account_name" property="displayName" sortable="true"/>
+                  </Columns>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_app_user_report_apps</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Application Account Summary Report"
+                    executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename" progressMode="Percentage" subType="Identity and User Reports"
+                    template="true" type="LiveReport">
+        <Description>Displays a summary of the accounts on each application.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessApplicationUserReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+              <value>
+                <LiveReport title="Application Account Summary Report">
+                  <DataSource objectType="Application" type="Filter">
+                     <QueryParameters>
+                      <Parameter argument="applications" property="id"/>
+                    </QueryParameters>
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig field="application" header="rept_app_account_summary_col_app" property="name" sortable="true"/>
+                    <ReportColumnConfig field="totalAccounts" header="rept_app_account_summary_col_total_accounts" property="id" sortable="false">
+                      <RenderScript>
+                        <Source>
+                          import sailpoint.object.*;
+                          QueryOptions ops = new QueryOptions();
+                          ops.addFilter(Filter.eq("application.id", value));
+                          return context.countObjects(Link.class, ops);
+                        </Source>
+                      </RenderScript>
+                    </ReportColumnConfig>
+                    <ReportColumnConfig field="distinctIdentities" header="rept_app_account_summary_col_identities_with_accounts" property="id" sortable="false">
+                      <RenderScript>
+                        <Source>
+                          import sailpoint.object.*;
+                          QueryOptions ops = new QueryOptions();
+                          ops.addFilter(Filter.eq("links.application.id", value));
+                          ops.setDistinct(true);
+                          return context.countObjects(Identity.class, ops);
+                        </Source>
+                      </RenderScript>
+                    </ReportColumnConfig>
+                    <ReportColumnConfig field="multipleAccounts" header="rept_app_account_summary_col_identities_with_mult_accounts" property="id" sortable="false">
+                      <RenderScript>
+                        <Source>
+                            import sailpoint.object.*;
+                            Map queryArgs = new HashMap();
+                            queryArgs.put("application", value);
+
+                            int multipleLinksCount = 0;
+                            String hql = "select count(distinct identityAlias.id) from sailpoint.object.Identity identityAlias where (select count(*) from sailpoint.object.Link links2 where links2.identity.id = identityAlias.id and links2.application.id = (:application)) > 1";
+                            Iterator it = context.search(hql, queryArgs, null);
+                            while (it.hasNext()) {
+                                Object o = it.next();
+                                if(o!=null) {
+                                    multipleLinksCount = ((Long)o).intValue();
+                                }
+                            }
+                          return multipleLinksCount;
+                        </Source>
+                      </RenderScript>
+                    </ReportColumnConfig>
+                  </Columns>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_app_accounts_report_apps</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name="Configured Applications Details Report" executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename"
+                    progressMode="Percentage" subType="Configured Resource Reports" 
+                    template="true" type="LiveReport">
+        <Description>A detailed view of all configured applications.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessApplicationReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+                 <value>
+                    <LiveReport title="Applications Detail Report">
+                       <ReportForm>
+                         <Reference class="sailpoint.object.Form" name="Applications Detail Report Form"/>
+                       </ReportForm>
+                       <DataSource objectType="Application" type="Filter">
+                        <QueryParameters>
+                            <Parameter argument="applications" property="id"/>
+                            <Parameter argument="owners" property="owner.id"/>
+                        </QueryParameters>
+                       </DataSource>
+                       <Columns>
+                        <ReportColumnConfig field="application" header="rept_app_grid_col_app" property="name" sortable="true" width="110"/>
+                        <ReportColumnConfig field="type" header="rept_app_grid_col_type" property="type" sortable="true" width="110"/>
+                        <ReportColumnConfig field="owner" header="rept_app_grid_col_owner" property="owner.name" sortable="true" width="110"/>
+                        <ReportColumnConfig field="remediator" header="rept_app_grid_col_revoker" property="remediators.name" sortable="true" width="110">
+                            <RenderScript>
+                                <Source>
+                                    import sailpoint.tools.Message;
+                                    import sailpoint.web.messages.MessageKeys;
+                                    
+                                    if(value==null) {
+                                    Message m = Message.localize(MessageKeys.REPT_APP_NO_REVOKERS);
+                                    return m.getLocalizedMessage(locale,timezone);                    
+                                    }
+                                    else {
+                                    return value;
+                                    }
+                                </Source>
+                            </RenderScript>
+                        </ReportColumnConfig>  
+                       </Columns>
+                      </LiveReport>
+                     </value>
+                    </entry>          
+          </Map>
+        </Attributes>   
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_app_report_apps</Description>
+                </Argument>
+                <Argument filterString="capabilitiesString != &quot;null&quot;" multi="true" name="owners"
+                          type="Identity">
+                    <Description>rept_input_app_report_owners</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name="Delimited File Application Status Report" executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename"
+                    progressMode="Percentage" subType="Configured Resource Reports" 
+                    template="true" type="LiveReport">
+        <Description>A detailed view of configured applications and the status of their local file repositories.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessApplicationReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+                <value>
+                    <LiveReport title="Delimited File Application Status Report">
+                    <ReportForm>
+                        <Reference class="sailpoint.object.Form" name="Delimited File Report Form"/>
+                    </ReportForm>
+                    <DataSource dataSourceClass="sailpoint.reporting.datasource.DelimitedFileReportDataSource" type="Java">
+                        <QueryParameters>
+                            <Parameter argument="applications"/>
+                        </QueryParameters>
+                    </DataSource>
+                    <Columns>
+                        <ReportColumnConfig field="application" header="rept_app_grid_col_app" sortable="true" width="110"/>
+                        <ReportColumnConfig field="owner" header="rept_app_grid_col_owner" sortable="true" width="110"/>
+                        <ReportColumnConfig field="remediator" header="rept_app_grid_col_revoker" width="110"/>
+                        <ReportColumnConfig field="refreshDate" header="rept_app_delimited_refresh_date" width="110"/>
+                        <ReportColumnConfig field="fileName" header="rept_app_delimited_filename" width="110"/>
+                        <ReportColumnConfig field="fileDate" header="rept_app_delimited_filedate" width="110"/>
+                        <ReportColumnConfig field="fileSize" header="rept_app_delimited_filesize" width="110"/>
+                        <ReportColumnConfig field="daysOld" header="rept_app_delimited_days_old" width="110"/>
+                    </Columns>
+                    </LiveReport>
+                </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_app_report_apps</Description>
+                </Argument>
+                <Argument name="resultScope" type="Scope">
+                    <Description>rept_input_result_scope</Description>
+                </Argument>
+                <Argument name="emailIdentities" type="Identity" multi="true">
+                    <Description>rept_input_email_recips</Description>
+                </Argument>
+                <Argument name="REPORT_MAX_COUNT" type="int">
+                    <Description>rept_input_max_rows</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+    
+    <TaskDefinition name="Application Risk Live Report" executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename" progressMode="Percentage" subType="Risk Reports" template="true"
+                    type="LiveReport">
+        <Description>A summary view of the risk of each application and the accounts that factor into that risk.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessApplicationRiskReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+                <value>
+                  <LiveReport title="Application Risk Live Report">
+                    <DataSource objectType="Application" type="Filter">
+                        <QueryParameters>
+                            <Parameter argument="applications" property="id"/>
+                            <Parameter argument="owners" property="owner.id"/>
+                        </QueryParameters>
+                    </DataSource>
+                    <Columns>
+                      <ReportColumnConfig field="name" header="rept_app_risk_col_app" property="name" sortable="true"/>
+                      <ReportColumnConfig field="compositeScore" header="rept_app_risk_col_comp_score" property="scorecard.compositeScore" sortable="true"/>
+                    </Columns>
+                    <ExtendedColumnScript>
+                      <Source>
+                          <![CDATA[
+                          import java.util.*;
+                          import sailpoint.reporting.*;
+                          import sailpoint.object.*;
+
+                          List newCols = new ArrayList();
+                          ScoreConfig config = context.getObjectByName(ScoreConfig.class, ScoreConfig.OBJ_NAME);
+                          List scores = config.getApplicationScores();
+                          if (scores != null) {
+                              Rule rule = context.getObjectByName(Rule.class, "Report Scorecard Value Renderer");
+                              for (ScoreDefinition score : scores) {
+                                  if (!score.isDisabled()  && score.getName()!=null) {
+                                      ReportColumnConfig conf = new ReportColumnConfig(score.getName(),
+                                          score.getDisplayableName(), "java.lang.String");
+                                      conf.setProperty("scorecard");
+                                      conf.setSortable(false);
+                                      conf.setExtendedColumn(true);
+                                      conf.setRenderRule(rule);
+                                      newCols.add(conf);
+                                  }
+                              }
+                          }
+
+                          return newCols;
+                          ]]>
+                      </Source>
+                    </ExtendedColumnScript>
+                  </LiveReport>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_app_report_apps</Description>
+                </Argument>
+                <Argument multi="true" name="owners" filterString="workgroup == true || workgroup == false" type="Identity">
+                    <Description>rept_input_app_report_owners</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="User Details Report" executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename" progressMode="Percentage" subType="Identity and User Reports"
+                    template="true" type="LiveReport">
+        <Description>A detailed view of users currently detected by IdentityIQ.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessUserReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+              <value>
+                <LiveReport title="User Details Report">
+                  <InitializationRule>
+                    <Reference class="sailpoint.object.Rule" name="Identity Report Form Customizer"/>
+                  </InitializationRule>
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Base Identity Report Form"/>
+                  </ReportForm>
+                  <DataSource objectType="Identity" type="Filter" defaultSort="name">
+                     <QueryParameters>
+                      <Parameter argument="lastRefresh" property="lastRefresh" valueClass="daterange"/>
+                      <Parameter argument="lastLogin" property="lastLogin" valueClass="daterange"/>
+                      <Parameter argument="identityApplications" property="links.application.id"/>
+                      <Parameter argument="capabilities" property="capabilities.id"/>
+                      <Parameter argument="identityRoles">
+                        <QueryScript>
+                          <Source>
+                            import sailpoint.object.*;
+                            import java.lang.*;
+                            List roleFilters = new ArrayList();
+                            if (value != null){
+                              for(String role : value){
+                                roleFilters.add(Filter.eq("bundles.id", role));
+                                roleFilters.add(Filter.eq("assignedRoles.id", role));
+                              }
+
+                              if (!roleFilters.isEmpty())
+                                queryOptions.addFilter(Filter.subquery("id", Identity.class, "id", Filter.or(roleFilters)));
+                            }
+                            return queryOptions;
+                          </Source>
+                        </QueryScript>
+                      </Parameter>
+                      <Parameter argument="groupDefinitions">
+                        <QueryScript>
+                          <Source>
+                            import sailpoint.object.*;
+                            import sailpoint.reporting.*;
+                            Filter f = ReportingLibrary.getGroupDefinitionFilter(context, value, false);
+                            if(f!=null) {
+                                queryOptions.addFilter(f);
+                            }
+                            return queryOptions;
+                          </Source>
+                        </QueryScript>
+                      </Parameter>
+                     </QueryParameters>
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig field="identity" header="rept_user_details_col_identity" property="name" sortable="true"/>
+                    <ReportColumnConfig field="lastName" header="rept_user_details_col_lastname" property="lastname" sortable="true"/>
+                    <ReportColumnConfig field="firstName" header="rept_user_details_col_firstname" property="firstname" sortable="true"/>
+                    <ReportColumnConfig field="manager" header="rept_user_details_col_manager" property="manager.displayName" sortable="true"/>
+                    <ReportColumnConfig field="roles" header="rept_user_details_col_roles" property="id" sortable="false">
+                      <RenderScript>
+                        <Source>
+                          import sailpoint.object.*;
+                          import java.util.*;
+
+                          List nameFilter = new ArrayList();
+                          nameFilter.add(Filter.eq("name", "assignedRoles"));
+                          nameFilter.add(Filter.eq("name", "detectedRoles"));
+
+                          QueryOptions ops = new QueryOptions();
+                          ops.addFilter(Filter.eq("identity.id", value));
+                          ops.addFilter(Filter.or(nameFilter));
+
+                          List names = new ArrayList();
+                          List properties = new ArrayList();
+                          properties.add("value");
+                          Iterator iter = context.search(IdentityEntitlement.class, ops, properties);
+                          while(iter.hasNext()){
+                            names.add(iter.next()[0]);
+                          }
+                          return names;
+                        </Source>
+                      </RenderScript>
+                    </ReportColumnConfig>
+                    <ReportColumnConfig field="applications" header="rept_user_details_col_applications" property="links.application.name" subQueryKey="id" sortable="false"/>
+                  </Columns>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+
+                <Argument multi="true" name="groupDefinitions" type="string">
+                    <Description>rept_input_user_report_group_definition</Description>
+                </Argument>
+                <Argument name="capabilities" type="string">
+                    <Description>rept_input_user_report_capabilities</Description>
+                </Argument>
+                <Argument name="lastLogin" type="date">
+                    <Description>rept_input_user_report_last_login</Description>
+                </Argument>
+                <Argument name="lastRefresh" type="date">
+                    <Description>rept_input_user_report_last_refresh</Description>
+                </Argument>
+                <Argument multi="true" name="identityRoles" type="Bundle">
+                    <Description>rept_input_user_report_biz_roles</Description>
+                </Argument>
+                <Argument multi="true" name="identityApplications" type="Application">
+                    <Description>rept_input_user_report_apps</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Identity Roles Report" executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename" subType="Role Management Reports" template="true"
+                    type="LiveReport" progressMode="Percentage">
+        <Description>Displays the roles that each identity is a member of.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessIdentityRoleReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+              <value>
+                <LiveReport title="Identity Roles Report">
+                  <InitializationRule>
+                    <Reference class="sailpoint.object.Rule" name="Identity Entitlement Identity Report Form Customizer"/>
+                  </InitializationRule>
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Base Identity Report Form"/>
+                  </ReportForm>
+                  <DataSource objectType="IdentityEntitlement" type="Filter">
+                     <Query>name=="assignedRoles" || name=="detectedRoles"</Query>
+                     <QueryParameters>
+                      <Parameter argument="identities" property="identity.id"/>
+                      <Parameter argument="lastRefresh" property="identity.lastRefresh" valueClass="daterange"/>
+                      <Parameter argument="lastLogin" property="identity.lastLogin" valueClass="daterange"/>
+                      <Parameter argument="identityApplications" property="identity.links.application.id"/>
+                      <Parameter argument="capabilities" property="identity.capabilities.id"/>
+                      <Parameter argument="value">
+                        <ValueScript>
+                          <Source>
+                            import sailpoint.object.*;
+                            import sailpoint.api.ObjectUtil;
+                            if (value != null){
+                              return ObjectUtil.convertIdsToNames(context, Bundle.class, value);
+                            }
+                            return null;
+                          </Source>
+                        </ValueScript>
+                      </Parameter>
+                      <Parameter argument="groupDefinitions" property="identity">
+                        <QueryScript>
+                          <Source>
+                            import sailpoint.object.*;
+                            import sailpoint.reporting.*;
+                            Filter f = ReportingLibrary.getGroupDefinitionFilter(context, value, true, property);
+                            if(f!=null) {
+                                queryOptions.addFilter(f);
+                            }
+                            return queryOptions;
+                          </Source>
+                        </QueryScript>
+                      </Parameter>
+                     </QueryParameters>
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig field="identity" header="rept_id_roles_col_identity" property="identity.displayName" sortable="true"/>
+                    <ReportColumnConfig field="role" header="rept_id_roles_col_role" property="value" sortable="true"/>
+                    <ReportColumnConfig field="detected" header="rept_id_roles_col_method" property="name" sortable="true">
+                      <RenderScript>
+                        <Source>
+                          import sailpoint.tools.*;
+                          return value.equals("assignedRoles") ? Message.localize("rept_id_roles_col_assigned") : Message.localize("rept_id_roles_col_detected");
+                        </Source> </RenderScript>
+                    </ReportColumnConfig>
+                    <ReportColumnConfig field="lastCertification" header="rept_id_roles_last_cert" property="certificationItem.parent.certification.signed" sortable="true"/>
+                  </Columns>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="groupDefinitions" type="string">
+                    <Description>rept_input_user_report_group_definition</Description>
+                </Argument>
+                <Argument name="capabilities" type="string">
+                    <Description>rept_input_user_report_capabilities</Description>
+                </Argument>
+                <Argument name="lastLoginType" type="string">
+                    <Description>rept_input_user_report_last_login_type</Description>
+                </Argument>
+                <Argument name="lastLogin" type="date">
+                    <Description>rept_input_user_report_last_login</Description>
+                </Argument>
+                <Argument name="lastRefreshType" type="string">
+                    <Description>rept_input_user_report_last_refresh_type</Description>
+                </Argument>
+                <Argument name="lastRefresh" type="date">
+                    <Description>rept_input_user_report_last_refresh</Description>
+                </Argument>
+                <Argument multi="true" name="identityRoles" type="Bundle">
+                    <Description>rept_input_user_report_biz_roles</Description>
+                </Argument>
+                <Argument multi="true" name="identityApplications" type="Application">
+                    <Description>rept_input_user_report_apps</Description>
+                </Argument>
+                <Argument filterString="managerStatus == true" multi="true" name="managers" type="Identity">
+                    <Description>rept_input_user_report_mgrs</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Application Account by Attribute Report"
+                    executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename" progressMode="Percentage"
+                    subType="Identity and User Reports" 
+                    template="true" type="LiveReport">
+        <Description>Report for querying accounts on extended account attributes.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessApplicationUserReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+             <entry key="report">
+              <value>
+                <LiveReport title="User Account Attributes Report">
+                  <ExtendedColumnScript>
+                    <Source>
+                        <![CDATA[
+                        import java.util.*;
+                        import sailpoint.reporting.*;
+                        import sailpoint.object.*;
+
+                        List newCols = new ArrayList();
+                        Map formValues = form.getFieldValues();
+                        if (formValues != null && formValues.containsKey("application") && formValues.get("application") != null){
+                          newCols = ReportingLibrary.createApplicationAttributeColumns(context, formValues.get("application"));
+                        }
+
+                        return newCols;
+                        ]]>
+                    </Source>
+                  </ExtendedColumnScript>
+                  <InitializationRule>
+                    <Reference class="sailpoint.object.Rule" name="Account Report Form Customizer"/>
+                  </InitializationRule>
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Application Account by Attribute Report Form"/>
+                  </ReportForm>
+                  <DataSource objectType="sailpoint.object.Link" type="Filter">
+                     <QueryParameters>
+                      <Parameter argument="application" property="application.id"/>
+                    </QueryParameters>
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig field="application" header="rept_account_by_attr_col_application" property="application.name" sortable="true"/>
+                    <ReportColumnConfig field="account" header="rept_account_by_attr_col_account" property="displayName" sortable="true"/>
+                    <ReportColumnConfig field="identity" header="rept_account_by_attr_col_identity" property="identity.displayName" sortable="true"/>
+                  </Columns>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument name="application" type="Application"/>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name="Identity Risk Live Report" executor="sailpoint.reporting.LiveReportExecutor"
+                    formPath="/analyze/reports/userreportargs.xhtml" resultAction="Rename"
+                    progressMode="Percentage" subType="Risk Reports" template="true" type="LiveReport">
+        <Description>A detailed view of the risk associated with each identity detected by IdentityIQ.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessIdentityRiskReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+              <value>
+                <LiveReport title="Identity Risk Report">
+                  <Chart title="rept_id_risk_chart_title" type="column" leftLabel="rept_id_risk_chart_left_label"
+                         bottomLabel="rept_id_risk_chart_bottom_label">
+                    <Script>
+                      <Source>
+                        <![CDATA[
+                          import sailpoint.object.*;
+                          import java.util.*;
+
+                          Map scores = new HashMap();
+                          scores.put("rept_id_risk_col_score", "compositeScore");
+                          scores.put("rept_id_risk_col_role", "businessRoleScore");
+                          scores.put("rept_id_risk_col_entitlements", "entitlementScore");
+                          scores.put("rept_id_risk_col_policy", "policyScore");
+                          scores.put("rept_id_risk_col_certification", "certificationScore");
+
+                          List data = new ArrayList();
+                          for(Map.Entry entry : scores.entrySet()){
+                            for(var i=1;i<=5;i++){
+                              int min = (i - 1) * 200;
+                              int max = i * 200;
+
+                              Map rowData = new HashMap();
+                              rowData.put("category", min + " - " + max);
+                              rowData.put("series", entry.getKey());
+
+                              List filters = new ArrayList();
+                              filters.add(Filter.ge("scorecard." + entry.getValue(), min));
+                              filters.add(Filter.le("scorecard." + entry.getValue(), max));
+                              QueryOptions ops = new QueryOptions(baseQueryOptions);
+                              ops.addFilter(Filter.and(filters));
+                              int count = context.countObjects(Identity.class, ops);
+                              rowData.put("value", count);
+
+                              data.add(rowData);
+                            }
+                          }
+                          return data;
+                        ]]>
+                      </Source>
+                    </Script>
+                  </Chart>
+                  <DataSource objectType="Identity" type="Filter">
+                     <QueryParameters>
+                      <Parameter argument="identities" property="id"/>
+                      <Parameter argument="lastRefreshStart" property="lastRefresh" operation="GT"/>
+                      <Parameter argument="lastRefreshEnd" property="lastRefresh" operation="LT"/>
+                      <Parameter argument="lastLoginStart" property="lastLogin" operation="GT"/>
+                      <Parameter argument="lastLoginEnd" property="lastLogin" operation="LT"/>
+                      <Parameter argument="identityApplications" property="links.application.id"/>
+                      <Parameter argument="capabilities" property="capabilities.id"/>
+                      <Parameter argument="identityBusinessRoles">
+                        <QueryScript>
+                          <Source>
+                            import sailpoint.object.*;
+                            import java.lang.*;
+                            List roleFilters = new ArrayList();
+                            if (value != null){
+                              for(String role : value){
+                                roleFilters.add(Filter.eq("bundles.id", role));
+                                roleFilters.add(Filter.eq("assignedRoles.id", role));
+                              }
+
+                              if (!roleFilters.isEmpty())
+                                queryOptions.addFilter(Filter.or(roleFilters));
+                            }
+                            return queryOptions;
+                          </Source>
+                        </QueryScript>
+                      </Parameter>
+                      <Parameter argument="groupDefinitions">
+                        <QueryScript>
+                          <Source>
+                            import sailpoint.object.*;
+                            import sailpoint.reporting.*;
+                            Filter f = ReportingLibrary.getGroupDefinitionFilter(context, value, false);
+                            if(f!=null) {
+                                queryOptions.addFilter(f);
+                            }
+                            return queryOptions;
+                          </Source>
+                        </QueryScript>
+                      </Parameter>
+                     </QueryParameters>
+                  </DataSource>
+                  <InitializationRule>
+                    <Reference class="sailpoint.object.Rule" name="Identity Report Form Customizer"/>
+                  </InitializationRule>
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Identity Risk Report Form"/>
+                  </ReportForm>
+                  <Columns>
+                    <ReportColumnConfig field="username" header="rept_id_risk_col_username" property="name" sortable="true"/>
+                    <ReportColumnConfig field="firstname" header="rept_id_risk_col_first_name" property="firstname" sortable="true"/>
+                    <ReportColumnConfig field="manager" header="rept_id_risk_col_manager" property="manager.displayName" sortable="true"/>
+                    <ReportColumnConfig field="risk" header="rept_id_risk_col_score" property="scorecard.compositeScore" sortable="true"/>
+                    <ReportColumnConfig field="roleRisk" header="rept_id_risk_col_role" property="scorecard.businessRoleScore" sortable="true"/>
+                    <ReportColumnConfig field="entitlementRisk" header="rept_id_risk_col_entitlements" property="scorecard.entitlementScore" sortable="true"/>
+                    <ReportColumnConfig field="policyRisk" header="rept_id_risk_col_policy" property="scorecard.policyScore" sortable="true"/>
+                    <ReportColumnConfig field="certRisk" header="rept_id_risk_col_certification" property="scorecard.certificationScore" sortable="true"/>
+                  </Columns>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="groupDefinitions" type="string">
+                    <Description>rept_input_user_report_group_definition</Description>
+                </Argument>
+                <Argument name="capabilities" type="string">
+                    <Description>rept_input_user_report_capabilities</Description>
+                </Argument>
+                <Argument name="lastLoginStart" type="date">
+                    <Description>rept_input_user_report_last_login</Description>
+                </Argument>
+                <Argument name="lastLoginEnd" type="date">
+                    <Description>rept_input_user_report_last_login</Description>
+                </Argument>
+                <Argument name="lastRefreshStart" type="date">
+                    <Description>rept_input_user_report_last_refresh</Description>
+                </Argument>
+                <Argument name="lastRefreshEnd" type="date">
+                    <Description>rept_input_user_report_last_refresh</Description>
+                </Argument>
+                <Argument multi="true" name="identityBusinessRoles" type="Bundle">
+                    <Description>rept_input_user_report_biz_roles</Description>
+                </Argument>
+                <Argument multi="true" name="identityApplications" type="Application">
+                    <Description>rept_input_user_report_apps</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name="Identity Forwarding Report" executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename" progressMode="String" subType="Identity and User Reports"
+                    template="true" type="LiveReport">
+        <Description>A list of users who have forwarding configured and to which user.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessUserReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="report">
+              <value>
+                <LiveReport title="Identity Forwarding Report" disablePreview="true">
+                  <InitializationRule>
+                    <Reference class="sailpoint.object.Rule" name="Identity Report Form Customizer"/>
+                  </InitializationRule>
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Identity Forwarding Report Options Form"/>
+                  </ReportForm>
+                  <DataSource objectType="Identity" type="Java"
+                              dataSourceClass="sailpoint.reporting.datasource.UserForwardLiveReportDataSource">
+                     <QueryParameters>
+                      <Parameter argument="identities" property="id"/>
+                      <Parameter argument="lastRefresh" property="lastRefresh" valueClass="daterange"/>
+                      <Parameter argument="lastLogin" property="lastLogin" valueClass="daterange"/>
+                      <Parameter argument="applications" property="links.application.id"/>
+                      <Parameter argument="capabilities" property="capabilities.id"/>
+                      <Parameter argument="businessRoles">
+                        <QueryScript>
+                          <Source>
+                            import sailpoint.object.*;
+                            import java.lang.*;
+                            List roleFilters = new ArrayList();
+                            if (value != null){
+                              for(String role : value){
+                                roleFilters.add(Filter.eq("bundles.id", role));
+                                roleFilters.add(Filter.eq("assignedRoles.id", role));
+                              }
+
+                              if (!roleFilters.isEmpty())
+                                queryOptions.addFilter(Filter.subquery("id", Identity.class, "id", Filter.or(roleFilters)));
+                            }
+                            return queryOptions;
+                          </Source>
+                        </QueryScript>
+                      </Parameter>
+                      <Parameter argument="groupDefinitions">
+                        <QueryScript>
+                          <Source>
+                            import sailpoint.object.*;
+                            import sailpoint.reporting.*;
+                            Filter f = ReportingLibrary.getGroupDefinitionFilter(context, value, false);
+                            if(f!=null) {
+                                queryOptions.addFilter(f);
+                            }
+                            return queryOptions;
+                          </Source>
+                        </QueryScript>
+                      </Parameter>
+                     </QueryParameters>
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig field="identity" header="rept_usr_forward_col_identity" property="name" sortable="true"/>
+                    <ReportColumnConfig field="displayName" header="rept_usr_forward_col_identity_display" property="displayName" sortable="true"/>
+                    <ReportColumnConfig field="forwardingUser" header="rept_usr_forward_col_forward" property="preferences" sortable="false"/>
+                    <ReportColumnConfig field="forwardingDisplayName" header="rept_usr_forward_col_forward_display" property="preferences" sortable="false"/>
+                    <ReportColumnConfig field="startDate" header="rept_usr_forward_col_start" property="preferences" sortable="false"/>
+                    <ReportColumnConfig field="endDate" header="rept_usr_forward_col_end" property="preferences" sortable="false"/>
+                  </Columns>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="groupDefinitions" type="string">
+                    <Description>rept_input_user_report_group_definition</Description>
+                </Argument>
+                <Argument name="capabilities" type="string">
+                    <Description>rept_input_user_report_capabilities</Description>
+                </Argument>
+                <Argument name="lastLogin" type="date">
+                    <Description>rept_input_user_report_last_login</Description>
+                </Argument>
+                <Argument name="lastRefresh" type="date">
+                    <Description>rept_input_user_report_last_refresh</Description>
+                </Argument>
+                <Argument multi="true" name="businessRoles" type="Bundle">
+                    <Description>rept_input_user_report_biz_roles</Description>
+                </Argument>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_user_report_apps</Description>
+                </Argument>
+                <Argument multi="true" name="managers" type="Identity">
+                    <Description>rept_input_user_report_mgrs</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+</sailpoint>

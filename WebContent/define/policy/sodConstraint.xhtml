@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_edit_sod_rule}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/policy/SimulationWindows.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'SOD_CONSTRAINT';
+
+
+    Ext.onReady(function(){
+
+        Ext.QuickTips.init();
+
+        // save a little space for pad btwn the two grids
+        var gridWidth = $('left-display').clientWidth * .95;
+
+        // weird IE glitch here...
+        if (gridWidth == 0)
+            gridWidth = ($('contentTable').clientWidth / 2) * .95;
+
+        Ext.define('SailPoint.model.SODConstraint', {
+            extend : 'Ext.data.Model',
+            fields : ['id', 'name', 'description']
+        });
+
+        leftStore = SailPoint.Store.createStore({
+            model : 'SailPoint.model.SODConstraint',
+            autoLoad: false,
+            url: SailPoint.getRelativeUrl('/define/policy/constraintDataSource.json?side=left'),
+            totalProperty: 'count',
+            root : 'rows'
+        });
+
+        rightStore = SailPoint.Store.createStore({
+            model : 'SailPoint.model.SODConstraint',
+            autoLoad: false,
+            url: SailPoint.getRelativeUrl('/define/policy/constraintDataSource.json?side=right'),
+            totalProperty: 'count',
+            root : 'rows'
+        });
+
+        // display grid
+        Ext.define('SailPoint.ConstraintGrid', {
+            extend : 'Ext.grid.Panel',
+            columns: [{
+                header: '#{sp:escapeJavascript(msgs.business_role)}',
+                dataIndex: 'name',
+                flex: 1,
+                sortable: true,
+                hideable: true
+            },{
+                header: '#{sp:escapeJavascript(msgs.description)}',
+                dataIndex: 'description',
+                flex: 2,
+                sortable: false,
+                hideable: true
+            }],
+            cls: 'wrappingGrid',
+            width: gridWidth,
+            listeners: {
+                itemcontextmenu: showContextMenu
+            },
+            viewConfig: {
+                stripeRows: true,
+                scrollOffset: 0
+            }
+        });
+
+        leftGrid = Ext.create('SailPoint.ConstraintGrid', {
+            renderTo: 'left-display',
+            store: leftStore
+        });
+
+        rightGrid = Ext.create('SailPoint.ConstraintGrid', {
+            renderTo: 'right-display',
+            store: rightStore
+        });
+
+        leftStore.load();
+        rightStore.load();
+
+        // we also need a role suggest
+        if (#{sp:hasRight(facesContext, 'ManagePolicy')}) {
+            var leftRoleSuggest = new SailPoint.BaseSuggest({
+                id: 'leftRole',
+                renderTo: 'leftBusinessRoleSuggest',
+                binding: 'mainForm:leftBusinessRole',
+                baseParams: {'suggestType': 'role'},
+                emptyText: '#{sp:escapeJavascript(msgs.select_add_business_role)}',
+                value: '',
+                listeners: {
+                    select: newObject
+                }
+            });
+
+            var rightRoleSuggest = new SailPoint.BaseSuggest({
+                id: 'rightRole',
+                renderTo: 'rightBusinessRoleSuggest',
+                binding: 'mainForm:rightBusinessRole',
+                baseParams: {'suggestType': 'role'},
+                emptyText: '#{sp:escapeJavascript(msgs.select_add_business_role)}',
+                value: '',
+                listeners: {
+                    select: newObject
+                }
+            });
+        }
+    }); // Ext.onReady
+
+
+    function showContextMenu(gridView, record, HTMLitem, index, e, eOpts){
+        var canEdit = #{sp:hasRight(facesContext, 'ManagePolicy')};
+        if (!canEdit)
+            return;
+
+        id = record.getId();
+        name = record.get('name');
+
+        var contextMenu = new Ext.menu.Menu();
+        contextMenu.add(
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_delete)}',
+                               handler: deletePrompt,
+                               iconCls: 'deleteBtn'})
+        );
+
+        e.stopEvent();
+        contextMenu.showAt(e.xy);
+    }
+
+    function deletePrompt() {
+        Ext.MessageBox.confirm('Confirm delete of "' + name + '"?',
+                               'Are you sure you want to delete "' + name + '"?',
+                               deleteRule);
+    }
+
+    function deleteRule(button, text) {
+        if (button == 'yes') {
+            $('mainForm:gridObjectId').value = id;
+            $('mainForm:deleteButton').click();
+        }
+    }
+
+    function newObject(comp, record) {
+      $('mainForm:selectedRole').value = record[0].raw.name;
+
+      if (comp.getId() == 'leftRole')
+          $('mainForm:newLeftButton').click();
+      else
+          $('mainForm:newRightButton').click();
+    }
+
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="mainForm">
+
+          <h:inputHidden id="isPolicy" name="isPolicy"/>
+          <div class="spContent">
+            <h:outputText styleClass="spContentTitle" value="#{msgs.title_sod_rule}"/>
+
+            <ui:include src="constraint.xhtml">
+              <ui:param name="constraint" value="#{policy.session.constraint}" />
+            </ui:include>
+
+          </div>
+
+          <div class="spacerDiv"/>
+
+          <div class="spContent">
+            <table id="contentTable" class="width100" cellpadding="4" cellspacing="0">
+
+              <tr>
+                <td width="50%" align="center">
+                  <h:outputText styleClass="spContentTitle" value="#{msgs.policy_constraint_any_of_these_roles}"/>
+                </td>
+                <td width="50%" align="center">
+                  <h:outputText styleClass="spContentTitle" value="#{msgs.policy_constraint_conflict_with_these_roles}"/>
+                </td>
+              </tr>
+
+              <tr valign="top">
+                <td>
+                    <div id="left-display" style="width: 100% padding: 5px"></div>
+                </td>
+                <td>
+                    <div id="right-display" style="width: 100% padding: 5px"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                    <div class="spacerDiv"/>
+                  <h:panelGroup rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+                      <div id="leftBusinessRoleSuggest"></div>
+                      <t:inputHidden id="leftBusinessRole" />
+                   </h:panelGroup>
+                    <div class="spacerDiv"/>
+                </td>
+                <td>
+                    <div class="spacerDiv"/>
+                  <h:panelGroup rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+                      <div id="rightBusinessRoleSuggest"></div>
+                      <t:inputHidden id="rightBusinessRole" />
+                  </h:panelGroup>
+                  <div class="spacerDiv"/>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+
+                  <div class="buttonRow">
+                    <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+                      <h:commandButton id="returnButton" action="#{policy.saveConstraintAction}" value="#{msgs.button_done}" styleClass="primaryBtn" />
+                    </ui:fragment>
+                    <h:commandButton action="#{policy.cancelConstraintAction}" value="#{msgs.button_cancel}" immediate="true" styleClass="secondaryBtn" />
+                    <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+                      <button id="startSimulateRuleButton"
+                                        type="button"
+                                        onclick="SailPoint.Web.Define.Policy.SimulationWindows.displaySimulationDialoguePrompt(false); return false;"
+                                        style="#{(empty policy.session.constraint.taskResultId) ? '': 'display:none'}"
+                                        class="secondaryBtn" >#{msgs.button_simulation_run_simulation}
+                      </button>
+                      <button id="viewRuleResultsButton"
+                                        type="button"
+                                        onclick="SailPoint.Web.Define.Policy.SimulationWindows.displaySimulationResults('#{policy.session.constraint.name}','#{policy.session.constraintId}',false,'mainForm:simulateRuleButton'); return false;"
+                                        style="#{(not empty policy.session.constraint.taskResultId) ? '' : 'display:none'}"
+                                        class="secondaryBtn" >#{msgs.simulate_view_results}
+                      </button>
+                    </ui:fragment>
+                    <h:commandButton style="display:none" id="simulateRuleButton" action="#{policy.saveAndSimulatePolicyRuleAction}" />
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+      <h:inputHidden id="gridObjectId" value="#{policy.session.itemId}"/>
+
+      <h:commandButton id="editButton" style="display:none"
+                       action="#{policy.editItemAction}"/>
+
+      <h:commandButton id="deleteButton" style="display:none"
+                       action="#{policy.deleteItemAction}"/>
+
+      <h:inputHidden id="selectedRole" value="#{policy.selectedRole}"/>
+
+      <h:commandButton id="newLeftButton" style="display:none"
+                       action="#{policy.newLeftItemAction}"/>
+
+      <h:commandButton id="newRightButton" style="display:none"
+                       action="#{policy.newRightItemAction}"/>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

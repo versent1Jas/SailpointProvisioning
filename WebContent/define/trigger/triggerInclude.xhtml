@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+    <script type="text/javascript">
+    Ext.onReady(function () {
+        // Base params value returns only managers.
+        var oldManagerFilterSuggest = new SailPoint.IdentitySuggest({
+            id: 'oldManagerFilterSuggestCmp',
+            renderTo: 'oldManagerFilterSuggest', 
+            binding: 'oldManagerFilterInput',
+            baseParams: {'type': 'manager', context: 'Manager'}
+        });
+        
+        var iVal = '#{sp:escapeJavascript(trigger.oldManagerFilter.displayName)}'; 
+        if(iVal != ''){
+        	oldManagerFilterSuggest.setRawValue(iVal);
+            SailPoint.Suggest.IconSupport.setIconDiv(oldManagerFilterSuggest, 'userIcon');
+        }
+    
+        // Base params value returns only managers.
+        var newManagerFilterSuggest = new SailPoint.IdentitySuggest({
+            id: 'newManagerFilterSuggestCmp',
+            renderTo: 'newManagerFilterSuggest', 
+            binding: 'newManagerFilterInput',
+            baseParams: {'type': 'manager', context: 'Manager'}
+        });
+        
+        var iVal = '#{sp:escapeJavascript(trigger.newManagerFilter.displayName)}'; 
+        if(iVal != ''){
+        	newManagerFilterSuggest.setRawValue(iVal);
+            SailPoint.Suggest.IconSupport.setIconDiv(newManagerFilterSuggest, 'userIcon');
+        }
+    });
+    </script>
+
+    <tr>
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_name}" />
+        <h:outputText styleClass="requiredText" value="*"/>
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtName" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_name}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <h:inputText id="identityTriggerName" style="width: 300px" value="#{trigger.name}" disabled="#{readOnly == true}" />
+      </td>
+    </tr>
+
+    <tr>
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_desc}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtDesc" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_desc}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+      <h:inputTextarea value="#{trigger.description}" cols="60" rows="4" disabled="#{readOnly == true}" />
+      </td>
+    </tr>
+
+    <tr>
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_type_label}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtType" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_type}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <h:selectOneListbox
+          id="identityTriggerTypeSelect"
+          value="#{trigger.type}"
+          size="1"
+          onchange="SailPoint.Define.Trigger.Trigger.triggerTypeChanged(this);"
+          converter="sailpoint.object.Enum"
+          disabled="#{readOnly == true}">
+          <f:selectItems value="#{trigger.types}" />
+        </h:selectOneListbox>
+      </td>
+    </tr>
+
+    <tr id="attributeName" style="display: #{(trigger.type eq 'AttributeChange') ? '' : 'none'}">
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_attr_name}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtAttrName" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_attr_name}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <h:selectOneMenu id="triggerAttrSelect" value="#{trigger.attributeName}" disabled="#{readOnly == true}">
+          <f:selectItems value="#{trigger.attributes}"/>
+        </h:selectOneMenu>
+      </td>
+    </tr>
+
+    <tr id="oldAttributeFilter" style="display: #{(trigger.type eq 'AttributeChange') ? '' : 'none'}">
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_old_attribute_filter}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtOldAttrFilter" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_old_attribute_filter}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <h:inputText id="oldAttrFilterValue" value="#{trigger.oldValueFilter}" disabled="#{readOnly == true}" />
+      </td>
+    </tr>
+
+    <tr id="newAttributeFilter" style="display: #{(trigger.type eq 'AttributeChange') ? '' : 'none'}">
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_new_attribute_filter}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtNewAttrFilter" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_new_attribute_filter}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <h:inputText id="newAttrFilterValue" value="#{trigger.newValueFilter}" disabled="#{readOnly == true}" />
+      </td>
+    </tr>
+
+    <tr id="oldManagerFilter" style="display: #{(trigger.type eq 'ManagerTransfer') ? '' : 'none'}">
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_old_manager}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtOldManager" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_old_manager}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <div id="oldManagerFilterSuggest"></div>
+        <t:inputHidden id="oldManagerFilterInput"
+                       value="#{trigger.oldManagerFilter}" forceId="true">
+            <sp:convertIdentity />
+        </t:inputHidden>
+      </td>
+    </tr>
+
+    <tr id="newManagerFilter" style="display: #{(trigger.type eq 'ManagerTransfer') ? '' : 'none'}">
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_new_manager}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtNewManager" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_new_manager}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <div id="newManagerFilterSuggest"></div>
+        <t:inputHidden id="newManagerFilterInput"
+                       value="#{trigger.newManagerFilter}" forceId="true">
+            <sp:convertIdentity />
+        </t:inputHidden>
+      </td>
+    </tr>
+
+    <tr id="triggerRule" style="display: #{(trigger.type eq 'Rule') ? '' : 'none'}">
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_rule}" />
+        <h:outputText value="*" style="color:red" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtRule" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_rule}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <a4j:outputPanel id="rulesPanel">
+        <h:selectOneMenu id="triggerRuleSelect"
+                         value="#{trigger.ruleId}"
+                         disabled="#{readOnly == true}">
+          <f:selectItems value="#{trigger.rules}"/>
+        </h:selectOneMenu>
+        </a4j:outputPanel>
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" > 
+          <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                 onclick="SailPoint.Rule.Editor.edit($('#{formName}:triggerRuleSelect').value, 
+                                                     'IdentityTrigger',
+                                                     $('#{formName}:refreshTriggerRulesButton'))" />   
+                                                     
+          <a4j:commandButton id="refreshTriggerRulesButton"
+                             style="display:none"
+                             immediate="true"
+                             render="rulesPanel"/>
+        </ui:fragment>                    
+      </td>
+    </tr>
+
+    <tr>
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_disabled}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtDisabled" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_disabled}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <h:selectBooleanCheckbox id="triggerDisabled" value="#{trigger.disabled}" disabled="#{readOnly == true}" />
+      </td>
+    </tr>
+
+    <tr>
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.identity_trigger_selector}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEvtSelector" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_selector}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <ui:include src="/include/selector.xhtml">
+          <ui:param name="listener" value="#{trigger}"/>
+          <ui:param name="selector" value="#{trigger.selector}" />
+          <ui:param name="noneLabel" value="#{msgs.selector_type_all}" />
+          <ui:param name="readOnly" value="#{readOnly}" />
+        </ui:include>
+      </td>
+    </tr>
+</ui:composition>
+
+</body>
+</html>

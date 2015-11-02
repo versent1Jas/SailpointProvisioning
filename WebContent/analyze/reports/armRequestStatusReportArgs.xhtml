@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/armRequestStatusReportArgs.js?#{debug.revision}</src>
+  </sp:script>
+  
+  <script type="text/javascript">
+      Ext.onReady(function () {
+          SailPoint.Report.ARM.initialize();   
+      });    
+  </script>
+
+  <table class="width100" cellspacing="0" cellpadding="3">
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <tr>
+        <td colspan="2" width="30%">
+          <sp:outputText styleClass="spContentTitle" value="#{msgs.user_report_options}"/>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_approvers}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["approver"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>         
+                  <div id="approversMultiSuggest"></div>
+                  <t:inputHidden id="approvers"
+                                 value="#{taskDefinition.argMap['approver'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>  
+                  <div id="approverSuggestInfo" style="display:none">
+                    #{sp:basicJSONDataConverted(taskDefinition.argMap['approver'].objectListValue,'IdentityListConverter')}
+                  </div>                
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_requesters}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["requestor"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>         
+                  <div id="requestorsMultiSuggest"></div>
+                  <t:inputHidden id="requestors"
+                                 value="#{taskDefinition.argMap['requestor'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>  
+                  <div id="requestorSuggestInfo" style="display:none">
+                    #{sp:basicJSONDataConverted(taskDefinition.argMap['requestor'].objectListValue,'IdentityListConverter')}
+                  </div>                
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable">
+                <tr>
+                    <th><sp:outputText value="#{msgs.report_filter_roles}"/></th>
+                </tr>
+                <tr style="height:47px">
+                    <td><sp:outputText style="font-size:11px"
+                                      value='#{taskDefinition.argMap["roles"].argument.description}'/></td>
+                </tr>
+                <tr>
+                  <td valign="top">
+                    <div id="businessRolesMultiSuggest"></div>
+                    <t:inputHidden id="businessRolesSuggest"
+                                   value="#{taskDefinition.argMap['roles'].objectListValue}" forceId="true">
+                        <sp:convertList />
+                    </t:inputHidden>
+                    <div id="roleSuggestInfo" style="display:none">
+                      #{sp:basicJSONDataConverted(taskDefinition.argMap['roles'].objectListValue,'BundleListConverter')}
+                    </div> 
+                  </td>
+                </tr>
+              </table>
+            </div>
+        </td>
+        <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+              <table class="spTable">
+                  <tr>
+                      <th colspan="2"><sp:outputText value="#{msgs.report_filter_request_start_and_end}"/></th>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-size:11px"
+                                                    value='#{taskDefinition.argMap["creationDateStart"].argument.description}'/>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.start_date}"/></td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <h:selectBooleanCheckbox id="startDateSelect"
+                                                   value="#{taskDefinition.argMap['creationDateStart'].bound}"
+                                                   onclick="toggleDateDisplay($('startDateDiv'), !(this.checked));"/>
+                      </td>
+                      <td>
+                          <div id="startDateDiv">
+                              <sp:inputDate timeZone="#{base.userTimeZoneId}"  type="date" id="startDate" popupCalendar="true" ampm="true"
+                                           addResources="false" imageLocation="/scripts/myfacescalendar"
+                                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                           value='#{taskDefinition.argMap["creationDateStart"].dateValue}' styleClass="tomahawkInputDate"/>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">
+                          <a4j:outputPanel ajaxRendered="true">
+                              <h:message for="startDate" styleClass="formError"/>
+                          </a4j:outputPanel>
+                      </td>
+                  </tr>
+      
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-size:11px"
+                                                    value='#{taskDefinition.argMap["creationDateEnd"].argument.description}'/>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.end_date}"/></td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <h:selectBooleanCheckbox id="endDateSelect"
+                                                   value="#{taskDefinition.argMap['creationDateEnd'].bound}"
+                                                   onclick="toggleDateDisplay($('endDateDiv'), !(this.checked));"/>
+                      </td>
+                      <td>
+                          <div id="endDateDiv">
+                              <sp:inputDate timeZone="#{base.userTimeZoneId}"  type="date" id="endDate" popupCalendar="true" ampm="true"
+                                           addResources="false" imageLocation="/scripts/myfacescalendar"
+                                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                           value='#{taskDefinition.argMap["creationDateEnd"].dateValue}' styleClass="tomahawkInputDate"/>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">
+                          <a4j:outputPanel ajaxRendered="true">
+                              <h:message for="endDate" styleClass="formError"/>
+                          </a4j:outputPanel>
+                      </td>
+                  </tr>
+              </table>
+          </div>
+      </td>
+      </tr>
+      <tr>
+      <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+              <table class="spTable">
+                  <tr>
+                      <th colspan="2"><sp:outputText value="#{msgs.report_filter_approved_start_and_end}"/></th>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-size:11px"
+                                                    value='#{taskDefinition.argMap["approvedDateStart"].argument.description}'/>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.start_date}"/></td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <h:selectBooleanCheckbox id="approvedStartDateSelect"
+                                                   value="#{taskDefinition.argMap['approvedDateStart'].bound}"
+                                                   onclick="toggleDateDisplay($('approvedStartDateDiv'), !(this.checked));"/>
+                      </td>
+                      <td>
+                          <div id="approvedStartDateDiv">
+                              <sp:inputDate timeZone="#{base.userTimeZoneId}"  type="date" id="approvedStartDate" popupCalendar="true" ampm="true"
+                                           addResources="false" imageLocation="/scripts/myfacescalendar"
+                                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                           value='#{taskDefinition.argMap["approvedDateStart"].dateValue}' styleClass="tomahawkInputDate"/>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">
+                          <a4j:outputPanel ajaxRendered="true">
+                              <h:message for="startDate" styleClass="formError"/>
+                          </a4j:outputPanel>
+                      </td>
+                  </tr>
+      
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-size:11px"
+                                                    value='#{taskDefinition.argMap["approvedDateEnd"].argument.description}'/>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.end_date}"/></td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <h:selectBooleanCheckbox id="approvedEndDateSelect"
+                                                   value="#{taskDefinition.argMap['approvedDateEnd'].bound}"
+                                                   onclick="toggleDateDisplay($('approvedEndDateDiv'), !(this.checked));"/>
+                      </td>
+                      <td>
+                          <div id="approvedEndDateDiv">
+                              <sp:inputDate timeZone="#{base.userTimeZoneId}"  type="date" id="approvedEndDate" popupCalendar="true" ampm="true"
+                                           addResources="false" imageLocation="/scripts/myfacescalendar"
+                                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                           value='#{taskDefinition.argMap["approvedDateEnd"].dateValue}' styleClass="tomahawkInputDate"/>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">
+                          <a4j:outputPanel ajaxRendered="true">
+                              <h:message for="endDate" styleClass="formError"/>
+                          </a4j:outputPanel>
+                      </td>
+                  </tr>
+              </table>
+          </div>
+      </td>
+      <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.report_filter_status}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["status"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectOneMenu id="status" value="#{taskDefinition.argMap['status'].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.approved}" itemValue="approved" />
+                    <f:selectItem itemLabel="#{msgs.rejected}" itemValue="rejected" />
+                    <f:selectItem itemLabel="#{msgs.pending}" itemValue="pending" />
+                    <f:selectItem itemLabel="#{msgs.cancelled}" itemValue="cancelled" />
+                  </h:selectOneMenu>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </ui:fragment>
+  </table>
+</ui:composition>
+</body>
+</html>

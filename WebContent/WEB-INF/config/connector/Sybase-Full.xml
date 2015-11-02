@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, PASSWORD, GROUP_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, SYNC_PROVISIONING" icon="databaseIcon" name="Sybase Template" type="Sybase - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="Sybase"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <ClusterScript>
+        <Source>
+                        
+                          String cluster = null;
+                          Object host = application.getAttributeValue("host");
+                          Object port = application.getAttributeValue("port");
+                          if (host != null) {
+                            cluster = host.toString();
+                            if (port != null)
+                              cluster += ":" + port.toString();
+                            }
+                          return cluster;
+                        
+                      </Source>
+      </ClusterScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="USER_ID" minable="true" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" minable="true" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" type="string"/>
+        <AttributeDefinition displayName="Account Type" minable="true" name="SYBASE_USER_TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="UserID" minable="true" name="SYB_RU_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Full Name" minable="true" name="SYB_RU_LU_FULLNAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Default database" minable="true" name="SYB_RU_LU_DEF_DB" required="true" type="string"/>
+        <AttributeDefinition displayName="Default language" minable="true" name="SYB_RU_LU_DEF_LANG" required="true" type="string"/>
+        <AttributeDefinition displayName="Login name" minable="true" name="SYB_RU_LOGIN_NAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Commands" minable="true" multi="true" name="SYB_RU_DB_COMMANDS" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group Name" minable="true" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" minable="true" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Type" minable="true" name="SYB_UG_TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="Group ID" minable="true" name="SYB_UG_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Commands" minable="true" multi="true" name="SYB_UG_DB_COMMANDS" type="string"/>
+        <AttributeDefinition displayName="Commands" minable="true" multi="true" name="SYB_UG_DB_COMMANDS_MASTER" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="USER_ID" helpKey="Format for 1)DATABASE USER- DBname.DbuserName , 2)REMOTE LOGIN - [remoteservername].loginName  , 3)LOGIN - loginname " name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Container" helpKey="Simply the name of container or the database, in case of login user creation it should be (*), in case of remote login creation it should be [remoteservername]" name="USER_OE_PR" required="true" section="" type="string"/>
+        <Field displayName="Account Type" name="SYBASE_USER_TYPE" required="true" type="string">
+          <AllowedValues>
+            <String>LOGIN</String>
+            <String>REMOTE LOGIN</String>
+            <String>DATABASE USER</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Login Name" helpKey="Login name required in case of REMOTE LOGIN and DATABASE USER" name="SYB_RU_LOGIN_NAME" reviewRequired="true" type="string"/>
+        <Field displayName="Commands" helpKey="Format is (Command#Action#Grantee).Required only in case of DB user creation" multi="true" name="SYB_RU_DB_COMMANDS" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>ALL#GRANT#</String>
+            <String>CREATE DEFAULT#GRANT#</String>
+            <String>CREATE PROCEDURE#GRANT#</String>
+            <String>CREATE RULE#GRANT#</String>
+            <String>CREATE TABLE#GRANT#</String>
+            <String>CREATE VIEW#GRANT#</String>
+            <String>DUMP DATABASE#GRANT#</String>
+            <String>DUMP TRANSACTION#GRANT#</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group Name" helpKey="Format of field is 1)Database Group - (Database_name.Group_name) ,2)User Role - simply the name of the role to create " name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Parent Container" helpKey="Format of field  1)for Database Group - Database_name,2)for User Role - (*)" name="GROUP_OE_PR" required="true" section="" type="string"/>
+        <Field displayName="Group Type" name="SYB_UG_TYPE" required="true" section="" type="string">
+          <AllowedValues>
+            <String>Database group</String>
+            <String>User role</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="System Privileges FOR OTHER DATABASE" helpKey="(Applicable for other containers in database except master)Command#Action#Grantee" multi="true" name="SYB_UG_DB_COMMANDS" reviewRequired="true" section="" type="string"/>
+        <Field displayName="System Privileges FOR master" helpKey="(Applicable for master  container database)Command#Action#Grantee#" multi="true" name="SYB_UG_DB_COMMANDS_MASTER" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Group ID" name="SYB_UG_ID" readOnly="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

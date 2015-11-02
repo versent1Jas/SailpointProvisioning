@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition template="/appPage.xhtml">
+
+  <!-- No menu on this page since the user must answer questions before continuing. -->
+  <ui:param name="hideMenu" value="true" />
+
+  <ui:define name="title">#{msgs.auth_answers_title}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'AUTH_ANSWERS';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form id="editForm" styleClass="form">
+
+        <div class="pageInfo">
+          <h:outputText value="#{msgs.auth_answers_page_info}" />
+        </div>
+
+        <div class="spContent">
+          <div style="margin: 5px">
+            <ui:include src="authAnswersInclude.xhtml">
+              <ui:param name="authAnswersBeanParam" value="#{authAnswers}" />
+            </ui:include>
+          </div>
+        </div>
+
+        <div class="buttonRow">
+          <h:commandButton id="saveButton" action="#{authAnswers.save}" value="#{msgs.button_save}" styleClass="primaryBtn" />
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

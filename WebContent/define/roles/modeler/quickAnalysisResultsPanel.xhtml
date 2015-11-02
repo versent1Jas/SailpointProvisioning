@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <div id="analysisResultsCt">
+    <div id="analysisResultsDiv" class="spContent" style="display:none">
+      <a4j:outputPanel id="analysisResultsPanel">
+      <div class="spContentBody">
+        <ui:fragment rendered="#{empty roleEditor.quickAnalysisResults}">
+          <h:outputText class="sectionHeader" value="#{msgs.header_no_policy_conflicts}"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{!empty roleEditor.quickAnalysisResults}">
+          <table class="spTable">
+            <thead>
+              <tr>
+                <th><h:outputText value="#{msgs.impact_column_policy}"/></th>
+                <th><h:outputText value="#{msgs.impact_column_constraint}"/></th>
+                <th><h:outputText value="#{msgs.impact_column_description}"/></th>
+              </tr>
+            </thead>
+            <ui:repeat value="#{roleEditor.quickAnalysisResults}" var="policyConflict">
+              <tr>
+                <td><h:outputText value="#{policyConflict.policyName}"/></td>
+                <td><h:outputText value="#{policyConflict.constraintName}"/></td>
+                <td><h:outputText value="#{policyConflict.description}" escape="false"/></td>
+              </tr>
+            </ui:repeat>
+          </table>           
+        </ui:fragment>
+      </div>
+      </a4j:outputPanel>
+    </div>
+  </div>
+  
+</ui:composition>
+
+</body>
+</html>

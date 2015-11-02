@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui"
+      >
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_access_request} #{sp:stripLeadingZeroes(requestDetails.requestName)}</ui:define>
+
+  <ui:define name="headerItems">
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/NameWithTooltip.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/accessRequests/AccessRequestsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/EmailWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+    </sp:script>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/accessRequest">
+        <src>accessrequest.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+      <src>request-access.css</src>
+    </sp:style>
+    
+
+    <script type="text/javascript" >
+      Ext.onReady(function(){
+        // get the different provisioning engines used for the requeest
+        var requestId = '#{requestDetails.requestId}';
+        var requestType = '#{requestDetails.requestType}';
+        var counter = 0;
+        <c:forEach items="#{requestDetails.provisioningEngines}" var="item">
+            SailPoint.Manage.Grid.AccessRequests.createGrid(requestId,'#{item}', counter++, requestType);
+        </c:forEach>
+
+        SailPoint.Manage.Grid.AccessRequests.createRequestGrid(requestId, requestType);
+ 
+        if (#{not empty requestDetails.approvalSummaries}) {
+          var executionStatus = '#{requestDetails.executionStatus}'
+          SailPoint.Manage.Grid.AccessRequests.createApprovalsGrid(requestId, executionStatus === 'Terminated' || executionStatus === 'Completed');
+        }
+
+        if (#{not empty requestDetails.errorsAndWarnings})
+          SailPoint.Manage.Grid.AccessRequests.createErrorsGrid(requestId);
+
+        if (#{not empty requestDetails.filteredItems})
+          SailPoint.Manage.Grid.AccessRequests.createFilteredItemsGrid(requestId, requestType);
+
+        // adorn role columns with icons and information
+        // first check to see if there are any 'roleColumn' class elements
+        SailPoint.Manage.Grid.AccessRequests.adornColumn();
+      }); // Ext.onReady
+    </script>
+
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <div class="pageInfo">
+        <div class="content">
+          <table class="spPaddedTable" cellspacing="0">
+          <tbody>
+            <tr>
+              <td class="titleColumn">#{msgs.access_request_hdr_requestid}</td>
+              <td class=" nowrap">#{sp:stripLeadingZeroes(requestDetails.requestName)}</td>
+              <td class="titleColumn">#{msgs.access_request_hdr_currentstep}</td>
+              <td>#{requestDetails.step}</td>
+            </tr>
+            <tr>
+              <td class="titleColumn">#{msgs.access_request_hdr_type}</td>
+              <td>#{requestDetails.userFriendlyRequestType}</td>
+              <td class="titleColumn">#{msgs.access_request_hdr_requestdate}</td>
+              <td>
+                <h:outputText value="#{requestDetails.requestDate}">
+                  <f:convertDateTime type="both" timeStyle="short" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                </h:outputText>
+              </td>
+            </tr>
+            <tr>
+              <td class="titleColumn">#{msgs.access_request_hdr_requester}</td>
+              <td>#{requestDetails.requesterIdentity}</td>
+              <td class="titleColumn">#{msgs.access_request_hdr_completiondate}</td>
+              <td>
+                <h:outputText value="#{requestDetails.completionDate}">
+                  <f:convertDateTime type="both" timeStyle="short" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                </h:outputText>
+              </td>
+            </tr>
+            <tr>
+              <td class="titleColumn">#{msgs.access_request_hdr_requestee}</td>
+              <td>#{requestDetails.targetIdentity}</td>
+              <td class="titleColumn">#{msgs.access_request_hdr_verificationdate}</td>
+              <td>
+                <h:outputText value="#{requestDetails.verificationDate}">
+                  <f:convertDateTime type="both" timeStyle="short" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                </h:outputText>
+              </td>
+            </tr>
+            <tr>
+              <td class="titleColumn">#{msgs.access_request_hdr_status}</td>
+              <td>#{requestDetails.completionStatus}</td>
+              <td class="titleColumn">#{msgs.access_request_hdr_execution_status}</td>
+              <td>#{requestDetails.executionStatus}</td>
+            </tr>
+            <tr>
+              <td class="titleColumn">#{msgs.access_request_hdr_priority}</td>
+              <td>#{requestDetails.priority}</td>
+              <td class="titleColumn">
+              <h:outputText value="#{msgs.access_request_hdr_extTicketId}" rendered="#{lcmConfig.showExternalTicketId}"/>
+              </td>
+              <td><h:outputText value="#{requestDetails.externalTicketId}" rendered="#{lcmConfig.showExternalTicketId}"/></td>
+              
+            </tr>
+          </tbody>
+          </table>
+          <div style="margin-top:10px">
+            <h:form id="mainForm">
+              <h:commandButton immediate="true" styleClass="secondaryBtn" value="#{msgs.access_request_back_button}" id="backButton" action="#{requestDetails.cancelAction}"/>
+              <!-- Store requestId by default so we can set it on the navigation history for coming back to this page -->
+              <h:inputHidden id="requestId" value="#{requestDetails.requestId}"/>
+              <h:inputHidden id="workItemId" />
+              <h:commandButton id="viewWorkItem" style="display:none" action="#{requestDetails.viewWorkItem}">
+              </h:commandButton>
+            </h:form>
+          </div>
+        </div>
+      </div>
+        <div class="spContent">
+          <!-- general request info -->
+          <div class="accessdetailsgrid">
+            <h:outputText styleClass="sectionHeader" value="#{msgs.dash_access_req_table_requests_title}" />
+
+            <!-- policy violation detail popup -->
+            <h:panelGroup styleClass="policyViolationsSection" layout="block" rendered="#{not empty requestDetails.policyViolations}">
+              <h:link onclick='SailPoint.Manage.Grid.AccessRequests.showPolicyViolations("#{requestDetails.requestId}"); return false;' 
+                      value="#{msgs.access_request_approvals_grid_clickdetails}"/>
+            </h:panelGroup>
+
+            <div id="requestItemsGrid"></div>
+          </div>
+
+          <h:panelGroup styleClass="accessdetailsgrid" layout="block" rendered="#{not empty requestDetails.approvalSummaries}">
+            <h:outputText styleClass="sectionHeader" value="#{msgs.dash_access_req_table_approvals_title}" />
+            <div id="approvalItemsGrid"></div>
+          </h:panelGroup>
+
+          <h:panelGroup styleClass="accessdetailsgrid" layout="block"
+                        rendered="#{not empty requestDetails.provisioningEngines}">
+              <div id="provisioningChangesGrids"></div>
+          </h:panelGroup>
+
+          <h:panelGroup styleClass="accessdetailsgrid" layout="block" rendered="#{not empty requestDetails.filteredItems}">
+            <h:outputText styleClass="sectionHeader"  value="#{msgs.dash_access_req_table_filtered_title}" />
+            <div id="filteredItemsGrid"></div>
+          </h:panelGroup>
+
+          <h:panelGroup styleClass="accessdetailsgrid" layout="block" rendered="#{not empty requestDetails.errorsAndWarnings}">
+            <h:outputText styleClass="sectionHeader"  value="#{msgs.dash_access_req_table_errors_title}" />
+            <div id="errorsGrid"></div>
+          </h:panelGroup>
+
+        </div>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, PASSWORD, SEARCH, UNSTRUCTURED_TARGETS, ENABLE" icon="enterpriseIcon" name="Linux Template" type="Linux - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="Linux"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED " value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="Account Name" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" type="string"/>
+        <AttributeDefinition displayName="Home Directory" name="HOME" type="string"/>
+        <AttributeDefinition displayName="Shell" name="SHELL" type="string"/>
+        <AttributeDefinition displayName="Password Maturity" name="MATURITY" type="int"/>
+        <AttributeDefinition displayName="Last Login" name="LAST_LOGIN" type="string"/>
+        <AttributeDefinition displayName="Max. Password Inactivity" name="INACTIVE" type="int"/>
+        <AttributeDefinition displayName="Password Expiration" name="EXPIRATION" type="int"/>
+        <AttributeDefinition displayName="Password Warning Time" name="PWD_WARN" type="int"/>
+        <AttributeDefinition displayName="Password Last Change" name="PWD_LASTCHG" type="string"/>
+        <AttributeDefinition displayName="Password Absolute Expiration Date" name="PWD_ABS_EXPIRE" type="date"/>
+        <AttributeDefinition displayName="Create Home Directory" name="CREATE_HOME_DIR" type="boolean"/>
+        <AttributeDefinition displayName="Create User Group" name="CREATE_USER_GROUP" type="boolean"/>
+        <AttributeDefinition displayName="groups" entitlement="true" managed="true" multi="true" name="groups" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group Name" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="GID" name="GID" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="con_form_linux_full_userid" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="con_form_linux_full_password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="con_form_linux_full_container" name="USER_OE_PR" section="" type="string"/>
+        <Field displayName="con_form_linux_full_defgrp" name="UG_DEF" section="" type="string"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_form_linux_full_grpname" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="con_form_linux_full_gid" helpKey="help_con_linux_group" name="GID" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_form_linux_full_gid" helpKey="help_con_linux_group" name="GID" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

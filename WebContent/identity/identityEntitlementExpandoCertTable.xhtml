@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+<ui:composition>
+            
+ <ui:fragment rendered='#{certSummaryBean == null}'>
+   <div style="margin: 5px 5px 5px 5px;">     
+     <table>  
+      <tr>
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold; width:200px;" valign="top">             
+           #{notFoundMsg}  
+        </td>              
+      </tr>
+     </table>
+   </div>          
+ </ui:fragment>
+   
+ <ui:fragment rendered='#{certSummaryBean != null}'>
+   <div style="margin: 5px 5px 5px 5px;border:1px #ccc solid;">     
+     
+     <table class="spTable">   
+       <tr>
+         <th valign="top">           
+           <h:outputFormat  value="#{title}">
+             <f:param value="#{entitlementDetails.name}"/>
+             <f:param value="#{entitlementDetails.displayValue}"/>
+           </h:outputFormat>
+         </th>  
+       </tr>
+     </table>   
+     <table>     
+       <tr>
+         <td  style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold; width:200px;" valign="top">
+           #{msgs.date}
+         </td>
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+           #{certSummaryBean.certDate}
+         </td>
+       </tr>
+       <tr>           
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+           #{msgs.certification}
+         </td>
+       
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+           <h:outputText  value="#{certSummaryBean.certName}"></h:outputText>       
+         </td>            
+       </tr>     
+
+       <tr>
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+           #{msgs.certifier}
+         </td>
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+           #{certSummaryBean.certifier}
+         </td>
+       </tr>
+       
+       <tr>
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+           #{msgs.identity_entitlements_cert_decision}
+         </td>
+         <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+           #{certSummaryBean.localizedActionStatus}
+         </td>
+       </tr>
+              
+       <ui:fragment rendered='#{certSummaryBean.finishDate != null}'> 
+         <tr>
+           <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+             #{msgs.identity_entitlements_cert_decision_date} 
+           </td>
+           <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+             #{certSummaryBean.finishDate}
+           </td>
+         </tr>
+       </ui:fragment>
+     
+       <ui:fragment rendered='#{not entitlementDetails.iiqEntitlement}'> 
+         <tr>
+           <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+             #{msgs.identity_entitlements_cert_grainularity} 
+           </td>
+           <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+             #{certSummaryBean.granularity}
+           </td>
+         </tr>
+       </ui:fragment>
+     
+       <ui:fragment rendered='#{certSummaryBean.mitigationEndDate != null}'>
+         <tr>
+           <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+             #{msgs.identity_entitlements_cert_mitigation_end_date}
+           </td>
+           <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">
+             #{certSummaryBean.mitigationEndDate}
+           </td>
+         </tr>
+         
+       </ui:fragment>
+     </table>
+   </div>
+ </ui:fragment>
+   
+</ui:composition>
+</body>
+</html>

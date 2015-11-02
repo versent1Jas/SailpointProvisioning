@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, ENABLE, SEARCH" icon="internetIcon" name="GoToMeeting" type="GoToMeeting">
+    <Attributes>
+      <Map>
+        <entry key="connectorClass" value="openconnector.connector.GoToMeeting"/>
+        <entry key="formPath" value="GoToMeeting.xhtml"/>
+        <entry key="encrypted" value="token"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="Email" identityAttribute="OrganizerKey" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="OrganizerKey" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="FirstName" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="LastName" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="Email" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="Status" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="GroupKey" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="MaximumAttendeesAllowed" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" name="Groups" remediationModificationType="None" schemaObjectType="group" type="string"/>
+      </Schema>
+      <Schema displayAttribute="GroupName" identityAttribute="GroupKey" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="GroupName" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="GroupKey" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="ParentKey" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="GroupStatus" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="NumberOfOrganizers" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_form_gotomeeting_organizer_email" helpKey="help_con_form_gotomeeting_organizer_email" name="organizerEmail" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

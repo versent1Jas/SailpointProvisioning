@@ -1,0 +1,1224 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Initialization file for new SailPoint LCM repositories.
+-->
+<sailpoint>
+
+  <DashboardContent regionSize="0" name="Online Tutorials" title="dash_title_online_tutorials"
+                    source="dashboard/contentFlashBasedTraining.xhtml" type="My">
+    <Description>dash_description_online_tutorials</Description>
+    <Attributes>
+      <Map>
+        <entry key="tutorials">
+          <value>
+            <List>
+              <Map>
+                <entry key="title_key" value="help_tutorial_dashboard_overview"/>
+                <entry key="description_key" value="help_tutorial_dashboard_overview_description"/>
+                <entry key="page" value="dashboard_overview/dashboard_overview_NO_LCM.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_certification_worksheet"/>
+                <entry key="description_key" value="help_tutorial_certification_worksheet_description"/>
+                <entry key="page" value="certification_overview_worksheet/certification_overview_worksheet.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_certification_list"/>
+                <entry key="description_key" value="help_tutorial_certification_list_description"/>
+                <entry key="page" value="certification_overview_list/certification_overview_list.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_certification_approval"/>
+                <entry key="description_key" value="help_tutorial_certification_approval_description"/>
+                <entry key="page" value="certification_approval/certification_approval.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_certification_approval_manager"/>
+                <entry key="description_key" value="help_tutorial_certification_approval_manager_description"/>
+                <entry key="page" value="certification_approval_manager/certification_approval_manager.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_certification_reassign"/>
+                <entry key="description_key" value="help_tutorial_certification_reassign_description"/>
+                <entry key="page" value="certification_bulk_reassignment/certification_bulk_reassignment.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_certification_revoke"/>
+                <entry key="description_key" value="help_tutorial_certification_revoke_description"/>
+                <entry key="page" value="certification_revocation/certification_revocation.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_LCM_overview"/>
+                <entry key="description_key" value="help_tutorial_LCM_overview_description"/>
+                <entry key="page" value="LCM_overview/LCM_overview.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_LCM_request_new_entitlement"/>
+                <entry key="description_key" value="help_tutorial_LCM_request_new_entitlement_description"/>
+                <entry key="page" value="LCM_request_new_entitlement/LCM_request_new_entitlement.htm"/>
+              </Map>
+              <Map>
+                <entry key="title_key" value="help_tutorial_LCM_request_new_role"/>
+                <entry key="description_key" value="help_tutorial_LCM_request_new_role_description"/>
+                <entry key="page" value="LCM_request_new_role/LCM_request_new_role.htm"/>
+              </Map>
+            </List>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </DashboardContent>
+
+  <DashboardContent regionSize="1" name="Access Request Status" title="dash_title_lcm_access_request"
+    source="dashboard/contentAccessRequest.xhtml" type="Lifecycle" required="false">
+    <Description>dash_desc_lcm_access_request</Description>
+    <RequiredRights>
+      <Reference class="sailpoint.object.SPRight" name="ViewAccessRequest" />
+    </RequiredRights>
+  </DashboardContent>
+
+  <DashboardContent regionSize="1" name="My Access Requests" title="dash_title_lcm_my_requests"
+    source="dashboard/contentMyRequests.xhtml" type="My" required="false">
+    <Description>dash_desc_lcm_my_requests</Description>
+  </DashboardContent>
+  
+  
+  <IdentityDashboard name="dashboardLifecycleDefault" type="Lifecycle">
+    <Layout>
+      <Reference class='sailpoint.object.DashboardLayout' name='oneCol'/>
+    </Layout>
+    <References>
+      <DashboardReference region="XtraLarge1" minimized="false" index="1">
+        <Content>
+          <Reference class='sailpoint.object.DashboardContent' name='Access Request Status'/>
+        </Content>
+      </DashboardReference>
+    </References>
+  </IdentityDashboard>
+  
+  <IdentityDashboard name="dashboardDefaultLCM" type="My">
+    <Layout>
+      <Reference class='sailpoint.object.DashboardLayout' name='twoColEvenTop'/>
+    </Layout>
+    <References>
+      <DashboardReference region="Medium1" minimized="false" index="1">
+        <Content>
+          <Reference class='sailpoint.object.DashboardContent' name='Inbox'/>
+        </Content>
+      </DashboardReference>
+      <DashboardReference region="Medium2" minimized="false" index="2">
+        <Content>
+          <Reference class='sailpoint.object.DashboardContent' name='Outbox'/>
+        </Content>
+      </DashboardReference>
+    </References>
+  </IdentityDashboard>
+
+  <ImportAction name="merge">
+    <UIConfig name='UIConfig'>
+      <Attributes>
+        <Map>
+          <entry key='lcmSearchIdentityAttributes' value='manager'/>
+          <entry key="lcmSearchRoleAttributes" value='none'/>
+          <entry key="dashboardAccessRequestGridColumns">
+            <value>
+              <List>
+                <ColumnConfig property="id" hidden="true" />
+                <ColumnConfig headerKey="dash_access_req_col_id" property="name" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_requester" property="requesterDisplayName" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_identity" property="targetDisplayName" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_request_date" property="created" width="100" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_status" property="executionStatus" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_external_ticket" property="externalTicketId" sortable="true" hideable="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="dashboardMyAccessRequestGridColumns">
+            <value>
+              <List>
+                <ColumnConfig property="id" hidden="true" />
+                <ColumnConfig headerKey="dash_access_req_col_id" property="name" sortable="true" hideable="true" />
+                <ColumnConfig headerKey="dash_access_req_col_priority" property="priority" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_type" property="type" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_requester" property="requesterDisplayName" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_requestee" property="targetDisplayName" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_request_date" property="created" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_status" property="executionStatus" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_external_ticket" property="externalTicketId" sortable="true" hideable="true"/>  
+              </List>
+            </value>
+          </entry>
+          <entry key="myAccessRequestGridColumns">
+            <value>
+              <List>
+                <ColumnConfig property="id" hidden="true" />
+                <ColumnConfig headerKey="dash_access_req_col_id" property="name" sortable="true" hideable="true" />
+                <ColumnConfig headerKey="dash_access_req_col_priority" property="priority" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_type" property="type" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_requester" property="requesterDisplayName" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_requestee" property="targetDisplayName" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_request_date" property="created" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_current_step" property="state" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_completed" property="endDate" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_status" property="executionStatus" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="dash_access_req_col_external_ticket" property="externalTicketId" sortable="true" hideable="true"/>  
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.RequestPopulationBean">
+            <value>
+              <List>
+                <ColumnConfig property="id" fieldOnly="true" />
+                <ColumnConfig dataIndex="IIQ_Selected" fieldOnly="true" />
+                <ColumnConfig headerKey="idents_grid_hdr_name" property="name" sortable="true" hideable="true" flex="1"/>
+                <ColumnConfig headerKey="idents_grid_hdr_first_name" property="firstname" sortable="true" hideable="true" flex="1"/>
+                <ColumnConfig headerKey="idents_grid_hdr_last_name" property="lastname" sortable="true" hideable="true" flex="1"/>
+                <ColumnConfig headerKey="idents_grid_hdr_manager" property="manager.displayName" sortable="true" hideable="true" flex="1"/>
+                <ColumnConfig headerKey="idents_grid_hdr_display_name" property="displayName" fieldOnly="true" flex="1"/>
+             </List>
+            </value>
+          </entry>  
+          <entry key="sailpoint.web.lcm.AccountsRequestBean">
+            <value>
+              <List>
+                <ColumnConfig property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.ManageAccounts.buttonRenderer" width="30" />
+                <ColumnConfig headerKey="link_account_id" property="displayName" sortable="true" hideable="true" renderer="SailPoint.LCM.ManageAccounts.nameRenderer"/>
+                <ColumnConfig headerKey="lcm_manage_accounts_status" dataIndex="IIQ_status" sortable="true" hideable="true" width="80" renderer="SailPoint.LCM.ManageAccounts.statusRenderer"/>
+                <ColumnConfig headerKey="lcm_manage_accounts_status_class" dataIndex="IIQ_status_class" fieldOnly="true"/>
+                <ColumnConfig headerKey="link_application" property="application.name" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="instance" property="instance" sortable="true" hideable="true" hidden="false"/>
+                <ColumnConfig headerKey="link_last_refresh" property="lastRefresh" dateStyle="short" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="lcm_manage_accounts_refresh_status" dataIndex="IIQ_refresh_status" sortable="false" hideable="false" width="140" renderer="SailPoint.LCM.ManageAccounts.refreshButtonRenderer"/>
+                <ColumnConfig headerKey="native_identity" property="nativeIdentity" fieldOnly="true"/>
+                <ColumnConfig headerKey="application" property="application.id" fieldOnly="true"/>
+                <ColumnConfig headerKey="IIQ_decisions" dataIndex="IIQ_decisions" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.AccountsRequestBean_summary">
+            <value>
+              <List>
+                <ColumnConfig property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.SummaryChanges.buttonRenderer" width="33" />
+                <ColumnConfig headerKey="lcm_summary_action" property="opName" sortable="true" hideable="true" renderer="SailPoint.LCM.SummaryChanges.renderAction"/>
+                <ColumnConfig headerKey="lcm_summary_action" property="op" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_summary_identity" property="identity" sortable="true" hideable="true" flex="1"/>
+                <ColumnConfig headerKey="lcm_summary_application" property="applicationName" sortable="true" hideable="true" flex="1"/>
+                <ColumnConfig headerKey="lcm_summary_instance" property="instance" sortable="true" hideable="true" hidden="false"/>
+                <ColumnConfig headerKey="lcm_summary_account" property="account" renderer="SailPoint.LCM.SummaryChanges.renderAccount" hideable="true" sortable="true"/>
+                <ColumnConfig headerKey="applicationId" property="application" sortable="true" hideable="true" fieldOnly="true"/>
+                <ColumnConfig headerKey="native_identity" property="nativeIdentity" sortable="true" hideable="true" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_request_comments" property="comments" sortable="false" hideable="false" renderer="SailPoint.LCM.SummaryChanges.renderComments"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.PasswordsRequestBean">
+            <value>
+              <List>
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig headerKey="link_account_id" property="displayName" sortable="true" hideable="true" renderer="SailPoint.LCM.AccountsGridSupport.nameRenderer"/>
+                <ColumnConfig headerKey="link_application" property="application.name" sortable="true" hideable="true" renderer="SailPoint.LCM.ManagePasswords.linkPasswordPolicyRenderer"/>
+                <ColumnConfig headerKey="instance" property="instance" sortable="true" hideable="true" hidden="false"/>
+                <ColumnConfig headerKey="lcm_manage_accounts_status" dataIndex="IIQ_status" sortable="true" hideable="true" width="100" renderer="SailPoint.LCM.AccountsGridSupport.statusRenderer"/>
+                <ColumnConfig dataIndex="IIQ_status_class" fieldOnly="true"/>
+                <ColumnConfig property="nativeIdentity" fieldOnly="true"/>
+                <ColumnConfig property="application.id" fieldOnly="true"/>
+                <ColumnConfig dataIndex="password_requirements" fieldOnly="true"/>
+                <ColumnConfig dataIndex="supports_current_password" fieldOnly="true"/>
+                <ColumnConfig headerKey="link_last_refresh" property="lastRefresh" dateStyle="short" sortable="true" hideable="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.PasswordsRequestBean_summary">
+            <value>
+              <List>
+                <ColumnConfig headerKey="" property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.SummaryChanges.buttonRenderer" width="30" />
+                <ColumnConfig headerKey="lcm_summary_identity" property="identity" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="lcm_summary_application" property="application" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="lcm_summary_instance" property="instance" sortable="true" hideable="true" hidden="false"/>
+                <ColumnConfig headerKey="lcm_summary_account" property="account" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="lcm_summary_password" property="value" sortable="true" hideable="true" renderer="SailPoint.LCM.SummaryChanges.renderPassword"/>
+                <ColumnConfig headerKey="lcm_request_comments" property="comments" sortable="false" hideable="false" renderer="SailPoint.LCM.SummaryChanges.renderComments" flex="1"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.AccessRequestBean">
+            <value>
+              <List>
+                <ColumnConfig dataIndex="name" fieldOnly="true" property="name" sortProperty="name" />
+                <ColumnConfig headerKey="lcm_request_access_name" property="displayableName" sortable="true" hideable="true" percentWidth="50" renderer="SailPoint.LCM.RequestAccess.renderName" />
+                <ColumnConfig headerKey="lcm_request_access_type" property="type" sortable="true" hideable="true" percentWidth="10" renderer="SailPoint.LCM.RequestAccess.renderType" />
+                <ColumnConfig headerKey="lcm_request_access_score" property="riskScore" sortable="true" hideable="true" percentWidth="10" renderer="SailPoint.LCM.RequestAccess.renderScore" />
+                <ColumnConfig headerKey="lcm_request_access_owner" property="owner.displayName" sortable="true" hideable="true" percentWidth="20" renderer="SailPoint.LCM.RequestAccess.renderOwner" />
+                <ColumnConfig headerKey="lcm_role_population" dataIndex="IIQ_population" hidden="true" sortable="false" hideable="true" percentWidth="10" renderer="SailPoint.LCM.RequestAccess.renderPopulation"/>
+                <ColumnConfig property="description" fieldOnly="true"/>
+                <ColumnConfig dataIndex="application-name" fieldOnly="true"/>
+                <ColumnConfig dataIndex="attribute" fieldOnly="true"/>
+                <ColumnConfig dataIndex="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_color" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_icon" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_has_high_risk" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_population_total" fieldOnly="true"/>
+                <ColumnConfig dataIndex="owner-displayName" fieldOnly="true"/>
+                <ColumnConfig property="value" fieldOnly="true" />
+                <ColumnConfig dataIndex="IIQ_Selected" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          
+          <entry key="sailpoint.web.lcm.AccessRequestBean_summary">
+            <value>
+              <List>
+                <ColumnConfig percentWidth="3" headerKey="" property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.SummaryChanges.buttonRenderer"/>
+                <ColumnConfig percentWidth="7" headerKey="" property="value" sortable="false" hideable="false" renderer="SailPoint.LCM.SummaryChanges.editDetailsRenderer"/>
+                <ColumnConfig headerKey="lcm_summary_col_action" property="action" sortable="true" hideable="true" percentWidth="8" renderer="SailPoint.LCM.SummaryChanges.actionRenderer"/> 
+                <ColumnConfig dataIndex="name" fieldOnly="true" property="name" sortProperty="name"/>
+                <ColumnConfig percentWidth="35" headerKey="lcm_summary_col_name" property="displayableName" sortable="true" hideable="true" renderer="SailPoint.LCM.SummaryChanges.nameRenderer"/>
+                <ColumnConfig percentWidth="10" headerKey="lcm_summary_col_type" property="type" sortable="true" hideable="true"/>
+                <ColumnConfig percentWidth="15" headerKey="lcm_summary_col_assignmentNote" property="assignmentNote" sortable="false" hideable="true" renderer="SailPoint.LCM.SummaryChanges.renderAssignmentNote"/>
+                <ColumnConfig percentWidth="15" headerKey="lcm_summary_col_comments" property="comments" sortable="false" hideable="false" renderer="SailPoint.LCM.SummaryChanges.renderComments"/>
+                <ColumnConfig percentWidth="5" headerKey="lcm_summary_col_risk_score" property="riskScore" sortable="true" hideable="true" renderer="SailPoint.LCM.SummaryChanges.renderScore"/>
+                <ColumnConfig percentWidth="10" headerKey="lcm_summary_col_owner" property="owner" sortable="true" hideable="true"/>     
+                <ColumnConfig dataIndex="IIQ_color" fieldOnly="true"/>     
+                <ColumnConfig property="description" fieldOnly="true"/>
+                <ColumnConfig property="attributes" fieldOnly="true" />  
+                <ColumnConfig property="attribute" fieldOnly="true" />                 
+                <ColumnConfig property="application" fieldOnly="true" />
+                <ColumnConfig property="nativeIdentity" fieldOnly="true" />
+                <ColumnConfig property="updateable" fieldOnly="true" />
+                <ColumnConfig property="activation_pretty" fieldOnly="true" />
+                <ColumnConfig property="activation" fieldOnly="true" />
+                <ColumnConfig property="deactivation" fieldOnly="true" />
+                <ColumnConfig property="deactivation_pretty" fieldOnly="true" />
+                <ColumnConfig property="identityId" fieldOnly="true" />
+                <ColumnConfig property="objectId" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.AccessRequestBean_cart">
+            <value>
+              <List>
+                <ColumnConfig headerKey="" property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.RequestAccess.buttonRenderer" percentWidth="10"/>
+                <ColumnConfig headerKey="lcm_summary_col_name" property="displayableName" sortable="true" hideable="true" percentWidth="40"/>
+                <ColumnConfig headerKey="lcm_summary_col_type" property="type" sortable="true" hideable="true" percentWidth="30"/>  
+                <ColumnConfig headerKey="lcm_summary_col_action" property="action" sortable="true" hideable="true" percentWidth="20" renderer="SailPoint.LCM.SummaryChanges.actionRenderer"/>            
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.AccountsRequestBean_cart">
+            <value>
+              <List>
+                <ColumnConfig headerKey="" property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.RequestAccess.buttonRenderer" percentWidth="10"/>
+                <ColumnConfig headerKey="lcm_summary_account" property="account" sortable="true" hideable="true" percentWidth="40"/>
+                <ColumnConfig headerKey="lcm_summary_application" property="application" sortable="true" hideable="true" percentWidth="30"/>  
+                <ColumnConfig headerKey="lcm_summary_action" property="op" sortable="true" hideable="true" percentWidth="20" renderer="SailPoint.LCM.SummaryChanges.actionRenderer"/>            
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.PasswordsRequestBean_cart">
+            <value>
+              <List>
+                <ColumnConfig headerKey="" property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.RequestAccess.buttonRenderer" percentWidth="10" />
+                <ColumnConfig headerKey="lcm_summary_identity" property="identity" sortable="true" hideable="true" percentWidth="30"/>
+                <ColumnConfig headerKey="lcm_summary_application" property="application" sortable="true" hideable="true" percentWidth="20"/>
+                <ColumnConfig headerKey="lcm_summary_account" property="account" sortable="true" hideable="true" percentWidth="20"/>
+                <ColumnConfig headerKey="lcm_summary_password" property="value" sortable="true" hideable="true" percentWidth="20"/>                
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.AttributesRequestBean_cart">
+            <value>
+              <List>
+                <ColumnConfig property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.RequestAccess.buttonRenderer" percentWidth="10"/>
+                <ColumnConfig headerKey="lcm_summary_action" property="opName" sortable="true" hideable="true" renderer="SailPoint.LCM.SummaryChanges.renderAction" percentWidth="20"/>
+                <ColumnConfig headerKey="lcm_summary_action" property="op" fieldOnly="true" percentWidth="20"/>
+                <ColumnConfig headerKey="lcm_summary_summary" property="summary" sortable="true" hideable="true" renderer="Ext.util.Format.defaultValue" percentWidth="30"/>
+                <ColumnConfig headerKey="lcm_summary_identity" property="identity" sortable="true" hideable="true" percentWidth="20"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.AccessRequestBean_currently_assigned">
+            <value>
+              <List>
+                <ColumnConfig headerKey="" property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.RequestAccess.currentAccessButtonRenderer" percentWidth="5"/>
+                <ColumnConfig headerKey="lcm_request_access_name" property="displayableName" sortable="true" hideable="true" percentWidth="25" renderer="SailPoint.LCM.RequestAccess.roleDetailRenderer"/>
+                <ColumnConfig headerKey="lcm_request_access_status" dataIndex="IIQ_status" sortable="true" hideable="true" percentWidth="15" renderer="SailPoint.LCM.RequestAccess.statusRenderer"/>
+                <ColumnConfig headerKey="lcm_request_access_type" dataIndex="IIQ_type" sortable="true" hideable="true" percentWidth="20"/>
+                <ColumnConfig property="description" fieldOnly="true"/>
+                <ColumnConfig property="IIQ_raw_type" fieldOnly="true"/>
+                <ColumnConfig property="IIQ_Selected" fieldOnly="true"/>
+                <ColumnConfig headerKey="application" dataIndex="application-name" hideable="true" property="application" sortable="true" percentWidth="20" />
+                <ColumnConfig headerKey="account_name" dataIndex="account" hideable="true" property="account" sortable="true" percentWidth="20" />
+                <ColumnConfig dataIndex="nativeIdentity" headerKey="nativeIdentity" hidden="true" hideable="true" property="nativeIdentity" sortProperty="nativeIdentity" sortable="true" percentWidth="20"/>
+                <ColumnConfig headerKey="instance" dataIndex="instance" hideable="true" property="instance" sortable="true" hidden="true" />
+                <ColumnConfig dataIndex="attribute" fieldOnly="true"/>
+                <ColumnConfig property="value" fieldOnly="true" />
+                <ColumnConfig property="type" fieldOnly="true" />
+                <ColumnConfig dataIndex="name" fieldOnly="true" property="name" sortProperty="name"/>
+                <ColumnConfig dataIndex="IIQ_status_class" fieldOnly="true" property="IIQ_status_class"/>
+                <ColumnConfig dataIndex="assignmentId" fieldOnly="true" />
+                <ColumnConfig dataIndex="roleId" fieldOnly="true" />
+                <ColumnConfig dataIndex="removable" fieldOnly="true" />
+                <ColumnConfig dataIndex="detectedOrAssigned" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.EntitlementsRequestBean">
+            <value>
+              <List>
+                <ColumnConfig property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.CurrentEntitlementsGrid.buttonRenderer" width="5" />
+                <ColumnConfig headerKey="lcm_request_entitlements_application" property="application" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_instance" property="instance" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_native_identity" property="displayName" sortable="true" hideable="true" renderer="SailPoint.LCM.CurrentEntitlementsGrid.displayNameRenderer"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_attribute" property="attribute" sortable="true" hideable="true" renderer="SailPoint.LCM.CurrentEntitlementsGrid.attributeRenderer"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_value" property="displayValue" sortable="true" hideable="true" renderer="SailPoint.LCM.CurrentEntitlementsGrid.displayValueRenderer"/>
+                <ColumnConfig property="value" fieldOnly="true"/>
+                <ColumnConfig property="nativeIdentity" fieldOnly="true"/>
+                <ColumnConfig property="description" fieldOnly="true"/>
+                <ColumnConfig property="showDescriptionFirst" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.EntitlementsRequestBean_search">
+            <value>
+              <List>
+                <ColumnConfig property="id" fieldOnly="true" />
+                <ColumnConfig property="application.id" fieldOnly="true"/>
+                <ColumnConfig property="application.icon" fieldOnly="true" />
+                <ColumnConfig property="type" fieldOnly="true" />
+                <ColumnConfig property="value" fieldOnly="true" />
+                <ColumnConfig dataIndex="IIQ_has_high_risk" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_allow_slider" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_population_total" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_application" property="application.name" sortable="true" secondarySort="attribute, displayableName" hideable="true"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_attribute" property="attribute" sortable="true" secondarySort="application.name, displayableName" hideable="true"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_entitlement" property="displayableName" sortable="true" secondarySort="application.name, attribute" hideable="true"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_description" dataIndex="description" sortable="false" hideable="true" percentWidth="40"/>
+                <ColumnConfig headerKey="lcm_role_population" dataIndex="IIQ_population" sortable="false" hideable="true" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_request_entitlements_owner" property="owner.displayName" sortable="true" secondarySort="application.name, attribute, displayableName" hideable="true" />
+                <ColumnConfig headerKey="lcm_request_entitlements_risk" dataIndex="riskScore" sortable="false" hideable="true" renderer="SailPoint.LCM.RequestAccess.riskScoreRenderer" />
+                <ColumnConfig dataIndex="IIQ_color" fieldOnly="true"/>
+                <ColumnConfig property="owner.name" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_icon" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.RolesRequestBean">
+            <value>
+              <List>
+                <ColumnConfig property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.RequestAccess.buttonRenderer" width="5" />
+                <ColumnConfig dataIndex="name" property="name" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_role_name" property="displayableName" sortable="true" hideable="true" width="40"/>
+                <ColumnConfig headerKey="lcm_role_description" property="description" sortable="false" hideable="true" renderer="SailPoint.LCM.RequestAccess.descriptionRenderer"/>
+                <ColumnConfig headerKey="lcm_role_authorization" dataIndex="IIQ_authorization" sortable="false" hideable="true" width="40"/>
+                <ColumnConfig headerKey="lcm_role_status" dataIndex="IIQ_status" sortable="true" hideable="true" width="30" renderer="SailPoint.LCM.RequestAccess.statusRenderer"/>
+                <ColumnConfig headerKey="lcm_role_status_class" dataIndex="IIQ_status_class" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_role_type_hidden" property="type" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_role_type" property="type" dataIndex="roleTypeName" sortable="true" hideable="true" renderer="SailPoint.LCM.RequestAccess.typeRenderer" width="30"/>
+                <ColumnConfig headerKey="lcm_role_type_icon" dataIndex="roleTypeIcon" fieldOnly="true"/>
+                <ColumnConfig headerKey="idents_grid_hdr_composite_score" property="riskScoreWeight" renderer="SailPoint.LCM.RequestAccess.scoreRenderer" sortable="true" hideable="true" width="20"/>
+                <ColumnConfig dataIndex="IIQ_color" fieldOnly="true"/>
+                <ColumnConfig property="owner.displayName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_Selected" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.RolesRequestBean_search">
+            <value>
+              <List>
+                <ColumnConfig property="id" fieldOnly="true" />
+                <ColumnConfig dataIndex="name" property="name" fieldOnly="true" sortProperty="name"/>
+                <ColumnConfig headerKey="lcm_role_name" property="displayableName" flex="1" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="lcm_role_type" property="type" dataIndex="typeName" sortable="true" hideable="true" />
+                <ColumnConfig headerKey="lcm_role_population" dataIndex="IIQ_population" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_role_type_high_risk" dataIndex="IIQ_has_high_risk" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_role_type_icon" dataIndex="roleTypeIcon" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_role_population_total" dataIndex="IIQ_population_total" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_role_allow_slider" dataIndex="IIQ_allow_slider" fieldOnly="true"/>
+                <ColumnConfig headerKey="idents_grid_hdr_composite_score" property="riskScoreWeight" dataIndex="riskScore" renderer="SailPoint.LCM.RequestAccess.riskScoreRenderer" sortable="true" hideable="true"/>
+                <ColumnConfig dataIndex="IIQ_color" fieldOnly="true"/>
+                <ColumnConfig headerKey="owner" property="owner.displayName" dataIndex="owner-displayName" />
+                <ColumnConfig dataIndex="IIQ_icon" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_Selected" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="lcmPopulationSearchGridColumns">
+            <value>
+              <List>
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig headerKey="idents_grid_hdr_name" property="name" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="idents_grid_hdr_first_name" property="firstname" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="idents_grid_hdr_last_name" property="lastname" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="idents_grid_hdr_manager" property="manager.displayName" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="idents_grid_hdr_composite_score" property="scorecard.compositeScore" renderer="SailPoint.LCM.RequestAccess.scoreRenderer" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="idents_grid_hdr_policy_violations" property="scorecard.totalViolations" sortable="true" hideable="true"/>
+                <ColumnConfig property="managerStatus" fieldOnly="true"/>
+                <ColumnConfig dataIndex="IIQ_color" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.AttributesRequestBean_summary">
+            <value>
+              <List>
+                <ColumnConfig property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.SummaryChanges.buttonRenderer" width="33" />
+                <ColumnConfig headerKey="lcm_summary_action" property="opName" sortable="true" hideable="true" renderer="SailPoint.LCM.SummaryChanges.renderAction"/>
+                <ColumnConfig headerKey="lcm_summary_action" property="op" fieldOnly="true"/>
+                <ColumnConfig headerKey="lcm_summary_summary" property="summary" sortable="true" hideable="true" renderer="Ext.util.Format.defaultValue"/>
+                <ColumnConfig headerKey="lcm_summary_identity" property="identity" sortable="true" hideable="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="lcmCreateIdentityProvisioningPolicyRequiredFields">
+            <value>
+              <List>
+                <Field displayName="Username" name="name" required="true" type="string"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="batchRequestTableColumns">
+            <value>
+              <List>
+                <ColumnConfig headerKey="fileName" property="fileName" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="requestedDate" property="created" sortable="true" hideable="true" dateStyle="short" timeStyle="short"/>
+                <ColumnConfig headerKey="runDate" property="runDate" sortable="true" hideable="true" dateStyle="short" timeStyle="short"/>
+                <ColumnConfig headerKey="completedDate" property="completedDate" sortable="true" hideable="true" dateStyle="short" timeStyle="short"/>
+                <ColumnConfig headerKey="recordCount" property="recordCount" sortable="true" hideable="true"/>
+                <ColumnConfig headerKey="status" property="status" sortable="true" hideable="true"/>
+                <ColumnConfig fieldOnly="true" property="message" />
+              </List>
+            </value>
+          </entry>
+          <entry key="batchRequestItemsTableColumns">
+            <value>
+              <List>
+                <ColumnConfig headerKey="batch_details_grid_request_data" property="requestData" sortable="true" hideable="true" />
+                <ColumnConfig headerKey="batch_details_grid_result" property="result" sortable="true" hideable="true" />
+                <ColumnConfig headerKey="batch_details_grid_status" property="status" sortable="true" hideable="true" />
+                <ColumnConfig headerKey="batch_details_grid_identity_request_id" property="identityRequestId" sortable="true" hideable="true" />
+                <ColumnConfig fieldOnly="true" property="message" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiApprovalsListColumns">
+            <value>
+              <List>
+                <ColumnConfig dataIndex="id" property="id" sortProperty="id" sortable="true" />
+                <ColumnConfig dataIndex="created" property="created" sortProperty="created" sortable="true" />
+                <ColumnConfig dataIndex="priority" property="level" sortProperty="level" sortable="true" />
+                <ColumnConfig dataIndex="requestType" property="IdentityRequest.type" sortable="false" />
+                <ColumnConfig dataIndex="requester" property="requester" sortable="false" />
+                <ColumnConfig dataIndex="owner" property="owner" sortable="false" />
+                <ColumnConfig dataIndex="workItemName" property="name" sortable="false" />
+                <ColumnConfig dataIndex="accessRequestName" property="IdentityRequest.name" sortable="false" />
+                <ColumnConfig dataIndex="assignee" property="assignee" sortable="false" />
+                <!--Calculated columns -->
+                <ColumnConfig dataIndex="approvalItems" />
+                <ColumnConfig dataIndex="target" />
+                <ColumnConfig dataIndex="esigMeaning" />
+                <ColumnConfig dataIndex="violations" />
+                <ColumnConfig dataIndex="commentCount" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiApprovalItemsColumnsRole">
+            <value>
+              <List>
+                <ColumnConfig dataIndex="operation" headerKey="my_approvals_action_col" renderer="operation" />
+                <ColumnConfig dataIndex="riskScoreWeight" headerKey="my_approvals_risk_col" renderer="risk" />
+                <ColumnConfig dataIndex="sunriseSunset" headerKey="my_approvals_dates_col" renderer="sunriseSunset" />
+                <ColumnConfig dataIndex="isNewAccount" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunrise" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunset" fieldOnly="true" />
+                <ColumnConfig dataIndex="hadSunriseSunset" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiApprovalItemsColumnsEntitlement">
+            <value>
+              <List>
+                <ColumnConfig dataIndex="operation" headerKey="my_approvals_action_col" renderer="operation" />
+                <ColumnConfig dataIndex="application" property="application" headerKey="my_approvals_application_col" />
+                <ColumnConfig dataIndex="name" property="name" headerKey="my_approvals_attribute_col" />
+                <ColumnConfig dataIndex="sunriseSunset" headerKey="my_approvals_dates_col" renderer="sunriseSunset" />
+                <ColumnConfig dataIndex="isNewAccount" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunrise" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunset" fieldOnly="true" />
+                <ColumnConfig dataIndex="hadSunriseSunset" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiAccessItemsColumnsRole">
+            <value>
+              <List>
+                <!-- Displayable fields -->
+                <ColumnConfig dataIndex="displayableAccessType" headerKey="ui_access_type" />
+                <ColumnConfig dataIndex="owner" property="owner.displayName" headerKey="ui_access_owner" />
+                <!--Calculated columns -->
+                <ColumnConfig dataIndex="riskScoreWeight" property="riskScoreWeight" headerKey="ui_access_risk" renderer="risk" />
+                <ColumnConfig dataIndex="populationStatistics" fieldOnly="true" />
+                <!-- Data only -->
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig property="name" fieldOnly="true"/>
+                <ColumnConfig property="type" fieldOnly="true"/>
+                <ColumnConfig property="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="riskScoreColor" fieldOnly="true"/>
+                <ColumnConfig dataIndex="riskScoreTextColor" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="uiAccessItemsColumnsEntitlement">
+            <value>
+              <List>
+                <!-- Displayable fields -->
+                <ColumnConfig dataIndex="displayableAccessType" headerKey="ui_access_type"/>
+                <ColumnConfig dataIndex="owner" property="owner.displayName" headerKey="ui_access_owner" />
+                <ColumnConfig dataIndex="application" property="application.name" headerKey="ui_access_application" />
+                <ColumnConfig property="attribute" headerKey="ui_access_attribute" />
+                <ColumnConfig dataIndex="accountName" headerKey="ui_access_account"/>
+                <!--Calculated columns -->
+                <ColumnConfig dataIndex="populationStatistics" fieldOnly="true" />
+                <!-- Data only -->
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig property="type" fieldOnly="true"/>
+                <ColumnConfig property="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="icon" property="application.icon" fieldOnly="true"/>
+                <ColumnConfig property="value" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="uiCurrentAccessItemsColumnsRole">
+            <value>
+              <List>
+                <!-- Displayable fields -->
+                <ColumnConfig dataIndex="displayableAccessType" headerKey="ui_access_type" />
+                <ColumnConfig dataIndex="owner" property="owner.displayName" headerKey="ui_access_owner" />
+                <!--Calculated columns -->
+                <ColumnConfig dataIndex="riskScoreWeight" property="riskScoreWeight" headerKey="ui_access_risk" renderer="risk" />
+                <!-- Data only -->
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig property="name" fieldOnly="true"/>
+                <ColumnConfig property="type" fieldOnly="true"/>
+                <ColumnConfig property="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="riskScoreColor" fieldOnly="true"/>
+                <ColumnConfig dataIndex="riskScoreTextColor" fieldOnly="true"/>
+                <ColumnConfig dataIndex="sunrise" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunset" fieldOnly="true" />
+                <ColumnConfig dataIndex="status" fieldOnly="true" />
+                <ColumnConfig dataIndex="roleTargets" fieldOnly="true" />
+                <ColumnConfig dataIndex="assignmentId" fieldOnly="true" />
+                <ColumnConfig dataIndex="assignmentNote" fieldOnly="true" />
+                <ColumnConfig dataIndex="removable" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiCurrentAccessItemsColumnsEntitlement">
+            <value>
+              <List>
+                <!-- Displayable fields -->
+                <ColumnConfig dataIndex="displayableAccessType" headerKey="ui_access_type"/>
+                <ColumnConfig dataIndex="owner" property="owner.displayName" headerKey="ui_access_owner" />
+                <ColumnConfig dataIndex="application" property="application.name" headerKey="ui_access_application" />
+                <ColumnConfig property="attribute" headerKey="ui_access_attribute" />
+                <ColumnConfig dataIndex="instance" headerKey="ui_access_instance" />
+                <ColumnConfig dataIndex="accountName" headerKey="ui_access_account" />
+                <!-- Data only -->
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig property="type" fieldOnly="true"/>
+                <ColumnConfig property="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="icon" property="application.icon" fieldOnly="true"/>
+                <ColumnConfig property="value" fieldOnly="true"/>
+                <ColumnConfig dataIndex="nativeIdentity" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunrise" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunset" fieldOnly="true" />
+                <ColumnConfig dataIndex="status" fieldOnly="true" />
+                <ColumnConfig dataIndex="removable" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiRequestAccessIdentityCard">
+            <value>
+              <List>
+                <ColumnConfig property="id" fieldOnly="true" />
+                <ColumnConfig property="displayName" fieldOnly="true" />
+                <ColumnConfig headerKey="ui_access_username" dataIndex="name" property="name"/>
+                <ColumnConfig headerKey="ui_access_manager" dataIndex="managerName" property="manager.displayName"/>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </UIConfig>
+  </ImportAction>
+
+  
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+        <Map>        
+          <entry key="workflowLCMAccessRequest" value="LCM Provisioning"/>
+          <entry key="workflowLCMRolesRequest" value="LCM Provisioning"/>
+          <entry key="workflowLCMEntitlementsRequest" value="LCM Provisioning"/>
+          <entry key="workflowLCMAccountsRequest" value="LCM Provisioning"/>
+          <entry key="workflowLCMPasswordsRequest" value="LCM Manage Passwords"/>
+          <entry key="workflowLCMExpirePassword" value="LCM Manage Passwords"/>
+          <entry key="workflowLCMForgotPassword" value="LCM Manage Passwords"/>
+          <entry key="workflowLCMIdentityCreateRequest" value="LCM Create and Update"/>
+          <entry key="workflowLCMIdentityEditRequest" value="LCM Create and Update"/>
+          <entry key="workflowLCMSelfServiceRegistrationRequest" value="LCM Registration"/>
+          <entry key="workflowLCMUnlockAccount" value="LCM Provisioning"/>
+
+          <entry key="batchRequestAccessRequest" value="LCM Provisioning"/>
+          <entry key="batchRequestAccountsRequest" value="LCM Provisioning"/>
+          <entry key="batchRequestPasswordsRequest" value="LCM Manage Passwords"/>
+          <entry key="batchRequestIdentityCreateRequest" value="LCM Create and Update"/>
+          <entry key="batchRequestIdentityEditRequest" value="LCM Create and Update"/>
+
+          <entry key="registerForm" value="Self-service Registration Form" />
+          
+          <entry key='manageAccountsActions'>
+            <value>
+              <List>
+                <AccountOperation>Delete</AccountOperation>
+                <AccountOperation>Disable</AccountOperation>
+                <AccountOperation>Enable</AccountOperation>
+                <AccountOperation>Unlock</AccountOperation>
+              </List>
+            </value>
+          </entry>
+
+          <entry key="manageAccountsDisableAutoRefreshStatus">
+           <value>
+            <List>
+             <String> </String>
+            </List>
+           </value>
+          </entry>
+
+          <entry key='lcmAllowRequestPermits' value='true'/>
+          <entry key='lcmRequirePasswordIdentityCreate' value='true'/>
+          
+          <entry key='manageAccountsDeleteSelfEnabled' value='true' />
+          <entry key='manageAccountsDeleteSubordinateEnabled' value='true' />
+          
+          <entry key='manageAccountsDisableSelfEnabled' value='true' />
+          <entry key='manageAccountsDisableSubordinateEnabled' value='true' />
+          
+          <entry key='manageAccountsEnableSelfEnabled' value='true' />
+          <entry key='manageAccountsEnableSubordinateEnabled' value='true' />    
+          
+          <entry key='manageAccountsUnlockSelfEnabled' value='true' />
+          <entry key='manageAccountsUnlockSubordinateEnabled' value='true' />
+          
+          <entry key='lcmManageAccountsShowAllButtons' value='false'/>
+          
+          <entry key='requestRolesPermittedSelfEnabled' value='true'/>
+          <entry key='requestRolesPermittedSubordinateEnabled' value='true'/>
+          
+          <entry key='requestRolesAssignableSelfEnabled' value='true'/>
+          <entry key='requestRolesAssignableSubordinateEnabled' value='true'/>
+          
+          <entry key='lcmEnabled' value='true'/>
+          <entry key='allowGeneratePasswordDelegated' value='true'/>          
+          
+          <entry key='lcmAllowAccessPopulationSearch' value='true'/>
+          <entry key='lcmAllowAccessAttributesSearch' value='true'/>
+          <entry key='lcmAllowAccessAttributesSearch' value='true'/>         
+          <entry key='lcmAllowAccessSortPercentage' value='true'/>
+          <entry key='lcmAllowAccessPercentageSlider' value='false'/>
+          <entry key='lcmAllowAccessSortPercentageCount' value='50'/>
+
+          <entry key='lcmCreateIdentityUseByDays' value='30'/>
+          
+          <entry key='quickLinkCategories'>
+            <value>
+              <List>
+                <QuickLinkCategory name="Access" ordering="3" messageKey="quicklink_category_access" icon="quickLinkCategoryAccess"/>
+                <QuickLinkCategory name="Manage" ordering="4" messageKey="quicklink_category_manage" icon="quickLinkCategoryManage"/>
+              </List>
+            </value>
+          </entry>
+          
+          <entry key='selfServiceQuickLinks'>
+            <value>
+              <List>
+                <QuickLink name="Request Access" category="Access" messageKey="quicklink_request_access" action="requestAccess" icon="requestRoles" ordering="0"/>
+                <QuickLink name="Request Roles" category="Access" hidden="true" messageKey="quicklink_request_roles" action="requestRoles" icon="requestRoles" ordering="1"/>
+                <QuickLink name="Request Entitlements" category="Access" hidden="true" messageKey="quicklink_request_entitlements" action="requestEntitlements" icon="requestEntitlements" ordering="2"/>
+                <QuickLink name="Manage Accounts" category="Access" messageKey="quicklink_manage_accounts" action="manageAccounts" icon="manageAccounts" ordering="3"/>
+                <QuickLink name="Manage Passwords" category="Access" messageKey="quicklink_change_passwords" action="managePasswords" icon="managePasswords" ordering="4"/>
+                <QuickLink name="Track Requests" category="Access" messageKey="quicklink_track_requests" action="viewAccessRequests" icon="managePasswords" ordering="5"/>
+                <QuickLink name="Edit Identity" category="Manage" messageKey="quicklink_edit_identity" action="manageAttributes" icon="editIdentity" ordering="6"/>
+                <QuickLink name="View Identity" category="Manage" messageKey="quicklink_view_identity" action="viewIdentity" icon="viewIdentity" ordering="7"/>
+              </List>
+            </value>
+          </entry>
+          <entry key='selfServiceRequestControls'>
+            <value>
+              <Map>
+                <entry key="applicationSelectorRule" value="Objects in Requestor's Authorized Scopes"/>
+                <entry key="roleSelectorRule" value="Objects in Requestor's Authorized Scopes"/>
+                <entry key="managedAttributeSelectorRule" value="All Objects" />
+
+                <entry key="allowRequestEntitlementsAdditionalAccountRequests" value="false" />
+                <entry key="allowManageAccountsAdditionalAccountRequests" value="false" />
+                <entry key="allowManageExistingAccounts" value="true" />
+                <entry key="allowAccountOnlyRequests" value="false" />
+                <entry key="allowRequestEntitlementsShowPopulation" value="true"/>
+                <entry key="allowRequestRolesAdditionalAccountRequests" value="false" />
+                <entry key="allowRequestRolesShowPopulation" value="true"/>
+                <entry key="allowRequestRolesRemove" value="true" />
+                <entry key="allowRequestEntitlementsRemove" value="true" />
+              </Map>
+            </value>
+          </entry>
+          <entry key='managerQuickLinks'>
+            <value>
+              <List>
+                <QuickLink name="Request Access" category="Access" messageKey="quicklink_request_access" action="requestAccess" icon="requestRoles" bulk="true" ordering="0"/>
+                <QuickLink name="Request Roles" category="Access" hidden="true" messageKey="quicklink_request_roles" action="requestRoles" icon="requestRoles" bulk="true" ordering="1"/>
+                <QuickLink name="Request Entitlements" category="Access" hidden="true" messageKey="quicklink_request_entitlements" action="requestEntitlements" icon="requestEntitlements" bulk="true" ordering="2"/>
+                <QuickLink name="Manage Accounts" category="Access" messageKey="quicklink_manage_accounts" action="manageAccounts" icon="manageAccounts" ordering="3"/>
+                <QuickLink name="Manage Passwords" category="Access" messageKey="quicklink_change_passwords" action="managePasswords" icon="managePasswords" ordering="4"/>
+                <QuickLink name="Create Identity" category="Manage" messageKey="quicklink_create_identity" action="createIdentity" icon="createIdentity" ordering="5"/>
+                <QuickLink name="Edit Identity" category="Manage" messageKey="quicklink_edit_identity" action="manageAttributes" icon="editIdentity" ordering="6"/>
+                <QuickLink name="View Identity" category="Manage" messageKey="quicklink_view_identity" action="viewIdentity" icon="viewIdentity" ordering="7"/>
+              </List>
+            </value>
+          </entry>
+          <entry key='managerRequestControls'>
+            <value>
+              <Map>
+                <entry key="allowAnythingFromAnyone" value="false"/>
+                <entry key="matchAnyOrAll" value="matchAny"/>
+                <entry key="ignoreIIQScoping" value="false"/>
+                <entry key="enableAttributeControl" value="false"/>
+                <entry key="attributeControlFilter" value=""/>
+                <entry key="enableSubordinateControl" value="true"/>
+                <entry key="subordinateChoice" value="directOrIndirect"/>
+                <entry key="maxHierarchyDepth" value="10"/>
+                <entry key="enableCustomControl" value="false"/>
+                <entry key="customFilter" value=""/>
+
+                <entry key="applicationSelectorRule" value="Objects in Requestor's Authorized Scopes"/>
+                <entry key="roleSelectorRule" value="Objects in Requestor's Authorized Scopes"/>
+                <entry key="managedAttributeSelectorRule" value="All Objects" />
+
+                <entry key="allowRequestEntitlementsAdditionalAccountRequests" value="false" />
+                <entry key="allowManageAccountsAdditionalAccountRequests" value="false" />
+                <entry key="allowManageExistingAccounts" value="true" />
+                <entry key="allowAccountOnlyRequests" value="false" />
+                <entry key="allowRequestEntitlementsShowPopulation" value="true"/>
+                <entry key="allowRequestRolesAdditionalAccountRequests" value="false" />
+                <entry key="allowRequestRolesShowPopulation" value="true"/>
+                <entry key="allowRequestRolesRemove" value="true" />
+                <entry key="allowRequestEntitlementsRemove" value="true" />
+              </Map>
+            </value>
+          </entry>
+          <entry key='generalPopulationQuickLinks'>
+            <value>
+              <List>
+                <QuickLink name="Request Access" category="Access" disabled="true" messageKey="quicklink_request_access" action="requestAccess" icon="requestRoles" bulk="true" ordering="0"/>
+                <QuickLink name="Request Roles" category="Access" disabled="true" hidden="true" messageKey="quicklink_request_roles" action="requestRoles" icon="requestRoles" bulk="true" ordering="1"/>
+                <QuickLink name="Request Entitlements" category="Access" disabled="true" hidden="true" messageKey="quicklink_request_entitlements" action="requestEntitlements" icon="requestEntitlements" bulk="true" ordering="2"/>
+                <QuickLink name="Manage Accounts" category="Access" disabled="true" messageKey="quicklink_manage_accounts" action="manageAccounts" icon="manageAccounts" ordering="3"/>
+                <QuickLink name="Manage Passwords" category="Access" disabled="true" messageKey="quicklink_change_passwords" action="managePasswords" icon="managePasswords" ordering="4"/>
+                <QuickLink name="Create Identity" category="Manage" disabled="true" messageKey="quicklink_create_identity" action="createIdentity" icon="createIdentity" ordering="5"/>
+                <QuickLink name="Edit Identity" category="Manage" disabled="true" messageKey="quicklink_edit_identity" action="manageAttributes" icon="editIdentity" ordering="6"/>
+                <QuickLink name="View Identity" category="Manage" disabled="true" messageKey="quicklink_view_identity" action="viewIdentity" icon="viewIdentity" ordering="7"/>
+              </List>
+            </value>
+          </entry>
+          <entry key='generalPopulationRequestControls'>
+            <value>
+              <Map>
+                <entry key="allowAnythingFromAnyone" value="false"/>
+                <entry key="matchAnyOrAll" value="matchAny"/>
+                <entry key="ignoreIIQScoping" value="false"/>
+                <entry key="enableAttributeControl" value="false"/>
+                <entry key="attributeControlFilter" value=""/>
+                <entry key="enableCustomControl" value="false"/>
+                <entry key="customFilter" value=""/>
+
+                <entry key="allowRequestEntitlementsAdditionalAccountRequests" value="false" />
+                <entry key="allowManageAccountsAdditionalAccountRequests" value="false" />
+                <entry key="allowManageExistingAccounts" value="false" />
+                <entry key="allowAccountOnlyRequests" value="false" />
+                <entry key="allowRequestEntitlementsShowPopulation" value="true"/>
+                <entry key="allowRequestRolesAdditionalAccountRequests" value="false" />
+                <entry key="allowRequestRolesShowPopulation" value="true"/>
+                <entry key="allowRequestRolesRemove" value="true" />
+                <entry key="allowRequestEntitlementsRemove" value="true" />
+              </Map>
+            </value>
+          </entry>
+          <entry key='helpDeskQuickLinks'>
+            <value>
+              <List>
+                <QuickLink name="Request Access" category="Access" messageKey="quicklink_request_access" action="requestAccess" icon="requestRoles" bulk="true" ordering="0"/>
+                <QuickLink name="Request Roles" category="Access" hidden="true" messageKey="quicklink_request_roles" action="requestRoles" icon="requestRoles" bulk="true" ordering="1"/>
+                <QuickLink name="Request Entitlements" category="Access" hidden="true" messageKey="quicklink_request_entitlements" action="requestEntitlements" icon="requestEntitlements" bulk="true" ordering="2"/>
+                <QuickLink name="Manage Accounts" category="Access" messageKey="quicklink_manage_accounts" action="manageAccounts" icon="manageAccounts" ordering="3"/>
+                <QuickLink name="Manage Passwords" category="Access" messageKey="quicklink_change_passwords" action="managePasswords" icon="managePasswords" ordering="4"/>
+                <QuickLink name="Create Identity" category="Manage" messageKey="quicklink_create_identity" action="createIdentity" icon="createIdentity" ordering="5"/>
+                <QuickLink name="Edit Identity" category="Manage" messageKey="quicklink_edit_identity" action="manageAttributes" icon="editIdentity" ordering="6"/>
+                <QuickLink name="View Identity" category="Manage" messageKey="quicklink_view_identity" action="viewIdentity" icon="viewIdentity" ordering="7"/>
+              </List>
+            </value>
+          </entry>
+          <entry key='helpDeskRequestControls'>
+            <value>
+              <Map>
+                <entry key="allowAnythingFromAnyone" value="true"/>
+                <entry key="matchAnyOrAll" value="matchAny"/>
+                <entry key="ignoreIIQScoping" value="false"/>
+                <entry key="enableAttributeControl" value="false"/>
+                <entry key="attributeControlFilter" value=""/>
+                <entry key="enableCustomControl" value="false"/>
+                <entry key="customFilter" value=""/>
+
+                <entry key="applicationSelectorRule" value="Objects in Requestor's Authorized Scopes"/>
+                <entry key="roleSelectorRule" value="Objects in Requestor's Authorized Scopes"/>
+                <entry key="managedAttributeSelectorRule" value="All Objects" />
+                
+                <entry key="allowRequestEntitlementsAdditionalAccountRequests" value="false" />
+                <entry key="allowManageAccountsAdditionalAccountRequests" value="false" />
+                <entry key="allowManageExistingAccounts" value="true" />
+                <entry key="allowAccountOnlyRequests" value="false" />
+                <entry key="allowRequestEntitlementsShowPopulation" value="true"/>
+                <entry key="allowRequestRolesAdditionalAccountRequests" value="false" />
+                <entry key="allowRequestRolesShowPopulation" value="true"/>
+                <entry key="allowRequestRolesRemove" value="true" />
+                <entry key="allowRequestEntitlementsRemove" value="true" />
+              </Map>
+            </value>
+          </entry>
+          
+          <entry key='searchInputDefinitions'>
+            <value>
+              <List>
+                  <!-- LCM  -->  
+                  <SearchInputDefinition description="srch_input_def_name" headerKey="srch_input_def_name" ignoreCase="true"
+                    matchMode="START" inputType="Like" name="lcm.name" propertyName="name" propertyType="String" searchType="LCM"
+                    filterBuilder="sailpoint.search.NameFilterBuilder"/>
+                  <SearchInputDefinition description="srch_input_def_manager" headerKey="srch_input_def_manager" ignoreCase="true"
+                    matchMode="START" inputType="Equal" name="lcm.manager" propertyName="manager.id" propertyType="String" searchType="LCM"
+                    suggestType="manager"/>
+                  <SearchInputDefinition description="srch_input_def_application" headerKey="srch_input_def_application" ignoreCase="true"
+                    matchMode="START" inputType="Equal" name="lcm.application" propertyName="links.application.id" propertyType="Collection" searchType="LCM"
+                    suggestType="application"/>
+                  <SearchInputDefinition description="srch_input_def_detected_role" headerKey="srch_input_def_detected_role" ignoreCase="true"
+                    inputType="Equal" name="lcm.detectedRole" nullPropertyName="bundleSummary" nullPropertyType="String" propertyName="bundles.id" propertyType="Collection" 
+                    searchType="LCM" suggestType="role"/>
+                  <SearchInputDefinition description="srch_input_def_assigned_role" headerKey="srch_input_def_assigned_role" ignoreCase="true"
+                    inputType="Equal" name="lcm.assignedRole" nullPropertyName="assignedRoleSummary" nullPropertyType="String" propertyName="assignedRoles.id" propertyType="Collection" 
+                    searchType="LCM" suggestType="role"/>
+              </List>
+            </value>
+          </entry>
+          
+          <!-- Number of questions that must be answered for authenticating with questions. -->
+          <entry key="numAuthQuestionsForAuthn" value="2" />
+
+          <!-- Number of questions for which the user must setup answers. -->
+          <entry key="numAuthQuestionAnswersRequired" value="3" />
+
+          <!-- The maximum number of failed authentication question attempts before lockout (less than 1 is no lockout). -->
+          <entry key="maxAuthQuestionFailures" value="3" />
+
+          <!-- The amount of time to lockout a user due to authentication question failures. -->
+          <entry key="authQuestionLockoutDurationMillis" value="3600000" />
+
+          <!-- Whether users with unanswered authentication questions should be required to answer upon login. -->
+          <entry key="promptForAuthQuestionAnswersAfterLogin" value="false" />
+          
+          <!-- Enables authentication questions allowing the "forgot password" link to be shown on the login page. -->
+          <entry key="authQuestionsEnabled" value="false" />        
+            
+          <!-- The max size of a bulk request before the request is pushed into the background and forms are left in work items -->
+          <entry key="lcmMaxSynchronousBulkSize" value="5"/>
+
+          <!-- The max number of identities when requesting entitlements by searching by identity. -->
+          <entry key="managedAttributeStatsMaxIdentities" value="200"/>
+
+          <!-- The max number of entitlements when requesting entitlements by searching by identity. -->
+          <entry key="managedAttributeStatsMaxAttributes" value="5000"/>
+
+          <!--  Option to enable editing and provisioning for Group ManagedAttributes -->
+          <entry key="allowGroupManagement" value="true"/>
+          
+          <!-- Allow searching by populatoin in request access -->
+          <entry key="allowPopulationSearch" value="true" />
+          
+          <!-- Allow searching by identity in request access -->
+          <entry key="allowIdentitySearch" value="true" />
+
+          <!-- opt-in for viewing more details in request access results -->
+          <entry key="optinResultsDetails" value="false" />
+
+          <!-- max results returned in a request access search -->
+          <entry key="lcmSearchMaxResults" value="100" />
+
+          <!-- max number of selectable users allowed in mobile UI -->
+          <entry key="lcmMobileMaxSelectableUsers" value="100" />
+
+          <!-- show request external ticket id in UI -->
+          <entry key="lcmShowExternalTicketId" value="false" />
+
+          <!--  Request Types -->
+          <entry key='accessRequestTypes'>
+            <value><List>
+              <String>AccessRequest</String>
+              <String>RolesRequest</String>
+              <String>EntitlementsRequest</String>
+              <String>AccountsRequest</String>
+              <String>ExpirePassword</String>
+              <String>ForgotPassword</String>
+              <String>PasswordsRequest</String>
+              <String>IdentityCreateRequest</String>
+              <String>IdentityEditRequest</String>
+              <String>Registration</String>
+            </List></value>
+          </entry>
+
+          <entry key="selfRegistrationGroup" value="SelfRegistrationWorkGroup"/>
+          
+          <entry key="lcmUserAccessFulltextIndex" value="BundleManagedAttribute" />
+          
+          <entry key="lcmEnableFulltext" value="true" />
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+  <AuthenticationQuestion question="auth_question_mothers_maiden_name" />
+  <AuthenticationQuestion question="auth_question_favorite_color" />
+  <AuthenticationQuestion question="auth_question_first_street" />
+  <AuthenticationQuestion question="auth_question_favorite_pets_name" />
+  <AuthenticationQuestion question="auth_question_childhood_best_friend" />
+  <AuthenticationQuestion question="auth_question_maternal_grandmother_firstname" />
+  <AuthenticationQuestion question="auth_question_favorite_author" />
+  
+  <!--
+    A set of default Identity Lifecycle Events.  These are disabled by default
+    and are mainly to illustrate common lifecycle events and the type of processing
+    that you might perform with them.  These are meant to be changed after being
+    deployed.  The corresponding workflows are in lcmworkflows.xml
+    -->
+  
+  <IdentityTrigger name="Joiner" handler="sailpoint.api.WorkflowTriggerHandler" type="Create" disabled="true">
+    <Description>Process a new employee.</Description>
+    <HandlerParameters>
+      <Attributes>
+        <Map>
+          <entry key="workflow" value="Lifecycle Event - Joiner"/>
+        </Map>
+      </Attributes>
+    </HandlerParameters>
+  </IdentityTrigger>
+  
+  <IdentityTrigger name="Leaver" attributeName="inactive" handler="sailpoint.api.WorkflowTriggerHandler" newValueFilter="true" oldValueFilter="false" type="AttributeChange" disabled="true">
+    <Description>Disable all accounts when a user leaves.</Description>
+    <HandlerParameters>
+      <Attributes>
+        <Map>
+          <entry key="workflow" value="Lifecycle Event - Leaver"/>
+        </Map>
+      </Attributes>
+    </HandlerParameters>
+  </IdentityTrigger>
+  
+  <IdentityTrigger name="Reinstate" attributeName="inactive" handler="sailpoint.api.WorkflowTriggerHandler" newValueFilter="false" oldValueFilter="true" type="AttributeChange" disabled="true">
+    <Description>Re-enable all accounts when a user has been reinstated.</Description>
+    <HandlerParameters>
+      <Attributes>
+        <Map>
+          <entry key="workflow" value="Lifecycle Event - Reinstate"/>
+        </Map>
+      </Attributes>
+    </HandlerParameters>
+  </IdentityTrigger>
+  
+  <IdentityTrigger name="Manager transfer" handler="sailpoint.api.WorkflowTriggerHandler" type="ManagerTransfer" disabled="true">
+    <Description>Disable all accounts when manager transfer occurs.</Description>
+    <HandlerParameters>
+      <Attributes>
+        <Map>
+          <entry key="workflow" value="Lifecycle Event - Manager Transfer"/>
+        </Map>
+      </Attributes>
+    </HandlerParameters>
+  </IdentityTrigger>
+
+  <ImportAction name="merge">
+    <AuditConfig name='AuditConfig'>
+      <AuditActions>
+        <!-- Default lcm workflow audit trail, these plus approve and reject -->
+        <AuditAction name="ApproveLineItem" displayName="audit_action_ApproveLineItem" enabled="true" />
+        <AuditAction name="AccountsRequestStart" displayName="audit_action_AccountsRequestStart" enabled="true" />
+        <AuditAction name="Comment" displayName="audit_action_Comment" enabled="true" />
+        <AuditAction name="Create" displayName="audit_action_Create" enabled="true" />
+        <AuditAction name="Delete" displayName="audit_action_Delete" enabled="true" />
+        <AuditAction name="Disable" displayName="audit_action_Disable" enabled="true" />
+        <AuditAction name="Enable" displayName="audit_action_Enable" enabled="true" />
+        <AuditAction name="EntitlementAdd" displayName="audit_action_EntitlementAdd" enabled="true" />
+        <AuditAction name="EntitlementRemove" displayName="audit_action_EntitlementRemove" enabled="true" />
+        <AuditAction name="EntitlementsRequestStart" displayName="audit_action_EntitlementsRequestStart" enabled="true" />
+        <AuditAction name="ExpirePasswordStart" displayName="audit_action_ExpirePasswordStart" enabled="true" />
+        <AuditAction name="ForgotPasswordStart" displayName="audit_action_ForgotPasswordStart" enabled="true" />
+        <AuditAction name="IdentityCreateRequestStart" displayName="audit_action_IdentityCreateRequestStart" enabled="true" />
+        <AuditAction name="IdentityEditRequestStart" displayName="audit_action_IdentityEditRequestStart" enabled="true" />
+        <AuditAction name="ManualChange" displayName="audit_action_ManualChange" enabled="true" />
+        <AuditAction name="Modify" displayName="audit_action_Modify" enabled="true" />
+        <AuditAction name="PasswordsRequestStart" displayName="audit_action_PasswordsRequestStart" enabled="true" />
+        <AuditAction name="PasswordChange" displayName="audit_action_PasswordChanged" enabled="true" />
+        <AuditAction name="PasswordChangeFailure" displayName="audit_action_PasswordChangeFailure" enabled="true" />
+        <AuditAction name="ForgotPasswordChange" displayName="audit_action_ForgotPasswordChange" enabled="true" />
+        <AuditAction name="ExpiredPasswordChange" displayName="audit_action_ExpiredPasswordChange" enabled="true" />
+        <AuditAction name="ProvisioningComplete" displayName="audit_action_ProvisioningComplete" enabled="true" />
+        <AuditAction name="ProvisioningFailure" displayName="audit_action_ProvisioningFailure" enabled="true" />
+        <AuditAction name="RegistrationStart" displayName="audit_action_RegistrationStart" enabled="true" />
+        <AuditAction name="RejectLineItem" displayName="audit_action_RejectLineItem" enabled="true" />
+        <AuditAction name="RoleAdd" displayName="audit_action_RoleAdd" enabled="true" />
+        <AuditAction name="RoleRemove" displayName="audit_action_RoleRemove" enabled="true" />
+        <AuditAction name="RolesRequestStart" displayName="audit_action_RolesRequestStart" enabled="true" />
+        <AuditAction name="Unlock" displayName="audit_action_Unlock" enabled="true" />
+        <AuditAction name="IdentityLocked" displayName="audit_action_IdentityLocked" enabled="true" />
+        <AuditAction name="AuthAnswerIncorrect" displayName="audit_action_AuthAnswerIncorrect" enabled="true" />
+        <AuditAction name="AccessRequestStart" displayName="audit_action_AccessRequestStart" enabled="true" />
+        <AuditAction name="PasswordPolicyChange" displayName="audit_action_PasswordPolicyChange" enabled="true" />
+        <AuditAction name="ServerUpDown" displayName="audit_action_ServerUpDown" enabled="true" />
+      </AuditActions>
+    </AuditConfig>
+  </ImportAction>
+
+  <ImportAction name="merge">
+    <Configuration name='IdentitySelectorConfiguration'>
+      <Attributes>
+        <Map>
+          <entry key="identityFilters">
+            <value>
+              <Map>
+                <entry key="LcmPopulation">
+                  <value>
+                    <IdentityFilter name="LcmPopulation">
+                      <FilterScript>
+                        <Script>
+                          <Source>
+                            import sailpoint.object.Identity;
+                            import sailpoint.web.lcm.LCMConfigService;
+    
+                            Identity identity = context.getObjectById(Identity.class, loggedInUser);
+                            LCMConfigService svc = new LCMConfigService(context);
+                            return svc.getConfiguredIdentityQueryOptions(identity);
+                          </Source>
+                        </Script>
+                      </FilterScript>
+                      <OrderBy>
+                        <String>firstname</String>
+                        <String>lastname</String>
+                        <String>name</String>
+                        <String>id</String>
+                      </OrderBy>
+                    </IdentityFilter>
+                  </value>
+                </entry>
+                <entry key="LcmPopulationManager">
+                  <value>
+                    <IdentityFilter name="LcmPopulationManager">
+                      <FilterScript>
+                        <Script>
+                          <Source><![CDATA[
+                            import sailpoint.object.Filter;
+                            import sailpoint.object.Identity;
+                            import sailpoint.object.QueryOptions;
+                            import sailpoint.web.lcm.LCMConfigService;
+                            import sailpoint.tools.Util;
+    
+                            QueryOptions qo = new QueryOptions();
+
+                            Identity identity = context.getObjectById(Identity.class, loggedInUser);
+                            LCMConfigService svc = new LCMConfigService(context);
+                            QueryOptions popQueryOptions = svc.getConfiguredIdentityQueryOptions(identity);
+                            
+                            // Null QueryOptions means that the logged in user can't request for any
+                            // users.  We need a way to return this from IdentityFilters.  Currently,
+                            // this is filter config is only used when we know that the logged in user
+                            // is able to request for others, so we won't worry about it yet.
+                            if ((null != popQueryOptions) && !Util.isEmpty(popQueryOptions.getRestrictions())) {
+                                List popFilters = popQueryOptions.getRestrictions();
+                                Filter subFilter =
+                                    (popFilters.size() > 0) ? Filter.and(popFilters)
+                                                            : (Filter) popFilters.get(0);
+                                Filter f = Filter.subquery("id", Identity.class, "manager.id", subFilter);
+                                qo.addFilter(f);
+                            } else {
+                                qo.addFilter(Filter.eq("managerStatus", true));
+                            }
+                              
+                            return qo;
+                          ]]>
+                          </Source>
+                        </Script>
+                      </FilterScript>
+                      <OrderBy>
+                        <String>firstname</String>
+                        <String>lastname</String>
+                        <String>name</String>
+                        <String>id</String>
+                      </OrderBy>
+                    </IdentityFilter>
+                  </value>
+                </entry>
+              </Map>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+  <Identity name="SelfRegistrationWorkGroup" protected="true" workgroup="true" >
+      <Attributes>
+        <Map>
+          <entry key="displayName" value="SelfRegistrationWorkGroup"/>
+          <entry key="systemUser">
+            <value>
+              <Boolean>true</Boolean>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+  </Identity>
+
+  <!-- Since only LCM needs this, define it here rather than with all the
+       other ServiceDefinitions in init.xml since we start it by default and
+       there isn't a way to configure the index path in the UI without
+       importing init-lcm.xml
+   -->
+  <ServiceDefinition name="FullText" hosts='global' interval="3600">
+    <Description>
+Service definition for refreshing full text indexes.  The executionMode may be either "scheduled" or "automatic".  The default if not specified is scheduled.
+    </Description>
+    <Attributes>
+      <Map>
+        <entry key='executionMode' value='automatic'/>
+      </Map>
+    </Attributes>
+  </ServiceDefinition>
+
+  <ImportAction name="include" value="WEB-INF/config/lcmrules.xml" />  
+  <ImportAction name="include" value="WEB-INF/config/lcmemailtemplates.xml" />
+  <ImportAction name="include" value="WEB-INF/config/identityRequestWorkflowSubs.xml" />
+  <ImportAction name="include" value="WEB-INF/config/lcmworkflows.xml" />
+  <ImportAction name='include' value='WEB-INF/config/lcmReportForms.xml' />
+  <ImportAction name="include" value="WEB-INF/config/lcmReportTasks.xml" />
+  <ImportAction name="include" value="WEB-INF/config/batchworkflows.xml" />
+  <ImportAction name="include" value="WEB-INF/config/lcmForms.xml" />
+  <ImportAction name="include" value="WEB-INF/config/webResources-lcm.xml" />
+
+</sailpoint>

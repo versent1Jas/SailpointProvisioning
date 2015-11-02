@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+
+<sailpoint>
+
+<!-- ====================================================================
+
+  Generic Step Library
+
+========================================================================= -->
+
+  <Workflow name='Generic Step Library' 
+          type='StepLibrary'
+          template='true'>
+
+    <Step name='Generic Step' icon='Default'/>
+    <Step name='Start' icon='Start'/>
+    <Step name='Stop' icon='Stop'/>
+    
+  </Workflow>
+  
+<!-- ====================================================================
+
+  Provisioning Step Library has steps that assume the context of
+  a provisioning workflow that includes things related to 
+  Identity provisioning workflows.
+
+========================================================================= -->
+
+  <Workflow name='IdentityProvisioningStepLibrary' 
+            type='StepLibrary'
+            template='true'>
+
+    <Step name='Account Approval' icon='Task'
+          configForm='Provisioning Approval Step Form'>
+    
+      <Description>
+        Step library that can be used for provisioning request approvals.
+        The process assumes many of the Provisioning Workflow structures exist
+        and has things like provisioning plans and approvalSets are required.           
+      </Description>
+    
+      <WorkflowRef>
+        <Reference class='Workflow' name='Provisioning Approval Subprocess'/>
+      </WorkflowRef>
+      
+      <Arg name='approvalMode'/>
+      <Arg name='approvalScheme'/>
+      <Arg name='approvalSet' value='ref:approvalSet'/>
+      <Arg name='approvalAssignmentRule'/>
+      <Arg name='approvingIdentities'/>     
+      <Arg name='fallbackApprover' value='ref:fallbackApprover'/>
+      <Arg name='flow' value='ref:flow'/>    
+      <Arg name='identityName' value='ref:identityName'/>
+      <Arg name='identityDisplayName' value='ref:identityDisplayName'/>
+      <Arg name='identityElectronicSignature'/>
+      <Arg name='identityEmailTemplate'/>
+      <Arg name='identityRequestId' value='ref:identityRequestId'/>
+      <Arg name='launcher' value='ref:launcher'/>
+      <Arg name='managerEmailTemplate'/>      
+      <Arg name='managerElectronicSignature'/>
+      <Arg name='ownerEmailTemplate'/>
+      <Arg name='ownerElectronicSignature'/>
+      <Arg name='project' value='ref:project'/>
+      <Arg name='policyViolations' value='ref:policyViolations'/>
+      <Arg name='priority' value='ref:workItemPriority'/>
+      <Arg name='securityOfficerName'/>
+      <Arg name='securityOfficerEmailTemplate'/>
+      <Arg name='securityOfficerElectronicSignature'/>
+      <Arg name='trace' value='ref:trace'/>
+      <Arg name='workItemComments'/>
+      <Arg name='workItemReminderTemplate'/>
+      <Arg name='workItemHoursBetweenReminders'/>
+      <Arg name='workItemMaxReminders'/>
+      <Arg name='workItemEscalationTemplate'/>      
+      <Arg name='workItemHoursTillEscalation'/>
+      <Arg name='workItemEscalationRule'/>
+      <Return name='project'/>
+      <Return name='approvalSet'/>
+      <Return name='workItemComments'/>
+    </Step>
+	
+  	<Step icon='Email' configForm='Provisioning Notification Step Form' name='Notify' action='call:sendMultipleNotifications'>
+  	    <Description>
+      	  Notify the various actors specified on notification scheme.
+        </Description>
+        <Arg name="notificationScheme"/>
+        <Arg name="userEmail" value="script:getUserEmail(identityName, plan)"/>
+        <Arg name="userEmailTemplate"/>
+        <Arg name="requesterEmail" value="script:getEmail(launcher)"/>
+        <Arg name="requesterEmailTemplate"/>
+        <Arg name="managerEmail" value="script:getManagersEmail(identityName, plan)"/>
+        <Arg name="managerEmailTemplate"/>
+        <Arg name="securityOfficerName"/>
+        <Arg name="securityOfficerEmailTemplate"/>
+        <Arg name="otherUsersToNotify"/>
+        <Arg name="otherUsersToNotifyEmailTemplate"/>
+        <Arg name="identityName" value="ref:identityName"/>
+        <Arg name="plan" value="ref:plan"/>
+        <Arg name="flow" value="ref:flow"/>
+        <Arg name="launcher" value="ref:launcher"/>
+        <Arg name="trace" value="ref:trace"/>
+        <Arg name="source" value="ref:source"/>
+  	</Step>
+  </Workflow>
+  
+
+</sailpoint>

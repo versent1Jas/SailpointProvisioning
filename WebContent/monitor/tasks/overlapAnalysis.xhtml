@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<!--
+   Included by impactAnalysis.xhtml to display role overlap 
+   analysis results.  Currently these are always shown
+   in the context of a full impact analysis.  Caller must
+   check for a null overlap if it wants to suppress the display.
+  
+   Required parameters:
+
+       result
+         an instance of RoleOverlapResult
+
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+<ui:composition>  
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'ROLE_OVERLAP';
+
+        Ext.onReady(function () {
+            var gridWidth = $('overlap-grid').clientWidth;
+                
+            // data store 
+            // NOTE: This is not set up on the bean side to do remote sorting.
+            overlapStore = SailPoint.Store.createStore({
+                autoLoad: false,
+                url: CONTEXT_PATH + '/monitor/tasks/overlapAnalysisDataSource.json',
+                root: 'roles',
+                storeId: 'name',
+                fields: [
+                    'id',
+                    'name',
+                    'type',
+                    'localAssignment',
+                    'assignment',
+                    'localProvisioning',
+                    'provisioning' 
+                ],          
+                remoteSort: false,
+                sorters: [{property: 'name', direction: 'ASC'}],
+                simpleSortMode : true
+            });
+    
+            // display models
+            var cm = [{
+                header: '#{sp:escapeJavascript(msgs.overlap_column_role)}', 
+                id: 'name', 
+                dataIndex: 'name', 
+                width: gridWidth * .20,
+                sortable: true,
+                hidable: false
+            },{
+                header: '#{sp:escapeJavascript(msgs.overlap_column_type)}', 
+                id: 'type', 
+                dataIndex: 'type', 
+                width: gridWidth * .10,
+                sortable: true,
+                hidable: false
+            },{
+                header: '#{sp:escapeJavascript(msgs.overlap_column_local_assignment)}', 
+                id: 'localAssignment', 
+                dataIndex: 'localAssignment',
+                width: gridWidth * .15,
+                sortable: true,
+                hidable: false
+            },{
+                header: '#{sp:escapeJavascript(msgs.overlap_column_assignment)}', 
+                id: 'assignment', 
+                dataIndex: 'assignment',
+                width: gridWidth * .15,
+                sortable: true,
+                hidable: false
+            },{
+                header: '#{sp:escapeJavascript(msgs.overlap_column_local_provisioning)}', 
+                id: 'localProvisioning', 
+                dataIndex: 'localProvisioning', 
+                width: gridWidth * .15,
+                sortable: true,
+                hidable: false            
+            },{
+                header: '#{sp:escapeJavascript(msgs.overlap_column_provisioning)}', 
+                id: 'provisioning', 
+                dataIndex: 'provisioning', 
+                width: gridWidth * .15,
+                sortable: true,
+                hidable: false            
+            }];
+                 
+            // overlap grid
+            var overlapGrid = new Ext.grid.Panel({
+              id: 'overlapGrid',
+              renderTo: 'overlap-grid',
+              store: overlapStore,
+              stateful: true,
+              columns: cm,
+              width: gridWidth,
+              viewConfig: {
+                stripeRows: true,
+                scrollOffset: 0
+              }
+           });
+
+          overlapStore.load({params:{start:0, limit:20, id:"#{taskResult.object.id}"}});         
+
+        });
+        
+        // eliminates right mouse clicks on the row
+        function doNothing(grid, rowIndex, event) {   
+            event.stopEvent();
+        }
+
+      //--><!]]>
+    </script>
+
+  <!-- make it resemble the expanding details panel -->
+  <div class="baseWindow expandPanel">
+    <div class="baseWindowHeader expandPanelHeader">
+      <h:graphicImage
+        class="dashContentExpandBtn"
+        url="/images/icons/minus.png"
+        id="overlapExpandPanelExpandBtn" />
+      <h:outputText value="#{msgs.overlap_title_summary}"/>
+    </div>
+    <div id="expandPanelContent" class="baseWindowBody expandPanelBody" >
+      <div id="overlap-grid" style="width: 100%"></div>
+    </div>
+  </div>
+
+</ui:composition>
+
+</body>
+</html>

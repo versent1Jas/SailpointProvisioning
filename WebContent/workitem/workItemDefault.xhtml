@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+      <h:outputFormat value="#{msgs.title_view_work_item}">
+          <c:if test="#{workItem.object.name ne null}">
+              <f:param value="#{sp:stripLeadingZeroes(workItem.object.name)}"/>
+          </c:if>
+          <c:if test="#{(workItem.object.name eq null) and (workItem.object.description ne null)}">
+              <f:param value="#{workItem.object.description}"/>
+          </c:if>
+          <c:if test="#{(workItem.object.name eq null) and (workItem.object.description eq null)}">
+              <f:param value=""/>
+          </c:if>
+      </h:outputFormat>
+   </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>image-radio.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/AssignmentForm.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRadio.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/Pager.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/JsfExtBridge.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/LinkAttributeValueSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification/CertificationItemSecondPass.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification/IdentityHistoryPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification/IdentityDetailPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/certification/Certification.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/policyViolations/policyViolationDetails.js?#{debug.revision}</src>
+    </sp:script>
+
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css"
+          rel="stylesheet" type="text/css" />
+          
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+
+        Ext.onReady(function() {
+            ImageRadio.initializeAll();
+            addDescriptionTooltips();
+            setupDynamicColSpans();
+        });
+
+
+
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+        <div class="spGrayBackground" id="spBackground">
+          <div class="spContent" style="width:95%">
+            <h:inputHidden id="id" value="#{workItem.object.id}"/>            
+            <ui:include src="summaryFieldset.xhtml"/>
+          </div>
+          
+          <div class="spContent" style="width:95%">
+            <ui:include src="commentsFieldset.xhtml"/>
+          </div>
+  
+          <!--
+            Eventually this could be refactored so that certification work items
+            specify their own renderers rather than conditionlizing the default 
+            renderer.
+          -->
+         <div class="spContent"  style="width:95%;">
+          <div>
+
+            <c:choose>
+              <c:when test="#{workItem.standaloneViolationDelegation}">
+                  <input type="hidden" id="violationViewBeanId" name="violationViewBeanId" value="[#{workItem.object.targetId}]"/>
+                  <h:inputHidden id="violationIds"
+                   value="#{policyViolationAction.violationIds}" converter="java.util.List"/>
+                  <ui:include src="/workitem/genericViolationRemediation.xhtml" />
+              </c:when>
+              <c:when test="#{workItem.businessCompositionCertification and workItem.object.type eq 'Remediation'}">
+                <ui:fragment rendered="#{sp:size(workItem.object.remediationItems) gt 1}">
+                  <ui:include src="/workitem/businessRoleRemediationItems.xhtml" />
+                </ui:fragment>
+                <ui:fragment rendered="#{sp:size(workItem.object.remediationItems) lt 2}">
+                  <ui:include src="/workitem/businessRoleRemediationItem.xhtml" />
+                </ui:fragment>
+              </c:when>
+              <!--
+                A violation remediation that has no remediation details will just display policy
+                description since there are no remediation items to act upon. Currently (3.0)
+                this will include all non-sod policies
+              -->
+              <c:when test="#{workItem.object.type == 'Remediation' and workItem.violationViewBean != null and sp:size(workItem.object.remediationItems) eq 1 and workItem.object.remediationItems[0].remediationDetails == null}">
+                  <ui:include src="/workitem/genericViolationRemediation.xhtml" />
+              </c:when>
+              <c:when test="#{workItem.object.type == 'Remediation'}">
+                <ui:include src="/workitem/remediationItems.xhtml" />
+              </c:when>
+              <c:when test="#{workItem.object.certificationItem != null}">
+                <ui:include src="/manage/certification/detailViewInclude.xhtml">
+                   <ui:param name="entityBean" value="#{workItem.certificationEntityViewBean}"/>
+                   <ui:param name="worksheetBean" value="#{workItem.worksheetViewBean}" />
+                </ui:include>
+              </c:when>
+              <c:when test="#{workItem.object.certificationEntity != null}">
+
+                <ui:include src="/manage/certification/detailViewInclude.xhtml">
+                   <ui:param name="entityBean" value="#{workItem.certificationEntityViewBean}"/>
+                   <ui:param name="certificationBeanParam" value="#{workItem.certification}"/>
+                   <ui:param name="worksheetBean" value="#{workItem.worksheetViewBean}" />
+                </ui:include>
+
+              </c:when>
+              <c:when test="#{workItem.object.certification != null}">
+                #{msgs.access_certification_workitem}
+              </c:when>
+              <c:when test="#{workItem.object.type == 'PolicyViolation'}">
+                <!-- make this look just like a standdaloneViolationDelegation for now, 
+                     not sure if we ever want these to be different? -->
+                <input type="hidden" id="violationViewBeanId" name="violationViewBeanId" value="[#{workItem.object.targetId}]"/>
+                <h:inputHidden id="violationIds"
+                 value="#{policyViolationAction.violationIds}" converter="java.util.List"/>
+                <ui:include src="/workitem/genericViolationRemediation.xhtml" />
+              </c:when>
+            </c:choose>
+          </div>
+          </div>
+        </div>
+          <br/>
+        <div class="buttonRow">
+          <h:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" />
+          <h:commandButton style="display: none" id="rejectBtn" action="#{workItem.reject}" />
+          <h:commandButton style="display: none" id="returnBtn" action="#{workItem.returnAction}" />
+          <h:commandButton style="display: none" id="refreshButton" action="#{workItem.refresh}"/>
+
+          <!-- Sigh, the WorkItem._renderer handles the details but we still need ad-hoc logic
+               for the buttons.  Need to figure out a way to encapculate these too...
+          -->
+
+          <ui:fragment rendered="#{workItem.editable}">
+
+            <h:commandButton value="#{msgs.button_continue_to_violation}"
+                             action="policyViolationDetail"
+                             title="#{button_title_click_to_save_violation}"
+                             onclick="$('editForm:violationIds').value=$('violationViewBeanId').value"
+                             rendered="#{workItem.standaloneViolationDelegation and workItem.validViolation}"
+                             styleClass="primaryBtn" />
+
+            <h:commandButton onclick="addComment('editForm:completeBtn', '#{sp:escapeJavascript(msgs.button_save_comment)}', '#{sp:escapeJavascript(msgs.dialog_title_completion_comments)}'); return false;"
+                             value="#{msgs.button_complete}"
+                             title="#{msgs.button_title_click_when_finished}"
+                             rendered="#{(!workItem.standaloneViolationDelegation or !workItem.validViolation) and workItem.object.type != 'Approval'}"
+                             styleClass="primaryBtn" />
+
+            <h:commandButton onclick="addComment('editForm:completeBtn', '#{sp:escapeJavascript(msgs.button_approve)}', '#{sp:escapeJavascript(msgs.dialog_title_approval_comments)}'); return false;"
+                             value="#{msgs.button_approve}"
+                             title="#{msgs.button_title_click_to_approve}"
+                             rendered="#{workItem.object.type == 'Approval'}"
+                             styleClass="primaryBtn" />
+
+            <!-- note that "reject" behaves more like "return" for cert delegations -->
+            <h:commandButton onclick="addComment('editForm:rejectBtn', '#{sp:escapeJavascript(msgs.button_reject)}', '#{sp:escapeJavascript(msgs.dialog_title_rejection_comments)}', false); return false;"
+                             value="#{msgs.button_reject}"
+                             title="#{msgs.button_title_click_to_reject}"
+                             rendered="#{!workItem.standaloneViolationDelegation and (workItem.object.type == 'Delegation' || workItem.object.type == 'Certification')}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton onclick="addComment('editForm:rejectBtn', '#{sp:escapeJavascript(msgs.button_reject)}', '#{sp:escapeJavascript(msgs.dialog_title_rejection_comments)}', false); return false;"
+                             value="#{msgs.button_reject}"
+                             title="#{msgs.button_title_click_to_reject_request}"
+                             rendered="#{workItem.object.type == 'Approval'}"
+                             styleClass="primaryBtn"/>
+
+            <!-- Hide 'Forward' button if "Disable Delegation Forwarding" is turned on -->
+            <c:if test="#{!workItem.certificationEntityViewBean.delegationForwardingDisabled}">
+                  <h:commandButton onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false, SailPoint.getWorkItemPriority()); return false;"
+                                   value="#{msgs.button_forward}"
+                                   title="#{msgs.button_title_click_to_forward}"
+                                   styleClass="primaryBtn"/>
+            </c:if >
+
+          </ui:fragment>
+          <h:commandButton action="#{workItem.save}"
+                           value="#{msgs.button_save}"
+                           styleClass="primaryBtn"/>
+          <h:commandButton action="#{workItem.cancel}"
+                           immediate="true"
+                           value="#{msgs.button_cancel}"
+                           styleClass="secondaryBtn"/>
+
+          <h:inputHidden id="workItemComplete" value="#{workItem.complete}" />
+          <h:inputHidden id="requiresCompletion" value="#{workItem.requiresCompletion}" />
+          <h:inputHidden id="workItemType" value="#{workItem.type}" />
+          <c:if test="#{workItem.type == 'Remediation'}">
+            <h:inputHidden id="remediationCount" value="#{workItem.remediationCount}" />
+          </c:if>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+  
+</ui:composition>
+
+</body>
+</html>

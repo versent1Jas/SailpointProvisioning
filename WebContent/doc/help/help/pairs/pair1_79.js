@@ -1,0 +1,21 @@
+var pairs =
+{
+"identityiq":{"mobile":1,"your":1}
+,"mobile":{"devices":1,"approvals":1,"access":1}
+,"devices":{"use":1,"identityiq":1,"brief":1,"mobile":1}
+,"use":{"following":1}
+,"following":{"components":1}
+,"components":{"work":1}
+,"work":{"identityiq":1}
+,"brief":{"explanation":1}
+,"explanation":{"using":1}
+,"using":{"identityiq":1}
+,"your":{"mobile":1}
+,"approvals":{"making":1,"from":1}
+,"making":{"decisions":1,"access":1}
+,"decisions":{"approvals":1}
+,"from":{"your":1}
+,"access":{"requests":1}
+,"requests":{"making":1,"from":1}
+}
+;Search.control.loadWordPairs(pairs);

@@ -1,0 +1,25 @@
+var pairs =
+{
+"access":{"review":1,"specific":1}
+,"review":{"details":1,"click":1,"page":1}
+,"details":{"-group":1,"page":1}
+,"-group":{"information":1}
+,"information":{"group":1,"tab":1,"item":1}
+,"group":{"information":1,"access":1,"certified":1}
+,"tab":{"available":1,"view":1}
+,"available":{"account":1,"from":1}
+,"account":{"group":1}
+,"click":{"line":1,"group":1}
+,"line":{"item":1}
+,"item":{"table":1,"group":1}
+,"table":{"access":1}
+,"page":{"access":1,"permission":1}
+,"specific":{"information":1}
+,"from":{"access":1}
+,"permission":{"membership":1}
+,"membership":{"account":1}
+,"view":{"list":1}
+,"list":{"attributes":1}
+,"attributes":{"account":1}
+}
+;Search.control.loadWordPairs(pairs);

@@ -1,0 +1,30 @@
+<sp-aria-errors></sp-aria-errors>
+
+<section>
+  <div class="form-group m-t-lg">
+    <label for="ownerNameSuggestBox">{{'ui_my_approvals_forward_to' | spTranslate}}</label>
+    <div>
+      <div class="sr-only">{{'ui_my_approvals_forward_to_help' | spTranslate}}</div>
+      <div sp-identity-suggest=""
+        ng-required="true"
+        sp-identity-suggest-id="ownerNameSuggestBox"
+        sp-identity-suggest-context="Owner"
+        sp-identity-suggest-limit="5"
+        ng-model="forward.selectedIdentity" />
+      <div aria-hidden="true" class="text-danger reader-error" ng-show="missingIdentity">
+        {{ 'ui_my_approvals_forward_identity_required' | spTranslate }}
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group m-b-lg">
+    <div class="form-group">
+      <label for="forwardCommentBox" >{{'ui_my_approvals_forward_comment' | spTranslate}}</label>
+      <textarea class="form-control" 
+        id="forwardCommentBox"
+        rows="5" 
+        placeholder="{{'ui_my_approvals_forward_comment_placeholder' | spTranslate}}" 
+        ng-model="forward.comment" ></textarea>
+    </div>
+  </div>
+</section>

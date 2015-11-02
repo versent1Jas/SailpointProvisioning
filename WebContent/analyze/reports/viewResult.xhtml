@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+<ui:define name="title">#{msgs.report_result}</ui:define>
+
+<ui:define name="headerItems">
+
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/analyze/reports">
+      <src>reports.css</src>
+  </sp:style>
+
+<sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/chart/ReportChartBuilder.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/GridReportLayout.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/reportResults.js?#{debug.revision}</src>
+</sp:script>
+
+<script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+
+    helpKey = 'REPORT_RESULTS';
+
+    SailPoint.taskComplete = #{reportResult.complete == true};
+
+    var gridColConf = #{reportResult.gridConfigJson};
+    var summaryTableJson = #{reportResult.summaryJson};
+    var chartDefinition = #{reportResult.chartJson};
+    var gridTitle = "#{msgs.rept_results_grid_title}";
+    var taskResultId = "#{reportResult.taskResultId}";
+    var hasGrid = #{reportResult.hasDetail};
+    var summaryTableTitle = "#{msgs.rept_preview_panel_summary}";
+    var workItemId = "#{reportResult.workItemId}";
+    var taskDefinitionId = "#{reportResult.taskDefinitionId}";
+    var percentDone = #{reportResult.percentComplete};
+    var reportIsComplete = #{reportResult.complete};
+
+    Ext.onReady(function() {
+
+        SailPoint.initReportResults(gridColConf, summaryTableJson, chartDefinition, summaryTableTitle,
+                                               taskDefinitionId, taskResultId, workItemId, hasGrid,
+                                               percentDone, reportIsComplete);
+
+    });
+
+    //--><!]]>
+</script>
+
+</ui:define>
+
+<ui:define name="body">
+    <f:view>
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        <h:form styleClass="form" id="editForm">
+
+            <div>
+                <h:inputHidden value="#{reportResult.workItemId}"/>
+                <h:inputHidden value="#{reportResult.taskResultId}"/>
+                <h:commandButton id="returnToWorkItemButton" style="display:none"
+                    action="#{reportResult.workItemAction}" />
+            </div>
+
+            <div id="detailsTarget"></div>
+
+            <div id="taskResultsDetailsDiv" style="width:100%" class="lightBorder">
+                <table style="width:100%;" class="paddedTable">
+                    <tr><td colspan="4" class="reportHeader">#{msgs.rept_results_details_panel}</td></tr>
+                    <tr>
+                        <td width="10%" class="spLightGray rBorder paddedCell"><h:outputText styleClass="textBold"
+                                                                                  value="#{msgs.label_name}"/></td>
+                        <td width="40%" class="paddedCell"><h:outputText value="#{reportResult.name}"/></td>
+                        <td width="10%" class="spLightGray lrBorder paddedCell" ><h:outputText styleClass="textBold"
+                                                                                   value="#{msgs.started_by}"/></td>
+                        <td width="40%" class="paddedCell"><h:outputText value="#{reportResult.launcher}"/></td>
+                    </tr>
+                    <tr>
+                        <td class="spLightGray rBorder paddedCell"><h:outputText styleClass="textBold"
+                                                                      value="#{msgs.label_task_type}"/></td>
+                        <td class="paddedCell"><h:outputText value="#{reportResult.typeName}"/></td>
+                        <td class="spLightGray lrBorder paddedCell"><h:outputText styleClass="textBold"
+                                                                       value="#{msgs.started}"/>
+                        </td>
+                        <td id="startDate" class="paddedCell">
+                            <h:outputText value="#{reportResult.launched}">
+                                <f:convertDateTime type="both" dateStyle="short" timeStyle="medium"
+                                                   timeZone="#{reportResult.userTimeZone}"/>
+                            </h:outputText>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="spLightGray rBorder paddedCell" valign="top"><h:outputText styleClass="textBold"
+                                                                      value="#{msgs.label_description}"/></td>
+                        <td class="paddedCell" ><h:outputText value="#{reportResult.description}"/></td>
+                        <td class="spLightGray lrBorder paddedCell" valign="top"><h:outputText styleClass="textBold"
+                                                                       value="#{msgs.label_task_completed}"/></td>
+                        <td id="endDate" class="paddedCell" valign="top">
+                            <h:outputText value="#{reportResult.completeDate}">
+                                <f:convertDateTime type="both" dateStyle="short" timeStyle="medium"
+                                                   timeZone="#{reportResult.userTimeZone}"/>
+                            </h:outputText>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="spLightGray rBorder paddedCell"><h:outputText styleClass="textBold"
+                                                                      value="#{msgs.label_status}"/></td>
+                        <td id="status" class="paddedCell">
+                            <t:div rendered="#{reportResult.complete == true}">
+                                <div class="textBold #{(reportResult.error ? 'failBox' : (reportResult.warning ? 'warnBox' : 'successBox'))}">#{reportResult.resultMessage}</div>
+                            </t:div>
+
+                            <t:div rendered="#{reportResult.complete != true}">
+                                <h:outputText value="#{msgs.label_task_pending}"/>
+                            </t:div>
+                        </td>
+
+                        <td class="spLightGray lrBorder paddedCell">
+                            <h:outputText styleClass="textBold" value="#{msgs.label_progress}"/>
+                        </td>
+                        <td class="paddedCell">
+                            <div id="progress"/>
+                            <div class="buttonRow" style="margin:3px">
+                              <span id="pdfButton"></span>
+                              <span id="csvButton"></span>
+                            </div>
+                        </td>
+
+                    </tr>
+                    <tr>
+                      <td colspan="4" class="buttonRow" style="padding: 5px;border-top: 1px solid #CCCCCC" >
+                        <span id="back-button"></span>
+                        <span id="edit-report-button"></span>
+                      </td>
+                    </tr>
+                </table>
+            </div>
+
+          <t:div rendered="#{reportResult.error}">
+            <table cellspacing="0" cellpadding="3">
+              <ui:repeat value="#{taskResult.object.messages}" var="msg">
+                <tr>
+                  <td class="#{sp:getMessageStyle(msg)}">#{sp:localize(msg)}</td>
+                </tr>
+              </ui:repeat>
+            </table>
+          </t:div>
+
+          <ui:fragment rendered="#{reportResult.signoff != null}">
+              <ui:include src="../../monitor/tasks/taskResultsSignoffInclude.xhtml">
+                  <ui:param name="signoff" value="#{reportResult.signoff}"/>
+              </ui:include>
+            </ui:fragment>
+
+            <div id="notifyPanel" style="display:none;margin-top:20px;text-align:center;">
+                <div class="spContentTitle">#{msgs.rept_progress_title_running}</div>
+                <p style="width:300px;margin: 10px auto">#{msgs.rept_progress_msg_running}</p>
+
+                <div id="notifyButton"></div>
+
+                <div id="notifyMessage" class="spContentTitle" style="display:none">#{msgs.rept_progress_msg_notification}</div>
+            </div>
+
+            <div id="completePanel" style="display:none;margin-top:20px;text-align:center;">
+                <div class="spContentTitle">#{msgs.rept_progress_title_complete}</div>
+                <p style="width:300px;margin: 10px auto">#{msgs.rept_progress_msg_complete}</p>
+
+                <div id="refreshButton"></div>
+            </div>
+
+            <div id="summaryPanel" style="margin-top:20px;"></div>
+
+            <div id="gridPanel" style="margin-top:20px;"></div>
+
+
+        </h:form>
+    </f:view>
+</ui:define>
+
+</ui:composition>
+
+</body>
+</html>

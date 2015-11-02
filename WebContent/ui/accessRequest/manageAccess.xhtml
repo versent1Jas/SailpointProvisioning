@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui">
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+  <h:body>
+    <section ng-if="flowCtrl.isRemoveAccessTabEnabled()"
+             class="container-fluid bg-light lt">
+      <div class="row text-center">
+        <div class="manage-access-bar col-xs-12">
+          <div class="btn-group btn-group-justified sub-nav">
+            <a id="addAccessBtn"
+               ui-sref="accessRequest.manageAccess.add"
+               sp-space-bar-click=""
+               ui-sref-active="active"
+               class="btn btn-white btn-sm"
+               role="button"
+               tabindex="50">
+              <span class="hidden-xs">{{'ui_access_add_access' | spTranslate}}</span>
+              <span class="visible-xs-inline">{{'ui_access_add' | spTranslate}}</span>
+              <span id="addAccessCount" ng-if="flowCtrl.getAddedItemsCount()" class="badge bg-success">
+                {{ flowCtrl.getAddedItemsCount() }}
+              </span>
+              <span class="sr-only" ng-if="flowCtrl.getAddedItemsCount()">{{'ui_access_items_selected_sr' | spTranslate}}</span>
+              <span class="sr-only" ng-if="'accessRequest.manageAccess.add' | isState">{{'ui_access_selected' | spTranslate}}</span>
+            </a>
+            <a id="removeAccessBtn"
+               ui-sref="accessRequest.manageAccess.remove"
+               sp-space-bar-click=""
+               ui-sref-active="active"
+               class="btn btn-white btn-sm"
+               role="button"
+               ng-class="{ 'disabled': !flowCtrl.isRemoveAccessTabEnabled() }"
+               aria-disabled="{{ !flowCtrl.isRemoveAccessTabEnabled() }}"
+               tabindex="50">
+              <span class="hidden-xs">{{'ui_access_remove_access' | spTranslate}}</span>
+              <span class="visible-xs-inline">{{'ui_access_remove' | spTranslate}}</span>
+              <span id="removeAccessCount" ng-if="flowCtrl.getRemovedItemsCount()" class="badge bg-danger">
+                {{ flowCtrl.getRemovedItemsCount() }}
+              </span>
+              <span class="sr-only" ng-if="flowCtrl.getRemovedItemsCount()">{{'ui_access_items_selected_sr' | spTranslate}}</span>
+              <span class="sr-only" ng-if="'accessRequest.manageAccess.remove' | isState">{{'ui_access_selected' | spTranslate}}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div ui-view="" />
+
+  </h:body>
+</html>

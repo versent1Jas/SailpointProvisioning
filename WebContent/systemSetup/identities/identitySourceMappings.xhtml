@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"    
+      xmlns:h="http://java.sun.com/jsf/html">
+
+     
+  <body>
+
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_identity_attributes}</ui:define>
+  <ui:define name="headerItems">
+
+    <script type="text/javascript">
+
+    helpKey = 'EMPLOYEE_DATA';
+    
+    Ext.onReady(function(){
+
+        Ext.QuickTips.init();
+        var gridWidth = $('idSrcMappings-grid').clientWidth;
+
+        // data store
+        idSrcMappingsStore = SailPoint.Store.createStore({
+            fields: [ 'id', 'name', 'displayName', 'primarySource',
+                     'characteristics', 'standard', 'groupFactoryNames' ],
+            autoLoad: true,
+            url: CONTEXT_PATH + '/systemSetup/identities/identityMappingsDataSource.json',
+            root :'attributes',
+            pageSize: 20,
+            sorters : [{property:'displayName', direction:'ASC'}],
+            simpleSortMode : true,
+            remoteSort: true
+        });
+
+        // display models      
+        var cols = [{
+            header: '#{sp:escapeJavascript(msgs.attribute)}', 
+            dataIndex: 'displayName', 
+            width: gridWidth * .20,
+            tooltip: '#{sp:escapeJavascript(help.help_ident_map_attributes)}',
+            sortable: true, 
+            hideable: true
+        },{
+            header: '#{sp:escapeJavascript(msgs.label_primary_source_mapping)}', 
+            dataIndex: 'primarySource', 
+            width: gridWidth * .55,
+            tooltip: '#{sp:escapeJavascript(help.help_ident_map_source_app)}',
+            sortable: true, 
+            hideable: true
+        },{
+            header: '#{sp:escapeJavascript(msgs.section_advanced_options)}', 
+            dataIndex: 'characteristics',
+            width: gridWidth * .25,
+            tooltip: '#{sp:escapeJavascript(help.help_ident_map_attr_characteristics)}',
+            sortable: true, 
+            hideable: true
+        }];
+        
+        // idSrcMappings grid
+        var idSrcMappingsGrid = new Ext.grid.Panel({
+            id: 'idSrcMappingsGrid',
+            renderTo: 'idSrcMappings-grid',
+            store: idSrcMappingsStore,
+            columns: cols,
+            width: gridWidth+2,
+            listeners: { 
+                itemclick: clickRow, 
+                itemcontextmenu: showContextMenu,
+                activate: refreshPanel
+            },
+            viewConfig: {
+                stripeRows: true
+            },
+            bbar: {
+                xtype : 'pagingtoolbar',
+                store: idSrcMappingsStore,
+                displayInfo: true
+            }
+        });
+
+    }); // Ext.onReady
+            
+    function showContextMenu(gridView, record, HTMLitem, index, e, eOpts){
+        id = record.getId();
+        name = record.get('name');
+
+        var contextMenu = new Ext.menu.Menu();
+        contextMenu.add(
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_edit)}', 
+                               handler: editObject, 
+                               iconCls: 'editBtn'})
+        );          
+        
+        if (!record.get('standard')) {
+	        contextMenu.add(
+	            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_delete)}', 
+	                               handler: deletePrompt, 
+	                               iconCls: 'deleteBtn'})
+            );                 
+        }
+          
+        e.stopEvent();
+        contextMenu.showAt(e.xy);
+    }  
+
+
+    function clickRow (gridView, record, HTMLitem, index, e, eOpts){
+        id = record.getId();
+        editObject();
+    }
+    
+    
+    function editObject() {
+        $('configForm:editedObjectId').value = id;
+        $('configForm:editButton').click();
+    }
+    
+    
+    function deletePrompt() {
+        $('configForm:editedObjectId').value = id;
+        Ext.MessageBox.confirm('Confirm delete of "' + name + '"?', 
+                               'Are you sure you want to delete "' + name + '"?', 
+                               deleteObject);
+    }
+    
+    
+    function deleteObject(button, text) {
+        if (button == 'yes') {
+            $('configForm:editedObjectId').value = id;
+            $('configForm:deleteButton').click();
+        }
+    }
+    
+    
+    function refreshPanel(component) {
+        component.getStore().load({params:{start:0, limit:20}});
+    }  
+    
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <ui:fragment rendered="#{identityConfig.configWarnings != null}">
+        <div class="formError">
+        <table>
+          <ui:repeat value="#{identityConfig.configWarnings}" var="warning">
+            <tr>
+              <td>
+                <h:outputText value="#{warning}"/>
+              </td>
+            </tr>
+          </ui:repeat>
+        </table>
+        </div>
+        <br/>
+      </ui:fragment>
+
+      <h:form styleClass="form" id="configForm">
+      
+          <div id="idSrcMappings-grid" style="margin-top: 20px; width:100%"></div>
+          
+          <h:inputHidden id="editedObjectId" 
+                         value="#{identityConfig.editedAttribute}"/>
+
+        <div class="buttonRow">
+          <h:commandButton styleClass="primaryBtn" value="#{msgs.button_add_new_attribute}" 
+                           action="#{identityConfig.addAttribute}"/>
+          
+          <h:commandButton styleClass="secondaryBtn" value="#{msgs.button_return_to_system_setup}" 
+                           action="backToSystemSetup"/>
+
+          <h:commandButton id="editButton"
+                           style="display:none"
+                           action="#{identityConfig.editAttribute}" />                           
+                           
+          <h:commandButton id="deleteButton" 
+                           style="display:none" 
+                           action="#{identityConfig.deleteSelectedAttrAction}"/>                          
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

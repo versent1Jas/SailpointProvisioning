@@ -1,0 +1,296 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!--
+The custom ServiceNow Interrogatorre's task can fetch the status of the request from iiq, but there
+is nothing built-in to the product.  See comments for status values below to understand what
+the link is between what return and what's in ServiceNow.
+-->
+
+<sailpoint>
+
+<Rule language='beanshell' name='ServiceNowIntegrationRule' type='Integration'>
+  <Description>
+    Use this rule to customize the data loaded into the provisioningPlan's 
+    integrationData object. The provisioningPlan and its integrationData 
+    object are used by Velocity to populate values in the XML templates for 
+    the web service calls.
+  </Description>
+  <Signature returnType='Attributes'>
+    <Inputs>
+      <Argument name='identity'>
+        <Description>
+          A sailpoint.object.Identity representing the person being remediated.
+        </Description>
+      </Argument>
+      <Argument name='plan'>
+        <Description>
+          A sailpoint.object.ProvisioningPlan representing remediation.
+        </Description>
+      </Argument>
+      <Argument name='context'>
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to 
+          query the database to find the Rule.
+        </Description>
+      </Argument>
+      <Argument name='log'>
+        <Description>
+          A Log object to help report and/or debug the Rule.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+    <![CDATA[
+    import java.util.ArrayList;
+    import java.util.List;
+    import sailpoint.object.Identity;
+      
+    Map map = (Map)plan.getIntegrationData();
+    map.put("identityName", identity.getName());
+    //System.out.println ("Plan: "  + plan.toXml());
+
+    if (identity.getFirstname() != null)  {
+      map.put("identityFirstname", identity.getFirstname());
+      }
+
+    if (identity.getLastname() != null)  {
+      map.put("identityLastname", identity.getLastname());
+      }
+     
+    List requesters = new ArrayList();
+    List planRequesters = plan.getRequesters();
+    if (planRequesters != null) {
+        for (int i = 0 ; i < planRequesters.size() ; i++) {
+            Identity req = (Identity)planRequesters.get(i);
+            requesters.add(req.getDisplayableName());
+            //System.out.println ("Requester: " + req.getDisplayableName()); 
+        }
+    } else
+        requesters.add("IIQRequestor");
+ 
+
+    map.put("requesters", requesters);
+
+    map.put("sourceId", plan.getSourceId());
+    map.put("sourceName", plan.getSourceName());
+    map.put("sourceType", plan.getSourceType());
+
+    ]]>
+  </Source>
+</Rule>
+
+
+<IntegrationConfig name="ServiceNowIntegration"
+                   executor="sailpoint.integration.servicenow.ServiceNowIntegrationExecutor"
+                   roleSyncStyle="none">
+
+            
+  <PlanInitializer>
+    <Reference class="sailpoint.object.Rule" name="ServiceNowIntegrationRule"/>
+  </PlanInitializer>
+
+              
+   
+    <!--
+      Connection params.  Can also include username and password for 
+      SOAP authentication.
+    -->
+    <Attributes>
+      <Map>
+        <!-- set this to true and we will save a provisioining request object
+             which we will check to make sure that we don't send another provisioning
+             request with the same things -->
+        <entry key='saveProvisioningRequests' value='false'/>
+
+        <!-- no reason not to handle all request types, but the resources won't have 
+             support some by default.  TODO : think about adding the features -->
+        <entry key='operations' value='Create,Modify,Delete,Enable,Unlock,SetPassword'/>
+
+        <!-- date formatting for dateTime XML data type -->
+        <entry key="dateFormat" value="yyyy-MM-dd'T'HH:mm:ss"/>
+      
+        <!-- authentication -->
+        <entry key="username" value=""/>
+		<entry key="password" value=""/>
+
+		<!--Authentication level for service-now web service calls.		
+		1) Basic authentication - Set the value of authType as "Basic" or empty.
+		2) WS-Security  - The value of authType should be "WS-Security".
+		3) Basic and WS-Security - The value of authType should be "Basic And WS-Security".
+		4) WS-Security and UsernameToken - The value of authType should be "WS-Security And UsernameToken".
+		Please ensure you have defined WS Security profile and other relevant settings on service-now side.
+		-->
+		<entry key="authType" value=""/>
+
+		<!--Full path of java keystore e.g. C:/kestore/testkeystore.jks -->
+		<entry key="keystorePath" value=""/>
+		<!--Keystore password -->
+		<entry key="keystorePass" value=""/>
+
+		<!--Keystore type e.g. jks -->
+		<entry key="keystoreType" value=""/>
+		
+		<!--Keystore alias which will be used to sign soap messages -->
+		<entry key="alias" value=""/>
+		<!--KeyPassword of alias. It might be same as keystore password -->
+		<entry key="keyPass" value=""/>
+                       
+        
+        <!-- configuration maps for the different integration methods require
+             at a minimum a responseElement and a soapMessage -->
+        <entry key="provision">
+            <value>
+                <Map>
+			        <entry key="endpoint" value=""/> <!-- e.g. https://demo.service-now.com/u_sailpointincident.do?SOAP !-->
+					<entry key="prefix" value="u"/>
+					<!-- the SOAPAction header is not required but some customer may need it to verify incoming SOAP request -->
+					<!-- using some 3rd party tools like xml gateway -->
+					<entry key="SOAPAction" value=""/><!-- e.g. http://demo.service-now.com/u_sailpointincident/insert !-->
+			        <entry key="responseElement" value="display_value"/>    
+			        <entry key="soapMessage">
+			            <!-- XML template -->
+                  <value>
+                    <String><![CDATA[<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://www.service-now.com/u_sailpointincident"><soapenv:Header></soapenv:Header><soapenv:Body>
+<u:insert>
+  <u_assignment_group>Service Desk</u_assignment_group> 
+  <u_category>request</u_category> 
+  <u_contact_type>email</u_contact_type> 
+  <u_impact>3</u_impact> 
+  <u_incident_state>1</u_incident_state>
+  <u_caller_id>$provisioningPlan.integrationData.requester</u_caller_id>
+  <u_opened_by>$config.username</u_opened_by> 
+  <u_urgency>3</u_urgency> 
+  <u_short_description>IdentityIQ provisioning request for: $provisioningPlan.integrationData.identityName    $!provisioningPlan.integrationData.identityRequestId  
+  </u_short_description>
+  <u_description>#foreach ($request in $provisioningPlan.accountRequests)
+#if ($request.attributeRequests)
+#foreach ($att in $request.attributeRequests)
+$request.application $att.operation $att.name $att.value
+#end
+#else
+$request.operation $request.application nativeIdentity $request.nativeIdentity
+#end
+#end
+Source Data:
+id= $!provisioningPlan.integrationData.sourceId
+name= $!provisioningPlan.integrationData.sourceName
+type= $!provisioningPlan.integrationData.sourceType</u_description>
+</u:insert>
+</soapenv:Body>
+</soapenv:Envelope>
+ ]]>
+	                     </String>
+			            </value>
+			        </entry>
+			    </Map>
+			</value>
+    </entry>
+
+
+            <!-- mapping of integration request status values to the six  
+             possible status values in the RequestStatus class -->
+        <entry key="statusMap">
+            <value>
+                <Map>
+                    <entry key="1" value="queued" />
+					<entry key="2" value="queued" />
+					<entry key="3" value="queued" />
+					<entry key="4" value="queued" />
+					<entry key="5" value="queued" />
+					<entry key="6" value="committed" />
+                    <entry key="7" value="committed" />
+                </Map>
+            </value>
+        </entry>
+		
+		<entry key="statusMapCloserCode">
+            <value>
+                <Map>
+                    <entry key="Solved (Work Around)" value="committed" />
+					<entry key="Solved (Permanently)" value="committed" />
+					<entry key="Solved Remotely (Work Around)" value="committed" />
+					<entry key="Solved Remotely (Permanently)" value="committed" />
+					<entry key="Closed/Resolved by Caller" value="committed" />
+					<entry key="Not Solved (Not Reproducible)" value="failed" />
+                    <entry key="Not Solved (Too Costly)" value="failed" />
+                </Map>
+            </value>
+        </entry>
+
+    <entry key="getRequestStatus">
+      <value>
+        <Map>
+          <entry key="endpoint" value=""/> <!-- e.g. https://demo.service-now.com/incident.do?SOAP !-->
+		  <entry key="prefix" value="q0"/>
+		  <!-- the SOAPAction header is not required but some customer may need it to verify incoming SOAP request -->
+          <!-- using some 3rd party tools like xml gateway -->
+		  <entry key="SOAPAction" value=""/><!-- e.g. http://demo.service-now.com/incident/getRecords -->
+          <entry key="responseElement" value="incident_state"/>
+		  <entry key="closureInfoResponseElement" value="close_code"/>
+          <entry key="soapMessage">
+            <!-- XML template -->
+            <value>
+              <String><![CDATA[<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:q0="http://www.service-now.com/incident" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Header></soapenv:Header><soapenv:Body>
+    <q0:getRecords>
+      <number>$requestID</number>
+    </q0:getRecords>
+  </soapenv:Body>
+</soapenv:Envelope>
+]]>
+                            </String>
+                        </value>
+                    </entry>
+                </Map>
+            </value>
+        </entry>
+       </Map>
+    </Attributes>
+
+   
+    <ManagedResources>
+      <ManagedResource>
+        <ApplicationRef>
+          <Reference class="sailpoint.object.Application" name="Active_Directory" />
+        </ApplicationRef>
+      </ManagedResource>
+      <ManagedResource>
+        <ApplicationRef>
+          <Reference class="sailpoint.object.Application" name="Procurement_System"/>
+        </ApplicationRef>
+      </ManagedResource>
+    </ManagedResources>    
+  </IntegrationConfig>
+
+
+
+  <!-- This relies on sailpoint.custom.ServiceNowInterrogator which
+       we can use to test getStatus until it's baked into the ui -->
+
+<TaskDefinition name='ServiceNow Interrogator' type='Generic' executor='sailpoint.custom.ServiceNowInterrogator'>
+  <Attributes>
+    <Map>
+      <entry key="ServiceNowConfig" value="ServiceNowIntegration"/>
+    </Map>
+  </Attributes>
+  <Description>
+    Query ServiceNow for status of IIQ-generated incidents
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name='ticketId' type='string' multi='false' required='true'>
+        <Prompt>ServiceNow incident number</Prompt>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name='ticketStatus' type='String'>
+        <Prompt>Incident Status:</Prompt>
+      </Argument>
+      <Argument name='errorMessage' type='String'>
+        <Prompt>Error Message:</Prompt>
+      </Argument>
+    </Returns>
+  </Signature>
+</TaskDefinition>
+</sailpoint>

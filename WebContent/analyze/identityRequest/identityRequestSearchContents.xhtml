@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <h:form id="identityRequestSearchForm">
+    <a4j:outputPanel ajaxRendered="true">
+      <h:messages infoClass="formInfo" errorClass="formError"/>
+    </a4j:outputPanel>
+    <input name="searchType" type="hidden" value="IdentityRequest"/>
+    
+    <div style="display:none" class="width100" id="IdentityRequestError"></div>
+    
+    <a4j:outputPanel ajaxRendered="true">
+      <ui:fragment rendered="#{(analyzeController.searchBean.mySearchItemsByType!=null) and (!empty analyzeController.searchBean.mySearchItemsByType)}">
+        <div class="spContent" >
+          <table class="width100" style="margin:5px"><tr><td>
+            <ui:include src="../searchUserItems.xhtml">
+              <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+              <ui:param name="formName" value="identityRequestSearchForm"/>
+              <ui:param name="loadBtnName" value="identityRequestLoadBtn"/>
+            </ui:include>
+          </td></tr>           
+          </table>
+        </div>
+      </ui:fragment>
+    </a4j:outputPanel>
+    
+    <a4j:outputPanel id="identityRequestReRenderOnClear"> 
+      <div class="paddedContainer" id="identityRequestSearchCriteria">
+        <table class="width100" cellpadding="4" cellspacing="0">
+          <tr>
+            <td width="75%">
+              <div>
+                <h:outputText value="#{msgs.identity_request_search_criteria}" styleClass="spContentTitle"/>
+                <h:graphicImage id="imgHlpIdentityRequestSearchCriteria" 
+                                alt="#{analyzeController.searchBean.criteriaHelpMsg}"
+                                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/dashboard_help_16.png" />
+              </div>
+            </td>
+            <td width="25%">
+              <div>
+                <h:outputText value="#{msgs.fields_to_display}" styleClass="spContentTitle"/>
+                <h:graphicImage id="imgHlpIdentityRequestSearchDisplayFields" 
+                                alt="#{analyzeController.searchBean.displayHelpMsg}"
+                                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/dashboard_help_16.png" />
+              </div>
+            </td>
+          </tr>
+          <tr valign="top">
+            <td>
+              <div class="spTabledContent">
+                <a4j:outputPanel id="identityRequestAttributes">
+                  <table id="identityRequestAttrbTbl" class="spTable width100" cellspacing="0">
+                    <tr>
+                      <th>
+                        <h:outputText value="#{msgs.identity_request_attrs}"/>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                        <div id="identityRequestAttributes">
+                          <ui:include src="identityRequestAttributes.xhtml">
+                            <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+                          </ui:include>                                    
+                        </div>                                    
+                      </td>
+                    </tr>
+                  </table>
+                </a4j:outputPanel>
+              </div>
+            </td>
+            <td>
+              <ui:include src="identityRequestDisplayFields.xhtml">
+                <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+              </ui:include>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </a4j:outputPanel>
+    
+    <a4j:commandButton style="display:none" 
+                       action="#{analyzeController.searchBean.runQueryAction}"
+                       id="ajaxSearchBtn"
+                       onclick="SailPoint.Analyze.setButtonsDisabled('preIdentityRequestSearchBtn', 'clearBtn', true);"
+                       oncomplete="if (#{facesContext.maximumSeverity==null}) {
+                                       var gridPanel = Ext.getCmp('identityRequestSearchResultsGrid');
+                                       gridPanel.isRefresh = true;
+                                       Ext.MessageBox.wait('#{sp:escapeJavascript(msgs.loading_data)}');
+                                       gridPanel.getStore().loadPage(1, {
+                                           params:{start:0},
+                                           callback: SailPoint.IdentityRequest.Search.displaySearchResults
+                                       });
+                                   }
+                                   SailPoint.Analyze.setButtonsDisabled('preIdentityRequestSearchBtn', 'clearBtn', false);"/>
+                      
+    <a4j:commandButton  style="display:none" 
+                        immediate="true" 
+                        action="#{analyzeController.searchBean.clearSearchItem}"
+                        id="resetBtn"
+                        onclick="SailPoint.Analyze.setButtonsDisabled('preIdentityRequestSearchBtn', 'clearBtn', true);"
+                        oncomplete="SailPoint.IdentityRequest.Search.clearSearchFields(); 
+                                    SailPoint.Analyze.resetSearchName('identityRequestSearchForm');
+                                    SailPoint.Analyze.setButtonsDisabled('preIdentityRequestSearchBtn', 'clearBtn', false);"/>
+    <a4j:commandButton id="rerenderSearchItemsBtn" action="none" render="" style="display:none"/>
+  </h:form>
+</ui:composition>
+
+</body>
+</html>

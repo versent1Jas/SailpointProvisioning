@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Debug Pages</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_LIST';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+
+      <h2>#{debug.objectClass} Objects</h2>
+      <h:messages infoClass="formInfo" warnClass="formWarn"
+                  errorClass="formError" fatalClass="formError" />
+
+      <h:form styleClass="form" id="editForm">
+        <h:inputHidden id="selectedId" value="#{debug.objectName}"/>
+        <h:commandButton style="display:none" id="editButton"
+                         action="#{debug.selectAction}"/>
+        <script type="text/javascript" defer="defer">
+          <!--//--><![CDATA[//><!--
+            function editObject(id) {
+                // alert(type + ': ' + id);
+                $('editForm:selectedId').value = id;
+                $('editForm:editButton').click();
+            }  // editObject()
+          //--><!]]>
+        </script>
+        
+        <style type="text/css">
+
+            .debug-table td{
+                padding: 0 3px;
+
+            }
+
+        </style>
+
+
+        <h:panelGrid columns='1'>
+
+          <t:dataTable value="#{debug.rows}" var="row" bodyStyleClass="debug-table">
+            <t:columns value="#{debug.columnKeys}" var="columnKey">
+              <f:facet name="header">
+                <h:outputText value="#{debug.columns[columnKey]}"/>
+              </f:facet>
+              <h:outputLink value="#"
+                            onclick="editObject('#{row['id']}'); return false;"
+                            rendered="#{columnKey == debug.keyColumn}">
+                <h:outputText value="#{row[columnKey]}"/>
+              </h:outputLink>
+              <h:outputText value="#{row[columnKey]}"
+                            rendered="#{columnKey != debug.keyColumn}"/>
+            </t:columns>
+          </t:dataTable>
+
+          <h:panelGroup>
+            <h:commandButton action="#{debug.cancelAction}" value="Ok" />
+          </h:panelGroup>
+
+        </h:panelGrid>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>
+

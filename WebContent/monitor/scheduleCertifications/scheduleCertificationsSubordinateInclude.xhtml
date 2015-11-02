@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+
+    <ui:fragment rendered="#{isRendered}">
+      <tr>
+        <td align="right" class="#{formName == 'certificationScheduleForm' ? 'titleColumn certScheduleTitleCol' : ''}" width="#{cellWidth}">
+          <h:outputText value="#{msgs.label_generate_certifications}" /></td>
+        <td class="#{formName == 'certificationScheduleForm' ? 'certScheduleHelpCol' : ''}" width="15px">
+          <h:graphicImage id="imgHlpSubordinate" width="12px"
+            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_sub}"/></td>
+        <td align="left">
+          <h:selectOneRadio layout="pageDirection" id="certifySubordinate" 
+                            value="#{optionsBean.isSubordinateCertificationEnabled}"
+                            onclick="showHideForRadio($('certifySubordinateOptions'), this, 'false'); clearSelectionIfHide(this); makePageDirtyIfAvailable();"
+                            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+            <f:selectItem id="enableSubordinate" itemLabel="#{msgs.sys_config_selection_managers_and_subs}" itemValue="true"/>
+            <f:selectItem id="disableSubordinate" itemLabel="#{msgs.sys_config_selection_managers_only}" itemValue="false"/>
+          </h:selectOneRadio>
+        </td>
+      </tr>
+      
+      <tr>
+        <td></td>
+        <td colspan="2">
+          <div id="certifySubordinateOptions">
+            <table  class="width100" cellpadding="0" cellspacing="0">
+              <tbody>
+                <tr>
+                  <td align="right" width="17%">
+                    <h:outputText value="#{msgs.label_flatten_hierarchy}" />
+                  </td>
+                  <td class="certScheduleHelpCol">
+                    <h:graphicImage id="imgHlpFlattenHierarchy"
+                      width="12px" height="12px" alt="#{help.help_sched_cert_sub_flatten}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td align="left"><h:selectBooleanCheckbox
+                      id="flattenManagerCertificationHierarchy"
+                      onclick="makePageDirtyIfAvailable();"
+                      value="#{optionsBean.flattenManagerCertificationHierarchy}"
+                      disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                      readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+                  </td>
+                  <td colspan="3" width="73%"/>                
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </ui:fragment>
+
+    <tr><td colspan="3">
+      <script>
+      <!--//--><![CDATA[//><!--
+        Ext.onReady(function () {
+            if (#{certificationSchedule.editedCertificationSchedule.type == 'Manager'}) {
+              
+              // Display the proper options based on the current radio selection
+              var selectedRadio = null;
+              
+              var radioInputs = document.getElementsByName('#{formName}:certifySubordinate');
+              
+              for (var i = 0; i < radioInputs.length && selectedRadio == null; ++i) {
+                  if (radioInputs[i].checked) {
+                      selectedRadio = radioInputs[i];
+                  }
+              }
+              showHideForRadio($('certifySubordinateOptions'), selectedRadio, 'false');          
+            }
+        });
+
+        function makePageDirtyIfAvailable() {
+          if (#{formName == 'editForm'}) {
+            makePageDirty();
+          }
+        }
+        
+        function clearSelectionIfHide(element) {
+          if (element != null) {
+            var isHidden = (element.value == 'true');
+            if (isHidden) {
+        	    var flattenCheckbox = document.getElementById('#{formName}:flattenManagerCertificationHierarchy');
+        	    if (flattenCheckbox != null) {
+        	      flattenCheckbox.checked = false;
+              }
+            }
+          }
+        }
+        
+        //--><!]]>
+      </script>
+    </td></tr>
+</ui:composition>
+
+</body>
+</html>

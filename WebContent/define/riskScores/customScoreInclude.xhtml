@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">
+    #{riskScoreConfig.scoreDefinition.displayName}
+  </ui:define>
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/risk-scores">
+      <src>risk-scores.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/sliderGroups.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/riskBands.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/compositeScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+    </sp:script>
+    <script defer='defer'>
+      <!--//--><![CDATA[//><!--
+      var isPageDirty = false;
+      helpKey = 'RISK_SCORES';
+
+      function makePageDirty() {
+        isPageDirty = true;
+        // Return false so that we don't accidentally submit the form
+        return false;
+      };
+      //--><!]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+    <ui:param name="score" value="#{riskScoreConfig.scoreDefinition}"/>
+    <f:view>
+      <h:form id="editForm">
+        <div class="pageInfo">
+          <div id='CertificationCompensationInstructions' class="instructions">
+            <h:outputText value="#{score.description}"/>
+          </div>
+        </div>
+     
+        <div class="spContent">
+          <div>
+
+            <table class="paddedTbl" style="margin:5px" cellspacing="0" cellpadding="4">
+              <tr>
+                <td align="right"><h:outputText value="#{msgs.label_disabled}" /></td>
+                <td width="15px">
+                  <h:graphicImage
+                    width="12px" height="12px"
+                    id="imgHlp_RiskCustomDisabled" 
+                    alt="#{help.help_risk_custom_disabled}"
+                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox
+                    value="#{score.disabled}" onclick="makePageDirty();"/>
+                </td>
+              </tr>
+              
+              <ui:fragment rendered="#{score.signature != null}">
+                <ui:repeat value="#{score.signature.arguments}" var="arg">
+                  <tr>
+                    <td align="right"><h:outputText value="#{arg.prompt}" /></td>
+                    <ui:fragment rendered="#{arg.helpKey == null}">
+                      <td/>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{arg.helpKey != null}">
+                      <td>
+                        <h:graphicImage
+                          width="12px" height="12px" 
+                          id="imgHlp_#{arg.helpKey}"
+                          alt="#{help[arg.helpKey]}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                    </ui:fragment>
+                    <td>
+                      <h:inputText value="#{score.arguments[arg.name]}" 
+                        size="#{arg.type == 'int' ? '5' : '40'}"/>
+                    </td>
+                  </tr>
+                </ui:repeat>
+              </ui:fragment>
+            
+              <ui:fragment rendered="#{score.signature == null}">
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.label_attribute_name}" /></td>
+                  <td width="15px">
+                    <h:graphicImage
+                      width="12px" height="12px"
+                      id="imgHlp_RiskCustomAttribute" 
+                      alt="#{help.help_risk_custom_attribute}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <h:inputText value="#{score.arguments['attribute']}" size="40"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.label_attribute_value}" /></td>
+                  <td width="15px">
+                    <h:graphicImage
+                      width="12px" height="12px"
+                      id="imgHlp_RiskCustomValue" 
+                      alt="#{help.help_risk_custom_value}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <h:inputText value="#{score.arguments['value']}" size="40"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.label_score}" /></td>
+                  <td width="15px">
+                    <h:graphicImage
+                      width="12px" height="12px"
+                      id="imgHlp_RiskCustomScore" 
+                      alt="#{help.help_risk_custom_score}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <h:inputText value="#{score.arguments['score']}" size="5"/>
+                  </td>
+                </tr>
+              </ui:fragment>
+            </table>
+
+          </div>
+        </div>
+      
+        <div class="buttonRow">
+          <a4j:commandButton id="visibleSaveButton" onclick="confirmSave(isPageDirty, 'editForm:stealthSaveButton');" value="#{msgs.button_save}" styleClass="primaryBtn" />
+          <a4j:commandButton id="visibleCancelButton" onclick="confirmCancel(isPageDirty, 'editForm:stealthCancelButton');" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+          <h:commandButton style="display:none" id="stealthSaveButton" action="#{riskScoreConfig.saveChangesAction}" />
+          <h:commandButton style="display:none" id="stealthCancelButton" action="#{riskScoreConfig.cancelChangesAction}" />
+        </div>   
+        
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+  
+  <ui:define name="headerItems">
+
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+    <src>image-radio.css</src>
+  </sp:style>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+    <src>lcm.css</src>
+    <src>request-access.css</src>
+  </sp:style>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/TextField.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRadio.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCriteria.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/UniqueCheckboxSelectionModel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/lcmRenderers.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/lcmCreateAccountRequest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/requestAccess.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessSidebarPanel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessRoleFilterPanel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessEntitlementFilterPanel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessList.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessCartItemsWindow.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessCurrentAccessGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessPermittedRolesWindow.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessPopulationWindow.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessAccountChoiceWindow.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessSelectAccountPanel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessRoleWizard.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessDirectLink.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/AccountRequest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/NameWithTooltip.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/NativeIdentityCombo.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/mobile/Support.js?#{debug.revision}</src>
+  </sp:script>
+  <sp:style serveOffset="#{base.requestContextPath}/css">
+    <src>layout.css</src>
+  </sp:style>
+  
+  <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'REQUEST_ACCESS';
+      //--><!]]>
+    </script>
+  </ui:define>
+ 
+  <ui:define name="title">#{msgs.quicklink_request_access} - #{msgs.lcm_breadcrumb_select_access}</ui:define>
+  
+  <ui:define name="subtitle">
+    <ui:include src="requestHeaderInclude.xhtml">
+      <ui:param name="bean" value="#{accessRequest}"/>
+      <ui:param name="hideIdentity" value="true"/>
+    </ui:include>
+  </ui:define>
+  
+ <ui:define name="breadCrumbs">
+    <div class="breadcrumbs_wrap">
+      <ul class="breadcrumbs">
+        <li class="past"><h:commandLink value="#{msgs.lcm_breadcrumb_select_identity}" action="#{accessRequest.back}"/></li>
+        <li class="present">#{msgs.lcm_breadcrumb_select_access}</li>
+        <li class="future last">#{msgs.lcm_breadcrumb_review}</li>
+      </ul>
+    </div>
+
+    <div class="request_access_title_container">
+      <div class="request_access_title">
+        <ui:fragment rendered="#{!(accessRequest.bulk)}">
+          <h4>#{msgs.lcm_request_access_info_title}
+            <a style="text-decoration:underline"
+               href="#" onclick="SailPoint.IdentityDetailPopup.showForLcmRequest('#{accessRequest.identityId}','#{sp:escapeJavascript(accessRequest.identityNameAttribute)}'); return false;">#{accessRequest.identityName}</a>
+
+            <h:graphicImage style="cursor:pointer;margin:0 0 0 5px" id="imgHlpNotBulk"
+                            width="12px" height="12px" url="/images/icons/dashboard_help_16.png"
+                            alt="#{msgs.lcm_request_access_info}"/>
+           </h4>
+           </ui:fragment>
+           <ui:fragment rendered="#{(accessRequest.bulk)}">
+           <h4>
+            <h:outputFormat value="#{msgs.lcm_request_access_info_bulk_title}">
+              <f:param value="#{sp:size(accessRequest.identityIds)}"/>
+            </h:outputFormat>
+            <a style="text-decoration:underline"
+               href="#" onclick="SailPoint.IdentityDetailPopup.showForLcmRequest('#{accessRequest.identityId}','#{sp:escapeJavascript(accessRequest.identityNameAttribute)}')">#{accessRequest.identityName}</a>
+            <h:graphicImage style="cursor:pointer;margin:0 0 0 5px" id="imgHlpBulk"
+                           width="12px" height="12px" url="/images/icons/dashboard_help_16.png"
+                           alt="#{msgs.lcm_request_access_info_bulk}"/>
+          </h4>
+        </ui:fragment>
+      </div>
+    </div>
+    <div id="requestAccessSearchToggle">
+        <a href="#" onclick="SailPoint.LCM.RequestAccess.toggleSearch(this); return false;" class="active keyword">
+            #{msgs.lcm_request_access_search_keyword}
+        </a>
+        <ui:fragment rendered="#{accessRequest.allowUserBasedSearch}">
+          <span> | </span>
+          <a href="#" id="userBasedSearchID" onclick="SailPoint.LCM.RequestAccess.toggleSearch(this); return false;" class="user-based">
+            #{msgs.lcm_request_access_search_user_based}
+          </a>
+        </ui:fragment>
+    </div>
+    
+    <div id="request_access_search_container">
+      <div id="request_access_search"></div>
+      <div id="request_access_search_btn">
+        <input type="button" class="primaryBtn" value="#{msgs.button_search}" id="search_btn" onclick="requestAccessList.runSearch()"/>
+      </div>
+    </div>
+    
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+      <h:form id="editForm">
+        
+        <a4j:outputPanel ajaxRendered="true">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+        </a4j:outputPanel>
+        
+        
+        <div id="request_access_panel" style="width:100%"></div>
+
+        <h:commandButton style="display:none" action="#{accessRequest.submit}" value="#{msgs.Submit}"/>
+        <a4j:commandButton action="#{accessRequest.addRequest}" id="addRequestBtn" style="display:none" 
+          oncomplete="SailPoint.LCM.RequestAccess.addRequest(); Page.fireEvent('cartItemsAdded'); Ext.getCmp('requestAccessList').unmask();" 
+          onerror="Page.fireEvent('addCartItemsError');Ext.getCmp('requestAccessList').unmask();"/>
+        <a4j:commandButton action="true" id="postAddRequestBtn" style="display:none" render="lcmHeaderSubTitle"/>
+        <h:inputHidden id="requestsJSON" value="#{accessRequest.requestsJSON}"/>
+        <h:inputHidden id="requestsId" value="#{accessRequest.requestId}"/>
+        <h:inputHidden id="accountInfosJSON" value="#{accessRequest.accountInfosJSON}" />
+      </h:form>
+      
+      <div style="display:none" id="lcmAllowAttributesSearch">#{sp:getSystemConfigurationValue('lcmAllowRoleAttributesSearch', true)}</div>
+      <div style="display:none" id="lcmAllowPopulationSearch">#{accesssRequest.allowPopulationSearch}</div>
+      <div style="display:none" id="lcmAllowIdentitiesSearch">#{accessRequest.allowIdentitiesSearch}</div>
+      <div style="display:none" id="allowPercentageSlider">#{sp:getSystemConfigurationValue('lcmAllowRolePercentageSlider', true)}</div>
+      <div style="display:none" id="allowSortPercentage">#{sp:getSystemConfigurationValue('lcmAllowRoleSortPercentage', 50)}</div>
+      
+      <script type="text/javascript">
+      var CURRENT_ACCESS_GRID_STATE_ID = '#{accessRequest.currentAccessGridStateId}';
+      
+      var stateProvider = new SailPoint.state.StateProvider({
+          stateIds: [CURRENT_ACCESS_GRID_STATE_ID],
+          states: ['#{gridConfigBean.gridStateConfig[accessRequest.currentAccessGridStateId].state}']
+      });
+      
+      Ext.state.Manager.setProvider(stateProvider); 
+
+      /** The filter panel on the left side of the screen **/
+      var requestAccessPanel;
+      var requestAccessList;
+      var requestAccessFilterPanel;
+      var cartItemsGrid;
+      var currentAccessGrid;
+      var populationWindow;
+      
+      SailPoint.LCM.RequestAccessCartItemsWindow.isReadOnly = false;
+      
+      SailPoint.LCM.RequestAccess.requestCount = #{sp:size(accessRequest.currentRequests)};
+
+      SailPoint.LCM.RequestAccess.submitOnEnter = null;
+
+      var unauthorizedParam = #{accessRequest.unauthorizedParam};
+      
+      var allowRoles = #{accessRequest.rolesEnabled};
+      var allowEntitlements = #{accessRequest.entitlementsEnabled};
+      var allowPopulationSearch = #{accessRequest.allowPopulationSearch};
+      var allowIdentitySearch = #{accessRequest.allowIdentitiesSearch};
+      var resultDetailsOptInEnabled = #{accessRequest.allowOptinResultsDetails};
+      var searchMaxResults = #{accessRequest.searchMaxResults};
+
+      var rolesGridMetadata = #{rolesRequest.searchColumnJSON};
+      var entitlementsGridMetadata = #{entitlementsRequest.searchColumnJSON};
+      var listStoreFields = #{accessRequest.listStoreFieldsJSON};
+      
+      var attributeMap = #{accessRequest.attributes};
+      var allowAssignable = #{accessRequest.allowAssignable};
+      var allowPermitted = #{accessRequest.allowPermitted};
+      var gridMetaData = #{accessRequest.columnJSON}; 
+      var popGridMetaData = #{gridConfigBean.uiConfigJson['lcmPopulationSearchGridColumns']}; 
+      var assignableTypes = #{accessRequest.assignableTypes}; 
+      var roleTypes = #{accessRequest.roleTypes};
+      SailPoint.LCM.RequestAccess.identityId = '#{accessRequest.identityId}';
+      SailPoint.LCM.RequestAccess.identityName = '#{sp:escapeJavascript(accessRequest.identityName)}';
+      
+      // US710 - filters required for the deep links
+      var deepFilters = #{accessRequest.deepFiltersJson};
+      var filterFlags = #{accessRequest.deepFiltersFlagJson};
+      var filterApplicationJsonData = #{sp:basicJSONDataConverted(
+          accessRequest.filterEntitlementApplicationList,
+          'ApplicationListConverter')};
+      var filterEntitlementAttributeJsonData = SailPoint.LCM.RequestAccess.listToSuggestData(deepFilters['attributes']);
+      var jsonFilterIdentity = #{sp:basicJSONDataConverted(
+              accessRequest.filterIdentityList,
+              'IdentityListConverter')};
+      var jsonFilterPopulationManager = [#{sp:buildJSONFromIdentity(accessRequest.filterPopulationManager)}];
+      var jsonFilterEntitlementOwnerIdentity = [#{sp:buildJSONFromIdentity(accessRequest.filterEntitlementOwner)}];
+
+      /** The grid that contains the current assigned items **/
+      var assignedGridMetaData = #{accessRequest.assignedColumnJSON};
+      
+      var ruleData = [];
+      var ruleDataObj = #{util.rulesJSON};
+      if (ruleDataObj != null){
+          for (var key in ruleDataObj.objects){
+              if (ruleDataObj.objects.hasOwnProperty(key)){
+                  var rule = ruleDataObj.objects[key];
+                  ruleData.push([rule.name, rule.value]);
+              }
+          }
+      }
+      </script>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+</body>
+</html>

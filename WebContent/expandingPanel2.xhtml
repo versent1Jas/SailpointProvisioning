@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:remove><!--
+  Identical to expandingPanel except it adds a numeric
+  qualifier to the component ids so more than one expanding
+  panel can be used on the page.
+--></ui:remove>
+<ui:composition>
+  <div class="baseWindow expandPanel">
+    <div class="baseWindowHeader expandPanelHeader" >
+            <h:graphicImage
+              class="dashContentExpandBtn"
+              url="/images/icons/minus.png"
+              id="expandPanelExpandBtn2" />
+          <ui:insert name="panelTitle" />
+    </div>
+    <div id="expandPanelContent2" class="baseWindowBody expandPanelBody" >
+      <ui:insert name="panelBody" />
+    </div>
+    <div class="baseWindowFooter expandPanelFooter"><img src="#{base.requestContextPath}/images/blank.gif" style="display:none"/></div>
+  </div>
+
+  <script type="text/javascript" defer="defer">
+    var expanderLock2 = false;
+    var expander2 = $('editForm:expandPanelExpandBtn2');
+    if(expander2==null)
+      expander2 = document.getElementsByClassName('dashContentExpandBtn2', '')[0];
+      
+    var content2 = $('expandPanelContent2');
+
+    Event.observe(
+      expander2, 'click',
+      function (e) {
+        if(!expanderLock2){
+          expanderLock2 = true;
+          Effect.toggle(content2, 'Blind', {duration: '0.5'});
+          if(content2.visible())
+          {
+            expander2.src = CONTEXT_PATH + "/images/icons/plus.png";
+          }
+          else
+          {
+            expander2.src = CONTEXT_PATH + "/images/icons/minus.png";
+          }
+          setTimeout("expanderLock2 = false", 500);
+        }
+      },   
+      false    
+    );      
+  </script>
+
+</ui:composition>
+</body>
+</html>

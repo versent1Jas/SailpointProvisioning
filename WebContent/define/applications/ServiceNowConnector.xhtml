@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+            
+        function toggleCredentials(authType) {
+            if (authType == "") {
+                authType = "Basic";
+            }
+            if (authType == "Basic") {                  
+                $('editForm:userpass').disabled = false;
+                $('editForm:keystrfile').value = '';
+                $('editForm:keystrtype').value = '';
+                $('editForm:keystorepass').value = '';
+                $('editForm:pkeypass').value = '';
+                $('editForm:calias').value = '';                
+                $('editForm:keystorepass').disabled = true;
+                $('editForm:pkeypass').disabled = true;
+                $('editForm:calias').disabled = true;    
+                $('editForm:keystrtype').disabled = true;
+                $('editForm:keystrfile').disabled = true; 
+            } if (authType == "WS-Security"){
+                $('editForm:uname').value = ''; 
+                $('editForm:userpass').value = '';              
+                $('editForm:keystrfile').disabled = false;
+                $('editForm:keystrtype').disabled = false;
+                $('editForm:keystorepass').disabled = false;
+                $('editForm:pkeypass').disabled = false;
+                $('editForm:calias').disabled = false;
+            }if (authType == "Basic and WS-Secured" || authType == "UsernameToken and WS-Secured"){
+                $('editForm:uname').disabled = false;
+                $('editForm:userpass').disabled = false;               
+                $('editForm:keystrfile').disabled = false;
+                $('editForm:keystrtype').disabled = false;
+                $('editForm:keystorepass').disabled = false;
+                $('editForm:pkeypass').disabled = false;
+                $('editForm:calias').disabled = false;
+        }
+        }
+        
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+        toggleCredentials('#{applicationObject.attributes['authtype']}');
+        
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+             
+               var atype = getFieldValue('editForm:authType');
+               var un = getFieldValue('editForm:uname');
+               var pwd = getFieldValue('editForm:userpass');
+               var keyfile = getFieldValue('editForm:keystrfile');
+               var keytype = getFieldValue('editForm:keystrtype');
+
+               if(atype == "Basic" && un == '' || un == null){
+                    Validator.validateNonBlankString(un, "Username cannot be null!");
+               }if(atype == "Basic" && pwd == '' || pwd == null){
+                    Validator.validateNonBlankString(pwd, "Password cannot be null!");
+               }if(atype == "WS-Security" && keyfile == '' || keyfile == null){
+                    Validator.validateNonBlankString(keyfile, "Keystore path cannot be null!");
+               }if(atype == "WS-Security" && keytype == '' || keytype == null){
+                    Validator.validateNonBlankString(keytype, "Keystore type cannot be null!");
+               }
+               
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_servicenow_settings}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_url}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpUrl" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_url}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="url" 
+                           value="#{applicationObject.attributes['url']}"
+                           size="80" 
+                           required="true"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           requiredMessage="URL cannot be null!"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_auth_type}"/>
+            </td>
+            <td class="certScheduleHelpCol"> 
+              <h:graphicImage id="imgHlpauthtype" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_auth_type}"/>
+            </td>
+             <td>
+               <h:selectOneMenu id="authType" 
+                               value="#{applicationObject.attributes['authtype']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               onchange="toggleCredentials(this.value)"> 
+                  <f:selectItem itemValue="Basic" itemLabel="#{msgs.con_form_servicenow_auth_type_normal}"/>
+                  <f:selectItem itemValue="WS-Security" itemLabel="#{msgs.con_form_servicenow_auth_type_ws}"/>
+                  <f:selectItem itemValue="Basic and WS-Secured" itemLabel="#{msgs.con_form_servicenow_auth_type_basicnsecured}"/>
+                  <f:selectItem itemValue="UsernameToken and WS-Secured" itemLabel="#{msgs.con_from_servicenow_auth_type_usernametokennsecured}"/>
+               </h:selectOneMenu>  
+             </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_user_name}" />
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpUsername" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_user_name}"/>
+            </td>
+            <td>
+              <h:inputText id="uname" 
+                           value="#{applicationObject.attributes['username']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_user_password}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_user_password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="userpass"
+                               size="50" 
+                               value="#{applicationObject.attributes['password']}" redisplay="true" 
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+          </tr>
+
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_keystore_file}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpkestorefile" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_keystore_file}"/>
+            </td>
+            <td>
+              <h:inputText id="keystrfile"
+                          value="#{applicationObject.attributes['kestorefile']}"
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_keystore_type}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpkestoretype" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_keystore_type}"/>
+            </td>
+            <td>
+              <h:inputText id="keystrtype" 
+                           value="#{applicationObject.attributes['kestoretype']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}" />
+                           
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_keystore_password}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpkeystorepassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_keystore_password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="keystorepass"
+                               size="50" 
+                               value="#{applicationObject.attributes['keystorepassword']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+          </tr>
+          
+           <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_cert_alias}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpcertificatealias" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_cert_alias}"/>
+            </td>
+            <td>
+              <h:inputText id="calias"
+                           value="#{applicationObject.attributes['certificatealias']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_servicenow_pkey_password}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlppkeypassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_servicenow_pkey_password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="pkeypass"
+                               size="50" 
+                               value="#{applicationObject.attributes['pkeypassword']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+          </tr>
+          
+        </table>
+
+      </div>
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

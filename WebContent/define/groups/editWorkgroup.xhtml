@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui"
+      >
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.workgroup_edit}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'EDIT_WORKGROUP';
+        
+        var sp = new SailPoint.state.StateProvider({
+          stateIds: ['#{workgroup.gridState.name}'],
+          states:   ['#{workgroup.gridState.state}']
+        });
+
+        Ext.state.Manager.setProvider(sp);  
+
+        var controlledScopesMultiSuggest;
+        var capabilities;
+        var allcapabilities;
+        var membersStore;
+        var membersGrid;
+
+        function initializeCapabilities() {
+
+          if ( $('editForm:capabilityInput') ) 
+            capabilities = $('editForm:capabilityInput').value;
+          allcapabilities = $('allwgcapabilities');
+          if(capabilities) {
+            caps = stringToArray(capabilities, true);
+            for(i=0; i<caps.length; i++) {
+              cap = caps[i];
+              for(j=0; j<allcapabilities.options.length; j++) {
+                if(allcapabilities.options[j].value == cap)
+                  allcapabilities.options[j].selected = true;
+              }
+            }
+          }
+        }
+
+        function updateSelectedIds() { 
+          $('editForm:selectedIdentityIds').value = arrayToString(membersGrid.selModel.getSelectedIds(), true);
+        }
+    
+        function updateStore() {
+            membersStore.load({params: {start: 0, limit: 20}});       
+            membersGrid.deselectAll();
+        }
+
+        function updateCapabilities(container) {
+          caps = [];
+          for(i=0; i<container.options.length; i++) {
+            if(container.options[i].selected) {
+              caps.push(container.options[i].value);
+            }
+          }
+          $('editForm:capabilityInput').value = arrayToString(caps, true);
+        }
+      //--><!]]>
+    </script>
+    <script type="text/javascript">
+        Ext.onReady(function(){
+
+          initializeCapabilities();
+          var gridStateStr = '#{workgroup.gridState.JSON}';
+          var gridState = new SailPoint.GridState(JSON.parse(gridStateStr));
+          if (#{workgroup.showAssignedScopeControl}) {
+            var scopeSuggest = new SailPoint.ScopeSuggest({
+                  renderTo: 'assignedScopeSuggest',
+                  binding: 'assignedScope',
+                  width: 200,
+                  listConfig : {width : 300}
+            });
+            
+            scopeSuggest.setRawValue('#{workgroup.dto.assignedScopeDisplayName}');
+          }
+  
+          if(!$('controlledScopesSuggest') &amp;&amp; $('controlledScopesMultiSuggest')) {
+            controlledScopesMultiSuggest = new SailPoint.MultiSuggest({
+              id:'controlledScopesSuggest',
+              renderTo: 'controlledScopesMultiSuggest',
+              suggestType: 'scope',
+              disabled: #{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')},
+              jsonData: #{workgroup.dto.controlledScopesJson},
+              inputFieldName: 'controlledScopes',
+              contextPath: CONTEXT_PATH
+            });
+          }
+
+          var gridMetaData = #{workgroup.memberColumnJSON};
+          
+          // data store
+          membersStore = SailPoint.Store.createStore({
+        	  fields: gridMetaData.fields,
+              autoLoad: false,
+              url: CONTEXT_PATH + '/define/groups/workgroupMembersDataSource.json',
+              root : 'workgroupMembers',
+              remoteSort: true
+          });
+
+
+          membersGrid = new SailPoint.grid.PagingCheckboxGrid({
+              id: 'membersGrid',
+              renderTo: 'members-display',
+              store: membersStore,
+              columns: gridMetaData.columns,
+              selModel: new SailPoint.grid.CheckboxSelectionModel({selectMessageBox: $('selectedCount')}),
+              viewConfig : {stripeRows: true},
+              pageSize : 10,
+              bbar: {
+                  xtype : 'pagingtoolbar',
+                  pageSize: 10,
+                  store: membersStore,
+                  displayInfo: true
+              }
+          });
+
+          membersStore.load({params: {start: 0, limit: 20}});
+          // suggest component for adding new identities to this group
+          var idSuggest = new SailPoint.IdentitySuggest({
+            id: 'editWorkgroupIdSuggestCmp',
+            renderTo: 'addedIdentitySuggest',
+            disabled: #{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')},
+            binding: 'addedIdentity',
+            width: 200,
+            listConfig : {width : 300}
+          });    
+
+          // suggest component for owner
+          var ownerSuggest = new SailPoint.IdentitySuggest({
+            id: 'editWorkgroupOwnerSuggestCmp',
+            renderTo: 'workgroupOwnerSuggest', 
+            disabled: #{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')},
+            binding: 'workgroupOwner',
+            width: 300
+          });
+          
+          if (#{!empty workgroup.dto.ownerDisplayName}) {
+        	  ownerSuggest.setRawValue('#{workgroup.dto.ownerDisplayName}');
+          } else {
+	          var iVal = #{empty sp:buildJSONFromIdentity(workgroup.dto.persistentId) ? "''" : sp:buildJSONFromIdentity(workgroup.dto.persistentId)};  
+	          if(iVal &amp;&amp; iVal.displayableName){
+	        	  ownerSuggest.setRawValue(iVal.displayableName); 
+	              SailPoint.Suggest.IconSupport.setIconDiv(ownerSuggest, 'userIcon'); 
+	          }
+          }
+        }); // Ext.onReady        
+    </script>
+    <style>
+        span#editForm\3AworkgroupEditing td.none {
+            padding : 5px 0px 5px 15px;
+         }
+    </style>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form styleClass="form" id="editForm">
+        <h:inputHidden name="persistentId" id="id" value="#{workgroup.dto.persistentId}"/>
+        <h:inputHidden name="activeTab" id="activeTab" value="workgroupsGrid"/>
+          <div class="spContent">
+            <!-- Basic information -->
+            <h:panelGroup id="workgroupEditing">
+              <h:panelGroup>
+                <h:outputText styleClass="requiredText" value="*"/>
+                <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+              </h:panelGroup>
+              <t:saveState value="#{workgroup.gridState}" />
+
+              <h:panelGrid columns="2" columnClasses="nowrap vertical-align, none">
+                <h:panelGroup>
+                  <h:outputText styleClass="titleColumn" value="#{msgs.name}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </h:panelGroup>
+                <h:inputText id="name" value="#{workgroup.dto.name}" size="40"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" />
+
+                <h:panelGroup>
+                  <h:outputText styleClass="titleColumn" value="#{msgs.owner}"/>
+                </h:panelGroup>
+
+                <h:panelGroup>
+                  <div id="workgroupOwnerSuggest"></div>
+                  <t:inputHidden name="workgroupOwner" id="workgroupOwner"
+                                   value="#{workgroup.dto.owner}" forceId="true">
+                  </t:inputHidden>
+                </h:panelGroup>
+
+                <h:outputText styleClass="titleColumn"  value="#{msgs.description}"/>
+                <h:inputTextarea id="description" value="#{workgroup.dto.description}" cols="60" rows="4"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" />
+
+                  <h:outputText rendered="#{workgroup.showAssignedScopeControl}" styleClass="titleColumn" value="#{msgs.label_scope}"/>
+		          <h:panelGroup rendered="#{workgroup.showAssignedScopeControl}">
+                      <div id="assignedScopeSuggest"></div>
+                      <t:inputHidden name="assignedScope" id="assignedScope"                 
+                                     value="#{workgroup.dto.assignedScope}"
+                                     rendered="#{workgroup.showAssignedScopeControl}"
+                                     forceId="true">
+                      </t:inputHidden>
+                  </h:panelGroup>
+
+                <h:outputText styleClass="titleColumn" value="#{msgs.workgroup_dist_list}"/>
+                <h:inputText id="email" value="#{workgroup.dto.email}" size="40"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" />
+
+                <h:outputText styleClass="titleColumn" value="#{msgs.workgroup_notification_setting}"/>
+                <h:selectOneMenu id='notificationSetting' value='#{workgroup.dto.notificationOption}'
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" >
+                    <f:selectItem itemLabel="#{msgs.workgroup_notify_both}" itemValue="Both" />
+                    <f:selectItem itemLabel="#{msgs.workgroup_notify_distonly}" itemValue="GroupEmailOnly" />
+                    <f:selectItem itemLabel="#{msgs.workgroup_notify_members}" itemValue="MembersOnly" />
+                    <f:selectItem itemLabel="#{msgs.workgroup_notify_disabled}" itemValue="Disabled" />
+                </h:selectOneMenu>
+
+              </h:panelGrid>
+            </h:panelGroup>
+
+            <!-- Group Rights -->
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetWorkgroupCapability') or workgroup.showControlledScopesControl}">
+              <table>
+                <tr>
+                  <td class="leftAlignedColumn">
+                    <div style="margin-top:20px">
+                      <h:outputText styleClass="spContentTitle" value="#{msgs.rights}"/>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetWorkgroupCapability')}">
+                    <h:inputHidden name="capInput" value="#{workgroup.dto.capabilities}" id="capabilityInput" converter="java.util.List"/>
+                    <td style="padding:10px" valign="top">
+                      <h:outputText styleClass="titleColumn" value="#{msgs.capabilities}"/><br/>
+                      <select multiple="true" name="capSelect" id="allwgcapabilities" size="10" onchange="updateCapabilities(this)">
+                        <ui:repeat value="#{workgroup.allCapabilities}" var="item">
+                          <option value="#{item.value}">#{item.label}</option>
+                        </ui:repeat>
+                      </select>
+                    </td>
+                  </ui:fragment>
+                  <ui:fragment rendered="#{workgroup.showControlledScopesControl}">
+                    <td style="padding:10px" valign="top">
+                      <h:outputText styleClass="titleColumn" value="#{msgs.authorized_scopes}"/><br/>
+                      <div id="controlledScopesMultiSuggest"></div>
+                      <t:inputHidden name="controlledScopes" id="controlledScopes"                 
+                                     value="#{workgroup.dto.controlledScopes}" converter="java.util.List" forceId="true">
+                      </t:inputHidden>
+                      <br/>
+                      <div>
+                        <h:selectBooleanCheckbox value="#{workgroup.dto.controlsAssignedScope}" 
+                           disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}"
+                           readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" />
+                        <f:verbatim>&amp;nbsp;</f:verbatim>
+                        <h:outputText value="#{msgs.workgroup_controls_scope}" />
+                      </div>
+                    </td>
+                  </ui:fragment>
+                </tr>
+              </table>
+            </ui:fragment>
+
+            <!-- Members --> 
+            <h:inputHidden name="selectedIdentityIds" id="selectedIdentityIds" value="#{workgroup.dto.currentMemberIdsToRemove}" converter="java.util.List"/>
+            <table id="membersTbl" cellpadding="0" cellspacing="0" class="width100 eraseTdPadding">
+              <tr>
+                <td class="leftAlignedColumn">
+                  <div style="margin-top:20px;margin-bottom:10px;">
+                    <h:outputText styleClass="spContentTitle" value="#{msgs.members}"/>
+                  </div>
+                </td>
+              </tr>
+              <tr><td colspan="3" class="width100">
+                  <a4j:outputPanel id="identityCertPanel">
+                    <div id="members-display" style="width: 98%; margin: 0px 0px 0px 10px"></div>
+                  </a4j:outputPanel>
+              </td></tr>
+            </table>    
+            <br/>
+            <table>
+              <tr>
+                <td> 
+                  <div style="margin-top:5px"></div>
+                </td> 
+                <td></td> 
+                <td></td> 
+              </tr>
+              <tr>
+                <td style="text-align:left;padding-right:20px">
+                  <a4j:commandButton id="removeMembers" value="#{msgs.workgroup_remove_members}" styleClass="secondaryBtn" action="#{workgroup.removeMembers}" onclick="updateSelectedIds()" oncomplete="updateStore()" render="errorPanel" disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" />
+                </td>
+                <td style="text-align:right;padding-right:3px">
+                  <div id="addedIdentitySuggest"></div>
+                  <t:inputHidden name="addedIdentity" id="addedIdentity" value="#{workgroup.dto.currentMemberIdToAdd}" forceId="true">
+                  </t:inputHidden>
+                </td>
+                <td style="text-align:left">
+                  <a4j:commandButton id="addMembers" value="#{msgs.workgroup_add_member}" styleClass="primaryBtn" action="#{workgroup.addMember}" onclick="updateSelectedIds()" oncomplete="updateStore()" disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" />
+                </td>
+              </tr>
+            </table>
+          </div>
+
+        <div class="buttonRow">
+          <h:commandButton id="saveButton" action="#{workgroup.saveAction}" value="#{msgs.button_save}" styleClass="primaryBtn"
+                           disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}"
+                           readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" /> 
+          <h:commandButton id="cancelButton" action="#{workgroup.cancelAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn"/>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+
+</html>

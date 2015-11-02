@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+	</sp:script>
+    
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            var identitiesMultiSuggest = new SailPoint.MultiSuggest({
+                id: 'mitigationReportIdentities',
+                renderTo: 'identitiesMultiSuggest',
+                suggestType: 'identity',
+                jsonData: #{sp:basicJSONDataConverted(
+                   taskDefinition.argMap['identities'].objectListValue,
+                   'IdentityListConverter')},
+                inputFieldName: 'identities',
+                contextPath: CONTEXT_PATH,
+                baseParams: {context: 'Global'}
+            });                
+
+            var businessRolesMultiSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'businessRolesMultiSuggest',
+                suggestType: 'role',
+                jsonData: #{sp:basicJSONDataConverted(
+                    taskDefinition.argMap['businessRoles'].objectListValue,
+                    'BundleListConverter')},
+                inputFieldName: 'businessRolesSuggest'
+                });
+                
+            var managersMultiSuggest = new SailPoint.MultiSuggest({
+                id: 'mitigationReportManagers',
+                renderTo: 'managersMultiSuggest',
+                suggestType: 'manager',
+                jsonData: #{sp:basicJSONDataConverted(
+                   taskDefinition.argMap['managers'].objectListValue,
+                   'IdentityListConverter')},
+                inputFieldName: 'managers',
+                baseParams: {'type': 'manager', context: 'Manager'},
+                contextPath: CONTEXT_PATH
+            });                                
+        });    
+    </script>
+
+  <table class="width100" cellspacing="0" cellpadding="3">
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <tr>
+        <td colspan="3" width="30%">
+          <sp:outputText styleClass="spContentTitle" value="#{msgs.mitigation_report_options}"/>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_ids}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["identities"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <div id="identitiesMultiSuggest"></div>
+                  <t:inputHidden id="identities"
+                                 value="#{taskDefinition.argMap['identities'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr >
+                <th colspan="2"><sp:outputText value="#{msgs.report_filter_exp_date}"/></th>
+              </tr>
+              <tr>
+                <td colspan="2"><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["expirationDate"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectBooleanCheckbox id="inputDateSelect" value="#{taskDefinition.argMap['expirationDate'].bound}" 
+                    onclick="toggleDateDisplay($('inputDateDiv'), !(this.checked));" />
+                </td>
+                <td>
+                  <div id="inputDateDiv">
+                    <sp:inputDate timeZone="#{base.userTimeZoneId}" type="date" id="inputDate"
+                      value='#{taskDefinition.argMap["expirationDate"].dateValue}' addResources="false" imageLocation="/scripts/myfacescalendar"
+                      javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                      popupCalendar="true"  ampm="true" styleClass="tomahawkInputDate"/>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <a4j:outputPanel ajaxRendered="true">
+                    <h:message for="inputDate" styleClass="formError"/>
+                  </a4j:outputPanel>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_roles}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["businessRoles"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>     
+		          <div id="businessRolesMultiSuggest"></div>
+		          <t:inputHidden id="businessRolesSuggest"
+		                         value="#{taskDefinition.argMap['businessRoles'].objectListValue}" forceId="true">
+		              <sp:convertList />
+		          </t:inputHidden>
+
+                  <a4j:outputPanel ajaxRendered="true">
+                    <br/><br/>
+                    <h:message styleClass="formError" for="businessRolesSuggest" />
+                  </a4j:outputPanel>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>        
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_mitigators}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["managers"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <div id="managersMultiSuggest"></div>
+                  <t:inputHidden id="managers"
+                                 value="#{taskDefinition.argMap['managers'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>                    
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+      </tr>
+    </ui:fragment>
+  </table>
+  <script defer="defer">
+    <!--//--><![CDATA[//><!--
+    var checkBox = $('editForm:inputDateSelect');
+    toggleDisplay($('inputDateDiv'), !(checkBox.checked));
+    
+    //--><!]]>
+  </script>
+</ui:composition>
+</body>
+</html>

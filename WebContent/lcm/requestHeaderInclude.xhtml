@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    <h:outputScript name="commandLinkPatch.js" target="head"/>  
+  <a4j:outputPanel ajaxRendered="true" id="lcmHeaderSubTitle">
+    <div id="subtitle" class="requestHeaderLinks roundedBottom" style="#{sp:size(bean.currentRequests) gt 0 ? '' : 'display:none'}">
+      <a href="javascript:SailPoint.LCM.RequestAccess.showCartWindow()">
+        <span id="requestsTotal">
+          <h:outputFormat value="#{msgs.lcm_cart_count}">
+            <f:param value="#{sp:size(bean.currentRequests)}"/>
+          </h:outputFormat>
+        </span>  
+      </a>
+      <div id="summaryLink">
+        <h:form id="summaryForm">
+          <h:commandLink id="checkoutLink" action="#{bean.viewSummary}" value="#{msgs.lcm_checkout}"/>
+          <h:commandButton id="checkoutBtn" style="display:none" action="#{bean.viewSummary}"/>
+        </h:form>
+      </div>
+    </div>      
+  </a4j:outputPanel>
+
+  <ui:fragment rendered="#{!(bean.identityId == null) and !(hideIdentity)}">      
+    <p class="viewIdentityDetails">
+      <a href="#" onclick="SailPoint.IdentityDetailPopup.showForLcmRequest('#{bean.identityId}', '#{sp:escapeJavascript(bean.identityNameAttribute)}'); return false;">#{msgs.lcm_view_identity_details}</a>
+    </p>      
+  </ui:fragment>
+  <script>
+    /** The grid that contains the current requests in the cart **/
+    var cartGridMetaData = #{bean.cartColumnJSON}; 
+  </script>
+
+  <h:form id="cartForm">
+      <a4j:commandButton action="#{bean.removeRequest}" id="cartRemoveRequestsBtn" style="display:none" oncomplete="SailPoint.LCM.RequestAccess.refreshCartWindow();"/>        
+      <h:inputHidden id="cartRemoveRequestsId" value="#{bean.requestId}"/>
+  </h:form>
+  
+</ui:composition>
+</body>
+</html>

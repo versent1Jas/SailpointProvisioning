@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//Dtd XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/tr/xhtml1/Dtd/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+
+
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+<ui:define name="title">#{msgs.title_policy_violations}</ui:define>
+
+<ui:define name="headerItems">
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/policy-violations">
+      <src>policy-violations.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/AssignmentForm.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/policyViolations/policyViolationDetails.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript"><!--//--><![CDATA[//><!--
+
+    helpKey = 'POLICY_VIOLATION_VIEWER';
+
+    var decisionTextMap = {
+        'Remediate':'#{sp:escapeJavascript(msgs.cert_decision_remediate)}',
+        'Acknowledge':'#{sp:escapeJavascript(msgs.cert_decision_acknowledge)}',
+        'Delegate' :'#{sp:escapeJavascript(msgs.cert_decision_delegate)}',
+        'Allow' :'#{sp:escapeJavascript(msgs.cert_decision_allow_violation)}'
+    };
+
+    Ext.onReady(function() {
+
+        createEntitlementSodViolationTable( $( 'actionForm:submitRemediationTargetsButton' ) );
+        
+        Ext.QuickTips.init();           
+
+       var violationStatus = '#{policyViolationAction.policyAdvisor.violationViewBean.status}';
+
+       setLastDecision(violationStatus);      
+    });
+    //--><!]]>
+    </script>
+</ui:define>
+
+<ui:define name="body">
+
+<f:view>
+<h:form id="actionForm">
+
+<!-- ****************************************************************************
+
+BEGIN main body
+
+**********************************************************************************  -->
+
+    <h:inputHidden id="workItemId" value="#{policyViolationAction.workItemId}"/>
+
+<br/>
+
+<div class="pageInfo">
+    <div class="content">
+
+        <ui:param name="violationView" value="#{policyViolationAction.policyAdvisor.violationViewBean}"/>
+
+        <table class="spPaddedTable" cellspacing="0">
+          <tr>
+            <td class="titleColumn"><h:outputText value="#{msgs.violation_viewer_label_identity}"/></td>
+            <td><h:outputText value="#{violationView.identityName}"/></td>
+          </tr>
+          <tr>
+            <td class="titleColumn"><h:outputText value="#{msgs.violation_viewer_label_status}"/></td>
+            <td>
+            <c:choose>
+            <c:when test="#{policyViolationAction.currentWorkItem != null and policyViolationAction.currentWorkItem.type=='Delegation'}">
+                <h:outputFormat value="#{msgs.violation_delegated_on} ">
+                    <f:param value="#{sp:getDisplayNameForName('Identity', policyViolationAction.currentWorkItem.owner.name)}"/>
+                </h:outputFormat>
+                <h:outputText value="#{policyViolationAction.currentWorkItem.created}">
+                     <f:convertDateTime type="both" dateStyle="short" timeStyle="short" timeZone="#{policyViolationAction.timeZoneName}"/>
+                </h:outputText>
+
+            </c:when>
+            <c:when test="#{policyViolationAction.currentWorkItem != null and policyViolationAction.currentWorkItem.type=='Remediation'}">
+               <h:outputFormat value="#{msgs.violation_remediated_on} ">
+                    <f:param value="#{sp:getDisplayNameForName('Identity', policyViolationAction.currentWorkItem.requester.name)}"/>
+                </h:outputFormat>
+                <h:outputText value="#{policyViolationAction.currentWorkItem.created}">
+                     <f:convertDateTime type="both" dateStyle="short" timeStyle="short" timeZone="#{policyViolationAction.userTimeZone}"/>
+                </h:outputText>
+            </c:when>
+            <c:when test="#{policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.remediation and policyViolationAction.policyAdvisor.violationViewBean.status=='policy_violation_remediated'}">
+                <h:outputFormat value="#{msgs.violation_remediated_on} ">
+                    <f:param value="#{sp:getDisplayNameForName('Identity',policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.actorName)}"/>
+                </h:outputFormat>
+                <h:outputText value="#{policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.created}">
+                     <f:convertDateTime type="both" dateStyle="short" timeStyle="short" timeZone="#{policyViolationAction.userTimeZone}"/>
+                </h:outputText>
+            </c:when>
+            <c:when test="#{policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.acknowledgment and policyViolationAction.policyAdvisor.violationViewBean.status=='policy_violation_acknowledged'}">
+                <h:outputFormat value="#{msgs.violation_acknowledged_on} ">
+                    <f:param value="#{sp:getDisplayNameForName('Identity',policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.actorName)}"/>
+                </h:outputFormat>
+                <h:outputText value="#{policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.created}">
+                     <f:convertDateTime type="both" dateStyle="short" timeStyle="short" timeZone="#{policyViolationAction.userTimeZone}"/>
+                </h:outputText>
+            </c:when>
+            <c:when test="#{policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.mitigationExpiration!=null and policyViolationAction.policyAdvisor.violationViewBean.status=='policy_violation_mitigated'}">
+                <h:outputText value="#{msgs.cert_action_mitigated_until} "/>
+                <h:outputText value="#{policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.mitigationExpiration}">
+                      <f:convertDateTime type="date" dateStyle="short" timeZone="#{policyViolationAction.userTimeZone}" />
+                </h:outputText>
+                <h:outputFormat value=" #{msgs.cert_action_by}">
+                    <f:param value="#{sp:getDisplayNameForName('Identity',policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.actorName)}"/>
+                </h:outputFormat>
+            </c:when>
+            <c:otherwise>#{sp:localizeKey(policyViolationAction.policyAdvisor.violationViewBean.status)}</c:otherwise>
+            </c:choose>
+            </td>
+          </tr>
+
+          <ui:include src="/identity/policyGenericDetails.xhtml">
+            <ui:param name="violationView" value="#{violationView}"/>
+          </ui:include>
+
+          <c:if test="#{violationView.identityPageRenderer != null}">
+            <ui:include src="/identity/#{violationView.identityPageRenderer}">
+              <ui:param name="violationView" value="#{violationView}"/>
+            </ui:include>
+          </c:if>
+
+        </table>
+    </div>
+</div>
+
+<div id="resultsPanel">
+
+<table id="mainTable" width="100%">
+<tr>
+
+<td width="60%" valign="top" style="height:100%">
+
+    <div class="spContent" style="height:100%">
+
+        <div class="lightBorder" style="margin:5px;padding-left:5px;width:95%;height:95%">
+
+
+            <table width="100%" style="paddedTbl" border="0">
+            <tr><td height="35px">
+
+                    <h:outputText styleClass="spContentTitle" value="#{msgs.violation_viewer_label_violation_decision_select}"/>&nbsp;&nbsp;
+
+
+                        <h:selectOneMenu id="selectedAction" value="#{policyViolationAction.selectedAction}"
+                                         onchange="onSelectAction(this.options[this.selectedIndex].value);">
+                            <f:converter converterId="sailpoint.object.Enum"/>
+                            <f:selectItems value="#{policyViolationAction.actionChoicesWithDefault}"/>
+                            <f:converter converterId="sailpoint.object.Enum"/>
+                        </h:selectOneMenu>
+
+            </td></tr>
+
+            <tr><td height="80px" align="top">
+
+                <div style="margin:5px">
+
+
+
+
+        <!-- ***************************************************************************************  -->
+
+
+                <h:inputHidden id="violationIds" value="#{policyViolationAction.violationIds}"
+                               converter="java.util.List"/>
+
+                <div id="certificationActionError" class="formError" style="display:none;margin-bottom:7px"/>
+
+
+
+                <h:messages styleClass="formError" rendered="#{! empty facesContext.maximumSeverity}"
+                            style="margin-bottom:5px"/>
+
+
+                <br/>
+
+
+                <table id="mitigationTable" style="display:none" class="ViolationForm Allow">
+
+                    <tr>
+                        <td class="titleColumn policyViolationDetailLabel">
+                            <b>#{msgs.label_expiration}</b>
+                        </td>
+                        <td class="leftAlignedColumn" style="padding-left:7px">
+
+                             <table cellpadding="4" cellspacing="4">
+                                <tr style="padding:5px">
+                                        <ui:fragment rendered="#{policyViolationAction.allowAcknowledge}">
+                                        <td style="padding:5px">
+                                            <input name="expirationType" type="radio" checked="true" onclick="$('actionForm:expiration.month').disabled = false;$('actionForm:expiration.day').disabled = false;$('actionForm:expiration.year').disabled = false;$('actionForm:acknowledge').value = 'false';"/>
+                                        </td>
+                                        </ui:fragment>
+                                        <td style="padding:5px">
+                                              <sp:inputDate id="expiration" type="date" popupCalendar="true" 
+                                                 imageLocation="/scripts/myfacescalendar"
+                                                 javascriptLocation="/scripts/myfacescalendar"
+                                                 styleLocation="/scripts/myfacescalendar"
+                                                 timeZone="#{base.userTimeZoneId}" addResources="false"
+                                                 value="#{policyViolationAction.currentExpiration}"
+                                                 styleClass="tomahawkInputDate"/>                                          
+                                    </td>
+                                </tr>
+                                <ui:fragment rendered="#{policyViolationAction.allowAcknowledge}">
+                                    <tr><td style="padding:5px"><input name="expirationType" type="radio" onclick="$('actionForm:expiration.month').disabled = true;$('actionForm:expiration.day').disabled = true;$('actionForm:expiration.year').disabled = true;$('actionForm:acknowledge').value = 'true';"/></td>
+                                        <td style="padding:5px">
+                                            <h:inputHidden id="acknowledge" value="#{policyViolationAction.expireNextCertification}"/>${msgs.violation_decision_acknowledge}
+                                        </td>
+                                    </tr>
+                                </ui:fragment>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+                <table style="display:none" id="remediationAdvisor" class="ViolationForm">
+                    <tr>
+                        <td style="text-align:left;">
+                            <table width="100%" border="0" cellpadding="2" cellspacing="0"
+                                   style="text-align: left; margin-top: 10px">
+                                <tr>
+                                    <td>
+                                        <b>#{msgs.label_correction_adv}</b>
+                                        <div>#{msgs.inst_select_roles_to_remove}</div>
+                                        <br/>                                    
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <b>#{msgs.violation_conflicting_roles}</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+
+                                        <table class="spTable" style="border-bottom:1px #cccccc solid">
+
+                                            <tr><th></th><th><h:outputText value="#{msgs.business_role}"/></th><th><h:outputText value="#{msgs.description}"/></th></tr>
+                                            <c:forEach var="businessRole" items="#{policyViolationAction.policyAdvisor.rightBusinessRoles}">
+                                                <tr>
+                                                    <td><h:selectBooleanCheckbox id="left_#{businessRole.businessRole.id}" value="#{businessRole.selected}"
+                                                            onclick="addRemediation(this, '#{businessRole.businessRole.displayableName}')" styleClass="BizRole"/></td>
+                                                    <td>#{businessRole.businessRole.displayableName}</td>
+                                                    <td><h:outputText escape="false" value="#{sp:localizeAttribute(businessRole.businessRole,'description')}"/></td>
+                                                </tr>
+                                            </c:forEach>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-top: 10px">
+                                        <b>#{msgs.biz_roles}</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table class="spTable" style="border-bottom:1px #cccccc solid">
+                                            <tr><th></th><th><h:outputText value="#{msgs.business_role}"/></th><th><h:outputText value="#{msgs.description}"/></th></tr>
+                                            <c:forEach var="businessRole" items="#{policyViolationAction.policyAdvisor.leftBusinessRoles}">
+                                                <tr>
+                                                    <td><h:selectBooleanCheckbox id="right_#{businessRole.businessRole.id}" value="#{businessRole.selected}"
+                                                            onclick="addRemediation(this, '#{businessRole.businessRole.displayableName}')" styleClass="BizRole"/></td>
+                                                    <td>#{businessRole.businessRole.displayableName}</td>
+                                                    <td><h:outputText escape="false" value="#{sp:localizeAttribute(businessRole.businessRole,'description')}"/></td>
+                                                </tr>
+                                            </c:forEach>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                   <ui:include src="/manage/policyViolations/entitlementSodViolationRemediationPanel.xhtml">
+                     <ui:param name="entitlementViolations" value="#{policyViolationAction.policyAdvisor.entitlementViolations}"/>
+                   </ui:include>
+
+                <ui:fragment rendered="#{policyViolationAction.entitlementSodViolation}">
+                   <ui:include src="/manage/policyViolations/entitlementSodViolationSelectedPanel.xhtml">
+                   </ui:include>
+               </ui:fragment>
+
+               <ui:fragment rendered="#{policyViolationAction.requirePolicyBusinessRoles}">
+                    <div id="selectedBizRoleTable" class="ViolationForm Remediate" style="display:none">
+                        <table  style="margin-bottom:12px">
+                            <tr style="text-align:left">
+                                <td class="policyViolationDetailLabel">
+                                    <b>#{msgs.violation_selected_roles} </b>
+                                </td>
+                            </tr>
+                            <tr style="text-align: left">
+                                <td style="padding-left:10px">
+                                    <ul id="selectedRolesToRemediate" >
+                                        <c:forEach var="businessRole" items="#{policyViolationAction.policyAdvisor.leftBusinessRoles}">
+                                            <c:if test="#{businessRole.selected}">
+                                                <li id="li_actionForm:_#{businessRole.businessRole.id}">#{businessRole.businessRole.displayableName}</li>
+                                            </c:if>
+                                        </c:forEach>
+                                        <c:forEach var="businessRole" items="#{policyViolationAction.policyAdvisor.rightBusinessRoles}">
+                                            <c:if test="#{businessRole.selected}">
+                                                <li id="li_actionForm:_#{businessRole.businessRole.id}">#{businessRole.businessRole.displayableName}</li>
+                                            </c:if>
+                                        </c:forEach>
+                                    </ul>
+                                </td>
+                            </tr>
+                         </table>
+                    </div>
+               </ui:fragment>
+
+                  
+                    <!--
+                      Description and recipient suggest box. Show up in delegations and when assigning a remediations
+                    -->
+                <input type="hidden" id="workItemOwnerName" name="workItemOwnerName" 
+                       value="#{sp:getDisplayNameForName('Identity', policyViolationAction.currentWorkItem.owner.name)}"/>
+                <textarea rows="5" cols="50" style="display:none" id="workItemComments" name="workItemComments">#{policyViolationAction.currentWorkItem.comments[0].comment}</textarea>
+                <input type="hidden" id="lastDecisionOwnerName" name="lastDecisionOwnerName"
+                       value="#{sp:getDisplayNameForName('Identity', policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.ownerName)}"/>
+                <textarea rows="5" cols="50" style="display:none" id="lastDecisionComments" name="lastDecisionComments">#{policyViolationAction.policyAdvisor.violationViewBean.lastDecision.action.comments}</textarea>
+                
+                <a4j:outputPanel id="assignmentDetailsPanel">
+                  <h:inputHidden id="ownerName" value="#{policyViolationAction.ownerName}"/>
+                  <h:inputHidden id="ownerId" value="#{policyViolationAction.ownerId}"/>
+                  <h:inputHidden id="defaultRemediatorName" value="#{policyViolationAction.defaultRemediatorName}"/>
+                  <div id="quickAssignmentOptionsJson" style="display:none">#{policyViolationAction.quickAssignmenOptionsJson}</div>
+                  
+                              
+                  <table>
+                    <ui:fragment rendered="#{policyViolationAction.violationAssignmentEnabled}">
+                      <tr style="display:none; vertical-align: top" class="ViolationForm Delegate Remediate">
+                          <td class="policyViolationDetailLabel titleColumn">
+                              <h:outputText value="#{msgs.label_select_recipient}"/>
+                              <h:outputText value="*" style="color:red" />
+                          </td>
+                          <td style="padding-left:10px;" class="policyViolationDetailLabel leftAlignedColumn">
+                              <div id="ownerNameSuggest" />
+                          </td>
+                      </tr>
+                    </ui:fragment>
+                    <tr style="display:none" class="ViolationForm Delegate Remediate">
+                        <td class="policyViolationDetailLabel titleColumn">
+                            #{msgs.label_description}
+                        </td>
+                        <td style="padding-left:10px" class="leftAlignedColumn">
+                            <input type="hidden" id="delegationDescription" name="delegationDescription" value="#{policyViolationAction.delegationDescription}"/>
+                            <input type="hidden" id="remediationDescription" name="remediationDescription" value="#{policyViolationAction.remediationDescription}"/>
+                            <h:inputText id="description" size="52"  value="#{policyViolationAction.description}"/>
+                        </td>
+                    </tr>
+
+                    <!--
+                        Comments - this only displays when the user is delegating, mitigating or assigning a remediation
+                    -->
+
+                    <tr style="display:none" class="ViolationForm Allow Delegate Remediate Acknowledge">
+                        <td class="titleColumn policyViolationDetailLabel">
+                            #{msgs.label_comments}
+                        </td>
+                        <td style="padding-left:10px" class="leftAlignedColumn policyViolationDetailLabel">
+                            <h:inputTextarea id="comments" rows="5" cols="50" value="#{policyViolationAction.comments}"/>
+                        </td>
+                    </tr>
+                  </table>
+                </a4j:outputPanel>
+
+
+    <!-- ***************************************************************************************  -->
+
+
+
+
+                </div>
+
+            </td></tr>
+
+            <tr><td height="35px">
+
+
+
+                    <!--
+                    Default the text on this button to remediate for the case in which they enter directly
+                    from the list page. Otherwise they'll make the decision from the select box, which will
+                    overwrite the text here.
+                    -->
+                    <h:commandButton id="certifyButton" action="#{policyViolationAction.certify}" style="display:none" styleClass="primaryBtn"/>
+                    <input type="hidden" id="requirePolicyBusinessRoles" name="requirePolicyBusinessRoles" value="#{policyViolationAction.requirePolicyBusinessRoles}"/>
+                    <input type="hidden" id="isEntitlementSodViolation" name="isEntitlementSodViolation" value="#{policyViolationAction.entitlementSodViolation}"/>
+                    <!-- 
+                    <input type="hidden" id="entitlementViolations" name="entitlementViolations" value="#{policyViolationAction.policyAdvisor.entitlementViolations}"/>
+                     -->
+                    <input type="hidden" id="entitlementViolationsJson" name="entitlementViolationsJson" value="#{policyViolationAction.policyAdvisor.entitlementViolationsJson}"/>
+                    <h:inputHidden id="selectedEntitlementsJson" value="#{policyViolationAction.selectedEntitlementsJson}"/>
+
+                    <input type="hidden" id="lastSelectedAction" name="lastSelectedAction" />
+                    <a4j:commandButton id="submitRemediationTargetsButton" styleClass="ViolationForm primaryBtn"
+                           oncomplete="onSelectAction('Remediate')" disabled="disabled"
+                           onclick="if (validateRemediationItems()){handleSelectedEntitlements();}else{return false;}" action="#{policyViolationAction.selectRemediationTargets}"
+                           value="#{msgs.violation_decision_remediate}"  style="display:none"
+                           render="assignmentDetailsPanel"/>
+                           
+                    <h:commandButton id="submitActionButton" styleClass="ViolationForm primaryBtn"
+                                     action="#{policyViolationAction.executeSelectedAction}"
+                                     onclick="return validateSubmit();" style="display:none" />
+                </td></tr>
+              </table>
+        </div>
+
+    </div>
+</td>
+
+</tr>
+<tr>
+
+</tr>
+</table>
+
+<!--
+Todo I couldnt get jsf's forwarding mechanism working here unless I came to this page w/ a redirect.
+Should be using a commandButton with an action=backToList
+-->
+<ui:fragment rendered="#{!policyViolationAction.showBackToDashboardBtn}">
+ <h:commandButton styleClass="secondaryBtn" id="cancelButton" action="#{violationView.cancelAction}" value="#{msgs.button_back_to_list}" />
+            
+</ui:fragment>
+<ui:fragment rendered="#{policyViolationAction.showBackToDashboardBtn}">
+    <input type="button" class="secondaryBtn" value="#{msgs.button_back_to_dash}" onclick="location.href='#{base.requestContextPath}/dashboard.jsf'"/>
+</ui:fragment>
+</div>
+</h:form>
+
+</f:view>
+</ui:define>
+</ui:composition>
+
+</body>
+</html>

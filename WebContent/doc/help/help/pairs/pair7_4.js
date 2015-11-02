@@ -1,0 +1,19 @@
+var pairs =
+{
+"members":{"read-only":1}
+,"read-only":{"tab":1}
+,"tab":{"lists":1,"pertains":1}
+,"lists":{"identities":1}
+,"identities":{"detected":1}
+,"detected":{"roles":1}
+,"roles":{"profiles":1}
+,"profiles":{"match":1}
+,"match":{"edited":1}
+,"edited":{"managed":1}
+,"managed":{"attribute":1,"attributes":1}
+,"attribute":{"tab":1}
+,"pertains":{"group":1}
+,"group":{"type":1}
+,"type":{"managed":1}
+}
+;Search.control.loadWordPairs(pairs);

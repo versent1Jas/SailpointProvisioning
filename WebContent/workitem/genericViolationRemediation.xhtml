@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:t="http://myfaces.apache.org/tomahawk"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:c="http://java.sun.com/jstl/core"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+<!--
+
+    A violation remediation that has no remediation details will just display policy
+    description since there are no remediation items to act upon. Currently (3.0)
+    this will include all non-sod policies
+
+-->
+
+<ui:composition >
+
+      <c:if test="#{workItem.violationViewBean == null}">
+          <table class="spPaddedTable" cellspacing="0" width='95%'>
+            <tr>
+              <th><h:outputText styleClass="spContentTitle" value="#{msgs.work_item_remed_violation_title_lost}"/></th>
+            </tr>
+          </table>
+      </c:if>
+      <c:if test="#{workItem.violationViewBean != null}">
+          <table class="spPaddedTable" cellspacing="0" width='95%'>
+            <tr>
+              <th><h:outputText styleClass="spContentTitle" value="#{msgs.work_item_remed_violation_title_plz_address}"/></th>
+            </tr>
+            <tr>
+              <td>
+                <table cellspacing="5" class="spPaddedTable">
+                  <tr>
+                    <td class='titleColumn'><h:outputText value="#{msgs.witem_identity_name}"/> </td>
+                    <td align='left'><h:outputText value="#{workItem.violationViewBean.identityName}"/> </td>
+                  </tr>
+                  <ui:include src="/identity/policyGenericDetails.xhtml">
+                    <ui:param name="violationView" value="#{workItem.violationViewBean}"/>
+                    <ui:param name="showViolationLink" value="true"/>
+                  </ui:include>
+                  <c:if test="#{workItem.violationViewBean.identityPageRenderer != null}">
+                    <ui:include src="/identity/#{workItem.violationViewBean.identityPageRenderer}">
+                        <ui:param name="violationView" value="#{workItem.violationViewBean}"/>
+                    </ui:include>
+                  </c:if>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+      </c:if>
+
+</ui:composition>
+
+</body>
+</html>
+
+

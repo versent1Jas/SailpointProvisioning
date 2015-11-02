@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/certification/RemediationGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+  </sp:script>
+  <script defer="defer">
+    SailPoint.Certification.RemediationGrid.forwardPage = '#{forwardPage}';
+    function showRemediationGrid(certificationId) {
+      
+      var gridResponseMeta = #{certificationIdentityItemsList.remediationColumnsJSON};
+      
+      SailPoint.Certification.RemediationGrid.showRemediationGrid(certificationId, gridResponseMeta.fields, gridResponseMeta.columns, "#{sp:localizeKey('title_revocations')}");      
+    }
+    </script>
+  
+  </f:view>
+</ui:composition>
+</body>
+</html>

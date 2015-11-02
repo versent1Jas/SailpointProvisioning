@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.ProjectServer" featuresString="PROVISIONING, ENABLE, DIRECT_PERMISSIONS, SYNC_PROVISIONING, MANAGER_LOOKUP" icon="enterpriseIcon" name="Microsoft Project Server Template" type="Microsoft Project Server">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="ProjectServerAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="DisplayName" identityAttribute="UserID" includePermissions="true" nativeObjectType="User" objectType="account">
+      <AttributeDefinition internalName="WRES_ACCOUNT" name="AccountName" type="string"/>
+      <AttributeDefinition internalName="RES_NAME" name="DisplayName" type="string"/>
+      <AttributeDefinition internalName="RES_UID" name="UserID" type="string"/>
+      <AttributeDefinition internalName="RES_INITIALS" name="Initials" type="string"/>
+      <AttributeDefinition internalName="WRES_EMAIL" name="Email" type="string"/>
+      <AttributeDefinition internalName="WRES_EMAIL_LANGUAGE" name="EmailLanguage" type="string"/>
+      <AttributeDefinition internalName="RES_RTF_NOTES" name="Notes" type="string"/>
+      <AttributeDefinition internalName="RES_TERMINATION_DATE" name="TerminationDate" type="string"/>
+      <AttributeDefinition internalName="RES_TIMESHEET_MGR_UID" name="ManagerUID" type="string"/>
+      <AttributeDefinition internalName="RES_PHONETICS" name="PhoneNumber" type="string"/>
+      <AttributeDefinition internalName="RES_HYPERLINK_ADDRESS" name="PersonalHyperlink" type="string"/>
+      <AttributeDefinition internalName="RES_HYPERLINK_FRIENDLY_NAME" name="HyperlinkName" type="string"/>
+      <AttributeDefinition internalName="RES_HIRE_DATE" name="HireDate" type="string"/>
+      <AttributeDefinition internalName="RES_EXCHANGE_SYNC" name="ExchangeSync" type="string"/>
+      <AttributeDefinition internalName="RES_DEF_ASSN_OWNER" name="AssignmentOwner" type="string"/>
+      <AttributeDefinition internalName="RES_COST_CENTER" name="CostCenter" type="string"/>
+      <AttributeDefinition internalName="RES_CHECKOUTDATE" name="CheckoutDate" type="string"/>
+      <AttributeDefinition internalName="RES_CHECKOUTBY" name="CheckoutBy" type="string"/>
+      <AttributeDefinition internalName="RES_CAN_LEVEL" name="ResourceCanLevel" type="string"/>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="Categories" type="string"/>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="Groups" schemaObjectType="group" type="string"/>
+      </Schema>
+      <Schema displayAttribute="GroupName" featuresString="PROVISIONING, NO_PERMISSIONS_PROVISIONING" identityAttribute="GroupID" includePermissions="true" nativeObjectType="Group" objectType="group">
+        <AttributeDefinition internalName="WSEC_GRP_UID" name="GroupID" type="string"/> 
+        <AttributeDefinition internalName="WSEC_GRP_NAME" name="GroupName" type="string"/>       
+        <AttributeDefinition internalName="WSEC_GRP_DESC" name="Description" type="string"/>
+        <AttributeDefinition internalName="WSEC_GRP_AD_GROUP" name="ADGroup" type="string"/>       
+      </Schema>
+    </Schemas>
+    <Templates>
+    <Template name="Create Account" schemaObjectType="account" usage="Create">
+      <Field displayName="con_prov_policy_ps_DisplayName" helpKey="help_con_prov_policy_ProjectServer_UDisplayName" name="DisplayName" required="true" type="string"/>
+      <Field displayName="con_prov_policy_ps_Email" helpKey="help_con_prov_policy_ProjectServer_UEmail" name="Email" reviewRequired="true" type="string"/>     
+      <Field displayName="con_prov_policy_ps_AccountName" helpKey="help_con_prov_policy_ProjectServer_UName" name="AccountName" required="true" type="string"/>
+    </Template>
+    <Template name="Group create" schemaObjectType="group" usage="Create">
+      <Field displayName="con_prov_policy_ps_GroupName" name="GroupName" required="true" type="string"/>
+    </Template>
+    <Template name="Update Group" schemaObjectType="group" usage="Update">
+      <Field displayName="con_prov_policy_ps_Description" name="Description" type="string"/>
+      <Field displayName="con_prov_policy_ps_ActiveDirectoryGroup" helpKey="help_con_prov_policy_ProjectServer_AdGroup" name="ADGroup" type="string"/>
+    </Template>   
+  </Templates>
+  </Application>
+</ImportAction>

@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition>
+  <!--  Any page that includes this page must also include the bandConfig.js file! -->
+  <h:inputHidden id="numBands" value="#{bandConfig.numBands}"/>
+  <table class="sysConfigTable">
+    <thead>
+      <tr><th class="dashContentHeader" colspan="2">
+        <h:outputText value="#{msgs.band_range}" />
+      </th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="2"><t:dataTable styleClass="spTable"
+          id="bandConfigTable"
+          columnClasses="centeredColumn, centeredColumn"
+          value="#{bandConfig.bands}" var="band"
+          forceIdIndexFormula="#{band.index}">
+          <h:column>
+            <f:facet name="header">
+              <h:outputText value="#{msgs.band_label}"/>
+            </f:facet>
+            <h:outputText id="bandLabel" value="#{band.label}"/>
+            <h:inputHidden id="bandColor" value="#{band.color}"/>
+            <h:inputHidden id="bandTextColor" value="#{band.textColor}"/>
+          </h:column>
+          <h:column>
+            <f:facet name="header">
+              <h:outputText value="#{msgs.range}"/>
+            </f:facet>
+            
+            <h:outputText id="bandlower" value="#{band.lowerBound}" />
+            <h:outputText value=" - " /> 
+            <h:outputText id="bandupper" value="#{band.upperBound}" />
+          </h:column>
+        </t:dataTable></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <ui:repeat value="#{bandConfig.bands}" var="bandOption">
+    <script defer="defer" type="text/javascript">
+      // <![CDATA[
+      // Set up the colors that we will use to display bands
+        addColor(#{bandOption.index}, '#{bandOption.color}');
+      // ]]>
+    </script>
+  </ui:repeat>
+        
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  >
+<body>
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="headerItems">
+<!--
+  may be able to weed some of these out...
+-->
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/sliderGroups.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/bandConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/compositeScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/appScores.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script defer='defer'>
+      <!--//--><![CDATA[//><!--
+      helpKey = 'APP_RISK_SCORES';
+      //--><!]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="title">#{msgs.title_app_risk_scoring_conf}</ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form id="editForm">
+         
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        
+        <div id="appScoreTabs" style="width:95%; margin-top: 20px;"></div> 
+        
+        <div id="componentContent" class="x-hide-display">
+          <div class="paddedContainer">
+            <ui:include src="/define/riskScores/appComponentsInclude.xhtml"/>
+          </div>
+        </div>
+        
+        <div id="compositeContent" class="x-hide-display">
+          <div class="paddedContainer">
+              <ui:include src="/define/riskScores/appCompositeInclude.xhtml"/>
+          </div>
+        </div>
+
+        <div class="buttonRow">
+          <a4j:commandButton id="visibleSaveButton" 
+            value="#{msgs.button_save}" styleClass="primaryBtn" onclick="confirmSaveOrCancel('editForm:stealthSaveButton', 'editForm:stealthCancelButton');" />
+      
+          <a4j:commandButton id="visibileCancelButton" styleClass="secondaryBtn" 
+                value="#{msgs.button_cancel}" onclick="confirmSaveOrCancel('editForm:stealthSaveButton', 'editForm:stealthCancelButton');"  />
+        </div>
+
+        <h:commandButton style="display:none" id="stealthSaveButton"
+          action="#{applicationRisk.saveChangesAction}" />
+
+        <h:commandButton style="display:none" id="stealthCancelButton"
+          action="#{applicationRisk.cancelChangesAction}" />
+
+      </h:form>      
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

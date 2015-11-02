@@ -1,0 +1,1685 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+
+<h:head>
+<title>#{msgs.title_configure_compliance_manager_settings}</title>
+</h:head>
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">#{msgs.title_configure_compliance_manager_settings}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>       
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/bandConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/electronicSignatures.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'SYSTEM_COMPLIANCE_SETTINGS';
+
+        function syncAllowExceptionDisabledState() {
+            var checkbox = $('editForm:enableAllowException');
+            var bulkCheckbox = $('editForm:enableListViewBulkMitigate');
+            var enableBulkAllowExceptionCB = $('editForm:enableListViewBulkAllowException');
+
+            if (checkbox && bulkCheckbox) {
+                bulkCheckbox.disabled = !checkbox.checked;
+            }
+            if (checkbox && enableBulkAllowExceptionCB) {
+                enableBulkAllowExceptionCB.disabled = !checkbox.checked;
+            }
+        }
+
+        function syncBulkAccountRevocationState() {
+            // Don't show bulk account revoke options if
+            // general account revoke is disabled
+            var accountRevokeEnabledCheckbox = $('editForm:enableAccountRevoke');
+            var bulkAccountRevoke1 = $('editForm:enableListViewBulkAccountRevocation');
+            var bulkAccountRevoke2 = $('editForm:enableEntityBulkAccountRevocation');
+
+            if (accountRevokeEnabledCheckbox && bulkAccountRevoke1 && bulkAccountRevoke2) {
+                bulkAccountRevoke1.disabled = !accountRevokeEnabledCheckbox.checked;
+                bulkAccountRevoke2.disabled = !accountRevokeEnabledCheckbox.checked;
+            }
+        }
+
+        var isPageDirty = false;
+        function makePageDirty() {
+          isPageDirty = true;
+          // Return false so that we don't accidentally submit the form
+          return false;
+        }
+
+        function updateAutoSignoffOption() {
+            var isAutoSignoffDisabled = $('editForm:completeReassignments').checked || $('editForm:assimilateBulkReassignments').checked;
+            $('editForm:autoSignoffOnReassignments').disabled = isAutoSignoffDisabled;
+            if (isAutoSignoffDisabled) {
+                $('editForm:autoSignoffOnReassignments').checked = false;
+            }
+        }
+
+
+        function initSysCompAutoCloseSuggest () {
+            var autoCloseSignerSuggest;
+            if (!$('automaticClosingSuggestComp') && $('automaticClosingSuggest')) {
+                autoCloseSignerSuggest = new SailPoint.IdentitySuggest({
+                    id: 'automaticClosingSuggestComp',
+                    renderTo: 'automaticClosingSuggest',
+                    binding: 'automaticClosingInput',
+                    baseParams: {context: 'Owner'}
+                });
+                
+                var iVal = '#{sp:escapeJavascript(systemConfig.automaticClosingSigner.displayName)}'; 
+                if(iVal != ''){
+                	autoCloseSignerSuggest.setRawValue(iVal);
+                    SailPoint.Suggest.IconSupport.setIconDiv(autoCloseSignerSuggest, 'userIcon');
+                }
+            }
+
+            // stoopid IE...
+            autoCloseSignerSuggest = Ext.getCmp('automaticClosingSuggestComp');
+            //autoCloseSignerSuggest.hide();
+            autoCloseSignerSuggest.show();
+            }
+
+
+        /**
+         * Fixes a weird display artifact in the younger versions of IE
+         */
+        function hideSignerSuggest () {
+            var suggest = Ext.getCmp('automaticClosingSuggestComp');
+            if (suggest)
+                suggest.hide();
+        }
+
+        function syncAllowExceptionPopup() {
+          var allowPopup = $('editForm:enableAllowExceptionPopup');
+          var requireComments = $('editForm:requireMitigationComments');
+          if (requireComments.checked) {
+            allowPopup.checked = true;
+          }
+        }
+
+        function syncAutoSignOffState() {
+            var autoSignOffWhenNothing = $('editForm:autoSignOffWhenNothingToCertify').checked;
+            var supressNotificationWhenNothing = $('editForm:suppressEmailWhenNothingToCertify').checked;
+            var requireSubordinateSignOff = $('editForm:completeCertificationHierarchy').checked;
+            /* Auto Sign Off When Nothing To Certify and Require Subordinate Sign Off are mutually exclusive options.
+             * The suppress notification option is dependent on the Auto Sign Off option. */
+            if( !requireSubordinateSignOff && !autoSignOffWhenNothing) { 
+                $('editForm:autoSignOffWhenNothingToCertify').disabled = false;
+                $('editForm:suppressEmailWhenNothingToCertify').checked = false;
+                $('editForm:suppressEmailWhenNothingToCertify').disabled = true;
+                $('editForm:completeCertificationHierarchy').disabled = false;
+            } else if( requireSubordinateSignOff ) {
+                $('editForm:autoSignOffWhenNothingToCertify').checked = false;
+                $('editForm:autoSignOffWhenNothingToCertify').disabled = true;
+                $('editForm:suppressEmailWhenNothingToCertify').checked = false;
+                $('editForm:suppressEmailWhenNothingToCertify').disabled = true;
+                $('editForm:completeCertificationHierarchy').disabled = false;
+            } else {
+                $('editForm:autoSignOffWhenNothingToCertify').disabled = false;
+                $('editForm:suppressEmailWhenNothingToCertify').disabled = false;
+                $('editForm:completeCertificationHierarchy').checked = false;
+                $('editForm:completeCertificationHierarchy').disabled = true;
+            }
+        }
+
+        function syncRequireMitigationComments() {
+          var allowPopup = $('editForm:enableAllowExceptionPopup');
+          var requireComments = $('editForm:requireMitigationComments');
+          if (!allowPopup.checked) {
+            requireComments.checked = false;
+          }
+        }
+
+        function initAccountReassign() {
+            var defaultAssigneeSuggest = new SailPoint.IdentitySuggest({
+                id: 'defaultAssigneeSuggestComp',
+                renderTo: 'defaultAssigneeSuggest',
+                binding: 'defaultAssigneeInput',
+                baseParams: {context: 'Owner'}
+            });
+            
+            defaultAssigneeSuggest.loadValueByName('#{systemConfig.defaultAssignee.name}');
+        }
+        
+        function syncAccountReassign() {
+            var reassignCheckbox = $('editForm:enableAccountReassign');
+            if (reassignCheckbox && !reassignCheckbox.checked) {
+                var cmp = Ext.getCmp('defaultAssigneeSuggestComp');
+                if (cmp) {
+                    cmp.clearValue();
+                }
+            }
+        }
+
+        function onLimitReassignmentsChanged(el) {
+            var elLimit = $('editForm:reassignmentLimit');
+            if (elLimit) {
+                elLimit.disabled = !el.checked;
+                SailPoint.toggleClass('.notLimit', 'disabled', !el.checked);
+            }
+        }
+
+        Ext.onReady(function() {
+            if ($('editForm:certifyAutomaticClosingSelect').checked)
+                initSysCompAutoCloseSuggest();
+
+            syncAllowExceptionDisabledState();
+
+            syncBulkAccountRevocationState();
+            syncAutoSignOffState();
+            // Display the proper options based on the current radio selection
+            var selectedRadio = null;
+            var radioInputs = document.getElementsByName('editForm:certifySubordinate');
+            for (var i = 0; i < radioInputs.length && selectedRadio == null; ++i) {
+                if (radioInputs[i].checked) {
+                    selectedRadio = radioInputs[i];
+                }
+            }
+            if (selectedRadio.value != 'false') {
+                $('certifySubordinateOptions').style['display'] = 'none';
+            }
+
+            var defaultRemediatorSuggest = new SailPoint.IdentitySuggest({
+                id: 'defaultRemediatorSuggestComp',
+                renderTo: 'defaultRemediatorSuggest',
+                binding: 'defaultRemediatorInput',
+                baseParams: {context: 'Owner'}
+            });
+            
+            var iVal = '#{sp:escapeJavascript(systemConfig.defaultRemediator.displayName)}'; 
+            if(iVal != ''){
+            	defaultRemediatorSuggest.setRawValue(iVal);
+                SailPoint.Suggest.IconSupport.setIconDiv(defaultRemediatorSuggest, 'userIcon');
+            }
+            
+            var meaningsStore;
+            initMeaningsComboBox('#{systemConfig.defaultElectronicSignatureName}',false,false,'editForm:defaultElectronicSignatureName');
+
+            var el = $('editForm:limitReassignments');
+            if (el) {
+                onLimitReassignmentsChanged(el);
+            }
+
+            initAccountReassign();
+            
+            Ext.QuickTips.init();
+        });
+        
+        //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+
+    <f:view>
+      <h:form styleClass="form" id="editForm">
+
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        <table id="wholePage" class="width100">
+          <tbody>
+            <tr><td colspan="2">
+                <div class="spContent">
+                  <table class="spTable" style="margin:5px">
+                      <tr>
+                        <td colspan="3">
+                            <h:outputText styleClass="spContentTitle" value="#{msgs.cert_sched_behavior_presentation_properties}"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="right" width="500px"><h:outputText
+                          value="#{msgs.system_config_cert_page_list_detailed_view}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpListDetailedView"
+                            width="12px" height="12px" alt="#{help.help_system_config_cert_page_list_detailed_view}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td><h:selectOneRadio layout="lineDirection" id="listOrDetailed"
+                              value="#{systemConfig.detailedViewFilterSet}" onclick="makePageDirty();">
+                              <f:selectItem id="systemConfigCertList" itemLabel="#{msgs.label_list}" itemValue="false"/>
+                              <f:selectItem id="systemConfigCertDetailed" itemLabel="#{msgs.label_detailed}" itemValue="true"/>
+                            </h:selectOneRadio></td>
+                      </tr>
+                      <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.system_config_cert_page_list_items_view}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpCertPageListItems"
+                            width="12px" height="12px" alt="#{help.help_system_config_cert_page_list_items_view}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td><h:selectOneRadio layout="lineDirection" id="certPageListItems"
+                              value="#{systemConfig.certPageListItems}" onclick="makePageDirty();">
+                              <f:selectItem id="systemConfigCertListWorkSheetView" itemLabel="#{msgs.label_worksheet_view}" itemValue="true"/>
+                              <f:selectItem id="systemConfigCertListIdentityView" itemLabel="#{msgs.label_identity_view}" itemValue="false"/>
+                            </h:selectOneRadio></td>
+                      </tr>
+                     <tr>
+                        <td align="right">#{msgs.sys_config_cert_entitlement_display}</td>
+                        <td width="15px">
+                         <h:graphicImage id="imgHlpExcludeEntsDisplay" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_cert_entitlement_display}"/>
+                        </td>
+                        <td>
+                            <h:selectOneRadio value="#{systemConfig.displayEntitlementDescription}" onclick="makePageDirty();">
+                              <f:selectItem itemLabel="#{msgs.sys_config_cert_entitlement_display_val}" itemValue="false" />
+                              <f:selectItem itemLabel="#{msgs.sys_config_cert_entitlement_display_desc}" itemValue="true" />
+                            </h:selectOneRadio>
+                        </td>
+                      </tr>
+                     <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.system_config_subcert_page_size}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpSubCertPageSize"
+                            width="12px" height="12px" alt="#{help.help_system_config_subcert_page_size}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td>
+                          <h:inputText id="subCertificationPageSize"
+                                       value="#{systemConfig.subCertificationPageSize}"
+                                       onchange="makePageDirty();"
+                                       size="4">
+                            <f:validateLongRange minimum="0" maximum="9999" />
+                          </h:inputText>
+                        </td>
+                      </tr>
+                  </table>
+              </div>
+                <div class="spContent">
+                  <table style="margin:5px" class="spTable">
+                      <tr>
+                        <td colspan="4">
+                            <h:outputText styleClass="spContentTitle" value="#{msgs.cert_sched_lifecycle_tab}"/>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right" width="500px">
+                          <h:outputText value="#{msgs.sys_config_notify_remediation}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpNotifyRemed"
+                            width="12px" height="12px" alt="#{help.help_system_config_notify_remediation}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td>
+                          <h:selectBooleanCheckbox id="notifyRemediation" value="#{systemConfig.notifyRemediation}" onclick="makePageDirty();" />
+                        </td>
+                        <td>
+                          <h:message styleClass="formError" for="notifyRemediation" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_specify_certification_escalation_rule}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpCertEscRule"
+                            width="12px" height="12px" alt="#{help.help_system_config_cert_esc_rule}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td class="nowrap" colspan="2">
+                          <a4j:outputPanel id="escalationRulePanel">
+                          <h:selectOneMenu id="escalationRule"
+                                           value="#{systemConfig.selectedEscalationRule}"
+                                           onchange="makePageDirty();">
+                            <f:selectItems value="#{systemConfig.escalationRules}" />
+                          </h:selectOneMenu>
+                          </a4j:outputPanel>
+                          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                             <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                                    onclick="SailPoint.Rule.Editor.edit($('editForm:escalationRule').value,
+                                                                        'Escalation',
+                                                                        $('editForm:refreshEscalationRulesButton'))" />
+                          </ui:fragment>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_mitigation_expiration_action}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpMitExpAction"
+                            width="12px" height="12px" alt="#{help.help_system_config_mit_exp_action}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td colspan="2"><h:selectOneMenu
+                          id="mitigationExpirationAction"
+                          converter="sailpoint.object.Enum"
+                          value="#{systemConfig.mitigationExpirationAction}"
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.mitigationExpirationActions}" />
+                        </h:selectOneMenu></td>
+                      </tr>
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.system_config_active_period_duration}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpActivePeriodDuration" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_active_period_duration}"/>
+                        </td>
+                        <td colspan="2">
+                          <h:inputText id="activePeriodDuration" value="#{systemConfig.activePeriodDurationAmount}" onchange="makePageDirty();" size="3"/>
+                          <h:selectOneListbox
+                            id="activeDurationDurationScale"
+                            size="1"
+                            onchange="makePageDirty();"
+                            converter="sailpoint.object.Enum"
+                            value="#{systemConfig.activePeriodDurationScale}">
+                          <f:selectItems value="#{systemConfig.durationScales}" />
+                          </h:selectOneListbox>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_challenge_period}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpClg" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_chlg_enabled}"/>
+                        </td>
+                        <td>
+                          <h:selectBooleanCheckbox id="certifyChallengeSelect" value="#{systemConfig.challengePeriodEnabled}"
+                            onclick="showHideWithLock($('challengePeriodConfig'), this); makePageDirty();"/>
+                        </td>
+                        <td></td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2"></td>
+                        <td colspan="2">
+                          <div id="challengePeriodConfig" style="display: #{systemConfig.challengePeriodEnabled ? '' : 'none'}">
+                            <table class="width100">
+                              <thead>
+                                <tr>
+                                  <th colspan="4" class="dashContentHeader">
+                                    <h:outputText value="#{msgs.sys_config_challenge_period_config}" />
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_challenge_period_duration}" /></td>
+                                  <td width="15px"><h:graphicImage id="imgHlpClgDuration"
+                                    width="12px" height="12px"
+                                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_chlg_duration}"/>
+                                  </td>
+                                  <td colspan="2">
+                                    <h:inputText id="challengeDuration" value="#{systemConfig.challengePeriodDurationAmount}" onchange="makePageDirty();" size="3"/>
+                                    <h:selectOneListbox
+                                      id="challengeDurationDurationScale"
+                                      size="1"
+                                      onchange="makePageDirty();"
+                                      converter="sailpoint.object.Enum"
+                                      value="#{systemConfig.challengePeriodDurationScale}">
+                                      <f:selectItems value="#{systemConfig.durationScales}" />
+                                    </h:selectOneListbox>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_remediation_period}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpRemed" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_remed_enabled}"/>
+                        </td>
+                        <td colspan="2">
+                          <h:selectBooleanCheckbox
+                            id="certifyRemediationSelect"
+                            value="#{systemConfig.remediationPeriodEnabled}"
+                            onclick="showHideWithLock($('remediationPeriodConfig'), this); makePageDirty();$('certificationRemediationSelectWarning').style.display = ( $('editForm:certifyRemediationSelect').checked ? 'none' : '' );"
+                            rerender="certificationRemediationSelectWarning"/>
+                            <div id="certificationRemediationSelectWarning" class='formWarn' style="display: #{certificationSchedule.editedCertificationSchedule.remediationPeriodEnabled ? 'none' : ''}">
+                                <h:outputText value="#{msgs.cert_sched_remediation_scanner_warning}" />
+                            </div>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2"></td>
+                        <td colspan="2">
+                          <div id="remediationPeriodConfig" style="display: #{systemConfig.remediationPeriodEnabled ? '' : 'none'}">
+                            <table class="width100">
+                              <thead>
+                                <tr>
+                                  <th colspan="4" class="dashContentHeader">
+                                    <h:outputText value="#{msgs.sys_config_remediation_period_config}" />
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_remediation_period_duration}" /></td>
+                                  <td width="15px"><h:graphicImage id="imgHlpRemedDuration"
+                                    width="12px" height="12px"
+                                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_remed_duration}"/>
+                                  </td>
+                                  <td colspan="2">
+                                    <h:inputText id="remediationDuration" value="#{systemConfig.remediationPeriodDurationAmount}" onchange="makePageDirty();" size="3"/>
+                                    <h:selectOneListbox
+                                      id="remediationDurationDurationScale"
+                                      size="1"
+                                      onchange="makePageDirty();"
+                                      converter="sailpoint.object.Enum"
+                                      value="#{systemConfig.remediationPeriodDurationScale}">
+                                      <f:selectItems value="#{systemConfig.durationScales}" />
+                                    </h:selectOneListbox>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+
+                     <tr>
+                        <td align="right">#{msgs.sys_config_default_remediator}</td>
+                        <td width="15px">
+                         <h:graphicImage id="imgHlpDfltRemed" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_default_remediator}"/>
+                        </td>
+                        <td colspan="2">
+                          <div id="defaultRemediatorSuggest"></div>
+                          <t:inputHidden id="defaultRemediatorInput"
+                                         value="#{systemConfig.defaultRemediator}" forceId="true">
+                              <sp:convertIdentity />
+                          </t:inputHidden>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_automatic_closing_enabled}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpAutoClose" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_automatic_closing_enabled}"/>
+                        </td>
+                        <td colspan="2">
+                          <h:selectBooleanCheckbox
+                            id="certifyAutomaticClosingSelect"
+                            value="#{systemConfig.automaticClosingEnabled}"
+                            onclick="hideSignerSuggest();showHideWithLock($('automaticClosingConfig'), this, null, initSysCompAutoCloseSuggest); makePageDirty();"/>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td colspan="2"></td>
+                        <td colspan="2">
+                          <div id="automaticClosingConfig" style="display: #{systemConfig.automaticClosingEnabled ? '' : 'none'}">
+                            <table class="width100">
+                              <thead>
+                                <tr>
+                                  <th colspan="3" class="dashContentHeader">
+                                    <h:outputText value="#{msgs.sys_config_automatic_closing_config}" />
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_automatic_closing_duration}" /></td>
+                                  <td width="15px"><h:graphicImage id="imgHlpAutoCloseDuration"
+                                    width="12px" height="12px"
+                                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_automatic_closing_duration}"/>
+                                  </td>
+                                  <td>
+                                    <h:inputText id="automaticClosingDuration" value="#{systemConfig.automaticClosingDurationAmount}" onchange="makePageDirty();" size="3"/>
+                                    <h:selectOneListbox
+                                      id="automaticClosingDurationScale"
+                                      size="1"
+                                      onchange="makePageDirty();"
+                                      converter="sailpoint.object.Enum"
+                                      value="#{systemConfig.automaticClosingDurationScale}">
+                                      <f:selectItems value="#{systemConfig.durationScales}" />
+                                    </h:selectOneListbox>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_automatic_closing_rule}" /></td>
+                                  <td width="15px"><h:graphicImage id="imgHlpAutoCloseRule"
+                                    width="12px" height="12px"
+                                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_automatic_closing_rule}"/>
+                                  </td>
+                                  <td class="nowrap">
+                                    <a4j:outputPanel id="automaticClosingRulePanel">
+                                    <h:selectOneMenu id="automaticClosingRuleName"
+                                                     value="#{systemConfig.automaticClosingRuleName}"
+                                                     onchange="makePageDirty();">
+                                      <f:selectItems value="#{systemConfig.automaticClosingRules}" />
+                                    </h:selectOneMenu>
+                                    </a4j:outputPanel>
+
+                                    <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                                       <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                                              onclick="SailPoint.Rule.Editor.edit($('editForm:automaticClosingRuleName').value,
+                                                                                  'CertificationAutomaticClosing',
+                                                                                  $('editForm:refreshAutomaticClosingRulesButton'))" />
+                                    </ui:fragment>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_automatic_closing_action}" /></td>
+                                  <td width="15px"><h:graphicImage id="imgHlpAutoCloseAction"
+                                    width="12px" height="12px"
+                                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_automatic_closing_action}"/>
+                                  </td>
+                                  <td>
+                                    <h:selectOneListbox
+                                      id="automaticClosingAction"
+                                      size="1"
+                                      onchange="makePageDirty();"
+                                      converter="sailpoint.object.Enum"
+                                      value="#{systemConfig.automaticClosingAction}">
+                                      <f:selectItems value="#{systemConfig.automaticClosingActions}" />
+                                    </h:selectOneListbox>
+                                  </td>
+                                </tr>
+                                <tr class="vertical-align">
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_automatic_closing_comments}" /></td>
+                                  <td width="15px"><h:graphicImage id="imgHlpAutoCloseComments"
+                                    width="12px" height="12px"
+                                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_automatic_closing_comments}"/>
+                                  </td>
+                                  <td>
+                                    <h:inputTextarea
+                                      id="automaticClosingComments"
+                                      rows="4" cols="50"
+                                      onchange="makePageDirty();"
+                                      value="#{systemConfig.automaticClosingComments}" />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_automatic_closing_signer}" /></td>
+                                  <td width="15px"><h:graphicImage id="imgHlpAutoCloseSigner"
+                                    width="12px" height="12px"
+                                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_automatic_closing_signer}"/>
+                                  </td>
+                                  <td>
+                                    <div id="automaticClosingSuggest"></div>
+                                    <t:inputHidden id="automaticClosingInput"
+                                                   value="#{systemConfig.automaticClosingSigner}" forceId="true">
+                                        <sp:convertIdentity />
+                                    </t:inputHidden>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+
+                  </table>
+              </div>
+                <div class="spContent">
+                  <table style="margin:5px" class="spTable">
+                      <tr>
+                          <td colspan="4">
+                            <h:outputText styleClass="spContentTitle" value="#{msgs.cert_sched_behavior_behavior_properties}"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="right" width="500px"><h:outputText value="#{msgs.sys_config_require_bulk_certify_confirm}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpReqBulkCertConfirm"
+                            width="12px" height="12px" alt="#{help.help_system_config_require_bulk_certify_confirm}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td colspan="2">
+                          <h:selectBooleanCheckbox id="requireBulkCertifyConfirm"
+                             value='#{systemConfig.object.attributes["requireBulkCertifyConfirmation"]}'
+                             onclick="makePageDirty();" />
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_bulk_certify_confirm_selection_count}" /></td> 
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpBulkCertConfirmSelCnt"
+                            width="12px" height="12px" alt="#{help.help_system_config_bulk_certify_confirm_selection_count}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td colspan="2">
+                          <h:inputText id="bulkCertConfirmSelCnt"
+                                       value='#{systemConfig.object.attributes["bulkSelectionCountForConfirmation"]}'
+                                       onchange="makePageDirty();"
+                                       size="4">
+                            <f:validateLongRange minimum="0" maximum="9999" />
+                          </h:inputText>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right">#{msgs.sys_config_enable_certification_signoff_popup}</td>
+                        <td width="15px">
+                         <h:graphicImage id="imgHlpAutomateSignOff" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_enable_certification_signoff_popup}"/>
+                        </td>
+                        <td colspan="2">
+                          <h:selectBooleanCheckbox
+                            id="automateSignOffPopup"
+                            value="#{systemConfig.object.attributes['automateSignOffPopup']}" />
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td align="right">#{msgs.sys_config_default_electronic_signature_enabled}</td>
+                        <td width="15px">
+                         <h:graphicImage id="imgHlpDefaultESigEnabled" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_default_electronic_signature_enabled}"/>
+                        </td>
+                        <td colspan="2">
+                          <h:selectBooleanCheckbox
+                            id="defaultESigEnabledSelect"
+                            value="#{systemConfig.defaultElectronicSignatureEnabled}"
+                            onclick="showHideWithLock($('defaultESigConfig'), this, null, null); makePageDirty();"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="2"></td>
+                        <td colspan="2">
+                          <div id="defaultESigConfig" style="display: #{systemConfig.defaultElectronicSignatureEnabled ? '' : 'none'}">
+                          <table class="width100">
+                          <thead>
+                                <tr>
+                                  <th colspan="3" class="dashContentHeader">
+                                    <h:outputText value="#{msgs.sys_config_default_electronic_signature_config_header}" />
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_default_electronic_signature_config_text}" /></td>
+                                  <td width="15px">
+                                    <span id="imgHlpESigComboBox"/>
+                                  </td>
+                                  <td>
+			                           <div id="eSigComboBox"/>
+			                           <h:inputHidden id="defaultElectronicSignatureName" value="#{systemConfig.defaultElectronicSignatureName}"/>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                      
+                      <tr>
+                        <td align="right">
+                          <h:outputText value="#{msgs.label_require_subordinate_completion}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpCompleteHierarchy"
+                            width="12px" height="12px" alt="#{help.help_sched_cert_sub_complete}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="left" colspan="2"><h:selectBooleanCheckbox
+                            id="completeCertificationHierarchy"
+                            onclick="makePageDirty();syncAutoSignOffState();"
+                            value="#{systemConfig.completeCertificationHierarchy}" />
+                        </td>
+                      </tr>
+                      
+                      <tr id="autoSignOffWhenNothingToCertifyRow">
+                        <td align="right">
+                          <h:outputText value="#{msgs.label_enable_auto_sign_off_when_nothing_to_certify}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpAutoSignOffWhenNothingToCertify"
+                            width="12px" height="12px" alt="#{help.help_sched_cert_enable_auto_sign_off_when_nothing_to_certify}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="left" colspan="2"><h:selectBooleanCheckbox
+                            id="autoSignOffWhenNothingToCertify"
+                            value="#{certificationSchedule.editedCertificationSchedule.autoSignOffWhenNothingToCertify}"
+                            disabled="#{certificationSchedule.existingCertGroup}"
+                            onclick="makePageDirty();syncAutoSignOffState()" />
+                        </td>
+                      </tr>
+              
+                      <tr id="suppressEmailWhenNothingToCertifyRow">
+                        <td align="right">
+                          <h:outputText value="#{msgs.label_suppress_email_when_nothing_to_certify}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpSupressEmailWhenNothingToCertify"
+                            width="12px" height="12px" alt="#{help.help_sched_cert_suppress_email_when_nothing_to_certify}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="left" colspan="2"><h:selectBooleanCheckbox
+                            id="suppressEmailWhenNothingToCertify"
+                            disabled="#{certificationSchedule.existingCertGroup}"
+                            value="#{certificationSchedule.editedCertificationSchedule.suppressEmailWhenNothingToCertify}"
+                            onclick="makePageDirty();syncAutoSignOffState()" />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right">
+                          <h:outputText value="#{msgs.label_require_reassignment_completion}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpCompleteReassignments"
+                            width="12px" height="12px" alt="#{help.help_sched_cert_require_reassignment_completion}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="left" colspan="2"><h:selectBooleanCheckbox
+                            id="completeReassignments"
+                            onclick="makePageDirty(); updateAutoSignoffOption();"
+                            value="#{systemConfig.object.attributes['requireReassignmentCompletion']}" />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right">
+                          <h:outputText value="#{msgs.label_assimilate_bulk_reassignments}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpAssimBulkReassign"
+                            width="12px" height="12px" alt="#{help.help_sched_cert_assimilate_bulk_reassignments}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="left" colspan="2"><h:selectBooleanCheckbox
+                            id="assimilateBulkReassignments"
+                            onclick="makePageDirty(); updateAutoSignoffOption();"
+                            value="#{systemConfig.object.attributes['assimilateBulkReassignments']}" />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right">
+                          <h:outputText value="#{msgs.label_enable_auto_signoff_on_reassignment}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpReassignmentAutoSignoff"
+                            width="12px" height="12px" alt="#{help.help_sched_cert_enable_auto_signoff_on_reassignment}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="left" colspan="2"><h:selectBooleanCheckbox
+                            id="autoSignoffOnReassignments"
+                            onclick="makePageDirty();"
+                            disabled="#{systemConfig.object.attributes['requireReassignmentCompletion'] or systemConfig.object.attributes['assimilateBulkReassignments'] ? 'true' : 'false'}"
+                            value="#{systemConfig.object.attributes['automateSignOffOnReassignment']}" />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.sys_config_require_approval_comments}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpRequireApprovalComments"
+                            width="12px" height="12px" alt="#{help.help_system_config_require_cert_approval_comments}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td colspan="2"><h:selectBooleanCheckbox
+                            id="requireApprovalComments"
+                            value="#{systemConfig.requireApprovalComments}"
+                            onclick="makePageDirty();" /></td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.sys_config_require_mitigation_comments}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpRequireMitigationComments"
+                            width="12px" height="12px" alt="#{help.help_system_config_require_exception_comments}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td colspan="2"><h:selectBooleanCheckbox
+                            id="requireMitigationComments"
+                            value="#{systemConfig.requireMitigationComments}"
+                            onclick="makePageDirty();syncAllowExceptionPopup();" /></td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.sys_config_require_review_on_delegate}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpRequireDelReview"
+                            width="12px" height="12px" alt="#{help.help_system_config_require_del_review}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="left"><h:selectBooleanCheckbox
+                          id="requireCertificationDelegationReview"
+                          value="#{systemConfig.certificationDelegationReviewRequired}"
+                          onclick="makePageDirty();" /></td>
+                        <td><h:message styleClass="formError"
+                          for="requireCertificationDelegationReview" /></td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.sys_config_require_delegation_completion}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpRequireDelComplete"
+                            width="12px" height="12px" alt="#{help.help_system_config_require_delegation_completion}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="left"><h:selectBooleanCheckbox
+                          id="requireDelegationCompletion"
+                          value='#{systemConfig.object.attributes["requireDelegationCompletion"]}'
+                          onclick="makePageDirty();" /></td>
+                        <td><h:message styleClass="formError"
+                          for="requireCertificationDelegationReview" /></td>
+                      </tr>
+
+                      <!-- Forward Action on Delegated work Item -->
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_disable_delegation_forwarding}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpDiableDelegationForwarding"
+                            width="12px" height="12px" alt="#{help.help_system_config_disable_delegation_forwarding}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td colspan="2">
+                          <h:selectBooleanCheckbox id="diableDelegationForwarding"
+                            value='#{systemConfig.object.attributes["certificationDisableDelegationForwarding"]}'
+                            onclick="makePageDirty();" />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.sys_config_allow_self_certify}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpAllowSelfCertify"
+                            width="12px" height="12px" alt="#{help.help_system_config_allow_self_certify}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                          <td colspan="2"><h:selectOneMenu
+                                  id="allowSelfCertify"
+                                  converter="sailpoint.object.Enum"
+                                  value="#{systemConfig.selfCertificationAllowedLevel}"
+                                  onchange="makePageDirty();">
+                              <f:selectItems value="#{systemConfig.selfCertificationAllowedLevels}" />
+                          </h:selectOneMenu></td>
+                      </tr>
+
+                      <!-- Limit Reassignments -->
+                      <tr>
+                        <td align="right">
+                          <h:outputText value="#{msgs.sys_config_limit_reassignment}" />
+                        </td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpLimitReassignments"
+                            width="12px" height="12px" alt="#{help.help_system_config_limit_reassignment}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td colspan="2">
+                          <h:selectBooleanCheckbox id="limitReassignments"
+                            value='#{systemConfig.limitReassignments}'
+                            onchange="onLimitReassignmentsChanged(this);"
+                            onclick="makePageDirty();">
+                          </h:selectBooleanCheckbox>
+                          <h:outputText value="#{msgs.sys_config_reassignment_limit}" style="margin-left:10px; padding:2px" styleClass="notLimit"/>
+                          <h:graphicImage id="imgHlpReassignmentLimit"
+                            width="12px" height="12px" alt="#{help.help_system_config_reassignment_limit}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px;margin-left:10px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                          <h:inputText id="reassignmentLimit"
+                                       value='#{systemConfig.reassignmentLimit}'
+                                       style="margin-left:10px; padding:2px"
+                                       onchange="makePageDirty();"
+                                       required="true"
+                                       requiredMessage="#{msgs.sys_config_err_reassignment_limit_empty}"
+                                       validatorMessage="#{msgs.sys_config_err_reassignment_limit_not_valid}"
+                                       size="4">
+                            <f:validateLongRange minimum="1" maximum="9999" />
+                          </h:inputText>
+                        </td>
+                      </tr>
+                  </table>
+              </div>
+                <div class="spContent">
+                  <table style="margin:5px" class="spTable">
+                      <tr>
+                        <td colspan="3">
+                            <h:outputText styleClass="spContentTitle" value="#{msgs.cert_sched_behavior_decision_properties}"/>
+                        </td>
+                      </tr>
+
+
+                      <tr>
+                        <td align="right" width="500px">#{msgs.sys_config_enable_allow_prov_missing_requirements}</td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpallowProvisioningMissingRequirements"
+                            width="12px" height="12px" alt="#{help.help_system_config_enable_allow_prov_missing_requirements}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td><h:selectBooleanCheckbox
+                            id="allowProvisioningMissingRequirements"
+                            value="#{systemConfig.allowProvisioningMissingRequirements}"
+                            onclick="makePageDirty();" /></td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_enable_line_item_delegate}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableItemDelegation"
+                            width="12px" height="12px" alt="#{help.help_system_config_enable_item_delegation}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td>
+                          <h:selectBooleanCheckbox id="enableItemDelegation"
+                            value='#{systemConfig.object.attributes["certificationItemDelegationEnabled"]}'
+                            onclick="makePageDirty();" />
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right">#{msgs.sys_config_enable_approve_account}</td>
+                        <td width="15px">
+                         <h:graphicImage id="imgHlpEnableAcctApproval" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_enable_approve_account}"/>
+                        </td>
+                        <td>
+                            <h:selectBooleanCheckbox
+                            id="enableApproveAccount"
+                            value="#{systemConfig.enableApproveAccount}"
+                            onclick="makePageDirty();"/>
+                        </td>
+                      </tr>
+                      <tr>
+                         <td align="right">
+                             <h:outputText styleClass="required" value="#{msgs.sys_config_enable_revoke_account}" />
+                         </td>
+                         <td class="certScheduleHelpCol">
+                            <h:graphicImage id="imgHlpEnableAcctRevoke" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_enable_revoke_account}"/>
+                         </td>
+                         <td>
+                             <h:selectBooleanCheckbox id="enableAccountRevoke"
+                               value="#{systemConfig.enableRevokeAccount}"
+                               onclick="syncBulkAccountRevocationState(); makePageDirty();"/>
+                         </td>
+                      </tr>
+                      
+                      <tr>
+                        <td align="right">#{msgs.sys_config_enable_reassign_account}</td>
+                        <td width="15px">
+                         <h:graphicImage id="imgHlpEnableAcctReassign" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_enable_reassign_account}"/>
+                        </td>
+                        <td>
+                          <h:selectBooleanCheckbox
+                            id="enableAccountReassign"
+                            value="#{systemConfig.enableReassignAccount}"
+                            onclick="showHideWithLock($('accountReassignConfig'), this, null, null); syncAccountReassign(); makePageDirty();"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="2"></td>
+                        <td>
+                          <div id="accountReassignConfig" style="display: #{systemConfig.enableReassignAccount ? '' : 'none'}">
+                          <table class="width100">
+                          <thead>
+                                <tr>
+                                  <th colspan="3" class="dashContentHeader">
+                                    <h:outputText value="#{msgs.sys_config_reassign_account_config_header}" />
+                                  </th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td align="right"><h:outputText value="#{msgs.sys_config_reassign_account_config_text}" /></td>
+                                  <td width="15px">
+                                    <span id="imgHlpReassignAccountComboBox"/>
+                                  </td>
+                                  <td>
+                                    <div id="defaultAssigneeSuggest"/>
+                                    <t:inputHidden id="defaultAssigneeInput"
+                                                   value="#{systemConfig.defaultAssignee}" forceId="true">
+                                        <sp:convertIdentity />
+                                    </t:inputHidden>
+                                  </td>
+                                  <td></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr>
+                          <td align="right">#{msgs.sys_config_enable_override_violation_default_remediator}</td>
+                          <td width="15px">
+                              <h:graphicImage id="imgHlpOverridDefRemed" width="12px"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" alt="#{help.help_sys_config_enable_override_violation_default_remediator}"/>
+                          </td>
+                          <td>
+                              <h:selectBooleanCheckbox
+                                  id="enableOverrideDefaultViolationRemediator"
+                                  value="#{systemConfig.enableOverrideDefaultViolationRemediator}"
+                                  onclick="makePageDirty();"/>
+                          </td>
+                      </tr>
+
+                      <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.sys_config_enable_role_creation_from_cert}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableRolesFromCert"
+                            width="12px" height="12px" alt="#{help.help_system_config_allow_create_roles_from_cert}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td><h:selectBooleanCheckbox
+                            id="allowCreateRolesFromCertification"
+                            value="#{systemConfig.allowCreateRolesFromCertification}"
+                            onclick="makePageDirty();" /></td>
+                      </tr>
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_enable_entity_delegate}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableEntityDelegation"
+                            width="12px" height="12px" alt="#{help.help_system_config_enable_entity_delegation}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td>
+                          <h:selectBooleanCheckbox id="enableEntityDelegation"
+                            value='#{systemConfig.object.attributes["certificationEntityDelegationEnabled"]}'
+                            onclick="makePageDirty();" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="right"><h:outputText
+                          value="#{msgs.sys_config_enable_allow_exceptions}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableAllowException"
+                            width="12px" height="12px" alt="#{help.help_system_config_enable_allow_exception}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td><h:selectBooleanCheckbox
+                            id="enableAllowException"
+                            value="#{systemConfig.mitigationEnabled}"
+                            onclick="syncAllowExceptionDisabledState(); makePageDirty();" /></td>
+                      </tr>
+                       <tr>
+                         <td align="right">
+                            <h:outputText value="#{msgs.sys_config_enable_allow_exception_popup}" /></td>
+                         <td width="15px">
+                           <h:graphicImage id="imgHlpEnableAllowExceptionPopup"
+                             width="12px" height="12px" alt="#{help.help_system_config_enable_allow_exception_popup}"
+                             style="cursor:pointer;padding: 0px 7px 0px 7px"
+                             url="/images/icons/dashboard_help_16.png"/>
+                         </td>
+                         <td><h:selectBooleanCheckbox
+                             id="enableAllowExceptionPopup"
+                             value='#{systemConfig.exceptionPopupEnabled}'
+                             onclick="syncRequireMitigationComments();" /></td>
+                       </tr>
+
+                       <tr>
+                           <td align="right">
+                             <h:outputText value="#{msgs.sys_config_default_allow_exception_duration}" />
+                           </td>
+                           <td width="15px">
+                             <h:graphicImage id="imgHlpEnableAllowExceptionDefaultDuration"
+                               width="12px" height="12px" alt="#{help.help_system_config_default_allow_exception_duration}"
+                               style="cursor:pointer;padding: 0px 7px 0px 7px"
+                               url="/images/icons/dashboard_help_16.png"/>
+                           </td>
+                           <td>
+                             <h:inputText id="allowExceptionPeriodAmount" value="#{systemConfig.exceptionPeriodAmount}" size="3" ></h:inputText>
+
+                             <h:selectOneListbox
+                              id="allowExceptionDurationScale"
+                              size="1"
+                              converter="sailpoint.object.Enum"
+                              value="#{systemConfig.exceptionPeriodScale}"
+                              disabled=""
+                              readonly=""
+                              style="margin-left:10px; padding:2px">
+                              <f:selectItems value="#{systemConfig.durationScales}" />
+                            </h:selectOneListbox>
+                           </td>
+                       </tr>
+                       
+                       <tr>
+                            <td align="right">
+                                <h:outputText value="#{msgs.sys_config_default_remediation_modifiable_op}"/>
+                            </td>
+                            <td width="15px">
+                            <h:graphicImage id="imgHlpDefaultRemediationModifiableOp"
+                             width="12px" height="12px" alt="#{help.help_system_config_default_remediation_modifiable_op}"
+                             style="cursor:pointer;padding: 0px 7px 0px 7px"
+                             url="/images/icons/dashboard_help_16.png"/>
+                            </td>
+                            <td>
+                               <h:selectOneListbox value="#{systemConfig.defaultRemediationModifiableOp}" size="1">
+                                    <f:selectItem itemLabel="#{msgs.sys_config_option_modify}" itemValue="Modify" />
+                                    <f:selectItem itemLabel="#{msgs.sys_config_option_remove}" itemValue="Remove" />
+                               </h:selectOneListbox> 
+                            </td>
+                       </tr>
+                  </table>
+              </div>
+                <div class="spContent">
+                  <table style="margin:5px" class="spTable">
+                      <tr>
+                        <td colspan="5">
+                            <h:outputText styleClass="spContentTitle" value="#{msgs.cert_sched_behavior_bulk_behavior_properties}"/>
+                        </td>
+                      </tr>
+                    <tr>
+                        <td width="500px"></td>
+                        <td width="15px"></td>
+                        <td class="textBold" style='text-align:center'>
+                            <h:outputText value="#{msgs.cert_sched_behavior_bulk_actions_grid_header}" />
+                        </td>
+                        <td class="textBold" style='text-align:center'>
+                            <h:outputText value="#{msgs.cert_sched_behavior_bulk_actions_details_header}" />
+                        </td>
+                        <td width="40%"></td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            <h:outputText value="#{msgs.sys_config_enable_bulk_approve}" /></td>
+                        <td >
+                          <h:graphicImage id="imgHlpEnableListBulkApprove"
+                            width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_approve}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableListViewBulkApprove"
+                             value='#{systemConfig.object.attributes["allowListViewBulkApprove"]}'
+                             onclick="makePageDirty();"/>
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableEntityBulkApprove"
+                             value='#{systemConfig.object.attributes["allowCertificationEntityBulkApprove"]}'
+                             onclick="makePageDirty();"/>
+                        </td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">
+                            <h:outputText value="#{msgs.sys_config_enable_bulk_revoke}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableListBulkRevoke"
+                            width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_revoke}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableListViewBulkRevoke"
+                             value='#{systemConfig.object.attributes["allowListViewBulkRevoke"]}'
+                             onclick="makePageDirty();"/>
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableEntityBulkRevoke"
+                             value='#{systemConfig.object.attributes["allowCertificationEntityBulkRevocation"]}'
+                             onclick="makePageDirty();"/>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            <h:outputText value="#{msgs.sys_config_enable_bulk_allow_exception}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableListBulkAllowException"
+                            width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_allow_exception}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableListViewBulkAllowException"
+                             value='#{systemConfig.object.attributes["allowListViewBulkMitigate"]}'
+                             onclick="makePageDirty();" />
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            <h:outputText value="#{msgs.sys_config_enable_bulk_reassign}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableListBulkReassign"
+                            width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_reassign}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableListViewBulkReassign"
+                             value='#{systemConfig.object.attributes["allowListViewBulkReassign"]}'
+                             onclick="makePageDirty();" />
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">
+                            <h:outputText value="#{msgs.sys_config_enable_bulk_revoke_account}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableEntityBulkAccountRevocation"
+                            width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_account_revocation}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableListViewBulkAccountRevocation"
+                             value='#{systemConfig.object.attributes["allowListViewBulkAccountRevoke"]}'
+                             onclick="makePageDirty();" />
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableEntityBulkAccountRevocation"
+                             value='#{systemConfig.object.attributes["allowCertificationEntityBulkAccountRevocation"]}'
+                             onclick="makePageDirty();" />
+                        </td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">
+                            <h:outputText value="#{msgs.sys_config_enable_bulk_clear_decisions}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpEnableEntityBulkClearDecisions"
+                            width="12px" height="12px" alt="#{help.help_sys_config_enable_bulk_clear_decisions}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableListViewBulkClearDecisions"
+                             value='#{systemConfig.object.attributes["allowListViewBulkClearDecisions"]}'
+                             onclick="makePageDirty();" />
+                        </td>
+                        <td align="center">
+                          <h:selectBooleanCheckbox id="enableEntityBulkClearDecisions"
+                             value='#{systemConfig.object.attributes["allowCertificationEntityBulkClearDecisions"]}'
+                             onclick="makePageDirty();" />
+                        </td>
+                        <td></td>
+                    </tr>
+
+                  </table>
+              </div>
+
+                <div class="spContent">
+                  <table style="margin:5px" class="spTable">
+                      <tr>
+                        <td colspan="3">
+                            <h:outputText styleClass="spContentTitle" value="#{msgs.cert_sched_contents_header}"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="right" width="500px"><h:outputText value="#{msgs.sys_config_entitlement_granularity}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpAdtEntGran"
+                            width="12px" height="12px" alt="#{help.help_system_config_adt_ent_granularity}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png"/>
+                        </td>
+                        <td><h:selectOneMenu
+                          id="additionalEntitlementGranularity"
+                          value='#{systemConfig.entitlementGranularity}'
+                          onchange="makePageDirty();"
+                          converter="sailpoint.object.Enum">
+                          <f:selectItems value="#{systemConfig.entitlementGranularities}" />
+                        </h:selectOneMenu></td>
+                      </tr>
+                      <tr>
+                        <td align="right"><h:outputText value="#{msgs.sys_config_exclude_base_app_accts}" /></td>
+                        <td width="15px">
+                          <h:graphicImage id="imgHlpExcludeBaseAcct" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_system_config_cert_exclude_base_app_accts}"/>
+                        </td>
+                        <td>
+                          <h:selectBooleanCheckbox
+                            id="excludeBaseAppAccounts"
+                            value="#{systemConfig.excludeBaseAppAccounts}"
+                            onchange="makePageDirty();"/>
+                        </td>
+                     </tr>
+                     <ui:include src="/monitor/scheduleCertifications/scheduleCertificationsSubordinateInclude.xhtml">
+                       <ui:param name="formName" value="editForm"/>
+                       <ui:param name="isRendered" value="true"/>
+                       <ui:param name="optionsBean" value="#{systemConfig}"/>
+                       <ui:param name="cellWidth" value="500px"/>
+                     </ui:include>
+                  </table>
+                  
+                </div>
+
+                <!-- Start of Email Templates section -->
+                <div class="spContent">
+                  <table style="margin:5px" class="spTable">
+                    <tr>
+                      <td colspan="3">
+                        <h:outputText styleClass="spContentTitle" value="#{msgs.sys_config_email_templates}"/>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td align="right" width="500px"> <h:outputText value="#{msgs.label_suppress_initial_notifications}" /></td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpSuppressInitialEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_suppress_initial_notifications}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td>
+                          <h:selectBooleanCheckbox
+                            id="suppressInitialEmail"
+                            value='#{systemConfig.object.attributes["suppressInitialNotification"]}'
+                                onchange="makePageDirty();">
+                          </h:selectBooleanCheckbox>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td align="right"> <h:outputText value="#{msgs.label_initial_notification_email_template}" /></td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpInitialCertEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_mit_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td><h:selectOneMenu
+                        id="certificationEmailTemplate"
+                        value='#{systemConfig.object.attributes["certificationEmailTemplate"]}'
+                        onchange="makePageDirty();">
+                        <f:selectItems value="#{systemConfig.emailTemplates}" />
+                      </h:selectOneMenu>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td align="right"> <h:outputText value="#{msgs.email_template_mitigation_expiration}" /></td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpMitEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_mit_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td><h:selectOneMenu
+                        id="mitigationExpirationEmailTemplate"
+                        value='#{systemConfig.object.attributes["mitigationExpirationEmailTemplate"]}'
+                        onchange="makePageDirty();">
+                        <f:selectItems value="#{systemConfig.emailTemplates}" />
+                      </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_bulk_reassign_modification}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpBlkReassignEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_blk_reassign_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["bulkReassignmentEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_challenge_period_start_challenger}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgStartEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_start_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["challengePeriodStartEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_challenge_period_end_certifier}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgEndEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_end}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["challengePeriodEndEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_challenge_generation_challenger}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgGenEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_generation_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["challengeGenerationEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_challenge_decisions_certifier}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgChallengedEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_challenged_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["certificationDecisionChallengedEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_challenge_expiration_challenger}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgExpEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_expired_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["challengeExpirationEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_challenge_decision_expiration}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgDecExpEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_decision_expired_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["challengeDecisionExpirationEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_challenge_accepted}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgAcceptedEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_accepted_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["challengeAcceptedEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_challenge_rejected}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgRejectedEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_rejected_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["challengeRejectedEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        <h:outputText value="#{msgs.email_template_cert_sign_off_approval}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpSignOffApprEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_cert_sign_off_approval_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                          value='#{systemConfig.object.attributes["certificationSignOffApprovalEmailTemplate"]}'
+                          onchange="makePageDirty();">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+
+                    </tr>
+                  </table>
+                </div>
+               <div class="spContent">
+                <a4j:commandButton styleClass="primaryBtn" id="visibleSaveButton"
+                  value="#{msgs.button_save}" onclick="$('editForm:stealthSaveButton').click();" />
+
+                <a4j:commandButton styleClass="secondaryBtn" id="visibileCancelButton" style="margin-left:5px"
+                  value="#{msgs.button_cancel}" onclick="confirmCancel(isPageDirty, 'editForm:stealthCancelButton');"  />
+              </div>
+           
+           </td>
+           </tr>
+         </tbody>
+       </table>
+
+       <a4j:commandButton id="refreshEscalationRulesButton"
+                          style="display:none"
+                          render="escalationRulePanel"/>
+
+       <a4j:commandButton id="refreshAutomaticClosingRulesButton"
+                          style="display:none"
+                          render="automaticClosingRulePanel"/>
+
+       <h:commandButton style="display:none" id="stealthSaveButton"
+         action="#{systemConfig.saveChangesAction}" />
+
+       <h:commandButton style="display:none" id="stealthCancelButton"
+         action="#{systemConfig.cancelChangesAction}" />
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

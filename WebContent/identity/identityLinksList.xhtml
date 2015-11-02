@@ -1,0 +1,203 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <h:outputText styleClass="spContentTitle" value="#{msgs.application_account}"/>
+
+  <a4j:outputPanel id="linkAttributeContentA4J" >
+  <div class="paddedContainer">
+    <table id="appAcctTbl" class="spTable" cellspacing="0">
+      <tr>
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'DeleteIdentityLink') or sp:hasRight(facesContext, 'MoveIdentityLink')}">
+          <th></th>
+        </ui:fragment>
+        <th>#{msgs.application}</th>
+        <ui:fragment rendered="#{identity.linksHelper.linkInstances}">
+          <th>#{msgs.instance}</th>
+        </ui:fragment>
+        <th>#{msgs.account_name}</th>
+        <th></th>
+        <th>#{msgs.status}</th>
+        <th>#{msgs.label_last_refresh}</th>
+      </tr>
+
+      <ui:repeat value="#{links}" var="link" varStatus="status">
+        <tr class="#{status.even ? 'even' : 'odd'}">
+
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'DeleteIdentityLink') or sp:hasRight(facesContext, 'MoveIdentityLink')}">
+            <td width="25" align="center">
+              <!--
+
+                    !Hack!
+
+                    - LinkChecker class just helps us lookup the checkboxes in the DOM.
+                    - The link id is included in the class so that we have some way to get
+                      it via javascript when we move a link off an identity.
+                    - we also flag whether the link is manually correlated, a composite and
+                      if it's on an authoritative app.
+
+              -->
+              <h:selectBooleanCheckbox class="linkChecker #{link.manuallyCorrelated ? 'manuallyCorrelated ' : ''}#{link.authoritative ? 'authoritative ' : ''}#{link.composite ? 'composite ' : ''}#{link.id}"  value="#{identity.linksHelper.linkSelections[link.id]}"/>
+            </td>
+          </ui:fragment>
+       
+
+
+          <td class="identityLinkListApplicationColumn">
+                <input type="hidden" value="false" class="displayButtonMarker" id="#{sp:escapeHTMLElementId(link.id)}" name="#{sp:escapeHTMLElementId(link.id)}" />
+                <a4j:commandButton id="linkDisplayButton"
+                                  action="#{link.toggleDisplayed}"
+                                  onclick="$('linkSpinner_#{sp:escapeHTMLElementId(link.id)}').setStyle({display:''});"
+                                  style="display:none"
+                                  oncomplete="addDescriptionTooltips();
+                                              SailPoint.initAttributeEditor('linkAttributeEditorTable');
+                                              SailPoint.identity.setTabPanelHeight();
+                                              SailPoint.identity.toggleDisclosure('#{sp:escapeHTMLElementId(link.id)}');"
+                                  render="linkAttributeContentA4J"/>
+
+                <a onclick="toggleLinkDetails('#{sp:escapeHTMLElementId(link.id)}');"
+                   title="#{msgs.info_app_account_details}"
+                   class="disclosure #{link.displayed ? 'disclosureUp ' : ''}">
+                    <h:outputText value="#{link.applicationName}" />
+                </a>
+
+            <ui:fragment rendered="#{link.pendingMove}">
+              <h:graphicImage styleClass="identityLinkListIcon"
+                              alt="#{msgs.identity_acct_pending_move}"
+                              title="#{msgs.identity_acct_pending_move}"
+                              url="/images/icons/pending_move_16.png"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{link.pendingDelete}">
+              <h:graphicImage styleClass="identityLinkListIcon"
+                              alt="#{msgs.identity_acct_pending_delete}"
+                              title="#{msgs.identity_acct_pending_delete}"
+                              url="/images/icons/pending_delete_16.png"/>
+            </ui:fragment>
+          </td>
+
+          <ui:fragment rendered="#{identity.linksHelper.linkInstances}">
+            <td><h:outputText value="#{link.instance}"/></td>
+          </ui:fragment>
+
+          <td><h:outputText value="#{link.displayableName}" /></td>
+
+          <td>
+            <ui:repeat value="#{identity.linksHelper.iconMapping[link.id]}" var="icon">
+              <h:graphicImage styleClass="identityLinkListIcon" 
+                              alt="#{icon.title}"
+                              title="#{icon.title}"
+                              url="#{icon.source}"/>
+            </ui:repeat>
+          </td>
+          
+          <td>
+            <ui:fragment rendered="#{link.status == 'Disabled'}">
+                <div class="lcmDisabled">#{msgs.lcm_manage_accounts_status_disabled}</div>
+            </ui:fragment>
+            
+            <ui:fragment rendered="#{link.status == 'Locked'}">
+                <div class="lcmLocked">#{msgs.lcm_manage_accounts_status_locked}</div>
+            </ui:fragment>
+            
+            <ui:fragment rendered="#{link.status == 'Active'}">
+                <div class="lcmActive">#{msgs.lcm_manage_accounts_status_active}</div>
+            </ui:fragment>
+          </td>
+
+          <td>
+            <h:outputText value="#{link.lastRefresh}">
+              <f:convertDateTime type="date" dateStyle="medium" timeZone="#{identity.userTimeZone}"/>
+            </h:outputText>
+          </td>
+
+        </tr>
+        <tr class="skip">
+          <td colspan="6" style="padding: 0px;">
+            <div id="linkSpinner_#{sp:escapeHTMLElementId(link.id)}" class="spContent" style="display:none">
+              <h:graphicImage url="/images/progress.gif"
+                              style="padding:5px;vertical-align:middle"/>
+            </div>
+            <ui:fragment rendered="#{link.displayed}">
+              <div class="detailsPanel" id="linkDetails_#{sp:escapeHTMLElementId(link.id)}" style="#{(link.displayed) ? '' : 'display:none'};">
+                <div class="detailsPanelTitleBar">
+                  <h:graphicImage alt="#{msgs.identity_acct_expando_button_close}"
+                                  title="#{msgs.identity_acct_expando_button_close}"
+                                  value="/images/icons/CloseDelete.png"
+                                  onclick="toggleLinkDetails('#{sp:escapeHTMLElementId(link.id)}');"
+                                  styleClass="detailsPanelClose"/>
+                  <h:outputFormat value="#{msgs.identity_acct_expando_title_acct}">
+                      <f:param value="#{link.displayableName}"/>
+                  </h:outputFormat>
+                </div>
+                <div class="detailsPanelContent">
+                  <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityAttribute') and link.attributeEditAvailable and !link.editable}">
+                    <div class="editButtonDiv_#{sp:escapeHTMLElementId(link.id)}">
+                      <span style="padding-left:10px" onclick="toggleEditLink('#{sp:escapeHTMLElementId(link.id)}', '#{link.id}');">
+                        <h:outputText styleClass="smallFakeLink" value="#{msgs.button_edit}"/>
+                      </span>
+                      <input type="hidden" class="editLinkButtonMarker" id="#{sp:escapeHTMLElementId(link.id)}" name="#{sp:escapeHTMLElementId(link.id)}" />
+                      <a4j:commandButton  id="editLinkButton"
+                            action="#{link.toggleEditable}"
+                            style="display:none"
+                            oncomplete="SailPoint.initAttributeEditor('linkAttributeEditorTable');SailPoint.AttributeEditor.setFocus('#{sp:escapeHTMLElementId(link.id)}');"
+                            render="linkAttributeContentA4J"/>
+                    </div>
+                  </ui:fragment>
+                  <ui:fragment rendered="#{link.editable}">
+                    <ui:include src="/include/attributeEditor.xhtml">
+                      <ui:param name="tableId" value="linkAttributeEditorTable_#{sp:escapeHTMLElementId(link.id)}"/>
+                      <ui:param name="attributeEditor" value="#{link.linkAttributeEditor}" />
+                      <ui:param name="leftColumnClass" value="title"/>
+                      <ui:param name="rightColumnClass" value="wide"/>
+                      <ui:param name="labelStyle" value="padding:5px"/>
+                      <ui:param name="withColon" value="true"/>
+                    </ui:include>
+                  </ui:fragment>
+                  <ui:fragment rendered="#{!link.editable}">
+                    <ui:include src="/identity/linkAttributes.xhtml">
+                      <ui:param name="attributes" value="#{link.attributes}" />
+                    </ui:include>
+                  </ui:fragment>
+                </div>
+              </div>
+            </ui:fragment>
+          </td>
+        </tr>
+      </ui:repeat>
+
+      <ui:fragment rendered="#{sp:hasRight(facesContext, 'DeleteIdentityLink') or sp:hasRight(facesContext, 'MoveIdentityLink') or sp:hasRight(facesContext, 'FullAccessIdentityCorrelation')}">
+        <tr>
+          <td colspan="6">
+            <div class="buttonRow">
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'DeleteIdentityLink')}">
+                <a4j:commandButton id="linkDeleteButton"
+                                   value="#{msgs.button_delete}"
+                                   styleClass="secondaryBtn"
+                                   onclick="if (!validateDeleteLinkSelection()){return false;}"
+                                   action="#{identity.linksHelper.deleteLinks}"
+                                   render="linkAttributeContentA4J"/>
+              </ui:fragment>
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'FullAccessIdentityCorrelation') or sp:hasRight(facesContext, 'MoveIdentityLink')}">
+                <input type="submit" onclick="if (validateMoveLinkSelection(moveLinkWin)) moveLinkWin.show();return false;" value="#{msgs.button_move_account}" class="secondaryBtn"/>
+              </ui:fragment>
+            </div>
+          </td>
+        </tr>
+      </ui:fragment>
+
+    </table>
+  </div>
+  </a4j:outputPanel>
+</ui:composition>
+
+</body>
+
+</html>

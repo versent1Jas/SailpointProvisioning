@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="AUTHENTICATE, GROUP_PROVISIONING, PROVISIONING, SYNC_PROVISIONING, PASSWORD, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE" icon="enterpriseIcon" name="HP-UX Template" type="HP-UX - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="HP-UX10"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="USER_ID" groupAttribute="groups" identityAttribute="USER_ID" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Groups" entitlement="true" managed="true" multi="true" name="groups" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Home Directory" name="HOME" required="true" type="string"/>
+        <AttributeDefinition displayName="Login Shell" name="SHELL" required="true" type="string"/>
+        <AttributeDefinition displayName="User Information" name="UID" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="GROUP_ID" identityAttribute="GROUP_ID" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Group" name="GROUP_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Information" name="GID" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Parent OE" name="USER_OE_PR" section="" type="string"/>
+        <Field displayName="Default Group" name="UG_DEF" type="string"/>
+        <Field displayName="Home Directory" name="HOME" type="string"/>
+        <Field displayName="Login Shell" name="SHELL" type="string"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group Name" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="GID" helpKey="Group Identifier" name="GID" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="GID" helpKey="Group Identifier" name="GID" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

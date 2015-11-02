@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <br/>    
+  <h:panelGroup>
+    <!-- jsl - split this out into two tables so the rolenames don't wrap -->
+    <table cellspacing="10">
+      <tr>
+        <td><h:outputText value='#{msgs.att_user_name}' styleClass="titleColumn"/> </td>
+        <td align='left'><h:outputText value="#{workItem.armWorkItemDetail.identity}"/> </td>
+      </tr>
+    </table>
+    <table cellspacing="10" width="90%">
+      <ui:fragment rendered="#{workItem.armWorkItemDetail.showToAdd}">
+          <tr>
+              <td colspan="2"><h:outputText value="#{msgs.arm_roles_to_add}" styleClass="titleColumn"/></td>
+          </tr>
+          <tr>
+              <td colspan="2">
+                <ui:repeat value="#{workItem.armWorkItemDetail.adds}" var="toAdd">
+                  <div style="clear:both">
+                    <div 
+                        class="#{workItem.armWorkItemDetail.requestItems[toAdd].approveClass}" 
+                        onclick="clickApprove(this);return false;" 
+                        style="float:left;width:23px;">
+                    </div>
+                    <div
+                        class="#{workItem.armWorkItemDetail.requestItems[toAdd].rejectClass}" 
+                        onclick="clickReject(this);return false;" 
+                        style="float:left;width:23px;">
+                    </div>
+                    <div style="float:left">
+                      <h:outputText value="#{toAdd}"/>                      
+                    </div>
+                    
+                    <ui:fragment 
+                      rendered="#{!(workItem.armWorkItemDetail.requestItems[toAdd].activeDate eq null) || !(workItem.armWorkItemDetail.requestItems[toAdd].inactiveDate eq null)}">
+                      <div class="activationNotice floatLeft">
+                    
+                        <ui:fragment rendered="#{!(workItem.armWorkItemDetail.requestItems[toAdd].activeDate eq null)}">
+                          <h:outputText styleClass="label green" value="#{msgs.active_on}: "/>
+                          <h:outputText value="#{workItem.armWorkItemDetail.requestItems[toAdd].activeDate}">
+                            <f:convertDateTime type="date" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                          </h:outputText>
+                        </ui:fragment>
+                      
+                        <ui:fragment rendered="#{!(workItem.armWorkItemDetail.requestItems[toAdd].inactiveDate eq null)}">
+                          <h:outputText styleClass="label red" value="#{msgs.inactive_on}: "/>
+                          <h:outputText value="#{workItem.armWorkItemDetail.requestItems[toAdd].inactiveDate}">
+                            <f:convertDateTime type="date" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                          </h:outputText>
+                        </ui:fragment>
+                        <div class="vis-clear"></div>
+                      </div>
+                    </ui:fragment>
+                        
+                    <h:inputHidden 
+                        value="#{workItem.armWorkItemDetail.requestItems[toAdd].selectState}" 
+                        converter="sailpoint.object.Enum"/>
+                </div>
+                </ui:repeat>
+              </td>
+          </tr>
+      </ui:fragment>
+      <ui:fragment rendered="#{workItem.armWorkItemDetail.showToRemove}">
+          <tr>
+              <td colspan="2"><h:outputText value="#{msgs.arm_roles_to_remove}" styleClass="titleColumn"/></td>
+          </tr>
+          <tr>
+              <td colspan="2">
+              <ui:repeat value="#{workItem.armWorkItemDetail.removes}" var="toRemove">
+                <div style="clear:both;">
+                  <div 
+                          class="#{workItem.armWorkItemDetail.requestItems[toRemove].approveClass}" 
+                          onclick="clickApprove(this);return false;"
+                          style="float:left;width:23px;">
+                  </div>
+                  <div
+                          class="#{workItem.armWorkItemDetail.requestItems[toRemove].rejectClass}" 
+                          onclick="clickReject(this);return false;"
+                          style="float:left;width:23px">
+                  </div>
+                  <div style="float:left;">
+                      <h:outputText value="#{toRemove}"/>
+                  </div>
+                  
+                  <ui:fragment 
+                      rendered="#{!(workItem.armWorkItemDetail.requestItems[toRemove].inactiveDate eq null)}">
+                      <div class="activationNotice floatLeft">
+                      
+                      <ui:fragment rendered="#{!(workItem.armWorkItemDetail.requestItems[toRemove].inactiveDate eq null)}">
+                        <h:outputText styleClass="label red" value="#{msgs.inactive_on}: "/>
+                        <h:outputText value="#{workItem.armWorkItemDetail.requestItems[toRemove].inactiveDate}">
+                          <f:convertDateTime type="date" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                        </h:outputText>
+                      </ui:fragment>
+                    </div>
+                  </ui:fragment>
+                    
+                  <h:inputHidden 
+                        value="#{workItem.armWorkItemDetail.requestItems[toRemove].selectState}" 
+                        converter="sailpoint.object.Enum"/>
+                </div>        
+              </ui:repeat>
+              </td>
+          </tr>
+      </ui:fragment>
+    </table>
+
+    <!-- 
+      This is a convention recognized by viewResult
+      TQM: do we need this for arm work item?
+     -->
+    <h:inputHidden id="TaskResultId" value="#{workItem.taskResultId}"/>
+
+  </h:panelGroup>
+</ui:composition>
+</body>
+</html>

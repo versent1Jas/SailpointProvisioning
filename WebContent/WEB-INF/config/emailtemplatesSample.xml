@@ -1,0 +1,873 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  HTML Email Template Samples
+-->
+<sailpoint>
+<EmailTemplate name="Remediation Notification - HTML" cc="$!{identity.manager.email}">
+    <Description>
+      Email Template for notifying users that an item has been remediated.
+      Notice that this is setup to CC the user's manager (see CC attribute above).
+
+      Arguments
+      ---------
+      item:                The CertificationItem being remediated.
+      remediationDetails:  The ProvisioningPlan with the entitlements being removed.
+                           (Convenience accessor for item.action.remediationDetails)
+      identity:            The Identity that is having their item remediated.
+      comments:            Comments from the remediator about the remediation.
+      requester:           The Identity that remediated the item.
+      requesterName:       Full name of the Identity that remediated the item.
+                           (Convenience accessor for requestor.fullName)
+    </Description>
+    <Subject>Access is being revoked by $!{requesterName}</Subject>
+    <Body>    
+
+<![CDATA[
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+  <title>Access Revoked by: $!{requesterName}</title>
+    
+</head>
+
+<body style="background:#FFF;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td height="20">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    </tr>
+    <tr valign="top">
+      <!-- CHANGE IMAGE SRC TO CLIENT LOGO -->
+      <td align="right" height="79" width="295">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <!-- /CLIENT LOGO -->
+    </tr>
+    <tr valign="top">
+        <td height="7">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+        <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:left;border-bottom:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td width="30" height="85">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+                <h2 style="color:#98bec6;margin:0;padding:0;font:bold 11pt Arial;text-transform:uppercase;">Revocation Notification</h2>
+                <h1 style="color:#fff;margin:0;padding:0;font:bold 20pt Arial;">Items Revoked by $!{requesterName}</h1>             
+            </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+        
+        <!-- CONTENT -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#fff;margin:0;padding:0;text-align:left;border-left:4px solid #ccc;border-right:4px solid #ccc;">
+        <tr valign="top"> 
+          <td colspan="3" height="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="1" width="30" alt="" /></td>
+          <td>
+            
+            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="bottom">
+            <td>
+            <p style="margin:0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;"></p>
+            <p/>
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">$!{requesterName} has revoked one or more entitlements from you.</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#333;font: bold 10pt Arial;line-height:15pt;">Comments from $requesterName:</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">$!{comments}</p>
+            <br/>
+
+#if ($remediationDetails.nonModifyAccountRequests &&
+     $remediationDetails.getNonModifyAccountRequests().size() > 0)
+
+            <p style="margin:0;padding:0;color:#333;font: bold 10pt Arial;line-height:15pt;">Account Requests:</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">
+      
+#foreach ($acctReq in $remediationDetails.nonModifyAccountRequests)
+Application: $acctReq.applicationName <br/>
+  Operation: $acctReq.operation <br/>
+ Account ID: $acctReq.nativeIdentity <br/><br/>
+
+</p>
+
+#end
+#end
+#if ($remediationDetails.modifyAccountRequests &&
+     $remediationDetails.getModifyAccountRequests().size() > 0)
+
+      <p style="margin:0;padding:0;color:#333;font: bold 10pt Arial;line-height:15pt;">Modification Requests:</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">
+
+#foreach ($acctReq in $remediationDetails.modifyAccountRequests)
+Application: $acctReq.applicationName <br/>
+#if ($acctReq.nativeIdentity) ## Role modification requests in IIQ won't have a nativeIdentity
+ Account ID: $acctReq.nativeIdentity <br/>
+#end
+
+#foreach ($attrReq in $acctReq.attributeRequests)
+  Operation: $attrReq.operation <br/>
+  Attribute: $attrReq.name <br/>
+   Value(s): $attrReq.value <br/><br/>
+
+#end
+#foreach ($permReq in $acctReq.permissionRequests)
+  Operation: $permReq.operation <br/>
+ Permission: $permReq.target <br/>
+   Right(s): $permReq.rightsList <br/><br/>
+
+#end
+
+#end
+#end                       
+            </p>
+            <br/>
+            </td>
+            </tr>
+            </table>
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:0;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">Thank you for your cooperation</p>
+            <p style="margin:0 0 50px;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;">Your Security and Compliance Team</p>
+            </td>
+            <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+            <p style="margin:0 0 0 30px;padding:0;color:#b0adad;font:normal 8pt Arial;line-height:12pt;margin-bottom:30px"><a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Support</a></p></td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:right;border-top:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td height="60">&nbsp;</td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+
+</body>
+</html>
+    ]]>
+    </Body>
+</EmailTemplate>
+
+<!--
+  Bulk Reassignment HTML Template
+-->
+
+  <EmailTemplate name="Bulk Reassignment - HTML">
+    <Description>
+      Email Template for notifying a user when they have been reassigned identities
+      from an existing certification.
+      
+      Arguments
+      ---------
+      certificationName (String):   The name of the certification containing the items to reassign
+      certification (Certification):    The Certification object containing the items to reassign
+      owner (Identity):        The Identity object receiving the reassignment request
+      comments (String):        Comments from the reassigner
+      description (String):       Description of the reassignment
+      numNewIdentities (String):    Number of new identities
+      requesterName (String):       The display name of the Identity that requested the reassignment
+
+    </Description>
+    <Subject>New access review reassignment request: $certificationName</Subject>
+
+    <Body>
+    <![CDATA[
+        <html>
+    <body style="background:#FFF;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td height="20">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+      <!-- CHANGE IMAGE SRC TO CLIENT LOGO -->
+      <td align="right" width="295" height="79">&nbsp;</td>
+        <!-- /CLIENT LOGO -->
+    </tr>
+    <tr valign="top">
+        <td height="7">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+        <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:left;border-bottom:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td width="30" height="85">&nbsp;&nbsp;</td>
+            <td><!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+                <h2 style="color:#98bec6;margin:0;padding:0;font:bold 11pt Arial;text-transform:uppercase;">New Access Review - Reassignment</h2>
+                <h1 style="color:#fff;margin:0;padding:0;font:bold 20pt Arial;">Reassignment from $requesterName</h1>             
+            </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+        
+        <!-- CONTENT -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#fff;margin:0;padding:0;text-align:left;border-left:4px solid #ccc;border-right:4px solid #ccc;">
+        <tr valign="top">
+          <td colspan="3" height="30">&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td width="30">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td>
+
+      <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="top">
+            <td>
+            <!-- Use owner.displayableName as of release 6.3 the owner is available to use in bulk reassignemnt templates -->
+            <p style="margin:20px 0 0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;">$!{owner.displayableName},</p>
+            <br/>
+
+            <p style="margin:0 0 20px;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">$!{requesterName} has assigned $!{numNewIdentities} users to you for access certification.</p>
+            <p style="margin:0;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">A specific access review reassignment named <b>$!{certificationName}</b> has been created for you, and is due on <strong>$spTools.formatDate( $certification.expiration,3,3)</strong>.</p>
+            
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:20px 0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;"><a href="http://localhost:8080/identityiq/manage/certification/entityList.jsf?certificationId=$!{certification.id}">Click here to get started on this task.</a></p>
+            <p style="margin:0 0 20px;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">
+            <strong>Description:</strong></br>
+            $!{description}<br/>
+            <br/>
+            <strong>Comments from $!{requesterName}:</strong></br>
+            $!{comments}</p>
+            <p style="margin:0;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">Thank you for your cooperation,</p><br />
+            <p style="margin:0 0 20px;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;">The Security and Compliance Organization</p>
+            </td>
+            <td width="220" align="right">
+            
+              <table cellpadding="0" cellspacing="0" width="192" border="0" style="margin-bottom:30px">
+                <tr valign="top">
+                <td style="background:#668641;border-bottom:2px solid #fff;">
+                  <!-- CHANGE HEADER BACKGROUND COLOR ABOVE : green - #668641 ; red - #a22831 -->
+                  <p style="color:#fff;font:bold 11pt Arial;margin:10px 0 10px 15px;line-height:13pt;">Details</p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#e7e6e6;border-bottom:2px solid #fff;">
+                  <p style="color:#000;font:normal 8pt Arial;margin:10px 0 10px 15px;line-height:13pt;"><strong>Due Date: </strong>$spTools.formatDate($certification.expiration,3,3)</p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#e7e6e6;border-bottom:2px solid #fff;">
+                  <p style="color:#000;font:normal 8pt Arial;margin:10px 0 0 15px;padding:0;line-height:13pt;"><strong>Reassigned By: </strong>$!{requesterName}</p>
+                    <p style="color:#000;font:normal 8pt Arial;margin:0 0 0 15px;padding:0;line-height:13pt;"><strong>Reassigned Date: </strong>$spTools.formatDate($certification.created,3,3)<br/></p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#e7e6e6;border-bottom:2px solid #fff;">
+                  <p style="color:#000;font:bold 8pt Arial;margin:10px 0 0 15px;padding:0;line-height:13pt;">Tags:</p>
+                    <p style="color:#000;font:normal 8pt Arial;margin:0 0 0 15px;padding:0;line-height:13pt;">
+#foreach( $tag in $certification.tags )
+$tag.name</br>
+#end
+</p>
+                </td>
+                </tr>
+                </table>
+            </td>
+            </tr>
+            </table>
+            
+            </td>
+            <td width="10">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+            
+            <table cellspacing="0" cellpadding="0" width="550" border="0">
+            <tr valign="middle">
+            <td>
+            <!-- HELP LINKS -->
+            <!-- REPLACE THESE LINKS TO POINT TO ENVIRONMENT SPECIFIC LOCATIONS -->
+            <p style="margin:0 0 0 30px;padding:0;color:#b0adad;font:normal 8pt Arial;line-height:12pt;margin-bottom:30px;"><a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Support</a></p>
+            </td>
+            <td width="145">
+            <!-- START TASK BUTTON -->
+            <!-- CHANGE BACKGROUND COLOR BELOW : red - #9f2d32 ; green - #668641 -->
+            <!-- CHANGE BORDER COLOR BELOW : red - #b35b62 ; green - #78a347 -->
+            <div style="background:#668641;border:3px solid #78a347;width:145px;height:33px;float:right;margin-bottom:30px;">
+              <a href="http://localhost:8080/identityiq/manage/certification/entityList.jsf?certificationId=$!{certification.id}" 
+                style="color:#fff; text-align:center;font:normal 14pt Arial;display:block;margin-top:3px;text-decoration:none;">
+                <!--<img src="http://www.sailpoint.com/mailers/task-alert/btn-start-task.png" border="0" width="145" height="33" alt="Start Task" />-->
+                Start Task
+              </a>
+            </div>
+            <!-- /BUTTON -->
+            </td>
+            </tr>
+            </table>            
+            </td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:right;border-top:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td height="60">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+
+</body>
+</html>
+
+    ]]>    
+    
+    </Body>
+  </EmailTemplate>
+
+<!--
+  Delegation HTML Email Template
+-->
+<EmailTemplate name="Delegation - HTML">
+    <Description>
+      Email Template for notifying work item owners of new delegations.
+      
+      Arguments
+      ---------
+      workItemName (String):        The name of the delegated WorkItem
+      certification (Certification):    The Certification object containing the delegated item
+      comments (String):        Comments from the delegator
+    requesterName (String):       The display name of the Identity that requested the reassignment
+
+    </Description>
+    <Subject>New delegation request: $!{workItemName}</Subject>
+    <Body>    
+
+<![CDATA[
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+  <title>New Delegation Request: $!{workItemName}</title>
+    
+</head>
+
+<body style="background:#FFF;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="20" width="1" alt="" /></td>
+    </tr>
+    <tr valign="top">
+      <!-- CHANGE IMAGE SRC TO CLIENT LOGO -->
+      <td align="right"><img src="http://www.sailpoint.com/mailers/task-alert/client-logo.png" alt="client logo" width="295" height="79" alt="" /></td>
+        <!-- /CLIENT LOGO -->
+    </tr>
+    <tr valign="top">
+        <td><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="7" width="1" alt="" /></td>
+    </tr>
+    <tr valign="top">
+        <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:left;border-bottom:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" width="30" height="85" alt="" /></td>
+            <td><!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+                <h2 style="color:#98bec6;margin:0;padding:0;font:bold 11pt Arial;text-transform:uppercase;">New Delegation</h2>
+                <h1 style="color:#fff;margin:0;padding:0;font:bold 20pt Arial;">Delegated Access Review Decision</h1>             
+            </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+        
+        <!-- CONTENT -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#fff;margin:0;padding:0;text-align:left;border-left:4px solid #ccc;border-right:4px solid #ccc;">
+        <tr valign="top"> 
+          <td colspan="3"><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="40" width="1" alt="" /></td>
+        </tr>
+        <tr valign="top">
+          <td><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="1" width="30" alt="" /></td>
+          <td>
+            
+            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="bottom">
+            <td>
+            <p style="margin:0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;"></p>
+            <p/>
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">$!{requesterName} has delegated the following work item to you: </p>
+            <br/>
+            <p style="margin:0;padding:0;color:#333;font: bold 10pt Arial;line-height:15pt;">$!{workItemName}</p>
+            </td>
+            </tr>
+            </table>
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:20px 0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;"><a href="http://localhost:8080/identityiq" style="color:#0987a0;">Click here to get started on this task.</a></p>
+            <p style="margin:0 0 20px;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">Comments from $!{requesterName}:</p>
+            <p style="margin:0 0 20px;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">$!{comments}</p>
+            <p style="margin:0;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">Thank you for your cooperation</p>
+            <p style="margin:0 0 50px;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;">Your Security and Compliance Team</p>
+            </td>
+            <td><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="1" width="40" alt="" /></td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+            <p style="margin:0 0 0 30px;padding:0;color:#b0adad;font:normal 8pt Arial;line-height:12pt;"><a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Support</a></p>
+            <img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="30" width="1" alt="" /></td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:right;border-top:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td><img src="http://www.sailpoint.com/mailers/task-alert/powered-by.png" width="180" height="60" alt="Powered By IdentityIQ" /></td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+
+</body>
+</html>
+    ]]>
+    </Body>
+</EmailTemplate>
+  
+
+<EmailTemplate name="Delegation Revocation - HTML">
+    <Description>
+      Email Template for notifying work item owners that their delegation
+      work item has been revoked.
+      
+      Arguments
+      ---------
+      workItemName (String):        The name of the delegated WorkItem
+      certification (Certification):    The Certification object containing the delegated item
+    requesterName (String):       The display name of the Identity that requested the reassignment
+
+    </Description>
+    <Subject>Work Item Revoked: $!{workItemName}</Subject>
+    <Body>    
+
+<![CDATA[
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+  <title>Work Item Revoked: $!{workItemName}</title>
+    
+</head>
+
+<body style="background:#FFF;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td height="20">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+      <!-- CHANGE IMAGE SRC TO CLIENT LOGO -->
+      <td align="right" width="295" height="79">&nbsp;</td>
+        <!-- /CLIENT LOGO -->
+    </tr>
+    <tr valign="top">
+        <td height="7">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+        <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:left;border-bottom:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td height="85">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+                <h2 style="color:#98bec6;margin:0;padding:0;font:bold 11pt Arial;text-transform:uppercase;">Delegation Revocation</h2>
+                <h1 style="color:#fff;margin:0;padding:0;font:bold 20pt Arial;">Delegation Revoked by $!{requesterName}</h1>              
+            </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+        
+        <!-- CONTENT -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#fff;margin:0;padding:0;text-align:left;border-left:4px solid #ccc;border-right:4px solid #ccc;">
+        <tr valign="top"> 
+          <td colspan="3"><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="40" width="1" alt="" /></td>
+        </tr>
+        <tr valign="top">
+          <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td>
+            
+            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="bottom">
+            <td>
+            <p style="margin:0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;"></p>
+            <p/>
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">$!{requesterName} has revoked the following work item from you:</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#333;font: bold 10pt Arial;line-height:15pt;">$!{workItemName}.</p>
+            <br/>
+            </td>
+            </tr>
+            </table>
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:0;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">Thank you for your cooperation</p>
+            <p style="margin:0 0 50px;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;">Your Security and Compliance Team</p>
+            </td>
+            <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+            <p style="margin:0 0 0 30px;padding:0;color:#b0adad;font:normal 8pt Arial;line-height:12pt;margin-bottom:30px"><a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Support</a></p>
+          </td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:right;border-top:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td width="180" height="60">&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+
+</body>
+</html>
+    ]]>
+    </Body>
+</EmailTemplate>
+
+<EmailTemplate name="Work Item Reminder - HTML">
+    <Description>
+      Email Template for reminding work item owners that their work
+      items are overdue.
+      NOTE: In addition to the declared arguments, all entries 
+      from the work item attributes map are also available by name in the template.
+
+      
+      Arguments
+      ---------
+      workItemName (String):      The name of the delegated WorkItem
+      oldDueDate  (date):         The old due date of the work item
+      newDueDate  (date):         The new due date of the work item
+      expiration  (date):         The expiration of the work item
+      remindersRemaining  (int):  The number of reminders remaining until the next escalation
+      requester (String):         The Identity that requested the reassignment
+
+    </Description>
+    <Subject>Work Item Reminder: $!{workItemName}</Subject>
+    <Body>    
+
+<![CDATA[
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+  <title>Work Item Reminder: $!{workItemName}</title>
+    
+</head>
+
+<body style="background:#FFF;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td height="20">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+      <!-- CHANGE IMAGE SRC TO CLIENT LOGO -->
+      <td align="right" width="295" height="79">&nbsp;</td>
+        <!-- /CLIENT LOGO -->
+    </tr>
+    <tr valign="top">
+        <td height="7">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+        <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:left;border-bottom:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td height="85">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+                <h2 style="color:#98bec6;margin:0;padding:0;font:bold 11pt Arial;text-transform:uppercase;">WorkItem Reminder</h2>
+                <h1 style="color:#fff;margin:0;padding:0;font:bold 20pt Arial;">$!{workItemName}</h1>              
+            </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+        
+        <!-- CONTENT -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#fff;margin:0;padding:0;text-align:left;border-left:4px solid #ccc;border-right:4px solid #ccc;">
+        <tr valign="top"> 
+          <td colspan="3"><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="40" width="1" alt="" /></td>
+        </tr>
+        <tr valign="top">
+          <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td>
+            
+            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="bottom">
+            <td>
+            <p style="margin:0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;"></p>
+            <p/>
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">This is your $ordinalNumReminders reminder 
+            that the work item $workItemName #if($requester)requested by $requester.displayableName, 
+            and #{end}created on $spTools.formatDate($created,3,1), #if($expiration)#if($expiration.getTime() > $nowDate.getTime())is 
+            due on $spTools.formatDate($expiration,3,1).#{else}was due on $spTools.formatDate($expiration,3,1).#{end}#{else}was 
+            due on $spTools.formatDate($oldDueDate,3,1).#{end}</p>
+            <br/>
+            
+            #if ($newDueDate > $expiration)
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">
+            The due date has been extended to $spTools.formatDate($newDueDate,3,1).
+            </p>
+            <br/>
+            #end
+            
+            #if ($remindersRemaining > 0)            
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">
+            This work item will escalate after $remindersRemaining more reminder(s).
+            </p>
+            <br/>
+            #end            
+            
+            <p style="margin:0;padding:0;color:#333;font: 10pt Arial;line-height:15pt;">Please login to IdentityIQ and view your 
+            work item inbox to resolve this at your earliest convenience.
+            </p>
+            <br/>
+            </td>
+            </tr>
+            </table>
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:0;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">Thank you for your cooperation</p>
+            <p style="margin:0 0 50px;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;">Your Security and Compliance Team</p>
+            </td>
+            <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+            <p style="margin:0 0 0 30px;padding:0;color:#b0adad;font:normal 8pt Arial;line-height:12pt;margin-bottom:30px"><a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Support</a></p>
+          </td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:right;border-top:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td width="180" height="60">&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+
+</body>
+</html>
+    ]]>
+    </Body>
+</EmailTemplate>
+
+
+  <EmailTemplate name="New Certification - HTML">
+    <Description>
+      Email Template for notifying work item owners of new certifications.
+      
+      Arguments
+      ---------
+      workItemName (String):          The name of the Workitem
+      workItem (Workitem):            The Workitem object
+      certification (Certification):    The Certification Object
+    requesterName (String):       The display name of the Identity that requested the certification
+   
+    </Description>
+        <Subject>New access review: $workItemName</Subject>
+    <Body>
+    <![CDATA[
+    <html>
+    <body style="background:#FFF;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td><img src="http://www.sailpoint.com/mailers/task-alert/+___.gif" height="20" width="1" alt="" /></td>
+    </tr>
+    <tr valign="top">
+      <!-- CHANGE IMAGE SRC TO CLIENT LOGO -->
+      <td align="right" width="295" height="79">&nbsp;</td>
+      <!-- /CLIENT LOGO -->
+    </tr>
+    <tr valign="top">
+      <td height="7">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+      <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:left;border-bottom:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td height="85" width="30">&nbsp;&nbsp;&nbsp;</td>
+          <td><!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+            <h2 style="color:#98bec6;margin:0;padding:0;font:bold 11pt Arial;text-transform:uppercase;">New Access Review</h2>
+            <h1 style="color:#fff;margin:0;padding:0;font:bold 20pt Arial;">$!{workItemName}</h1>             
+          </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+        
+        <!-- CONTENT -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#fff;margin:0;padding:0;text-align:left;border-left:4px solid #ccc;border-right:4px solid #ccc;">
+        <tr valign="top">
+          <td colspan="3" height="30">&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td width="30">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td>
+
+      <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="top">
+            <td>
+            <p style="margin:20px 0 0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;">$!{workItem.owner.firstname},</p>
+            <br/>
+
+            <p style="margin:0 0 20px;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">As part of our periodic compliance efforts, you are responsible for certifying the access your employees have to enterprise applications. </p>
+            <p style="margin:0;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">A specific access certification is named <b>$!{workItemName}</b> has been created for you, and is due on <strong>$spTools.formatDate( $certification.expiration,3,3)</strong>.</p>
+            
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:20px 0;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;"><a href="http://localhost:8080/identityiq/manage/certification/entityList.jsf?certificationId=$!{certification.id}">Click here to get started on this task.</a></p>
+            <p style="margin:0 0 20px;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">Your timely completion of this access review is an important part of protecting our valuable corporate information. Your participation is greatly appreciated</p>
+            <p style="margin:0;padding:0;color:#333;font:normal 10pt Arial;line-height:15pt;">Thank you for your cooperation,</p><br />
+            <p style="margin:0 0 20px;padding:0;color:#333;font:bold 10pt Arial;line-height:15pt;">The Security and Compliance Organization</p>
+            </td>
+            <td width="220" align="right">
+            
+              <table cellpadding="0" cellspacing="0" width="192" border="0" style="margin-bottom:30px">
+                <tr valign="top">
+                <td style="background:#668641;border-bottom:2px solid #fff;">
+                  <!-- CHANGE HEADER BACKGROUND COLOR ABOVE : green - #668641 ; red - #a22831 -->
+                  <p style="color:#fff;font:bold 11pt Arial;margin:10px 0 10px 15px;line-height:13pt;">Details</p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#e7e6e6;border-bottom:2px solid #fff;">
+                  <p style="color:#000;font:normal 8pt Arial;margin:10px 0 10px 15px;line-height:13pt;"><strong>Due Date: </strong>$spTools.formatDate($certification.expiration,3,3)</p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#e7e6e6;border-bottom:2px solid #fff;">
+                  <p style="color:#000;font:normal 8pt Arial;margin:10px 0 0 15px;padding:0;line-height:13pt;"><strong>Created By: </strong>$!{requesterName}</p>
+                    <p style="color:#000;font:normal 8pt Arial;margin:0 0 0 15px;padding:0;line-height:13pt;"><strong>Creation Date: </strong>$spTools.formatDate($certification.created,3,3)<br/></p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#e7e6e6;border-bottom:2px solid #fff;">
+                  <p style="color:#000;font:bold 8pt Arial;margin:10px 0 0 15px;padding:0;line-height:13pt;">Tags:</p>
+                    <p style="color:#000;font:normal 8pt Arial;margin:0 0 0 15px;padding:0;line-height:13pt;">
+#foreach( $tag in $certification.tags )
+$tag.name</br>
+#end
+</p>
+                </td>
+                </tr>
+              </table>
+            </td>
+            </tr>
+            </table>
+            
+            </td>
+            <td width="10">&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+            
+            <table cellspacing="0" cellpadding="0" width="550" border="0">
+            <tr valign="middle">
+            <td>
+            <!-- HELP LINKS -->
+            <!-- REPLACE THESE LINKS TO POINT TO ENVIRONMENT SPECIFIC LOCATIONS -->
+            <p style="margin:0 0 0 30px;padding:0;color:#b0adad;font:normal 8pt Arial;line-height:12pt;"><a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="#" style="color:#666666;text-decoration:none;font-weight:bold;">Support</a></p>
+            </td>
+            <td width="145">
+            <!-- START TASK BUTTON -->
+            <!-- CHANGE BACKGROUND COLOR BELOW : red - #9f2d32 ; green - #668641 -->
+            <!-- CHANGE BORDER COLOR BELOW : red - #b35b62 ; green - #78a347 -->
+            <div style="background:#668641;border:3px solid #78a347;width:145px;height:33px;float:right;margin-bottom:30px;">
+              <a href="http://localhost:8080/identityiq/manage/certification/certification.jsf?id=$!{certification.id}" 
+                style="color:#fff; text-align:center;font:normal 14pt Arial;display:block;margin-top:3px;text-decoration:none;">
+                <!--<img src="http://www.sailpoint.com/mailers/task-alert/btn-start-task.png" border="0" width="145" height="33" alt="Start Task" />-->
+                Start Task
+              </a>
+            </div>
+            <!-- /BUTTON -->
+            </td>
+            </tr>
+            </table>            
+            </td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:#0987a0;margin:0;padding:0;text-align:right;border-top:5px solid #e4e4e4;">
+        <tr valign="middle">
+          <td height="60" width="180">
+            <!--<img src="http://www.sailpoint.com/mailers/task-alert/powered-by.png" width="180" height="60" alt="Powered By IdentityIQ" />-->
+            &nbsp;
+          </td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+
+</body>
+</html>
+
+    ]]>    
+    
+    </Body>
+  </EmailTemplate>
+
+
+</sailpoint>

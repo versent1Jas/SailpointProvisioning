@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  
+  <table class="width100" cellspacing="0" cellpadding="0">
+    <tr>
+      <td>          
+        <table class="width100">            
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold" 
+                value="#{sp:localizeKey(searchBean.inputs['role.name'].description)}"/>
+            </td>
+            <td colspan="2">
+              <h:inputText id="roleSearchName" styleClass="searchInputText inputWidth"
+                value="#{searchBean.inputs['role.name'].value}"/>
+            </td>             
+            <td>                
+              <h:outputText styleClass="textBold"
+               value="#{sp:localizeKey(searchBean.inputs['role.owner'].description)}"/>
+            </td>
+            <td colspan="2">
+              <div id="roleOwnerSuggestDiv"></div>
+              <t:inputHidden id="roleOwner" value="#{searchBean.inputs['role.owner'].value}" forceId="true">
+              </t:inputHidden>
+            </td>
+          </tr>            
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold" 
+                value="#{sp:localizeKey(searchBean.inputs['role.displayName'].description)}"/>
+            </td>
+            <td colspan="2">
+              <h:inputText id="roleSearchDisplayName" styleClass="searchInputText inputWidth"
+                value="#{searchBean.inputs['role.displayName'].value}"/>
+            </td>             
+            <td>                
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['role.status'].description)}"/>
+            </td>
+            <td colspan="2">
+                <h:selectOneMenu id="roleStatus" styleClass="searchInputSelect" value="#{searchBean.inputs['role.status'].value}">
+                  <f:selectItem itemLabel="" itemValue=""/>
+                  <f:selectItem itemLabel="#{msgs.enabled}" itemValue="false" />
+                  <f:selectItem itemLabel="#{msgs.label_disabled}" itemValue="true" />
+                </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold" 
+                value="#{sp:localizeKey(searchBean.inputs['role.type'].description)}"/>
+            </td>
+            <td colspan="5">
+                <h:selectOneMenu id="roleTypes" styleClass="searchInputSelect" value="#{searchBean.inputs['role.type'].value}">
+                  <f:selectItem itemLabel="" itemValue=""/>
+                  <f:selectItems value="#{bundleList.typeOptions}" />
+                </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr><td colspan="6">&nbsp;</td></tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['role.detectedCount'].description)}"/>
+            </td>
+            <td colspan="2">
+              <table class="searchInputPairTable">
+                <tr>
+                  <td>
+                      <h:selectOneMenu id="roleSearchDetectedCountSelection" styleClass="searchInputSelect"
+                        value="#{searchBean.inputs['role.detectedCount'].inputTypeValue}">
+                        <f:selectItems value="#{searchBean.amountInputTypeChoices}"/>
+                      </h:selectOneMenu>
+                  </td>
+                  <td>
+                    <h:inputText styleClass="searchInputText inputNumberWidth" id="detectedCount"
+                      value="#{searchBean.inputs['role.detectedCount'].value}">
+                      <f:validateLongRange minimum="0" maximum="1000000" />
+                    </h:inputText>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['role.assignedCount'].description)}"/>
+            </td>
+            <td colspan="2">
+              <table class="searchInputPairTable">
+                <tr>
+                  <td>
+                      <h:selectOneMenu styleClass="searchInputSelect" id="roleSearchAssignedCountSelection"
+                        value="#{searchBean.inputs['role.assignedCount'].inputTypeValue}">
+                        <f:selectItems value="#{searchBean.amountInputTypeChoices}"/>
+                      </h:selectOneMenu>
+                  </td>
+                  <td>
+                    <h:inputText styleClass="searchInputText inputNumberWidth" id="assignedCount"
+                      value="#{searchBean.inputs['role.assignedCount'].value}">
+                      <f:validateLongRange minimum="0" maximum="1000000" />
+                    </h:inputText>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['role.entitlementCount'].description)}"/>
+            </td>
+            <td colspan="2">
+              <table class="searchInputPairTable">
+                <tr>
+                  <td>
+                      <h:selectOneMenu styleClass="searchInputSelect" id="roleSearchEntitlementCountSelection"
+                        value="#{searchBean.inputs['role.entitlementCount'].inputTypeValue}">
+                        <f:selectItems value="#{searchBean.amountInputTypeChoices}"/>
+                      </h:selectOneMenu>
+                  </td>
+                  <td>
+                    <h:inputText styleClass="searchInputText inputNumberWidth" id="entitlementCount"
+                      value="#{searchBean.inputs['role.entitlementCount'].value}">
+                      <f:validateLongRange minimum="0" maximum="1000000" />
+                    </h:inputText>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['role.riskScoreWeight'].description)}"/>
+            </td>
+            <td colspan="2">
+              <table class="searchInputPairTable">
+                <tr>
+                  <td>
+                      <h:selectOneMenu styleClass="searchInputSelect" id="roleSearchRiskScoreSelection"
+                        value="#{searchBean.inputs['role.riskScoreWeight'].inputTypeValue}">
+                        <f:selectItems value="#{searchBean.amountInputTypeChoices}"/>
+                      </h:selectOneMenu>
+                  </td>
+                  <td>
+                    <h:inputText styleClass="searchInputText inputNumberWidth" id="riskScoreWeight"
+                      value="#{searchBean.inputs['role.riskScoreWeight'].value}">
+                      <f:validateLongRange minimum="0" maximum="1000" />
+                    </h:inputText>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold" 
+                value="#{sp:localizeKey(searchBean.inputs['role.associatedToRole'].description)}"/>
+            </td>
+            <td colspan="5">
+                <h:selectOneMenu id="associated" styleClass="searchInputSelect" value="#{searchBean.inputs['role.associatedToRole'].value}">
+                  <f:selectItem itemLabel="" itemValue="" />
+                  <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                  <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                </h:selectOneMenu>
+            </td>
+          </tr>
+          
+          <!--  Extended Attributes -->
+          
+          <ui:fragment rendered="#{null != searchBean.extendedAttributeKeys}">
+          <tr>
+            <td colspan="6" style="border-bottom:1px #ccc solid">
+              <h:outputText value=" "/>
+            </td>
+          </tr>
+          <tr class="odd">
+            <td colspan="6" style="border-bottom:1px #ccc solid;" >
+              <h:outputText styleClass="textBold" 
+                value="#{msgs.label_filter_by_extended_attribute}"/>
+            </td>
+          </tr>
+          
+          <c:forEach id="extendedIdentityAttributes" items="#{searchBean.extendedAttributeKeys}" var="key">
+            
+            <!-- Boolean -->
+            <ui:fragment rendered="#{searchBean.inputs[key].propertyType eq 'Boolean'}">
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+              </td>
+              <td colspan="2">
+                  <h:selectOneMenu styleClass="searchInputSelect" value="#{searchBean.inputs[key].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                    <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                  </h:selectOneMenu>
+              </td>
+            </tr>
+            </ui:fragment>
+            
+            <!-- String -->
+            <ui:fragment rendered="#{(searchBean.inputs[key].propertyType eq 'String')}">
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+              </td>
+              <td colspan="2">
+                <h:inputText styleClass="searchInputText inputWidth" value="#{searchBean.inputs[key].value}"/>
+              </td>
+            </tr>
+            </ui:fragment>
+            
+            <!-- identity -->
+            <ui:fragment rendered="#{(searchBean.inputs[key].propertyType eq 'Identity')}">
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+              </td>
+              <td colspan="2" class="searchIdentitySuggestCell">
+                <div id="SearchIdentity#{key}Suggest"></div>
+                <t:inputHidden name="SearchIdentity#{key}" id="SearchIdentity#{key}SuggestInput" value="#{searchBean.inputs[key].value}"  forceId="true">
+                </t:inputHidden>
+              </td>
+            </tr>
+            </ui:fragment>
+                        
+            <!-- Integer -->
+            <ui:fragment rendered="#{(searchBean.inputs[key].propertyType eq 'Integer')}">
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+              </td>
+              <td colspan="2">
+                <table class="searchInputPairTable">
+                  <tr>
+                    <td>
+                        <h:selectOneMenu styleClass="searchInputSelect"
+                          value="#{searchBean.inputs[key].inputTypeValue}">
+                          <f:selectItems value="#{searchBean.amountInputTypeChoices}"/>
+                        </h:selectOneMenu>
+                    </td>
+                    <td>
+                      <h:inputText styleClass="searchInputText inputNumberWidth" 
+                        value="#{searchBean.inputs[key].value}">
+                        <f:validateLongRange minimum="0" maximum="1000000" />
+                      </h:inputText>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            </ui:fragment>
+            
+            <!-- Date -->
+            <ui:fragment rendered="#{(searchBean.inputs[key].propertyType eq 'Date')}">
+            <tr >
+              <td colspan="6" >
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs[sp:concat(key, '.startDate')].description)}"/>
+                <input type="checkbox" class="startOrEndDate" id="#{key}StartDateSelect" name="#{key}StartDateSelect" style="margin:5px;vertical-align:middle"
+                  onclick="SailPoint.Analyze.updateStartType(this, $('roleSearchForm:#{key}StartDateType'), $('#{key}StartDateDiv'));"/>
+                <h:inputText id="#{key}StartDateType" value="#{searchBean.inputs[sp:concat(key, '.startDate')].inputTypeValue}" styleClass="hiddenDateType" style="display:none"/>
+              </td>
+              <td align="left" colspan="2" >
+                <div id="#{key}StartDateDiv" style="display:#{search.inputs[sp:concat(key, '.startDate')].inputTypeValue == 'After' ? '' : 'none'}">
+                  <sp:inputDate type="date" id="#{key}StartDate" popupCalendar="true" ampm="true" timeZone="#{taskSchedule.userTimeZoneId}" addResources="false"
+                    value='#{searchBean.inputs[sp:concat(key, ".startDate")].objectDateValue}' imageLocation="/scripts/myfacescalendar" 
+                    javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+                </div>
+              </td>                  
+              <td >
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs[sp:concat(key, '.endDate')].description)}"/>
+                <input type="checkbox" id="#{key}EndDateSelect" name="#{key}EndDateSelect" class="startOrEndDate" style="margin:5px;vertical-align:middle"
+                  onclick="SailPoint.Analyze.updateEndType(this, $('roleSearchForm:#{key}EndDateType'), $('#{key}EndDateDiv'));"/>
+                <h:inputText id="#{key}EndDateType" value="#{searchBean.inputs[sp:concat(key, '.endDate')].inputTypeValue}" styleClass="hiddenDateType" style="display:none"/>
+            
+              </td>
+              <td align="left"  colspan="2" >
+                <div id="#{key}EndDateDiv" style="display:#{search.inputs[sp:concat(key, '.endDate')].inputTypeValue == 'Before'? '' : 'none'}">  
+                  <sp:inputDate type="date" id="#{key}EndDate" popupCalendar="true" ampm="true" timeZone="#{searchBean.userTimeZoneId}" addResources="false"                  
+                   value='#{searchBean.inputs[sp:concat(key, ".endDate")].objectDateValue}' imageLocation="/scripts/myfacescalendar" 
+                   javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+                </div>
+              </td>
+            </tr>
+            </ui:fragment>    
+                         
+          </c:forEach>
+                        
+        </ui:fragment>  
+        
+        <!-- End Extended Attributes -->        
+          <tr>
+            <td colspan="6" style="border-bottom:1px #ccc solid">
+              <h:outputText value=" "/>
+            </td>
+          </tr>
+          <tr class="odd">
+            <td colspan="6" style="border-bottom:1px #ccc solid;" >
+              <h:outputText styleClass="textBold" 
+                value="#{msgs.label_filter_by_date}"/>
+            </td>
+          </tr>
+          <tr>
+            <td width="15%">
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs['role.date'].description)}"/>
+            </td>
+            <td colspan="5">
+                <h:selectOneMenu styleClass="searchInputSelect"
+                  id="roleDates" value="#{searchBean.inputs['role.date'].value}">
+                  <f:selectItems value="#{searchBean.dateOptions}"/>
+                </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td>
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs['role.startDate'].description)}"/>
+                <input type="checkbox" id="roleStartDateSelect" name="roleStartDateSelect" class="startOrEndDate" style="margin:5px;vertical-align:middle"
+                  onclick="SailPoint.Analyze.updateStartType(this, $('roleSearchForm:roleStartDateType'), $('roleStartDateDiv'));"/>
+                <h:inputHidden id="roleStartDateType" value="#{searchBean.inputs['role.startDate'].inputTypeValue}"/>
+            </td>
+            <td align="left" colspan="2">
+              <div id="roleStartDateDiv" style="display:#{search.inputs['role.startDate'].inputTypeValue == 'After' ? '' : 'none'}" >
+                <sp:inputDate type="date" id="roleStartDate" popupCalendar="true" ampm="true" timeZone="#{taskSchedule.userTimeZoneId}" addResources="false" 
+                  value='#{searchBean.inputs["role.startDate"].objectDateValue}' imageLocation="/scripts/myfacescalendar" 
+                  javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+              </div>
+            </td>                  
+            <td>
+                <h:outputText styleClass="textBold" 
+                  value="#{sp:localizeKey(searchBean.inputs['role.endDate'].description)}"/>
+                <input type="checkbox" id="roleEndDateSelect" name="roleEndDateSelect" class="startOrEndDate" style="margin:5px;vertical-align:middle"
+                  onclick="SailPoint.Analyze.updateEndType(this, $('roleSearchForm:roleEndDateType'), $('roleEndDateDiv'));"/>
+                <h:inputHidden id="roleEndDateType" value="#{searchBean.inputs['role.endDate'].inputTypeValue}"/>
+            
+            </td>
+            <td align="left"  colspan="2">
+              <div id="roleEndDateDiv" style="display:#{search.inputs['role.endDate'].inputTypeValue == 'Before'? '' : 'none'}">  
+                <sp:inputDate type="date" id="roleEndDate" popupCalendar="true" ampm="true" timeZone="#{searchBean.userTimeZoneId}" addResources="false" 
+                 value='#{searchBean.inputs["role.endDate"].objectDateValue}' imageLocation="/scripts/myfacescalendar" 
+                 javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  <script type="text/javascript" defer="defer">
+    SailPoint.Utils.styleSelects();
+  </script>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+  <t:saveState value="#{certificationPercentList.appOffset}"/>
+  
+  <a4j:outputPanel id="appCertCompletionStatusPanel">
+  <ui:fragment rendered="#{certificationPercentList.appCount le 0}">  
+    <table class="width100" cellpadding="0" cellspacing="0">
+        <tr>
+          <td class="lightBlueBoxHeading" align="center"><h:outputText value="#{msgs.msg_no_app_with_open_certs}" />
+          </td>
+        </tr>
+      </table>
+  </ui:fragment>
+  
+  <a4j:commandButton  id="prevAppBtn"
+                      style="display:none"
+                      action="#{certificationPercentList.prevApps}" value="prev"
+                      render="appCertCompletionStatusPanel"
+                      oncomplete="setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500)"/>
+                                
+  <a4j:commandButton  id="nextAppBtn"
+                      style="display:none"
+                      action="#{certificationPercentList.nextApps}"
+                      render="appCertCompletionStatusPanel"
+                      oncomplete="setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500)"/> 
+  
+  
+  
+  <ui:fragment rendered="#{certificationPercentList.appCount gt 0}">
+
+    <!-- Pager -->
+    <ui:include src="dashboardPager.xhtml">
+      <ui:param name="pageSize"   value="#{certificationPercentList.maxApps}" />
+      <ui:param name="totalRows"  value="#{certificationPercentList.appCount}" />
+      <ui:param name="startIdx"   value="#{certificationPercentList.appOffset}" />
+      <ui:param name="endIdx"     value="#{certificationPercentList.appEnd}" />
+      <ui:param name="prevBtn"    value="#{parentFormName}:prevAppBtn" />
+      <ui:param name="nextBtn"    value="#{parentFormName}:nextAppBtn" />
+      <ui:param name="objectType" value="#{msgs.applications}" />
+      <ui:param name="statusText" value="#{certificationPercentList.appStatusText}" />
+    </ui:include>
+    
+    <table class="spTable dashWidth100 paddedTbl" id="appCertStatusTbl" style="margin:0px 0px;border-bottom:1px #ccc solid">
+      <tr>
+        <th></th>
+        <th width="30%">
+          <h:outputText styleClass="font10" value="#{msgs.name}" />
+        </th>
+        <th colspan="2" width="70%" >
+          <h:outputText styleClass="font10" value="#{msgs.percentage_complete}" />
+        </th>
+      </tr>
+      
+    <ui:repeat value="#{certificationPercentList.applicationCertPercentages}" var="appCertPercent">
+    
+    <tr style="#{(appCertPercent.totalItems gt 0) ? 'cursor:pointer' : ''}" 
+      onmouseover="this.style.backgroundColor='#FFFFCC'"  onmouseout="this.style.backgroundColor=''">
+    
+      <td valign="middle">
+        <h:outputLink value="javascript: SailPoint.EmailWindow.open('#{appCertPercent.recipientId}', '#{appCertPercent.openCertsEmailTemplate}')">
+          <h:graphicImage url="/images/icons/mail_16.gif" />
+        </h:outputLink>
+      </td>
+      
+      <td onclick="SailPoint.Dashboard.toggleCertPercentDisplay('appDetails#{appCertPercent.id}', '#{(appCertPercent.totalItems gt 0)}', $('showAppDetails_#{appCertPercent.id}'));">
+        <h:outputText styleClass="font10" value="#{appCertPercent.name}" />
+      </td>
+      
+      <td colspan="2" onclick="SailPoint.Dashboard.toggleCertPercentDisplay('appDetails#{appCertPercent.id}', '#{(appCertPercent.totalItems gt 0)}', $('showAppDetails_#{appCertPercent.id}'));">
+        <ui:fragment rendered="#{appCertPercent.totalItems le 0}">
+          <h:outputText styleClass="font10" style="margin-left: 10px" class="font10" value="#{msgs.msg_no_open_ceritications}"/>
+       	</ui:fragment>
+        
+        <ui:fragment rendered="#{(appCertPercent.totalItems gt 0)}">
+          <sp:progressBar 
+            rendered="#{appCertPercent.hasContinuous}"           
+            totalNum="#{appCertPercent.totalItems}"
+            completedNum="#{appCertPercent.completedItems}"
+            greenNum="#{appCertPercent.certifiedItems}"
+            yellowNum="#{appCertPercent.certificationRequiredItems}"
+            redNum="#{appCertPercent.overdueItems}"
+            percentComplete="#{sp:round(appCertPercent.percentComplete)}">
+          </sp:progressBar> 
+          
+          <sp:progressBar
+            rendered="#{!(appCertPercent.hasContinuous)}"          
+            totalNum="#{appCertPercent.totalItems}"
+            completedNum="#{appCertPercent.completedItems}"
+            remainingClass="progressBarRemainingDarkGray"
+            percentComplete="#{sp:round(appCertPercent.percentComplete)}">
+          </sp:progressBar>
+          
+        </ui:fragment>
+      </td>
+    </tr>
+    <tr id="appDetails#{appCertPercent.id}" style="#{!(empty appCertPercent.certifications) ? '' : 'display:none'}" >
+      <td colspan="4" class="spLightGray">
+      
+      <span id="showAppDetails_#{appCertPercent.id}" class="#{(appCertPercent.totalItems gt 0) ? '' : 'empty'}">
+        <a4j:commandButton  style="display:none"
+                            action="#{appCertPercent.loadCerts}"
+                            render="appCertCompletionStatusPanel"/>
+      </span>
+      
+      <span id="prevAppDetails_#{appCertPercent.id}" class="#{(appCertPercent.totalItems gt 0) ? '' : 'empty'}">
+        <a4j:commandButton  style="display:none"
+                            action="#{appCertPercent.prevCerts}" value="prev"
+                            render="appCertCompletionStatusPanel"/>
+      </span>
+      
+      <span id="nextAppDetails_#{appCertPercent.id}" class="#{(appCertPercent.totalItems gt 0) ? '' : 'empty'}">                        
+        <a4j:commandButton style="display:none"
+                            action="#{appCertPercent.nextCerts}"
+                            render="appCertCompletionStatusPanel"/>
+      </span>
+      
+      <a4j:outputPanel id="appCertDetails#{appCertPercent.id}">
+      
+        <h:inputHidden id="offset_#{appCertPercent.id}" value="#{appCertPercent.offset}"/>
+        
+        <ui:fragment rendered="#{empty appCertPercent.certifications}">
+          <h:graphicImage url="/images/progress.gif"/> 
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{!empty appCertPercent.certifications}">
+          <table cellpadding="3" cellspacing="0" class="width100">
+            <tr>
+              <td align="left" class="spBlue textBold" style="width:16px">
+                <ui:fragment rendered="#{appCertPercent.certificationsCount gt appCertPercent.maxCerts }">                            
+                  <h:graphicImage alt="next" url="/images/icons/left_circle_blue_16.png"
+                    style="vertical-align:bottom;cursor:pointer;" 
+                    rendered="#{appCertPercent.offset gt 0}"
+                    onclick="SailPoint.Dashboard.loadCerts($('prevAppDetails_#{appCertPercent.id}'))"/>
+                </ui:fragment>                        
+              </td>
+              <td class="spBlue textBold">
+                <h:outputText styleClass="font10" value="#{msgs.label_details} #{appCertPercent.certificationsCount} Certification(s)"/>
+              </td>
+              <td class="spBlue">
+                <ui:fragment rendered="#{appCertPercent.certificationsCount gt appCertPercent.maxCerts }">                            
+                  <h:outputText value=" [#{msgs.label_showing} #{appCertPercent.start} - #{appCertPercent.end}]"/> 
+                </ui:fragment>
+              </td>
+              <td align="right" class="spBlue textBold" style="width:16px">
+                <ui:fragment rendered="#{appCertPercent.certificationsCount gt appCertPercent.maxCerts }">                            
+                  <h:graphicImage alt="next" url="/images/icons/right_circle_blue_16.png"
+                    style="vertical-align:bottom;cursor:pointer;" 
+                    rendered="#{(appCertPercent.end lt appCertPercent.certificationsCount)}"
+                    onclick="SailPoint.Dashboard.loadCerts($('nextAppDetails_#{appCertPercent.id}'))"/>
+                </ui:fragment>
+              </td>
+            </tr>     
+            
+            
+            <ui:repeat value="#{appCertPercent.certifications}" var="certificationBean">
+              <tr>
+                <td colspan="4">
+                  <ui:include src="contentApplicationCertPercentInclude.xhtml">
+                    <ui:param name="certificationBean" value="#{certificationBean}" />
+                    <ui:param name="emailTemplate" value="#{appCertPercent.openCertsEmailTemplate}"/>
+                  </ui:include>
+                </td>
+              </tr>
+            </ui:repeat>  
+          </table>
+        </ui:fragment>
+      
+      </a4j:outputPanel>
+      </td>
+     </tr>
+    </ui:repeat>
+  </table>
+  <script>
+    makeTableMulticolored($('appCertStatusTbl'), true, false, 'even', 'odd');
+  </script> 
+  </ui:fragment>
+</a4j:outputPanel>
+</ui:composition>
+
+</body>
+</html>

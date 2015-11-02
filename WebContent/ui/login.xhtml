@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:sp="http://sailpoint.com/ui">
+
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+<h:head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>#{msgs.sailpoint_iiq}</title>
+  <link rel="shortcut icon" href="#{base.requestContextPath}/ui/images/favicon.ico"/>
+  <!-- split up css because IE9 can only handle ~4k rules per file -->
+  <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+    <src>theme.css?#{debug.revision}</src>
+  </sp:style>
+  <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+    <src>application.css?#{debug.revision}</src>
+  </sp:style>
+  <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+    <src>animate.css?#{debug.revision}</src>
+    <src>login.css?#{debug.revision}</src>
+    <src>ui-custom.css?#{debug.revision}</src>
+  </sp:style>
+
+  <sp:script serveOffset="#{base.requestContextPath}/ui/js">
+    <src>#{base.requestContextPath}/ui/js/lib/jquery/jquery.min.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/ui/js/shared/util.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/ui/js/shared/androidTablet.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/ui/js/shared/login.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/ui/js/shared/timeZone.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/ui/js/common/error/ErrorHandler.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/ui/js/lib/ie/phoneCompat.js?#{debug.revision}</src>
+  </sp:script>
+
+  <f:verbatim>
+    <!--[if lte IE 9]>
+      <script src="#{base.requestContextPath}/ui/js/lib/ie/respond.min.js?#{debug.revision}"></script>
+      <script src="#{base.requestContextPath}/ui/js/lib/ie/html5.js?#{debug.revision}"></script>
+      <script src="#{base.requestContextPath}/ui/js/lib/jquery-placeholder/jquery.placeholder.js?#{debug.revision}"></script>
+      <script type="text/javascript">
+        $(function() {
+            $('input').placeholder();
+        });
+      </script>
+    <![endif]-->
+  </f:verbatim>
+
+  <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+    if (#{!base.allowXFrameOptions}) {
+        if (top.location != window.location) {
+            top.location.replace(window.location);
+        }
+    }
+
+    window.onload = function () {
+        /* Internet Explorer has the behavior that when focused a field loses its placeholder text
+         * to avoid showing a blank field we do not auto-focus the username field */
+        var ieRegEx = /MSIE/;
+        SailPoint.TimeZone.getTimeZone('loginForm');
+        if(!ieRegEx.test(navigator.userAgent)) {
+            document.getElementById('loginForm:accountId').focus();
+            document.getElementById('loginForm:accountId').select();
+        }
+
+        var hash = window.location.hash,
+            preLoginUrlInput = document.getElementById("loginForm:preLoginUrl");
+
+        if(hash && preLoginUrlInput) {
+            // If preLoginUrl doesn't already have an anchor, go ahead and add the hash.
+            if(preLoginUrlInput.value.indexOf('#') === -1) {
+                preLoginUrlInput.value = preLoginUrlInput.value + hash;
+            }
+        }
+    };
+
+    SailPoint.ErrorHandler.init($,document);
+    //--><!]]>
+  </script>
+</h:head>
+<h:body>
+  <header class="header bg-info dk">
+    <div class="navbar-header">
+      <div class="nav-brand"><img src="images/logo.png"/></div>
+    </div>
+  </header>
+
+  <section id="content" class="m-t-lg animated fadeInUp">
+    <div class="row m-n">
+      <div class="col-sm-6 col-sm-offset-3 m-t-lg">
+        <sp:sailpointForm id="loginForm">
+
+          <h:inputHidden id="timeZoneRawOffset" value="#{login.timeZoneRawOffset}"/>
+          <h:inputHidden id="timeZoneObservesDST" value="#{login.timeZoneObservesDST}"/>
+          <h:inputHidden id="timeZoneDSTStarts" value="#{login.timeZoneDSTStarts}"/>
+          <h:inputHidden id="timeZoneDSTEnds" value="#{login.timeZoneDSTEnds}"/>
+          <h:inputHidden id="preLoginUrl" value="#{login.preLoginUrl}"/>
+          <section class="panel">
+            <header class="panel-heading bg-light lter text-center">
+              <h:outputText value="#{msgs.login_ui_welcome}" styleClass="h3 font-thin login-welcome"/>
+            </header>
+
+            <div class="panel-body">
+              <section role="presentation">
+                <div class="clearfix text-center">
+                  <div class="inline">
+                    <div class="thumb-md m-b-lg">
+                      <img src="images/loginLogo.png" class="img-circle"/>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div id="alertDiv" class="sr-only" role="alert" aria-live="rude"></div>
+
+              <div class="form-group #{login.accountIdInput.valid ? '' : 'has-error'}">
+                <label for="loginForm:accountId" class="sr-only">#{msgs.label_username}</label>
+                  <sp:inputText id="accountId" value="#{login.accountId}"
+                                styleClass="form-control input-lg"
+                                required="true"
+                                requiredMessage="#{msgs.login_username_required}"
+                                binding = "#{login.accountIdInput}"
+                                onkeypress="return SailPoint.Login.submitenter(this,event,'loginForm:loginButton')"
+                                placeholder="#{msgs.label_username}"
+                                tabindex="1"/>
+                  <ui:fragment rendered="#{not login.accountIdInput.valid}">
+                    <div aria-hidden="true">
+                      <h:message id="usernameErrors" for="accountId" showDetail="false" showSummary="true" errorClass="text-danger reader-error"/>
+                    </div>
+                  </ui:fragment>
+              </div>
+              <div class="form-group #{login.passwordInput.valid ? '' : 'has-error'}">
+                  <label for="loginForm:password" class="sr-only">#{msgs.label_password}</label>
+                  <sp:inputSecret id="password" value="#{login.password}"
+                                  styleClass="form-control input-lg"
+                                  required="#{param['loginForm:loginButton'] == 'Login'}"
+                                  requiredMessage="#{msgs.login_password_required}"
+                                  binding="#{login.passwordInput}"
+                                  onkeypress="return SailPoint.Login.submitenter(this,event,'loginForm:loginButton')"
+                                  placeholder="#{msgs.label_password}"
+                                  tabindex="2"/>
+                  <ui:fragment rendered="#{not login.passwordInput.valid}">
+                    <div aria-hidden="true">
+                      <h:message id="passwordErrors" for="password" showDetail="false" showSummary="true" errorClass="text-danger reader-error"/>
+                    </div>
+                  </ui:fragment>
+              </div>
+              <div class="pull-right m-t-n-xs">
+              <ui:fragment rendered="#{login.forgotPasswordEnabled}">
+                <div>
+                   <a id="forgotPassButtonLink" href="javascript:void(0);" tabindex="50" class="font-thin text-info"
+                      onclick="$('#loginForm\\:forgotPasswordButton').click()"><strong>#{msgs.forgot_password_link}</strong>
+                   </a>
+                   <h:commandButton id="forgotPasswordButton" style="display:none" value=""
+                                    action="#{login.userResetAction}">
+                     <f:setPropertyActionListener target="#{login.userResetType}" value="passwordReset"/>
+                   </h:commandButton>
+                </div>
+               </ui:fragment>
+               <ui:fragment rendered="#{login.accountUnlockEnabled}">
+                 <div>
+                   <a id="unlockAccountButtonLink" href="javascript:void(0);" tabindex="50" class="font-thin text-info"
+                      onclick="$('#loginForm\\:unlockAccountButton').click()"><strong>#{msgs.desktop_reset_unlock_account}</strong>
+                   </a>
+                   <h:commandButton id="unlockAccountButton" style="display:none"
+                                    action="#{login.userResetAction}">
+                     <f:setPropertyActionListener target="#{login.userResetType}" value="accountUnlock"/>
+                   </h:commandButton>
+                 </div>
+              </ui:fragment>
+              </div>
+              <ui:fragment rendered="#{login.loginError}">
+                <div aria-hidden="true">
+                  <h:message id="loginErrors" for="loginForm" showDetail="false" showSummary="true" styleClass="text-danger reader-error" />
+                </div>
+              </ui:fragment>
+            </div>
+            <footer class="panel-footer text-center clearfix bg-light lter">
+              <div class="inline">
+                <h:commandButton id="loginButton" action="#{login.login}" styleClass="btn btn-info btn-s-lg" value="#{msgs.button_login}" tabindex="3"/>
+              </div>
+            </footer>
+          </section>
+        </sp:sailpointForm>
+      </div>
+    </div>
+    <div class="text text-center text-muted v-bottom m-t-sm hidden-xs" aria-hidden="true">
+      <h:outputFormat value="#{msgs.iiq_version}">
+        <f:param value="#{debug.version}"/>
+      </h:outputFormat>
+      &#xA0;
+      &#169;
+      #{msgs.copy_right}
+    </div>
+  </section>
+
+  <!-- Client locale: #{base.locale} -->
+  <!-- Build: #{debug.fullVersion} -->
+
+</h:body>
+</html>

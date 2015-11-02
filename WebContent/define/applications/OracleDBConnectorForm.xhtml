@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+              // var DriverClass = getFieldValue('editForm:driverClass');
+               //Validator.validateNonBlankString(DriverClass, "driverClass can not be Null!");
+                           var URL = getFieldValue('editForm:url');
+               Validator.validateNonBlankString(URL, "#{msgs.con_form_Oracle_Hostnotnull}");
+
+        
+               var userID = getFieldValue('editForm:user');
+               Validator.validateNonBlankString(userID, "#{msgs.con_form_Oracle_Usernotnull}");
+                           
+                           var passwordOfAdmin = getFieldValue('editForm:password');
+                           Validator.validateNonBlankString(passwordOfAdmin, "#{msgs.con_form_Oracle_Passwordnotnull}");
+                           
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_Oracle_Attributes}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+
+                <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_Oracle_Administrator}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpUserName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_Oracle_Administrator}"/>
+            </td>
+            <td>
+              <h:inputText id="user"
+                           value="#{applicationObject.attributes['user']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+           
+          </tr>
+                  
+                  <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_Oracle_password}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_Oracle_Password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="password"
+                               size="50" 
+                               value="#{applicationObject.attributes['password']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+             
+          </tr>
+                  
+                  
+                  <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_Oracle_url}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpUrl" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_Oracle_URL}"/>
+            </td>
+            <td>
+              <h:inputText id="url"
+                           value="#{applicationObject.attributes['url']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+           
+          </tr>
+                  
+                  
+                  
+                  <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_Oracle_driver}"/>
+            </td>
+                        <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpDriverClass" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_Oracle_Driver}"/>
+            </td>
+            
+            <td>
+              <h:inputText id="driverClass"
+                           value="#{applicationObject.attributes['driverClass']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+                  
+
+
+        </table>
+
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

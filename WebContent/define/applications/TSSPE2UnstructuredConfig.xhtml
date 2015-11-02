@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+           buildTooltips();
+        });
+    </script>
+    <f:view>
+    <h:panelGrid columns="1">
+      <table>
+        <tr>
+          <td><h:outputText styleClass="sectionHeader" value="#{msgs.attributes}"/></td>
+        </tr>
+        <tr>
+          <td>
+              <h:panelGrid columns="2">
+                <h:outputText styleClass="textBold" value="#{msgs.col_form_tss_appname}"/>
+                <h:inputText value="#{targetSource.object.configuration['PE2ApplName']}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+             </h:panelGrid>
+          </td>
+        </tr>
+      </table>      
+        <div id="siteCollectionConfig" class="submenuContentBox" style="border:0px">
+            <div class="spContent">
+            
+              <table width="100%">
+                <tr>
+                  <td>
+                                
+              <a4j:outputPanel id="PE2CollectionsTable">
+                <table class="width100" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <h:outputText styleClass="sectionHeader" value="${msgs.col_form_tss_title}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <h:outputText styleClass="font10" value="${msgs.col_form_tss_subtitle}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <table class="spTable">
+                        <thead>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <th style="text-align:center">
+                                <h:selectBooleanCheckbox id="selectAllToggleSites" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/>
+                              </th>
+                              <th/>
+                            </ui:fragment>
+                              <th> 
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_tss_targetName}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpTSSTargetName"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{help.help_con_form_tss_targetName}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+                              <th style="text-align:left"> 
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_tss_targetType}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpTSSTargetType"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{help.help_con_form_tss_targetType}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+                              <th style="text-align:left">
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_tss_type}"/>
+                                    </td>
+                                    <td>
+                                       <h:graphicImage id="imgHlpTSSGenricType"
+                                                       styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                       alt="#{help.help_con_form_tss_type}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>                              
+                          </tr>
+                        </thead>
+                        <tfoot>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <td class="spDataTableHeader centeredColumn">
+                                  <a4j:commandButton id='removeSite' value="#{msgs.button_delete}" styleClass="secondaryBtn" action="#{targetSource.removePE2Config}" render="PE2CollectionsTable"/>
+                              </td>
+                              <td class="spDataTableHeader centeredColumn">
+                                  <a4j:commandButton id='addSite' value="#{msgs.button_add}" styleClass="primaryBtn" action="#{targetSource.addPE2Config}" render="PE2CollectionsTable"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <h:inputText value="#{targetSource.newpe2config.object.targetName}" size="25" style="text-transform:uppercase"/> 
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <h:inputText value="#{targetSource.newpe2config.object.targetType}" size="25" style="text-transform:uppercase"/> 
+                              </td>
+                             <td class="spDataTableHeader">
+                              		<h:selectOneMenu value="#{targetSource.newpe2config.object.type}" > 
+                              		<f:selectItem itemValue="PREFIX" itemLabel="#{msgs.col_form_tss_type_prefix}"/>
+                              		<f:selectItem itemValue="ID" itemLabel="#{msgs.col_form_tss_type_id}"/>                               		
+                               		</h:selectOneMenu>
+                              </td>
+                            </ui:fragment>
+                          </tr>
+                        </tfoot>
+                        <tbody>
+                          <ui:repeat value="#{targetSource.pe2configs}" var="site">
+                            <tr>
+                              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <td class="centeredColumn">
+                                    <h:selectBooleanCheckbox styleClass="toggleable" id="#{share.id}checkbox" value="#{targetSource.selectedShares[site.id]}"/>
+                                  </td>
+                                  <td/>
+                              </ui:fragment>
+                              <td><h:inputText value="#{site.object.targetName}" size="25"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}" style="text-transform:uppercase"/></td>
+                              <td><h:inputText value="#{site.object.targetType}" size="15"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}" style="text-transform:uppercase"/></td>
+                              <td>
+                                <h:selectOneMenu value="#{site.object.type}"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <f:selectItem itemValue="PREFIX" itemLabel="#{msgs.col_form_tss_type_prefix}"/>
+                                  <f:selectItem itemValue="ID" itemLabel="#{msgs.col_form_tss_type_id}"/>
+                                </h:selectOneMenu>
+                              </td>
+                            </tr>
+                          </ui:repeat>
+                        </tbody>
+                      </table>                        
+                    </td>
+                  </tr>
+                </table>
+              </a4j:outputPanel>
+
+                  </td>
+                </tr>
+              </table>
+
+            </div> <!-- spContent -->
+        </div> <!-- siteCollectionConfig -->
+      </h:panelGrid>
+    </f:view>
+</ui:composition>
+</body>
+</html>

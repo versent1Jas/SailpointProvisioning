@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC
+"-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2015 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+        <ui:composition>
+                <ui:define name="headerItems"/>
+                        <sp:script>
+                                <src>#{base.requestContextPath}/scripts/ext-4.1.0/ux/form/MultiSelect.js?load=#{debug.revision}</src>
+                                <src>#{base.requestContextPath}/scripts/ext-4.1.0/ux/form/ItemSelector.js?load=#{debug.revision}</src>
+                                <src>#{base.requestContextPath}/scripts/sailpoint/web/discoverDomains.js?load=#{debug.revision}</src>                               
+                        </sp:script>
+                        
+                        <f:view> 
+                            <h:inputHidden id="isGCSaved" value="#{applicationObject.attributes['forestGC']}"/>
+                                <table class="spTable" style="border:0px " cellspacing="0">
+                                        <tr>
+                                                <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_AD_domain_conf}"/>
+                                                <h:outputText styleClass="requiredText" value="*"/>
+                                                <h:graphicImage
+                                                        id="domainImgTemp" styleClass="helpIcon"
+                                                        url="/images/icons/dashboard_help_16.png"
+                                                        alt="#{help.help_con_form_AD_domain_conf}"
+                                                        style="display: none;" />
+                                                <h:graphicImage id="imgHlpDomain"
+                                                        styleClass="helpIcon" 
+                                                        url="/images/icons/dashboard_help_16.png" 
+                                                        alt="#{help.help_con_form_AD_domain_conf}"/>
+                                        </tr>
+                                        <tr>
+                                                <td>
+                                                        <h:panelGroup>
+                                                                <h:selectBooleanCheckbox id="enable" value="false"
+                                                                        disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                                        readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                                        onclick="SailPoint.DiscoverDomains.enableDiscover(this.checked)"/>
+                                                                <h:outputText styleClass="titleColumn" value="#{msgs.con_form_AD_discover_domains}"/>
+                                                                <h:graphicImage
+                                                                        id="discoverImgTemp" styleClass="helpIcon"
+                                                                         url="/images/icons/dashboard_help_16.png"
+                                                                        alt="#{help.help_con_form_AD_discover_domains}"
+                                                                        style="display: none;" />
+                                                                <h:graphicImage id="imgHlpDiscover"
+                                                                        styleClass="helpIcon" 
+                                                                        url="/images/icons/dashboard_help_16.png" 
+                                                                        alt="#{help.help_con_form_AD_discover_domains}"/>
+                                                        </h:panelGroup>
+                                                </td>
+                                        </tr> 
+
+                                        <tr> 
+                                                <td class='titleColumnLeftAlign certScheduleTitleCol'>
+                                                        <h:outputText id="gcLabel" value="#{msgs.con_form_AD_gc}" style="padding-left: 5px"/>
+                                                        <h:graphicImage
+                                                                id="gcImgTemp" styleClass="helpIcon"
+                                                                url="/images/icons/dashboard_help_16.png"
+                                                                alt="#{help.help_con_form_AD_administrator}" 
+                                                                style="display: none;" />
+                                                        <h:graphicImage id="imgHlpGC"
+                                                                styleClass="helpIcon" 
+                                                                url="/images/icons/dashboard_help_16.png" 
+                                                                alt="#{help.help_con_form_AD_gc}"/>
+                                                        <h:inputText id="forestGC" value="#{applicationObject.attributes['forestGC']}" style="width: 275px;"/>
+                                                        <h:outputText id="gcAdminUserLabel" value="#{msgs.con_form_AD_administrator}" style="padding-left: 15px"/>
+                                                        <h:graphicImage
+                                                                id="gcImgTemp1" styleClass="helpIcon"
+                                                                url="/images/icons/dashboard_help_16.png"
+                                                                alt="#{help.help_con_form_AD_administrator}" 
+                                                                style="display: none;" />
+                                                        <h:graphicImage id ="imgHlpGCAdminUser" styleClass="helpIcon" 
+                                                                url="/images/icons/dashboard_help_16.png" 
+                                                                alt="#{help.help_con_form_AD_administrator}"/>
+                                                        <h:inputText id="forestAdmin" 
+                                                                value="#{applicationObject.attributes['forestAdmin']}"
+                                                                style="width: 275px;"
+                                                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                                                        <h:outputText id="gcPwdLabel" value="#{msgs.con_form_AD_password}" style="padding-left: 15px"/>
+                                                        <h:graphicImage
+                                                                id="gcImgTemp2" styleClass="helpIcon"
+                                                                url="/images/icons/dashboard_help_16.png"
+                                                                alt="#{help.help_con_form_AD_administrator}"
+                                                                style="display: none;" />
+                                                        <h:graphicImage id="imgHlpGCPwd" styleClass="helpIcon" 
+                                                                url="/images/icons/dashboard_help_16.png" 
+                                                                alt="#{help.help_con_form_AD_password}"/>
+                                                        <sp:inputSecret id="forestAdminPassword" value="#{applicationObject.attributes['forestAdminPassword']}"
+                                                                style="width: 125px;" redisplay="true"
+                                                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                                                </td>
+
+                                                <td align="center" valign="top" width="140">
+                                                        <a4j:commandButton id="discoverButton"
+                                                                value="#{msgs.button_discover}"
+                                                                styleClass="secondaryBtn"
+                                                                action="#{manageDomain.discoverDomains}"
+                                                                onclick="SailPoint.DiscoverDomains.startDiscover(this)"
+                                                                oncomplete="SailPoint.DiscoverDomains.endDiscover()"
+                                                                render="domainResultsPanel, domainErrorPanel, domainsTable"/>
+                                                </td>
+
+                                                <td>
+                                                        <a4j:outputPanel id="domainResultsPanel">
+                                                                <table>
+                                                                        <tr>
+                                                                                <td>
+                                                                                        <div id="domainResultsDiv" class="#{manageDomain.domainSuccess ? 'successText' : 'failText'}">
+                                                                                                <h:outputText value="#{manageDomain.domainResult}"/>
+                                                                                        </div>
+                                                                                </td>
+                                                                        </tr>
+                                                                </table>
+                                                        </a4j:outputPanel>
+                                                </td>
+                                        </tr>
+                                </table>
+
+                                <a4j:outputPanel id="domainsTable">
+                                        <table class="width90" cellpadding="0" cellspacing="0">
+                                                <tr>
+                                                        <td>
+                                                                <div class="spTabledContent">
+                                                                        <table class="spTable" cellspacing="0">
+                                                                                <thead>
+                                                                                        <tr>
+                                                                                                <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                                                                                    <th style="text-align:center; width: 5px;"><h:selectBooleanCheckbox id="selectAllToggle" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/></th>
+                                                                                                </ui:fragment>
+                                                                                                <th style="text-align:left"><h:outputText value="#{msgs.con_form_AD_domain}"/></th>
+                                                                                                <th style="text-align:left"><h:outputText value="#{msgs.con_form_AD_user}"/></th>
+                                                                                                <th style="text-align:left"><h:outputText value="#{msgs.con_form_AD_password}"/></th>
+                                                                                                <th style="text-align:left"><h:outputText value="#{msgs.con_form_AD_servers}"/></th>
+                                                                                                <th style="text-align:left"><h:outputText value="#{msgs.con_form_AD_ssl}"/></th>
+                                                                                        </tr>
+                                                                                </thead>
+                                                                                <tfoot>
+                                                                                        <tr>
+                                                                                                <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                                                                                        <th/>
+                                                                                                        <td >
+                                                                                                                <h:inputText value="#{manageDomain.domainDataObj.object.domainDN}" style="width: 400px; margin-left:0px; margin-right:0px;"/>
+                                                                                                        </td>
+                                                                                                        <td  style="width: 175px;">
+                                                                                                                <h:inputText value="#{manageDomain.domainDataObj.object.user}" style=" width: 225px; margin-left:0px;"/>
+                                                                                                        </td>
+                                                                                                        <td style="width: 175px;">
+                                                                                                                <sp:inputSecret value="#{manageDomain.domainDataObj.object.password}" style=" width: 175px; margin-left:0px;" redisplay="true" autocomplete="off"/>
+                                                                                                        </td>
+                                                                                                        <td  style="width: 175px;">
+                                                                                                                <h:inputTextarea rows="2" cols="5" value="#{manageDomain.domainDataObj.object.serverList}"
+                                                                                                                        converter="NewLineList" style="resize:none; width: 190px; margin-left:0px;"/> 
+                                                                                                        </td>
+                                                                                                        <td class="centeredColumn" style="width: 5px;">
+                                                                                                                <h:selectBooleanCheckbox value="#{manageDomain.domainDataObj.object.useSSL}" style="text-align:center"/>
+                                                                                                        </td> 
+                                                                                                </ui:fragment> 
+                                                                                        </tr>
+                                                                                </tfoot>
+
+                                                                                <tbody>
+                                                                                        <a4j:repeat value="#{manageDomain.domainDataList}" var="domain" id="domainInfo" rowKeyVar="index">
+                                                                                                <tr>
+                                                                                                        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                                                                                                <td class="centeredColumn" style="width: 5px;">
+                                                                                                                <h:selectBooleanCheckbox styleClass="toggleable" id="#{domain.id}checkbox" value="#{manageDomain.selectedDomains[domain.id]}" />
+                                                                                                                </td>
+                                                                                                        </ui:fragment>
+                                                                                                        <td>
+                                                                                                                <h:inputText value="#{domain.object.domainDN}" style="width: 400px; margin-left:0px; margin-right:0px;"/>
+                                                                                                        </td>
+                                                                                                        <td style="width: 175px;">
+                                                                                                                <h:inputText value="#{domain.object.user}" style="width: 225px; margin-left:0px;"/>
+                                                                                                        </td>
+                                                                                                        <td style="width: 175px;">
+                                                                                                                <sp:inputSecret value="#{domain.object.password}" style="width: 175px; margin-left:0px;" redisplay="true" autocomplete="off"/>
+                                                                                                        </td>
+                                                                                                        <td style="width : 220px;">
+                                                                                                                <h:inputTextarea id="servers" rows="2" cols="2" value="#{domain.object.serverList}"
+                                                                                                                converter="NewLineList" style="resize:none; width:190px; margin-left:0px;"/>
+                                                                                                                <a4j:commandButton value=" ... " stylesClass="secondaryBtn" onclick="SailPoint.DiscoverDomains.showServers(#{index}, '#{domain.object.domainDN}')" style="vertical-align:top; font-weight: bold;"></a4j:commandButton>
+                                                                                                        </td>
+                                                                                                        <td class="centeredColumn" style="width: 5px;">
+                                                                                                                <h:selectBooleanCheckbox value="#{domain.object.useSSL}" style="text-align:center"/>
+                                                                                                        </td> 
+                                                                                                </tr>
+                                                                                        </a4j:repeat>
+                                                                                </tbody>
+                                                                        </table>
+
+                                                                        <div class="buttonRow">
+                                                                                <a4j:commandButton id='removeDomainData' value="#{msgs.button_delete}" styleClass="secondaryBtn" action="#{manageDomain.removeDomainData}" render="domainsTable"/>                                     
+                                                                                <a4j:commandButton id='addDomainData' value="#{msgs.button_add}" styleClass="primaryBtn" action="#{manageDomain.addDomainData}" render="domainsTable"/>
+                                                                        </div>
+                                                                         <div id="itemselector" class='spContent'/>
+                                                                </div>
+                                                        </td>
+                                                </tr>
+                                        </table>
+                                </a4j:outputPanel>
+                        </f:view>
+                </ui:composition>
+        </body>
+</html>

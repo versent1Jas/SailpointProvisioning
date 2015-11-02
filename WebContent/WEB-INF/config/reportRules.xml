@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+<Rule language="beanshell" type="FieldValue" name="System Configured Locale Rule">
+ <Description>
+    This rule returns the locales configured in the System Configuration.
+  </Description>
+  <Signature returnType="java.util.List">
+    <Inputs>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="locales">
+        <Description>
+          A list containing the locales found in the System Configuration.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+      import java.util.*;
+     Map sysConfig = context.getConfiguration().getAttributes();
+     List locales = sysConfig.get("supportedLanguages");
+     return locales;
+</Source>
+</Rule>
+
+<Rule language="beanshell" type="TaskEventRule" name="Report Completion Notification">
+ <Description>
+    This rule sends a notification email when a report is completed.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="taskResult">
+        <Description>
+          The TaskResult object
+        </Description>
+      </Argument>
+      <Argument name="event">
+        <Description>
+          The TaskEvent object
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="taskResult">
+        <Description>The resulting task result object, or null if no update is required.</Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+      <![CDATA[
+        import sailpoint.object.*;
+        import java.util.*;
+
+        String identity = (String)event.getAttribute(TaskEvent.ATTR_EMAIL_RECIP);
+
+        if (identity != null){
+
+          Identity identity = context.getObjectByName(Identity.class, identity);
+          if (identity == null)
+            return result;
+
+          List emailAddresses = new ArrayList();
+          emailAddresses.add(identity.getEmail());
+          EmailOptions options = new EmailOptions(emailAddresses, null);
+          options.setSendImmediate(true);
+
+          Map emailVars = new HashMap();
+          emailVars.put("reportName", taskResult.getName());
+          options.setVariables(emailVars);
+
+          String templateName = (String)context.getConfiguration().get(Configuration.REPORT_COMPLETION_EMAIL_TEMPLATE);
+          EmailTemplate et = context.getObjectByName(EmailTemplate.class, templateName);
+
+          context.sendEmailNotification(et, options);
+        }
+
+        return null;
+      ]]>
+</Source>
+</Rule>
+
+<Rule language="beanshell" type="ReportCustomizer" name="Identity Report Form Customizer">
+ <Description>
+    This rule populates a form with fields for the standard and extended identity attributes.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="locale">
+        <Description>
+          The current user's locale
+        </Description>
+      </Argument>
+      <Argument name="report">
+        <Description>
+          The base report
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+
+    </Returns>
+  </Signature>
+  <Source>
+       <![CDATA[
+        import sailpoint.object.*;
+        import sailpoint.reporting.ReportingLibrary;
+
+        ObjectConfig identityConfig = ObjectConfig.getObjectConfig(Identity.class);
+        List standardAttributes = new ArrayList();
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("firstname"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("lastname"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("displayName"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("email"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("manager"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("inactive"));
+
+        ReportingLibrary.addAttributes(context, report, Identity.class, standardAttributes, null,
+          "Identity Attributes", locale, "id");
+
+        List extendedAttrs = new ArrayList();
+        for(ObjectAttribute att : identityConfig.getSearchableAttributes()){
+          if (!att.isStandard())
+            extendedAttrs.add(att);
+        }
+
+        for(ObjectAttribute att : identityConfig.getMultiAttributeList()){
+            extendedAttrs.add(att);
+        }
+
+        ReportingLibrary.addAttributes(context, report, Identity.class, extendedAttrs, null,
+          "Identity Extended Attributes", locale, "id");
+
+
+       ]]>
+</Source>
+</Rule>
+
+<Rule language="beanshell" type="ReportCustomizer" name="Identity Entitlement Identity Report Form Customizer">
+ <Description>
+    This rule populates a form with fields for the standard and extended identity attributes accessed through an identity entitlement.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="locale">
+        <Description>
+          The current user's locale
+        </Description>
+      </Argument>
+      <Argument name="report">
+        <Description>
+          The base report
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+
+    </Returns>
+  </Signature>
+  <Source>
+       <![CDATA[
+        import sailpoint.object.*;
+        import sailpoint.reporting.ReportingLibrary;
+
+        ObjectConfig identityConfig = ObjectConfig.getObjectConfig(Identity.class);
+        List standardAttributes = new ArrayList();
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("firstname"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("lastname"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("displayName"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("email"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("manager"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("inactive"));
+
+        ReportingLibrary.addAttributes(context, report, IdentityEntitlement.class, standardAttributes, "identity",
+          "Identity Attributes", locale, "id");
+
+
+        List extendedAttrs = new ArrayList();
+        for(ObjectAttribute att : identityConfig.getSearchableAttributes()){
+          if (!att.isStandard())
+            extendedAttrs.add(att);
+        }
+
+        for(ObjectAttribute att : identityConfig.getMultiAttributeList()){
+            extendedAttrs.add(att);
+        }
+
+        ReportingLibrary.addAttributes(context, report, IdentityEntitlement.class, extendedAttrs, "identity",
+          "Identity Extended Attributes", locale, "id");
+
+
+       ]]>
+</Source>
+</Rule>
+
+<Rule language="beanshell" type="ReportCustomizer" name="Account Report Form Customizer">
+ <Description>
+    This rule populates a form with fields for all searchable account fields.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="locale">
+        <Description>
+          The current user's locale
+        </Description>
+      </Argument>
+      <Argument name="report">
+        <Description>
+          The base report
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+
+    </Returns>
+  </Signature>
+  <Source>
+       <![CDATA[
+        import sailpoint.object.*;
+        import sailpoint.reporting.ReportingLibrary;
+
+        ObjectConfig linkConfig = ObjectConfig.getObjectConfig(Link.class);
+        ReportingLibrary.addAttributes(context, report, Link.class, linkConfig.getSearchableAttributes(), null,
+          "Account Properties", locale);
+       ]]>
+</Source>
+</Rule>
+
+<Rule language="beanshell" type="ReportCustomizer" name="Privileged Access Report Customizer">
+ <Description>
+    This rule populates a form with fields for the standard and extended identity attributes as well as
+    a form for defining the 'privileged' identity attribute.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="locale">
+        <Description>
+          The current user's locale
+        </Description>
+      </Argument>
+      <Argument name="report">
+        <Description>
+          The base report
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+
+    </Returns>
+  </Signature>
+  <Source>
+       <![CDATA[
+        import sailpoint.object.*;
+        import sailpoint.reporting.ReportingLibrary;
+
+        ObjectConfig linkConfig = ObjectConfig.getObjectConfig(Link.class);
+        ReportingLibrary.addAttributes(context, report, Link.class, linkConfig.getSearchableAttributes(), null,
+          "Privileged Account Attributes", locale, "id");
+
+
+        ObjectConfig identityConfig = ObjectConfig.getObjectConfig(Identity.class);
+        List standardAttributes = new ArrayList();
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("firstname"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("lastname"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("displayName"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("email"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("manager"));
+        standardAttributes.add(identityConfig.getObjectAttributeMap().get("inactive"));
+
+        ReportingLibrary.addAttributes(context, report, Identity.class, standardAttributes, "identity",
+          "Identity Properties", locale, "id");
+
+        List extendedAttrs = new ArrayList();
+        for(ObjectAttribute att : identityConfig.getSearchableAttributes()){
+          if (!att.isStandard())
+            extendedAttrs.add(att);
+        }
+
+        for(ObjectAttribute att : identityConfig.getMultiAttributeList()){
+            extendedAttrs.add(att);
+        }
+
+        ReportingLibrary.addAttributes(context, report, Identity.class, extendedAttrs, "identity",
+          "Identity Extended Properties", locale, "id");
+       ]]>
+</Source>
+</Rule>
+
+<Rule language="beanshell" type="ReportValidator" name="Privileged Access Report Validation Rule">
+   <Description>
+      This rule validates the Privileged Access Report Form
+    </Description>
+    <Signature returnType="java.util.List">
+      <Inputs>
+        <Argument name="context">
+          <Description>
+            A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+          </Description>
+        </Argument>
+        <Argument name="report">
+          <Description>
+            The report object
+          </Description>
+        </Argument>
+        <Argument name="form">
+          <Description>
+            The submitted sailpoint Form object.
+          </Description>
+        </Argument>
+      </Inputs>
+      <Returns>
+        <Argument name="messages">
+          <Description>
+            A list of error messages.
+          </Description>
+        </Argument>
+      </Returns>
+    </Signature>
+    <Source>
+      <![CDATA[
+       import java.util.*;
+       import sailpoint.object.*;
+       import sailpoint.tools.Message;
+       List messages = new ArrayList();
+
+       Form.Section section = form.getSection("Privileged Account Attributes");
+       if (section != null) {
+         boolean found = false;
+         for(FormItem item : section.getItems()){
+           Field field = (Field)item;
+           if(field.getValue() != null && !field.getValue().equals("") && !field.getValue().equals("null")) {
+             found = true;
+           }
+         }
+
+         if (!found) {
+           messages.add(Message.localize("rept_priv_access_err_no_attr"));
+         }
+       } else {
+         messages.add(Message.localize("rept_priv_attr_setup_needed"));
+       }
+
+       return messages;
+      ]]>
+  </Source>
+</Rule>
+
+<Rule language="beanshell" name="Report Scorecard Value Renderer">
+   <Description>
+      This rule renders report columns which pull values from a Scorecard object.
+    </Description>
+    <Source>
+      <![CDATA[
+       import java.util.*;
+       import sailpoint.object.*;
+
+       Integer score = null;
+       if(value!=null) {
+					score = value.getScore(column.getField());
+			 }
+
+       return score != null ? score.toString() : null;
+      ]]>
+  </Source>
+</Rule>
+
+<!--
+
+   Certification Report Customizer
+
+    This rule enables or disabled the preview grid in a Certification report when
+    exclusions are included or removed from the report.
+
+-->
+<Rule language="beanshell" type="ReportCustomizer" name="Certification Report Customizer">
+  <Source>
+       <![CDATA[
+        import sailpoint.object.*;
+        import sailpoint.tools.Util;
+        import sailpoint.web.messages.MessageKeys;
+        if (Util.otob(taskDefinition.getArgument("exclusions"))){
+          report.setDisablePreview(true);
+          report.setDisablePreviewMessage(MessageKeys.REPT_CERT_PREVIEW_DISABLED_EXCLUSIONS);
+        } else {
+          report.setDisablePreview(false);
+          report.setDisablePreviewMessage(null);
+        }
+
+       ]]>
+</Source>
+</Rule>
+
+
+
+</sailpoint>

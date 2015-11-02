@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+    <f:view>
+
+      <table>
+        <tr>
+          <td><h:outputText styleClass="sectionHeader" value="#{msgs.attributes}"/></td>
+        </tr>
+        <tr>
+          <td>
+              <h:panelGrid columns="2">
+                <h:outputText styleClass="textBold" value="#{msgs.iq_service_host}"/>
+                <h:inputText value="#{targetSource.object.configuration['IQServiceHost']}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+                <h:outputText styleClass="textBold" value="#{msgs.iq_service_port}"/>
+                <h:inputText value="#{targetSource.object.configuration['IQServicePort']}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+                <h:outputText styleClass="textBold" value="#{msgs.num_targets_per_block}"/>
+                <h:inputText value="#{targetSource.object.configuration['blockSize']}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </h:panelGrid>
+          </td>
+        </tr>
+      </table>
+
+      <h:panelGrid columns="1">
+        <div id="fileShareInfos" class="submenuContentBox" style="border:0px">
+            <div class="spContent">              
+              <table width="100%">
+                <tr>
+                  <td>
+                      <a4j:outputPanel id="fileSystemsTable">
+                        <table class="width100" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                          </tr>
+                          <tr><h:outputText styleClass="sectionHeader" value="#{msgs.file_shares}"/></tr>
+                          <tr>
+                            <td>
+                              <div class="spTabledContent">
+                                <table class="spTable" cellspacing="0">
+                                  <thead>
+                                    <tr>
+                                      <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                        <th style="text-align:center"><h:selectBooleanCheckbox id="selectAllToggleShares" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/></th>
+                                        <th/>
+                                      </ui:fragment>
+                                      <th><h:outputText value="#{msgs.file_shares_path}"/></th>
+                                      <th style="text-align:left"><h:outputText value="#{msgs.file_shares_directories_only}"/></th>
+                                      <th style="text-align:left"><h:outputText value="#{msgs.file_shares_directory_depth}"/></th>
+                                      <th style="text-align:left"><h:outputText value="#{msgs.file_shares_wildcard}"/></th>
+                                      <th style="text-align:left"><h:outputText value="#{msgs.file_shares_administrator}"/></th>
+                                      <th style="text-align:left"><h:outputText value="#{msgs.file_shares_password}"/></th>
+                                    </tr>
+                                  </thead>
+                                  <tfoot>
+                                    <tr>
+                                      <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                        <td class="spDataTableHeader centeredColumn">
+                                          <a4j:commandButton id='removeTargetShares' value="#{msgs.button_delete}" styleClass="secondaryBtn" action="#{targetSource.removeShares}" render="fileSystemsTable"/>
+                                        </td>
+                                        <td class="spDataTableHeader centeredColumn">
+                                          <a4j:commandButton id='addTargetShare' value="#{msgs.button_add}" styleClass="primaryBtn" action="#{targetSource.addShare}" render="fileSystemsTable"/>
+                                        </td>
+                                        <td class="spDataTableHeader">
+                                          <h:inputText value="#{targetSource.newShare.path}" size="40"/>
+                                        </td>
+                                        <td class="spDataTableHeader centeredColumn">
+                                          <h:selectBooleanCheckbox value="#{targetSource.newShare.object.directoriesOnly}" style="margin:5px;vertical-align:middle"/>
+                                        </td>
+                                        <td class="spDataTableHeader">
+                                          <h:selectOneMenu value="#{targetSource.newShare.depthStr}">
+                                            <f:selectItem itemValue="#{targetSource.maxInt}" itemLabel="#{msgs.file_shares_depth_sub_tree}"/>
+                                            <f:selectItem itemValue="1" itemLabel="#{msgs.file_shares_depth_one_level}"/>
+                                            <f:selectItem itemValue="2" itemLabel="2"/>
+                                            <f:selectItem itemValue="3" itemLabel="3"/>
+                                            <f:selectItem itemValue="4" itemLabel="4"/>
+                                            <f:selectItem itemValue="5" itemLabel="5"/>
+                                            <f:selectItem itemValue="6" itemLabel="6"/>
+                                            <f:selectItem itemValue="7" itemLabel="7"/>
+                                            <f:selectItem itemValue="8" itemLabel="8"/>
+                                            <f:selectItem itemValue="9" itemLabel="9"/>
+                                            <f:selectItem itemValue="10" itemLabel="10"/>
+                                          </h:selectOneMenu>
+                                        </td>
+                                        <td class="spDataTableHeader">
+                                          <h:inputText value="#{targetSource.newShare.object.filter}" size="4"/>
+                                        </td>
+                                        <td class="spDataTableHeader">
+                                          <h:inputText value="#{targetSource.newShare.object.user}"/>
+                                        </td>
+                                        <td class="spDataTableHeader">
+                                          <sp:inputSecret value="#{targetSource.newShare.object.password}" autocomplete="off" size="15" redisplay="true"/>
+                                        </td>
+                                      </ui:fragment>
+                                    </tr>
+                                  </tfoot>
+                                  <tbody>
+                                    <ui:repeat value="#{targetSource.shares}" var="share">
+                                      <tr>
+                                        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                          <td class="centeredColumn">
+                                            <h:selectBooleanCheckbox styleClass="toggleable" id="#{share.id}checkbox" value="#{targetSource.selectedShares[share.id]}"/>
+                                          </td>
+                                          <td/>
+                                        </ui:fragment>
+                                        <td><h:inputText value="#{share.path}" size="40"
+                                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+        
+        
+                                        <td class="centeredColumn">
+                                          <h:selectBooleanCheckbox value="#{share.object.directoriesOnly}"
+                                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                                        </td>
+        
+                                        <td>
+                                          <h:selectOneMenu value="#{share.depthStr}"
+                                                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                            <f:selectItem itemValue="#{targetSource.maxInt}" itemLabel="#{msgs.file_shares_depth_sub_tree}"/>
+                                            <f:selectItem itemValue="1" itemLabel="#{msgs.file_shares_depth_one_level}"/>
+                                            <f:selectItem itemValue="2" itemLabel="2"/>
+                                            <f:selectItem itemValue="3" itemLabel="3"/>
+                                            <f:selectItem itemValue="4" itemLabel="4"/>
+                                            <f:selectItem itemValue="5" itemLabel="5"/>
+                                            <f:selectItem itemValue="6" itemLabel="6"/>
+                                            <f:selectItem itemValue="7" itemLabel="7"/>
+                                            <f:selectItem itemValue="8" itemLabel="8"/>
+                                            <f:selectItem itemValue="9" itemLabel="9"/>
+                                            <f:selectItem itemValue="10" itemLabel="10"/>
+                                          </h:selectOneMenu>
+                                        </td>
+                                        <td><h:inputText value="#{share.object.filter}" size="4"
+                                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                        <td><h:inputText value="#{share.object.user}"
+                                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                        <td><sp:inputSecret value="#{share.object.password}" size="15" redisplay="true"
+                                                            autocomplete="off"
+                                                            disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                            readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                      </tr>
+                                    </ui:repeat>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                      </a4j:outputPanel>
+                    
+                  </td>
+                </tr>
+              </table>
+            </div>
+        </div> <!-- fileShareInfos -->
+      </h:panelGrid>
+
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

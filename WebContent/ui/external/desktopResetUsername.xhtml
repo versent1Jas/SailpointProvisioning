@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:sp="http://sailpoint.com/ui">
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs" />
+<h:head>
+    <meta charset="UTF-8" />
+    <title>#{msgs.sailpoint_iiq}</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="shortcut icon"
+        href="#{base.requestContextPath}/ui/images/favicon.ico" />
+    <link rel="stylesheet"
+        href="#{base.requestContextPath}/ui/css/font-awesome.min.css"
+        type="text/css" />
+    <!-- split up css because IE9 can only handle ~4k rules per file -->
+    <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+      <src>theme.css?#{debug.revision}</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+      <src>application.css?#{debug.revision}</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/ui/css">
+      <src>animate.css?#{debug.revision}</src>
+      <src>login.css?#{debug.revision}</src>
+      <src>ui-custom.css?#{debug.revision}</src>
+    </sp:style>
+    <sp:script serveOffset="#{base.requestContextPath}/ui/js">
+        <src>#{base.requestContextPath}/ui/js/shared/util.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/ui/js/lib/ie/phoneCompat.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/ui/js/lib/jquery/jquery.min.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/ui/js/lib/bootstrap/bootstrap.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/ui/js/shared/timeZone.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/ui/js/common/error/ErrorHandler.js?#{debug.revision}</src>
+    </sp:script>
+    <f:verbatim>
+        <!--[if lte IE 9]>
+     <script src="#{base.requestContextPath}/ui/js/lib/ie/respond.min.js?#{debug.revision}"></script>
+     <script src="#{base.requestContextPath}/ui/js/lib/ie/html5.js?#{debug.revision}"></script>
+     <script src="#{base.requestContextPath}/ui/js/lib/jquery-placeholder/jquery.placeholder.js?#{debug.revision}"></script>
+     <script type="text/javascript">
+         $(function() {
+             $('input').placeholder();
+         });
+     </script>
+    <![endif]-->
+    </f:verbatim>
+    <script type="text/javascript">
+      // Reset any frames if this is not allowed.
+      if (#{!base.allowXFrameOptions}) {
+          if (top.location !== window.location) {
+              top.location.replace(window.location);
+          }
+      }
+    
+      // If IE10 on desktop, add extra class to top element
+      // msMaxTouchPoints is IE10, maxTouchPoints is IE11+
+      if (navigator.msMaxTouchPoints === 0 || navigator.maxTouchPoints === 0) {
+          document.documentElement.classList.add("ie10-desktop");
+      }
+      
+      window.onload = function () {
+          SailPoint.TimeZone.getTimeZone('loginForm');
+      }
+      
+      SailPoint.ErrorHandler.init($,document);
+  </script>
+</h:head>
+<body>
+    <header class="header bg-info dk">
+        <div class="navbar-header">
+            <div class="nav-brand">
+                <img src="#{base.requestContextPath}/ui/images/logo.png" />
+            </div>
+        </div>
+    </header>
+    <section id="content" class="m-t-lg animated fadeInUp">
+        <div class="row m-n">
+            <div class="col-sm-6 col-sm-offset-3 m-t-lg">
+                <sp:sailpointForm id="loginForm">
+                    <section class="panel">
+                        <header
+                            class="panel-heading bg-light lter text-center">
+                            <span class="h3 font-thin text-info">#{msgs.desktop_reset_section_header}</span>
+                        </header>
+
+                        <h:inputHidden id="timeZoneRawOffset"
+                            value="#{login.timeZoneRawOffset}" />
+                        <h:inputHidden id="timeZoneObservesDST"
+                            value="#{login.timeZoneObservesDST}" />
+                        <h:inputHidden id="timeZoneDSTStarts"
+                            value="#{login.timeZoneDSTStarts}" />
+                        <h:inputHidden id="timeZoneDSTEnds"
+                            value="#{login.timeZoneDSTEnds}" />
+
+                        <div class="panel-body">
+                            <div id="alertDiv" class="sr-only"
+                                role="alert" aria-live="rude"></div>
+                            <div
+                                class="form-group #{login.accountIdInput.valid ? '' : 'has-error'}">
+                                <label for="loginForm:accountId"
+                                    class="sr-only">#{msgs.label_username}</label>
+                                <sp:inputText id="accountId"
+                                    value="#{login.accountId}"
+                                    styleClass="form-control input-lg"
+                                    required="true"
+                                    requiredMessage="#{msgs.login_username_required}"
+                                    onkeypress="if(event.keyCode == 13) {return false;}"
+                                    binding="#{login.accountIdInput}"
+                                    placeholder="#{msgs.label_username}"
+                                    tabindex="50" />
+                                <ui:fragment
+                                    rendered="#{not login.accountIdInput.valid}">
+                                    <div aria-hidden="true">
+                                        <h:message id="usernameErrors"
+                                            for="accountId"
+                                            showDetail="false"
+                                            showSummary="true"
+                                            errorClass="text-danger reader-error" />
+                                    </div>
+                                </ui:fragment>
+                            </div>
+                        </div>
+                        <footer
+                            class="panel-footer clearfix text-center bg-light lter">
+                            <div class="inline">
+                                <h:commandButton
+                                    id="forgotPasswordButton"
+                                    styleClass="btn btn-info m-r-xs"
+                                    value="#{msgs.desktop_reset_forgot_password}"
+                                    action="#{login.userResetAction}"
+                                    rendered="#{login.forgotPasswordEnabled}"
+                                    tabIndex="50">
+                                    <f:setPropertyActionListener
+                                        target="#{login.userResetType}"
+                                        value="passwordReset" />
+                                </h:commandButton>
+                                <h:commandButton
+                                    id="unlockAccountButton"
+                                    styleClass="btn btn-info"
+                                    value="#{msgs.desktop_reset_unlock_account}"
+                                    action="#{login.userResetAction}"
+                                    rendered="#{login.accountUnlockEnabled}"
+                                    tabIndex="50">
+                                    <f:setPropertyActionListener
+                                        target="#{login.userResetType}"
+                                        value="accountUnlock" />
+                                </h:commandButton>
+                            </div>
+                        </footer>
+                    </section>
+                </sp:sailpointForm>
+            </div>
+        </div>
+    </section>
+    <div class="text text-center text-muted v-bottom m-t-sm hidden-xs"
+        aria-hidden="true">&#xA0; &#169; #{msgs.copy_right}</div>
+
+</body>
+</html>

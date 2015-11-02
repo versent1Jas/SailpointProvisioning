@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+
+               var user = getFieldValue('editForm:adminuser');
+               Validator.validateNonBlankString(user, "#{msgs.con_form_siebel_adminnotnull}");
+               var passwd = getFieldValue('editForm:passwd');
+               Validator.validateNonBlankString(passwd, "#{msgs.con_form_siebel_pswdnotnull}");
+               var lang = getFieldValue('editForm:language');
+               Validator.validateNonBlankString(lang, "#{msgs.con_form_siebel_langnotnull}");
+
+               var siebelURL = getFieldValue('editForm:siebelURL');
+                          
+               if (siebelURL.length == 0) {
+               var domain = getFieldValue('editForm:SiebelServerHost');
+               Validator.validateNonBlankString(domain, "#{msgs.con_form_siebel_hostnotnull}");
+               var scbport = getFieldValue('editForm:scbport');
+               Validator.validateNonBlankString(scbport, "#{msgs.con_form_siebel_portnotnull}");
+               var ent = getFieldValue('editForm:enterprise');
+               Validator.validateNonBlankString(ent, "#{msgs.con_form_siebel_entnotnull}");
+               var ent = getFieldValue('editForm:objmgr');
+               Validator.validateNonBlankString(ent, "#{msgs.con_form_siebel_somnotnull}");
+               }
+               var bo = getFieldValue('editForm:bo');
+               Validator.validateNonBlankString(bo, "#{msgs.con_form_siebel_abonotnull}");
+               var bc = getFieldValue('editForm:bc');
+               Validator.validateNonBlankString(bc, "#{msgs.con_form_siebel_abcnotnull}");
+               var pbo = getFieldValue('editForm:pbo');
+               Validator.validateNonBlankString(pbo, "#{msgs.con_form_siebel_ebonotnull}");
+               var pbc = getFieldValue('editForm:pbc');
+               Validator.validateNonBlankString(pbc, "#{msgs.con_form_siebel_ebcnotnull}");
+               
+
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_siebel_setting}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+
+<tr>
+            <td class='titleColumn certScheduleTitleCol' >
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_trans}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlptransport" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_trans}"/>
+            </td>
+
+            <td valign="center">
+              <h:selectOneMenu id="transport" value="#{applicationObject.attributes['transport']}"
+                      disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                      readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                  <f:selectItem itemValue="tcpip" itemLabel="TCPIP"/>
+                  <f:selectItem itemValue="none" itemLabel="None"/>
+                </h:selectOneMenu>
+            </td>
+</tr>
+<tr>
+            <td class='titleColumn certScheduleTitleCol' >
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_encryp}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpencryption" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_encrypt}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:selectOneMenu id="encryption" value="#{applicationObject.attributes['encryption']}"            
+                      disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                      readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                      <f:selectItem itemValue="none" itemLabel="None"/>
+                      <f:selectItem itemValue="rsa" itemLabel="RSA"/>
+                </h:selectOneMenu>
+            </td>
+</tr>
+<tr>
+            <td class='titleColumn certScheduleTitleCol' >
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_comp}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpcompression" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_comprs}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:selectOneMenu id="compression" value="#{applicationObject.attributes['compression']}"            
+                      disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                      readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                      <f:selectItem itemValue="zlib" itemLabel="ZLIB"/>
+                      <f:selectItem itemValue="none" itemLabel="None"/>
+                </h:selectOneMenu>
+            </td>
+</tr>
+<tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_host}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpHostName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_host}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="SiebelServerHost"
+                           value="#{applicationObject.attributes['SiebelServerHost']}"
+                           redisplay="true"
+                           size="80"
+                            requiredMessage="#{msgs.help_con_form_siebel_hostname}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+</tr>
+
+<tr>
+            <td class='titleColumn certScheduleTitleCol' >
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_port}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpscbport" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_scbport}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="scbport"
+                           value="#{applicationObject.attributes['scbport']}"
+                           redisplay="true"
+                           size="80"
+                           requiredMessage="#{msgs.help_con_form_siebel_port}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+</tr>
+<tr>
+            <td class='titleColumn certScheduleTitleCol' >
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_entname}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpenterprise" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_entname}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="enterprise"
+                           value="#{applicationObject.attributes['enterprise']}"
+                           redisplay="true"
+                           size="80"
+                               requiredMessage="#{msgs.help_con_form_siebel_entrp}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+</tr>
+<tr>
+            <td class='titleColumn certScheduleTitleCol' >
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_objmgr}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpobjmgr" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_aom}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="objmgr"
+                           value="#{applicationObject.attributes['objmgr']}"
+                           redisplay="true"
+                           size="80"
+                               requiredMessage="#{msgs.help_con_form_siebel_aomname}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+</tr>
+<tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_user}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpUserName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_user}"/>
+            </td>
+
+            <td valign="center">
+              <h:inputText id="adminuser"
+                           value="#{applicationObject.attributes['adminuser']}"
+                           redisplay="true"
+                           size="80"
+                               requiredMessage="#{msgs.help_con_form_siebel_username}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+</tr>
+<tr>
+
+           <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_pswd}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpUsrPasswd" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_pswd}"/>
+
+            </td>
+
+            <td valign="center">
+              <sp:inputSecret id="passwd"
+                           value="#{applicationObject.attributes['passwd']}"
+                           redisplay="true"
+                           size="80"
+                              requiredMessage="#{msgs.help_con_form_siebel_password}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+</tr>
+<tr>
+           <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_lang}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpLanguage" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_lang}"/>
+
+            </td>
+
+            <td valign="center">
+               <h:selectOneMenu id="language" value="#{applicationObject.attributes['language']}"            
+                      disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                      readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                  <f:selectItem itemValue="ENU" itemLabel="English"/>
+                  <f:selectItem itemValue="PTB" itemLabel="Brazilian Portuguese"/>
+                  <f:selectItem itemValue="FRA" itemLabel="French"/>
+                  <f:selectItem itemValue="DEU" itemLabel="German"/>
+                  <f:selectItem itemValue="ITA" itemLabel="Italian"/>
+                  <f:selectItem itemValue="JPN" itemLabel="Japanese"/>
+                  <f:selectItem itemValue="KOR" itemLabel="Korean"/>
+                  <f:selectItem itemValue="CHS" itemLabel="Simplified Chinese"/>
+                  <f:selectItem itemValue="ESP" itemLabel="Spanish"/>
+                  <f:selectItem itemValue="CHT" itemLabel="Traditional Chinese"/>
+                </h:selectOneMenu>
+            </td>
+
+          </tr>
+
+          <tr>
+           <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_abo}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpBO" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_abo}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="bo"
+                           value="#{applicationObject.attributes['bo']}"
+                           redisplay="true"
+                           size="80"
+                              requiredMessage="#{msgs.help_con_form_siebel_aboname}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+
+          </tr>
+
+          <tr>
+           <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_abc}"/>
+           <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpBC" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_abc}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="bc"
+                           value="#{applicationObject.attributes['bc']}"
+                           redisplay="true"
+                           size="80"
+                              requiredMessage="#{msgs.help_con_form_siebel_abcname}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+
+          </tr>
+
+          <tr>
+           <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_ebo}"/>
+           <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpPBO" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_ebo}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="pbo"
+                           value="#{applicationObject.attributes['pbo']}"
+                           redisplay="true"
+                           size="80"
+                              requiredMessage="#{msgs.help_con_form_siebel_eboname}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+
+          </tr>
+
+          <tr>
+           <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_ebc}"/>
+           <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpPBC" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_ebc}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="pbc"
+                           value="#{applicationObject.attributes['pbc']}"
+                           redisplay="true"
+                           size="80"
+                              requiredMessage="#{msgs.help_con_form_siebel_ebcname}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+
+          </tr>
+          <tr>
+
+           <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_siebel_url}"/>
+              <!--h:outputText styleClass="requiredText" value="*"/-->
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpsiebelURL" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_siebel_url}"/>
+
+            </td>
+
+            <td valign="center">
+              <h:inputText id="siebelURL"
+                           value="#{applicationObject.attributes['siebelURL']}"
+                           redisplay="true"
+                           size="80"
+                              requiredMessage="#{msgs.help_con_form_siebel_conn}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

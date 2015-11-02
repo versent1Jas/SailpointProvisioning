@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">
+    <h:outputFormat value="#{msgs.app_permissions}">
+      <f:param value="#{editedEntitlementApp.application.name}"/>
+    </h:outputFormat>
+  </ui:define>
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/risk-scores">
+      <src>risk-scores.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/bandConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/compositeScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/entitlementBARConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+      // <![CDATA[
+      helpKey = 'RISK_SCORES';
+      Ext.onReady(function() {
+    	  EntitlementPermissionsPage.initPage();
+      }); 
+      // ]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+  
+    <f:view>
+    <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+    <h:form id="editForm">
+      <ui:param name="appName" value="#{sp:buildValidComponentIdIgnoringNulls(editedEntitlementApp.application.id, true)}"/>
+      
+      <div id="bandInfo" style="display:none;">
+        <ui:include src="bandsInclude.xhtml"/>
+      </div>
+
+        <div id="#{appName}_PermissionsConfigTable" class="spContent">
+          <div class="spTabledContent">
+            <t:dataTable styleClass="spTable"
+                rowClasses="even, odd"
+                id="#{appName}Permissions"
+                value="#{editedEntitlementApp.application.permissions}" var="permissions"
+                forceIdIndexFormula="#{sp:buildValidComponentIdIgnoringNulls(permissions.name, true)}">
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText value="#{msgs.name}"/>
+                </f:facet>
+                <h:outputText value="#{permissions.name}"/>
+              </h:column>
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText value="#{msgs.permission_weight}"/>
+                </f:facet>
+                
+                <h:panelGroup>
+                  <div id="sliderWrapPerm#{appName}_#{sp:buildValidComponentId(permissions.name)}" class="sliderWrap">
+                    <div id="sliderTrackPerm#{appName}_#{sp:buildValidComponentId(permissions.name)}" class="sliderLeft" />
+                    <div id="sliderPerm#{appName}_#{sp:buildValidComponentId(permissions.name)}" class="slider">
+                      <div id="handlePerm#{appName}_#{sp:buildValidComponentId(permissions.name)}" class="sliderHandle">
+                        <img src="#{base.requestContextPath}/images/sliderHandle.gif" alt=""/>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <img id="#{appName}_#{sp:buildValidComponentId(permissions.name)}Indicator" class="dynamicRiskIndicator" src=""/>
+                  <h:inputText id="permFactor" value="#{permissions.weight}" size="3"/>
+                  
+                  <script type="text/javascript" defer="defer">
+                    // <![CDATA[
+                    addIndicatorSliderData('#{appName}_PermissionsConfigTable',
+                                           'handlePerm#{appName}_#{sp:buildValidComponentId(permissions.name)}', 
+                                           'sliderPerm#{appName}_#{sp:buildValidComponentId(permissions.name)}', 
+                                           '#{permissions.weight}', 
+                                           $('editForm:#{appName}Permission#{sp:buildValidComponentId(permissions.name)}:permFactor'),
+                                           $('#{appName}_#{sp:buildValidComponentId(permissions.name)}Indicator'),
+                                           '#{appName}_PermissionsConfigTable');
+                    // ]]>
+                  </script>
+                  
+                </h:panelGroup>
+              </h:column>
+            </t:dataTable>
+          </div>
+          
+          <div class="buttonRow">
+            <a4j:commandButton id="savePermissionsButton" render="editForm" onclick="EntitlementsPage.confirmSave(EntitlementPermissionsPage);" value="#{msgs.button_save}" styleClass="primaryBtn" />
+            <h:commandButton id="stealthSaveButton" action="#{permissionsRiskConfig.saveChanges}" style="display:none"/>
+            <span width="20px"/>
+            <a4j:commandButton id="cancelButton" render="editForm:#{editedEntitlementApp.application.id}Attributes" onclick="EntitlementsPage.confirmCancel(EntitlementPermissionsPage);" value="#{msgs.button_cancel}" styleClass="secondaryBtn"/>
+            <h:commandButton style="display:none" id="stealthCancelButton" action="#{permissionsRiskConfig.cancelChanges}" />              
+          </div>
+        </div>
+      <script type="text/javascript" defer="defer">
+        // <![CDATA[
+        initRiskSlidersOnLoad('#{appName}_PermissionsConfigTable');
+        // ]]>
+      </script>    
+    </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC
+"-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2015 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+    <ui:composition>
+        <script type="text/javascript">
+            <!--//--><![CDATA[//><!--
+            helpKey = 'APPLICATION';
+            Ext.onReady(function () {
+                Ext.QuickTips.init();
+            });
+            //--><!]]>
+        </script>
+        <f:view>
+            <a4j:outputPanel id="accountScopeTable">
+                <table class="width90" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_AD_account_search_scope}"/>
+                        <h:outputText styleClass="requiredText" value="*"/>
+                        <h:graphicImage
+                                id="searchAccImgTemp" styleClass="helpIcon"
+                                url="/images/icons/dashboard_help_16.png"
+                                alt="#{help.help_con_form_AD_search_account}"
+                                style="display: none;" />
+                        <h:graphicImage id="imgHlpsearchAcc"
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_AD_search_account}"/>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="spTabledContent">
+                                <table class="spTable" cellspacing="0" > 
+                                    <thead>
+                                        <tr>
+                                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                                <th style="text-align:center; width: 5px;"><h:selectBooleanCheckbox id="selectAllToggleAccounts" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/></th>
+                                            </ui:fragment> 
+                                            <th><h:outputText  value="#{msgs.con_form_AD_search_dn}"/></th>
+                                            <th style="text-align:left"><h:outputText value="#{msgs.con_form_AD_iterate_search_filter}"/></th>
+                                            <th style="text-align:left"><h:outputText value="#{msgs.con_form_AD_primary_group_search_dn}"/></th>
+                                            <th style="text-align:left"><h:outputText value="#{msgs.con_form_AD_group_membership_search_dn}"/></th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                                <th/>
+                                                <td>
+                                                    <h:inputText value="#{accountSearchScope.accountScope.object.searchDN}" style="width: 255px; margin-left:0px; margin-right:0px;"/>
+                                                </td>
+                                                <td>
+                                                    <h:inputText value="#{accountSearchScope.accountScope.object.iterateSearchFilter}" style="width: 255px; margin-left:0px;"/>
+                                                </td>
+                                                <td>
+                                                    <h:inputText value="#{accountSearchScope.accountScope.object.primaryGroupSearchDN}" style="width: 255px; margin-left:0px;"/>
+                                                </td>
+                                                <td>
+                                                    <h:inputText value="#{accountSearchScope.accountScope.object.groupMembershipSearchDN}" style="width: 255px; margin-left:0px;"/>
+                                                </td>
+                                            </ui:fragment>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        <ui:repeat value="#{accountSearchScope.scopes}" var="scopeObj">
+                                            <tr>
+                                                <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                                    <td class="centeredColumn">
+                                                        <h:selectBooleanCheckbox styleClass="toggleable" id="#{scopeObj.id}checkbox" value="#{accountSearchScope.selectedScopes[scopeObj.id]}"/>
+                                                    </td>
+                                                </ui:fragment>
+                                                <td>
+                                                    <h:inputText value="#{scopeObj.object.searchDN}" style="width: 255px; margin-left:0px;"/>
+                                                </td>
+                                                <td>
+                                                    <h:inputText value="#{scopeObj.object.iterateSearchFilter}" style="width: 255px; margin-left:0px;"/>
+                                                </td>
+                                                <td>
+                                                    <h:inputText value="#{scopeObj.object.primaryGroupSearchDN}" style="width: 255px; margin-left:0px;"/>
+                                                </td>
+                                                <td>
+                                                    <h:inputText value="#{scopeObj.object.groupMembershipSearchDN}" style="width: 255px; margin-left:0px;"/>
+                                                </td>
+                                            </tr>
+                                        </ui:repeat>
+                                    </tbody>
+                                </table>
+
+                                <div class="buttonRow">
+                                        <a4j:commandButton id='removeAccountScope' value="#{msgs.button_delete}" styleClass="secondaryBtn" action="#{accountSearchScope.removeAccountScope}" render="accountScopeTable"/>
+                                        <a4j:commandButton id='addAccountScope' value="#{msgs.button_add}" styleClass="primaryBtn" action="#{accountSearchScope.addAccountScope}" render="accountScopeTable"/>
+                                </div>
+
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </a4j:outputPanel>
+        </f:view>
+    </ui:composition>
+</body>
+</html>

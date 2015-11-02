@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+  <h:form id="scheduleItRoleMiningForm">
+    <div id="itRoleMiningDefaults" style="display:none">
+      #{itRoleMiningScheduleBean.defaultValues}
+    </div>
+    <div id="itRoleMiningSearchDiv">
+      <ui:fragment rendered="#{!(bfrMining.templateName eq null)}">
+        <div id="itRoleMiningSearchInfo" class="spContent" style="width:97%">
+          <div class="spBorderlessContentBody">
+              <div class="formWarn">
+                <h:outputFormat class="sectionHeader" value="#{msgs.role_mining_template_info}">
+                  <f:param value="#{itRoleMiningScheduleBean.templateName}"/>
+                </h:outputFormat>
+              </div>
+          </div>
+        </div>
+      </ui:fragment>
+      
+      <div id="roleMiningSearchContents" class="spContent" style="width:97%">      
+        <h:panelGroup>
+          <h:outputText styleClass="requiredText" value="*"/>
+          <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+        </h:panelGroup>
+        <div id="itRoleMiningSearchTable" class="spTabledContent" style="padding:0px; margin:0px">
+          <table class="spTable">
+            <thead><tr><th colspan="4"><h:outputText value="#{msgs.title_automated_mining}"/></th></tr></thead>
+            <tbody>   
+            <tr>
+                <td>
+                    <h:outputText styleClass="titleColumn" value="#{msgs.label_name}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td colspan="3">
+                    <h:inputText id="itRoleMiningTemplateName" size="50" value="#{itRoleMiningScheduleBean.templateName}" />
+                </td>
+            </tr>
+                     
+            <tr>
+              <td style="width:250px">
+                <h:outputText styleClass="titleColumn" value="#{msgs.role_mining_role_owner}"/>
+              </td>
+              <td colspan="3">
+                <h:inputHidden id="itRoleMiningOwner" value="#{itRoleMiningScheduleBean.owner}"/>
+                <h:inputHidden id="itRoleMiningOwnerName" value="#{itRoleMiningScheduleBean.ownerName}"/>
+                <div id="itRoleMiningOwnerSuggest" />
+              </td>
+            </tr>
+            
+            <tr id="itRoleMiningTemplateNoOwnerError" style="display:none">
+              <td colspan="3">
+               <div class="formError">
+                 <h:outputText value="#{msgs.it_role_mining_template_validation_no_owner}"/>
+               </div>
+              </td>
+            </tr>
+    
+            <tr>
+              <td><h:outputText styleClass="titleColumn" value="#{msgs.role_mining_identities_to_mine}"/></td>
+              <td colspan="3">
+                <h:inputHidden style="display:none" id="populationFilterType" value="#{itRoleMiningScheduleBean.populationFilterType}"/>
+                <h:selectOneRadio styleClass="attributeOrIpopSelector" id="attributeOrIpopSelector" value="#{itRoleMiningScheduleBean.populationFilterType}"
+                                  onclick="Ext.getCmp('itRoleMiningPanel').showSearchFilterOptions(this.value); $('scheduleItRoleMiningForm:updateEntitlements').click();"
+                                  render="identityAttributesFragment iPopFragment">
+                  <f:selectItem itemLabel="#{msgs.role_entitlements_analysis_search_by_attributes}" itemValue="searchByAttributes" />
+                  <f:selectItem itemLabel="#{msgs.role_entitlements_analysis_search_by_ipop}" itemValue="searchByIpop" />
+                </h:selectOneRadio>
+              </td>
+            </tr>
+            <tr id="identityAttributesRow">
+              <td/>
+                <td colspan="2" style="padding-left:13px">
+                  <div class="spTabledContent" style="width:350px; margin:0px; padding:0px">
+                    <table id="itRoleMiningSearchAttributesTable" class="spTable width100">
+                      <tr><th colspan="2"><h:outputText value="#{msgs.title_identity_attributes}"/></th></tr>
+                      <ui:repeat value="#{itRoleMiningScheduleBean.filterBean.attributes}" var="attribute">
+                        <tr>
+                          <td><h:outputText styleClass="titleColumn" value="#{attribute.displayName}"/></td>
+                          <ui:fragment rendered="#{attribute.typeAsString != 'Boolean'}">
+                            <td style="text-align:left">
+                              <h:inputText value="#{attribute.value}" onkeypress="Ext.getCmp('itRoleMiningPanel').updatePopulationOnKeypress();"/>
+                            </td>
+                          </ui:fragment>
+                          <ui:fragment rendered="#{attribute.typeAsString == 'Boolean'}">
+                            <td style="text-align:left">
+                              <h:selectOneMenu 
+                                value="#{attribute.value}"
+                                onchange="Ext.getCmp('itRoleMiningPanel').updatePopulationOnKeypress();">
+                                <f:selectItem itemLabel="" itemValue=""/>
+                                <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true"/>
+                                <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false"/>
+                              </h:selectOneMenu> 
+                            </td>
+                          </ui:fragment>
+                        </tr>
+                      </ui:repeat>
+                    </table>
+                  </div>
+                </td>
+              <td/>
+            </tr>
+            <tr id="ipopSelectorRow" style="display:none">
+              <td/>
+              <td colspan="3"  style="padding-left:6px">
+                <div id="itRoleMiningIpopFilter" class="spTabledContent" style="margin:0px; padding:0px">
+                  <div id="itRoleMiningIpopsInfo" style="display:none">
+                    #{groupDefinitionList.myIpopJson}
+                  </div>
+                  <table id="itRoleMiningIpop" class="spTable" cellspacing="0">
+                    <thead><tr>
+                      <th><h:outputText value="#{msgs.population}"/></th>
+                      <th><h:outputText value="#{msgs.description}"/></th>
+                      <th><h:outputText value="#{msgs.role_entitlements_analysis_identities_in_ipop}"/></th>
+                      <th><h:outputText value="#{msgs.role_entitlements_analysis_apps_in_ipop}"/></th>
+                    </tr></thead>
+                    <tbody>
+                      <tr>
+                        <td style="width: 265px">
+                          <h:selectOneMenu id="ipopName" style="width:250px"
+                            value="#{itRoleMiningScheduleBean.ipopName}"
+                            onchange="Ext.getCmp('itRoleMiningPanel').updateIpopDescription(this.value);
+                                      Ext.getCmp('itRoleMiningPanel').addApplicationsForIpop(this.value);">
+                            <f:selectItems value="#{groupDefinitionList.myIpopSelectItems}"/>
+                          </h:selectOneMenu>
+                        </td>
+                        <td>
+                          <div id="itRoleMiningIpopDescription"/>
+                        </td>
+                        <td style="width: 75px">
+                          <div id="itRoleMiningIpopSize"/>
+                        </td>
+                        <td style="width: 260px">
+                          <div id="itRoleMiningIpopApps"/>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>          
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><h:outputText styleClass="titleColumn" value="#{msgs.role_mining_applications_to_mine}"/><h:outputText styleClass="requiredText" value="*"/></td>
+              <td style="width:400px">
+                <div id="applicationsToMine" class="floatLeft padded10 width50">
+                  <div id="itRoleMiningAppNameMultiSuggest"/>
+                  <h:inputHidden id="itRoleMiningAppNameSuggest" value="#{itRoleMiningScheduleBean.applications}"/>
+                  <div id="itRoleMiningAppNameMultiSuggestData" style="display:none">
+                    #{itRoleMiningScheduleBean.applicationsAsJson}
+                  </div>
+                </div>
+              </td>
+              <td style="width:350px">
+                <table>
+                  <tr><td>
+                    <div id="itRoleMiningExcludedEntitlementsSuggest" style="width:350px"/>
+                  </td></tr>
+                  <tr><td>
+                    <h:inputHidden id="itRoleMiningExcludedEntitlements" value="#{itRoleMiningScheduleBean.excludedEntitlements}"/>
+                    <div id="itRoleMiningEntitlementsToInclude" class="floatleft spTabledContent" style="padding:0px; margin:0px">
+                      <table class="spTable" style="height:150px"><tbody>
+                        <tr><th style="height:25px"><h:outputText value="#{msgs.role_mining_entitlements_to_exclude}"/></th></tr>
+                        <tr><td>
+                          <ul class="noList"><li class="formInfo">#{msgs.role_mining_no_entitlements_excluded}</li></ul>
+                        </td></tr>
+                      </tbody></table>
+                    </div>
+                  </td></tr>
+                </table>
+              </td>
+              <td/>
+            </tr>
+            
+            <tr id="itRoleMiningTemplateNameError" style="display:none">
+                <td colspan="4">
+                    <div class="formError">
+                        <h:outputText value="#{msgs.it_role_mining_template_validation_blank_name}"/>
+                    </div>
+                </td>
+            </tr>
+            
+            <tr id="itRoleMiningTemplateNoApplicationsError" style="display:none">
+              <td colspan="4">
+               <div class="formError">
+                 <h:outputText value="#{msgs.it_role_mining_template_validation_no_applications}"/>
+               </div>
+              </td>
+            </tr>
+            
+            <tr><td colspan="4">
+              <a4j:outputPanel id="itRoleMiningPopulation">
+                <h:outputText value="#{itRoleMiningScheduleBean.populationMsg}"/>
+              </a4j:outputPanel>
+            </td></tr>
+    
+            <tr><td colspan="4"><h:outputText value="#{itRoleMiningScheduleBean.populationLimitMsg}"/></td></tr>
+    
+            <tr>
+              <td><h:outputText styleClass="titleColumn" value="#{msgs.role_mining_min_identities}"/></td>
+              <td colspan="3"><h:inputText id="minIdentities" size="3" value="#{itRoleMiningScheduleBean.minIdentitiesPerCandidate}"/></td>
+            </tr>
+            
+            <tr>
+              <td><h:outputText styleClass="titleColumn" value="#{msgs.role_mining_min_entitlements}"/></td>
+              <td colspan="3"><h:inputText id="minEntitlements" size="3" value="#{itRoleMiningScheduleBean.minEntitlementsPerCandidate}"/></td>
+            </tr>
+            
+            <tr>
+              <td><h:outputText styleClass="titleColumn" value="#{msgs.role_mining_max_candidate_roles}"/></td>
+              <td colspan="3"><h:inputText id="maxCandidates" size="3" value="#{itRoleMiningScheduleBean.maxCandidateRoles}"/></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <a4j:outputPanel id="itRoleMiningLaunchResultsPanel">
+      <div id="itMiningLaunchResults" style="display:none">
+      #{itRoleMiningScheduleBean.launchResults}
+      </div>
+    </a4j:outputPanel>
+    
+    <h:inputHidden id="itRoleMiningTemplateSaveStatus" value="#{itRoleMiningScheduleBean.saveStatus}"/>
+    <h:inputHidden id="itRoleMiningTemplateSaveMessage" value="#{itRoleMiningScheduleBean.saveMessage}"/>
+    <h:inputHidden id="itRoleMiningTemplateId" value="#{itRoleMiningScheduleBean.templateId}"/>
+    <h:inputHidden id="itRoleMiningOriginalTemplateName" value="#{itRoleMiningScheduleBean.originalTemplateName}"/>
+  
+    <a4j:commandButton id="saveAndExecuteButton" style="display:none" value="#{msgs.role_mining_schedule_role_mining}" 
+                       action="#{itRoleMiningScheduleBean.saveTemplate}"
+                       render="itRoleMiningTemplateSaveStatus,itRoleMiningTemplateSaveMessage,itRoleMiningTemplateEmptyNameError,
+                                 itRoleMiningTemplateExistingNameError,itRoleMiningTemplateNoOwnerError,
+                                 itRoleMiningTemplateNoApplicationsError"
+                       oncomplete="if( $( 'scheduleItRoleMiningForm:itRoleMiningTemplateSaveStatus' ).value == 'success' ) {
+                                    $( 'scheduleItRoleMiningForm:launchITRoleMining' ).click();
+                                   } else {
+                                        Ext.getCmp('itRoleMiningPanel').showSaveError( $( 'scheduleItRoleMiningForm:itRoleMiningTemplateSaveMessage' ).value );
+                                   }"/>
+                       
+    <a4j:commandButton id="launchITRoleMining" style="display:none" value="#{msgs.role_mining_schedule_role_mining}" 
+                       action="#{itRoleMiningScheduleBean.scheduleItRoleMining}"
+                       render="itRoleMiningLaunchResultsPanel"
+                       onclick="Ext.getCmp('itRoleMiningPanel').displayLaunchingTaskMessage();"
+                       oncomplete="Ext.getCmp('itRoleMiningPanel').displayResultsMessage();"/>
+                       
+    <a4j:commandButton id="saveAsNew" style="display:none"
+                       action="#{itRoleMiningScheduleBean.saveTemplate}"
+                       render="itRoleMiningTemplateSaveStatus, itRoleMiningTemplateSaveMessage,itRoleMiningTemplateEmptyNameError,
+                                 itRoleMiningTemplateExistingNameError,itRoleMiningTemplateNoOwnerError,
+                                 itRoleMiningTemplateNoApplicationsError"
+                       oncomplete="if( $( 'scheduleItRoleMiningForm:itRoleMiningTemplateSaveStatus' ).value === 'success' ) {
+                                       Ext.MessageBox.show({
+                                           title:'#{sp:escapeJavascript(msgs.title_role_mining_template)}',
+                                           msg:'#{sp:escapeJavascript(msgs.role_mining_template_success)}',
+                                           buttons: Ext.MessageBox.OK,
+                                           icon: Ext.MessageBox.INFO,
+                                           fn: function() {
+                                               $( 'scheduleItRoleMiningForm:resetForm' ).click();
+                                               Ext.getCmp('roleMiningPanel').getLayout().setActiveItem( 0 ); 
+                                           }
+                                       });
+                                   } else {
+                                        Ext.getCmp('itRoleMiningPanel').showSaveError( $( 'scheduleItRoleMiningForm:itRoleMiningTemplateSaveMessage' ).value );
+                                   }"/>
+                       
+    <a4j:commandButton id="updateEntitlements" 
+                       style="display:none" render="itRoleMiningEntitlements"
+                       onclick="Ext.getCmp('itRoleMiningPanel').getEntitlementsLoadMask().show();"
+                       oncomplete="Ext.getCmp('itRoleMiningPanel').updateEntitlementsTable(); 
+                                   $('scheduleItRoleMiningForm:updateCount').click();"/>
+                       
+    <a4j:commandButton id="removeEntitlementsForApp"
+                       style="display:none" render="itRoleMiningEntitlements, itRoleMiningPopulation"
+                       onclick="Ext.getCmp('itRoleMiningPanel').getEntitlementsLoadMask().show();"
+                       oncomplete="Ext.getCmp('itRoleMiningPanel').updateEntitlementsTable();"/>
+                       
+    <a4j:commandButton id="resetForm" action='#{itRoleMiningScheduleBean.reset}'
+                       style="display:none"/>
+                       
+    <a4j:commandButton id="updateCount" style="display:none" render="itRoleMiningPopulation" action="#{itRoleMiningScheduleBean.updateCount}"/>
+                       
+  </h:form>
+</ui:composition>   
+
+</body>
+</html>  

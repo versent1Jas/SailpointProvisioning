@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+  <ui:composition>
+    <table class="width100" cellpadding="0" cellspacing="0">
+      <tr>
+        <td>
+          <div id="submenu-main">
+            <div id="submenu-tabs">
+              <ul id="submenu-links">
+                <li id="button0" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('transportSettingsContent', 'button0')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.transport_settings} </span>
+                </li>
+                <li id="button1" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('logFileSettingsContent', 'button1')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.log_file_settings} </span>
+                </li>
+                <li id="button2" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('logFieldsContent', 'button2')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.log_fields} </span>
+                </li>
+                <li id="button3" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('targetsContent', 'button3')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.activity_targets} </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="transportSettingsContent" class="submenuContentBox" >
+              <div>
+                <table class="width100" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <a4j:outputPanel id="transportSettingsTable">
+                        <div class="paddedContainer x-panel-body-default" style="margin: 0px 5px;">
+                          <table class="spTable" cellspacing="0" cellpadding="0">
+                            <thead>
+                              <tr><th colspan="2"><h:outputText value="#{msgs.transport_settings}"/></th></tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td width="25%"><h:outputText value="#{msgs.transport_type}"/></td>
+                                <td>
+                                  <h:selectOneMenu id="fileTransportValue" value="#{activityDataSource.object.configuration['filetransport']}" onchange="SailPoint.LogFileCollectorConfig.updateTransportSettings();"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                    <f:selectItem itemValue="local" itemLabel="#{msgs.transport_type_local}"/>
+                                    <f:selectItem itemValue="ftp" itemLabel="#{msgs.transport_type_ftp}"/>
+                                    <f:selectItem itemValue="scp" itemLabel="#{msgs.transport_type_scp}"/>
+                                  </h:selectOneMenu>
+                                </td>
+                              </tr>
+                              <h:panelGroup rendered="#{activityDataSource.object.configuration['filetransport'] == 'ftp'}">
+                                <tr>
+                                  <td><h:outputText value="#{msgs.ftp_user}" /></td>
+                                  <td><h:inputText size="50" value="#{activityDataSource.object.configuration['ftpuser']}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                  <td><h:outputText value="#{msgs.ftp_password}"/></td>
+                                  <td><sp:inputSecret size="50" value="#{activityDataSource.object.configuration['ftppassword']}" redisplay="true"
+                                                      autocomplete="off"
+                                                      disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                      readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                  <td><h:outputText value="#{msgs.ftp_host}"/></td>
+                                  <td><h:inputText size="50" value="#{activityDataSource.object.configuration['ftphost']}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                              </h:panelGroup>
+                              <h:panelGroup  rendered="#{activityDataSource.object.configuration['filetransport'] == 'scp'}">
+                                <tr>
+                                  <td><h:outputText value="#{msgs.scp_user}"/></td>
+                                  <td><h:inputText size="50" value="#{activityDataSource.object.configuration['scpuser']}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                  <td><h:outputText value="#{msgs.scp_password}"/></td>
+                                  <td><sp:inputSecret size="50" value="#{activityDataSource.object.configuration['scppassword']}" redisplay="true"
+                                                      autocomplete="off"
+                                                      disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                      readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                  <td><h:outputText value="#{msgs.scp_host}"/></td>
+                                  <td><h:inputText size="50" value="#{activityDataSource.object.configuration['scphost']}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                  <td><h:outputText value="#{msgs.scp_private_key}"/></td>
+                                  <td><h:inputTextarea cols="50" value="#{activityDataSource.object.configuration['scpPrivateKey']}"
+                                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                              </h:panelGroup>
+                            </tbody>
+                          </table>
+                        </div>
+                                                
+                        <script defer="defer">
+                          reapplyStyles();
+                        </script>
+                      </a4j:outputPanel>
+                      
+                      <a4j:commandButton id="updateTransportSettings" style="display:none" action="#{activityDataSource.updateTransportSettings}" render="transportSettingsTable"/>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+          </div>  <!-- transportSettingsContent -->
+          
+          <div id="logFileSettingsContent" class="submenuContentBox" style="display:none; border:0px">
+              <div class="paddedContainer x-panel-body-default" style="margin: 0 5px;" > 
+                <table class="width100" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <div class="spTabledContent">
+                        <table class="spTable" cellspacing="0">
+                          <thead>
+                            <tr><th colspan="2"><h:outputText value="#{msgs.log_file_settings}"/></th></tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td width="25%"><h:outputText value="#{msgs.log_file_name}"/></td>
+                              <td><h:inputText size="50" value="#{activityDataSource.object.configuration['file']}"
+                                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                            </tr>
+                            <tr>
+                              <td><h:outputText value="#{msgs.log_file_lines_to_skip}" /></td>
+                              <td>
+                                <h:inputText id="linesToSkip" value="#{activityDataSource.object.configuration['linesToSkip']}" size="4"
+                                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <f:validateLongRange minimum="0"/>
+                                </h:inputText>
+                                <h:message for="linesToSkip" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td><h:outputText value="#{msgs.log_file_filter_nulls}" /></td>
+                              <td><h:selectBooleanCheckbox value="#{activityDataSource.object.configuration['shouldFilterNulls']}"
+                                                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                            </tr>
+                            <tr>
+                              <td><h:outputText value="#{msgs.log_file_multi_lined_data}"/></td>
+                              <td><h:selectBooleanCheckbox value="#{activityDataSource.object.configuration['multiLinedData']}"
+                                                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                            </tr>
+                            <tr>
+                              <td><h:outputText value="#{msgs.log_file_regexp}"/></td>
+                              <td><h:inputText size="80" value="#{activityDataSource.object.configuration['regularExpression']}"
+                                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+          </div>  <!-- logFileSettingsContent -->
+
+          <div id="logFieldsContent" class="submenuContentBox" style="display:none; border:0px">
+              <div class="paddedContainer x-panel-body-default" style="margin: 0 5px;" > 
+                <a4j:outputPanel id="logFieldTable">
+                  <table class="width100" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td>
+                        <div class="spTabledContent">
+                          <table class="spTable" cellspacing="0">
+                            <thead>
+                              <tr>
+                                <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <th style="text-align:center"><h:selectBooleanCheckbox id="selectAllToggle" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/></th>
+                                  <th/>
+                                </ui:fragment>
+                                <th><h:outputText value="#{msgs.name}"/></th>
+                                <th style="text-align:center"><h:outputText value="#{msgs.log_file_trim_value}"/></th>
+                                <th style="text-align:center"><h:outputText value="#{msgs.log_file_drop_nulls}"/></th>
+                              </tr>
+                            </thead>
+                            <tfoot>
+                              <tr>
+                                <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <td class="spDataTableHeader centeredColumn">
+                                    <a4j:commandButton value="#{msgs.button_delete}" styleClass="secondaryBtn" action="#{activityDataSource.removeLogFields}" render="logFieldTable"/>
+                                  </td>
+                                  <td class="spDataTableHeader centeredColumn">
+                                    <a4j:commandButton value="#{msgs.button_add}" styleClass="primaryBtn" action="#{activityDataSource.addLogField}" render="logFieldTable"/>
+                                  </td>
+                                  <td class="spDataTableHeader">
+                                    <h:inputText value="#{activityDataSource.newLogField.name}" />
+                                  </td>
+                                  <td class="spDataTableHeader centeredColumn"><h:selectBooleanCheckbox value="#{activityDataSource.newLogField.trim}" /></td>
+                                  <td class="spDataTableHeader centeredColumn"><h:selectBooleanCheckbox value="#{activityDataSource.newLogField.dropNulls}" /></td>
+                                </ui:fragment>
+                              </tr>
+                            </tfoot>
+                            <tbody>
+                              <ui:repeat value="#{activityDataSource.object.configuration['fields']}" var="logField">
+                                <tr>
+                                  <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                    <td class="centeredColumn"><h:selectBooleanCheckbox styleClass="toggleable" id="#{logField.name}checkbox" value="#{activityDataSource.selectedLogFields[logField.name]}"/></td>
+                                    <td/>
+                                  </ui:fragment>
+                                  <td><h:inputText value="#{logField.name}" disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}" readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                  <td class="centeredColumn"><h:selectBooleanCheckbox value="#{logField.trim}" disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                  <td class="centeredColumn"><h:selectBooleanCheckbox value="#{logField.dropNulls}" disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                              </ui:repeat>
+                            </tbody>
+                          </table>                        
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </a4j:outputPanel>
+              </div>
+          </div> <!-- logFieldsContent -->
+          <div id="targetsContent" class="submenuContentBox" style="display:none; border:0px">
+            <ui:include src="activityTargets.xhtml"/>
+          </div> <!-- targetsContent -->
+        </td>
+      </tr>
+    </table>    
+  </ui:composition>
+</body>
+</html>

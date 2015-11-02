@@ -1,0 +1,2238 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!-- **********************************************************************
+
+  Subprocesses for workflows. The idea is that these are logical
+  things grouped together to make the top level workflow easier to read  
+  and easier to customize.  
+
+  Designed for LCM but will eventually be leveraged by the Identity
+  side so try to keep the naming non-product specific.  
+
+  Going with the Identity Request prefix to disassociate with LCM 
+  or CM.
+
+  To truly disconnect from LCM we will need to make a pass and 
+  make all of the rule/email template references are part
+  of the core imports.
+
+  ********************************************************************** -->
+
+<sailpoint>
+
+<!-- **********************************************************************
+  -
+  - Subprocess used to initialize the information used by provisioning 
+  - workflows.
+  -
+  -  This subprocess returns a ProvisioningProject, PolicyViolations and
+  -  an ApprovalSet.
+  -
+  ********************************************************************** -->
+<Workflow name="Identity Request Initialize"
+          type='Subprocess'
+          libraries="Identity,IdentityRequest">
+
+  <Description>
+      This workflow subprocess is used to initialize the various
+      object necessary when executing workflows that deal
+      with provisioning.
+
+      This subprocess was added in 5.5 in an effort to
+      break groups of related steps into a single call
+      from the top level workflow.
+
+      It now encapsulates the following services:
+
+        - Compliation of the plan into a project
+        - Build an approval set
+           defaults to using buildApprovalSet but allows it to be passed in
+        - Audit Start
+        - Create the IdentityRequest object for the request tracking
+        - Check policies
+        - Build required forms for the launcher
+
+  </Description>
+
+  <Variable name='identityName' input='true' required='true'>
+    <Description>
+      The name of the identity object being modified.
+    </Description>
+  </Variable>
+
+  <Variable name="identityDisplayName" input='true'
+            initializer='script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)'>
+    <Description>
+      The displayName of the identity being updated.
+      This may be passed in, if not the script queries for this
+      using a projection query and falls back to the name.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="endOnManualWorkItems" initializer="false" >
+    <Description>Option to skip requests with manual work items.</Description>
+  </Variable>
+
+  <Variable input="true" name="endOnProvisioningForms" initializer="false" >
+    <Description>Option to skip requests with provisioning forms.</Description>
+  </Variable>
+
+  <Variable input="true" name="flow">
+    <Description>
+      The name of the LCM flow that launched this workflow.
+
+      This is one of these values:
+
+      AccountsRequest
+      EntitlementsRequest
+      RolesRequest
+      IdentityCreateRequest
+      IdentityEditRequest
+      ForgotPassword
+      ExpiredPassword
+      PasswordRequest
+
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="plan" required='true'>
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+
+  <Variable name='optimisticProvisioning' input='true' required='true'>
+    <Description>
+      Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.
+    </Description>
+  </Variable>
+
+  <Variable name='asyncCacheRefresh' input='true'>
+    <Description>
+      Set to true to enable asynchronous refresh of the policy and role
+      caches.  This speeds up response time for the LCM user, but you
+      may want to disable this during demonstrations after editing
+      the role or policy models.  This may also be enabled globally
+      in the system configuration.  This variable overrides the
+      system configuration if it has a value.
+    </Description>
+  </Variable>
+
+  <Variable name="policiesToCheck" input="true">
+    <Description>
+      A List of policies that should be checked. If this list is
+      empty all violations will be checked. Used in combination
+      with policyScheme.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="allowRequestsWithViolations">
+    <Description>
+      If this variable is set to true, requesters will be able to proceed past
+      the Policy Violation Review form without taking any action on
+      policy violations resulting from the request.
+    </Description>
+  </Variable>
+
+   <Variable name='requireViolationReviewComments' input='true'>
+     <Description>
+      If true, requesters will be required to enter in comments if they
+      proceed with a request that will result in policy violations.
+     </Description>
+   </Variable>
+
+  <Variable name="formTemplate" input="true" initializer="Identity Update">
+    <Description>
+      Template used when processing provisioning forms.
+    </Description>
+  </Variable>
+
+  <Variable name="trace" input="false" initializer="false">
+    <Description>
+      Used for debugging this subprocess and when set to true trace
+      statements will be sent to stdout.
+    </Description>
+  </Variable>
+
+  <Variable initializer="continue" input="true" name="policyScheme">
+    <Description>
+      A String that specifies how policy checks effect the overall
+      process.
+
+      none - disabled policy checking
+
+      interactive -  allow requester to remove request items which are causing violations
+
+      continue -  continue if policy violations are found
+
+      fail -  fail and exit the workflow if any policy violations are found
+
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="source" initializer="LCM">
+    <Description>
+      String version of sailpoint.object.Source to indicate
+      where the request originated.  Defaults to LCM.
+    </Description>
+  </Variable>
+
+  <Variable name='priority' input='true'>
+    <Description>
+      String version of WorkItem.level that will be used
+      to set the priority any generated workitems. It will
+      also configure the priority of the request as
+      on the generated Access Request.
+    </Description>
+  </Variable>
+
+  <Variable name='enableRetryRequest' input='true' initializer='false'>
+    <Description>
+      When set to true it will disable the workflow retry loop and let the
+      Provision step launch requests to handle the retries.  Enabling
+      this flag will enable some older functionality.
+    </Description>
+  </Variable>
+
+  <!-- Out -->
+  <Variable name='project' output='true'>
+    <Description>
+      A ProvisioningProject object describing the modifications to the identity.
+      This may include a list of Question objects which will
+      cause the generation of a Form and a WorkItem to solicit
+      additional information necessary for provisioning.
+    </Description>
+  </Variable>
+
+  <Variable name="policyViolations" output="true">
+    <Description>
+       List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see
+       pending violations.
+    </Description>
+  </Variable>
+
+  <Variable name="approvalSet" output="true">
+    <Description>
+       This attribute is set during the "Build Approval Set" step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved.
+
+       This variable includes all ApprovalItems that are part of
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+
+  <Variable name="identityRequest">
+    <Description>
+       The request object we get back from the create call. This is
+       primarily useful for debugging.
+    </Description>
+  </Variable>
+
+  <Variable name='violationReviewDecision' output="true">
+    <Description>
+     Decision made by the user in the Policy Violation Review step.
+     This may be one of three choices:
+
+     -ignore:   User is ignoring the violations and letting the request continue. If
+                 requireViolationReviewComments=true the user will be required to enter
+                 comments indicating why they are allowing the violations.
+
+     -remediate: Indicates that the user removed the request items that were causing the
+                 violations
+
+     -cancel:   Indicates that the user decided to abandon the request, terminating the workflow.
+
+    </Description>
+  </Variable>
+
+  <Variable name="workItemComments">
+    <Description>
+      Global comments accumulated during the workflow which should be shared
+      with other approvals. When a new approval is created, the comments in this
+      list will be added to the work item.
+    </Description>
+  </Variable>
+
+  <Step icon="Start" name="Start" posX="25" posY="15">
+    <Transition to="Compile Project"/>
+  </Step>
+
+  <Step action="call:compileProvisioningProject" icon="Task" name="Compile Project" posX="121" posY="15" resultVariable="project">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="requester" value="ref:launcher"/>
+    <Arg name="source" value="ref:source"/>
+    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+    <Arg name="disableRetryRequest" value="!ref:enableRetryRequest"/>
+    <Arg name="noApplicationTemplates">
+      <Script>
+        <Source>
+            boolean ignoreForms = false;
+            if ("ForgotPassword".equals(flow) || "ExpirePassword".equals(flow)) {
+               ignoreForms = true;
+            }
+            return ignoreForms;
+        </Source>
+      </Script>
+    </Arg>
+    <Description>Compile the provisioning plan into a provisioning project.
+      If you need to pass in provisioner options like "noFiltering"
+      or "noRoleDeprovisioning" you must pass them as explicit
+      arguments to the call.
+
+      The evaluation options "requester" and "source" are commonly
+      set here.
+
+      You can also pass things into the Template and Field scripts by
+      defining Args in this step.</Description>
+    <Transition to="end" when="script:(isTrue(endOnManualWorkItems) &amp;&amp; (project.getUnmanagedPlan() != null))"/>
+    <Transition to="end" when="script:(isTrue(endOnProvisioningForms) &amp;&amp; (project.hasQuestions()))"/>
+    <Transition to="Build Approval Set" when="script:isNull(approvalSet)"/>
+    <Transition to="Rebuild Approval Set"/>
+  </Step>
+
+  <Step action="call:buildApprovalSet" condition="script:isNull(approvalSet)" name="Build Approval Set" posX="260" posY="92" resultVariable="approvalSet">
+    <Arg name='plan' value='ref:plan'/>
+    <Return name='approvalSet' to='approvalSet'/>
+    <Transition to="Check Policies"/>
+  </Step>
+
+  <Step condition="script:(!policyScheme.equals(&quot;none&quot;))" name="Check Policies" posX="391" posY="92">
+    <WorkflowRef>
+      <Reference class='Workflow' name='Identity Request Violation Review'/>
+    </WorkflowRef>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+    <Arg name='project' value='ref:project'/>
+    <Arg name='plan' value='ref:plan'/>
+    <Arg name='approvalSet' value='ref:approvalSet'/>
+    <Arg name='policyScheme' value='ref:policyScheme'/>
+    <Arg name="policiesToCheck" value="ref:policiesToCheck"/>
+    <Arg name="asyncCacheRefresh" value="ref:asyncCacheRefresh"/>
+    <Arg name="priority" value="ref:priority"/>
+    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+    <Arg name="flow" value="ref:flow"/>
+    <Arg name="requireViolationReviewComments" value="ref:requireViolationReviewComments"/>
+    <Arg name="allowRequestsWithViolations" value="ref:allowRequestsWithViolations"/>
+    <Return name='policyViolations' to='policyViolations'/>
+    <Return name='project' to='project'/>
+    <Return name='plan' to='plan'/>
+    <Return name='violationReviewDecision' to='violationReviewDecision'/>
+    <Return name='workItemComments' to='workItemComments' merge='true'/>
+    <Transition to="end" when="script:(&quot;cancel&quot;.equals(violationReviewDecision))"/>
+    <Transition to="end" when="script:((policyScheme.equals(&quot;fail&quot;) &amp;&amp; (size(policyViolations) > 0 )  ))"/>
+    <Transition to="Rebuild Approval Set"/>
+  </Step>
+
+  <Step action="call:buildApprovalSet" name="Rebuild Approval Set" posX="186" posY="252" resultVariable="approvalSet">
+    <Arg name='plan' value='ref:plan'/>
+    <Return name='approvalSet' to='approvalSet'/>
+    <Transition to="Audit Start"/>
+  </Step>
+
+  <Step action="call:auditLCMStart" icon="Audit" name="Audit Start" posX="396" posY="252">
+    <Arg name='approvalSet' value='ref:approvalSet'/>
+    <Transition to="Create Identity Request"/>
+  </Step>
+
+  <Step action="call:createIdentityRequest" icon="Task" name="Create Identity Request" posX="543" posY="252" resultVariable="identityRequest">
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="flow" value="ref:flow"/>
+    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+    <Arg name="project" value="ref:project"/>
+    <Arg name="priority" value="ref:priority"/>
+    <Arg name="source" value="ref:source"/>
+    <Return name='identityRequestId' to='identityRequestId'/>
+    <Transition to="Do Provisioning Forms Pre-Approval"/>
+  </Step>
+
+  <Step icon="Task" name="Do Provisioning Forms Pre-Approval" posX="741" posY="252">
+    <Description>
+      Call the standard subprocess for assembling, presenting, and assimilating
+      provisioning forms that can be filled out before approvals.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Do Provisioning Forms'/>
+    </WorkflowRef>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='identityDisplayName' value='ref:identityDisplayName'/>
+    <Arg name="priority" value="ref:priority"/>
+    <Arg name='project' value='ref:project'/>
+    <Arg name='formTemplate' value='ref:formTemplate'/>
+    <Arg name='requiredOwner' value='ref:sessionOwner'/>
+    <Arg name='workItemComments' value='ref:workItemComments'/>
+    <Return name='project' to='project'/>
+    <Transition to="end"/>
+  </Step>
+
+  <Step icon="Stop" name="end" posX="740" posY="12"/>
+
+</Workflow>
+
+<!-- **********************************************************************
+  -
+  - Subprocess to handle approvals from the LCM workflows
+  -
+  ********************************************************************** -->
+
+<Workflow name="Identity Request Approve"
+          type='Subprocess'>
+
+  <RuleLibraries>
+    <Reference name="Approval Library" class="sailpoint.object.Rule"/>
+    <Reference name="LCM Workflow Library" class="sailpoint.object.Rule"/>
+  </RuleLibraries>
+
+  <Variable name='identityName' input='true' required='true'>
+    <Description>
+      The name of the identity object being modified.
+    </Description>
+  </Variable>
+
+  <Variable name='batchRequestId' input='true'>
+    <Description>
+      Batch request id.
+    </Description>
+  </Variable>
+
+  <Variable name="identityDisplayName" input='true'
+            initializer='script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)'>
+    <Description>
+      The displayName of the identity being updated.
+      This may be passed in, if not the script queries for this
+      using a projection query and falls back to the name.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="identityId"
+            initializer='script:getIdentityProperty(identityName, &quot;id&quot;)'>
+    <Description>
+      The id of the identity being updated.
+    </Description>
+  </Variable>
+
+  <Variable name="identityRequestId" input="true">
+    <Description>
+       The ID of the IdentityRequest for this request.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="approvalScheme" required='true'>
+    <Description>
+      A csv string that specifies how approvals should be generated for
+      the incoming request.
+
+      The value can be any of the values below, combined together but
+      are always processed in this order:
+
+      1. manager
+      2. owner
+      3. securityOfficer
+
+      Any rejected items from previous approvals will be omitted from the
+      next phase of approvers.
+
+      none - disabled approvals
+
+      owner - the object owner gets the approval
+              For Role approvals this is the Role object owner. When dealing
+              with things like Unlock and other account level changes
+              the approvals will be assigned to the the application owner.
+
+      manager - The manager will get all approvals
+
+      securityOfficer - The identity named security the security in the variable
+                        securityOfficerName.
+
+    </Description>
+  </Variable>
+
+ <Variable initializer="serial" input="true" name="approvalMode">
+    <Description>
+     A string that specifies how we should handle the approvals.
+
+     By default this is serial since most of these request with
+     the exception of manager transfers will have only one approver.
+
+     parallel
+       Approvals are processed concurrently and there must be consensus,
+       we wait for all approvers to approve.  The first approver that
+       rejects terminates the entire approval.
+
+     parallelPoll
+       Approvals are processed concurrently but consensus is not required.
+       All approvals will be process, we don't stop if there any
+       rejections.
+
+     serial
+       Approvals are processed one at a time and there must be consensus.
+       The first approver that rejects terminates the entire approval.
+
+     serialPoll
+       Approvals are processed in order but consensus is not required.
+       All approvals will be processed, we don't stop if there are any
+       rejections.  In effect we are "taking a poll" of the approvers.
+
+     any
+      Approvals are processed concurrently, the first approver to
+      respond makes the decision for the group.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="fallbackApprover" required='true'>
+    <Description>
+      A String that specifies the name of the Identity that will
+      be assigned any approvals where the owner of the approver
+      can't be resolved. Example if the scheme is "owner" and the
+      application doesn't specify and owner.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="securityOfficerName">
+    <Description>
+       The name of the identity that will be sent approvals
+       during security officer approvals.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="batchRequestApprover">
+    <Description>
+       Identity responsible for approving batch requests.
+    </Description>
+  </Variable>
+
+   <Variable name="includeRejectedItemsInApprovalChain" input="true" initializer="false">
+    <Description>
+       When using multi approvalSchemes a flag to indicate if new
+       approvals in the chain will include rejected items.
+    </Description>
+  </Variable>
+
+  <Variable name="policyViolations" input="true">
+    <Description>
+       List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see
+       pending violations.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="flow">
+    <Description>
+      The name of the LCM flow that launched this workflow.
+
+      This is one of these values:
+
+      AccountsRequest
+      EntitlementsRequest
+      RolesRequest
+      IdentityCreateRequest
+      IdentityEditRequest
+      ForgotPassword
+      ExpiredPassword
+      PasswordRequest
+
+    </Description>
+  </Variable>
+
+  <Variable name="trace" input="true">
+    <Description>
+      Used for debugging this subprocess and when set to true trace
+      statements will be sent to stdout.
+    </Description>
+  </Variable>
+
+  <!-- Out -->
+  <Variable name="approvalSet" input="true" output="true">
+    <Description>
+       This attributes is set during the "Build Approval Set" step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved,
+
+       This variable includes all ApprovalItems that are part of
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+
+  <Variable name="managerEmailTemplate" initializer="LCM Identity Update Approval" input="true">
+    <Description>
+       Name of the email template to use when manager of pending approvals.
+    </Description>
+  </Variable>
+
+  <Variable name="ownerEmailTemplate" initializer="LCM Identity Update Approval" input="true">
+    <Description>
+       Name of the email template to use when notifying the owner of pending approvals.
+    </Description>
+  </Variable>
+
+  <Variable name="securityOfficerEmailTemplate" initializer="LCM Identity Update Approval" input="true">
+    <Description>
+       Name of the email template to use when notifying the security officer of pending approvals.
+    </Description>
+  </Variable>
+
+  <Variable name="batchApproverEmailTemplate" initializer="Batch Approval" input="true">
+    <Description>
+       Name of the email template to use when notifying the batch approver of pending approval.
+    </Description>
+  </Variable>
+
+  <Variable name="workItemComments" input="true">
+    <Description>
+       List of global workflow comments to be appended to the approval workitem.
+    </Description>
+  </Variable>
+
+  <Variable name="managerElectronicSignature" input="true">
+    <Description>
+       The name of the electronic signature object that should be used when workitems
+       are completed by a manager.
+    </Description>
+  </Variable>
+
+  <Variable name="ownerElectronicSignature" input="true">
+    <Description>
+       The name of the electronic signature object that should be used when workitems
+       are completed by object owners.
+    </Description>
+  </Variable>
+
+    <Variable name="securityOfficerElectronicSignature" input="true">
+    <Description>
+       The name of the electronic signature object that should be used when workitems
+       are completed by the security officer.
+    </Description>
+  </Variable>
+
+  <Variable name="batchApproverElectronicSignature" input="true">
+    <Description>
+       The name of the electronic signature object that should be used when workitems
+       are completed by the batch approver when performing batch operations.
+    </Description>
+  </Variable>
+
+  <Variable name='priority' input='true'>
+    <Description>
+      String version of WorkItem.level that will be used
+      to set the priority of the workitems generated
+      as part of any generated approvals.
+    </Description>
+  </Variable>
+
+  <Variable name="tmpApprovalSet">
+    <Description>
+       Temporary and transient  ApprovalSet used to hold filtered
+       approval sets as we transition through the approval chain.
+    </Description>
+  </Variable>
+
+  <Variable name="tmpApproval">
+    <Description>
+       Temporary and transient list of Approval object used to hold filtered
+       approval as we transition through the approval chain.
+    </Description>
+  </Variable>
+
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="Start Approval"/>
+  </Step>
+
+  <Step icon="Task" name="Start Approval" posX="28" posY="149">
+    <Transition to="Manager Approval" when="script:isApprovalEnabled(approvalScheme, &quot;manager&quot;)"/>
+    <Transition to="Build Owner ApprovalSet" when="script:isApprovalEnabled(approvalScheme, &quot;owner&quot;)"/>
+    <Transition to="Build Security Officer ApprovalSet" when="script:isApprovalEnabled(approvalScheme, &quot;securityOfficer&quot;)"/>
+    <Transition to="Batch Request Approval" when="script:isApprovalEnabled(approvalScheme, &quot;batchRequest&quot;)"/>
+    <Transition to="end"/>
+  </Step>
+
+  <Step icon="Approval" name="Manager Approval" posX="172" posY="7">
+    <Description>
+      If approvalScheme contains manager, send an approval for all
+      requested items in the request. This approval will get the entire
+      approvalSet as part of the workitem.
+    </Description>
+    <Approval renderer='lcmWorkItemRenderer.xhtml' mode='serial'
+       owner='call:buildManagerApproval'
+       send='approvalSet,identityDisplayName,identityName,policyViolations'>
+
+      <Arg name='workItemIdentityRequestId' value='ref:identityRequestId'/>
+      <Arg name='workItemElectronicSignature' value='ref:managerElectronicSignature'/>
+      <Arg name='workItemRequester' value='$(launcher)'/>
+      <Arg name='workItemDescription' value='Manager Approval - Account Changes for User: $(identityDisplayName)'/>
+      <Arg name='workItemNotificationTemplate' value='ref:managerEmailTemplate'/>
+      <Arg name='workItemTargetClass' value='sailpoint.object.Identity'/>
+      <Arg name='workItemTargetName' value='$(identityName)'/>
+      <Arg name='workItemTargetId' value='$(identityId)'/>
+      <Arg name='workItemPriority' value='ref:priority'/>
+
+      <AfterScript>
+        <Source>
+          import sailpoint.workflow.IdentityRequestLibrary;
+
+            assimilateWorkItemApprovalSet(wfcontext, item, approvalSet);
+            IdentityRequestLibrary.assimilateWorkItemApprovalSetToIdentityRequest(wfcontext, approvalSet);
+            auditDecisions(item);
+        </Source>
+      </AfterScript>
+    </Approval>
+    <Transition to="Build Owner ApprovalSet" when="script:isApprovalEnabled(approvalScheme, &quot;owner&quot;)"/>
+    <Transition to="Build Security Officer ApprovalSet" when="script:isApprovalEnabled(approvalScheme, &quot;securityOfficer&quot;)"/>
+    <Transition to="end"/>
+  </Step>
+
+  <Step action="script:filterApprovalSet(approvalSet,includeRejectedItemsInApprovalChain,false)" icon="Task" name="Build Owner ApprovalSet" posX="237" posY="212" resultVariable="tmpApprovalSet">
+    <Transition to="Owner Approval"/>
+  </Step>
+
+  <Step name="Owner Approval" icon="Approval" posX="389" posY="211" >
+    <Description>
+      If approvalScheme contains owner, send approvals out to all
+      of the owners for items in the request. The main approvalSet
+      is broken up into owner specific approval sets and assimilated
+      back into the main approvalset as decisions are made.
+
+      The previous decisions made on the items will be present along
+      with any comments made by the manager.
+
+      This step will be skipped if all items are
+      rejected and includeRejectedItemsInApprovalChain is set to false
+    </Description>
+    <Approval renderer='lcmWorkItemRenderer.xhtml' mode="ref:approvalMode"
+              owner="call:buildOwnerApprovals"
+              send='identityDisplayName,identityName,policyViolations'>
+      <Arg name='approvalSet' value='ref:tmpApprovalSet'/>
+      <Arg name='workItemDescription' value='Owner Approval - Account Changes for User: $(identityDisplayName)'/>
+      <Arg name='workItemElectronicSignature' value='ref:ownerElectronicSignature'/>
+      <Arg name='workItemIdentityRequestId' value='ref:identityRequestId'/>
+      <Arg name='workItemNotificationTemplate' value='ref:ownerEmailTemplate'/>
+      <Arg name='workItemPriority' value='ref:priority'/>
+      <Arg name='workItemRequester' value='$(launcher)'/>
+      <AfterScript>
+        <Source>
+
+          import sailpoint.workflow.IdentityRequestLibrary;
+
+          if ( item == null )
+              return;
+
+          assimilateWorkItemApprovalSet(wfcontext, item, approvalSet);
+          IdentityRequestLibrary.assimilateWorkItemApprovalSetToIdentityRequest(wfcontext, approvalSet);
+          auditDecisions(item);
+        </Source>
+      </AfterScript>
+    </Approval>
+    <Transition to="Build Security Officer ApprovalSet" when="script:isApprovalEnabled(approvalScheme, &quot;securityOfficer&quot;)"/>
+    <Transition to="end"/>
+  </Step>
+
+  <Step action="script:filterApprovalSet(approvalSet,includeRejectedItemsInApprovalChain,false)" icon="Task" name="Build Security Officer ApprovalSet" posX="309" posY="61" resultVariable="tmpApprovalSet">
+    <Transition to="Security Officer Approval"/>
+  </Step>
+
+  <Step condition="script:!isNull(tmpApprovalSet) &amp;&amp; !tmpApprovalSet.isEmpty()" icon="Approval" name="Security Officer Approval" posX="698" posY="59">
+    <Description>
+     If approvalScheme contains securityOfficer and the securityOfficeName is
+     non null this step will send items with decisions and comments
+     from the cart for final decision.
+
+     The previous decisions made on the item will be present along with
+     any comments made in previous approval steps.
+    </Description>
+    <Approval renderer='lcmWorkItemRenderer.xhtml' mode="serial" owner="call:buildSecurityOfficerApproval"
+              send='identityDisplayName,identityName,policyViolations'>
+      <Arg name='approvalSet' value='ref:tmpApprovalSet'/>
+      <Arg name='workItemElectronicSignature' value='ref:securityOfficerElectronicSignature'/>
+      <Arg name='workItemIdentityRequestId' value='ref:identityRequestId'/>
+      <Arg name='workItemRequester' value='$(launcher)'/>
+      <Arg name='workItemDescription' value='Security Officer Approval - Account Changes for User: $(identityDisplayName)'/>
+      <Arg name='workItemNotificationTemplate' value='ref:securityOfficerEmailTemplate'/>
+      <Arg name='workItemPriority' value='ref:priority'/>
+      <Arg name='workItemTargetClass' value='sailpoint.object.Identity'/>
+      <Arg name='workItemTargetName' value='ref:identityName'/>
+      <Arg name='workItemTargetId' value='ref:identityId'/>
+      <AfterScript>
+        <Source>
+          import sailpoint.workflow.IdentityRequestLibrary;
+
+          assimilateWorkItemApprovalSet(wfcontext, item, approvalSet);
+          IdentityRequestLibrary.assimilateWorkItemApprovalSetToIdentityRequest(wfcontext, approvalSet);
+        </Source>
+      </AfterScript>
+    </Approval>
+    <Transition to="Batch Request Approval"/>
+  </Step>
+
+  <Step icon="Approval" name="Batch Request Approval" posX="833" posY="59">
+    <Description>
+     If approvalScheme contains batchRequest and the batchRequestApprover is
+     non null this step will send items with decisions and comments
+     from the cart for final decision.
+    </Description>
+    <Approval renderer='lcmWorkItemRenderer.xhtml' mode="serial" owner="ref:batchRequestApprover"
+              send='identityDisplayName,identityName'>
+      <Arg name='approvalSet' value='ref:approvalSet'/>
+      <Arg name='workItemDescription' value='Batch Request Approval requested by $(launcher)'/>
+      <Arg name='workItemElectronicSignature' value='ref:batchApproverElectronicSignature'/>
+      <Arg name='workItemIdentityRequestId' value='ref:identityRequestId'/>
+      <Arg name='workItemNotificationTemplate' value='ref:batchApproverEmailTemplate'/>
+      <Arg name='workItemPriority' value='ref:priority'/>
+      <Arg name='workItemRequester' value='$(launcher)'/>
+      <Arg name='workItemTargetClass' value='sailpoint.object.BatchRequest'/>
+      <Arg name='workItemTargetId' value='ref:batchRequestId'/>
+      <AfterScript>
+        <Source>
+          assimilateWorkItemApprovalSet(wfcontext, item, approvalSet);
+        </Source>
+      </AfterScript>
+    </Approval>
+    <Transition to="end"/>
+  </Step>
+
+  <Step icon="Stop" name="end" posX="920" posY="1"/>
+
+</Workflow>
+
+<!-- **********************************************************************
+  -
+  - Subprocess to handle notification from the LCM workflows
+  -
+  ********************************************************************** -->
+
+<Workflow name="Identity Request Notify"
+          type='Subprocess'
+          libraries="IdentityRequest">
+
+  <Variable name='identityName' input='true' required='true'>
+    <Description>
+      The name of the identity object being modified.
+    </Description>
+  </Variable>
+
+  <Variable name="identityDisplayName" input='true'
+            initializer='script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)'>
+    <Description>
+      The displayName of the identity being updated.
+      This may be passed in, if not the script queries for this
+      using a projection query and falls back to the name.
+    </Description>
+  </Variable>
+
+  <Variable initializer="user,requester" input="true" name="notificationScheme">
+    <Description>
+     A string that specifies who should be notified when the request has been complete.
+     The value can be null or a csv of one or more of the following options.
+
+     none or null
+       disable notifications
+
+     user
+       Identity that is being update will be notified.
+
+     manager
+       The manager of the Identity that is being updated will be notified.
+
+     requester
+       The person that has requested the update will be notified.
+
+     securityOfficer
+       The identity named in the securityOfficerNameVariable will be notified.
+    </Description>
+  </Variable>
+
+  <Variable name="securityOfficerName" input="true">
+    <Description>
+      The name of the security officer identity.
+    </Description>
+  </Variable>
+
+  <Variable name="policyViolations" input="true">
+    <Description>
+       List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see
+       pending violations.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="flow">
+    <Description>
+      The name of the LCM flow that launched this workflow.
+
+      This is one of these values:
+
+      AccountsRequest
+      EntitlementsRequest
+      RolesRequest
+      IdentityCreateRequest
+      IdentityEditRequest
+      ForgotPassword
+      ExpiredPassword
+      PasswordRequest
+
+    </Description>
+  </Variable>
+
+  <Variable name="trace" input="true">
+    <Description>
+      Used for debugging this subprocess and when set to true trace
+      statements will be sent to stdout.
+    </Description>
+  </Variable>
+  
+  <Variable name="approvalScheme" input="true">
+    <Description>
+       A string that specifies how approvals should be generated for
+       this workflow.
+       
+       This is usefull for the notification subprocess incase
+       the template wants to render specific text in the email
+       when certain schemes are configured.
+    </Description>
+  </Variable>
+
+  <Variable name="approvalSet" input="true">
+    <Description>
+       This attributes is set during the "Build Approval Set" step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved,
+
+       This variable includes all ApprovalItems that are part of
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="plan">
+    <Description>The provisioning plan for the request.</Description>
+  </Variable>
+
+  <Variable name="userEmailTemplate" initializer="LCM User Notification" input="true">
+    <Description>
+       Name of the email template to use when notifying the user.
+    </Description>
+  </Variable>
+
+  <Variable name="managerEmailTemplate" initializer="LCM Manager Notification" input="true">
+    <Description>
+       Name of the email template to use when notifying the manager.
+    </Description>
+  </Variable>
+
+  <Variable name="requesterEmailTemplate" initializer="LCM Requester Notification" input="true">
+    <Description>
+       Name of the email template to use when notifying the requester.
+    </Description>
+  </Variable>
+
+  <Variable name="securityOfficerEmailTemplate" initializer="LCM Manager Notification" input="true">
+    <Description>
+       Name of the email template to use when notifying the security officer.
+    </Description>
+  </Variable>
+
+  <Variable name='priority' input='true'>
+    <Description>
+      String version of WorkItem.level that was used
+      to set the priority on the access request and
+      any workitems.
+    </Description>
+  </Variable>
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="Notify User"/>
+  </Step>
+
+  <Step action="call:sendEmail" condition="script:Util.csvToList(notificationScheme).contains(&quot;user&quot;)" icon="Email" name="Notify User" posX="98" posY="10">
+    <Arg name="template" value="ref:userEmailTemplate"/>
+    <Arg name="to" value="script:getUserEmail(identityName, plan)"/>
+    <Arg name="approvalSet" value="call:prepareApprovalSetForNotification"/>
+    <Transition to="Notify Requester"/>
+  </Step>
+
+  <Step action="call:sendEmail" condition="script:Util.csvToList(notificationScheme).contains(&quot;requester&quot;)" icon="Email" name="Notify Requester" posX="216" posY="10">
+    <Arg name="template" value="ref:requesterEmailTemplate"/>
+    <Arg name="to" value="script:getEmail(launcher)"/>
+    <Arg name="approvalSet" value="call:prepareApprovalSetForNotification"/>
+    <Transition to="Notify Manager"/>
+  </Step>
+
+  <Step action="call:sendEmail" condition="script:Util.csvToList(notificationScheme).contains(&quot;manager&quot;)" icon="Email" name="Notify Manager" posX="351" posY="10">
+    <Arg name="template" value="ref:managerEmailTemplate"/>
+    <Arg name="to" value="script:getManagersEmail(identityName, plan)"/>
+    <Arg name="approvalSet" value="call:prepareApprovalSetForNotification"/>
+    <Transition to="Notify Security Officer"/>
+  </Step>
+
+  <Step action="call:sendEmail" condition="script:Util.csvToList(notificationScheme).contains(&quot;securityOfficer&quot;)" icon="Email" name="Notify Security Officer" posX="483" posY="10">
+    <Arg name="template" value="ref:securityOfficerEmailTemplate"/>
+    <Arg name="to" value="script:getEmail(securityOfficerName)"/>
+    <Arg name="approvalSet" value="call:prepareApprovalSetForNotification"/>
+    <Transition to="end"/>
+  </Step>
+
+  <Step icon="Stop" name="end" posX="602" posY="10"/>
+
+</Workflow>
+
+<!-- **********************************************************************
+  -
+  - Subprocess to handle provisioning from the LCM workflows
+  -
+  ********************************************************************** -->
+
+<Workflow name="Identity Request Provision"
+          type='Subprocess'
+          libraries="Identity,IdentityRequest">
+
+  <RuleLibraries>
+    <Reference name="LCM Workflow Library" class="sailpoint.object.Rule"/>
+  </RuleLibraries>
+
+  <Description>
+      This workflow subprocess is used to provision a
+      project.
+
+      This subprocess was added in 5.5 in an effort to
+      break groups of related steps into a single call
+      from the top level workflow.
+
+      It now encapsulates the following services:
+
+        - Process approval decisions
+           -- which recompiles the project
+        - Post provisioning forms for user's outside of the requester
+
+  </Description>
+  <Variable initializer='false' name='optimisticProvisioning' editable='true' input='true'>
+    <Description>
+      Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.
+    </Description>
+  </Variable>
+
+  <Variable name='foregroundProvisioning' editable='true' initializer='true' input='true'>
+    <Description>
+      Normally provisioning is done in a step that uses the "background"
+      option to force the workflow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintenance task to
+      see the resutls of the request.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="fallbackApprover" required='true'>
+    <Description>
+      A String that specifies the name of the Identity that will
+      be assigned any manual actions  where the owner of the approver
+      can't be resolved.
+    </Description>
+  </Variable>
+
+  <Variable name="approvalSet" input="true">
+    <Description>
+       This attributes is set during the "Build Approval Set" step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved,
+
+       This variable includes all ApprovalItems that are part of
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+
+  <Variable name="formTemplate" input="true" initializer="Identity Update">
+    <Description>
+      Template used when processing provisioning forms.
+    </Description>
+  </Variable>
+
+  <Variable name="trace" input="true">
+    <Description>
+      Used for debugging this workflow and when set to true trace
+      will be sent to stdout.
+    </Description>
+  </Variable>
+
+  <Variable name="plan" input="true">
+    <Description>
+      The plan may be passed in from the Create/Update Identity workflows.
+      Otherwise the passed in project's master plan is typically used.
+    </Description>
+  </Variable>
+
+  <Variable name="recompile" input="true" initializer='true'>
+    <Description>
+       Option that can be used to prevent recompilation after approval
+       changes have been applied to the plan/project.
+    </Description>
+  </Variable>
+
+  <Variable name="manualActionsEmailTemplate" input="true" initializer='Pending Manual Changes'>
+    <Description>
+       Option that can be used to prevent recompilation after approval
+       changes have been applied to the plan/project.
+    </Description>
+  </Variable>
+
+  <Variable name="workItemComments" input="true">
+    <Description>
+       Global comments which should be appended to each approval item.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="approvalScheme">
+    <Description>
+      A csv string that specifies how approvals should be generated for
+      the incoming request.
+
+      The value can be any of the values below, combined together but
+      are always processed in this order:
+
+      1. manager
+      2. owner
+      3. securityOfficer
+
+      Any rejected items from previous approvals will be omitted from the
+      next phase of approvers.
+
+      none - disabled approvals
+
+      owner - the object owner gets the approval
+              For Role approvals this is the Role object owner. When dealing
+              with things like Unlock and other account level changes
+              the approvals will be assigned to the the application owner.
+
+      manager - The manager will get all approvals
+
+      securityOfficer - The identity named security the security in the variable
+                        securityOfficerName.
+
+    </Description>
+  </Variable>
+
+  <Variable name="identityRequestId" input="true">
+    <Description>
+       The ID of the IdentityRequest.
+    </Description>
+  </Variable>
+
+  <Variable name='priority' input='true'>
+    <Description>
+      String version of WorkItem.level that will be used
+      to set the priority on any generated workitems for
+      of forms or manual actions.
+    </Description>
+  </Variable>
+
+  <!-- Out -->
+  <Variable name="project" input="true" output="true">
+    <Description>
+      ProvisioningProject which is just a compiled version of the ProvisioningPlan.
+    </Description>
+  </Variable>
+
+  <Step icon="Start" name="Start" posX="15" posY="12">
+    <Transition to="Start Provisioning Process"/>
+  </Step>
+
+  <Step action="call:addMessage" icon="Message" name="Start Provisioning Process" posX="130" posY="12">
+    <Arg name="message" value="Modifications to $(identityDisplayName) are being provisioned."/>
+    <Transition to="Process Approval Decisions"/>
+  </Step>
+
+  <Step action="call:processApprovalDecisions" condition="script:!isNull(approvalSet)" icon="Task" name="Process Approval Decisions" posX="309" posY="11" resultVariable="project">
+    <Description>
+      Dig through the ApprovalSets found in the Approval step and build an audit
+      trail for the decisions.  Then for any rejected items remove them from
+      the provisioning plan so they are not part of the provisioning request.
+    </Description>
+    <Arg name="project" value="ref:project"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="recompile" value="ref:recompile"/>
+    <Arg name="disableAudit" value="true"/>
+    <Transition to="Do Provisioning Forms Post-Approval"/>
+  </Step>
+
+  <Step icon="Task" name="Do Provisioning Forms Post-Approval" posX="511" posY="12">
+    <Description>
+      Call the standard subprocess for assembling, presenting, and assimilating
+      provisioning forms that remain after approvals.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Do Provisioning Forms'/>
+    </WorkflowRef>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='identityDisplayName' value='ref:identityDisplayName'/>
+    <Arg name='project' value='ref:project'/>
+    <Arg name='priority' value='ref:priority'/>
+    <Arg name='formTemplate' value='ref:formTemplate'/>
+    <Arg name='preferredOwner' value='ref:sessionOwner'/>
+    <Return name='project' to='project'/>
+    <Transition to='Pre Provision'/>
+  </Step>
+
+  <Step action="call:assimilateAccountIdChanges" icon="Task" name="Pre Provision" posX="682" posY="13" resultVariable="approvalSet">
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="project" value="ref:project"/>
+    <Description>
+      Before we approve assimilate the result of any accountId changes that may have been compiled
+      into the plan back onto the ApprovalSet.
+    </Description>
+    <Transition to="Refresh Identity Request"/>
+  </Step>
+
+  <Step action="call:refreshIdentityRequestAfterApproval" icon="Task" name="Refresh Identity Request" posX="813" posY="13">
+    <Arg name="project" value="ref:project"/>
+    <Description>
+       Assimilate any approval summaries that were built up during
+       the provisioning process.
+    </Description>
+    <Transition to="Provision"/>
+  </Step>
+
+  <Step icon="Task" name="Provision" posX="941" posY="13">
+    <Description>
+      Call the standard subprocess to initialize the request, this includes
+      auditing, building the approvalset, compiling the plan into
+       project and checking policy violations.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Provision with retries'/>
+    </WorkflowRef>
+    <Arg name="project" value="ref:project"/>
+    <Arg name='foregroundProvisioning' value='ref:foregroundProvisioning'/>
+    <Arg name='trace' value='ref:trace'/>
+    <Arg name='identityRequestId' value='ref:identityRequestId'/>
+    <Return name='retries' to='retries'/>
+    <Return name='project' to='project'/>
+    <Transition to="Wait for Queued Items"/>
+  </Step>
+
+  <Step icon="Task" name="Wait for Queued Items" posX="1074" posY="13">
+    <WorkflowRef>
+      <Reference class='Workflow' name='Check Status of queued items'/>
+    </WorkflowRef>
+    <Arg name="project" value="ref:project"/>
+    <Arg name='trace' value='ref:trace'/>
+    <Return name='project' to='project'/>
+    <Transition to="Post Provision"/>
+  </Step>
+
+  <Step icon="Task" name="Post Provision" posX="1205" posY="13">
+    <Script>
+      <Source>
+        import sailpoint.tools.Util;
+
+        if ( approvalSet != null ) {
+            // Set state to pending
+            approvalSet.initializeProvisioningState();
+            if ( Util.otob(trace) ) {
+                 System.out.println("ApprovalSet:\n" + approvalSet.toXml());
+            }
+        }
+        if ( project != null ) {
+            if ( Util.otob(trace) ) {
+                 System.out.println("Project Executed:\n" + project.toXml());
+            }
+        }
+      </Source>
+    </Script>
+    <Transition to="Manual Actions"/>
+  </Step>
+
+  <Step condition="script:project.getUnmanagedPlan() != null" icon="Approval" name="Manual Actions" posX="1316" posY="13">
+    <Approval renderer='lcmManualActionsRenderer.xhtml' mode="parallelPoll"
+              owner="rule:Build Manual Action Approvals"
+              send='identityDisplayName,identityName,policyViolations'>
+      <Arg name='workItemRequester' value='$(launcher)'/>
+      <Arg name='workItemDescription' value='Manual Changes requested for User: $(identityDisplayName)'/>
+      <Arg name='workItemPriority' value='ref:priority'/>
+      <Arg name='workItemType' value='ManualAction'/>
+      <Arg name='workItemNotificationTemplate' value='ref:manualActionsEmailTemplate'/>
+      <AfterScript>
+        <Source>
+          import sailpoint.object.ApprovalSet;
+          import sailpoint.object.ApprovalItem;
+          import sailpoint.object.WorkItem;
+          import sailpoint.object.WorkItem;
+          import sailpoint.workflow.IdentityRequestLibrary;
+
+          if (item == null) {
+              // must not be a leaf approval...
+              return;
+          }
+
+          // mark all of the items finished once the item is complete
+          ApprovalSet set = (ApprovalSet)item.get("approvalSet");
+          if ( set != null ) {
+              List approvalItems = set.getItems();
+              for ( ApprovalItem approvalItem : approvalItems ) {
+                  approvalItem.setState(WorkItem.State.Finished);
+                  // update identity request provisioning state
+                  IdentityRequestLibrary.updateIdentityRequestItemProvisioningState(approvalItem, wfcontext);
+              }
+          }
+
+          // Audit the manual change
+          auditManualAction(item);
+        </Source>
+      </AfterScript>
+    </Approval>
+    <Transition to="end"/>
+  </Step>
+
+  <Step icon="Stop" name="end" posX="1419" posY="13"/>
+
+</Workflow>
+
+<!-- **********************************************************************
+  -
+  - Subprocess to handle final step from the LCM workflows. 
+  -
+  ********************************************************************** -->
+
+<Workflow name="Identity Request Finalize"
+          libraries="Identity,IdentityRequest"
+          type='Subprocess'>
+
+  <Variable name="project">
+    <Description>
+      ProvisioningProject which is just a compiled version of the ProvisioningPlan.
+      From the project the IdentityRequestItem model will be updated.
+    </Description>
+  </Variable>
+
+  <Variable name="identityRequestId" input="true" output="true">
+    <Description>
+       The ID ot the identitytRequestId.
+
+       This step will update the identityRequest status and completion
+       status.
+    </Description>
+  </Variable>
+
+  <Variable name="approvalSet" input="true">
+    <Description>
+       This attributes is set during the "Build Approval Set" step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved,
+
+       This variable includes all ApprovalItems that are part of
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+
+  <Variable name="trace" input="true">
+    <Description>
+      Used for debugging this subprocess and when set to true trace
+      statements will be sent to stdout.
+    </Description>
+  </Variable>
+
+  <Variable name="ticketManagementApplication" input="true">
+    <Description>
+      Name of the application that can handle ticket requests.
+      When non-null the Manage Ticket Steps will be visited to open
+      tickets during the workflow lifecycle.
+    </Description>
+  </Variable>
+
+  <Variable name='ticketDataGenerationRule' input='true'>
+    <Description>
+      A rule that builds up the ticketing provisioning plan based on the workflow
+      context.  This rule gets all of the arguments to this subprocess
+      plus the curreent workflow context.  The rule can return either a
+      ProvisioningPlan or a Map of name value pairs.
+
+      The rule name can be specified here on the subprocess or on the
+      ticketManagementApplication config under the same name as this
+      variable.
+    </Description>
+  </Variable>
+
+  <Variable name="autoVerifyIdentityRequest">
+    <Description>
+      Flag to indicate when finishing the request we should
+      automatically mark it verified. Currently used by
+      the change password workflow so we don't wait to
+      verify since passwords can't be verifed.
+    </Description>
+  </Variable>
+
+  <Variable name='priority' input='true'>
+    <Description>
+      String version of WorkItem.level that was used
+      to set the priority of the IdentityRequest and
+      workitems.
+    </Description>
+  </Variable>
+
+  <Step icon="Start" name="Start" posX="15" posY="12">
+    <Transition to="Audit Completion"/>
+  </Step>
+
+  <Step action="call:auditLCMCompletion" icon="Audit" name="Audit Completion" posX="115" posY="12">
+    <Arg name='approvalSet' value='ref:approvalSet'/>
+    <Transition to="Complete Identity Request"/>
+  </Step>
+
+  <Step name="Complete Identity Request" action="call:completeIdentityRequest" icon="Task" posX="261" posY="12" resultVariable="identityRequest">
+    <Arg name="project" value="ref:project"/>
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="autoVerify" value="$(autoVerifyIdentityRequest)"/>
+    <Arg name='identityRequestId' value='ref:identityRequestId'/>
+    <Transition to="Update Ticket On Complete"/>
+  </Step>
+
+  <Step condition="script:(ticketManagementApplication != null)" icon="Task" name="Update Ticket On Complete" posX="443" posY="12">
+    <Description>
+      Call a subprocess to update the ticket in the ticketManagementApplication is non-null.
+
+      You can specify a specific 'ticketDataGenerationRule' here or you can also specify
+      it on the application.  It'll be read from the argument first and fall back to the '
+      application config.
+    </Description>
+
+    <WorkflowRef>
+      <Reference class='Workflow' name='Manage Ticket'/>
+    </WorkflowRef>
+    <Arg name='action' value='complete'/>
+    <Arg name='source' value='ref:source'/>
+    <Arg name='priority' value='ref:priority'/>
+    <Arg name='project' value='ref:project'/>
+    <Arg name='ticketManagementApplication' value='ref:ticketManagementApplication'/>
+    <Arg name='identityRequestId' value='ref:identityRequestId'/>
+    <Arg name='ticketDataGenerationRule' value=''/>
+    <Arg name='trace' value='ref:trace'/>
+
+    <Transition to='end'/>
+  </Step>
+
+  <Step icon="Stop" name="end" posX="601" posY="13"/>
+
+</Workflow>
+
+<!-- **********************************************************************
+  -
+  - Subprocess to handle approvals from the LCM Identity Create/ Update 
+  - requests
+  -
+  ********************************************************************** -->
+
+    <Workflow  explicitTransitions="true"   name="Identity Request Approve Identity Changes" type="Subprocess">
+
+  <Description>
+     The subprocess that drives the Create and Update Identity workflows.
+     This is different then the Identity Request Approve subprocess because this
+     approval process produces a form with the approval so that
+     approvers can update values while approving.
+
+     This subprocess builds the form necessary for the editable approvals
+     and then assimilates that data entered back to the plan, which
+     can be returned from the subprocess.
+  </Description>
+
+  <RuleLibraries>
+    <Reference name="Approval Library" class="sailpoint.object.Rule"/>
+    <Reference name="LCM Workflow Library" class="sailpoint.object.Rule"/>
+  </RuleLibraries>
+
+  <Variable name='identityName' input='true' required='true'>
+    <Description>
+      The name of the identity object being modified.
+    </Description>
+  </Variable>
+
+  <Variable name="identityDisplayName" input='true'
+            initializer='script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)'>
+    <Description>
+      The displayName of the identity being updated.
+      This may be passed in, if not the script queries for this
+      using a projection query and falls back to the name.
+    </Description>
+  </Variable>
+
+  <Variable name="identityRequestId" input="true">
+    <Description>
+       The ID of the IdentityRequest.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="plan" required='true'>
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+
+  <Variable input="true" name="formTemplate" initializer='LCM Identity Approval'>
+    <Description>Name of the form Template to use when building provisioning form.</Description>
+  </Variable>
+
+  <Variable name="approvalSet" input='true' output='true'>
+    <Description>
+       This variable includes all ApprovalItems that are part of
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="approvers">
+    <Description>Owners that should recieve the approval.</Description>
+  </Variable>
+
+  <Variable input="true" name="approvalScheme">
+    <Description>
+      A String that specifies how approvals should be generated for
+      this workflow there are five built-in modes
+
+      none - disabled approvals
+
+      manager - The user's current manager will get approvals
+
+      newManager - The newly assigned manager will get approvals when
+                   manager transfers occur. Otherwise the user's manager
+                   current manager will be the approver.
+
+      securityOfficer - The identity in the securityOfficerName variable
+                        will get approvals.
+    </Description>
+  </Variable>
+
+  <Variable name="approvalEmailTemplate" input="true" initializer="LCM Identity Update Approval">
+    <Description>
+     The email template to use for approval notifications.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="securityOfficerName">
+    <Description>
+       The name of the identity that will be sent approvals
+       during security officer approvals.
+    </Description>
+  </Variable>
+
+  <Variable name="approvalForm">
+    <Description>The generated form that is displayed to the user during the approval.</Description>
+  </Variable>
+
+  <Variable input="true" name="fallbackApprover" required='true'>
+    <Description>
+      A String that specifies the name of the Identity that will
+      be assigned any manual actions  where the owner of the approver
+      can't be resolved.
+    </Description>
+  </Variable>
+
+ <Variable initializer="serial" input="true" name="approvalMode">
+    <Description>
+     A string that specifies how we should handle the approvals.
+
+     By default this is serial since most of these request with
+     the exception of manager transfers will have only one approver.
+
+     parallel
+       Approvals are processed concurrently and there must be consensus,
+       we wait for all approvers to approve.  The first approver that
+       rejects terminates the entire approval.
+
+     parallelPoll
+       Approvals are processed concurrently but consensus is not required.
+       All approvals will be process, we don't stop if there any
+       rejections.
+
+     serial
+       Approvals are processed one at a time and there must be consensus.
+       The first approver that rejects terminates the entire approval.
+
+     serialPoll
+       Approvals are processed in order but consensus is not required.
+       All approvals will be processed, we don't stop if there are any
+       rejections.  In effect we are "taking a poll" of the approvers.
+
+     any
+      Approvals are processed concurrently, the first approver to
+      respond makes the decision for the group.
+    </Description>
+  </Variable>
+
+  <Variable name="policyViolations" input="true">
+    <Description>
+       List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see
+       pending violations.
+    </Description>
+  </Variable>
+
+  <Variable name='priority' input='true'>
+    <Description>
+      String version of WorkItem.level that will be used
+      to set the priority of any generated approval
+      workitems.
+    </Description>
+  </Variable>
+
+  <Variable name="approverElectronicSignature" input="true">
+    <Description>
+       The name of the electronic signature object that should be used when workitems
+       are completed by the batch approver when performing batch operations.
+    </Description>
+  </Variable>
+
+  <Step icon="Start" name="Start" posX="14" posY="12">
+    <Transition to="Build Approval Form"/>
+  </Step>
+
+  <Step action="call:buildPlanApprovalForm" icon="Task" name="Build Approval Form" posX="106" posY="12" resultVariable="approvalForm">
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="template" value="ref:formTemplate"/>
+    <Transition to="Customize Approval Form"/>
+  </Step>
+
+  <Step name="Customize Approval Form" posX="247" posY="12" resultVariable="approvalForm">
+    <Description>
+       using the form that was generaed, mMrk the password field read only so approvers
+       can't change it.  Also associate a Rule with the name so name changes during
+       approvals can be validate.
+    </Description>
+    <Script>
+      <Source>
+        import sailpoint.object.Field;
+        import sailpoint.object.Form;
+        import sailpoint.object.Rule;
+        import sailpoint.object.Configuration;
+        import sailpoint.tools.Util;
+
+        if ( approvalForm != null ) {
+            Field passwordField = approvalForm.getField("IIQ:password");
+            if ( passwordField != null ) {
+                passwordField.setReadOnly(true);
+
+                Configuration config = wfcontext.getSailPointContext().getObject(Configuration.class, Configuration.OBJ_NAME);
+                boolean requirePassword = Util.atob(config.getString(Configuration.LCM_REQUIRE_PASSWORD_IDENTITY_CREATE));
+                passwordField.setRequired(requirePassword);
+            }
+            Field userId = approvalForm.getField("IIQ:name");
+            if ( userId != null ) {
+                String ruleName = "LCM Validate Identity Name";
+                Rule rule = wfcontext.getSailPointContext().getObject(Rule.class, ruleName);
+                if ( rule != null ) {
+                    userId.setValidationRule(rule);
+                }
+            }
+            Field manager = approvalForm.getField("IIQ:manager");
+            if ( manager != null ) {
+                // tell the FormBean to output the value as a name
+                // instead of ID which is the default
+                manager.addAttribute(Field.ATTR_VALUE_PROPERTY, "name");
+            }
+        }
+        return approvalForm;
+      </Source>
+    </Script>
+    <Transition to="Build Approvers If Necessary"/>
+  </Step>
+
+  <Step action="call:getIdentityCreateUpdateApprovals" condition="script:isNull(approvers)" icon="Task" 
+        name="Build Approvers If Necessary" posX="429" posY="12" resultVariable="approvers">
+    <Description>
+      If the approvals weren't passed in then build them up using our
+      default rule.
+    </Description>
+    <Transition to="Approval"/>
+  </Step>
+
+  <Step icon="Approval" name="Approval" posX="577" posY="12">
+    <Approval renderer='lcmEditableWorkItemRenderer.xhtml' mode="ref:approvalMode"
+              owner="ref:approvers"
+              send='identityDisplayName,identityName,policyViolations, approvalSet'>
+      <Arg name='workItemDescription' value='Account Changes for User: $(identityDisplayName)'/>
+      <Arg name='workItemElectronicSignature' value='ref:approverElectronicSignature'/>
+      <Arg name='workItemForm' value='ref:approvalForm'/>
+      <Arg name='workItemIdentityRequestId' value='ref:identityRequestId'/>
+      <Arg name='workItemNotificationTemplate' value='ref:approvalEmailTemplate'/>
+      <Arg name='workItemPriority' value='ref:priority'/>
+      <Arg name='workItemRequester' value='$(launcher)'/>
+
+      <!-- since this has a form the default type will be Form, force
+           it to Approval -->
+      <Arg name='workItemType' value='Approval'/>
+      <AfterScript>
+        <Source>
+          import sailpoint.workflow.IdentityRequestLibrary;
+
+          import sailpoint.object.ApprovalSet;
+          import sailpoint.object.WorkItem;
+          import sailpoint.object.WorkflowCase;
+          import sailpoint.object.Form;
+          import sailpoint.object.ProvisioningPlan.AccountRequest;
+          import sailpoint.object.ProvisioningPlan.AttributeRequest;
+          import sailpoint.util.GeneralException;
+
+          if (item == null) {
+              return;
+          }
+          // Assimilate all of the approvalItem changes into our gloval
+          // approval set
+          //
+          ApprovalSet set = (ApprovalSet)item.get("approvalSet");
+          if ( set != null ) {
+              // Global completion comments will apply to each of the items
+              // If there are completion comments append them
+              // to any other completion comments, but typically its
+              // one or the other
+              String completionComments = item.getCompletionComments();
+              Identity id = item.getOwner();
+              String ownerName = null;
+              if ( id != null ) {
+                  ownerName = id.getName();
+              }
+              approvalSet.assimilate(set, ownerName, completionComments, true);
+          } else {
+              throw new GeneralException("ApprovalSet not found in afterscript.");
+          }
+
+          // djs: this is kind of a hack, do I have alternatives?
+          // come back to this
+          // jsl: Yes, I think you want &lt;Return name='workItemForm' to='approvalForm'/>
+          Form form = (Form)item.get("workItemForm");
+          if ( form != null ) {
+              WorkflowCase c = wfcontext.getWorkflowCase();
+              if ( c != null ) {
+                  c.put("approvalForm", form);
+              }
+          }
+
+          // bug#9611 if we notice that the manager request was edited,
+          // change the next approval
+          if (approvalScheme == null ||
+              approvalScheme.contains("manager") ||
+              approvalScheme.contains("newManager")) {
+              Form form = item.getForm();
+              if (form != null) {
+                  Field field = form.getField("IIQ:manager");
+                  if (field != null) {
+                      String newManager = field.getValue();
+                      if (newManager != null) {
+                          Approval newApproval = null;
+                          if (approval != null) {
+                              Approval parent = approval.getParent();
+                              if (parent != null) {
+                                  // find the one after us
+                                  List approvals = parent.getChildren();
+                                  if (approvals != null) {
+                                      Approval prev = null;
+                                      for (int i = 0 ; i &lt; approvals.size() ; i++) {
+                                          Approval a = (Approval)approvals.get(i);
+                                          if (prev == approval) {
+                                             newApproval = a;
+                                             break;
+                                          }
+                                          else
+                                            prev = a;
+                                      }
+                                  }
+                              }
+                          }
+
+                          // newApproval can be null if the user didn't start
+                          // with a manager or if the current manager requested
+                          // the change
+                          if (newApproval != null) {
+                              String oldManager = newApproval.getOwner();
+
+                              // If the managers aren't equal, this *could* be a manager change
+                              // or it could just be some other type of approval.
+                              if (!newManager.equals(oldManager)) {
+
+                                  // Get the manager that was submitted in the plan.
+                                  String planager = null;
+                                  if (null == plan) {
+                                      log.warn("Expected a plan variable in identity request " +
+                                               "approval AfterScript.");
+                                  }
+                                  else {
+                                      AccountRequest iiqReq = plan.getIIQAccountRequest();
+                                      if (null != iiqReq) {
+                                          AttributeRequest managerReq =
+                                              iiqReq.getAttributeRequest("manager");
+                                          if (null != managerReq) {
+                                              planager = managerReq.getValue();
+
+                                              // May have an ID or name, so load it to get the name.
+                                              Identity manager =
+                                                  context.getObject(Identity.class, planager);
+                                              if (null != manager) {
+                                                  planager = manager.getName();
+                                              }
+                                          }
+                                      }
+                                  }
+
+                                  // If the newManager is the same as what was originally submitted
+                                  // then we haven't really changed the manager ... the newApproval
+                                  // was for a different type of approver (eg - securityOfficer).
+                                  if ((null == planager) || !planager.equals(newManager)) {
+                                      log.info("Changing new manager approval owner from " +
+                                               oldManager + " to " + newManager);
+                                      newApproval.setOwner(newManager);
+
+                                      // The old owner could have been cached.  Clear it to
+                                      // make sure this goes to the right guy.
+                                      newApproval.setIdentity(null);
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+
+          //
+          // If they are all rejected mark the Approval Rejected.
+          // This allows the Transition to execute once we
+          // get a rejection.
+          //
+          if ( approvalSet.isAllRejected() ) {
+              approval.setState(WorkItem.State.Rejected);
+          }
+
+          IdentityRequestLibrary.assimilateWorkItemApprovalSetToIdentityRequest(wfcontext, approvalSet);
+          auditWorkItemOwnerHistory(item);
+          auditWorkItemComments(item);
+          auditDecisions(item);
+        </Source>
+      </AfterScript>
+    </Approval>
+   <Transition to='Assimilate Form Changes'/>
+  </Step>
+
+  <Step action="call:assimilatePlanApprovalForm" icon="Task" name="Assimilate Form Changes" posX="712" posY="12" resultVariable="plan">
+    <Description>
+      This step takes the form from the workitem and applys any edits that were
+      made back into the plan.
+    </Description>
+    <Arg name="form" value="ref:approvalForm"/>
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Transition to="Check Plan and Update Cart"/>
+  </Step>
+
+  <Step icon="Task" name="Check Plan and Update Cart" posX="877" posY="12" resultVariable="plan">
+    <Description>
+      This step takes looks for name changes during creates and updates
+      the stub identity on the plan accordingly.
+    </Description>
+    <Script>
+      <Source>
+        import sailpoint.object.ApprovalSet;
+        import sailpoint.object.ApprovalItem;
+        import sailpoint.object.Identity;
+        import sailpoint.object.ProvisioningPlan;
+        import sailpoint.object.ProvisioningPlan.AccountRequest;
+        import sailpoint.object.ProvisioningPlan.AttributeRequest;
+
+        AccountRequest iiq = plan.getAccountRequest(ProvisioningPlan.APP_IIQ);
+        if ( iiq != null ) {
+            // Look for the name attribute
+            boolean nameChanged = false;
+            String idName = identityName;
+            AttributeRequest name = iiq.getAttributeRequest("name");
+            if ( name != null ) {
+                String nameStr = Util.otoa(name.getValue());
+                if ( nameStr != null ) {
+                    // If they don't match this indicates a form
+                    // update changes the accountId
+                    if ( identityName.compareTo(nameStr) != 0 ) {
+                        idName = nameStr;
+                        nameChanged = true;
+                         // update the plan with the new/correct account ID
+                        iiq.setNativeIdentity(idName);
+                    }
+                }
+            }
+            Identity planIdentity = plan.getIdentity();
+            if ( ( planIdentity == null ) || ( nameChanged ) ) {
+                SailPointContext ctx = wfcontext.getSailPointContext();
+                Identity stub = ctx.getObject(Identity.class, idName);
+                if ( stub == null ) {
+                    stub = new Identity();
+                    stub.setName(idName);
+                }
+                plan.setIdentity(stub);
+            }
+
+            //
+            // Update the approval item with any changes that
+            // were made during the approval process
+            //
+            if ( approvalSet != null ) {
+                List approvalItems =  approvalSet.getItems();
+                // in the default case there is always just one item for all the changes
+                if ( Util.size(approvalItems) == 1 ) {
+                    // Re-flatten the attribute values so they are accurate when auditing changes
+                    // and notifying. The values may have been updated in the approvalForm.
+                    ApprovalItem item = approvalItems.get(0);
+                    List attrRequestFlat = flattenAttributeRequests(iiq.getAttributeRequests());
+                    if ( attrRequestFlat != null ) {
+                        item.setValue(attrRequestFlat);
+                    }
+                    if ( nameChanged ) {
+                        item.setNativeIdentity(idName);
+                    }
+                }
+            }
+        }
+        return plan;
+      </Source>
+    </Script>
+    <Transition to="end"/>
+  </Step>
+
+  <Step icon="Stop" name="end" posX="1021" posY="12"/>
+
+</Workflow>
+
+
+<Workflow name="Identity Request Violation Review"
+          type='Subprocess'>
+
+  <Description>
+   This sub-process determines if there are any violations which will be
+   caused by the request specified in the plan. If the policy scheme is
+   'interactive' the user will be presented with a form which details
+   the actions they can take to deal with the violations. Otherwise,
+   control is returned to the calling process.
+  </Description>
+
+  <RuleLibraries>
+    <Reference name="LCM Workflow Library" class="sailpoint.object.Rule"/>
+  </RuleLibraries>
+
+   <Variable name='trace' initializer="false">
+    <Description>
+      The name of the identity object being modified.
+    </Description>
+  </Variable>
+
+  <Variable name='identityName' input='true' required='true'>
+    <Description>
+      The name of the identity object being modified.
+    </Description>
+  </Variable>
+
+  <Variable name="identityDisplayName" input='true'
+            initializer='script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)'>
+    <Description>
+      The displayName of the identity being updated.
+      This may be passed in, if not the script queries for this
+      using a projection query and falls back to the name.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="project" required='true'>
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+
+  <Variable input="true" name="plan" required='true'>
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+
+  <Variable name='source' input='true'/>
+
+  <Variable name='optimisticProvisioning' input='true' required='true'>
+    <Description>
+      Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.
+    </Description>
+  </Variable>
+
+  <Variable name='enableRetryRequest' input='true' initializer='false'>
+    <Description>
+      When set to true it will disable the workflow retry loop and let the
+      Provision step launch requests to handle the retries.  Enabling
+      this flag will enable some older functionality.
+    </Description>
+  </Variable>
+
+  <Variable name="policyViolations">
+    <Description>
+       List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see
+       pending violations.
+    </Description>
+  </Variable>
+
+  <Variable name="policiesToCheck" input="true">
+    <Description>
+      A List of policies that should be checked. If this list is
+      empty all violations will be checked. Used in combination
+      with policyScheme.
+    </Description>
+  </Variable>
+
+  <Variable name='policyScheme' input='true'/>
+
+  <Variable name="asyncCacheRefresh" input="true">
+    <Description>
+      Set to true to enable asynchronous refresh of the policy and role
+      caches.  This speeds up response time for the LCM user, but you
+      may want to disable this during demonstrations after editing
+      the role or policy models.  This may also be enabled globally
+      in the system configuration.  This variable overrides the system
+      configuration if it has a value.
+    </Description>
+  </Variable>
+
+  <Variable name='priority' input='true'>
+    <Description>
+      String version of WorkItem.level that will be used
+      to set the priority of the IdentityRequest.
+    </Description>
+  </Variable>
+
+  <Variable name="approvalSet">
+    <Description>
+       This attribute is passed in and contains the current
+       set of approvalItems in the request. When a user chooses
+       to remove a problematic approval item from the request, we
+       update this value before returning to the calling workflow.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="flow">
+    <Description>
+      The name of the LCM flow that launched this workflow.
+
+      This is one of these values:
+
+      AccountsRequest
+      EntitlementsRequest
+      RolesRequest
+      IdentityCreateRequest
+      IdentityEditRequest
+      ForgotPassword
+      ExpiredPassword
+      PasswordRequest
+
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="allowRequestsWithViolations">
+    <Description>
+      If this variable is set to true, requesters will be able to proceed past
+      the Policy Violation Review form without taking any action on
+      policy violations resulting from the request.
+    </Description>
+  </Variable>
+
+   <Variable name='requireViolationReviewComments' input='true'>
+     <Description>
+      If true, requesters will be required to enter in comments if they
+      proceed with a request that will result in policy violations.
+     </Description>
+   </Variable>
+
+  <Variable name="violationReviewDecision">
+    <Description>
+       Decision made by the user in the Policy Violation Review step.
+       This may be one of three choices:
+
+       -ignore:   User is ignoring the violations and letting the request continue. If
+                   requireViolationReviewComments=true the user will be required to enter
+                   comments indicating why they are allowing the violations.
+
+       -remediate: Indicates that the user removed the request items that were causing the
+                   violations
+
+       -cancel:   Indicates that the user decided to abandon the request, terminating the workflow.
+
+    </Description>
+  </Variable>
+
+  <Variable name="workItemComments">
+    <Description>
+      Completion comments added if the user decides to proceed with the
+      request without addressing the policy violations. These comments
+      will be propagated to all other approvals.
+    </Description>
+  </Variable>
+
+  <Variable name="originalPlan">
+    <Description>
+      The original plan calculated for the request.  As request modifications
+      are submitted and resubmitted after violation review, we will revert to
+      the original plan, so that the new selections can be calculated starting
+      from a clean slate. 
+    </Description>
+  </Variable>
+  
+  <Step icon="Start" name="Start" posX="22" posY="13">
+    <Transition to="Save Original Plan"/>
+  </Step>
+
+  <Step name="Save Original Plan" posX="118" posY="13">
+    <Description>
+      When a policyScheme of "interactive" is set, the user has an opportunity
+      to resolve the violation by removing requests.  Multiple iterations of
+      this form may be submitted.  Each submission must reset the plan so that
+      when the plan is compiled anew with the new set of decisions, the
+      original master plan is utilized.  This step saves that master plan.
+      It is reloaded in the "Reset Original Plan" step.
+    </Description>
+    <Script>
+      <Source>
+        import sailpoint.object.ProvisioningPlan;
+        
+        if (null != project) {
+            ProvisioningPlan master = project.getMasterPlan();
+            if (null != master) {
+                ProvisioningPlan copy = (ProvisioningPlan) master.deepCopy(wfcontext.getSailPointContext());
+                workflow.put("originalPlan", copy);
+            }
+        }
+      </Source>
+    </Script>  
+    <Transition to="Check Policies" />
+  </Step>
+
+  <Step name="Check Policies"  resultVariable='policyViolations' action="checkPolicyViolations" icon="Task" posX="220" posY="13">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="project" value="ref:project"/>
+    <Arg name="policies" value="ref:policiesToCheck"/>
+    <Arg name="policyScheme" value="ref:policyScheme"/>
+    <Arg name='asyncCacheRefresh' value='ref:asyncCacheRefresh'/>
+    <Return name='policyViolations' to='policyViolations'/>
+    <Transition to="Reset Original Plan" when="script:((!&quot;ignore&quot;.equals(violationReviewDecision)) &amp;&amp; size(policyViolations) > 0 &amp;&amp; (policyScheme.equals(&quot;interactive&quot;)))"/>
+    <Transition to="end"/>
+  </Step>
+  
+  <Step name="Reset Original Plan" posX="378" posY="9">
+    <Description>
+      In this step, we need to reload the original plan because previous
+      decisions may have modified the plan, so start with the original complete
+      plan.  Also see the step "Save Original Plan".
+    </Description>
+    <Script>
+      <Source>
+        if (null != originalPlan) {
+            plan = (ProvisioningPlan) originalPlan.deepCopy(wfcontext.getSailPointContext());
+            workflow.put("plan", plan);
+        }
+      </Source>
+    </Script>
+    <Transition to="Violation Review" />
+  </Step>
+
+  <Step name="Violation Review" icon="Approval" posX="446" posY="210">
+    <Description>
+      Give the user the option of either removing problematic request items, or
+      affirm that they are aware of the violations and wish to continue.
+    </Description>
+    <Approval renderer='lcmViolationReviewRenderer.xhtml' mode="ref:approvalMode" owner="ref:launcher"
+              send='identityDisplayName,identityName,policyViolations,approvalSet,violationReviewDecision,requireViolationReviewComments,allowRequestsWithViolations'>
+      <Arg name='workItemRequester' value='$(launcher)'/>
+      <Arg name='workItemDescription' value='Policy Violation Review - Account Changes for User: $(identityDisplayName)'/>
+      <Arg name='workItemPriority' value='ref:priority'/>
+      <Arg name="workItemType" value="ViolationReview"/>
+      <AfterScript>
+        <Source>
+          import sailpoint.object.ApprovalSet;
+          import sailpoint.object.ApprovalItem;
+          import sailpoint.object.WorkItem;
+          import sailpoint.object.ProvisioningPlan;
+          import sailpoint.object.Comment;
+
+
+          if (item == null) {
+              return;
+          }
+
+          workflow.put("violationReviewDecision", item.get("violationReviewDecision"));
+          
+          // Assimilate all of the approvalItem changes into our global
+          // approval set
+          ApprovalSet set = (ApprovalSet)item.get("approvalSet");
+          if ( set != null ) {
+              // Global completion comments will apply to each of the items
+              // If there are completion comments append them
+              // to any other completion comments, but typically its 
+              // one or the other
+              String completionComments = item.getCompletionComments();
+              Identity id = item.getOwner();
+              String ownerName = null;
+              if ( id != null ) {
+                  ownerName = id.getName();
+              }
+              approvalSet.assimilate(set, ownerName, completionComments, false);
+          } else {
+              throw new GeneralException("ApprovalSet not found in afterscript.");
+          }
+          
+          assimilateWorkItemApprovalSet(wfcontext, item, approvalSet);
+        </Source>
+      </AfterScript>
+    </Approval>
+
+    <Transition to="Handle Violation Review Decision" />
+  </Step>
+
+  <Step name="Handle Violation Review Decision" icon="Task" posX="248" posY="210">
+    <Description>
+
+    </Description>
+
+    <Transition to="Process Violation Review Decisions"/>
+  </Step>
+
+  <Step name="Process Violation Review Decisions" action="call:processPlanApprovalDecisions"
+        resultVariable='plan' icon="Task" posX="60" posY="210">
+    <Description>
+      Process the decisions made by the user. This will update the plan by removing
+      any items that were rejected by the user.
+    </Description>
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="disableAudit" value="true"/>
+    <Transition to="Compile Project"/>
+  </Step>
+
+  <Step name="Compile Project" resultVariable='project' action="compileProvisioningProject" icon="Task" posX="114" posY="134" >
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="requester" value="ref:launcher"/>
+    <Arg name="source" value="ref:source"/>
+    <Arg name="disableRetryRequest" value="!ref:enableRetryRequest"/>
+    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+    <Description>Recompile the provisioning plan into a provisioning project, taking into
+      consideration any items removed on the violation review form.</Description>
+    <Transition to="Check Policies"/>
+    <Transition to="end" when="script:(&quot;cancel&quot;.equals(violationReviewDecision) || &quot;ignore&quot;.equals(violationReviewDecision))"/>
+  </Step>
+
+  <Step icon="Stop" name="end" posX="288" posY="131"/>
+
+</Workflow>
+
+</sailpoint>

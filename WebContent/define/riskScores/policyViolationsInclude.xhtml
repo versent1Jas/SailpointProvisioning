@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">
+    #{msgs.score_def_policyScore_name}
+  </ui:define>
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/risk-scores">
+      <src>risk-scores.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/sliderGroups.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/riskBands.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/compositeScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+    </sp:script>
+  </ui:define>
+  
+  <ui:define name="body">
+    <ui:include src="/define/riskScores/compensatingControlsInclude.xhtml">
+      <ui:param name="configDiv" value="Separation of Duty Violation Compensated ScoreConfig"/>
+      <ui:param name="categoryName" value="#{msgs.comp_category_policy_violation}" />
+      <ui:param name="category" value="PV" />
+      <ui:param name="compensationSet" value="#{riskScoreConfig.sodViolationCompensations}" />
+      <ui:param name="instructions" value="#{riskScoreConfig.sodViolationCompensationInstructions}"/>
+    </ui:include>
+  </ui:define>  
+</ui:composition>
+
+</body>
+</html>

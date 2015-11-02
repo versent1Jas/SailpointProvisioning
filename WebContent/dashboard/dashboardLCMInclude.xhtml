@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+  <div id="dashboardLCMLaunch">
+    <c:forEach items="#{dashboard.quickLinkCategories}" var="category" varStatus="counter">
+      
+      <c:if test="#{sp:getSize(dashboard.quickLinks[category.name])>0}">
+      
+        <div class="quickLinkCategory #{category.icon}" id="category#{category.name}">
+          <h3>#{sp:localizeKey(category.messageKey)}</h3>
+          
+          <ul>
+          <c:forEach items="#{dashboard.quickLinks[category.name]}" var="quicklinkWrapper">
+            <li>
+            
+              <c:if test="#{quicklinkWrapper.allowOthers and quicklinkWrapper.allowSelf}">
+                <a href="#" class="quicklink_tip" rel="#{quicklinkWrapper.quicklink.name}" id="quicktip#{sp:escapeHTMLElementId(quicklinkWrapper.quicklink.name)}"
+                title="#{base.loggedInUser.id}">
+                  #{sp:localizeKey(quicklinkWrapper.quicklink.messageKey)}
+                  
+                  <c:if test="#{!(quicklinkWrapper.text == null)}"> (#{quicklinkWrapper.text})</c:if>
+                  
+                </a>
+              </c:if>  
+              
+              <c:if test="#{!(quicklinkWrapper.allowOthers) and quicklinkWrapper.allowSelf}">
+               <a href="javascript:SailPoint.Dashboard.MySubordinates.chooseQuickLink('#{quicklinkWrapper.quicklink.name}', '#{base.loggedInUser.id}');">
+                  #{sp:localizeKey(quicklinkWrapper.quicklink.messageKey)}
+                  <c:if test="#{!(quicklinkWrapper.text == null)}"> (#{quicklinkWrapper.text})</c:if>
+                </a>
+              </c:if> 
+              
+              <c:if test="#{quicklinkWrapper.allowOthers and !(quicklinkWrapper.allowSelf)}">
+               <a href="javascript:SailPoint.Dashboard.MySubordinates.chooseQuickLink('#{quicklinkWrapper.quicklink.name}');">
+                  #{sp:localizeKey(quicklinkWrapper.quicklink.messageKey)}
+                  <c:if test="#{!(quicklinkWrapper.text == null)}"> (#{quicklinkWrapper.text})</c:if>
+                </a>
+              </c:if> 
+              
+            </li>
+            
+          </c:forEach>
+          </ul>
+          
+        </div>
+        </c:if>
+      </c:forEach>     
+  </div>
+  <span style="display:none" id="requesteeCount">#{dashboard.requesteeCount}</span>
+  <h:commandButton action="#{dashboard.chooseQuickLink}" id="chooseQuickLinkBtn2" style="display:none"/>
+</body>
+</html>

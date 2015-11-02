@@ -1,0 +1,472 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+        <script type="text/javascript">
+            <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        function deriveDivId(field, field2) {
+            var tokens = field.split("_"); 
+            // we want the last token may be null
+            var nameSpace = tokens[tokens.length - 1];
+            return field2 + nameSpace;
+        }
+
+        function hideDiv(divId) {
+            var delimitedField = $(divId);
+            if ( delimitedField ) {
+                delimitedField.style.display = "none";
+            } else 
+                alert("div not found.")
+        }
+
+        function showDiv(divId) {
+            var delimitedField = $(divId);
+            if ( delimitedField ) {
+                delimitedField.style.display = "";
+            }
+        }
+        function toggleParsingSections(name, parsingMethod) {
+            var regexps = deriveDivId(name, "regexps_")
+            var delimited = deriveDivId(name, "delimited_")
+            if ( parsingMethod == "delimited" ) {
+              hideDiv(regexps);
+              showDiv(delimited);
+            } else {
+              showDiv(regexps);
+              hideDiv(delimited);
+            }
+          }
+
+          function changeSNCMode(select) {
+            if ( select ) {
+              var name = select.name;
+              if ( name ) {
+                var sncValue = getSelectedRadioInput(name);
+                toggleCredentialsSection(name, sncValue);
+              }
+            }
+          }
+
+          function toggleCredentialsSection(name, sncValue) {
+            var credentials = deriveDivId(name, "SNCCredentials_")
+            if ( sncValue == "0" ) {
+              hideDiv(credentials);
+            } else {
+              showDiv(credentials);
+            }
+          }
+
+        function togglePartitioning() {
+           var pdiv = $('partitionsRow_');
+           
+           // If the checkbox is enabled show the div for partitions
+           var partitioningEnabled = $('editForm:partitionMode_');
+           if ( partitioningEnabled && partitioningEnabled.checked == true) {
+               if ( pdiv ) {                   
+                   pdiv.style.display = "";
+               }               
+           } else {               
+               pdiv.style.display = "none";
+           }
+           
+           //
+           // Must resize the mainpanel because the hidden div
+           // has a big old text area on it
+           //
+           var mainPanel = Ext.getCmp("mainPanel");
+           if ( mainPanel ) {
+               mainPanel.doLayout();
+           }
+        }
+        
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+           var sncValue = getSelectedRadioInput("editForm:SNCMode_");
+           toggleCredentialsSection("editForm:SNCMode_",sncValue);
+           
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var host = getFieldValue('editForm:host');
+               Validator.validateNonBlankString(host, "The SAP host must be specified!");
+
+               var clientNumber = getFieldValue('editForm:clientNumber');
+               Validator.validateNonBlankString(clientNumber, "The SAP Client Number must be specified!");
+
+               var systemID = getFieldValue('editForm:systemID');
+               Validator.validateNonBlankString(systemID, "The SAP System ID must be specified!");
+               
+               var clientLanguage= getFieldValue('editForm:clientLanguage');
+               Validator.validateNonBlankString(clientLanguage, "The SAP clientLanguage must be specified!");
+               
+               var user = getFieldValue('editForm:user');
+               Validator.validateNonBlankString(user, "The user must be specified!");
+               
+               var passwordOfAdmin = getFieldValue('editForm:password');
+               Validator.validateNonBlankString(passwordOfAdmin, "The passwords must be specified!");
+
+                // Validate the partition data is non null and that there aren't any lines 
+               // in the partition line that evaluate to null.
+               var partitioningEnabled = $('editForm:partitionMode_');
+               if ( partitioningEnabled && partitioningEnabled.checked == true) {
+                 var partitions = getFieldValue('editForm:partitions_');                 
+                 // Split partitions "string" on new lines so we can look for empty
+                 var lines = partitions.split(/\r\n|\r|\n/g);
+                 var partitionsNew = '';
+                 if ( lines ) {
+                   for ( var i=0; i<lines.length ; i++ ) {
+                     var line = lines[i];
+                     if ( line && line.length > 0 ) {
+                       partitionsNew += line + '\n';                        
+                     } 
+                   }
+                 }                 
+                 $('editForm:partitions_').value = partitionsNew;
+                 Validator.validateNonBlankString(partitionsNew, "Partitioning is enabled, but there are no partitions defined. Please define at least one partition or disable partitioning.");
+               }
+               
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        togglePartitioning();});
+
+       //--><!]]>
+        </script>
+        <f:view>
+
+            <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_sap_settings}"/>
+            <br/>
+            <br/>
+            <div id='formErrorsTop' class="formError" style="display:none"/>
+
+            <div id="accountSettings" class='spContent'>
+                <table class="spTable" style="border:0px" cellspacing="0">
+                    <tr>
+                        <td class='titleColumn certScheduleTitleCol' valign="center">
+                            <h:outputText style='padding:5px' value="#{msgs.con_form_sap_host}"/>
+                            <h:outputText styleClass="requiredText" value="*"/>
+                        </td>
+
+                        <td class="certScheduleHelpCol" valign="middle">
+                            <h:graphicImage id="imgHlpHostName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                            alt="#{msgs.con_help_sap_host}"/>
+
+                        </td>
+                        <td valign="center">
+                            <h:inputText id="host"
+                                         value="#{applicationObject.attributes['host']}"
+                                         size="80"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class='titleColumn certScheduleTitleCol'>
+                            <h:outputText style='padding:5px' value="#{msgs.con_form_sap_systemid}"/>
+                            <h:outputText styleClass="requiredText" value="*"/>
+                        </td>
+                        <td class="certScheduleHelpCol">
+                            <h:graphicImage id="imgHlpSystemId" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                            alt="#{msgs.con_help_sap_systemid}"/>
+                        </td>
+                        <td>
+                            <h:inputText value="#{applicationObject.attributes['systemID']}"
+                                         size="5"
+                                         id="systemID"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class='titleColumn certScheduleTitleCol'>
+                            <h:outputText style='padding:5px' value="#{msgs.con_form_sap_client}"/>
+                            <h:outputText styleClass="requiredText" value="*"/>
+                        </td>
+                        <td class="certScheduleHelpCol">
+                            <h:graphicImage id="imgHlpClientNumber" styleClass="helpIcon"
+                                            url="/images/icons/dashboard_help_16.png"
+                                            alt="#{msgs.con_help_sap_client}"/>
+                        </td>
+                        <td>
+                            <h:inputText value="#{applicationObject.attributes['clientNumber']}"
+                                         size="5"
+                                         id="clientNumber"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class='titleColumn certScheduleTitleCol'>
+                            <h:outputText style='padding:5px' value="#{msgs.con_form_sap_clientlang}"/>
+                            <h:outputText styleClass="requiredText" value="*"/>
+                        </td>
+                        <td class="certScheduleHelpCol">
+                            <h:graphicImage id="imgHlpClientLang" styleClass="helpIcon"
+                                            url="/images/icons/dashboard_help_16.png"
+                                            alt="#{msgs.con_help_sap_lang}"/>
+                        </td>
+                        <td>
+                            <h:inputText value="#{applicationObject.attributes['clientLanguage']}"
+                                         size="10"
+                                                                 id="clientLanguage"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class='titleColumn certScheduleTitleCol'>
+                            <h:outputText style='padding:5px' value="#{msgs.con_form_sap_user}"/>
+                            <h:outputText styleClass="requiredText" value="*"/>
+                        </td>
+                        <td class="certScheduleHelpCol">
+                            <h:graphicImage id="imgHlpUser" styleClass="helpIcon"
+                                            url="/images/icons/dashboard_help_16.png"
+                                            alt="#{msgs.con_help_sap_user}"/>
+                        </td>
+                        <td>
+                            <h:inputText value="#{applicationObject.attributes['user']}"
+                                         size="20"
+                                                                 id="user"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class='titleColumn certScheduleTitleCol'>
+                            <h:outputText style='padding:5px' value="#{msgs.con_form_sap_password}"/>
+                            <h:outputText styleClass="requiredText" value="*"/>
+                        </td>
+                        <td class="certScheduleHelpCol">
+                            <h:graphicImage id="imgHlpPassword" styleClass="helpIcon"
+                                            url="/images/icons/dashboard_help_16.png"
+                                            alt="#{msgs.con_help_sap_password}"/>
+                        </td>
+                        <td>
+                            <sp:inputSecret size="50"
+                                                        id="password"
+                                            value="#{applicationObject.attributes['password']}" redisplay="true"
+                                            autocomplete="off"
+                                                                        disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                            readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="titleColumn certScheduleTitleCol" >
+                            <h:outputText style='padding:5px' value="#{msgs.con_form_sap_buildmap}"/>
+                        </td>
+                        <td class="certScheduleHelpCol">
+                            <h:graphicImage id="imgHlpSAPBuildMap"
+                                            styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                            alt="#{msgs.con_help_sap_buildMap}"/>
+  
+
+                        </td>
+                        <td>
+                            <h:selectOneMenu id="sapBuildMapRule" style="width:500px"
+                                             value="#{applicationObject.attributes['buildMapRule']}"
+                                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                <f:selectItems value="#{applicationObject.SAPBuildMapRules}" />
+                            </h:selectOneMenu>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class='titleColumn certScheduleTitleCol'>
+                            <h:outputText style='padding:5px' value="CUA System"/>
+              
+
+                        </td>
+                        <td class="certScheduleHelpCol">
+                            <h:graphicImage id="imgHlpIsCUASystem" styleClass="helpIcon"
+                                            url="/images/icons/dashboard_help_16.png"
+                                            alt="IsCUASystem"/>
+                        </td>
+                        <td>
+                            <h:selectBooleanCheckbox id="IsCUASystem"
+                                                    value="#{applicationObject.attributes['IsCUASystem']}"
+                                                    disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                        </td>
+                    </tr>
+          
+
+
+                </table>
+
+      <ui:fragment>
+          <!--  Partitioning Config -->
+          <br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_erp_partitioning}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_partitioningMode}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpPartitioningMode_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_erp_partitionEnable}"/>
+              </td>
+              <td width="100%">
+                <h:selectBooleanCheckbox id='partitionMode_' onclick='togglePartitioning()'
+                                         value="#{applicationObject.attributes['partitionMode']}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+              <tr id='partitionsRow_'>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_erp_partition_statements}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpPartitioningStatements_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.help_con_form_erp_partitions}"/>
+                </td>
+                <td>              
+                  <h:inputTextarea id='partitions_'
+                                   converter="NewLineList"
+                                   value="#{applicationObject.attributes['partitionStatements']}"
+                                   rows="5" cols="10"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>            
+            </table>
+        </ui:fragment>
+        <!--  SNC Config -->
+        <ui:fragment>
+          <br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_sap_SNC}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+           <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_sap_SNC_Mode}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpSNCConfigMode_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_sap_SNC_Mode}"/>
+              </td>
+              <td valign="center">
+                <h:selectOneRadio id="SNCMode_#{nameSpace}" 
+                                  onclick="changeSNCMode(this);" 
+                                  value="#{applicationObject.attributes[sp:concat(schemaType,'jco.client.snc_mode')]}">
+                  <f:selectItem itemLabel="#{msgs.con_form_sap_SNC_Mode_OFF}" itemValue="0"/>
+                  <f:selectItem itemLabel="#{msgs.con_form_sap_SNC_Mode_ON}" itemValue="1"/>
+               </h:selectOneRadio>
+              </td>
+          </tr>
+         </table>
+
+         <div id='SNCCredentials_#{nameSpace}'>
+          <table class="spTable" style="border:0px" cellspacing="0">
+             <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_sap_SNC_QOP}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpSNCType_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_sap_SNC_QOP}"/>
+              </td>
+              <td>
+              <h:selectOneMenu value="#{applicationObject.attributes[sp:concat(schemaType, 'jco.client.snc_qop')]}"
+                              disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                              readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                  <f:selectItem itemValue="1" itemLabel="1"/>
+                  <f:selectItem itemValue="2" itemLabel="2"/>
+                  <f:selectItem itemValue="3" itemLabel="3"/>
+                  <f:selectItem itemValue="8" itemLabel="8"/>
+                  <f:selectItem itemValue="9" itemLabel="9"/>
+                </h:selectOneMenu>
+             </td>
+           </tr>
+           <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_sap_SNC_Parnter_Name}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpSNCPartnerName_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_sap_SNC_Partner_Name}"/>
+              </td>
+              <td>
+              <h:inputText value="#{applicationObject.attributes['jco.client.snc_partnername']}"
+                           size="10"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           />
+            </td>
+          </tr>
+          <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_sap_SNC_Name}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpSNCName_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_sap_SNC_Name}"/>
+              </td>
+              <td>
+              <h:inputText value="#{applicationObject.attributes['jco.client.snc_myname']}"
+                           size="10"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           />
+            </td>
+         </tr>
+         <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_sap_SNC_Lib}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpSNCLib_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_sap_SNC_Lib}"/>
+              </td>
+              <td>
+              <h:inputText value="#{applicationObject.attributes['jco.client.snc_lib']}"
+                           size="10"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           />
+              </td>
+        </tr>
+       </table>
+      </div>
+    </ui:fragment> 
+   </div>
+   <div id='formErrorsBottom' class="formError" style="display:none"/>
+ </f:view>
+</ui:composition>
+
+</body>
+</html>
+

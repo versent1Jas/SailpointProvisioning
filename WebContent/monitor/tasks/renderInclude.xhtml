@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+<h:body>
+
+<ui:composition>
+
+    <f:view id="meView">
+
+      <a4j:outputPanel id="resultPanel" layout="block">
+
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        
+        <ui:fragment rendered="#{taskResult.object != null}">
+          <h:inputHidden id="id" value="#{taskResult.object.id}" />
+
+          <ui:include src="taskResultsDetailsInclude.xhtml" />
+        </ui:fragment>
+
+        <ui:fragment rendered="#{taskResult.object != null and taskResult.object.signoff != null}">
+          <ui:include src="taskResultsSignoffInclude.xhtml">
+              <ui:param name="signoff" value="#{taskResult.object.signoff}"/>
+          </ui:include>
+        </ui:fragment>
+      
+        <a4j:outputPanel rendered="#{taskResult.hasReport}" layout="block">
+          <ui:include src="taskResultsReportInclude.xhtml">
+          </ui:include>
+        </a4j:outputPanel>
+        
+                
+          <!-- jsl - need to be showing ALL the messages in the order they are in -->
+          <t:div rendered="#{taskResult.object != null and !(empty taskResult.resultMessages)}">
+            <table cellspacing="0" cellpadding="3">
+              <ui:repeat value="#{taskResult.resultMessages}" var="msg">
+                <tr><td class="#{sp:getMessageStyle(msg)}">#{sp:localize(msg)}</td></tr>
+              </ui:repeat>
+            </table>
+          </t:div>
+
+          <a4j:commandButton style="display:none" action="#{taskResult.refreshResult}" id="statsTablePanelRefreshButton" render="StatsTablePanel"/>
+          <a4j:outputPanel id="StatsTablePanel" layout="block">
+            <a4j:outputPanel id="reportBody" rendered="#{taskResult.detailAvailable or taskResult.object.partitioned}" layout="block">
+  
+              <a4j:outputPanel rendered="#{taskResult.renderer != null}">
+                 <ui:include src="#{taskResult.renderer}"/>
+              </a4j:outputPanel>
+  
+              <!-- use html file instead of jasper report to generate the stats section -->      
+              <a4j:outputPanel rendered="#{taskResult.renderer == null and !taskResult.hasReport and taskResult.hasAttributes}">
+                 <div align="center" >
+                    <ui:include src="taskResultsStatsInclude.xhtml">
+                      <ui:param name="attributes" value="#{taskResult.htmlDisplayableAttributes}"/>
+                      <ui:param name="captionName" value="#{taskResult.object.name}"/>
+                    </ui:include>
+                 </div>
+              </a4j:outputPanel>
+              
+              <a4j:outputPanel rendered="#{taskResult.renderer == null and taskResult.hasReport}">
+                 <div align="center" id="reportHTML">
+                    <h:outputText id="report" escape="false" value="#{taskResult.html}"/>
+                 </div>
+              </a4j:outputPanel>
+  
+            </a4j:outputPanel>
+          </a4j:outputPanel>
+
+          <a4j:commandButton style="display:none" action="#{taskResult.refreshResult}" id="partitionGridPanelRefreshButton" render="partitionGridPanel"/>
+          <a4j:outputPanel id="partitionGridPanel" layout="block">
+            <ui:fragment rendered="#{taskResult.object.partitioned}" >
+              <ui:include src="partitionedTaskResultsInclude.xhtml">
+              </ui:include>
+            </ui:fragment>
+          </a4j:outputPanel>
+  
+      </a4j:outputPanel>
+
+    </f:view>
+</ui:composition>
+
+</h:body>
+</html>

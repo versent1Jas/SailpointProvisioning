@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputText value="#{msgs.title_identity_triggers}"/>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'IDENTITY_TRIGGERS';
+      //--><!]]>
+    </script>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/trigger/Triggers.js?#{debug.revision}</src>
+    </sp:script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      
+      <script >
+        var stateId = '#{identityTriggersList.gridState.name}';
+        var sp = new SailPoint.state.StateProvider({
+            stateIds: [ stateId ],
+            states:   ['#{identityTriggersList.gridState.state}']
+        });
+        Ext.state.Manager.setProvider(sp);
+
+        var gridMetaData = #{identityTriggersList.columnJSON};
+  
+        Ext.onReady(function(){
+          var grid = SailPoint.Define.Trigger.Triggers.createTriggersGrid(stateId, gridMetaData.fields, gridMetaData.columns);
+          
+          var viewport = SailPoint.getViewport({
+              bodyContent: grid,
+              title: "#{msgs.title_identity_triggers}",
+              subtitleId: 'editForm'
+          });
+          viewport.doLayout();
+        });
+      </script>
+
+      <h:form styleClass="form" id="editForm">        
+        <h:inputHidden id="selectedId" value="#{identityTriggersList.selectedId}"/>
+
+        <h:commandButton id="newTriggerButton"
+                         style="display: none"
+                         action="#{identityTrigger.newAction}" />
+
+        <h:commandButton id="editTriggerButton"
+                         style="display:none"
+                         action="#{identityTriggersList.select}" />
+
+        <a4j:commandButton id="deleteTriggerButton" 
+                           style="display:none"
+                           action="#{identityTriggersList.delete}"
+                           oncomplete="SailPoint.Define.Trigger.Triggers.getGrid().reload();Ext.getCmp('spViewport').doLayout();"/>
+      </h:form>
+
+    </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

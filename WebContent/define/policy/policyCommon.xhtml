@@ -1,0 +1,286 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  A variant of policyFields.xhtml that expects GenericPolicyBean
+  with a PolicyDTO object.  Eventually all policy pages should
+  use this.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+    <src>html-editor-counter-plugin.css</src>
+  </sp:style>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditor.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditorCounterPlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiLanguageHtmlEditor.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+    
+    // <![CDATA[
+      Ext.onReady(function () {
+          var policyOwnerSuggest = new SailPoint.IdentitySuggest({
+              id: 'policyOwnerSuggestCmp',
+              renderTo: 'policyOwnerSuggest',
+              binding: 'policyOwner',
+              disabled: #{!sp:hasRight(facesContext, 'ManagePolicy')},
+              width: 300,
+              baseParams: {context: 'Owner'}
+          });
+          
+          var iVal = '#{sp:escapeJavascript(policy.policy.ownerObject.displayName)}';
+          if(iVal != ''){
+        	  policyOwnerSuggest.setRawValue(iVal);
+        	  SailPoint.Suggest.IconSupport.setIconDiv(policyOwnerSuggest, 'userIcon');
+          }
+
+          var policyViolationOwnerSuggest = new SailPoint.IdentitySuggest({
+              id: 'policyViolationOwnerSuggestCmp',
+              renderTo: 'policyViolationOwnerSuggest',
+              binding: 'policyViolationOwner',
+              disabled: #{!sp:hasRight(facesContext, 'ManagePolicy')},
+              width: 300,
+              baseParams: {context: 'Owner'}
+          });
+          
+          var iVal = '#{sp:escapeJavascript(policy.policy.violationOwnerObject.displayName)}';
+          if(iVal != ''){
+        	  policyViolationOwnerSuggest.setRawValue(iVal);
+              SailPoint.Suggest.IconSupport.setIconDiv(policyViolationOwnerSuggest, 'userIcon');
+          }
+          
+          if($('policyDescriptionHTML') && $("mainForm:sessionDescription")) {
+            var descriptionEditor = new SailPoint.MultiLanguageHtmlEditor({
+              renderTo: 'policyDescriptionHTML',
+              width:500,
+              height:200,
+              languageJSON : $("mainForm:sessionDescription").value,
+              id:'policyDescriptionHTMLCmp',
+              langSelectEnabled: #{sp:getSystemConfigurationValue("enableLocalizePolicyDescriptions", false)},
+              defaultLocale : '#{policy.locale}'
+            });
+          }
+	             
+	      if (#{policy.showAssignedScopeControl}) {
+              var scopeSuggest = new SailPoint.ScopeSuggest({
+					renderTo: 'assignedScopeSuggest',
+					binding: 'assignedScope',
+					width: 200,
+					listConfig: {width:300},
+					disabled: #{!sp:hasRight(facesContext, 'ManagePolicy')}
+	          });
+              scopeSuggest.setRawValue('#{policy.policy.assignedScopeObject.displayName}');
+          } 
+          
+          selectViolationOwnerType($('violationOwnerType').value);
+      });
+      
+      function selectViolationOwnerType(violationOwnerType) {
+          if (violationOwnerType == 'None') {
+            $('choice0').checked = 'checked';
+            Ext.getCmp('policyViolationOwnerSuggestCmp').disable();
+            $('mainForm:violationOwnerRule').disable();
+            if($('ruleEditButton') != null){                    
+                $('ruleEditButton').disable();
+            }
+          } else if (violationOwnerType == 'Identity') {
+          	$('choice1').checked = 'checked';
+      		Ext.getCmp('policyViolationOwnerSuggestCmp').enable();
+      		$('mainForm:violationOwnerRule').disable();
+      		if($('ruleEditButton') != null){                    
+                $('ruleEditButton').disable();
+            }			
+          } else if (violationOwnerType == 'Manager') {
+          	$('choice2').checked = 'checked';
+      		Ext.getCmp('policyViolationOwnerSuggestCmp').disable();
+      		$('mainForm:violationOwnerRule').disable();
+      		if($('ruleEditButton') != null){                    
+                $('ruleEditButton').disable();
+            }
+          } else if (violationOwnerType == 'Rule') {
+          	$('choice3').checked = 'checked';
+            $('mainForm:violationOwnerRule').enable();
+            if($('ruleEditButton') != null){                    
+                $('ruleEditButton').enable();
+            }
+            Ext.getCmp('policyViolationOwnerSuggestCmp').disable();
+          } else {
+          	alert('unknown violationOwnerType: ' + violationOwnerType);
+          	return;
+          }
+          $('violationOwnerType').value = violationOwnerType;
+      }
+     
+      function toggleAlertDisplay() {
+          var elements = [];
+          elements.push($('AlertDiv'));
+          showHideWithLock(elements);
+          Page.fireEvent('workItemOwnersRendered');
+      }
+      
+      // show the multi suggest after it is created if the alert div is already visible
+      // otherwise wait for the checkbox toggle to show it
+      Page.on('workItemOwnersRendered', function() {
+          var suggest = Ext.getCmp('workItemOwners');
+          var alertDiv = Ext.get('AlertDiv');
+          if (suggest && alertDiv && alertDiv.isVisible()) {
+              suggest.show();
+          }
+      });
+    //]]>
+  </script>
+
+    <h:panelGrid columns="2">
+
+      <h:outputText style="font-weight:bold" value="#{msgs.name}"/>
+      <h:panelGroup>
+        <h:inputText value="#{policy.policy.name}" size="40"
+          disabled="#{!sp:hasRight(facesContext, 'ManagePolicy')}"
+          readonly="#{!sp:hasRight(facesContext, 'ManagePolicy')}" />
+        <h:outputText styleClass='requiredText' value='*' />
+      </h:panelGroup>
+
+      <h:outputText style="font-weight:bold" value="#{msgs.owner}"/>
+      <h:panelGroup>
+        <div id="policyOwnerSuggest"></div>
+        <t:inputHidden id="policyOwner" value="#{policy.policy.ownerObject}" forceId="true">
+            <sp:convertIdentity />
+        </t:inputHidden>
+        <h:message styleClass="formError" for="policyOwner" />
+      </h:panelGroup>
+
+      <h:outputText style="font-weight:bold" value="#{msgs.policy_violation_owner}"/>
+      <h:panelGroup>
+        <table>
+            <tr>
+              <td colspan='2'><input type='radio' id='choice0'
+                name='violationOwnerChoice'
+                onclick="selectViolationOwnerType('None');" /><h:outputText
+                value='#{msgs.none}' style='padding-left:5px;' /></td>
+            </tr>
+        	<tr>
+        		<td><input type='radio' id='choice1' name='violationOwnerChoice' onclick="selectViolationOwnerType('Identity');"/><h:outputText value='#{msgs.identity}' style='padding-left:5px;'/></td>
+        		<td>
+                  <div id="policyViolationOwnerSuggest"/>
+          		  <t:inputHidden id="policyViolationOwner" value="#{policy.policy.violationOwnerObject}" forceId="true">
+                  <sp:convertIdentity />
+                  </t:inputHidden>
+                  <h:message styleClass="formError" for="policyViolationOwner" />
+        		</td>
+        	</tr>
+			<tr>
+				<td colspan="2">
+		      	  <input type='radio' id='choice2' name='violationOwnerChoice' onclick="selectViolationOwnerType('Manager');">
+		      		<h:outputText value='#{msgs.manager_is_violation_owner}' style='padding-left:5px;'/>
+		      	  </input>
+				</td>
+			</tr>
+			<tr>
+				<td><input type='radio' id='choice3' name='violationOwnerChoice' onclick="selectViolationOwnerType('Rule');"/><h:outputText value='#{msgs.label_rule}' style='padding-left:5px;'/></td>
+				<td>
+				  <a4j:outputPanel id="violationOwnerRulePanel">
+				  <h:selectOneMenu id="violationOwnerRule" value="#{policy.policy.violationOwnerRule}">
+                    <f:selectItems value="#{util.policyOwnerRules}" />
+                  </h:selectOneMenu>
+                  </a4j:outputPanel>
+                <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >                              
+                    <input type="button" id="ruleEditButton" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                           onclick="SailPoint.Rule.Editor.edit($('mainForm:violationOwnerRule').value, 
+                                                               'PolicyOwner',
+                                                               $('mainForm:refreshRulesButton'))" />                                                     
+                </ui:fragment>				
+                </td>
+			</tr>        	
+	      	<t:inputHidden id='violationOwnerType' value='#{policy.policy.violationOwnerType}' converter='sailpoint.object.Enum' forceId="true">
+	      	</t:inputHidden>
+        </table>
+      	
+      </h:panelGroup>
+
+      <h:outputText rendered="#{policy.showAssignedScopeControl}" style="font-weight:bold" value="#{msgs.label_scope}"/>
+      <h:panelGroup rendered="#{policy.showAssignedScopeControl}" >
+          <div id="assignedScopeSuggest"></div>
+	      <t:inputHidden id="assignedScope"         
+	                     value="#{policy.policy.assignedScopeObject}"
+	                     rendered="#{policy.showAssignedScopeControl}"
+                         forceId="true">
+	        <sp:convertScope />
+	      </t:inputHidden>
+      </h:panelGroup>
+
+      <h:outputText style="font-weight:bold" value="#{msgs.description}"/>
+      
+      <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+        <div id="policyDescriptionHTML"/>
+        <h:inputHidden value="#{policy.session.descriptionJSON}" id="sessionDescription"/> 
+      </ui:fragment>
+      <ui:fragment rendered="#{!sp:hasRight(facesContext, 'ManagePolicy')}">
+        <h:outputText escape="false" value="#{sp:localizeAttribute(policy.object, 'description')}"/>
+      </ui:fragment>
+
+
+      <ui:fragment rendered='#{policy.policy.type != "Account"}'>
+        <h:outputText style="font-weight:bold" value="#{msgs.policy_label_violation_rule}"/>
+      </ui:fragment>
+
+      <ui:fragment rendered='#{policy.policy.type != "Account"}'>
+        <h:panelGroup>
+        <a4j:outputPanel id="formattingRulePanel">
+        <h:selectOneMenu id="formattingRule" value="#{policy.policy.violationRule}">
+          <f:selectItems value="#{util.violationRules}" />
+        </h:selectOneMenu>
+        </a4j:outputPanel>
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >                              
+            <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                   onclick="SailPoint.Rule.Editor.edit($('mainForm:formattingRule').value, 
+                                                       'Violation',
+                                                       $('mainForm:refreshRulesButton'))" />                                                     
+        </ui:fragment>    
+        </h:panelGroup>                  
+      </ui:fragment>
+
+      <h:outputText style="font-weight:bold" value="#{msgs.policy_label_violation_workflow}"/>
+      <h:selectOneMenu id="violationWorkflow" value="#{policy.policy.violationWorkflow}">
+        <f:selectItems value="#{util.workflows}" />
+      </h:selectOneMenu>
+
+      <h:outputText style="font-weight:bold" value="#{msgs.state}"/>
+      <h:panelGroup>
+        <h:selectOneMenu id="policyStateOption" 
+                         value="#{policy.policy.state}"
+                         disabled="#{!sp:hasRight(facesContext, 'ManagePolicy')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManagePolicy')}">
+          <f:selectItems value="#{policy.policyStates}"/>
+        </h:selectOneMenu>
+      </h:panelGroup>
+
+      <h:outputText style="font-weight:bold" value="#{msgs.policy_label_send_alerts}"/>
+      <h:selectBooleanCheckbox id="doAlerts" value="#{policy.policy.alert.enabled}"
+        onclick="javascript:toggleAlertDisplay();"
+        disabled="#{!sp:hasRight(facesContext, 'ManagePolicy')}"/>
+
+
+    </h:panelGrid>
+    
+    <a4j:commandButton id="refreshRulesButton"
+                       style="display:none"
+                       immediate="true"
+                       render="violationOwnerRulePanel, formattingRulePanel"/>
+
+  </ui:composition>
+</body>
+</html>

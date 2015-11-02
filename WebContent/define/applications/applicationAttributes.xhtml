@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+        });
+       //--><!]]>
+    </script>
+    <f:view>
+      <!-- this is here to handle multiplex applications that don't have a form -->
+      <ui:fragment rendered="#{(applicationObject.connectorClass != null) and (not empty applicationObject.attributeConfig)}" >
+        <div class="spContent">
+          <h:outputText styleClass="spContentTitle" value="#{msgs.attributes}"/><br/>
+          <table class="width100">
+            <tr>
+              <td>
+                <div class="spTabledContent">
+                  <table class="spTable" cellspacing="0" id="attributeTbl">
+                    <tr>
+                      <th>#{msgs.name}</th>
+                      <th colspan="2">#{msgs.value}</th>
+                    </tr>
+                    <t:dataList value="#{applicationObject.attributeConfig}" var="attrDef">
+                      <tr>
+                        <td>
+                          <h:outputText style='padding:5px' value="#{attrDef.displayableName}"/>
+                        </td>
+                        <td colspan="2">
+                          <h:inputText rendered="#{attrDef.type != 'secret' and
+                                                   attrDef.type != 'boolean' and
+                                                   !attrDef.multiValued}"
+                             value="#{applicationObject.attributes[attrDef.name]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <sp:inputSecret rendered="#{attrDef.type == 'secret'}"
+                             value="#{applicationObject.attributes[attrDef.name]}"
+                             size="40" redisplay="true"
+                             autocomplete="off"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:inputTextarea rendered="#{attrDef.multiValued}"
+                             converter="NewLineList"
+                             value="#{applicationObject.attributes[attrDef.name]}"
+                             rows="5" cols="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:selectBooleanCheckbox rendered="#{attrDef.type == 'boolean'}"
+                             value="#{applicationObject.attributes[attrDef.name]}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*" rendered="#{attrDef.required}"/>
+                        </td>
+                      </tr>
+                    </t:dataList>
+                  </table>
+                  <script>
+                    makeTableMulticolored($('attributeTbl'), true, true, 'even', 'odd');
+                  </script>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </ui:fragment>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

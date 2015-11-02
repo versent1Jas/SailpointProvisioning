@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputText value="#{msgs.title_workflows}"/>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORKFLOW';
+      //--><!]]>
+    </script>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>paging-tree.css</src>
+      <src>rule-editor.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/workflow">
+      <src>workflow-editor.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/include/template">
+      <src>template-editor.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+      <src>form-panel.css</src>
+    </sp:style> 
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Store.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/PagingTreeStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleCombo.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ApprovalPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/FormGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ReferenceFormPopup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowApprovalWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/Workflow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowDesigner.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/EditorTextArea.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ScriptEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowScriptRadio.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowStepWindows.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/WorkItemConfigPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowFormContainer.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowFormToggleButton.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/excanvas/excanvas.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/raphael-2.0/raphael.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRotater.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/model/TemplateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateFieldEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditorWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateButtonEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateBooleanValue.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiText.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowFormEditor.js?#{debug.revision}</src>
+      <ui:remove><!-- adding formRenderer.xhtml include files here --></ui:remove>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/FormUtils.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/FormPanel.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/RadioGroup.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/Secret.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateField.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/BooleanCheckbox.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateTimeField.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlTemplate.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DataTable.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DynamicComboBox.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DynamicMultiSuggest.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/ext-4.1.0/ux/form/MultiSelect.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/ext-4.1.0/ux/form/ItemSelector.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SortInput.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateRange.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiText.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ExtendedAttributeFilter.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/BooleanRadioGroup.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/EntitlementSelector.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SuggestTemplates.js?load=#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ElectronicSignaturePopup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <ui:remove><!-- End adding formRenderer.xhtml include files here --></ui:remove>
+    </sp:script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:form styleClass="form" id="editForm">
+        <!-- Preloading this image here because ie7 has a problem downloading this image
+        through the canvas.  Status bar just says "Downloading..." for the entire session.  PH -->
+        <img style="display:none" src="#{base.requestContextPath}/images/icons/help.png"/>
+        <script>
+          <ui:remove><!-- Adding form global variables --></ui:remove>
+          // todo: this will only work with one form on the page.
+          SailPoint.jump = function(count, pages){
+            var form = Ext.getCmp('#{form.id}');
+            form.navigate(count);
+          }
+
+          // This is used to coordinate when multiple forms
+          // exist on the same page
+          if (!SailPoint.activeForms)
+            SailPoint.activeForms = [];
+          <ui:remove><!-- End adding form global variables --></ui:remove>
+          
+          var workflowEditor;
+          Ext.onReady(function(){
+            Ext.QuickTips.init();
+            
+            stores = [];
+            
+            var approvalModeStore = 
+            [
+              <c:forEach items="#{workflow.approvalModeOptions}" var="option" varStatus="vStatus">
+                <h:outputText rendered="#{!vStatus.first}" value=","/>
+                ['#{option}', '#{option}']
+              </c:forEach>  
+            ];
+            
+            var workItemNotificationStore = 
+            [
+              <c:forEach items="#{workflow.workItemConfig.emailTemplates}" var="template" varStatus="vStatus">
+                <h:outputText rendered="#{!vStatus.first}" value=","/>
+                ['#{template.value}', '#{template.label}']
+              </c:forEach>
+            ];
+            
+            var workItemRulesStore = 
+            [
+              <c:forEach items="#{workflow.workItemConfig.escalationRules}" var="rule" varStatus="vStatus">
+                <h:outputText rendered="#{!vStatus.first}" value=","/>
+                ['#{rule.value}', '#{rule.label}']
+              </c:forEach>
+            ];
+            
+            // Datastore for the esignatures in the system used in the combo box
+            var eSignatures = 
+            [
+              <c:forEach items="#{workflow.esignatures}" var="sig" varStatus="vStatus">
+                 <h:outputText rendered="#{!vStatus.first}" value=","/>
+                 ["#{sp:escapeJavascript(sig.value)}", "#{sp:escapeJavascript(sig.label)}"]
+              </c:forEach>
+            ];
+            
+            stores['approvalModeStore'] = approvalModeStore;
+            stores['workItemNotificationStore'] = workItemNotificationStore;
+            stores['workItemRulesStore'] = workItemRulesStore;
+            stores['esignatureStore'] = eSignatures;
+            
+            workflowEditor = new SailPoint.WorkflowEditor({
+              id: 'workflowPanel',
+              layout: 'border',
+              stores: stores,
+              saveInput: $('editForm:workflowJSON'),
+              saveBtn: $('editForm:saveWorkflowBtn'),
+              saveAsBtn: $('editForm:saveAsWorkflowBtn'),
+              clearBtn: $('editForm:clearWorkflowBtn')
+            });
+          
+            var viewport = SailPoint.getViewport({
+                bodyContent: workflowEditor,
+                title: '#{sp:escapeJavascript(msgs.title_workflows)}'
+            });
+
+            // Just in case we're loading out of the metrics search page
+            var controlPanelGrid = workflowEditor.controlPanel.workflowGrid;
+            var controlPanelStore = controlPanelGrid.getStore();
+            controlPanelStore.on('load', function(store, records, options) {
+                var wfjson = $('editForm:workflowJSON').value;
+                if (wfjson === "") {
+                    return;
+                }
+                
+                var workflowObj = Ext.JSON.decode(wfjson);
+                var workflowIndex;
+
+                if (workflowObj &amp;&amp; workflowObj.processId &amp;&amp; workflowObj.processId.length &gt; 0) {
+                    workflowIndex = store.indexOfId(workflowObj.processId);
+                    controlPanelGrid.getSelectionModel().select(workflowIndex);
+                    workflowEditor.load(workflowIndex ,controlPanelGrid);
+                    
+                }
+            }, controlPanelStore, {
+                single: true
+            });
+            
+          }); // Ext.onReady
+        </script>
+        
+        <h:inputHidden id="workflowJSON" value="#{workflow.workflowJSON}"/>
+        <a4j:commandButton id="saveWorkflowBtn" 
+                           action="#{workflow.saveWorkflowAction}" 
+                           oncomplete="workflowEditor.saveSuccess();"
+                           style="display:none"/>
+        <a4j:commandButton id="saveAsWorkflowBtn" 
+                           action="#{workflow.saveAsWorkflowAction}" 
+                           oncomplete="workflowEditor.saveSuccess(true);"
+                           style="display:none"/>
+                                              
+        <h:inputHidden id="workflowId" value="#{workflow.workflowId}"/>
+        <a4j:commandButton id="deleteWorkflowBtn" 
+                           action="#{workflow.deleteWorkflowAction}" 
+                           oncomplete="workflowEditor.deleteSuccess();"
+                           style="display:none"/>
+        <a4j:commandButton id="clearWorkflowBtn" action="#{workflow.clearWorkflowAction}" style="display:none"/>
+      </h:form>
+      
+      
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+    
+          <sp:sailpointForm styleClass="form" id="configForm" forceEncodedURL="true">
+                <a4j:commandButton id="submitButton" action="#{workflow.submit}" style="display: none" limitRender="true" render="formRenderer-1" oncomplete="workflowEditor.submitFormCallback({containerFormName: 'configForm', formJson : #{sp:xss((workflow.formBean.formJson != null) ? workflow.formBean.formJson : '{}')}, formId : '#{workflow.formBean.id}', renderInViewport : false, renderInDiv : false}, '#{workflow.formBean.id}', '#{workflow.formBean.action}');" />
+                <ui:include src='../../include/formRenderer.xhtml'>
+                 <ui:param name='form' value='#{workflow.formBean}'/>
+                 <ui:param name='formStyle' value='width: 768px'/>
+                 <ui:param name='submitButton' value='configForm:submitButton'/>
+                 <ui:param name='containerFormName' value='configForm'/>
+                 <ui:param name='panelGroupIndex' value='1'/>
+                </ui:include>
+          </sp:sailpointForm>
+      
+      
+      <h:form id="updateConfigForm">
+         <a4j:commandButton id="updateConfigFormButton" 
+                           action="#{workflow.updateConfigFormAction}" 
+                           style="display:none"
+                           limitRender="true"
+                           render="configForm:formRenderer-1"
+                           oncomplete="workflowEditor.loadConfigForm({containerFormName: 'configForm', formJson : #{sp:xss((workflow.formBean.formJson != null) ? workflow.formBean.formJson : '{}')}, formId : '#{workflow.formBean.id}', renderInViewport : false, renderInDiv : false});"/>
+                           
+         <h:inputHidden id="configFormName" value="#{workflow.configFormName}"/>
+         <h:inputHidden id="configFormContext" value="#{workflow.configFormContext}"/>
+         <h:inputHidden id="configFormStepName" value="#{workflow.configFormStepName}"/>
+         <h:inputHidden id="parentComponentId"/>
+         <h:inputHidden id="argJSON" value="#{workflow.formArgJSON}"/>
+         <h:inputHidden id="contextId" value="#{workflow.configFormPanelId}"/>
+      </h:form>
+       
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

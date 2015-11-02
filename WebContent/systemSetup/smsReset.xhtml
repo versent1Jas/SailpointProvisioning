@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+      Ext.onReady(function() {
+          SailPoint.SystemSetup.Login.initializeSMSReset();
+          toggleDisplay($('smsResetContainer'), #{!smsResetConfig.smsResetEnabled});
+      });
+      //--><!]]>
+  </script>
+  
+  <div class="paddedContainer">
+    <ui:fragment rendered="#{base.lcmEnabled}">
+      <h:outputText value="#{msgs.sms_reset_conf_enabled}" />
+      <h:graphicImage id="imgHlpSmsResetEnabled" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sms_reset_enabled}"/>
+      <h:selectBooleanCheckbox id="smsResetEnabled" value="#{smsResetConfig.smsResetEnabled}" onclick="showHideWithLock($('smsResetContainer'), this); SailPoint.SystemSetup.Login.updateLoginPanel();" onchange="SailPoint.SystemSetup.Login.makePageDirty();"/>
+    </ui:fragment>
+  
+    <table id="smsResetContainer" class="spTable">
+    <tr>
+      <th><span class="spContentTitle">#{msgs.sms_reset_conf}</span></th>
+    </tr>
+    <tr>
+      <td>
+        <table class="spContent">
+          <tr>
+            <td class="firstColumn">
+              #{msgs.sms_reset_conf_account_id} 
+            </td>
+            <td class="middleColumn">
+              <h:graphicImage id="imgHlpSmsResetAccountId" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sms_reset_account_id}"/>
+            </td>
+            <td class="leftAlignedColumn">
+              <h:inputText id="accountId" value="#{smsResetConfig.accountId}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" styleClass="wideInput"/>
+            </td>
+          </tr>
+          <tr>
+          <td class="firstColumn">    
+            #{msgs.sms_reset_conf_auth_token}
+          </td>
+          <td class="middleColumn">
+            <h:graphicImage id="imgHlpSmsResetAuthToken" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sms_reset_auth_token}"/>
+          </td>
+          <td class="leftAlignedColumn">
+            <h:inputText id="authToken" value="#{smsResetConfig.authToken}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" styleClass="wideInput"/>
+          </td>
+          </tr>
+          <tr>
+          <td class="firstColumn">    
+              #{msgs.sms_reset_conf_from_phone}
+          </td>
+          <td class="middleColumn">
+            <h:graphicImage id="imgHlpSmsResetFromPhone" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sms_reset_from_phone}"/>
+          </td>
+          <td class="leftAlignedColumn">
+            <h:inputText id="fromPhone" value="#{smsResetConfig.fromPhone}" onchange="SailPoint.SystemSetup.Login.makePageDirty();"/>
+          </td>
+          </tr>
+          <tr>
+          <td class="firstColumn">
+            #{msgs.sms_reset_conf_phone_attribute}    
+          </td>
+          <td class="middleColumn">
+            <h:graphicImage id="imgHlpSmsResetPhoneAttribute" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sms_reset_phone_attribute}"/>
+          </td>
+          <td class="leftAlignedColumn">
+            <div id="phoneAttributeDiv"/>
+            <h:inputHidden id="phoneAttributeHidden" value="#{smsResetConfig.phoneAttribute}" onchange="SailPoint.SystemSetup.Login.makePageDirty();"/>
+          </td>
+          </tr>
+          <tr>
+          <td class="firstColumn">   
+            #{msgs.sms_reset_conf_duration_valid} 
+          </td>
+          <td class="middleColumn">
+            <h:graphicImage id="imgHlpSmsResetDurationValid" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sms_reset_duration_valid}"/>
+          </td>
+          <td class="leftAlignedColumn">
+            <h:inputText id="durationValid" value="#{smsResetConfig.durationValid}" size="3" onchange="SailPoint.SystemSetup.Login.makePageDirty();"/>
+          </td>
+          </tr>
+
+          <tr>
+            <td class="firstColumn">
+              #{msgs.sms_reset_conf_throttle_min}
+            </td>
+            <td class="middleColumn">
+              <h:graphicImage id="imgHlpSmsResetThrottleMinutes" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sms_reset_throttle_minutes}"/>
+            </td>
+            <td class="leftAlignedColumn">
+              <h:inputText id="throttleMinutes" value="#{smsResetConfig.throttleMinutes}" size="3" onchange="SailPoint.SystemSetup.Login.makePageDirty();"/>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+    </table>
+  </div>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <ui:fragment rendered="#{(null eq filter.property)}">
+    <td colspan="3">
+      <sp:outputText styleClass="italic font10" value="The filter you have entered cannot be displayed but will be applied to your search."/>
+    </td>
+  </ui:fragment>
+  <ui:fragment rendered="#{!(null eq filter.property) and !filter.list}">
+    <td><sp:outputText styleClass="font10" value="#{filter.property}"/></td>
+    <td>
+      <h:outputText styleClass="font10" value=" #{filter.operationLabel}"/>
+      <h:outputText rendered="#{filter.matchMode != null}" styleClass="font10" value=" #{filter.matchMode}"/>
+    </td>
+    <td><h:outputText styleClass="font10" value=" #{filter.value}"/></td>
+  </ui:fragment>
+    <ui:fragment rendered="#{!(null eq filter.property) and filter.list}">
+    <td><sp:outputText styleClass="font10" value="#{filter.property}"/></td>
+    <td>
+      <h:outputText styleClass="font10" value=" #{filter.operationLabel}"/>
+      <h:outputText rendered="#{filter.matchMode != null}" styleClass="font10" value=" #{filter.matchMode}"/>
+    </td>
+    <td>
+      <t:dataList value="#{filter.value}" var="filterValue">
+        <div><h:outputText styleClass="font10" value=" #{filterValue}"/></div>
+      </t:dataList>
+    </td>
+  </ui:fragment>
+</ui:composition>
+
+</body>
+</html>

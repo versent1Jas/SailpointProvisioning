@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+  <ui:composition>
+    <table class="width100" cellpadding="0" cellspacing="0">
+      <tr>
+        <td>
+          <div id="submenu-main">
+            <div id="submenu-tabs">
+              <ul id="submenu-links">
+                <li id="button0" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('settingsContent', 'button0')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.event_log_settings} </span>
+                </li>
+                <li id="button1" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('targetsContent', 'button1')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.activity_targets} </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="settingsContent" class="submenuContentBox" style="border:0px">
+              <div class="spContent">
+                <div class="spTabledContent">
+                  <table class="spTable" cellspacing="0">
+                    <thead>
+                      <tr><th colspan="2"><h:outputText value="#{msgs.settings}"/></th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.user}"/></td>
+                        <td>
+                          <h:inputText size="50" id="user" value="#{activityDataSource.object.configuration['user']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.password}"/></td>
+                        <td>
+                          <sp:inputSecret size="50" id="password" value="#{activityDataSource.object.configuration['password']}" redisplay="true"
+                                          autocomplete="off"
+                                          disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                          readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.iq_service_host}"/></td>
+                        <td>
+                          <h:inputText size="50" id="iqServiceHost" value="#{activityDataSource.object.configuration['IQServiceHost']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.iq_service_port}"/></td>
+                        <td>
+                          <h:inputText size="50" id="iqServicePort" value="#{activityDataSource.object.configuration['IQServicePort']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.event_log_server}"/></td>
+                        <td>
+                          <h:inputText size="50" id="eventLogServer" value="#{activityDataSource.object.configuration['eventLogServer']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.query_string}"/></td>
+                        <td>
+                          <h:inputTextarea cols="48" id="queryString" value="#{activityDataSource.object.configuration['queryString']}"
+                                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.block_size}"/></td>
+                        <td>
+                          <h:inputText size="50" id="blockSize" value="#{activityDataSource.object.configuration['blockSize']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+          </div>  <!-- settingsContent -->
+          <div id="targetsContent" class="submenuContentBox" style="display:none; border:0px">
+            <ui:include src="activityTargets.xhtml"/>
+          </div> <!-- targetsContent -->
+        </td>
+      </tr>
+    </table>
+  </ui:composition>
+</body>
+</html>

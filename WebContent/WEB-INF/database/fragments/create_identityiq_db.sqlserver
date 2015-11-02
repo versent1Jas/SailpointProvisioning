@@ -1,0 +1,41 @@
+--
+-- This script is a SAMPLE and can be modified as appropriate by the
+-- customer as long as the equivalent tables and indexes are created.
+-- The database name, user, and password must match those defined in
+-- iiq.properties in the IdentityIQ installation.
+--
+
+CREATE DATABASE identityiq
+GO
+
+--create a sql server login with which to connect
+CREATE LOGIN [identityiq] WITH PASSWORD='identityiq',
+DEFAULT_DATABASE=identityiq
+GO
+
+USE identityiq
+GO
+
+--create a user in our db associated with our server login and our schema
+CREATE USER identityiq FOR LOGIN identityiq WITH DEFAULT_SCHEMA =
+identityiq
+GO
+
+-- create a schema
+CREATE SCHEMA identityiq AUTHORIZATION identityiq
+GO
+
+--grant permissions
+grant select,insert,update,delete to identityiq
+GO
+
+--this makes our default user the db owner, so it can be
+--used to run upgrade scripts.  This is a convenience for
+--non-production environments and is not necessary for 
+--normal IdentityIQ operation.  It is recommended to remove
+--this in production environments and run the upgrade scripts
+--as another user with db_owner rights.
+EXEC sp_addrolemember 'db_owner', 'identityiq'
+GO
+
+

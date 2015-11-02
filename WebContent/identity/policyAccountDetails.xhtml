@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+
+<!--
+   You're in a <table>.
+
+    parameters:
+        violationView - ViolationViewBean
+-->
+
+<ui:composition>
+
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <ui:fragment rendered="#{violationView.args!=null and violationView.certUserAuthorized}">
+    <tr>
+      <td class="titleColumn"><h:outputText value="#{msgs.label_application}"/></td>
+      <td><h:outputText value="#{violationView.args['AccountPolicyViolationAppName']}"/></td>
+    </tr>
+    <tr>
+      <td class="titleColumn"><h:outputText value="#{msgs.label_accounts}"/></td>
+      <td><h:outputText value="#{violationView.args['AccountPolicyViolationAccounts']}"/></td>
+    </tr>
+  </ui:fragment>
+
+
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    
+    <f:view>
+      <div class="spContentTitle">
+        <span class="textBold"><h:outputText value="#{msgs.con_form_delimited_rules}"/></span>
+      </div>
+      <div class="spContent">
+        <a4j:outputPanel id="connectorRulesPanel">
+          <table class="paddedTbl" cellpadding="5" cellspacing="0">
+          <tr>
+            <td>
+              <span class="textBold"><h:outputText value="#{msgs.con_form_delimited_buildMap}"/></span>
+            </td>
+            <td>
+              <h:graphicImage id="imgHlpParsingBuildMap"
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_buildMap}"/>
+  
+            </td>
+            <td>
+              <h:selectOneMenu id="buildMapRule" style="width:300px"
+                               value="#{applicationObject.attributes['buildMapRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{applicationObject.buildMapRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td>
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:buildMapRule').value, 
+                                                           'BuildMap',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+          <tr>
+            <td>
+              <span class="textBold"><h:outputText value="#{msgs.con_form_delimited_preIterate}"/></span>
+            </td>
+            <td>
+              <h:graphicImage id="imgHlpPreIterate"
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_preIterate}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="preiterateRule" style="width:300px"
+                                 value="#{applicationObject.attributes['preIterateRule']}"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{applicationObject.preIterateRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td>
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:preiterateRule').value, 
+                                                           'PreIterate',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+          <tr>
+            <td>
+              <span class="textBold"><h:outputText value="#{msgs.con_form_delimited_postIterate}"/></span>
+            </td>
+            <td>
+              <h:graphicImage id='imgHlpPostIterate'
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_postIterate}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="postIterateRule" style="width:300px"
+                               value="#{applicationObject.attributes['postIterateRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.postIterateRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td>
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:postIterateRule').value, 
+                                                           'PostIterate',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+          <tr>
+            <td>
+              <span class="textBold"><h:outputText value="#{msgs.con_form_delimited_transformation}"/></span>
+            </td>
+            <td>
+              <h:graphicImage id="imgHlpMapToObjectRule_#{nameSpace}"
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_transformation}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="transformationRule" style="width:300px"
+                                 value="#{applicationObject.attributes['mapToResourceObjectRule']}"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{applicationObject.transformationRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td>
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:transformationRule').value, 
+                                                           'Transformation',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+          <tr>
+            <td>
+              <span class="textBold"><h:outputText styleClass="textBold" value="#{msgs.con_form_delimited_mergeMaps}"/></span>
+            </td>
+            <td>
+              <h:graphicImage id="imgHlpMergeMapsRule"
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_mergeMaps}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="mergeMapsRule" style="width:300px"
+                                 value="#{applicationObject.attributes['mergeMapsRule']}"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{applicationObject.mergeMapsRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td>
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:mergeMapsRule').value, 
+                                                           'MergeMaps',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+        </table>
+        
+        <a4j:commandButton id="refreshConnectorRulesButton"
+                           style="display:none"
+                           immediate="true"
+                           render="connectorRulesPanel"/>
+        
+        </a4j:outputPanel>
+      </div>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

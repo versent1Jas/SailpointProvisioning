@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+  <table class="dashWidth100" style="margin:0px 0px 3px 0px;">
+    <tr>
+      <td style="padding: 3px; padding-right: 5px; text-align:left;" class="title">
+        <ui:fragment rendered="#{not hideAttrName}">
+          <h:outputText value="#{('true' == isExceptional) ? msgs.label_extra_values : msgs.label_value_or_values}" />
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{not hideAttrName}">
+          #{msgs.on} <span class="entitlementTxt"><h:outputText value="#{attributeName}"/></span>
+        </ui:fragment>
+        
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 2px; text-align:left;" class="wide">
+        <div class="entitlementTxt" style="padding-left:20px;">
+
+            <div class="entitlementValues" style="display:#{showEntitlementDescription ? 'none' : ''}">
+                <ui:repeat value="#{attributeValues}" var="currentAttrVal">
+                    
+                    
+                    <ui:fragment rendered="#{not sp:isFirstElement(currentAttrVal, sp:asList(attributeValues))}">
+						<br/>
+					</ui:fragment>
+
+                    <span id="name_#{sp:buildValidComponentId(applicationName)}_#{sp:buildValidComponentId(currentAttrVal)}" 
+                          class="#{(showRolesForEntitlements) ? 
+                                    sp:getEntitlementKey(applicationName, instance, nativeIdentity, attributeName, currentAttrVal) : 
+                                    ''}">
+                        <ui:include src="entitlementText.xhtml">
+                           <ui:param name="isDescriptionMode" value="false"/>
+                           <ui:param name="value" value="#{currentAttrVal}"/>
+                           <ui:param name="description" value="#{descriptionMap[currentAttrName][currentAttrVal] != null ? 
+                                                                 descriptionMap[currentAttrName][currentAttrVal] : 
+                                                                 sp:getGroupDisplayableName(applicationName, currentAttrName, currentAttrVal)}"/>
+                           <ui:param name="application" value="#{applicationName}"/>
+                           <ui:param name="attribute" value="#{currentAttrName}"/>
+                           <ui:param name="showInfoIcon" value="#{descriptionMap[currentAttrName][currentAttrVal] != null}"/>
+                           <ui:param name="infoIconAltText" value="#{descriptionMap[currentAttrName][currentAttrVal] != null ? 
+                                                                     descriptionMap[currentAttrName][currentAttrVal] : 
+                                                                     sp:getGroupDisplayableName(applicationName, currentAttrName, currentAttrVal)}"/>
+                       </ui:include>
+                    </span>
+
+                    <ui:fragment rendered="#{flagNewEntitlements and (null != newAttributeMap[attributeName]) and newAttributeMap[attributeName][currentAttrVal]}">
+                        <span class="newEntitlementTxt">#{msgs.bracket_new}</span>
+                    </ui:fragment>
+
+                </ui:repeat>
+            </div>
+
+            <div class="entitlementDescriptions" style="display:#{showEntitlementDescription ? '' : 'none'}">            
+                <ui:repeat value="#{attributeValues}" var="currentAttrVal">
+                    
+                    <ui:fragment rendered="#{not sp:isFirstElement(currentAttrVal, sp:asList(attributeValues))}">
+						<br/>
+					</ui:fragment>
+
+                    <span id="description_#{sp:buildValidComponentId(applicationName)}_#{sp:buildValidComponentId(currentAttrVal)}" 
+                          class="#{(showRolesForEntitlements) ? 
+                                    sp:getEntitlementKey(applicationName, instance, nativeIdentity, attributeName, currentAttrVal) : 
+                                    ''}">
+                        <ui:include src="entitlementText.xhtml">
+                           <ui:param name="isDescriptionMode" value="true"/>
+                           <ui:param name="infoIconAltText" value="#{sp:getGroupDisplayableName(applicationName, currentAttrName, currentAttrVal)}"/>
+                           <ui:param name="application" value="#{applicationName}"/>
+                           <ui:param name="attribute" value="#{currentAttrName}"/>
+                           <ui:param name="showInfoIcon" value="#{descriptionMap[currentAttrName][currentAttrVal] != null}"/>
+                           <ui:param name="description" value="#{descriptionMap[currentAttrName][currentAttrVal] != null ? 
+                                                                 descriptionMap[currentAttrName][currentAttrVal] : 
+                                                                 sp:getGroupDisplayableName(applicationName, currentAttrName, currentAttrVal)}"/>
+                           <ui:param name="value" value="#{currentAttrVal}"/>
+                       </ui:include>
+                    </span>
+
+                    <ui:fragment rendered="#{flagNewEntitlements and (null != newAttributeMap[attributeName]) and newAttributeMap[attributeName][currentAttrVal]}">
+                        <span class="newEntitlementTxt">#{msgs.bracket_new}</span>
+                    </ui:fragment>
+
+                </ui:repeat>
+            </div>
+        </div>
+      </td>
+    </tr>
+  </table>  
+</ui:composition>
+</body>
+</html>

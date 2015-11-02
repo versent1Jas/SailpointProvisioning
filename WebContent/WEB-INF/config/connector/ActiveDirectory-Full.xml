@@ -1,0 +1,192 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, AUTHENTICATE, MANAGER_LOOKUP, SEARCH, UNLOCK, ENABLE, PASSWORD" icon="directory1Icon" name="Active Directory Full Template" type="Active Directory - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="Win2000"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMADAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+              <entry key="accountLockedOut" value="false"/>
+              <entry key="dontExpirePswd" value="false"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="splContainerAttributes">
+          <value>
+            <Map>
+              <entry key="OE_ID" value="false"/>
+              <entry key="OE_PR " value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+                                import sailpoint.object.*;
+                                import sailpoint.object.ProvisioningPlan.AccountRequest;
+                                import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                                import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                                import sailpoint.object.ProvisioningPlan;
+                                import sailpoint.object.ProvisioningPlan.ObjectOperation;
+
+                                List accountRequests = plan.getAccountRequests();
+                                if(accountRequests != null)
+                                {
+                                    for (AccountRequest acctReq : accountRequests)
+                                    {
+                                        AccountRequest.Operation op = acctReq.getOperation();
+                                        if (op == AccountRequest.Operation.Create)
+                                        {
+                                            AttributeRequest userID = acctReq.getAttributeRequest("USER_ID");
+                                            if (userID != null)
+                                            {
+                                                String user_ID = userID.getValue();
+                                                String attname = "USER_OE_PR";
+                                                int nCommaIndex = user_ID.indexOf(",");
+                                                if(user_ID.charAt(nCommaIndex-1)=='/')
+                                                {
+                                                     nCommaIndex = user_ID.indexOf(",",nCommaIndex+1);
+                                                }
+                                                String value = user_ID.substring(nCommaIndex+1);
+                                                AttributeRequest att = new AttributeRequest(attname, value);
+                                                acctReq.add(att);
+
+                                            }
+                                        }
+                                    }
+                                }
+                                List objectRequests = plan.getObjectRequests();
+                                if(objectRequests != null)
+                                {
+                                    for (ObjectRequest objReq : objectRequests)
+                                    {
+                                        ObjectOperation op = objReq.getOp();
+                                        if (op == ObjectOperation.Create)
+                                        {
+                                            AttributeRequest grpID = objReq.getAttributeRequest("GROUP_ID");
+                                            if (grpID != null)
+                                            {
+                                                String group_ID = grpID.getValue();
+                                                String attname = "GROUP_OE_PR";
+                                                int nCommaIndex = group_ID.indexOf(",");
+                                                if(group_ID.charAt(nCommaIndex-1)=='/')
+                                                {
+                                                     nCommaIndex = group_ID.indexOf(",",nCommaIndex+1);
+                                                }
+                                                String value = group_ID.substring(nCommaIndex+1);
+                                                AttributeRequest att = new AttributeRequest(attname, value);
+                                                objReq.add(att);
+                                            }
+                                        }
+                                    }
+                                }
+                            </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="sAMAccountName" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="description" required="true" type="string"/>
+        <AttributeDefinition displayName="SAM-Account-Name" name="sAMAccountName" required="true" type="string"/>
+        <AttributeDefinition displayName="groups" entitlement="true" managed="true" multi="true" name="groups" type="string"/>
+        <AttributeDefinition displayName="Company" name="company" required="true" type="string"/>
+        <AttributeDefinition displayName="Country-Name" name="country" required="true" type="string"/>
+        <AttributeDefinition displayName="Department" name="department" required="true" type="string"/>
+        <AttributeDefinition displayName="Display-Name" name="displayName" required="true" type="string"/>
+        <AttributeDefinition displayName="Reports" name="directReports" required="true" type="string"/>
+        <AttributeDefinition displayName="Initials" name="initials" required="true" type="string"/>
+        <AttributeDefinition displayName="Location" name="location" required="true" type="string"/>
+        <AttributeDefinition displayName="Locality-Name" name="city" required="true" type="string"/>
+        <AttributeDefinition displayName="E-Mail-Addresses" name="mail" required="true" type="string"/>
+        <AttributeDefinition displayName="Manager" name="manager" required="true" type="string"/>
+        <AttributeDefinition displayName="Street-Address" name="street" required="true" type="string"/>
+        <AttributeDefinition displayName="Address" name="streetAddress" required="true" type="string"/>
+        <AttributeDefinition displayName="State-Or-Province-Name" name="state" required="true" type="string"/>
+        <AttributeDefinition displayName="phone-Mobile-Primary" name="mobile" required="true" type="string"/>
+        <AttributeDefinition displayName="Telephone-Number" name="telephoneNumber" required="true" type="string"/>
+        <AttributeDefinition displayName="Title" name="title" required="true" type="string"/>
+        <AttributeDefinition displayName="Surname" name="lastName" required="true" type="string"/>
+        <AttributeDefinition displayName="Given-Name" name="givenName" required="true" type="string"/>
+        <AttributeDefinition displayName="objectSid" name="objectSid" required="true" type="string"/>
+        <AttributeDefinition displayName="RDN" name="name" required="true" type="string"/>
+        <AttributeDefinition displayName="Enable Exchange" name="Exch_Exchange2000Enabled" required="true" type="string"/>
+        <AttributeDefinition displayName="ms-Exch-Mail-Nickname" name="Exch_Alias" required="true" type="string"/>
+        <AttributeDefinition displayName="ms-Exch-Home-MDB" name="Exch_MaileboxStore" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="sAMAccountName" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="SAM-Account-Name" name="sAMAccountName" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="description" required="true" type="string"/>
+        <AttributeDefinition displayName="Telephone-Number" name="telephoneNumber" required="true" type="string"/>
+        <AttributeDefinition displayName="E-Mail-Addresses" name="mail" required="true" type="string"/>
+        <AttributeDefinition displayName="Display-Name" name="displayName" required="true" type="string"/>
+        <AttributeDefinition displayName="Is-Member-Of-DL" multi="true" name="memberOf" required="true" type="string"/>
+        <AttributeDefinition displayName="Member" name="member" required="true" type="string"/>
+        <AttributeDefinition displayName="Display-Name" name="Exch_DisplayName" required="true" type="string"/>
+        <AttributeDefinition displayName="ms-Exch-Mail-Nickname" name="Exch_Alias" required="true" type="string"/>
+        <AttributeDefinition displayName="objectSid" name="objectSid" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Type" name="groupType" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Scope" name="groupScope" required="true" type="string"/>
+        <AttributeDefinition displayName="Enable Exchange" name="Exch_Exchange2000Enabled" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User DN" helpKey="The distinguished name of the account. E.g. CN=TestUser,CN=Users,DC=TestDomain,DC=Com" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Primary Group" helpKey="The distinguished name of the primary group. E.g. CN=Domain Users,CN=Users,DC=TestDomain,DC=Com" name="UG_DEF" required="true" section="" type="string"/>
+        <Field displayName="sAMAccountName" name="sAMAccountName" required="true" section="" type="string"/>
+        <Field displayName="First Name" name="givenName" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Last Name" name="lastName" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Object Class" name="objectClass" readOnly="true" required="true" section="" type="string" value="user"/>
+        <Field displayName="Enable Exchange" name="Exch_Exchange2000Enabled" reviewRequired="true" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Exchange Alias" name="Exch_Alias" reviewRequired="true" type="string"/>
+        <Field displayName="Mailbox store" helpKey="The distinguished name of Mailbox store" name="Exch_MaileboxStore" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group DN" helpKey="The distinguished name of the group. E.g. CN=TestGroup,CN=Users,DC=TestDomain,DC=Com" name="GROUP_ID" required="true" type="string"/>
+        <Field displayName="sAMAccountName" name="sAMAccountName" required="true" type="string"/>
+        <Field displayName="Object Class" name="objectClass" readOnly="true" required="true" section="" type="string" value="group"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="Description" name="description" reviewRequired="true" type="string"/>
+        <Field displayName="Group Type" name="groupType" reviewRequired="true" type="string" value="Security">
+          <AllowedValues>
+            <String>Security</String>
+            <String>Distribution</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Group Scope" name="groupScope" reviewRequired="true" type="string" value="Global">
+          <AllowedValues>
+            <String>Domain Local</String>
+            <String>Global</String>
+            <String>Universal</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Enable Exchange" name="Exch_Exchange2000Enabled" reviewRequired="true" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Exchange Alias" helpKey="Required if want to create Distribution Group on exchange. Only Universal group type can be created on exchange" name="Exch_Alias" reviewRequired="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

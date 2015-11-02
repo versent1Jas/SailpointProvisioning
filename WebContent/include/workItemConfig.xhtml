@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui">
+
+<ui:remove><!--
+  Include for editing a WorkItemConfig object.
+  This is typically inside a sliding div that hides the table when 
+  not needed.
+
+  Expected to be called with these parameters:
+
+    mainForm
+     the id of the primary form, used to locate fields, etc.
+     we seem to have two conventions for this, some call it mainForm
+     and some call it editForm
+
+    config
+      an instanceof WorkItemConfigBean wrapping a WorkItemConfig
+
+    idpre
+      a prefix to put in front of all component ids in case we need
+      to edit more than one WorkItemConfig on a page
+      (not fully functional yet...)
+
+    title
+      the text to display at the top of the table
+
+    ownerTitle
+      text to display next to the owner selector
+
+    ownerHelp
+      help text to display next to the owner selector since
+      is usually needs to be context specific
+
+    optionalWorkItem
+      set to "true" to hide the checkbox to enable or
+      disable work item generation
+
+    manageRight
+      the optional name of the SPRight required to edit the work item config.
+
+    tableCls
+      Optional class for the main form table
+
+--></ui:remove>
+
+<body>
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+
+        Ext.onReady(function() {
+
+            var workItemOwnerMultiSuggest = new SailPoint.MultiSuggest({
+                id: 'workItemOwners',
+                autoRender: 'workItemOwnerMultiSuggest',
+                suggestType: 'identity',
+                jsonData: #{sp:basicJSONDataConverted(
+                   config.ownerIds,
+                   'IdentityListConverter')},
+                inputFieldName: '#{idpre}workItemOwner',
+                disabled: #{(null != manageRight) and !sp:hasRight(facesContext, manageRight)},
+                contextPath: CONTEXT_PATH,
+                baseParams: {context: 'Owner'}
+            });
+
+            Page.fireEvent('workItemOwnersRendered');
+            if(SailPoint.layoutWorkitemConfig) {
+              SailPoint.layoutWorkitemConfig();
+            }
+
+        });   
+
+    // <![CDATA[
+
+    function toggleAllWorkItemConfigFields(el) {
+
+      if (el.checked) {
+        var toShow = [];
+        toShow.push($('workItemEscalationStyleField'));
+        showFields(toShow);
+
+        var style = $('#{mainForm}:#{idpre}hiddenStyle').value;
+        updateEscalationStyleFields(style);
+      }
+      else {
+        var toHide = [];
+        toHide.push($('workItemEscalationStyleField'));
+        hideFields(toHide);
+        updateEscalationStyleFields('none');
+      }
+    }
+
+    function updateEscalationStyle(el) {
+
+      var style = el.value;
+      $('#{mainForm}:#{idpre}hiddenStyle').value = style;
+
+      updateEscalationStyleFields(style);
+      if(SailPoint.layoutWorkitemConfig) {
+        SailPoint.layoutWorkitemConfig();
+      }
+
+    }
+
+    function updateEscalationStyleFields(style) {
+
+      // TODO: need to handle idpre!!
+      //alert("style = " + style);
+
+      if (style == 'none') {
+        var toHide = [];
+        toHide.push($('workItemReminderStartField'));
+        toHide.push($('workItemReminderFreqField'));
+        toHide.push($('workItemReminderTemplateField'));
+        toHide.push($('workItemMaxRemindersField'));
+        toHide.push($('workItemEscalationStartField'));
+        toHide.push($('workItemEscalationRuleField'));
+        toHide.push($('workItemEscalationTemplateField'));
+        hideFields(toHide);
+      }
+      else if (style == 'reminder') {
+        var toHide = [];
+        toHide.push($('workItemMaxRemindersField'));
+        toHide.push($('workItemEscalationStartField'));
+        toHide.push($('workItemEscalationRuleField'));
+        toHide.push($('workItemEscalationTemplateField'));
+        hideFields(toHide);
+
+        var toShow = [];
+        toShow.push($('workItemReminderStartField'));
+        toShow.push($('workItemReminderFreqField'));
+        toShow.push($('workItemReminderTemplateField'));
+        showFields(toShow);
+      }
+      else if (style == 'escalation') {
+        var toHide = [];
+        toHide.push($('workItemReminderStartField'));
+        toHide.push($('workItemReminderFreqField'));
+        toHide.push($('workItemReminderTemplateField'));
+        toHide.push($('workItemMaxRemindersField'));
+        hideFields(toHide);
+
+        var toShow = [];
+        toShow.push($('workItemEscalationStartField'));
+        toShow.push($('workItemEscalationRuleField'));
+        toShow.push($('workItemEscalationTemplateField'));
+        showFields(toShow);
+      }
+      else if (style == 'both') {
+        var toHide = [];
+        toHide.push($('workItemEscalationStartField'));
+        hideFields(toHide);
+
+        var toShow = [];
+        toShow.push($('workItemReminderStartField'));
+        toShow.push($('workItemReminderFreqField'));
+        toShow.push($('workItemReminderTemplateField'));
+        toShow.push($('workItemMaxRemindersField'));
+        toShow.push($('workItemEscalationRuleField'));
+        toShow.push($('workItemEscalationTemplateField'));
+        showFields(toShow);
+      }
+
+      // let other components know we've resized so we
+      // can relayout parent components
+      Page.fireEvent('resizeWorkItemConfig');
+    }
+
+    function hideFields(array) {
+      for (var i = 0 ; i < array.length ; i++) {
+        array[i].style.display = 'none';
+      }
+    }
+
+    function showFields(array) {
+      for (var i = 0 ; i < array.length ; i++) {
+        array[i].style.display = '';
+      }
+    }
+
+    //]]>
+  </script>
+
+  <h:inputHidden id="#{idpre}hiddenStyle" value="#{config.escalationStyle}"/>
+
+  <table class="#{tableCls != null ? tableCls : 'customWidth paddedTbl'}" cellspacing="0">
+    <tr>
+      <td colspan="5"><h:outputText styleClass="spContentTitle" value="#{title}"/></td>
+    </tr>
+
+    <tr id="workItemNotificationField">
+      <td align="right"><h:outputText value="#{msgs.label_initial_notification_email}" /></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpInitialTemplate" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_initial_template}"/>
+      </td>
+      <td>
+        <h:selectOneMenu id="#{idpre}workItemNotificationTemplate" value="#{config.notificationEmail}"
+                         disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                         readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}">
+          <f:selectItems value="#{config.emailTemplates}" />
+        </h:selectOneMenu>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemNotificationTemplate" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemNotificationTemplateError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+
+    <tr id="workItemEscalationStyleField" style="#{config.workItemEnabled ? '' : 'display: none;'}">
+      <td align="right"><h:outputText value="#{msgs.label_escalation}"/></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpStyle" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_escalation_style}"/>
+      </td>
+      <td>
+        <h:selectOneRadio id="#{idpre}workItemStyle" value="#{config.escalationStyle}"
+          onclick="javascript:updateEscalationStyle(this);"
+          disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+          readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}">
+          <f:selectItem itemValue="none" itemLabel="#{msgs.item_label_none}"/>
+          <f:selectItem itemValue="reminder" itemLabel="#{msgs.item_label_send_reminders}"/>
+          <f:selectItem itemValue="both" itemLabel="#{msgs.item_label_reminders_escalation}"/>
+          <f:selectItem itemValue="escalation" itemLabel="#{msgs.item_label_escalation_only}" />
+        </h:selectOneRadio>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemStyle" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemStyleError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+
+    <ui:fragment rendered="#{optionalWorkItem == 'true'}">
+      <tr id="workItemEnabledField">
+        <td align="right"><h:outputText value="#{msgs.label_open_work_item}" /></td>
+        <td width="15px">
+	      <h:graphicImage id="#{idpre}imgHlpEnable" styleClass="helpIcon"
+	        url="/images/icons/dashboard_help_16.png" 
+	        alt="#{help.work_item_enable}"/>            
+        </td>
+        <td>
+          <h:selectBooleanCheckbox id="doWorkItems" value="#{config.workItemEnabled}"
+            onclick="javascript:toggleAllWorkItemConfigFields(this);"
+            disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"/>
+        </td>
+        <td colspan="2"/>
+      </tr>
+    </ui:fragment>
+
+    <tr id="workItemReminderStartField" style="#{config.workItemEnabled and config.escalationStyle != 'none' ? '' : 'display: none;'}">
+      <td align="right"><h:outputText value="#{config.escalationStyle != 'escalate' ? msgs.label_days_before_first_reminder : msgs.label_escalate_days_before}"/></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpRemStart" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_reminder_start}"/>
+      </td>
+      <td>
+        <h:inputText id="#{idpre}workItemReminderStart" value="#{config.daysTillReminder}" size="3"
+                     disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                     readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"> 
+          <f:validateLongRange minimum="0" maximum="999" />
+        </h:inputText>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemReminderStart" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemReminderStartError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+
+    <tr id="workItemReminderFreqField" style="#{config.workItemEnabled and config.escalationStyle == 'reminder' || config.escalationStyle == 'both' ? '' : 'display: none;'}">
+      <td align="right"><h:outputText value="#{msgs.label_reminder_frequency}" /></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpRemFreq" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_reminder_frequency}"/>
+      </td>
+      <td>
+        <h:inputText id="#{idpre}workItemReminderFreq" value="#{config.daysBetweenReminders}" size="3"
+                     disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                     readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"> 
+        </h:inputText>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemReminderFreq" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemReminderFreqError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+    
+    <tr id="workItemReminderTemplateField" style="#{config.workItemEnabled and (config.escalationStyle == 'reminder' || config.escalationStyle == 'both') ? '' : 'display: none;'}">
+      <td align="right"><h:outputText value="#{msgs.label_reminder_email_template}" /></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpRemTemplate" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_reminder_template}"/>
+      </td>
+      <td>
+        <h:selectOneMenu id="#{idpre}workItemReminderTemplate" value="#{config.reminderEmail}"
+                         disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                         readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}">
+          <f:selectItems value="#{config.emailTemplates}" />
+        </h:selectOneMenu>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemReminderTemplate" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemReminderTemplateError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+
+    <tr id="workItemMaxRemindersField" style="#{config.workItemEnabled and config.escalationStyle == 'both' ? '' : 'display: none;'}">
+      <td align="right"><h:outputText value="#{msgs.label_reminders_before_escalation}" /></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpEscTrigger" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_max_reminders}"/>
+      </td>
+      <td>
+        <h:inputText id="#{idpre}workItemMaxReminders" size="3" value="#{config.maxReminders}"
+                     disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                     readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}">
+          <f:validateLongRange minimum="0" maximum="999" />
+        </h:inputText>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemMaxReminders" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemMaxRemindersError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+
+    <tr id="workItemEscalationStartField" style="#{config.workItemEnabled and config.escalationStyle == 'escalation' ? '' : 'display: none;'}">
+      <td align="right"><h:outputText value="#{msgs.label_escalate_days_before}"/></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpEscStart" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_escalation_start}"/>
+      </td>
+      <td>
+        <h:inputText id="#{idpre}workItemEscalationStart" value="#{config.daysTillEscalation}" size="3"
+                     disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                     readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"> 
+          <f:validateLongRange minimum="0" maximum="999" />
+        </h:inputText>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemEscalationStart" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemEscalationStartError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+
+    <tr id="workItemEscalationRuleField" style="#{config.workItemEnabled and (config.escalationStyle == 'escalation' || config.escalationStyle == 'both') ? '' : 'display: none;'}">
+      <td align="right"><h:outputText value="#{msgs.label_escalation_owner_rule}" /></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpEscRule" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_escalation_rule}"/>
+      </td>
+      <td>
+        <a4j:outputPanel id="#{idpre}workItemEscalationRulePanel">
+        <h:selectOneMenu id="#{idpre}workItemEscalationRule" styleClass="#{idpre}workItemEscalationRule" value="#{config.escalationRule}"
+                         disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                         readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}">
+          <f:selectItems value="#{config.escalationRules}" />
+        </h:selectOneMenu>
+          
+        <a4j:commandButton id="#{idpre}refreshWorkItemConfigRulesButton"
+                           style="display:none"
+                           styleClass="#{idpre}refreshWorkItemConfigRulesButton"
+                           immediate="true"
+                           render="#{idpre}workItemEscalationRulePanel"/>
+        </a4j:outputPanel>
+        
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >  
+            <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                   onclick="SailPoint.Rule.Editor.edit(Ext.query('.#{idpre}workItemEscalationRule')[0].value,
+                                                       'Escalation',
+                                                       Ext.query('.#{idpre}refreshWorkItemConfigRulesButton')[0])" />
+        </ui:fragment>                                                             
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemEscalationRule" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemEscalationRuleError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+
+    <tr id="workItemEscalationTemplateField" style="#{config.workItemEnabled and (config.escalationStyle == 'escalation' || config.escalationStyle == 'both') ? '' : 'display: none;'}">
+      <td align="right"><h:outputText value="#{msgs.label_escalation_email}" /></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpEscTemplate" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{help.work_item_escalation_template}"/>
+      </td>
+      <td>
+        <h:selectOneMenu id="#{idpre}workItemEscalationTemplate" value="#{config.escalationEmail}"
+                         disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                         readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}">
+          <f:selectItems value="#{config.emailTemplates}" />
+        </h:selectOneMenu>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemEscalationTemplate" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemEscalationTemplateError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+      
+    <tr style="vertical-align: top">
+      <td align="right" width="25%"><h:outputText value="#{ownerTitle}"/></td>
+      <td width="15px">
+        <h:graphicImage id="#{idpre}imgHlpOwner" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" 
+          alt="#{ownerHelp}"/>
+      </td>
+      <td>
+        <h:panelGroup>
+          <div id="workItemOwnerMultiSuggest"></div>
+          <t:inputHidden id="#{idpre}workItemOwner"
+                         value="#{config.ownerIds}"
+                         forceId="true">
+              <sp:convertList />
+          </t:inputHidden>
+        </h:panelGroup>
+      </td>
+      <td colspan="2">
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message for="#{idpre}workItemOwner" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+        <div id="#{idpre}workItemOwnerError" class="formErrorNoPad" style="display:none"></div>
+      </td>
+    </tr>
+  </table>
+
+</ui:composition>
+
+</body>
+</html>

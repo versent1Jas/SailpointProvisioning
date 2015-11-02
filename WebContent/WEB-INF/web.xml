@@ -1,0 +1,858 @@
+<?xml version="1.0"?>
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+    <description>
+      SailPoint Compliance Demo is an application the provides an interface
+      for managing, monitoring, and reporting on aspects of your enterprise
+      related to compliance.
+    </description>
+
+    <!--===============================================================
+        Parameters
+      ================================================================-->
+
+    <context-param> 
+      <param-name>com.sun.faces.enableRestoreView11Compatibility</param-name> 
+      <param-value>true</param-value>
+    </context-param>
+
+    <context-param>
+      <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+      <param-value>.xhtml</param-value>
+    </context-param>
+
+    <!-- Special Debug Output for Development -->
+    <context-param>
+      <param-name>facelets.DEVELOPMENT</param-name>
+      <param-value>false</param-value>
+    </context-param>
+
+    <!-- Special secret setting that fixes stuff -->
+    <context-param>
+      <param-name>facelets.BUILD_BEFORE_RESTORE</param-name>
+      <param-value>true</param-value>
+    </context-param>
+
+    <!-- Optional JSF-RI Parameters to Help Debug -->
+    <context-param>
+      <param-name>com.sun.faces.validateXml</param-name>
+      <param-value>true</param-value>
+    </context-param>
+
+    <context-param>
+      <param-name>com.sun.faces.verifyObjects</param-name>
+      <param-value>true</param-value>
+    </context-param>
+
+    <context-param>
+      <param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
+      <param-value>2</param-value>
+    </context-param>
+
+    <context-param>
+      <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+      <param-value>server</param-value>
+    </context-param>
+    
+    <context-param>
+       <param-name>org.richfaces.enableControlSkinning</param-name>
+       <param-value>false</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>com.sun.faces.expressionFactory</param-name>
+        <param-value>com.sun.el.ExpressionFactoryImpl</param-value>
+    </context-param>
+    
+    <!-- Added to keep compatibility with the jsf 1.1 validation
+    We should revisit this when we have more time -->
+    <context-param>
+        <param-name>javax.faces.VALIDATE_EMPTY_FIELDS</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    
+    <context-param>
+      <param-name>org.jboss.jbossfaces.WAR_BUNDLES_JSF_IMPL</param-name>
+      <param-value>true</param-value>
+    </context-param>
+    
+    <!--===============================================================
+        Listeners
+      ================================================================-->
+
+    <!-- This is what gets Spring started, brings up Hibernate, Quartz, etc. -->
+    <listener>
+      <listener-class>
+        sailpoint.web.StartupContextListener
+      </listener-class>
+    </listener>
+
+    <listener>
+      <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
+    </listener>
+    
+    <listener> 
+       <listener-class>sailpoint.server.CsrfSessionListener</listener-class> 
+    </listener> 
+
+    <!--===============================================================
+        Filters
+      ================================================================-->
+
+    <!-- Force everything to use UTF-8.
+         Necessary (for Tomcat at least) because not all browsers set the proper 
+         encoding (even if it is specified in the HTML source).  -->
+    <filter>
+        <filter-name>characterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+          <param-name>forceEncoding</param-name>
+          <param-value>true</param-value>
+        </init-param>
+        <init-param>
+          <param-name>encoding</param-name>
+          <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    
+    <filter-mapping>
+       <filter-name>characterEncodingFilter</filter-name>
+       <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+      <filter-name>responseHeaderFilter</filter-name>
+      <filter-class>sailpoint.web.ResponseHeaderFilter</filter-class>
+      <init-param>
+        <param-name>Cache-Control</param-name>
+        <param-value>no-store</param-value>
+      </init-param>
+      <init-param>
+        <param-name>Pragma</param-name>
+        <param-value>no-cache</param-value>
+      </init-param>
+    </filter>
+
+    <filter-mapping>
+      <filter-name>responseHeaderFilter</filter-name>
+      <url-pattern>/rest/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>responseHeaderFilter</filter-name>
+      <url-pattern>/ui/rest/*</url-pattern>
+    </filter-mapping>
+  
+    <filter-mapping>
+      <filter-name>responseHeaderFilter</filter-name>
+      <url-pattern>*.jsf</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>responseHeaderFilter</filter-name>
+      <url-pattern>*.xmlds</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>responseHeaderFilter</filter-name>
+      <url-pattern>*.json</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>responseHeaderFilter</filter-name>
+      <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+
+    <filter>
+      <display-name>Timing Filter</display-name>
+      <filter-name>timingFilter</filter-name>
+      <filter-class>sailpoint.web.util.TimingFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+      <filter-name>timingFilter</filter-name>
+      <url-pattern>*.jsf</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>timingFilter</filter-name>
+      <url-pattern>*.xmlds</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>timingFilter</filter-name>
+      <url-pattern>*.json</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+      <filter-name>timingFilter</filter-name>
+      <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+    
+    <filter>
+      <display-name>HTTP Method Filter</display-name>
+      <filter-name>methodFilter</filter-name>
+      <filter-class>sailpoint.web.util.MethodFilter</filter-class>
+      <init-param>
+        <param-name>methods</param-name>
+        <param-value>PUT,DELETE,TRACE,OPTIONS</param-value>
+      </init-param>
+    </filter>
+    
+    <filter-mapping>
+      <filter-name>methodFilter</filter-name>
+      <url-pattern>*.jsf</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>methodFilter</filter-name>
+      <url-pattern>*.xmlds</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+      <filter-name>methodFilter</filter-name>
+      <url-pattern>*.json</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>methodFilter</filter-name>
+      <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+    
+    <filter>
+      <display-name>JSON Filter</display-name>
+      <filter-name>jsonFilter</filter-name>
+      <filter-class>sailpoint.web.util.JsonFilter</filter-class>
+    </filter>
+    
+    <filter-mapping>
+      <filter-name>jsonFilter</filter-name>
+      <url-pattern>*.json</url-pattern>
+    </filter-mapping>
+
+
+    <filter>
+      <display-name>Javascript Filter</display-name>
+      <filter-name>jsFilter</filter-name>      
+      <filter-class>sailpoint.web.util.JavascriptFilter</filter-class>
+      <init-param>
+        <param-name>encoding</param-name>
+        <param-value>UTF-8</param-value>
+      </init-param>
+    </filter>
+    
+    <filter-mapping>
+      <filter-name>jsFilter</filter-name>
+      <url-pattern>*.js</url-pattern>
+    </filter-mapping>
+
+    <filter>
+      <filter-name>SailPoint Context Filter</filter-name>
+      <filter-class>sailpoint.web.SailPointContextRequestFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+      <filter-name>SailPoint Context Filter</filter-name>
+      <url-pattern>*.jsf</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>SailPoint Context Filter</filter-name>
+      <url-pattern>*.xmlds</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+      <filter-name>SailPoint Context Filter</filter-name>
+      <url-pattern>*.json</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>SailPoint Context Filter</filter-name>
+      <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>SailPoint Context Filter</filter-name>
+      <url-pattern>/rest/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>SailPoint Context Filter</filter-name>
+      <url-pattern>/ui/rest/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Entry point for the SOAPRouter SPML handler. -->
+    <filter-mapping>
+      <filter-name>SailPoint Context Filter</filter-name>
+      <url-pattern>/spml</url-pattern>
+    </filter-mapping>
+
+    <filter>
+      <filter-name>pageAuthenticationFilter</filter-name>
+      <filter-class>
+          sailpoint.web.PageAuthenticationFilter
+      </filter-class>
+      <init-param>
+          <param-name>loginUrl</param-name>
+          <param-value>/login.jsf</param-value>
+      </init-param>
+      <init-param>
+        <param-name>mobileLoginUrl</param-name>
+        <param-value>/ui/login.jsf</param-value>
+      </init-param>
+      <init-param>
+        <param-name>promptLoginUrl</param-name>
+        <param-value>/login.jsf?prompt=true</param-value>
+      </init-param>
+      <init-param>
+        <param-name>promptMobileLoginUrl</param-name>
+        <param-value>/ui/login.jsf?prompt=true</param-value>
+      </init-param>
+      <init-param>
+          <param-name>logoutUrl</param-name>
+          <param-value>/logout.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>expiredPasswordUrl</param-name>
+          <param-value>/expiredPassword.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>resetPasswordUrl</param-name>
+          <param-value>/resetPassword.jsf</param-value>
+      </init-param>
+      <init-param>
+        <param-name>forgotPasswordUrl</param-name>
+        <param-value>/forgotPassword.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>timeoutUrl</param-name>
+          <param-value>/timeout.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>endUserLoadFailureUrl</param-name>
+          <param-value>/user/notFound.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>desktopResetSuccessUrl</param-name>
+          <param-value>/passwordResetSuccess.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>userPageResourceUrls</param-name>
+          <param-value>/identity/linkDetails.jsf,/define/groups/counterAccountGroupsDataSource.json,/identity/viewAccountGroupWrapper.jsf,/define/groups/inheritedAccountGroupsDataSource.json,/define/groups/inheritingAccountGroupsDataSource.json,/define/groups/permissionsDataSource.json,/define/groups/accountGroupMembersDataSource.json,/identity/roleDetails.json,/identity/roleJson.json,/identity/businessRoleDetailsTabPanel.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>externalPagesPath</param-name>
+          <param-value>/external/</param-value>
+      </init-param>
+      <init-param>
+          <param-name>mobileExternalPagesPath</param-name>
+          <param-value>/ui/external/</param-value>
+      </init-param>
+      <init-param>
+          <param-name>setTimezoneUrl</param-name>
+          <param-value>/ui/setTimeZone.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>defaultLandingUrl</param-name>
+          <param-value>/dashboard.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>defaultMobileLandingUrl</param-name>
+          <param-value>/ui/index.jsf</param-value>
+      </init-param>
+    </filter>
+
+    <filter-mapping>
+      <filter-name>pageAuthenticationFilter</filter-name>
+      <url-pattern>*.jsf</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>pageAuthenticationFilter</filter-name>
+      <url-pattern>*.xmlds</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+      <filter-name>pageAuthenticationFilter</filter-name>
+      <url-pattern>*.json</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>pageAuthenticationFilter</filter-name>
+      <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+
+    <filter>
+      <filter-name>pageAuthorizationFilter</filter-name>
+      <filter-class>
+          sailpoint.web.PageAuthorizationFilter
+      </filter-class>
+      <init-param>
+          <param-name>accessDeniedUrl</param-name>
+          <param-value>/accessDenied.jsf</param-value>
+      </init-param>
+    </filter>
+
+    <filter-mapping>
+      <filter-name>pageAuthorizationFilter</filter-name>
+      <url-pattern>*.jsf</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>pageAuthorizationFilter</filter-name>
+      <url-pattern>*.xmlds</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+      <filter-name>pageAuthorizationFilter</filter-name>
+      <url-pattern>*.json</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+      <filter-name>pageAuthorizationFilter</filter-name>
+      <url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
+
+    <filter>
+      <filter-name>MyFacesExtensionsFilter</filter-name>
+      <filter-class>
+        org.apache.myfaces.webapp.filter.ExtensionsFilter
+      </filter-class>
+    </filter>
+
+      <!-- extension mapping for adding <script/>, <link/>, and other
+           resource tags to JSF-pages  -->
+    <filter-mapping>
+      <filter-name>MyFacesExtensionsFilter</filter-name>
+        <!-- servlet-name must match the name of the
+             javax.faces.webapp.FacesServlet entry -->
+      <servlet-name>Faces Servlet</servlet-name>
+    </filter-mapping>
+
+      <!-- extension mapping for serving page-independent resources
+           (javascript, stylesheets, images, etc.)  -->
+    <filter-mapping>
+      <filter-name>MyFacesExtensionsFilter</filter-name>
+      <url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+      <filter-name>restAuthenticationFilter</filter-name>
+      <filter-class>
+          sailpoint.rest.AuthenticationFilter
+      </filter-class>
+      <init-param>
+          <param-name>ignoredPaths</param-name>
+          <param-value>/authentication, /userReset, /messageCatalog, /redirect</param-value>
+      </init-param>
+    </filter>
+
+    <filter-mapping>
+      <filter-name>restAuthenticationFilter</filter-name>
+      <url-pattern>/rest/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+     <filter-name>restAuthenticationFilter</filter-name>
+     <url-pattern>/ui/rest/*</url-pattern>
+    </filter-mapping>
+
+<!--
+  REST CSRF validation filter. Remove the following filter and filter mappings to disable CSRF validation for 
+  REST apis.
+-->
+  
+  <filter>
+    <filter-name>restCsrfValidationFilter</filter-name>
+    <filter-class>
+      sailpoint.rest.RestCsrfValidationFilter
+    </filter-class>
+    <!-- The list of GET paths to ignore in Csrf validation. Note: POST and PUT paths are never ignored. -->
+    <init-param>
+      <param-name>ignoredPaths</param-name>
+      <param-value>/rest/report, /rest/image, /ui/rest/redirect</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>restCsrfValidationFilter</filter-name>
+    <url-pattern>/rest/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>restCsrfValidationFilter</filter-name>
+    <url-pattern>/ui/rest/*</url-pattern>
+  </filter-mapping>
+
+    <!-- Registration filter -->
+    <filter>
+      <filter-name>registrationFilter</filter-name>
+      <filter-class>
+          sailpoint.web.RegistrationFilter
+      </filter-class>
+      <init-param>
+          <param-name>loginUrl</param-name>
+          <param-value>/login.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>registrationErrorUrl</param-name>
+          <param-value>/external/registrationError.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>registrationSuccessUrl</param-name>
+          <param-value>/external/registrationSuccess.jsf</param-value>
+      </init-param>
+      <init-param>
+          <param-name>registrationSuccessAction</param-name>
+          <param-value>registrationSuccess</param-value>
+      </init-param>
+    </filter>
+    
+    <filter-mapping>
+      <filter-name>registrationFilter</filter-name>
+      <url-pattern>/external/registration.jsf</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+      <filter-name>registrationFilter</filter-name>
+      <url-pattern>/external/registrationError.jsf</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+      <filter-name>registrationFilter</filter-name>
+      <url-pattern>/external/registrationSuccess.jsf</url-pattern>
+    </filter-mapping>
+
+  <!-- Method Override Filter -->
+  <filter>
+    <filter-name>methodOverrideFilter</filter-name>
+    <filter-class>
+      sailpoint.rest.jaxrs.MethodOverrideFilter
+    </filter-class>
+    <init-param>
+      <param-name>allowedMethods</param-name>
+      <param-value>PATCH</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>methodOverrideFilter</filter-name>
+    <url-pattern>/ui/rest/*</url-pattern>
+  </filter-mapping>
+
+  <!--===============================================================
+      Servlets
+    ================================================================-->
+
+    <servlet>
+      <servlet-name>Faces Servlet</servlet-name>
+      <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+      <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>*.jsf</url-pattern>
+    </servlet-mapping>
+
+    <!-- This servlet-mapping added for WebSphere 6.1.0.9 compatability -->
+    <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>/faces/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Note: the .xmlds (XML data source) extension is mapped separately -->
+    <!-- from the .jsf extension so the HTML JTidy filter used by a4j is   -->
+    <!-- not applied when we return XML content from a facelet.            -->
+    <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>*.xmlds</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>*.json</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+      <servlet-name>Image Servlet</servlet-name>
+      <servlet-class>sailpoint.reporting.JasperImageServer</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Resource Servlet</servlet-name>
+        <servlet-class>org.richfaces.webapp.ResourceServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Resource Servlet</servlet-name>
+        <url-pattern>/org.richfaces.resources/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+      <servlet-name>Image Servlet</servlet-name>
+      <url-pattern>/reporting/image</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+      <servlet-name>Help Servlet</servlet-name>
+      <servlet-class>sailpoint.web.help.HelpServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>Help Servlet</servlet-name>
+      <url-pattern>/help</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+      <servlet-name>JAX-RS REST Servlet</servlet-name>
+      <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+
+      <!-- 
+        Ideally, we would let Jersey scan for annotated classes, but this causes
+        some application servers grief.  Instead we'll hardcode these in our 
+        custom Application for now.
+       -->
+      <init-param>
+        <param-name>javax.ws.rs.Application</param-name>
+        <param-value>com.versent.sailpoint.rest.RestIndex</param-value>
+      </init-param>
+
+      <!--
+        In Java 1.5, the JAXB jars are required for WADL generation.  Including
+        these has led to strange classpath conflicts in weblogic, so we'll just
+        turn off WADL generation.
+       -->
+      <init-param>
+        <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+        <param-value>true</param-value>
+      </init-param>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>JAX-RS REST Servlet</servlet-name>
+      <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+      <servlet-name>JAX-RS UI REST Servlet</servlet-name>
+      <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+
+      <!-- 
+        Ideally, we would let Jersey scan for annotated classes, but this causes
+        some application servers grief.  Instead we'll hardcode these in our 
+        custom Application for now.
+       -->
+      <init-param>
+        <param-name>javax.ws.rs.Application</param-name>
+        <param-value>sailpoint.rest.ui.SailPointUiRestApplication</param-value>
+      </init-param>
+      <!-- This secion has been added by Jaspreet -->
+      <!-- Following code is to enable the POJO mapping feature for custom REST service -->
+      <init-param>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>com.versent.sailpoint.resources</param-value>
+		</init-param>
+			<init-param>
+		<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
+		<param-value>true</param-value>
+	</init-param>
+<!-- This secion has been added by Jaspreet -->
+      <!--
+        In Java 1.5, the JAXB jars are required for WADL generation.  Including
+        these has led to strange classpath conflicts in weblogic, so we'll just
+        turn off WADL generation.
+       -->
+      <init-param>
+        <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+        <param-value>true</param-value>
+      </init-param>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>JAX-RS UI REST Servlet</servlet-name>
+      <url-pattern>/ui/rest/*</url-pattern>
+    </servlet-mapping>
+    
+	<!-- TaskResult Progress -->
+    <servlet>
+	    <servlet-name>TaskProgress Servlet</servlet-name>
+	    <servlet-class>sailpoint.web.task.TaskProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+    	<servlet-name>TaskProgress Servlet</servlet-name>
+    	<url-pattern>/taskProgress</url-pattern>
+    </servlet-mapping>
+
+	<!-- Error 500 -->
+    <servlet>
+	    <servlet-name>Error 500 Servlet</servlet-name>
+	    <servlet-class>sailpoint.web.Error500Servlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+    	<servlet-name>Error 500 Servlet</servlet-name>
+    	<url-pattern>/error500</url-pattern>
+    </servlet-mapping>
+
+    <!-- Only for testing -->
+    <servlet>
+      <servlet-name>TestIntegration Servlet</servlet-name>
+      <servlet-class>sailpoint.integration.IntegrationServlet</servlet-class>
+      <init-param>
+        <param-name>handler</param-name>
+        <param-value>sailpoint.integration.TestIntegration</param-value>
+      </init-param>
+      <init-param>
+        <param-name>authenticator</param-name>
+        <param-value>sailpoint.integration.TestAuthenticator</param-value>
+      </init-param>
+      <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>TestIntegration Servlet</servlet-name>
+      <url-pattern>/integrationtest/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+      <servlet-name>Desktop Password Reset Tool Servlet</servlet-name>
+      <servlet-class>sailpoint.web.DesktopResetServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>Desktop Password Reset Tool Servlet</servlet-name>
+      <url-pattern>/desktopreset</url-pattern>
+    </servlet-mapping>
+
+	<!-- ================================================================-->
+	<!-- ======= packtag stuff ==========================================-->
+	<servlet>
+		<description>This is the servlet needed for cache.type servlet, returns the packed resources</description>
+		<display-name>PackServlet</display-name>
+		<servlet-name>PackServlet</servlet-name>
+		<servlet-class>sailpoint.web.tags.resourceInclude.servlet.PackServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>PackServlet</servlet-name>
+		<url-pattern>*.pack</url-pattern>
+	</servlet-mapping>
+
+	<!--
+		This would delete all files generated by previous pack:tag
+		minifications (when cache.type is file). Attention: Experimental
+		<servlet> <servlet-name>PackTagCleanupServlet</servlet-name>
+        <servlet-class>sailpoint.web.tags.resourceInclude.servlet.CleanupServlet</servlet-class>
+		<load-on-startup>20</load-on-startup> </servlet>
+	-->
+	<!--  ===== End: packtag stuff ===========================================-->
+
+    <!--===============================================================
+        Security
+      ================================================================-->
+
+    <!-- This security constraint illustrates how JSP pages
+          with JSF components can be protected from
+          being accessed without going through the Faces Servlet.
+          The security constraint ensures that the Faces Servlet will
+          be used or the pages will not be processed. -->
+
+    <security-constraint>
+      <display-name>Restrict access to XHTML pages</display-name>
+      <web-resource-collection>
+        <web-resource-name>Restrict access to XHTML pages</web-resource-name>
+        <url-pattern>*.xhtml</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+        <description>With no roles defined, no access granted</description>
+      </auth-constraint>
+    </security-constraint>
+
+
+    <login-config>
+      <auth-method>BASIC</auth-method>
+    </login-config>
+
+    <!--===============================================================
+        SPML
+      ================================================================-->
+
+    <!-- 
+      This is actually more general but we only use it for SPML at the moment.
+    -->
+    <servlet>
+      <display-name>SailPoint SOAP Router</display-name>
+      <servlet-name>soaprouter</servlet-name>
+      <servlet-class>sailpoint.spml.SOAPRouter</servlet-class>
+      <init-param>
+          <param-name>handlers</param-name>
+          <param-value>sailpoint.spml.SailPointHandler</param-value>
+      </init-param>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>soaprouter</servlet-name>
+      <url-pattern>/spml</url-pattern>
+    </servlet-mapping>
+
+    <!--===============================================================
+        Other
+      ================================================================-->
+
+    <!-- Set the HTTP session timeout in minutes.  The default for most
+         application servers is 30 minutes.  Uncomment the following and
+         change the value as desired to change the default. -->
+    <!--
+    <session-config>
+      <session-timeout>30</session-timeout>
+    </session-config>
+    -->
+  
+    <!-- currently the W3C havent settled on a media type for WSDL;
+         http://www.w3.org/TR/2003/WD-wsdl12-20030303/#ietf-draft
+         for now we go with the basic 'it's XML' response -->
+    <mime-mapping>
+      <extension>wsdl</extension>
+      <mime-type>text/xml</mime-type>
+    </mime-mapping>
+  
+    <mime-mapping>
+      <extension>xsd</extension>
+      <mime-type>text/xml</mime-type>
+    </mime-mapping>
+
+    <mime-mapping>
+      <extension>htc</extension>
+      <mime-type>text/x-component</mime-type>
+    </mime-mapping>
+    
+    <!-- Added to handle tomahawk components after JSF upgrade. Tomahawk components log and error around
+    Mime Type in Weblogic without a mime type set for xhtml files. -->
+    <mime-mapping>
+      <extension>xhtml</extension>
+      <mime-type>application/xhtml+xml</mime-type>
+    </mime-mapping>
+
+    <!-- Used for WebSphere 6.1.0.9 compatability -->
+    <welcome-file-list id="WelcomeFileList">
+      <welcome-file>index.jsp</welcome-file>
+      <welcome-file>index.html</welcome-file>
+      <welcome-file>index.jws</welcome-file>
+    </welcome-file-list>
+
+    <error-page>
+      <error-code>404</error-code>
+      <location>/error404.html</location>
+    </error-page>
+
+    <error-page>
+      <error-code>500</error-code>
+      <location>/error500</location>
+    </error-page>
+    
+
+</web-app>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui">
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+  <h:body>
+    <section ng-cloak="ng-cloak" ng-controller="ApprovalsCtrl" >
+      <div id="approvalMask" sp-loading-mask="approvals" role="presentation">
+        <!-- Sub-Header -->
+        <header class="panel-heading bg-white no-radius hidden-xs" ng-hide="totalApprovals &lt; 1">
+          <div class="text text-info font-thin h4 m-t-xs m-b-xs">
+            <span>
+              #{msgs.my_approvals_title}
+            </span>
+            <span id="approvalCountBadge" class="badge bg-info">
+              {{pageInfo.getTotal()}}
+            </span>
+          </div>
+        </header>
+        <!-- approvalsList -->
+        <section class="wrapper" ng-swipe-right="prevPage()" ng-swipe-left="nextPage()">
+          <!-- Sort by drop down -->
+          <div class="row m-b">
+            <div class="col-xs-4 pull-right">
+              <div role="presentation" class="btn-group approvals-sort pull-right">
+                <button id="sortByMenuBtn" type="button" class="btn btn-sm btn-white dropdown-toggle"
+                        data-toggle="dropdown" tabindex="50" ng-show="pageInfo.getTotal() > 1">
+                  #{msgs.sort_by}<i class="fa fa-chevron-down chevron m-l-xs" role="presentation"></i>
+                </button>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="sortByMenuBtn">
+                  <li role="presentation">
+                    <a href="" ng-click="sortByNewest()" role="menuitem" tabindex="50">#{msgs.my_approvals_sort_by_newest}
+                      <i class="fa fa-check text-muted" ng-if="isSortByNewest()"></i>
+                    </a>
+                  </li>
+                  <li role="presentation">
+                    <a href="" ng-click="sortByOldest()" role="menuitem" tabindex="50">#{msgs.my_approvals_sort_by_oldest}
+                      <i class="fa fa-check text-muted" ng-if="isSortByOldest()"></i>
+                    </a>
+                  </li>
+                  <li role="presentation">
+                    <a href="" ng-click="sortByPriority()" role="menuitem" tabindex="50">#{msgs.my_approvals_sort_by_priority}
+                      <i class="fa fa-check text-muted" ng-if="isSortByPriority()"></i>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Approval -->
+          <section ng-repeat="approval in approvals">
+            <div class="panel m-t-sm m-b-none animated" ng-controller="ApprovalCtrl" ng-class="{ lightSpeedOut: isCompleted() }">
+              <header class="panel-heading bg-info tooltip-wrapper clearfix clickable" ng-class="{'panel-collapse-toggle': isCollapsed}" ng-click="toggleCollapsed()" tabindex="50" sp-expander=".chevron">
+                <span class="sr-only">#{msgs.my_approvals_toggle_approval}</span>
+
+                <label ng-show="isHighPriority()"
+                       class="high-priority-icon m-r-xs"
+                       tooltip="{{ 'ui_my_approvals_high_priority' | spTranslate }}">
+                  <i class="fa fa-flag" role="presentation" aria-hidden="true"></i>
+                  <span class="sr-only" aria-hidden="{{!isHighPriority()}}">{{ 'ui_my_approvals_high_priority' | spTranslate }}</span>
+                </label>
+
+                <span class="font-thin h5">
+                  <strong>{{'ui_my_approvals_for' | spTranslate: getTotalCount()}}</strong> {{getRequesteeName()}}
+                </span>
+
+                <span class="nav panel-collapse-toggle bg-info ">
+                  <span ng-class="{ active: isCollapsed }" class="panel-toggle">
+                    <i class="fa fa-chevron-down chevron text-white" role="presentation"></i>
+                  </span>
+                </span>
+                <span class="sr-only" ng-if="isCollapsed">{{'ui_approval_click_show' | spTranslate}}</span>
+                <span class="sr-only" ng-if="!isCollapsed">{{'ui_approval_click_hide' | spTranslate}}</span>
+              </header>
+
+              <!-- Approval content -->
+              <section collapse="isCollapsed" class="panel-body">
+                <div class="clearfix">
+                  <div class="pull-left approval-assignee-container">
+                    <div class="text text-default"><b>#{msgs.my_approvals_by}</b> {{ getRequesterName() }}</div>
+                    <div class="text text-default" ng-show="isOwnerWorkgroup()">
+                      <b>#{msgs.ui_my_approvals_assigned_to}</b>
+                      <a href="" ng-click="showWorkgroupAssignmentDialog()">
+                        {{ getAssigneeName() }}
+                        <i class="fa fa-pencil-square text-info"></i>
+                        <span class="sr-only">{{ 'ui_my_approvals_change_workgroup_assignment' | spTranslate }}</span>
+                      </a>
+                    </div>
+                  </div>
+  
+                  <div class="pull-right m-t-n-xs hidden-xs">
+                    <a href="" class="btn btn-sm btn-white" ng-click="showDetails()" tabindex="50">
+                      <span aria-hidden="true">#{msgs.my_approvals_details}</span>
+                      <span class="sr-only">#{msgs.my_approvals_approval_details}</span>
+                    </a>
+                    <a href=""
+                       class="btn btn-sm"
+                       ng-click="showApprovalComments()"
+                       tabindex="50" ng-class="{'btn-success': getCommentCount(), 'btn-white': !getCommentCount()}">
+                      <i class="fa fa-comment" role="presentation"></i>
+                      <span class="sr-only">#{msgs.my_approvals_approval_comments}</span>
+                      <span ng-show="getCommentCount() > 0">
+                        {{ getCommentCount() }}
+                        <span class="sr-only"> #{msgs.my_approvals_approval_after_count}</span>
+                      </span>
+                    </a>
+  
+                    <div class="btn-group">
+                      <button id="actionsBtnLarge" type="button" class="btn btn-sm btn-white dropdown-toggle"
+                        data-toggle="dropdown" tabindex="50">
+                        <span>
+                          #{msgs.my_approvals_actions} <span class="fa fa-chevron-down chevron" role="presentation"></span>
+                        </span>
+                      </button>
+  
+                      <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="actionsBtnLarge">
+                        <li role="presentation">
+                          <a href="" ng-click="approveAll()" role="menuitem" tabindex="50">
+                            #{msgs.my_approvals_approve_all}
+                          </a>
+                        </li>
+                        <li role="presentation">
+                          <a href="" ng-click="rejectAll()" role="menuitem" tabindex="50">
+                            #{msgs.my_approvals_deny_all}
+                          </a>
+                        </li>
+                        <li role="presentation">
+                          <a href="" ng-click="showForwardDialog()" role="menuitem" tabindex="50">#{msgs.my_approvals_forward}</a>
+                        </li>
+                        <li role="presentation" ng-show="#{sp:getSystemConfigurationValue('workItemPriorityEditingEnabled', false)}">
+                          <a href="" ng-click="showEditPriorityDialog()" role="menuitem" tabindex="50">
+                            #{msgs.my_approvals_change_priority}
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+  
+                  <div class="pull-right visible-xs">
+                    <button id="actionsBtnSmall" type="button" class="btn btn-sm btn-white dropdown-toggle"
+                     data-toggle="dropdown" tabindex="50">
+                      <span>
+                        <i class="fa fa-ellipsis-v" role="presentation" aria-hidden="true"></i>
+                        <span class="sr-only">#{msgs.my_approvals_approval_menu}</span>
+                      </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="actionsBtnSmall">
+                      <li role="presentation">
+                        <a href="" ng-click="approveAll()" role="menuitem" tabindex="50">
+                          #{msgs.my_approvals_approve_all}
+                        </a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" ng-click="rejectAll()" role="menuitem" tabindex="50">
+                          #{msgs.my_approvals_deny_all}
+                        </a>
+                      </li>
+                      <li role="presentation">
+                        <a href="" ng-click="showForwardDialog()" role="menuitem" tabindex="50">#{msgs.my_approvals_forward}</a>
+                      </li>
+                      <li role="presentation" ng-show="#{sp:getSystemConfigurationValue('workItemPriorityEditingEnabled', false)}">
+                        <a href="" ng-click="showEditPriorityDialog()" role="menuitem" tabindex="50">
+                          #{msgs.my_approvals_change_priority}
+                        </a>
+                      </li>
+  
+                      <li role="presentation" class="divider">
+                      </li>
+                      <li role="presentation">
+                        <a href="" tabindex="50" ng-click="showDetails()">
+                          #{msgs.my_approvals_approval_details}
+                        </a>
+                      </li>
+                      <li>
+                        <a href=""
+                           ng-click="showApprovalComments()"
+                           tabindex="50">
+                          <span>#{msgs.my_approvals_approval_comments} </span>
+                          <span ng-show="getCommentCount() > 0" class="badge bg-info">{{ getCommentCount() }}</span>
+                          <span class="sr-only">#{msgs.my_approvals_approval_after_count}</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div ng-repeat="violation in approval.violations"
+                     class="alert alert-danger alert-stack"
+                     ng-class="{first : $first, last: $last}">
+                  <a href="" class="h5 text-danger" ng-click="showViolationDetails(violation)">
+                    <i aria-hidden="true" class="fa fa-warning"></i>
+                    {{'ui_my_approvals_violation_found' | spTranslate:(violation.ruleName)}}
+                  </a>
+                </div>
+
+                <!-- Entitlement Approval Item -->
+                <article class="media overflow-visible" ng-repeat="approvalItem in getApprovalItems()">
+                  <section class="panel m-t-xs" ng-controller="ApprovalItemCtrl">
+                    <div class="panel-heading bg-light lter">
+                      <div class="row m-l-none m-r-none">
+                        <div class="col-sm-4 no-padder m-t-xs">
+                          <strong>{{ getOperation() }}:</strong> {{isAccountRequest() ? getAccountDisplayName() : getDisplayValue()}}
+                        </div>
+                        <div class="col-sm-8 no-padder">
+                          <span class="approval-item-header-btns-panel">
+                            <a href=""
+                               ng-click="showItemDetails()"
+                               class="btn btn-sm btn-white m-l-none"
+                               tabindex="50">
+                              <span aria-hidden="true">#{msgs.my_approvals_details}</span>
+                              <span class="sr-only">#{msgs.my_approvals_item_details}</span>
+                            </a>
+
+                            <a href=""
+                               ng-click="showSunriseSunsetDialog()"
+                               ng-show="showDateColumn()"
+                               class="btn btn-sm m-l-none"
+                               tabindex="50"
+                               ng-class="{'btn-success': hasSunrise() || hasSunset(),
+                                          'btn-white': !(hasSunrise() || hasSunset())}">
+                              <i class="fa fa-calendar" role="presentation"></i>
+                              <span class="sr-only">{{'ui_my_approvals_sunrise_button' | spTranslate}}</span>
+                            </a>
+
+                            <a href=""
+                               class="btn btn-sm m-l-none"
+                               tabindex="50"
+                               ng-click="showApprovalItemComments()"
+                               ng-class="{'btn-success': getItemCommentCount(), 'btn-white': !getItemCommentCount()}">
+                              <i class="fa fa-comment" role="presentation"></i>
+                              <span class="sr-only">#{msgs.my_approvals_item_comments}</span>
+                              <span ng-show="getItemCommentCount() > 0">
+                                {{ getItemCommentCount() }}
+                                <span class="sr-only"> #{msgs.my_approvals_approval_after_count}</span>
+                              </span>
+                            </a>
+
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <sp-configurable-details ng-model="approvalItem" sp-col-configs="getColumnConfigs()">
+                    </sp-configurable-details>
+
+                    <footer class="panel-footer bg-light lter">
+                      <div class="row">
+                        <div class="pull-left clear m-l-sm">
+                          <button ng-class="{ 'btn-success active' : isApproved()}"
+                                 aria-pressed="{{isApproved()}}"
+                                 ng-click="approve()"
+                                 class="btn btn-sm btn-white"
+                                 role="button"
+                                 tabindex="50">
+                            <i class="fa fa-thumbs-up "
+                               ng-class="{ 'text-success': !isApproved() }"
+                               role="presentation"></i>
+                            #{msgs.my_approvals_approve}
+                          </button>
+
+                          <button ng-class="{ 'btn-danger active': isRejected()}"
+                                 aria-pressed="{{isRejected()}}"
+                                 ng-click="reject()"
+                                 class="btn btn-sm btn-white"
+                                 role="button"
+                                 tabindex="50">
+                            <i class="fa fa-thumbs-down"
+                               ng-class="{ 'text-danger': !isRejected() }"
+                               role="presentation"></i>
+                            #{msgs.my_approvals_deny}
+                          </button>
+
+                          <button ng-click="undo()"
+                                 class="btn btn-sm btn-white"
+                                 role="button"
+                                 tabindex="50">
+                            <i class="fa fa-undo" role="presentation"></i>
+                            <span class="hidden-xs">
+                              #{msgs.my_approvals_undo}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </footer>
+                  </section>
+                </article> <!-- /approval item -->
+                <footer>
+                  <a ng-show="getRemainingCount() == 0"
+                        ng-click="completePreDecided()"
+                        class="btn btn-sm btn-info full-width-xs"
+                        role="button"
+                        tabindex="50"
+                        href="">
+                    #{msgs.my_approvals_complete}
+                  </a>
+                </footer>
+              </section> <!-- /approval content -->
+            </div>
+          </section> <!-- /approval -->
+
+          <sp-current-page-info class="col-12 m-t-sm" ng-model="pageInfo" ng-if="pageInfo.getTotal() > 0"/>
+          <div class="text-center" ng-show="pageInfo.hasMultiplePages()">
+            <pagination total-items="pageInfo.getTotal()"
+                        items-per-page="pageInfo.itemsPerPage"
+                        ng-model="pageInfo.currentPage"
+                        ng-change="pageChanged()"
+                        max-size="5"
+                        rotate="true">
+            </pagination>
+          </div>
+          <section id="content" class="m-t-lg" ng-show="pageInfo.getTotal() === 0">
+            <div class="row m-n" role="presentation">
+              <div class="col-md-12">
+                <div class="col-xs-12 text-center">
+                  <h3 class="text-muted">#{msgs.my_approvals_no_approvals}</h3>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section> <!-- /.approvalList -->
+      </div>
+    </section> <!-- /.scrollable -->
+  </h:body>
+</html>

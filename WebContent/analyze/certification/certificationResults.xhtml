@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.cert_search_results}</ui:define>
+
+  <ui:define name="headerItems">
+  	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/analyze.js?#{debug.revision}</src>
+  	</sp:script>
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'CERTIFICATION_SEARCH_RESULTS';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages errorClass="formError" infoClass="formInfo"/>
+      <h:form styleClass="form" id="editForm">
+      
+        <h:inputHidden id="currentObjectId" value="#{certificationList.selectedId}"/>
+        
+        <h:commandButton id="editButton" style="display:none"
+          action="#{certificationList.select}"/>
+          
+        <script type="text/javascript" defer="defer">
+        <!--//--><![CDATA[//><!--    
+        
+          function viewCertItem() {
+            $('editForm:currentObjectId').value = gDbId;
+              $('editForm:editButton').click();
+          }
+          
+          function forwardFromMenu() {
+            forwardCertificationWorkItem(gDbId, 'certificationSearchResults');
+          }
+          
+          
+          function handleClick (gridView, record, HTMLitem, index, e, eOpts){
+              var pos = gridView.getSelectionModel().getCurrentPosition();
+              var colName = gridView.getHeaderCt().getHeaderAtIndex(pos.column).dataIndex;
+            if(colName) {          
+              $('editForm:currentObjectId').value = record.getId();
+              $('editForm:editButton').click();
+            }
+          }
+          
+          function contextMenu(gridView, record, HTMLitem, index, e, eOpts){
+            var contextMenu = new Ext.menu.Menu();
+            gDbId = record.getId();
+            gIsCertification = true;
+            gMenu = contextMenu;
+    
+            contextMenu.add(
+              new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_view)}', handler: viewCertItem, iconCls: 'viewDetailsBtn'}),
+              new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_forward)}', handler: forwardFromMenu, iconCls: 'forwardBtn'})
+            );          
+              
+            e.stopEvent();
+            contextMenu.showAt(e.xy);
+          }  
+        //--><!]]>
+        </script>
+      
+        <ui:include src="../searchResultsInclude.xhtml">
+          <ui:param name="gridPage" value="certification/certificationGrid.xhtml"/>
+          <ui:param name="ajaxUrl" value="#{base.requestContextPath}/analyze/certification/certificationDataSource.json" />
+          <ui:param name="totalRows" value="#{certificationSearch.count}"/>
+          <ui:param name="searchType" value="Certification"/>
+          <ui:param name="searchBean" value="#{certificationSearch}"/>
+          <ui:param name="formName" value="editForm"/>
+        </ui:include>
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

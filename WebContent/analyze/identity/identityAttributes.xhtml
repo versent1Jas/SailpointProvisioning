@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+    <table class="width100" cellspacing="0">
+    <tr>            
+      <td valign="top">  
+        <h:outputText class="sectionHeader" value="#{msgs.standard_attrs}"/>
+        <table cellpadding="5" cellspacing="0" class="width100 nowrap">
+          <tr>
+            <td>                
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['lastName'].description)}"/>
+            </td>
+            <td colspan="2">
+              <h:inputText id="identityLastName" styleClass="searchInputText inputWidth"
+                value="#{searchBean.inputs['lastName'].value}"/>
+            </td>             
+          </tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['firstName'].description)}"/>
+            </td>
+            <td colspan="2">
+              <h:inputText id="identityFirstName" styleClass="searchInputText inputWidth"
+                value="#{searchBean.inputs['firstName'].value}"/>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['userName'].description)}"/>
+            </td>
+            <td colspan="2">
+              <ui:include src="../suggestAttribute.xhtml">
+                <ui:param name="key" value="userName"/>
+                <ui:param name="field" value="userName"/>
+              </ui:include>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['displayName'].description)}"/>
+            </td>
+            <td colspan="2">      
+              <ui:include src="../suggestAttribute.xhtml">
+                <ui:param name="key" value="displayName"/>
+                <ui:param name="field" value="displayName"/>
+              </ui:include>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['email'].description)}"/>
+            </td>
+            <td colspan="2">     
+              <ui:include src="../suggestAttribute.xhtml">
+                <ui:param name="key" value="email"/>
+                <ui:param name="field" value="email"/>
+              </ui:include>
+            </td>
+          </tr> 
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['manager'].description)}"/>
+            </td>
+            <td colspan="2">   
+              <ui:include src="../suggestAttribute.xhtml">
+                <ui:param name="key" value="manager"/>
+                <ui:param name="field" value="manager"/>
+              </ui:include>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['inactive'].description)}"/>
+            </td>
+            <td colspan="2">
+              <h:selectOneMenu id="inactive" value="#{searchBean.inputs['inactive'].value}">
+                <f:selectItem itemLabel="" itemValue="" />
+                <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h:outputText styleClass="textBold"
+                value="#{sp:localizeKey(searchBean.inputs['isManager'].description)}"/>
+            </td>
+            <td colspan="2">
+              <h:selectOneMenu id="isManager" value="#{searchBean.inputs['isManager'].value}">
+                <f:selectItem itemLabel="" itemValue="" />
+                <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+              </h:selectOneMenu>
+            </td>
+          </tr>          
+        </table>
+      </td>
+      <td valign="top">
+      
+        <ui:fragment rendered="#{null != searchBean.extendedAttributeKeys}">
+          <h:outputText class="sectionHeader" value="#{msgs.searchable_attrs}"/>
+          <table id="extendedAttributesTbl" cellpadding="5" cellspacing="0" class="width100">
+            <t:dataList id="extendedIdentityAttributes" value="#{searchBean.extendedAttributeKeys}" var="key">
+              <tr>
+                <td valign="top"><h:outputText styleClass="textBold" value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+                </td>
+                
+                <!--  Boolean -->
+                <ui:fragment rendered="#{searchBean.extendedAttributes[key].type eq 'boolean'}">
+                
+                  <td>
+                    <h:selectOneMenu id="identityAttribute#{sp:buildValidComponentIdIgnoringNulls(key,true)}Boolean" value="#{searchBean.inputs[key].value}">
+                      <f:selectItem itemLabel="" itemValue="" />
+                      <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                      <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                    </h:selectOneMenu>
+                  </td>
+                </ui:fragment>
+                
+                <!--  Date -->
+                <ui:fragment rendered="#{searchBean.extendedAttributes[key].type eq 'date'}">                
+                  <td>
+                    <div class="identityAttributeDateField" id="dateAttribute#{sp:escapeHTMLElementId(key)}Date"></div>
+                    <h:inputHidden id="dateAttribute#{sp:buildValidComponentIdIgnoringNulls(key,true)}" value="#{searchBean.inputs[key].value}"></h:inputHidden>
+                    <div id="dateAttribute#{sp:escapeHTMLElementId(key)}Val" style="display:none">#{searchBean.inputs[key].value}</div>
+                  </td>
+                </ui:fragment>
+                
+                <!--  String/Long/Int...values -->
+                <ui:fragment rendered="#{!(searchBean.extendedAttributes[key].type eq 'boolean') 
+                                        and !(searchBean.extendedAttributes[key].type eq 'date')}">
+                
+                  <td>
+                    <ui:fragment rendered="#{!(searchBean.inputs[key].suggestType eq 'none')}">
+                      <div id="identityAttribute#{sp:escapeHTMLElementId(key)}Suggest"></div>
+                      <h:inputHidden id="identityAttribute#{sp:buildValidComponentIdIgnoringNulls(key,true)}" value="#{searchBean.inputs[key].value}">
+                          <f:attribute name="forceId" value="true"/>
+                      </h:inputHidden>
+                      <div id="identityAttribute#{sp:escapeHTMLElementId(key)}Val" style="display:none" class="identityAttribute">#{searchBean.inputs[key].value}</div>
+                      <div id="identityAttribute#{sp:escapeHTMLElementId(key)}Nbr" style="display:none">#{searchBean.extendedAttributes[key].name}</div>
+                      <div id="identityAttribute#{sp:escapeHTMLElementId(key)}Type" style="display:none">#{searchBean.extendedAttributes[key].type}</div>
+                    </ui:fragment>
+                    
+                    <ui:fragment rendered="#{searchBean.inputs[key].suggestType eq 'none'}">
+                      <h:inputText id="extendedAttribute#{sp:buildValidComponentIdIgnoringNulls(key,true)}" styleClass="searchInputText inputWidth"
+                                    value="#{searchBean.inputs[key].value}"/>
+                    </ui:fragment>
+                  </td>
+                </ui:fragment>
+                
+                
+              </tr>                  
+            </t:dataList>
+          </table>                
+        </ui:fragment>          
+      
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" style="padding: 6px">
+        <ui:fragment rendered="#{appDisplay != 'none'}">         
+          <h:outputText styleClass="textBold"
+          value="#{sp:localizeKey(searchBean.inputs['application'].description)}"/><br/>
+          
+          <div id="appNameMultiSuggest"></div>
+          <t:inputHidden id="appNameSuggest"
+                         value="#{searchBean.inputs['application'].objectListValue}" forceId="true">
+              <sp:convertList />
+          </t:inputHidden>
+          
+          <div id="appNameMultiSuggestData" style="display:none">
+            #{sp:basicJSONDataConverted(
+              searchBean.inputs['application'].objectListValue,
+              'ApplicationListConverter')}
+          </div>
+          <br/>
+          <h:outputText styleClass="textBold" value="#{sp:localizeKey(searchBean.inputs['instance'].headerKey)}"/>
+          <h:outputText value="  "/>
+          <div id="identInstanceSuggest"></div>
+          <t:inputHidden id="identInstance" value="#{searchBean.inputs['instance'].value}" forceId="true">
+          </t:inputHidden>   
+          <div id="identInstanceVal" style="display:none">#{searchBean.inputs['instance'].value}</div>   
+        </ui:fragment>
+      </td>
+      <td valign="top" style="padding: 6px">
+        <ui:fragment rendered="#{jfDisplay != 'none'}">
+          <h:outputText styleClass="textBold"
+          value="#{sp:localizeKey(searchBean.inputs['businessRole'].description)}"/><br/>
+          
+          <div id="roleMultiSuggest"></div>
+          <t:inputHidden id="roleSuggest"
+                         value="#{searchBean.inputs['businessRole'].objectListValue}" forceId="true">
+              <sp:convertList />
+          </t:inputHidden>
+          <div id="roleNameMultiSuggestData" style="display:none">
+            #{sp:basicJSONDataConverted(
+              searchBean.inputs['businessRole'].objectListValue,
+              'BundleListConverter')}
+          </div>
+          
+          <br/>          
+          <h:selectBooleanCheckbox id="identityRoleHierarchy" styleClass="searchBooleanCheckbox" value="#{searchBean.inputs['roleHierarchy'].value}"/>
+          <strong>
+            <h:outputText styleClass="textbold" value=" #{sp:localizeKey(searchBean.inputs['roleHierarchy'].headerKey)}"/>
+          </strong>
+          
+          <br/>
+          <h:outputText
+          value="#{sp:localizeKey(searchBean.inputs['roleHierarchy'].description)}"/><br/>
+        </ui:fragment>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" style="padding: 6px">
+        <ui:fragment rendered="#{jfDisplay != 'none'}">
+          <h:outputText styleClass="textBold"
+          value="#{sp:localizeKey(searchBean.inputs['assignedRole'].description)}"/><br/>
+          
+          <div id="assignedRoleMultiSuggest"></div>
+          <t:inputHidden id="assignedRoleSuggest"
+                         value="#{searchBean.inputs['assignedRole'].objectListValue}" forceId="true">
+              <sp:convertList />
+          </t:inputHidden>
+          <div id="assignedRoleNameMultiSuggestData" style="display:none">
+            #{sp:basicJSONDataConverted(
+              searchBean.inputs['assignedRole'].objectListValue,
+              'BundleListConverter')}
+          </div>
+          
+          <br/>
+          <h:selectBooleanCheckbox id="identityAssignedRoleHierarchy" styleClass="searchBooleanCheckbox" value="#{searchBean.inputs['assignedRoleHierarchy'].value}"/>
+          <strong>
+            <h:outputText styleClass="textbold" value=" #{sp:localizeKey(searchBean.inputs['assignedRoleHierarchy'].headerKey)}"/>
+          </strong>
+          
+          <br/>
+          <h:outputText value="#{sp:localizeKey(searchBean.inputs['assignedRoleHierarchy'].description)}"/><br/>
+        </ui:fragment>
+      </td>
+
+      <td valign="top" style="padding: 6px">
+        <ui:fragment rendered="#{appDisplay != 'none'}">         
+          <h:outputText styleClass="textBold"
+          value="#{sp:localizeKey(searchBean.inputs['workgroup'].description)}"/><br/>
+          
+          <div id="workgroupsMultiSuggest"></div>
+          <t:inputHidden id="workgroupsSuggest"
+                         value="#{searchBean.inputs['workgroup'].objectListValue}" forceId="true">
+              <sp:convertList />
+          </t:inputHidden>
+          
+          <div id="workgroupsMultiSuggestData" style="display:none">
+            #{sp:basicJSONDataConverted(
+              searchBean.inputs['workgroup'].objectListValue,
+              'IdentityListConverter')}
+          </div>
+        </ui:fragment>
+      </td>
+
+    </tr>
+    </table>
+    <script type="text/javascript" defer="defer">
+      SailPoint.Utils.styleSelects();
+    </script>
+</ui:composition>
+</body>
+</html>

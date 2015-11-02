@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+  <h:form styleClass="form" id="mainForm">
+  
+    <h:inputHidden id="isPolicy" value="#{policy.isPolicy}"/>
+  
+    <script type="text/javascript" defer="defer">
+      // <![CDATA[
+      function preSave() {
+        var policyDescriptionCmp = Ext.getCmp('policyDescriptionHTMLCmp');
+
+        if(policyDescriptionCmp) {
+          $('mainForm:sessionDescription').value = policyDescriptionCmp.getCleanValue();
+        }
+      }
+      //]]>
+    </script>
+
+      <div style="margin-top: 20px;" class="spContent">
+        <table border="0" cellpadding="5" cellspacing="0" class="width100 paddedTbl">
+          <tr >
+            <td colspan="2"><h:outputText value="#{policy.object.name}" styleClass="spContentTitle"/></td>
+          </tr>
+          <tr>
+            <td>
+              <ui:include src="policyCommon.xhtml">
+                <ui:param name="policy" value="#{policy}" />
+              </ui:include>
+            </td>
+          </tr>
+        </table>           
+      </div>  
+
+      <div id="AlertDiv" style="#{policy.policy.alert.enabled ? '' : 'display: none;'}">
+        <div class="spContent">
+          <ui:include src="../../include/workItemConfig.xhtml">
+            <ui:param name="mainForm" value="mainForm"/>
+            <ui:param name="config" value="#{policy.policy.alert}"/>
+            <ui:param name="title" value="#{msgs.alert_properties}"/>
+            <ui:param name="ownerTitle" value="#{msgs.label_observers}"/>
+            <ui:param name="ownerHelp" value="#{help.policy_alert_owners}"/>
+            <ui:param name="optionalWorkItem" value="true"/>
+            <ui:param name="manageRight" value="ManagePolicy" />
+          </ui:include>
+        </div>
+      </div>
+
+      <ui:fragment rendered="#{policy.policy.signature != null}">
+        <div class="spContent">
+          <h:outputText styleClass="spContentTitle" value="#{msgs.policy_attributes}"/>
+          <ui:include src="../../include/signature.xhtml">
+            <ui:param name="signature" value="#{policy.policy.signature}" /> 
+            <ui:param name="target" value="#{policy.policy}" /> 
+            <ui:param name="manageRight" value="ManagePolicy" />
+          </ui:include>        
+        </div>
+      </ui:fragment>
+
+      <ui:fragment rendered="#{policy.simpleConstraint != null}">
+        <div class="spContent">
+          <h:outputFormat styleClass="spContentTitle" value="#{msgs.section_generic_rule}"/>
+          <ui:include src="simpleConstraint.xhtml">
+            <ui:param name="constraint" value="#{policy.simpleConstraint}" />
+          </ui:include>        
+        </div>
+      </ui:fragment>
+
+    <div class="buttonRow">
+      <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+        <h:commandButton id="saveButton" action="#{policy.saveAction}" value="#{msgs.button_save}" styleClass="primaryBtn" onclick="preSave()" />
+      </ui:fragment>
+      <h:commandButton id="cancelButton" action="#{policy.cancelAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+      <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+        <button id="simulatePolicyButton" type="button" class="secondaryBtn" style="#{(empty policy.object.arguments['taskResultId']) ? '' : 'display:none'}"
+                onclick="SailPoint.Web.Define.Policy.SimulationWindows.displaySimulationDialoguePrompt(true); return false;" >
+                #{msgs.button_simulation_run_simulation}
+        </button>
+        <button id="resultPolicyButton" type="button" class="secondaryBtn" style="#{(not empty policy.object.arguments['taskResultId']) ? '' : 'display:none'}"
+                onclick="SailPoint.Web.Define.Policy.SimulationWindows.displaySimulationResults(
+                        '#{policy.policy.name}','#{policy.policy.uid}',true,'mainForm:simHidPolicyButton'); return false;">
+                #{msgs.simulate_view_results}
+        </button>
+      </ui:fragment>
+    <h:commandButton style="display:none" id="simHidPolicyButton" action="#{policy.saveAndSimulatePolicyAction}" />
+    </div>
+  </h:form>
+</ui:composition>
+
+</body>
+</html>

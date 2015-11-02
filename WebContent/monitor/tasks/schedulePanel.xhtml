@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+
+  <ui:composition>
+    <f:view>
+      <h:head>
+        <style>
+          #scheduleTbl td { padding:3px }
+        </style>
+        <sp:script>
+          <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+        </sp:script>
+
+        <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"></link>
+        <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+        <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+        
+      </h:head>
+      <body>
+      <h:form styleClass="form" id="editForm">
+        <div id="errorMessages" class="formError" style="visibility:hidden"/>
+        
+        <div id="runningDiv" class="dialogWaitingForDataDiv" style="display:none">
+          <div id="runningText"> 
+            <h:outputText value="#{msgs.save_schedule_for} #{taskSchedule.definitionName}" />
+          </div>
+          <div id="modal_dialog_progress" class='alert_progress'></div>
+        </div>
+        
+        <h:inputHidden id="id" value="#{taskSchedule.object.id}"/>
+        
+        <h:outputFormat styleClass="spContentTitle" style="text-align:left"
+          rendered="#{!(taskSchedule.definitionName == 'unknown')}" 
+          value="#{msgs.schedule_desc}">
+            <f:param value="#{taskSchedule.definitionName}"/>
+        </h:outputFormat>
+        
+        <table id="scheduleTbl" style="text-align:left;border:0px;margin:5px">
+          <tr>
+            <td><h:outputText styleClass="sectionHeader" value="#{msgs.label_name}" />
+                <h:outputText styleClass="sectionHeader" value="*" style="color:red" /></td>
+            <td>
+              <h:inputText id="name" size="60" value="#{taskSchedule.object.name}" required="true"/>
+            </td>
+           <td>
+              <h:message for="name" errorClass="formError"/>
+           </td>
+          </tr>
+          <ui:fragment rendered="#{taskSchedule.object.id != null}">
+          <tr>
+            <td><h:outputText styleClass="sectionHeader" value="#{msgs.task}" /></td>
+            <td>
+              <h:outputText value="#{taskSchedule.object.definition.name}"/>
+            </td>
+          </tr>
+          </ui:fragment>
+          <tr>
+            <td><h:outputText styleClass="sectionHeader" value="#{msgs.label_description}"/></td>
+            <td>
+              <h:inputText id="description" size="60" value="#{taskSchedule.object.description}" />
+            </td>
+          </tr>
+
+		  <ui:fragment rendered="#{taskSchedule.object.id != null}">
+            <tr>
+              <td><h:outputText styleClass="sectionHeader" value="#{msgs.label_task_last_execution}"/></td>
+              <td>             
+                <h:outputText value="#{(null != taskSchedule.lastExecution) ? taskSchedule.lastExecution : 'Never'}">
+                    <f:convertDateTime type="both" dateStyle="short" timeStyle="medium" timeZone="#{taskSchedule.userTimeZone}"/>        	 
+                </h:outputText>             
+              </td>
+            </tr>
+  
+            <ui:fragment rendered="#{'Error' == taskSchedule.object.state}">
+              <tr>
+                <td><h:outputText styleClass="sectionHeader" value="#{msgs.label_last_launch_error}"/></td>
+                <td colspan="2">
+                  <h:outputText value="#{taskSchedule.object.lastLaunchError}" />
+                </td>
+              </tr>
+            </ui:fragment>
+          </ui:fragment>
+
+          <tr>
+            <td>
+              <h:outputText styleClass="sectionHeader" rendered="#{taskSchedule.object.id != null}" 
+                value="#{msgs.label_task_next_execution}"/>
+              <h:outputText styleClass="sectionHeader" rendered="#{taskSchedule.object.id == null}" 
+                value="#{msgs.label_task_first_execution}"/>
+            </td>
+            <td>
+              <sp:inputDate id="inputDate" value="#{taskSchedule.nextExecution}" timeZone="#{base.userTimeZoneId}"
+                type="both" ampm="true" popupCalendar="true" addResources="false" 
+                imageLocation="/scripts/myfacescalendar"
+                javascriptLocation="/scripts/myfacescalendar"
+                styleLocation="/scripts/myfacescalendar"
+                styleClass="tomahawkInputDate">
+              </sp:inputDate>
+            </td>
+            <td>
+              <h:outputText styleClass="sectionHeader" value="#{msgs.label_task_run_now} "/>
+              <h:selectBooleanCheckbox
+                  title="runNow" id="runNow"
+                  value="#{taskSchedule.runNow}" onclick="toggleInputDate('editForm:inputDate', this.checked);" />
+            </td>
+          </tr>
+
+          <tr>
+            <td><h:outputText styleClass="sectionHeader" value="#{msgs.label_task_execution_frequency}"/></td>
+            <td>
+              <h:selectOneListbox value="#{taskSchedule.frequency}" size="1">
+                <f:selectItem itemValue="Once" itemLabel="#{msgs.frequency_once}"/>
+                <f:selectItem itemValue="Hourly" itemLabel="#{msgs.frequency_hourly}"/>
+                <f:selectItem itemValue="Daily" itemLabel="#{msgs.frequency_daily}"/>
+                <f:selectItem itemValue="Weekly" itemLabel="#{msgs.frequency_weekly}"/>
+                <f:selectItem itemValue="Monthly" itemLabel="#{msgs.frequency_monthly}"/>                
+                <f:selectItem itemValue="Quarterly" itemLabel="#{msgs.frequency_quarterly}"/>
+                <f:selectItem itemValue="Annually" itemLabel="#{msgs.frequency_annually}" />
+              </h:selectOneListbox></td>
+          </tr>
+        </table>
+        <h:inputHidden id="taskScheduleError" value="#{taskSchedule.scheduleError}"/>
+        
+        <a4j:commandButton style="display:none" id="saveSchedule" 
+            action="#{taskSchedule.schedule}" 
+            onclick="enableInputDate('editForm:inputDate');$('editForm:taskScheduleError').value='';"
+            render="taskScheduleError"
+            oncomplete="renderScheduleError()"/>
+      </h:form>
+      </body>
+    </f:view>
+  </ui:composition>
+</html>

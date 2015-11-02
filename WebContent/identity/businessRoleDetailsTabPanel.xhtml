@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+
+<ui:composition>
+        <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/roles">
+          <src>roles.css</src>
+        </sp:style>
+
+        <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+        <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+        <div style="margin:7px">
+            
+            <table class="paddedTbl">
+              <tr>
+                <td valign="top"><b>#{msgs.name}:</b></td>
+                <td>#{roleDetails.details.displayableName}</td>
+              </tr>
+              <tr>
+                <td valign="top"><b>#{msgs.type}:</b></td>
+                <td><span class="#{roleDetails.details.iconCls}" style="padding-left:18px">#{roleDetails.details.typeName}</span></td>
+              </tr>
+              <tr>
+                <td valign="top"><b>#{msgs.owner}:</b></td>
+                <td>#{roleDetails.details.displayableOwnerName}</td>
+              </tr>
+              <tr>
+                <td valign="top"><b>#{msgs.description}:</b></td>
+                <td><h:outputText escape="false" value="#{sp:localizeAttribute(roleDetails.role, 'description')}"/></td>
+              </tr>
+              <tr>
+                <td valign="top"><b>#{msgs.acquired}:</b></td>
+                <td>#{roleDetails.acquired}</td>
+              </tr>
+              <tr style="display:#{(roleDetails.permittedBy == null) ? 'none' : ''}">
+                <td valign="top"><b>#{msgs.label_permitted_by}:</b></td>
+                <td>#{roleDetails.permittedBy}</td>
+              </tr>
+              <tr style="display:#{(roleDetails.assignmentNote == null) ? 'none' : ''}">
+                <td valign="top"><b>#{msgs.label_assignment_note}:</b></td>
+                <td>#{roleDetails.assignmentNote}</td>
+              </tr>
+            </table>
+
+
+            <ui:fragment rendered="#{(roleDetails.businessRoleBean.entitlements != null) and (!empty roleDetails.businessRoleBean.entitlements)}">
+                <div style="width:90%">
+                <div style="margin-top:5px" class="sectionHeader">#{msgs.label_contributing_entitlements}</div><br/>
+                <ui:repeat value="#{roleDetails.businessRoleBean.entitlements}" var="entitlement">
+
+                  <h:outputFormat style="font-weight:bold"
+                    rendered="#{entitlement.applicationName != null and entitlement.instance == null and entitlement.displayName == null}"
+                    value="#{msgs.identity_app_entitlements}">
+                    <f:param value="#{entitlement.applicationName}"/>
+                  </h:outputFormat>
+
+                  <h:outputFormat style="font-weight:bold"
+                    rendered="#{entitlement.applicationName != null and entitlement.instance != null and entitlement.displayName == null}"
+                    value="#{msgs.identity_app_instance_entitlements}">
+                    <f:param value="#{entitlement.applicationName}"/>
+                    <f:param value="#{entitlement.instance}"/>
+                  </h:outputFormat>
+
+                  <h:outputFormat style="font-weight:bold"
+                    rendered="#{entitlement.applicationName != null and entitlement.instance != null and entitlement.displayName == null}"
+                    value="#{msgs.identity_app_instance_entitlements}">
+                    <f:param value="#{entitlement.applicationName}"/>
+                    <f:param value="#{entitlement.instance}"/>
+                  </h:outputFormat>
+
+                  <h:outputFormat style="font-weight:bold"
+                    rendered="#{entitlement.applicationName != null and entitlement.instance == null and entitlement.displayName != null}"
+                    value="#{msgs.identity_app_account_entitlements}">
+                    <f:param value="#{entitlement.applicationName}"/>
+                    <f:param value="#{entitlement.displayName}"/>
+                  </h:outputFormat>
+
+                  <h:outputFormat style="font-weight:bold"
+                    rendered="#{entitlement.applicationName != null and entitlement.instance != null and entitlement.displayName != null}"
+                    value="#{msgs.identity_app_instance_account_entitlements}">
+                    <f:param value="#{entitlement.applicationName}"/>
+                    <f:param value="#{entitlement.instance}"/>
+                    <f:param value="#{entitlement.displayName}"/>
+                  </h:outputFormat>
+
+                  <ui:repeat value="#{entitlement.permissions}" var="currentPerm">
+
+                    <ui:include src="/identity/permissionsInclude.xhtml">
+                      <ui:param name="permission" value="#{currentPerm}" />
+                      <ui:param name="itemId" value="#{sp:buildValidComponentId(currentPerm)}"/>
+                      <ui:param name="businessRoleBean" value="#{businessRole}" />
+                      <ui:param name="showRolesForEntitlements" value="true" />
+                      <ui:param name="applicationName" value="#{entitlement.applicationName}" />
+                      <ui:param name="instance" value="#{entitlement.instance}" />
+                      <ui:param name="nativeIdentity" value="#{entitlement.nativeIdentity}" />
+                      <ui:param name="showEntitlementDescription"
+                                value="#{roleDetails.displayEntitlementDescription}" />
+                      <ui:param name="enableEntitlementDisplaySwitch" value="true" />
+                      <ui:param name="descriptionMap"
+                                value="#{roleDetails.entitlementDescriptionMap[entitlement.applicationName]}" />  
+                    </ui:include>
+
+                  </ui:repeat>
+
+                  <ui:repeat value="#{entitlement.attributeNames}" var="currentAttrName">
+
+                    <ui:include src="/identity/attributesInclude.xhtml">
+                      <ui:param name="attributeName" value="#{currentAttrName}" />
+                      <ui:param name="attributeValues" value="#{sp:asList(entitlement.attributes[currentAttrName])}" />
+                      <ui:param name="applicationName" value="#{entitlement.applicationName}" />
+                      <ui:param name="instance" value="#{entitlement.instance}" />
+                      <ui:param name="nativeIdentity" value="#{entitlement.nativeIdentity}" />
+                      <ui:param name="businessRoleBean" value="#{businessRole}" />
+                      <ui:param name="showRolesForEntitlements" value="true" />
+                      <ui:param name="showEntitlementDescription"
+                                value="#{roleDetails.displayEntitlementDescription}" />
+                      <ui:param name="enableEntitlementDisplaySwitch" value="true" />
+                      <ui:param name="descriptionMap"
+                                value="#{roleDetails.entitlementDescriptionMap[entitlement.applicationName]}" />  
+                    </ui:include>
+
+                  </ui:repeat>
+
+                </ui:repeat>
+                </div>
+            </ui:fragment>
+
+            <div id="#{roleDetails.rootId}_#{roleDetails.roleId}_ruleDesc" class="role-rule-desc" style="display:#{roleDetails.showRuleDescription ? '' : 'none'}">
+
+            </div>
+
+       </div>
+
+</ui:composition>
+</body>
+</html>

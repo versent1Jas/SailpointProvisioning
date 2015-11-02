@@ -1,0 +1,308 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  This is used by 'iiq upgrade' to drive upgrading the schema and data between
+  revisions.  
+
+  There are two files that define the upgrade: upgrade.xml and 
+  upgradeObjects.xml.  If you have LCM enabled, there are two additional
+  files, upgrade-lcm.xml and upgradeObjects-lcm.xml.
+
+  upgrade.xml and upgrade-lcm.xml are processed in a special way before
+  Hibernate is started so that changes can be made at the JDBC level.
+  These files should only contain <ImportAction> elements that use the
+  "execute" command to  call upgrader classes.  
+  *DO NOT PUT STATIC XML OBJECTS IN UPGRADE.XML OR UPGRADE-LCM.XML* 
+
+  upgradeObjects.xml and upgradeObjects-lcm.xml (this file) are
+  included by upgrade.xml and will be imported after Hibernate is started.
+  Any changes to objects that can be respesented as static XML or as
+  ImportActions with the "merge" command must go in these files to ensure
+  that they are parsed after Hibernate has been started so that
+  references can be resolved.  
+-->
+<sailpoint>
+
+  <!--
+     This will reimport some updated objects
+     and should be safe to do for every release.
+   -->
+  <ImportAction name="include" value="WEB-INF/config/lcmemailtemplates.xml" />
+  <ImportAction name="include" value="WEB-INF/config/lcmworkflows.xml" />
+  <ImportAction name="include" value="WEB-INF/config/batchworkflows.xml" />
+  <ImportAction name="include" value="WEB-INF/config/lcmrules.xml" />
+  <ImportAction name="include" value="WEB-INF/config/identityRequestWorkflowSubs.xml" />
+  <ImportAction name='include' value='WEB-INF/config/lcmReportForms.xml' />
+  <ImportAction name="include" value="WEB-INF/config/lcmReportTasks.xml" />
+  <!-- End of object updates -->
+
+
+  <ImportAction name="merge">
+    <AuditConfig name='AuditConfig'>
+      <AuditActions>
+        <!-- Default lcm workflow audit trail, these plus approve and reject -->
+        <AuditAction name="ApproveLineItem" displayName="audit_action_ApproveLineItem" enabled="true" />
+        <AuditAction name="AccountsRequestStart" displayName="audit_action_AccountsRequestStart" enabled="true" />
+        <AuditAction name="Comment" displayName="audit_action_Comment" enabled="true" />
+        <AuditAction name="Create" displayName="audit_action_Create" enabled="true" />
+        <AuditAction name="Delete" displayName="audit_action_Delete" enabled="true" />
+        <AuditAction name="Disable" displayName="audit_action_Disable" enabled="true" />
+        <AuditAction name="Enable" displayName="audit_action_Enable" enabled="true" />
+        <AuditAction name="EntitlementAdd" displayName="audit_action_EntitlementAdd" enabled="true" />
+        <AuditAction name="EntitlementRemove" displayName="audit_action_EntitlementRemove" enabled="true" />
+        <AuditAction name="EntitlementsRequestStart" displayName="audit_action_EntitlementsRequestStart" enabled="true" />
+        <AuditAction name="ExpirePasswordStart" displayName="audit_action_ExpirePasswordStart" enabled="true" />
+        <AuditAction name="ForgotPasswordStart" displayName="audit_action_ForgotPasswordStart" enabled="true" />
+        <AuditAction name="IdentityCreateRequestStart" displayName="audit_action_IdentityCreateRequestStart" enabled="true" />
+        <AuditAction name="IdentityEditRequestStart" displayName="audit_action_IdentityEditRequestStart" enabled="true" />
+        <AuditAction name="ManualChange" displayName="audit_action_ManualChange" enabled="true" />
+        <AuditAction name="Modify" displayName="audit_action_Modify" enabled="true" />
+        <AuditAction name="PasswordsRequestStart" displayName="audit_action_PasswordsRequestStart" enabled="true" />
+        <AuditAction name="PasswordChange" displayName="audit_action_PasswordChanged" enabled="true" />
+        <AuditAction name="PasswordChangeFailure" displayName="audit_action_PasswordChangeFailure" enabled="true" />
+        <AuditAction name="ForgotPasswordChange" displayName="audit_action_ForgotPasswordChange" enabled="true" />
+        <AuditAction name="ExpiredPasswordChange" displayName="audit_action_ExpiredPasswordChange" enabled="true" />
+        <AuditAction name="ProvisioningComplete" displayName="audit_action_ProvisioningComplete" enabled="true" />
+        <AuditAction name="ProvisioningFailure" displayName="audit_action_ProvisioningFailure" enabled="true" />
+        <AuditAction name="RegistrationStart" displayName="audit_action_RegistrationStart" enabled="true" />
+        <AuditAction name="RejectLineItem" displayName="audit_action_RejectLineItem" enabled="true" />
+        <AuditAction name="RoleAdd" displayName="audit_action_RoleAdd" enabled="true" />
+        <AuditAction name="RoleRemove" displayName="audit_action_RoleRemove" enabled="true" />
+        <AuditAction name="RolesRequestStart" displayName="audit_action_RolesRequestStart" enabled="true" />
+        <AuditAction name="Unlock" displayName="audit_action_Unlock" enabled="true" />
+        <AuditAction name="IdentityLocked" displayName="audit_action_IdentityLocked" enabled="true" />
+        <AuditAction name="AuthAnswerIncorrect" displayName="audit_action_AuthAnswerIncorrect" enabled="true" />
+        <AuditAction name="AccessRequestStart" displayName="audit_action_AccessRequestStart" enabled="true" />
+        <AuditAction name="PasswordPolicyChange" displayName="audit_action_PasswordPolicyChange" enabled="true" />
+        <AuditAction name="ServerUpDown" displayName="audit_action_ServerUpDown" enabled="true" />
+      </AuditActions>
+    </AuditConfig>
+  </ImportAction>
+
+
+  <ImportAction name="merge">
+    <UIConfig name="UIConfig">
+      <Attributes>
+        <Map>
+          <entry key="uiAccessItemsColumnsRole">
+            <value>
+              <List>
+                <!-- Displayable fields -->
+                <ColumnConfig dataIndex="displayableAccessType" headerKey="ui_access_type"/>
+                <ColumnConfig dataIndex="owner" property="owner.displayName" headerKey="ui_access_owner"/>
+                <!--Calculated columns -->
+                <ColumnConfig dataIndex="riskScoreWeight" property="riskScoreWeight" headerKey="ui_access_risk" renderer="risk"/>
+                <ColumnConfig dataIndex="populationStatistics" fieldOnly="true"/>
+                <!-- Data only -->
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig property="name" fieldOnly="true"/>
+                <ColumnConfig property="type" fieldOnly="true"/>
+                <ColumnConfig property="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="riskScoreColor" fieldOnly="true"/>
+                <ColumnConfig dataIndex="riskScoreTextColor" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="uiAccessItemsColumnsEntitlement">
+            <value>
+              <List>
+                <!-- Displayable fields -->
+                <ColumnConfig dataIndex="displayableAccessType" headerKey="ui_access_type"/>
+                <ColumnConfig dataIndex="owner" property="owner.displayName" headerKey="ui_access_owner"/>
+                <ColumnConfig dataIndex="application" property="application.name" headerKey="ui_access_application"/>
+                <ColumnConfig property="attribute" headerKey="ui_access_attribute"/>
+                <ColumnConfig dataIndex="accountName" headerKey="ui_access_account"/>
+                <!--Calculated columns -->
+                <ColumnConfig dataIndex="populationStatistics" fieldOnly="true"/>
+                <!-- Data only -->
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig property="type" fieldOnly="true"/>
+                <ColumnConfig property="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="icon" property="application.icon" fieldOnly="true"/>
+                <ColumnConfig property="value" fieldOnly="true"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="uiRequestAccessIdentityCard">
+            <value>
+              <List>
+                <ColumnConfig property="id" fieldOnly="true" />
+                <ColumnConfig property="displayName" fieldOnly="true" />
+                <ColumnConfig headerKey="ui_access_username" dataIndex="name" property="name"/>
+                <ColumnConfig headerKey="ui_access_manager" dataIndex="managerName" property="manager.displayName"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="uiCurrentAccessItemsColumnsRole">
+            <value>
+              <List>
+                <!-- Displayable fields -->
+                <ColumnConfig dataIndex="displayableAccessType" headerKey="ui_access_type" />
+                <ColumnConfig dataIndex="owner" property="owner.displayName" headerKey="ui_access_owner" />
+                <!--Calculated columns -->
+                <ColumnConfig dataIndex="riskScoreWeight" property="riskScoreWeight" headerKey="ui_access_risk" renderer="risk" />
+                <!-- Data only -->
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig property="name" fieldOnly="true"/>
+                <ColumnConfig property="type" fieldOnly="true"/>
+                <ColumnConfig property="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="riskScoreColor" fieldOnly="true"/>
+                <ColumnConfig dataIndex="riskScoreTextColor" fieldOnly="true"/>
+                <ColumnConfig dataIndex="sunrise" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunset" fieldOnly="true" />
+                <ColumnConfig dataIndex="status" fieldOnly="true" />
+                <ColumnConfig dataIndex="roleTargets" fieldOnly="true" />
+                <ColumnConfig dataIndex="assignmentId" fieldOnly="true" />
+                <ColumnConfig dataIndex="assignmentNote" fieldOnly="true" />
+                <ColumnConfig dataIndex="removable" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiCurrentAccessItemsColumnsEntitlement">
+            <value>
+              <List>
+                <!-- Displayable fields -->
+                <ColumnConfig dataIndex="displayableAccessType" headerKey="ui_access_type"/>
+                <ColumnConfig dataIndex="owner" property="owner.displayName" headerKey="ui_access_owner" />
+                <ColumnConfig dataIndex="application" property="application.name" headerKey="ui_access_application" />
+                <ColumnConfig property="attribute" headerKey="ui_access_attribute" />
+                <ColumnConfig dataIndex="instance" headerKey="ui_access_instance" />
+                <ColumnConfig dataIndex="accountName" headerKey="ui_access_account" />
+                <!-- Data only -->
+                <ColumnConfig property="id" fieldOnly="true"/>
+                <ColumnConfig property="type" fieldOnly="true"/>
+                <ColumnConfig property="displayableName" fieldOnly="true"/>
+                <ColumnConfig dataIndex="icon" property="application.icon" fieldOnly="true"/>
+                <ColumnConfig property="value" fieldOnly="true"/>
+                <ColumnConfig dataIndex="nativeIdentity" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunrise" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunset" fieldOnly="true" />
+                <ColumnConfig dataIndex="status" fieldOnly="true" />
+                <ColumnConfig dataIndex="removable" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="sailpoint.web.lcm.AccessRequestBean_currently_assigned">
+            <value>
+              <List>
+                <ColumnConfig headerKey="" property="id" sortable="false" hideable="false" renderer="SailPoint.LCM.RequestAccess.currentAccessButtonRenderer" percentWidth="5"/>
+                <ColumnConfig headerKey="lcm_request_access_name" property="displayableName" sortable="true" hideable="true" percentWidth="25" renderer="SailPoint.LCM.RequestAccess.roleDetailRenderer"/>
+                <ColumnConfig headerKey="lcm_request_access_status" dataIndex="IIQ_status" sortable="true" hideable="true" percentWidth="15" renderer="SailPoint.LCM.RequestAccess.statusRenderer"/>
+                <ColumnConfig headerKey="lcm_request_access_type" dataIndex="IIQ_type" sortable="true" hideable="true" percentWidth="20"/>
+                <ColumnConfig property="description" fieldOnly="true"/>
+                <ColumnConfig property="IIQ_raw_type" fieldOnly="true"/>
+                <ColumnConfig property="IIQ_Selected" fieldOnly="true"/>
+                <ColumnConfig headerKey="application" dataIndex="application-name" hideable="true" property="application" sortable="true" percentWidth="20" />
+                <ColumnConfig headerKey="account_name" dataIndex="account" hideable="true" property="account" sortable="true" percentWidth="20" />
+                <ColumnConfig dataIndex="nativeIdentity" headerKey="nativeIdentity" hidden="true" hideable="true" property="nativeIdentity" sortProperty="nativeIdentity" sortable="true" percentWidth="20"/>
+                <ColumnConfig headerKey="instance" dataIndex="instance" hideable="true" property="instance" sortable="true" hidden="true" />
+                <ColumnConfig dataIndex="attribute" fieldOnly="true"/>
+                <ColumnConfig property="value" fieldOnly="true" />
+                <ColumnConfig property="type" fieldOnly="true" />
+                <ColumnConfig dataIndex="name" fieldOnly="true" property="name" sortProperty="name"/>
+                <ColumnConfig dataIndex="IIQ_status_class" fieldOnly="true" property="IIQ_status_class"/>
+                <ColumnConfig dataIndex="assignmentId" fieldOnly="true" />
+                <ColumnConfig dataIndex="roleId" fieldOnly="true" />
+                <ColumnConfig dataIndex="removable" fieldOnly="true" />
+                <ColumnConfig dataIndex="detectedOrAssigned" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiApprovalItemsColumnsRole">
+            <value>
+              <List>
+                <ColumnConfig dataIndex="operation" headerKey="my_approvals_action_col" renderer="operation" />
+                <ColumnConfig dataIndex="riskScoreWeight" headerKey="my_approvals_risk_col" renderer="risk" />
+                <ColumnConfig dataIndex="sunriseSunset" headerKey="my_approvals_dates_col" renderer="sunriseSunset" />
+                <ColumnConfig dataIndex="isNewAccount" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunrise" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunset" fieldOnly="true" />
+                <ColumnConfig dataIndex="hadSunriseSunset" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+          <entry key="uiApprovalItemsColumnsEntitlement">
+            <value>
+              <List>
+                <ColumnConfig dataIndex="operation" headerKey="my_approvals_action_col" renderer="operation" />
+                <ColumnConfig dataIndex="application" property="application" headerKey="my_approvals_application_col" />
+                <ColumnConfig dataIndex="name" property="name" headerKey="my_approvals_attribute_col" />
+                <ColumnConfig dataIndex="sunriseSunset" headerKey="my_approvals_dates_col" renderer="sunriseSunset" />
+                <ColumnConfig dataIndex="isNewAccount" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunrise" fieldOnly="true" />
+                <ColumnConfig dataIndex="sunset" fieldOnly="true" />
+                <ColumnConfig dataIndex="hadSunriseSunset" fieldOnly="true" />
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </UIConfig>
+  </ImportAction>
+
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+        <Map>
+          <entry key="lcmUserAccessFulltextIndex" value="BundleManagedAttribute" />
+
+          <!-- max number of selectable users allowed in mobile UI -->
+          <entry key="lcmMobileMaxSelectableUsers" value="100" />
+
+          <!-- allow removal of roles/entitlements population option -->
+          <entry key="selfServiceRequestControls">
+            <value>
+              <Map>
+                <entry key="allowRequestRolesRemove" value="true" />
+                <entry key="allowRequestEntitlementsRemove" value="true" />
+              </Map>
+            </value>
+          </entry>
+
+          <entry key="managerRequestControls">
+            <value>
+              <Map>
+                <entry key="allowRequestRolesRemove" value="true" />
+                <entry key="allowRequestEntitlementsRemove" value="true" />
+              </Map>
+            </value>
+          </entry>
+
+          <entry key="helpDeskRequestControls">
+            <value>
+              <Map>
+                <entry key="allowRequestRolesRemove" value="true" />
+                <entry key="allowRequestEntitlementsRemove" value="true" />
+              </Map>
+            </value>
+          </entry>
+
+          <entry key="generalPopulationRequestControls">
+            <value>
+              <Map>
+                <entry key="allowRequestRolesRemove" value="true" />
+                <entry key="allowRequestEntitlementsRemove" value="true" />
+              </Map>
+            </value>
+          </entry>
+
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+  <ServiceDefinition name="FullText" hosts='global'>
+    <Description>
+Service definition for refreshing full text indexes.  The executionMode may be either "scheduled" or "automatic".  The default if not specified is scheduled.
+    </Description>
+    <Attributes>
+      <Map>
+        <entry key='executionMode' value='scheduled'/>
+      </Map>
+    </Attributes>
+  </ServiceDefinition>
+
+</sailpoint>

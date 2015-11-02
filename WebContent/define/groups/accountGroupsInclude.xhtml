@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition>
+
+    
+    <div id="groups-grid" class="width100"></div>
+           
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/groupGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/accountGroupGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+        Ext.onReady(function(){
+            Ext.QuickTips.init(); 
+            var gridWidth = $('groups-grid').clientWidth;  
+            
+            var sp = new SailPoint.state.StateProvider({
+                stateIds : [ '#{entitlementCatalogList.gridState.name}' ],
+                states : [ '#{entitlementCatalogList.gridState.state}' ]
+            });
+            Ext.state.Manager.setProvider(sp);
+            
+            
+            var gridMetaData = #{entitlementCatalogList.columnJSON};
+
+              
+            var acctStateStr = '#{entitlementCatalogList.gridState.JSON}';
+            var firstRow = parseInt($('editForm:AGfirstRow').value);
+            var pageSize = parseInt($('editForm:AGpageSize').value);
+            var currentPage = firstRow / pageSize + 1;
+            var acctGroupsGrid = SailPoint.Define.Grid.Group.createAcctGrid({
+                fields: gridMetaData.fields,
+                columns: gridMetaData.columns,
+                gridStateStr: acctStateStr,
+                pageSize: #{entitlementCatalogList.gridState.pageSize},
+                stateId: '#{entitlementCatalogList.gridState.name}',
+                enableNewAccountGroups: #{entitlementCatalogList.provisioningEnabled},
+                isEntitlementCatalog: true
+            });
+            
+            SailPoint.getViewport({
+               bodyContent: acctGroupsGrid,
+               title: '#{msgs.menu_label_entitlement_catalog}',
+               minWidth: 800
+            });
+            
+            SailPoint.Analyze.AccountGroup.initializeAttributes(true);
+            if (isNaN(currentPage)) {
+                SailPoint.Define.Grid.Group.accountGroupSearch();
+            } else {
+                SailPoint.Define.Grid.Group.accountGroupSearch(currentPage);
+            }
+        });
+    </script>
+
+        <h:inputHidden id="currentAccountGroupObjectId"
+                       value="#{entitlementCatalogList.selectedId}"/>
+
+        <h:commandButton id="editAccountGroupButton" 
+                         style="display:none"
+                         action="#{entitlementCatalogList.select}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManagedAttributePropertyAdministrator, ManagedAttributeProvisioningAdministrator')}" 
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManagedAttributePropertyAdministrator, ManagedAttributeProvisioningAdministrator')}" />
+
+        <h:inputHidden value="#{accountGroup.transitioning}" id="transition"/>
+        <a4j:commandButton style="display:none" 
+                           id="transitionToNewAccountGroupButton" 
+                           onclick="$('editForm:transition').value = true;"
+                           oncomplete="$('editForm:transition').value = false;"
+                           render="editAccountGroupPanel"/>
+
+        <t:saveState value="#{entitlementCatalogList.gridState}" />
+        <h:inputHidden id="AGsortColumn" value="#{entitlementCatalogList.gridState.sortColumn}" />
+        <h:inputHidden id="AGsortOrder" value="#{entitlementCatalogList.gridState.sortOrder}" />
+        <h:inputHidden id="AGfirstRow" value="#{entitlementCatalogList.gridState.firstRow}" />
+        <h:inputHidden id="AGpageSize" value="#{entitlementCatalogList.gridState.pageSize}" />
+        <h:inputHidden id="AGscrollPosition" value="#{entitlementCatalogList.gridState.scrollPosition}" />
+        <h:inputHidden id="searchFieldVal" value="#{entitlementCatalogList.searchField}"/>
+
+        <h:commandButton id="deleteAccountGroupButton" 
+                         style="display:none" 
+                         action="delete" 
+                         actionListener="#{entitlementCatalogList.deleteObject}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManagedAttributePropertyAdministrator, ManagedAttributeProvisioningAdministrator')}" 
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManagedAttributePropertyAdministrator, ManagedAttributeProvisioningAdministrator')}" />
+                         
+        <h:commandButton style="display:none" 
+                         immediate="true" 
+                         action="#{entitlementCatalogSearch.clearSearchItem}"
+                         id="resetBtn"/>
+        
+        <a4j:commandButton style="display:none" 
+                           action="#{entitlementCatalogSearch.saveQueryAction}"
+                           id="saveQueryBtn"
+                           oncomplete="SailPoint.Define.Grid.Group.accountGroupSearch();
+                                       Ext.getCmp('spHeaderPanel').doLayout();"/>
+                          
+        <h:commandButton style="display:none" 
+                         action="#{entitlementCatalogSearch.deleteSearchItem}" 
+                         id="deleteBtn"/>
+                          
+        <a4j:commandButton style="display:none" 
+                           action="#{entitlementCatalogSearch.clearSearchItem}"
+                           id="clearSearchBtn"
+                           oncomplete="Ext.getCmp('acctGroupsSearchField').onTrigger1Click();"/>
+                           
+        <a4j:commandButton id="updateGridStateBtn"
+                           style="display:none"
+                           limitRender="true"
+                           action="#{entitlementCatalogList.updateGridState}" />
+
+        <div id="accountGroupOwnerVal" style="display:none">#{entitlementCatalogSearch.inputs['entitlementCatalog.owner'].value}</div>
+        <div id="accountGroupAppVal" style="display:none">#{entitlementCatalogSearch.inputs["entitlementCatalog.application"].value}</div>
+        <div id="accountGroupAppSuggestInit" style="display:none">#{entitlementCatalogSearch.applicationSuggestInit}</div>
+        <div id="accountGroupOwnerSuggestInit" style="display:none">#{entitlementCatalogSearch.ownerSuggestInit}</div>
+        
+        <div id="accountGroupAttributesDiv" style="display:none;">
+            <ui:include src="../../define/groups/entitlementsCatalogAttributes.xhtml">
+                <ui:param name="searchBean" value="#{entitlementCatalogSearch}" />
+            </ui:include>
+        </div>
+        
+    
+    </ui:composition>
+
+</body>
+</html>

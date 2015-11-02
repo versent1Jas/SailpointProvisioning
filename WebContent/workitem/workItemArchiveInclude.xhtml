@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+      <h:outputFormat value="#{msgs.title_view_work_item}">
+          <c:if test="#{workItemArchive.object.name ne null}">
+              <f:param value="#{sp:stripLeadingZeroes(workItemArchive.object.name)}"/>
+          </c:if>
+          <c:if test="#{(workItemArchive.object.name eq null) and (workItemArchive.object.description ne null)}">
+              <f:param value="#{workItemArchive.object.description}"/>
+          </c:if>
+          <c:if test="#{(workItemArchive.object.name eq null) and (workItemArchive.object.description eq null)}">
+              <f:param value=""/>
+          </c:if>
+      </h:outputFormat>
+   </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>image-radio.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/AssignmentForm.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRadio.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/Pager.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/JsfExtBridge.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/LinkAttributeValueSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification/CertificationItemSecondPass.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification/IdentityHistoryPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification/IdentityDetailPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/certification/Certification.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/policyViolations/policyViolationDetails.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/utils/Utils.js?#{debug.revision}</src>
+    </sp:script>
+
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css"
+          rel="stylesheet" type="text/css" />
+          
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM_ARCHIVE';
+
+        Ext.onReady(function() {
+            ImageRadio.initializeAll();
+            addDescriptionTooltips();
+            setupDynamicColSpans();
+        });
+
+        //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+        
+            <!-- Summary info -->
+            <div class="spContent" style="width:95%">
+              <h:inputHidden id="id" value="#{workItemArchive.object.id}"/>
+              <ui:include src="summaryFieldset.xhtml">
+                  <ui:param name="workItem" value="#{workItemArchive}" />
+              </ui:include>
+
+              <c:if test="#{null != workItemArchive.approvalSet}">
+                <div class="spTabledContent" style="margin:5px">
+                  <table class="spTable" cellspacing="0">
+                    <tr>
+                      <th><h:outputText value="#{msgs.label_details}"/></th>
+                    </tr>
+                    <tr>
+                      <td>
+                        <ui:include src="approvalItemsBulkDecisionInclude.xhtml">
+                          <ui:param name="title" value="" />
+                          <ui:param name="workItem" value="#{workItemArchive}" />
+                          <ui:param name="isArchive" value="true" />
+                          <ui:param name="disableDecisionColumn" value="true" />
+                        </ui:include>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </c:if>
+            </div>
+         
+        <br/>
+
+        <h:commandButton action="#{workItemArchive.cancel}" 
+                         immediate="true" 
+                         value="#{msgs.button_back}" 
+                         styleClass="secondaryBtn"/>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+  
+</ui:composition>
+
+</body>
+</html>

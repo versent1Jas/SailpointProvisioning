@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+  <ui:composition>
+
+    <ui:repeat value="#{applicationObject.schemaDTOs}" var="schemaItem">
+      <script type="text/javascript">
+        Ext.onReady(function() {
+            var appTab = Ext.getCmp('appTab'), isCollapsed = false, schemaTab, objTypeTab;
+            
+            if (appTab) {
+                schemaTab = appTab.queryById('schemaContent');
+                if (schemaTab) {
+                    objTypeTab = schemaTab.queryById('#{schemaItem.objectType}SchemaContent');  
+                    if (objTypeTab) {
+                        isCollapsed = objTypeTab.getCollapsed();
+                        objTypeTab.destroy(true);
+                    }
+                    schemaTab.add(createCollapsiblePanelForDiv(
+                            '#{schemaItem.objectType}SchemaContent', 
+                            '#{msgs.app_object_type_panel_header} #{schemaItem.objectType}',
+                            '#{schemaItem.objectType}SchemaDiv',
+                            isCollapsed)
+                    );
+                }
+            }
+            
+        });
+      </script>
+      <div id="#{schemaItem.objectType}SchemaDiv" class="noBorder">
+      <table class="spTable width100 marDown">  
+        <tr>
+          <td>
+            <h:outputText style="margin-top: 10px;" styleClass="sectionHeader" value="#{msgs.label_details}"/><br/>
+          </td>
+        </tr>
+        <tr>
+
+          <td>
+            <div class="schema-detail-column">
+              <div class="schema-detail-item">
+                <div class="schema-detail-label"><h:outputText styleClass="textBold" value="#{msgs.native_obj_type}"/></div>
+                <div><h:inputText value="#{schemaItem.nativeObjectType}" size="45"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></div>
+              </div>
+              <div class="schema-detail-item">
+                <div class="schema-detail-label"><h:outputText styleClass="textBold" value="#{msgs.identity_attribute}"/></div>
+                <div><h:inputText value="#{schemaItem.identityAttribute}" size="45"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></div>
+              </div>
+              <h:panelGroup layout="block" styleClass="schema-detail-item" rendered="#{schemaItem.hierarchyAttribute != null || sp:listContains(applicationObject.groupHierarchySchemaList, schemaItem.objectType)}">
+                <div class="schema-detail-label"><h:outputText styleClass="textBold" value="#{msgs.con_form_ldap_grp_hier_att}"/></div>
+                <div><h:inputText value="#{schemaItem.hierarchyAttribute}" size="45"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></div>
+              </h:panelGroup>
+              <div class="schema-detail-item">
+                <div class="schema-detail-label">
+                  <h:selectBooleanCheckbox
+                    value="#{schemaItem.includePermissions}"
+                    disabled="#{not applicationObject.supportsPermissions or !sp:hasRight(facesContext, 'ManageApplication')}"/>
+                  <h:outputText disabled="#{not applicationObject.supportsPermissions}" style="margin-left: 5px;" styleClass="textBold" value="#{msgs.include_permissions}"/>
+                </div>
+              </div>
+            </div>
+            <div class="schema-detail-column">
+              <div class="schema-detail-item">
+                <div class="schema-detail-label"><h:outputText styleClass="textBold" value="#{msgs.display_attribute}"/></div>
+                <div><h:inputText value="#{schemaItem.displayAttribute}" size="45"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></div>
+              </div>
+              <div class="schema-detail-item">
+                <div class="schema-detail-label"><h:outputText styleClass="textBold" value="#{msgs.instance_attribute}"/></div>
+                <div><h:inputText value="#{schemaItem.instanceAttribute}" size="45"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></div>
+              </div>
+              <h:panelGroup layout="block" styleClass="schema-detail-item" rendered="#{schemaItem.config['groupMemberAttribute'] != null || sp:listContains(applicationObject.groupMemberAttrSchemaList, schemaItem.objectType)}">
+                <div class="schema-detail-label"><h:outputText styleClass="textBold" value="#{msgs.con_form_ldap_grp_mbr_att}"/></div>
+                <div><h:inputText value="#{schemaItem.config['groupMemberAttribute']}" size="45"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></div>
+              </h:panelGroup>
+              <div class="schema-detail-item">
+                <div class="schema-detail-label"><h:outputText disabled="#{not applicationObject.supportsPermissions}"
+                                   styleClass="textBold" value="#{msgs.permission_remediation_modification_type}"/></div>
+                <div><h:selectOneListbox value="#{schemaItem.remediationModifiable}"
+                                         converter="sailpoint.object.Enum"
+                                         size="1"
+                                         disabled="#{not applicationObject.supportsPermissions or !sp:hasRight(facesContext, 'ManageApplication')}">
+                  <f:selectItems value="#{applicationObject.remediationModificationTypes}" />
+                </h:selectOneListbox></div>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td>    
+            <h:outputText styleClass="sectionHeader" value="#{msgs.label_attributes}"/><br/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="width100">
+
+                <!--
+
+                    Schema Attribute definitions table
+
+                -->
+                <table style="table-layout:fixed" class="spLightBlueTabledContent">
+                        <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                        <th>&nbsp;</th>
+                    </ui:fragment>
+
+                    <th><h:outputText value="#{msgs.name}"/></th>
+                    <th><h:outputText value="#{msgs.description}"/></th>
+                    <th><h:outputText value="#{msgs.type}"/></th>
+                    <th><h:outputText value="#{msgs.attr_properties}"/></th>
+                </tr>
+
+                    <ui:repeat id="schemaAttrTbl" value="#{schemaItem.attributes}" var="attr">
+
+                        <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                            <c:set var="attrKey" value="#{attr.uid}" />
+                                <td>
+                                    <h:selectBooleanCheckbox
+                                        value="#{attr.selected}"/>
+                                </td>
+                            </ui:fragment>
+
+                            <td><h:inputText id="attrName" value="#{attr.name}"
+                                    disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                    readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                    onchange="Page.fireEvent('schemaAttrNameChange', this.id)"/>
+                                <h:inputText id="oldAttrName" value="#{attr.name}" disabled="true" style="display:none"/>
+                                <ui:fragment rendered="#{applicationObject.appReconfMode == true or not empty attr.internalName}">
+                                  <h:inputText id="internalAttrName" value="#{attr.internalName}" style="display:none"/>
+                                </ui:fragment>
+                            </td>
+
+                            <td><h:inputText value="#{attr.description}" size="40"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                            </td>
+                            <td>
+                              <h:selectOneMenu id="attributeType" value="#{attr.type}"
+                                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                <f:selectItems value="#{applicationObject.schemaAttributeTypes}" />
+                              </h:selectOneMenu>
+                            </td>
+                            <td>
+                                <h:inputText styleClass="ent_#{attr.name}_#{schemaItem.uid} attributeCSV" value="#{attr.CSVAttributes}" disabled="true"/>
+                                <a href="javascript: SailPoint.define.applications.createAttributeDefinitionSchema(#{attr.JSONAttributes})"
+                                    class="attributeEdit">#{msgs.edit}</a>
+                            </td>
+                        </tr>
+                        <ui:fragment rendered="#{attr.compositeSourceAttribute != null}">
+                        <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                <td>&nbsp;</td>
+                            </ui:fragment>
+                            <td colspan="9">&nbsp;<h:graphicImage value="/images/icons/arrow_right_transparent.png" alt=""/>&nbsp;&nbsp;
+                                <h:outputFormat escape="false"  value="#{msgs.app_schema_composite_attr_src_desc}">
+                                    <f:param value="#{ sp:escapeHTML( attr.compositeSourceAttribute, false ) }"/>
+                                    <f:param value="#{ sp:escapeHTML( attr.compositeSourceApplication, false ) }"/>
+                                </h:outputFormat>
+                            </td>
+                        </tr>
+                        </ui:fragment>
+                    </ui:repeat>
+
+                </table>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>    
+                <!-- this hidden field is used in the
+                     newSchemaAttributeAction actionListener to know
+                     what type of object type to add a new schema
+                     attribute to. -->
+            <h:inputHidden id="objectType"
+                           value="#{schemaItem.objectType}"/>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+
+              <div class="buttonRow">
+                <a4j:commandButton id="newCompSchemaAttrButton"  value="#{msgs.app_schema_btn_add_tier_attr}"
+                   styleClass="secondaryBtn"
+                   rendered="#{applicationObject.allowTiersEdit and 'account' == schemaItem.objectType}"
+                   onclick="ApplicationPage.showCreateCompositeAttrDialog(this.id);return false;"/>
+                          
+                <a4j:commandButton id="newSchemaAttrButton" value="#{msgs.button_new_schema_attribute}"
+                   styleClass="secondaryBtn"
+                   actionListener="#{applicationObject.newSchemaAttributeAction}"
+                   action="#{applicationObject.newSchemaAttribute}"
+                   render="schemaData, errorPanel"
+                   oncomplete="scrollToElement('#' + '#{schemaItem.objectType}SchemaDiv input[type=&quot;checkbox&quot;]:last')"/>
+                <a4j:commandButton id="discoverButton" rendered="#{applicationObject.supportsSchemaDiscovery}" 
+                   styleClass="secondaryBtn"
+                   value="#{msgs.button_discover_schema_attribute}"
+                   actionListener="#{applicationObject.discoverSchemaAttributesAction}"
+                   action="#{applicationObject.newSchemaAttribute}"
+                   render="schemaData, errorPanel"/>
+                <a4j:commandButton value="#{msgs.button_delete_schema_attribute}"
+                   styleClass="secondaryBtn"
+                   actionListener="#{applicationObject.deleteSchemaAttributeAction}"
+                   action="#{applicationObject.deleteSchemaAttribute}"
+                   render="schemaData, errorPanel"/>
+              </div>
+
+              <ui:fragment rendered="#{!applicationObject.supportsNoAggregation and !applicationObject.supportsComposite}">
+                <br/>
+                <input type="button" class="primaryBtn" value="#{msgs.app_res_test_connector_button_label_generic}" style="margin:5px 0 0 0" onclick='SailPoint.connectorDebug("#{applicationObject.object.name}", "#{schemaItem.objectType}", "#{msgs.app_res_test_connector_button_label_generic}");return false;'/>
+              </ui:fragment>
+
+            </ui:fragment>
+          </td>
+        </tr>
+      </table>
+    </div>
+    </ui:repeat>
+
+    <!--
+        These are populated by a dialog created in ApplicationPage.showCreateCompositeAttrDialog(); 
+    -->
+    <h:inputHidden id="sourceApplication" value="#{applicationObject.sourceApplication}"/>
+    <h:inputHidden id="sourceAttribute" value="#{applicationObject.sourceAttribute}"/>
+
+    <!-- Populated by the AttributeDefinitionSchema -->
+    <h:inputHidden id="attributeDefinitionJSON" value="#{applicationObject.schemaAttributeEditor.updateAttributeJSON}"/>
+    <a4j:commandButton id="attributeDefinitionUpdateBtn" style="display: none" action="#{applicationObject.schemaAttributeEditor.updateAttribute}" render="schemaData"/>
+
+    <!-- Populated by AttributeDefinitionSchema, used to set properties on the schema -->
+    <h:inputHidden id="schemaPropertyJSON" value="#{applicationObject.schemaAttributeEditor.updateSchemaPropertyJSON}"/>
+    <a4j:commandButton id="schemaPropertyUpdateBtn" style="display: none"
+                       action="#{applicationObject.schemaAttributeEditor.updateSchemaAttribute}"
+                       render="schemaData"
+                       oncomplete="SailPoint.define.applications.updatePropertyMsg();"/>
+
+  </ui:composition>
+</body>
+</html>

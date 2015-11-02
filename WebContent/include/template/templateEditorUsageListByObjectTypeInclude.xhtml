@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+ 
+      <script type="text/javascript">
+        Ext.onReady(function() {
+            var appTab = Ext.getCmp('appTab'), tempateTab, introTab, titleDiv;
+
+            tempateTab = appTab.queryById('templateContent');
+            if (tempateTab) {
+                introTab = tempateTab.queryById('tempateEditorIntroContent');  
+                if (introTab) {
+                    introTab.destroy(true);
+                }
+                tempateTab.add(createComponentForDiv(
+                        'tempateEditorIntroContent', 
+                        'tempateEditorIntro')
+                );
+            }
+        });
+      </script>
+    
+      <div id="tempateEditorIntro">
+      <table class="" style="width:98%"><tr><td>
+        <h:outputFormat value="#{msgs.template_editor_intro}">
+          <f:param value="#{beanType}"/>
+        </h:outputFormat>
+      </td></tr></table>
+      </div>
+      
+      <a4j:outputPanel id="templatesList">
+      
+      <t:dataList value="#{templateEditor.objectTypes}" var="objectType">
+        <script type="text/javascript">
+          Ext.onReady(function() {
+              var appTab = Ext.getCmp('appTab'), isCollapsed = false,
+                           tempateTab, objTypeTab;
+
+              tempateTab = appTab.queryById('templateContent');
+              if (tempateTab) {
+              	
+                  initApplicationDependency();
+              	
+                  objTypeTab = tempateTab.queryById('#{objectType}_tempateUsageContent');  
+                  if (objTypeTab) {
+                  	//store the collapsed state
+                	isCollapsed = objTypeTab.getCollapsed();  
+                	tempateTab.remove(objTypeTab, true);
+                  }
+
+                  tempateTab.add(createCollapsiblePanelForDiv(
+                          '#{objectType}_tempateUsageContent', 
+                          '#{msgs.app_object_type_panel_header} #{objectType}',
+                          '#{objectType}_templateUsageDiv', 
+                          isCollapsed)
+                  );
+              }
+              
+          });
+        </script>
+
+        <div id="#{objectType}_templateUsageDiv" >
+      
+        <table class="spTable" style="width:100%" id="templateUsageList_#{objectType}">
+          <tr>
+            <th width="10%">#{msgs.type}</th>
+            <th>#{msgs.name}</th>
+            <th colspan="2">#{msgs.description}</th>
+          </tr>                  
+                
+          <t:dataList value="#{templateEditor.objectUsages[objectType]}" var="usage">
+            <tr>
+              <td>#{sp:localizedUsage(usage)}</td>
+              <ui:fragment rendered="#{!(sp:mapValueByPair(templateEditor.templateByObjectTypeUsageMap, objectType, usage) eq null)}">
+              
+                <td width="20%">
+                  <a href="javascript:editPolicy(
+                    '#{sp:mapValueByPair(templateEditor.templateByObjectTypeUsageMap, objectType, usage).id}',
+                    '#{objectType}',
+                    '#{usage}',
+                    '#{sp:mapValue(templateEditor.templateFormRefMap,
+                      sp:mapValueByPair(templateEditor.templateByObjectTypeUsageMap,
+                        objectType,
+                        usage).id)}');">
+                      #{(sp:mapValueByPair(templateEditor.templateByObjectTypeUsageMap, objectType, usage)).name}
+                  </a>
+                </td>
+                <td width="60%">#{sp:mapValueByPair(templateEditor.templateByObjectTypeUsageMap, objectType, usage).description}</td>
+                <td width="10%">
+                  <a href="javascript:deletePolicy('#{sp:mapValueByPair(templateEditor.templateByObjectTypeUsageMap, objectType, usage).id}', '#{objectType}', '#{usage}');" class="deleteLink">#{msgs.delete_policy}</a>
+                </td>
+              
+              </ui:fragment>
+              
+              <ui:fragment rendered="#{sp:mapValueByPair(templateEditor.templateByObjectTypeUsageMap, objectType, usage) eq null}">
+                <td width="20%"></td>
+                <td width="60%"></td>
+                <td align="left" width="10%">
+                  <a href="javascript:addPolicy('#{sp:mapValueByPair(templateEditor.templateByObjectTypeUsageMap, objectType, usage).id}', '#{objectType}', '#{usage}');" class="addLink">#{msgs.add_policy}</a>
+                </td>
+              </ui:fragment>
+            </tr>
+            
+          </t:dataList>
+        </table>   
+        <div class="spacerDiv"/>
+        <a4j:outputPanel id="appDependencyPanel" rendered="#{ objectType eq 'account'}">
+          <div style="margin-left: 10px" >
+            <span class="textBold">#{msgs.app_dependencies}</span>
+            <h:graphicImage id="imgHlpAppDepend" 
+                styleClass="helpIcon" 
+                url="/images/icons/dashboard_help_16.png" 
+                alt="#{help.help_app_dependencies}"/>
+          <div id="applicationDependency"/>
+            <div id="applicationDependencyData" style="display:none">#{sp:basicJSONData(applicationObject.object.dependencies)}</div>
+            <div id="applicationDependencyExclusionIds" style="display:none">#{applicationObject.object.id}</div>
+          </div>
+          <div class="spacerDiv"/>
+        </a4j:outputPanel>              
+        
+        </div>    
+        
+        <div class="spacerDiv"/>
+      </t:dataList>
+      </a4j:outputPanel>  
+              
+      <script type="text/javascript">
+      makeTableMulticolored($('templateUsageListTbl'),true,false, "even", "odd");
+      </script>   
+    
+    <div class="spacerDiv"></div>
+    
+    <script type="text/javascript">
+      // Template IDs are wiped out on each request.  The role editor keeps
+      // the TemplateEditBean in the session so it can use IDs.  Others don't
+      // do that so they rely on usages instead.  We're not consistent because
+      // Role templates don't have usages.
+      function addPolicy(templateId, objectType, usage) {
+          $('editForm:templateId').value = templateId;
+          $('editForm:templateUsage').value = usage;
+          $('editForm:templateObjectType').value = objectType;
+          $('editForm:templateAddBtn').click();
+      }
+
+      function editPolicy(templateId, objectType, usage, refId) {
+          $('editForm:templateId').value = templateId;                            
+          $('editForm:templateUsage').value = usage;
+          $('editForm:templateObjectType').value = objectType;
+          $('editForm:templateFormRefId').value = refId;
+          $('editForm:templateLoadBtn').click();
+      }
+
+      function deletePolicy(templateId, objectType, usage) {
+          Ext.MessageBox.confirm('#{msgs.delete}?', Ext.String.format('#{msgs.template_editor_delete_policy}', usage), function(btn){
+              if(btn === 'yes') {
+                  $('editForm:templateUsage').value = usage;
+                  $('editForm:templateObjectType').value = objectType;
+                  $('editForm:templateDeleteBtn').click();
+              }
+          });
+      }
+    </script>
+
+    <h:inputHidden id="applicationDependencyHidden" type="hidden" name="applicationDependencyHidden" value="#{applicationObject.object.dependencies}">
+      <f:converter converterId="sailpoint.object.ApplicationList"/>
+    </h:inputHidden>
+    
+    <h:inputHidden value="#{templateEditor.usage}" name="templateUsage" id="templateUsage"/>
+    <h:inputHidden value="#{templateEditor.formRefId}" name="templateFormRefId" id="templateFormRefId"/>
+    <h:inputHidden value="#{templateEditor.formRefName}" name="templateFormRefName" id="templateFormRefName"/>
+    <h:inputHidden value="#{templateEditor.objectType}" name="templateObjectType" id="templateObjectType"/>
+    <a4j:commandButton action="#{templateEditor.addTemplate}"
+                       id="templateAddBtn"
+                       render="templateId,templateName,templateApplicationId,templateApplicationName,templateFields,createAttributesPanel"
+                       oncomplete="SailPoint.component.ReferenceFormPopup.showApplication(
+                            '#{beanType}',
+                            $('editForm:templateUsage').value,
+                            'Application');"
+                       value="#{msgs.template_editor_add_template}"
+                       style="display:none"/>
+                             
+    <a4j:commandButton action="#{templateEditor.deleteTemplate}"
+                       id="templateDeleteBtn"
+                       render="templatesList"
+                       value="#{msgs.template_editor_delete_template}"
+                       style="display:none"/>    
+                       
+    <a4j:commandButton action="#{templateEditor.loadTemplate}"
+                       id="templateLoadBtn"
+                       name="templateLoadBtn"
+                       render="templateId,templateName,templateApplicationId,templateApplicationName,templateFields,createAttributesPanel"
+                       oncomplete="SailPoint.component.ReferenceFormPopup.showApplication(
+                            '#{beanType}',
+                            $('editForm:templateUsage').value,
+                            'Application',
+                            $('editForm:templateFormRefId').value);"
+                       style="display:none"/> 
+    <a4j:commandButton action="#{templateEditor.addFormReference}"
+                       id="templateAddFormRefBtn"
+                       name="templateAddFormRefBtn"
+                       render="templatesList"
+                       style="display:none"/>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <h:form id="processInstrumentationSearchForm">
+    <a4j:outputPanel ajaxRendered="true">
+      <h:messages infoClass="formInfo" errorClass="formError"/>
+    </a4j:outputPanel>
+    <input name="searchType" type="hidden" value="ProcessInstrumentation"/>
+    
+    <div id="processInstrumentationSearchContents" style="padding:7px 15px 0 15px">
+      <div style="margin:0 0  10px 0">
+        <h:outputText value="#{msgs.process_instrumentation_search_criteria}" styleClass="spContentTitle"/>
+        <h:graphicImage id="imgHlpProcessInstrumentationSearchCriteria" 
+                        alt="#{analyzeController.searchBean.criteriaHelpMsg}"
+                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                        url="/images/icons/dashboard_help_16.png" />
+      </div>
+
+      <div style="display:none" class="width100 formError" id="ProcessInstrumentationError"/> 
+
+      <table id="processInstrumentationInputsTbl" class="spTable width100" cellspacing="0">
+        <tr>
+          <th>
+            <h:outputText value="#{msgs.process_instrumentation_attributes}"/>
+          </th>
+        </tr>
+        <tr>
+          <td>
+            <table class="spDataTable" style="width:98%">
+              <tr>
+                <td style="vertical-align:top">
+                  <h:outputText styleClass="textBold" value="#{msgs.label_name}"/>
+                </td>
+                <td style="vertical-align:top">
+                  <div id="processNameSuggestDiv"/>
+                  <t:inputHidden id="processName" value="#{processInstrumentationSearch.processId}" forceId="true">
+                  </t:inputHidden>
+                  <div id="processNameInitialVal" style="display:none">
+                    #{processInstrumentationSearch.processName}
+                  </div>
+                </td>
+                <td style="vertical-align:top" rowspan="2">
+                  <h:outputText styleClass="textBold" value="#{msgs.process_instrumentation_search_containing_participants}"/>
+                </td>
+                <td rowspan="2">
+                  <div id="processParticipantMultiSuggest"/>
+                    <t:inputHidden id="processParticipantSuggest" value="#{processInstrumentationSearch.participantList}" forceId="true">
+                      <sp:convertList />
+                    </t:inputHidden>
+                  
+                    <div id="processParticipantMultiSuggestData" style="display:none">
+                      #{sp:basicJSONDataConverted(processInstrumentationSearch.participantList, 'IdentityListConverter')}
+                    </div>
+                </td>
+              </tr>
+    
+              <tr>
+                <td style="vertical-align:top">
+                  <h:outputText styleClass="textBold" value="#{msgs.process_instrumentation_result_status}"/>
+                </td>
+                <td style="vertical-align:top">
+                  <h:selectOneMenu id="resultStatusSelection" value="#{processInstrumentationSearch.resultStatus}">
+                    <f:selectItem itemLabel="#{msgs.selector_type_all}" itemValue="all"/>
+                    <f:selectItem itemLabel="#{msgs.success}" itemValue="complete" />
+                    <f:selectItem itemLabel="#{msgs.fail}" itemValue="failed" />
+                  </h:selectOneMenu>
+                </td>
+              </tr>
+
+              <tr><td colspan="4"><div class="spacerDiv"/></td></tr>
+
+              <tr class="odd"><td colspan="4"><h:outputText styleClass="textBold" value="#{msgs.process_instrumentation_active_dates}"/></td></tr>
+              <tr>
+                <td colspan="2">
+                  <h:outputText styleClass="textBold" value="#{msgs.process_instrumentation_search_result_start_date}"/>
+                  <h:inputHidden id="processInstrumentationEnableStartDateInput" value="#{processInstrumentationSearch.enableStartDate}"/>
+                  <span>&nbsp;</span>
+                  <input type="checkbox" id="processInstrumentationEnableStartDate" name="processInstrumentationEnableStartDate" style="margin:5px;vertical-align:middle"
+                    onclick="toggleDisplay($('processInstrumentationStartDateDiv'), !this.checked); $('processInstrumentationSearchForm:processInstrumentationEnableStartDateInput').value = this.checked;"/>              
+                  <span id="processInstrumentationStartDateDiv">
+                    <sp:inputDate type="date" id="processInstrumentationStartDate" popupCalendar="true" addResources="false" ampm="true" timeZone="#{taskSchedule.userTimeZoneId}" 
+                                 value="#{processInstrumentationSearch.activeStartDate}" 
+                                 imageLocation="/scripts/myfacescalendar" javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+                  </span>
+                </td>
+                <td colspan="2">
+                  <h:outputText styleClass="textBold" value="#{msgs.process_instrumentation_search_result_end_date}"/>
+                  <h:inputHidden id="processInstrumentationEnableEndDateInput" value="#{processInstrumentationSearch.enableEndDate}"/>
+                  <span>&nbsp;</span>
+                  <input type="checkbox" id="processInstrumentationEnableEndDate" name="processInstrumentationEnableEndDate" style="margin:5px;vertical-align:middle"
+                    onclick="toggleDisplay($('processInstrumentationEndDateDiv'), !this.checked); $('processInstrumentationSearchForm:processInstrumentationEnableEndDateInput').value = this.checked;"/>              
+                  <span id="processInstrumentationEndDateDiv">
+                    <sp:inputDate type="date" id="processInstrumentationEndDate" popupCalendar="true" addResources="false" ampm="true" timeZone="#{taskSchedule.userTimeZoneId}" 
+                                 value="#{processInstrumentationSearch.activeEndDate}" 
+                                 imageLocation="/scripts/myfacescalendar" javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+                  </span>
+                </td>
+              </tr>
+
+              <tr><td colspan="4"><div class="spacerDiv"/></td></tr>
+
+              <tr class="odd"><td colspan="4"><h:outputText styleClass="textBold" value="#{msgs.process_instrumentation_filter_by_execution_time}"/></td></tr>	        
+              <tr>
+                <td colspan="4">
+                    <table>
+                        <tr>
+                            <td>
+                  <h:selectOneMenu id="executionTimeThresholdChoice" value="#{processInstrumentationSearch.executionTimeThresholdChoice}">
+                    <f:selectItem itemLabel="#{msgs.label_average}" itemValue="average" />
+                    <f:selectItem itemLabel="#{msgs.label_maximum}" itemValue="maximum" />
+                  </h:selectOneMenu>
+                    </td><td>
+                  <h:outputText styleClass="textBold" value="#{msgs.process_instrumentation_search_execution_time_greater_than}"/>
+                    </td><td>
+                  <h:inputText id="executionTimeThreshold" styleClass="inputNumberWidth" value="#{processInstrumentationSearch.executionTimeThreshold}"/>
+                    </td><td>
+                  <h:selectOneMenu id="executionTimeThresholdUnits" value="#{processInstrumentationSearch.executionTimeThresholdUnits}">
+                    <f:selectItem itemLabel="#{msgs.minutes}" itemValue="minutes" />
+                    <f:selectItem itemLabel="#{msgs.hours}" itemValue="hours" />
+                    <f:selectItem itemLabel="#{msgs.days}" itemValue="days" />
+                  </h:selectOneMenu></td>
+                        </tr>
+                    </table>
+                </td>
+              </tr>	        
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+
+    <input style="display:none" type="button" id="preSearchBtn" value="#{msgs.identity_search_button_run_search}" onclick="SailPoint.Analyze.validateSearch('identitySearchForm', 'identity');"/>
+    <h:commandButton id="searchBtn" style="display:none" action="#{analyzeController.searchBean.runQueryAction}"/>
+    <a4j:commandButton style="display:none" 
+                       action="#{processInstrumentationSearch.runQueryAction}"
+                       id="processInstrumentationSearchBtn"
+                       oncomplete="SailPoint.ProcessInstrumentation.Search.afterRunSearchSubmit();"/>
+  </h:form>
+    <script type="text/javascript" defer="defer">
+      SailPoint.Utils.styleSelects();
+    </script>
+</ui:composition>
+
+</body>
+</html>

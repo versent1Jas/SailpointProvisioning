@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  >
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/sliderGroups.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/riskBands.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/compositeScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/entitlementBARConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/businessRoleBARConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/businessRoleScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskScores.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script defer='defer'>
+      <!--//--><![CDATA[//><!--
+      helpKey = 'RISK_SCORES';
+
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="title">#{msgs.title_risk_scoring_configuration}</ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form id="editForm">
+        <h:inputHidden id="numCategories" value="#{riskScoreConfig.numCategories}" />
+        <h:inputHidden id="currentPanel" value="#{editedEntitlementApp.currentRiskConfigTab}"/>
+
+        <div id='instructionPanel' class="pageInfo">
+          <div id="baselineAccessRiskPanelInstructions" style="display:none;">
+              <h:outputText value="#{msgs.inst_baseline_access_risk}"/>
+              <br/><br/>
+              <h:outputText value="#{msgs.inst_select_option_below}"/>
+          </div>
+
+          <div id="compositeScorePanelInstructions">
+              <h:outputText value="#{msgs.inst_compensating_factors}"/>
+              <br/><br/>
+              <h:outputText value="#{msgs.inst_user_sliders_to_define_impact}"/>
+              <br/><br/>
+              <h:outputText value="#{msgs.inst_select_category_to_adjust_score_factors}"/>
+          </div>
+
+          <!-- We are not sure we want this level of granularity yet.  This is commented out until we decide one way or the other
+            <div id="activityMonitoringPanelInstructions">
+                <h:outputText value="IdentityIQ applies an activity monitoring factor to business role, entitlement, and
+                                     SoD violation risk scores.  The monitoring factors for all monitored applications that
+                                     are associated with the score in question are taken into consideration.  The factor
+                                     that is applied is the one that has the least impact on the score."/>
+                <br/><br/>
+                <h:outputText value="For example, suppose four applications are associated with a given business role.  Enabling
+                                     activity monitoring reduces risk by 100% on three of these and 25% on the fourth.  The factor
+                                     that reduces risk by 25% is applied."/>
+                <br/><br/>
+                <h:outputText value="Adjust the values below to establish the impact of enabling activity monitoring on your
+                                     applications."/>
+            </div>
+          -->
+        </div>        
+        
+        <div id="riskScoreTabs" style="margin-bottom: 20px; width:95%"></div> 
+        
+        <div id="baselineContent" class="x-hide-display">
+            <ui:include src="barOverviewInclude.xhtml"/>
+        </div>
+        
+        <div id="compositeContent" class="x-hide-display">
+            <ui:include src="compositeScoringInclude.xhtml"/>
+        </div>
+        
+        <div class="buttonRow">
+          <a4j:commandButton id="visibleSaveButton" styleClass="primaryBtn" onclick="confirmSave(isPageDirty, 'editForm:stealthSaveButton');" value="#{msgs.button_save}"/>
+          <h:commandButton style="display:none" id="stealthSaveButton" onclick="$('editForm:currentPanel').value = 'compositeScorePanel';" action="#{riskScoreConfig.saveChangesAction}" />
+          <a4j:commandButton id="visibleCancelButton" styleClass="secondaryBtn" onclick="confirmCancel(isPageDirty, 'editForm:stealthCancelButton');" value="#{msgs.button_cancel}"/>
+          <h:commandButton style="display:none" id="stealthCancelButton" onclick="$('editForm:currentPanel').value = 'compositeScorePanel';" action="#{riskScoreConfig.cancelChangesAction}" />
+        </div>
+        
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

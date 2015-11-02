@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui"
+      >
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.batch_details_title}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/batch-requests">
+      <src>batch-requests.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/batchRequests/BatchRequestsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" >
+      helpKey = 'BATCHREQUESTS';
+      Ext.onReady(function(){
+        SailPoint.Manage.Grid.BatchRequests.createItemsGrid(#{batchRequestItemList.columnJSON});
+ 
+      }); // Ext.onReady
+    </script>
+
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <div class="pageInfo">
+        <div class="content">
+          <table class="spPaddedTable" cellspacing="0">
+          <tbody>
+            <tr>
+              <td class="leftTitle">#{msgs.batch_details_file_name}:</td>
+              <td class="leftData">#{batchRequest.fileName}</td>
+              <td class="leftTitle">#{msgs.batch_details_total_records}:</td>
+              <td class="">#{batchRequest.totalRecords}</td>
+            </tr>
+            <tr>
+              <td class="leftTitle">#{msgs.batch_details_date_requested}:</td>
+              <td class="leftData">
+                <h:outputText value="#{batchRequest.requestedDate}">
+                  <f:convertDateTime type="both" timeStyle="short" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                </h:outputText>
+              </td>
+              <td class="leftTitle">#{msgs.batch_details_total_completed}:</td>
+              <td class="">#{batchRequest.totalCompleted}</td>
+            </tr>
+            <tr>
+              <td class="leftTitle">#{msgs.batch_details_date_launched}:</td>
+              <td class="leftData">
+                <h:outputText value="#{batchRequest.launchedDate}">
+                  <f:convertDateTime type="both" timeStyle="short" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                </h:outputText>
+              </td>
+              <td class="leftTitle">#{msgs.batch_details_total_errors}:</td>
+              <td class="">#{batchRequest.totalError}</td>
+            </tr>
+            <tr>
+              <td class="leftTitle">#{msgs.batch_details_date_completed}:</td>
+              <td class="leftData">
+                <h:outputText value="#{batchRequest.completedDate}">
+                  <f:convertDateTime type="both" timeStyle="short" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                </h:outputText>
+              </td>
+              <td class="leftTitle">#{msgs.batch_details_total_invalid}:</td>
+              <td class="">#{batchRequest.totalInvalid}</td>
+            </tr>
+            <tr>
+              <td class="leftTitle">#{msgs.batch_details_status}:</td>
+              <td class="">#{batchRequest.statusMessage}</td>
+            </tr>
+          </tbody>
+          </table>
+          <div style="margin-top:10px">
+            <h:form id="mainForm">
+              <h:commandButton styleClass="secondaryBtn" immediate="true" value="#{msgs.access_request_back_button}" id="backButton" action="#{batchRequest.cancelAction}"/>
+            </h:form>
+          </div>
+        </div>
+      </div>
+      <div class="spContent">
+          <!-- Errors? -->
+        <ui:fragment rendered="#{batchRequest.message != null}">
+          <div>
+            <table cellspacing="0" cellpadding="3">
+              <tbody>
+                <tr>
+                  <td class="formError">#{msgs.batch_details_error_processing} #{batchRequest.message}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>        
+        </ui:fragment>
+          
+        <!-- general request info -->
+        <div class="accessdetailsgrid">
+          <div style="margin: 5px 5px 5px 0;">
+            <div style=""><span class="sectionHeader">#{msgs.batch_details_grid_header}</span></div>
+          </div>
+          <div id="requestItemsGrid"></div>
+        </div>
+      </div>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

@@ -1,0 +1,1540 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Initialization file for new SailPoint workflows.
+-->
+<sailpoint>
+
+<!-- ====================================================================
+
+  Role update worflow with impact analysis but no approvals.
+
+========================================================================= -->
+
+<Workflow name='Role Modeler - Impact Analysis' 
+          type='RoleModeler'
+          libraries='Role'
+          workItemRenderer='workflow.xhtml'>
+
+  <!--
+    Configuration variables
+  -->
+<!--
+<Variable name='trace' initializer='true'/>
+-->
+
+  <Variable name='doArchive' editable='true' type='boolean'>
+    <Description>Set to true to enable archiving role versions.</Description>
+    <Prompt>Enable Role Versioning</Prompt>
+  </Variable>
+
+  <Variable name='doOverlapAnalysis' editable='true' type='boolean' initializer='true'>
+    <Description>Set to true to enable role overlap analysis.</Description>
+    <Prompt>Enable Overlap Enalysis</Prompt>
+  </Variable>
+
+  <Variable name='overlapThreshold' editable='true' type='int' initializer='1'>
+    <Description>Minimum overlap percentage in any facet a role must have to be included in the result.</Description>
+    <Prompt>Minimum Overlap Percentage</Prompt>
+  </Variable>
+
+  <!--
+    Internal variables
+  -->
+
+  <Variable name='approvalObject' input='true'>
+    <Description>New version of role to approve</Description>
+  </Variable>
+
+  <Variable name='approvalType'>
+    <Description>Set to "delete" when deleting roles. Set to "rollback" when restoring a role archive.  Otherwise null.</Description>
+  </Variable>
+
+  <Variable name='approvalSource' input='true'>
+    <Description>
+       Where in the UI we are requesting the approval.
+       Values: modeler, directed, undirected, certification.
+     </Description>
+  </Variable>
+
+  <Variable name='impactAnalysisOwner' input='true'>
+    <Description>Name of user to receive impact analysis result</Description>
+  </Variable>
+
+  <Variable name='roleName' initializer='call:getDisplayableRoleName'>
+    <Description>Role name referenced by the email templates</Description>
+  </Variable>
+
+  <Variable name="noRolePropagation" editable="true" type='boolean' initializer="false">
+    <Description>Set to "true" to disable role change propagation.</Description>
+  </Variable>
+
+  <Step name='start' icon='Start'>
+    <!-- ugh, think more about false checking so we can deal with unbound -->
+    <Transition to='Impact Analysis'/>
+  </Step>
+
+  <!-- this launches the analysis task -->
+  <Step condition="script:!(impactAnalysisOwner == unbound || impactAnalysisOwner == null)" name='Impact Analysis' action='launchImpactAnalysis' posX='141' posY='17' icon='Analysis'>
+    <Arg name='doOverlapAnalysis' value='ref:doOverlapAnalysis'/>
+    <Arg name='overlapThreshold' value='ref:overlapThreshold'/>
+    <Arg name='noApplicationTemplates' value='true'/>     
+    <Transition to='Review Analysis'/>
+  </Step>
+
+  <!-- this waits for a review -->
+  <Step condition="script:!(impactAnalysisOwner == unbound || impactAnalysisOwner == null)" name='Review Analysis' posX='258' posY='17' icon='Email'>
+    <Approval owner='ref:impactAnalysisOwner'>
+      <Arg name='workItemDescription' 
+        value='Review impact analysis of $(call:getObjectClass): $(call:getDisplayableRoleName)'/>
+      <WorkItemConfig>
+        <NotificationEmailTemplateRef>
+          <Reference class='EmailTemplate' name='Role Modeler - Impact Analysis Review'/>
+        </NotificationEmailTemplateRef>
+      </WorkItemConfig>
+    </Approval>
+    <Transition to='Commit'/>
+  </Step>
+
+  <Step condition="script:(impactAnalysisOwner == unbound || impactAnalysisOwner == null) || approved" name='Commit' action='commit' posX='375' posY='17'>
+    <Arg name='archive' value='ref:doArchive'/>    
+    <Transition to='stop'/>
+  </Step>
+
+  <Step name='stop' posX='541' posY='17' icon='Stop'/>
+
+</Workflow>
+
+<EmailTemplate name="Role Modeler - Impact Analysis Review">
+  <Description>
+    Email Template for notifying role impact analysis reviewers.
+    Note that in addition to the declared arguments, all workflow variables,
+    Step arguments, and Approval arguments defined in the Workflow are
+    also available.
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name='workflow'>
+        <Description>The Workflow object being executed.</Description>
+      </Argument>
+      <Argument name='item'>
+        <Description>The WorkItem representing the review</Description>
+      </Argument>
+      <Argument name='launcher' type='string'>
+        <Description>The name of the Identity that launched the workflow.</Description>
+      </Argument>
+      <Argument name='roleName' type='string'>
+        <Description>The name of the role being analyzed.</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Body>An impact analysis of role '$(roleName)' has been assigned to you.
+
+Login and view your work item inbox to complete this review.
+  </Body>
+  <Subject>Review impact analysis of role: $(roleName)</Subject>
+</EmailTemplate>
+
+<!-- ====================================================================
+
+  Role update workflow with owner approval and impact analysis.
+
+========================================================================= -->
+
+<Workflow name='Role Modeler - Owner Approval' 
+          type='RoleModeler'
+          libraries='Role'
+          workItemRenderer='workflow.xhtml'>
+
+  <!--
+    Configuration variables
+  -->
+
+  <Variable name='doArchive' editable='true' type='boolean'>
+    <Description>Set to true to enable archiving role versions.</Description>
+    <Prompt>Enable Role Versioning</Prompt>
+  </Variable>
+
+  <Variable name='doOverlapAnalysis' editable='true' type='boolean' initializer='true'>
+    <Description>Set to true to enable role overlap analysis.</Description>
+    <Prompt>Enable Overlap Enalysis</Prompt>
+  </Variable>
+
+  <Variable name='overlapThreshold' editable='true' type='int' initializer='1'>
+    <Description>Minimum overlap percentage in any facet a role must have to be included in the result.</Description>
+    <Prompt>Minimum Overlap Percentage</Prompt>
+  </Variable>
+
+  <!--
+    Internal variables
+  -->
+
+  <Variable name='approvalObject' input='true'>
+    <Description>New version of role to approve</Description>
+  </Variable>
+
+  <Variable name='approvalType'>
+    <Description>Set to "delete" when deleting roles. Set to "rollback" when restoring an archive.  Otherwise null.</Description>
+  </Variable>
+
+  <Variable name='approvalSource' input='true'>
+    <Description>
+       Where in the UI we are requesting the approval.
+       Values: modeler, directed, undirected, certification.
+     </Description>
+  </Variable>
+
+  <Variable name='impactAnalysisOwner' input='true'>
+    <Description>Name of user to receive impact analysis result</Description>
+  </Variable>
+
+  <Variable name='roleName'>
+    <Description>Role name referenced by the email templates</Description>
+  </Variable>
+
+  <Variable name="noRolePropagation" editable="true" type='boolean' initializer="false">
+    <Description>Set to "true" to disable role change propagation.</Description>
+  </Variable>
+
+  <Step name='start' resultVariable='roleName' action='getDisplayableRoleName' icon='Start'>
+    <Description>
+      Copy the role name to a variable for easier reference in the
+      email template.  Skip to approvals if there is no impact
+      analysis owner.
+    </Description>
+    <Transition to='Check Approvals' when='impactAnalysisOwner == unbound || impactAnalysisOwner == null'/>
+    <Transition to='Impact Analysis'/>
+  </Step>
+
+  <Step name='Impact Analysis' action='launchImpactAnalysis' posX="167" posY="16" icon='Analysis'>
+    <Description>
+      Call a handler method to launch the impact analysis task.
+    </Description>
+    <Arg name='doOverlapAnalysis' value='ref:doOverlapAnalysis'/>
+    <Arg name='overlapThreshold' value='ref:overlapThreshold'/>
+    <Arg name='noApplicationTemplates' value='true'/> 
+    <Transition to='Review Analysis'/>
+  </Step>
+
+  <Step name='Review Analysis' posX="276" posY="16" icon='Email'>
+    <Description>
+      Wait for review of the impact analyis report.
+    </Description>
+    <Approval owner='ref:impactAnalysisOwner'>
+      <Arg name='workItemDescription' 
+        value='Review impact analysis of $(call:getObjectClass): $(call:getDisplayableRoleName)'/>
+      <WorkItemConfig>
+        <NotificationEmailTemplateRef>
+          <Reference class='EmailTemplate' name='Role Modeler - Impact Analysis Review'/>
+        </NotificationEmailTemplateRef>
+      </WorkItemConfig>
+    </Approval>
+    <Transition to='stop' when='!approved'/>
+    <Transition to='Check Approvals'/>
+  </Step>
+
+  <Step name='Check Approvals' posX="85" posY="125">
+    <Description>
+      Skip approvals if the launcher is also the (previous) role owner.
+    </Description>
+    <Transition to='Audit Success' when='call:isSelfApproval'/>
+    <Transition to='Approve'/>
+  </Step>
+
+  <!-- single stage approval on the role owner, use a handler call -->
+  <Step name='Approve' posX="276" posY="222" icon='Approval'>
+    <Description>
+      Single stage approval by the role owner.
+      The handler method will build a suitable Approval object.
+    </Description>
+    <Approval owner='call:buildOwnerApproval'>
+      <WorkItemConfig>
+        <NotificationEmailTemplateRef>
+          <Reference class='EmailTemplate' name='Role Modeler - Approval'/>
+        </NotificationEmailTemplateRef>
+      </WorkItemConfig>
+    </Approval>
+    <Transition when="approved" to='Audit Success'/>
+    <Transition when="!approved" to='Audit Failure'/>
+  </Step>
+
+  <Step name='Audit Failure' action='audit' posX="423" posY="218" icon='Audit'>
+    <Arg name='source' value='ref:launcher'/>
+    <Arg name='action' value='call:getApprovalAuditAction'/>
+    <Arg name='target' value='Role: $(roleName)'/>
+    <Arg name='string1' value='failure'/>
+    <Transition to='stop'/>
+  </Step>
+
+  <Step name='Audit Success' action='audit' posX="334" posY="120" icon='Audit'>
+    <Arg name='source' value='ref:launcher'/>
+    <Arg name='action' value='call:getApprovalAuditAction'/>
+    <Arg name='target' value='Role: $(roleName)'/>
+    <Arg name='string1' value='success'/>
+    <Transition to='Commit'/>
+  </Step>
+
+  <Step name='Commit' action='commit' posX="423" posY="120">
+    <Arg name='archive' value='ref:doArchive'/>
+    <Transition to='stop'/>
+  </Step>
+
+  <Step name='stop' posX="423" posY="12" icon='Stop'/>
+
+</Workflow>
+
+<EmailTemplate name="Role Modeler - Approval">
+  <Description>
+    Email Template for notifying role approvers of a new work item.
+    Note that in addition to the declared arguments, all workflow variables,
+    Step arguments, and Approval arguments defined in the Workflow are
+    also available.
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name='workflow'>
+        <Description>The Workflow object being executed.</Description>
+      </Argument>
+      <Argument name='item'>
+        <Description>The WorkItem representing the review</Description>
+      </Argument>
+      <Argument name='launcher' type='string'>
+        <Description>The name of the Identity that launched the workflow.</Description>
+      </Argument>
+      <Argument name='roleName' type='string'>
+        <Description>The name of the role being analyzed.</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Body>An approval is required for a modification of the role '$(roleName)' made by $(launcher).  
+
+Login and view your work item inbox to complete this approval.
+  </Body>
+  <Subject>Approve modification to role: $(roleName)</Subject>
+</EmailTemplate>
+
+<!-- ====================================================================
+
+  Identity refresh workflow.  This is called in the middle of the 
+  Identizer.refresh process to allow the insertion of approvals, 
+  trigger side effects, and account completion prompting.
+
+========================================================================= -->
+
+<Workflow name='Identity Refresh'
+          type='IdentityRefresh'
+          libraries='Identity'
+          resultExpiration='-1'>
+
+  <!--
+    Transient Input Variables
+    These are passed in by the identitizer but are not persisted
+    if the case needs to suspend.  This allows some expensive objects
+    to flow through to finishRefresh.
+  -->
+
+  <Variable name='identitizer' input='true' type='object' transient='true'>
+    <Description>
+      Instance of sailpoint.object.Identitizer that launched this workflow.
+      This is a transient object that will only be used if the
+      workflow executes synchronously to completion when launched.
+      It saves having finishRefresh allocate and initialize a new Identitizer.
+    </Description>
+  </Variable>
+
+  <Variable name='identity' input='true' type='object' transient='true'>
+    <Description>
+      Identity object we're refreshing.  This is a transient object
+      that will only be used by finishRefresh if the workflow runs to 
+      completion without suspending.
+    </Description>
+  </Variable>
+
+  <!--
+    Non-Transient Input Variables
+  -->
+
+  <Variable name='refreshOptions' input='true' type='object'>
+    <Description>
+      Map of options to configure Identitizer when we're ready to 
+      complete the refresh.  These were culled from the original set of
+      options given to the Identitizer that launched this workflow.
+    </Description>
+  </Variable>
+
+  <Variable name='identityName' input='true' type='string'>
+    <Description>
+      The name of the identity object being refreshed.  The first half
+      of the refresh will have been committed, this includes link refresh,
+      attribute promotion, and role detction.
+    </Description>
+  </Variable>
+
+  <Variable name='project' input='true'>
+    <Description>
+      A ProvisioningProject object describing the modifications to the identity.
+      This may include a list of Question objects which will 
+      cause the generation of a Form and a WorkItem to solicit
+      additional information necessary for provisioning.
+    </Description>
+  </Variable>
+
+  <Variable name='changeEvents' input='true'>
+    <Description>
+      A list of IdentityChangeEvent objects generated by pre-provisioning
+      triggers.
+    </Description>
+  </Variable>
+
+  <Variable name='detectionDifference' input='true'>
+    <Description>
+      A sailpoint.object.Difference object with changes made to the
+      detected role list during the first half of the refresh.  These
+      will already have been committed to the database.  In theory this
+      could be used to trigger approvals or notifications though we 
+      don't really support the notion of "rejecting" a detection.
+    </Description>
+  </Variable>
+
+  <Variable name='previousVersion' input='true' type='object'>
+    <Description>
+      A copy of the Identity object made before the refresh.
+      This is needed in the second phase of refresh for trigger processing.
+    </Description>
+  </Variable>
+
+  <Variable name='doManualActions' editable='true' input='true' initializer='false'>
+    <Description>
+      When set to 'true' the unmanged plan from the provisioning project
+      will be converted into one or more manual action work items to request
+      the changes since they can't be done automatically.
+      This may be passed in from the refresh task arguments.
+    </Description>
+  </Variable>
+
+  <Variable name='enableManualAccountSelection' input='true' >
+    <Description>
+      When set to 'true' the system will send out Account Selection Notification emails 
+      for users with more than one account on any one application and the system 
+      can't determine the provisioning account.
+      This may be passed in from the refresh task arguments.
+    </Description>
+  </Variable>
+
+  <!--
+    Steps
+  -->
+
+  <Step name='start' icon='Start' posX='28' posY='10'>
+    <Transition to='Evaluate Change Events'/>
+  </Step>
+
+  <!--
+    Just a placeholder, need to decide how we handle these...
+  -->
+  <Step name='Evaluate Change Events' condition='changeEvents != null' posX='161' posY='10'>
+    <Transition to='Do Provisioning Forms' />
+  </Step>
+
+  <!-- 
+    Present provisioning forms
+  -->
+  <Step name='Do Provisioning Forms' condition='project != null &amp;&amp; (project.hasQuestions() || (isTrue(enableManualAccountSelection) &amp;&amp; (project.hasUnansweredAccountSelections() ||  project.hasUnansweredProvisioningTargets())))' posX='346' posY='10'>
+    <Description>
+      Call the standard subprocess for assembling, presenting, and assimilating
+      provisioning forms.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Do Provisioning Forms'/>
+    </WorkflowRef>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='project' value='ref:project'/>
+    <Arg name='fallbackOwner' value='spadmin'/>
+    <Arg name='accountSelectionOwner' value='applicationOwner'/>
+    <Arg name='formTemplate' value='Identity Refresh'/>
+    <Arg name='disableManualAccountSelection' value='script:!isTrue(enableManualAccountSelection)'/>
+    <Return name='project' to='project'/> 
+    <Transition to='Finish Refresh'/>
+  </Step>
+
+  <!--
+    Provision, policy check, score, and various other things
+  -->
+  <Step name='Finish Refresh' action='finishRefresh' posX='515' posY='10'>
+    <Description>
+      Provision what is left in the project then finish the refresh
+      by running policy checks, recalculating scores, and other things.
+    </Description>
+    <Arg name='identitizer' value='ref:identitizer'/>
+    <Arg name='identity' value='ref:identity'/>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='refreshOptions' value='ref:refreshOptions'/>
+    <Arg name='previousVersion' value='ref:previousVersion'/>
+    <Arg name='project' value='ref:project'/>
+    <Transition to='Manual Actions' />
+  </Step>
+
+  <Step name='Manual Actions' condition='isTrue(doManualActions) &amp;&amp; project.getUnmanagedPlan() != null' posX='696' posY='10'>
+    <Description>
+      Present work items for the parts of the project that could not be sent
+      to an integrated IDM system.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Do Manual Actions'/>
+    </WorkflowRef>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='project' value='ref:project'/>
+    <Transition to='end'/>
+  </Step>
+
+  <Step name='end' posX='859' posY='10'/>
+
+</Workflow>
+
+<!-- ====================================================================
+
+  IIQ Identity edit workflow.
+
+========================================================================= -->
+
+<Workflow name="Identity Update"
+          type="IdentityUpdate"
+          configForm="Identity Update Config Form"
+          libraries="Identity">
+
+  <!--
+    Configuration Variables
+  -->
+  <Variable name='trace' initializer='false'>
+    <Description>
+      Used for debugging this workflow and when set to true trace
+      will be sent to stdout.
+    </Description>
+  </Variable>
+
+  <Variable name='optimisticProvisioning' editable='true'>
+    <Description>
+      Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be 
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.
+    </Description>
+  </Variable>
+
+  <Variable name='foregroundProvisioning' editable='true' initializer='true'>
+    <Description>
+      Normally provisioning is done in a step that uses the "backgroud"
+      option to force the workfow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintanance task to 
+      see the resutls of the request.
+    </Description>
+  </Variable>
+
+  <Variable name='doManualActions' editable='true' initializer='false'>
+    <Description>
+      When set to 'true' the unmanged plan from the provisioning project
+      will be converted into one or more manual action work items to request
+      the changes since they can't be done automatically.
+    </Description>
+  </Variable>
+
+  <Variable name='doRefresh' editable='true' initializer='false'>
+    <Description>
+      Set to true to cause an identity refresh after the changes in the plan
+      have been provisioned.  This is normally off, you might want this on
+      if you want modification of identity or link attributes to result in
+      an immediate re-evaluation of assigned and detected roles.
+    </Description>
+  </Variable>
+
+  <Variable name='requireCreateTemplates' editable='true' initializer='false'>
+    <Description>
+      When set to 'true' any requests for an account that does not exist
+      will be forced into the unmanaged plan unless the target application
+      specifies an account creation template.  This may be combined with
+      doManualActions to have work items sent out to handle account creation.
+    </Description>
+  </Variable>
+
+  <Variable name='approver' editable='true'>
+    <Description>
+      Name of Identity to approve role assignments.
+      This is not set when launched from the UI, but you may want
+      to hard code an initializer for testing.
+    </Description>
+  </Variable>
+
+  <Variable name="fallbackApprover" editable='true' initializer="spadmin">
+    <Description>
+      The name of an Identity that will be assigned ownership of any
+      manual action work items if the application owner is not set.
+    </Description>
+  </Variable>
+
+  <!--
+    Input Variables
+  -->
+
+  <Variable name='identityName' input='true' required='true'>
+    <Description>
+      Name of Identity that is being updated.
+    </Description>
+  </Variable>
+
+  <Variable name='plan' input='true' required='true'>
+    <Description>
+      Master provisioning plan containing the changes to process.
+    </Description>
+  </Variable>
+
+  <!--
+    System Variables
+  -->
+
+  <Variable name='sessionOwner'>
+    <Description>
+      This is a system variable that we do not need to declare, but it's 
+      good for documentation.  This will be set when the workflow is launched
+      to the name of the Identity that is considered to be the owner
+      of the interactive UI session.  This is passed to call:buildProvisioningForm
+      so that we present forms to the active user first before suspending and
+      opening work items for other users.
+    </Description>
+  </Variable>
+
+  <!--
+    Internal variables
+  -->
+
+  <Variable name="identityDisplayName" 
+            initializer='script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)'>
+    <Description>
+      The displayName of the identity being updated.
+      Query for this using a projection query and fall back to the name.
+    </Description>
+  </Variable>
+
+  <Variable name='project'>
+    <Description>
+      Provisioning project containing assigned roles and side effects,
+      compiled from the input plan.
+    </Description>
+  </Variable>
+
+
+  <!--
+    Until we can work out how the approvals should be implemented,
+    use the old approval page that expects the newRoles and oldRoles lists.
+  -->
+  <Variable name='newRoles'/>
+  <Variable name='oldRoles'/>
+  <Variable name='linksToAdd'/>
+  <Variable name='linksToMove'/>
+  <Variable name='linksToRemove'/>
+  <Variable name='approvalSet'/>
+
+  <Variable name="approvalEmailTemplate" input="true" initializer="LCM Identity Update Approval">
+    <Description>
+     The email template to use for approval notifications.
+    </Description>
+  </Variable>
+
+  <!-- 
+    Approvals could go on either side of role assignment forms if we have any...
+  -->
+  <Step name='start' icon='Start' posX='19' posY='17'>
+    <Transition to='Inspect Plan'/>
+  </Step>
+
+  <Step name='Inspect Plan' action='calculateIdentityDifference' posX='106' posY='17'>
+    <Description>
+      Dig some things out of the plan into variables.
+      We're setting newRoles and oldRoles temporarily so we can use
+      the old approval pages.  Sould be calculating other differences!
+    </Description>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='plan' value='ref:plan'/>
+    <Arg name='oldRoles' value='oldRoles'/>
+    <Arg name='newRoles' value='newRoles'/>
+    <Arg name='linksToAdd' value='linksToAdd'/>
+    <Arg name='linksToMove' value='linksToMove'/>
+    <Arg name='linksToRemove' value='linksToRemove'/>
+    <Arg name='approvalSet' value='approvalSet'/>
+    <Transition to='Compile Project'/>
+  </Step>
+
+  <Step name='Compile Project' action='compileProvisioningProject'
+        resultVariable='project' posX='204' posY='17'>
+    <Description>
+      Compile the provisioning plan into a provisioning project.
+      If you need to pass in provisioner options like "noFiltering"
+      or "noRoleDeprovisioning" you must pass them as explicit
+      arguments to the call.
+
+      The evaluation options "requester" and "source" are commonly
+      set here.
+
+      You can also pass things into the Template and Field scripts by
+      defining Args in this step.
+    </Description>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='plan' value='ref:plan'/>
+    <Arg name='requester' value='ref:launcher'/>
+    <Arg name='source' value='UI'/>
+    <Arg name='optimisticProvisioning' value='ref:optimisticProvisioning'/>
+    <Arg name='requireCreateTemplates' value='ref:requireCreateTemplates'/>
+    <Transition to='Start Approval Process' when='ref:approver'/>
+    <Transition to='Start Provisioning Form Process'/>
+  </Step>
+
+  <!--
+    Set a case message that will be displayed in the UI.
+  -->
+  <Step name='Start Approval Process' action='setLaunchMessage' icon='Message' posX='358' posY='13'>
+    <Description> 
+      Add a message to the worflow launch result indicating that an approval is in progress.
+      This also serves an example of building localized messages from the 
+      catalog.
+    </Description>
+    <Arg name='message' value='workflow_identity_approval'/>
+    <Arg name='arg1' value='ref:identityDisplayName'/>
+    <Arg name='arg2' value='ref:approver'/>
+    <Transition to='Approval'/>
+  </Step>
+
+  <!--
+    Need to extend form support so we can do basic all or nothing approvals
+    without having to write a JSf renderer!
+    Until then use the old pages with newRoles/oldRoles.
+    Need to migrate to Dan's new ApprovalSet model.
+  -->
+  <Step name='Approval' icon='Approval' posX='462' posY='13'>
+    <Approval owner='ref:approver'
+              description='Approve modification to $(identityDisplayName)'
+              send='identityName,identityDisplayName,newRoles,oldRoles,linksToAdd,linksToMove,linksToRemove,approvalSet'
+              renderer='identityUpdate.xhtml'>
+      <Arg name='workItemNotificationTemplate' value='ref:approvalEmailTemplate'/>
+    </Approval>
+    <Transition to='end' when='!ref:approved'/>
+    <Transition to='Start Provisioning Form Process'/>
+  </Step>
+
+  <Step name='Start Provisioning Form Process' action='setLaunchMessage'  icon='Message' posX='270' posY='124'>
+    <Arg name='message' value='workflow_identity_forms'/>
+    <Arg name='arg1' value='ref:identityDisplayName'/>
+    <Transition to='Do Provisioning Forms'/>
+  </Step>
+
+  <!-- 
+    Present provisioning forms
+  -->
+  <Step name='Do Provisioning Forms' posX='270' posY='219'>
+    <Description>
+      Call the standard subprocess for assembling, presenting, and assimilating
+      provisioning forms.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Do Provisioning Forms'/>
+    </WorkflowRef>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='project' value='ref:project'/>
+    <Arg name='formTemplate' value='Identity Update'/>
+    <Arg name='preferredOwner' value='ref:sessionOwner'/>
+    <Return name='project' to='project'/> 
+    <Transition to='Start Provisioning Process'/>
+  </Step>
+
+  <Step name='Start Provisioning Process' action='setLaunchMessage'  icon='Message' posX='270' posY='315'>
+    <Arg name='message'>
+      <Script>
+        <Source>
+          // pick a message with more detail if we're provisioning
+          import sailpoint.object.ProvisioningPlan;
+          String msg = "workflow_identity_saved";
+          boolean otherPlans = false;
+          List plans = project.getPlans();
+          if (plans != null) {
+              for (int i = 0 ; i &lt; plans.size() ; i++) {
+                  ProvisioningPlan plan = (ProvisioningPlan)plans.get(i);
+                  if (!ProvisioningPlan.APP_IIQ.equals(plan.getTargetIntegration())) {
+                     otherPlans = true;
+                     break;
+                  }
+              }
+          }
+
+          if (project.getUnmanagedPlan() != null &amp;&amp; isTrue(doManualActions)) {
+              if (otherPlans)
+                  msg = "workflow_identity_provisioning_manual";
+              else
+                  msg = "workflow_identity_manual";
+          }
+          else if (otherPlans) {
+              msg = "workflow_identity_provisioning";
+          }
+
+          return msg;
+        </Source>
+      </Script>
+    </Arg>
+    <Arg name='arg1' value='ref:identityDisplayName'/>
+    <Transition to='Provision'/>
+  </Step>
+
+  <Step name='Provision' action='call:provisionProject' icon='Provision' posX='394' posY='315'>
+    <Description>
+      Provision what remains in the project.  Normally we won't
+      be here with unanswered provisioning questions, but if we have them
+      the provisioner will just skip creating those accounts and do what it can.
+    </Description>
+    <Arg name='background' value='!ref:foregroundProvisioning'/>
+    <Arg name='project' value='ref:project'/>
+    <Transition to="Manual Actions" />
+  </Step>
+
+  <Step name='Manual Actions' condition='isTrue(doManualActions) &amp;&amp; project.getUnmanagedPlan() != null' posX='490' posY='315'>
+    <Description>
+      Present work items for the parts of the project that could not be sent
+      to an integrated IDM system.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Do Manual Actions'/>
+    </WorkflowRef>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='project' value='ref:project'/>
+    <Transition to='Refresh Identity' />
+  </Step>
+
+  <Step name='Refresh Identity' action='call:refreshIdentity' icon='Task' condition='ref:doRefresh' posX='599' posY='315'>
+    <Description>
+      Add arguments as necessary to enable refresh features.  Typically you only want this
+      to correlate roles and possibly provision if we notice new assigned roles.
+      Note that provisioning will be done in the Identity Refresh workflow so if there
+      are any provisioning forms to display we won't feed them directly to the 
+      current user, they'll have to return to the inbox.
+    </Description>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='correlateEntitlements' value='true'/>
+    <Arg name='provision' value='true'/>
+    <Arg name='synchronizeAttributes' value='true'/>
+    <Arg name='doManualActions' value='ref:doManualActions'/>
+    <Transition to='end'/>
+  </Step>
+
+  <Step name='Form Owner Error' posX='701' posY='9'>
+    <Script>
+      <Source>
+        //println("Unable to determine owner for provisioning form, terminating process");
+        //println(wfcontext.getWorkflowCase().toXml());
+      </Source>
+    </Script>
+    <Transition to='end'/>
+  </Step>
+
+  <Step name='end' posX='599' posY='9' icon='Stop'/>
+
+</Workflow>
+
+<!-- ====================================================================
+
+  Role/Entitlement Assignment
+
+========================================================================= -->
+
+<Workflow name='Scheduled Assignment' 
+          type='ScheduledAssignment'
+          libraries='Identity'
+          resultExpiration='-1'>
+  <Description>
+Workflow called to handle a scheduled assignment and deassignments,
+commonly known as "sunrise" and "sunset".  These are intended to
+be used only from Request objects that are scheduled by the provisioning
+plan evaluator.
+  </Description>
+
+  <Variable name='identity' input='true'>
+    <Description>The database id of the target identity</Description>
+  </Variable>
+
+  <Variable name='identityName' input='true'>
+    <Description>The name of the target identity</Description>
+  </Variable>
+
+  <Variable name='assigner' input='true'>
+    <Description>
+The name of the identity considered to be the source of the assignment.
+This is used for the audit event.  It is not necessary to make the assignment
+becuase the original assigner will also be stored in RoleAssignment metadata
+in the cube.
+    </Description>
+  </Variable>
+
+  <Variable name='doRefresh' editable='true' initializer='script:System.getProperty("iiq.forceRefreshAfterScheduledRoleChange")'>
+    <Description>Set to true to cause a cube refresh after the assignment</Description>
+  </Variable>
+
+  <Variable name='eventType' input='true'>
+    <Description>The type of assignment.  This will be one of the constants defined in RoleEventGenerator.</Description>
+  </Variable>
+
+  <Variable name='role' input='true'>
+    <Description>The database id of the role to assign, if this is a role event</Description>
+  </Variable>
+
+  <Variable name='roleName' input='true'>
+    <Description>The name of the role to assign, if this is a role event</Description>
+  </Variable>
+
+  <Variable name='assignmentId' input='true'>
+    <Description>The unique id of the RoleAssignment, if this is a role event</Description>
+  </Variable>
+
+  <Variable name='application' input='true'>
+    <Description>The database id of an application, if this is an entitlement event</Description>
+  </Variable>
+
+  <Variable name='applicationName' input='true'>
+    <Description>The name of an application, if this is an entitlement event</Description>
+  </Variable>
+
+  <Variable name='instance' input='true'>
+    <Description>The name of an application instance, if this is an entitlement event</Description>
+  </Variable>
+
+  <Variable name='nativeIdentity' input='true'>
+    <Description>The specific id of the target account in the application, if this is an entitlement event</Description>
+  </Variable>
+
+  <Variable name='name' input='true'>
+    <Description>The name of an attribute in the account schema, if this is an entitlement event</Description>
+  </Variable>
+
+  <Variable name='value' input='true'>
+    <Description>The value of the account attribute, if this is an entitlement event</Description>
+  </Variable>
+
+  <!-- 
+     Internal Variables
+  -->
+
+   <Variable name='project'>
+     <Description>ProvisioningProject compiled from the Request</Description>
+   </Variable>
+
+  <Step name="start" icon="Start" posX="30" posY="10">
+    <Transition to='Compile Assignment Project'/>
+  </Step>
+
+  <Step name='Compile Assignment Project' action='call:compileScheduledAssignmentProject' icon='Task' resultVariable='project' posX="150" posY="10">
+    <Arg name='identity' value='ref:identity'/>
+    <Arg name='assigner' value='ref:assigner'/>
+    <Arg name='eventType' value='ref:eventType'/>
+    <Arg name='role' value='ref:role'/>
+    <Arg name='assignmentId' value='ref:assignmentId'/>
+    <Arg name='application' value='ref:application'/>
+    <Arg name='instance' value='ref:instance'/>
+    <Arg name='nativeIdentity' value='ref:nativeIdentity'/>
+    <Arg name='name' value='ref:name'/>
+    <Arg name='value' value='ref:value'/>
+    <!-- let this be passed in through the Request for testing -->
+    <Arg name='optimisticProvisioning' value='ref:optimisticProvisioning'/>
+    <Transition to='Inspect Project'/>
+  </Step>
+
+  <Step name='Inspect Project' posX="300" posY="10">
+    <Script>
+      <Source>
+        // hooks for project customization before execution
+      </Source>
+    </Script>
+    <Transition to='Provision'/>
+  </Step>
+
+  <Step name="Provision" icon="Task" posX="414" posY="10">
+    <Description>
+      Execute the scheduled assignment project.
+      We call the standard subprocess that handles retries.
+      Note that the disableIdentityRequests option is passed
+      to prevent logging a warning since this workflow does
+      not maintain IdentityRequest objects.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Provision with retries'/>
+    </WorkflowRef>
+    <Arg name="project" value="ref:project"/>
+    <Arg name='foregroundProvisioning' value='true'/>
+    <Arg name='disableIdentityRequests' value='true'/>
+    <Arg name='trace' value='ref:trace'/>
+    <Return name='project' to='project'/>
+    <Transition to="Refresh Identity"/>
+  </Step>
+
+   <Step name="Refresh Identity" action="call:refreshIdentity" icon="Task" condition="script:isTrue(doRefresh)" posX="530" posY="10">
+    <Description>
+Add arguments as necessary to enable refresh features.  Provisioning is usually done
+with an option to the Activate Assignment step.  Here you might want to check
+policies or refresh the scorecard.  Correlating entitlements might pick up new
+detected roles if the provisioning was done synchronously.
+    </Description>
+    <Arg name='identity' value='ref:identity'/>
+    <Arg name='correlateEntitlements' value='true'/>
+    <Arg name='provision' value='true'/>
+    <Arg name='doManualActions' value='false'/>
+    <Transition to='Manual Actions'/>
+  </Step>
+    
+  <Step name='Manual Actions' condition='script:project.getUnmanagedPlan() != null' posX='640' posY='10'>
+    <Description>
+      Present work items for the parts of the project that could not be sent
+      to an integrated IDM system.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Do Manual Actions'/>
+    </WorkflowRef>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='project' value='ref:project'/>
+    <Transition to='end'/>
+  </Step>
+
+  <Step name='end' icon='Stop' posX="744" posY="10"/>
+
+</Workflow>
+
+<!-- ====================================================================
+
+  Role Activation
+
+========================================================================= -->
+
+<!--
+  Default workflow that is called when a role has been
+  scheduled to be activated (enabled).
+ -->  
+<Workflow name='Scheduled Role Activation' 
+          type='ScheduledRoleActivation'
+          libraries='Role,Identity'
+          resultExpiration='1'>
+  <Description>
+Workflow called when a role is ready to be enabled or disabled.
+  </Description>
+
+  <Variable name='eventType' input='true'>
+    <Description>The type of the role activation event.  This will be one of the constants defined in RoleEventGenerator: roleActivation or roleDeactivation</Description>
+  </Variable>
+
+  <Variable name='role' input='true'>
+    <Description>The database id of the role we're changing.</Description>
+  </Variable>
+
+  <Variable name='roleName' input='true'>
+    <Description>The name of the role we're changing.</Description>
+  </Variable>
+
+  <Variable name='doRefresh' editable='true' 
+            initializer='script:System.getProperty("iiq.forceRefreshAfterScheduledRoleChange")'>
+    <Description>Set to true to cause a full identity refresh after activation.</Description>
+  </Variable>
+
+  <Variable name='activate'>
+    <Script>
+      <Source>
+        // we sholld only be here for activation or deactivation events, 
+        // but err on the side of activation in case the type is wrong
+        import sailpoint.api.RoleEventGenerator;
+        return !RoleEventGenerator.EVENT_TYPE_ROLE_DEACTIVATION.equals(eventType);
+      </Source>
+    </Script>
+  </Variable>
+
+  <Variable name="noRolePropagation" editable="true" type='boolean' initializer="false">
+    <Description>Set to "true" to disable role change propagation.</Description>
+  </Variable>
+
+  <Step name='start' icon='Start' posX="30" posY="10">
+    <Transition to='Activate Role'/>
+  </Step>
+
+  <Step name='Activate Role' action='call:enableRole' icon='Task' condition="ref:activate" posX="140" posY="10">
+    <Arg name='role' value='ref:role'/>
+    <Transition to='Deactivate Role'/>
+  </Step>
+
+  <Step name='Deactivate Role' action='call:disableRole' icon='Task' condition="!ref:activate" posX="260" posY="10">
+    <Arg name='role' value='ref:role'/>
+    <Transition to='Audit Success'/>
+  </Step>
+
+  <Step name='Audit Success' action='audit' icon='Audit' posX="390" posY="10">
+    <Arg name='source' value='ref:launcher' />
+    <Arg name='action' value='script:(activate) ? "activate" : "deactivate"'/>
+    <Arg name='target' value='ref:roleName' />
+    <Arg name='string1' value='script:((activate) ? "Activated " : "Deactivated ") + roleName'/>
+    <Arg name='string2' value='Success' />
+    <Transition to='Refresh Identities'/>
+  </Step>
+     
+  <Step name='Refresh Identities' action='call:refreshIdentities' icon='Task' condition="ref:doRefresh" posX="525" posY="10">
+    <Arg name='identitiesWithRoles'>
+      <Script><Source>
+          // if we're deactivating, only refresh roles that have us
+          import sailpoint.api.RoleEventGenerator;
+          Object retval = null;
+          if (RoleEventGenerator.EVENT_TYPE_ROLE_DEACTIVATION.equals(eventType)) 
+             retval = role;
+          return retval;
+      </Source></Script>
+    </Arg>
+    <Arg name='correlateEntitlements' value='true' />
+    <Arg name='provision' value='true'/>
+    <Arg name='doManualActions' value='false'/>
+     <Transition to='end'/>
+  </Step>
+
+  <Step name='end' icon='Stop' posX="650" posY="10"/>
+
+</Workflow>
+
+<!-- ====================================================================
+
+  ManagedAttribute (aka AccountGroup, aka Group) Create/Edit Workflow.
+
+========================================================================= -->
+
+<Workflow name='Entitlement Update'
+          type='ManagedAttribute'
+          libraries='Group'>
+
+<!--
+  <Variable name='trace' initializer='true'/>
+-->
+
+  <!--
+    Configuration Variables
+  -->
+
+  <Variable name='optimisticProvisioning' editable='true'>
+    <Description>
+      Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be 
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.
+    </Description>
+  </Variable>
+
+  <Variable name='foregroundProvisioning' editable='true' initializer='true'>
+    <Description>
+      Normally provisioning is done in a step that uses the "backgroud"
+      option to force the workfow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintanance task to 
+      see the resutls of the request.  For group requests this is much less
+      of a problem than it is for account provisioning.
+    </Description>
+  </Variable>
+
+  <Variable name='doManualActions' editable='true' initializer='false'>
+    <Description>
+      When set to 'true' the unmanged plan from the provisioning project
+      will be converted into one or more manual action work items to request
+      the changes since they can't be done automatically.
+    </Description>
+  </Variable>
+
+  <Variable name="fallbackApprover" editable='true' initializer="spadmin">
+    <Description>
+      The name of an Identity that will be assigned ownership of any
+      manual action work items if the application owner is not set.
+    </Description>
+  </Variable>
+
+  <!--
+    Input Variables
+  -->
+
+  <Variable name='plan' input='true' required='true'>
+    <Description>
+      Master provisioning plan containing the changes to process.
+    </Description>
+  </Variable>
+
+  <Variable name='approver' input='true'
+    initializer='script:System.getProperty("iiq.forceApprover")'>
+    <Description>
+      Name of Identity to approve entitlement changes.
+      This is not set when launched from the UI, but you may want
+      to hard code an initializer for testing.
+    </Description>
+  </Variable>
+
+  <!--
+    System Variables
+  -->
+
+  <Variable name='sessionOwner'>
+    <Description>
+      This is a system variable that we do not need to declare, but it's 
+      good for documentation.  This will be set when the workflow is launched
+      to the name of the Identity that is considered to be the owner
+      of the interactive UI session.  This is passed to call:buildProvisioningForm
+      so that we present forms to the active user first before suspending and
+      opening work items for other users.
+    </Description>
+  </Variable>
+
+  <!--
+    Internal variables
+  -->
+  
+  <Variable name='summaryName'>
+    <Description>
+      Single string representation of ManagedAttribute identity.
+      This must be at least a combination of the application name
+      and the managed attribute value (group name).
+    </Description>
+  </Variable>
+
+  <Variable name='project'>
+    <Description>
+      Provisioning project containing assigned roles and side effects,
+      compiled from the input plan.
+    </Description>
+  </Variable>
+
+  <Variable name='changes'>
+    <Description>
+      A ChangeSummary object containing a JSF friendly summary of the
+      changes being made.  
+    </Description>
+  </Variable>
+
+  <Step name='start' icon='Start' posX="17" posY="19">
+    <Transition to='Examine Plan'/>
+  </Step>
+
+  <Step name='Examine Plan' action='getSummaryName' posX="112" posY="19"
+        resultVariable='summaryName'>
+    <Description>
+      Derive a single string we can use as the name of the entitlement
+      in approvals and logging.
+    </Description>
+    <Transition to='Compile Project'/>
+  </Step>
+
+  <Step name='Compile Project' action='compileGroupProject' posX="219" posY="19"
+        resultVariable='project'>
+    <Description>
+      Compile the provisioning plan into a provisioning project.
+      Unlike the project compilation step for identities, we do not
+      expect to be dealing with provisioning policies and forms.
+    </Description>
+    <Arg name='plan' value='ref:plan'/>
+    <Arg name='requester' value='ref:launcher'/>
+    <Arg name='source' value='UI'/>
+    <Arg name='optimisticProvisioning' value='ref:optimisticProvisioning'/>
+    <Transition to='Start Approval Process' when='ref:approver'/>
+    <Transition to='Start Provisioning Process'/>
+  </Step>
+
+  <!--
+    Set a case message that will be displayed in the UI.
+  -->
+  <Step name='Start Approval Process' action='setLaunchMessage' icon='Message' posX="285" posY="112">
+    <Description> 
+      Add a message to the worflow launch result indicating that an approval is in progress.
+      This also serves an example of building localized messages from the catalog.
+    </Description>
+    <Arg name='message' value='workflow_identity_approval'/>
+    <Arg name='arg1' value='ref:summaryName'/>
+    <Arg name='arg2' value='ref:approver'/>
+    <Transition to='Build Approval Summary'/>
+  </Step>
+
+  <Step name='Build Approval Summary' action='buildGroupChangeSummary' resultVariable='changes' posX="432" posY="112">
+    <Arg name="plan" value="ref:plan"/>
+    <Transition to="Approval"/>
+  </Step>
+
+  <Step name='Approval' icon='Approval' posX="554" posY="112">
+    <Approval owner='ref:approver'
+              send='summaryName,changes'
+              renderer='entitlement.xhtml'>
+      <Arg name='workItemDescription'>
+        <Script>
+          <Source>
+            String action = "modification";
+            if (changes.delete)
+                action = "deletion";
+            else if (changes.create)
+                action = "creation";
+            return "Approve " + action + " of entitlement " + summaryName;
+          </Source>
+        </Script>
+      </Arg>
+    </Approval>
+    <Transition to='end' when='!ref:approved'/>
+    <Transition to='Start Provisioning Process'/>
+  </Step>
+
+  <Step name='Start Provisioning Process' action='setLaunchMessage' icon='Message' posX="612" posY="15">
+    <Description>
+      Leave a launch message that can be displayed in the browser before
+      we start provisioning which may be asynchronous.  Note that this
+      uses the same message catalog keys as the identity update workflows
+      which is okay because they don't mention the type of object being
+      processed.  If that changes we'll need our own set of keys.
+    </Description>
+    <Arg name='message'>
+      <Script>
+        <Source>
+          // pick a message with more detail if we're provisioning
+          import sailpoint.object.ProvisioningPlan;
+          String msg = "workflow_identity_saved";
+          boolean otherPlans = false;
+          List plans = project.getPlans();
+          if (plans != null) {
+              for (int i = 0 ; i &lt; plans.size() ; i++) {
+                  ProvisioningPlan plan = (ProvisioningPlan)plans.get(i);
+                  if (!ProvisioningPlan.APP_IIQ.equals(plan.getTargetIntegration())) {
+                     otherPlans = true;
+                     break;
+                  }
+              }
+          }
+
+          if (project.getUnmanagedPlan() != null &amp;&amp; isTrue(doManualActions)) {
+              if (otherPlans)
+                  msg = "workflow_identity_provisioning_manual";
+              else
+                  msg = "workflow_identity_manual";
+          }
+          else if (otherPlans) {
+              // jsl - if there are errors it looks odd to show
+              // a "succesfully requesting provisioning" message
+              // followed by the error message, just leave this out,
+              // we can say something about manual provisioning but if
+              // simply committed the change we dont' need anything more
+              // msg = "workflow_identity_provisioning";
+          }
+          return msg;
+        </Source>
+      </Script>
+    </Arg>
+    <Arg name='arg1' value='ref:summaryName'/>
+    <Transition to='Provision'/>
+  </Step>
+
+  <Step name='Provision' action='call:provisionGroupProject' icon='Provision' posX="732" posY="15">
+    <Description>
+      Provision what remains in the project.  Normally we won't
+      be here with unanswered provisioning questions.
+    </Description>
+    <Arg name='background' value='!ref:foregroundProvisioning'/>
+    <Arg name='project' value='ref:project'/>
+    <Transition to='Check Provisioning Errors'/>
+  </Step>
+
+  <Step name='Check Provisioning Errors' posX="851" posY="15">
+    <Description>
+      Placeholder for custom logging or other actions.  
+      If there were group provisioning errors, provisionGroupProject
+      will have left them in the WorkflowCase.messages list.
+    </Description>
+    <Script>
+      <Source>
+        import sailpoint.tools.Message;
+        //System.out.println("Checking provisioning errors...");
+        List errors = wfcontext.getWorkflowCase().getErrors();
+        if (errors != null) {
+            for (Message error : errors) {
+                //System.out.println("*** " + error.toString());
+            }
+        }
+      </Source>
+    </Script>
+    <Transition to='end'/>
+  </Step>
+
+  <Step name='end' posX="977" posY="14" icon='Stop'/>
+
+</Workflow>
+
+<!-- ====================================================================
+
+  Password Intercept
+
+========================================================================= -->
+
+<Workflow name='Password Intercept'
+          type='PasswordIntercept'
+          libraries='Identity'>
+
+<!--
+  <Variable name='trace' initializer='true'/>
+-->
+
+  <!--
+    Configuration Variables
+  -->
+
+  <Variable name='syncAll' editable='true' initializer='true'>
+    <Description>
+      Set to true to enable full synchronization over all
+      accounts.
+    </Description>
+  </Variable>
+
+  <Variable name='targetApplications' editable='true'>
+    <Description>
+      Set to a csv or List(String) of Application names that will be synchronized.
+    </Description>
+  </Variable>
+
+  <!--
+    Input Variables
+  -->
+
+  <Variable name='identityName' input='true' required='true'>
+    <Description>
+      Name of the Identity whose password has changed.
+    </Description>
+  </Variable>
+
+  <Variable name='applicationName' input='true' required='true'>
+    <Description>
+      Name of the Application where the password change was detected.
+    </Description>
+  </Variable>
+
+  <Variable name='nativeIdentity' input='true' required='true'>
+    <Description>
+      Name of the account on the Application where the password change was detected.
+    </Description>
+  </Variable>
+
+  <Variable name='password' input='true' required='true'>
+    <Description>
+      The new password, encrypted.
+    </Description>
+  </Variable>
+
+  <!--
+    Internal Variables
+  -->
+
+  <Variable name='project'>
+    <Description>
+      A ProvisionignProject compiled from the target list.
+    </Description>
+  </Variable>
+
+
+  <Step name='start' icon='Start' posX="28" posY="15">
+    <Transition to='Select Targets'/>
+  </Step>
+
+  <Step name='Select Targets' posX="127" posY="15">
+    <Script>
+      <Source>
+        // Placeholder for custom application selection.
+        // The result must be left on the targetApplications list
+        // as either a csv or List(String) of Application names.
+      </Source>
+    </Script>
+    <Transition to='Compile Project'/>
+  </Step>
+
+  <Step name='Compile Project' action='call:compilePasswordInterceptProject' posX="239" posY="15"
+        resultVariable='project'>
+    <Description>
+      Perform the default password synchronization using the
+      supplied application list. 
+    </Description>
+    <Arg name='password' value='ref:password'/>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='sourceApplication' value='ref:applicationName'/>
+    <Arg name='targetApplications' value='ref:targetApplications'/>
+    <Arg name='syncAll' value='ref:syncAll'/>
+    <Transition to='Empty Project' when='project == null'/>
+    <Transition to='Examine Project'/>
+  </Step>
+
+  <Step name='Examine Project' posX="305" posY="150">
+    <Description>
+      This is a placeholder for custom code that may want to alter
+      the project before execution.
+    </Description>
+    <Script>
+      <Source>
+        //System.out.println("Password intercept project:");
+        //System.out.println(project.toXml());
+      </Source>
+    </Script>
+    <Transition to='Provision'/>
+  </Step>
+
+  <Step name="Provision" icon="Task" posX="418" posY="150">
+    <Description>
+      Execute the password synchronization project.
+      We call the standard subprocess that handles retries.
+      Note that the disableIdentityRequests option is passed
+      to prevent logging a warning since this workflow does
+      not maintain IdentityRequest objects.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Provision with retries'/>
+    </WorkflowRef>
+    <Arg name="project" value="ref:project"/>
+    <Arg name='foregroundProvisioning' value='true'/>
+    <Arg name='disableIdentityRequests' value='true'/>
+    <Arg name='trace' value='ref:trace'/>
+    <Return name='project' to='project'/> 
+    <Transition to='Audit'/>
+  </Step>
+
+  <Step name='Audit' posX="535" posY="150">
+    <Description>
+      Placeholder, what kind of auditing should we do?
+      We've got low level ProvisioningResults in the project.
+    </Description>
+    <Transition to='end'/>
+  </Step>
+
+  <Step name='Empty Project' posX="418" posY="11">
+    <Description>
+      Here if there wasn't enough to build a project.  If there
+      were missing inputs there should be errors in the log.  We could
+      just be here because there were no sync targets.
+    </Description>
+    <Script>
+      <Source>
+        //System.out.println("Empty synchronization project");
+      </Source>
+    </Script>
+    <Transition to='end'/>
+  </Step>
+
+  <Step name="end" icon="Stop" posX="535" posY="11"/>
+
+</Workflow>
+
+<!-- ====================================================================
+
+  Import Actions
+
+========================================================================= -->
+
+<ImportAction name="include" value="WEB-INF/config/workflow-identityCorrelation.xml" />
+
+</sailpoint>

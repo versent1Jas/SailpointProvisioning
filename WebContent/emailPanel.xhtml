@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+  <ui:composition>
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  
+    <f:view>
+    
+    <script>
+        Ext.onReady(function () {
+            var recipientSuggest = new SailPoint.IdentitySuggest({
+                id: 'emailRecipient',
+                renderTo: 'recipientSuggest',
+                binding: 'emailPanelForm:recipient',
+                initialData : [#{sp:buildJSONFromIdentity(email.recipient.id)}],
+                width: 300,
+                baseParams: {context: 'Owner'}
+            });
+            
+            if ('#{email.disableSuggest}' === 'true') {
+              // reenable the hidden element so it submits since we still need to submit recipient
+              document.getElementById('emailPanelForm:recipient').disabled = false;
+            } 
+        });   
+    </script>
+    
+    <h:form id="emailPanelForm">
+        
+      <table style="margin:10px">
+        <tr>
+          <td align="left" style="padding:5px"><h:outputText styleClass="sectionHeader" value="#{msgs.label_recipient}: "/></td>
+          <td align="left" style="padding:5px">
+            <div id="recipientSuggest"></div>
+            <t:inputHidden id="recipient" value="#{email.recipient}">
+                <sp:convertIdentity />
+            </t:inputHidden>
+          </td>
+        </tr>
+        <tr>
+          <td align="left" style="padding:5px"><h:outputText styleClass="sectionHeader" value="#{msgs.label_subject}: "/></td>
+          <td align="left" style="padding:5px"><h:inputText value="#{email.subject}" size="75" id="subject"/></td>
+        </tr>
+        <tr style="vertical-align: top">
+          <td align="left" style="padding:5px"><h:outputText styleClass="sectionHeader" value="#{msgs.label_message}: "/></td>
+          <td align="left" style="padding:5px"><h:inputTextarea value="#{email.body}" cols="75" rows="8" id="body"/></td>
+        </tr>
+      </table>
+      
+      <a4j:commandButton action="#{email.send}" id="sendEmailBtn" style="display:none"/>
+    </h:form>
+    </f:view>
+  </ui:composition>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_scheduled_certs}</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+        helpKey = 'CERTIFICATION_SCHEDULED';
+        var gDbId;
+        var gName;
+        var certTypeStore = [
+            <c:forEach items="#{certificationScheduleList.certTypes}" var="certType" varStatus="vStatus">
+            <h:outputText rendered="#{!vStatus.first}" value=","/>
+              {text: '#{certType.label}', value:'#{certType.value}'}
+            </c:forEach>
+        ];
+        function selectionFunc(scope) {
+          $('editForm:certType').value = scope.value;
+          $('editForm:newCertificationButton').click();
+        };
+
+      Ext.onReady(function() {
+        SailPoint.Component.MenuButton.renderMenuButton('#{msgs.list_item_sched_new_cert}', certTypeStore, selectionFunc, 'newCertButton');
+      });
+
+    </script>
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/menuButton.js?#{debug.revision}</src>
+    </sp:script>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/monitor/schedule-certifications">
+        <src>schedule-certifications.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>menuButton.css</src>
+    </sp:style>
+  </ui:define>
+  
+  <ui:define name="subtitle">
+    <div id="subtitle" class="highlight">
+    </div>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <ui:include src="certificationsGrid.xhtml"/>
+      
+      <h:form styleClass="form" id="editForm">        
+        <h:inputHidden id="currentScheduleId" value="#{certificationScheduleList.selectedId}"/>
+        <h:inputHidden id="currentEventId" value="#{certificationEventsList.selectedId}"/>
+        <h:inputHidden id="currentResultId" value="#{taskResult.objectId}"/>
+        <h:inputHidden id="certificationGroupId" value="#{certGroupList.certificationGroupId}"/>
+        <h:inputHidden id="certType" value="#{certificationScheduleList.newCertificationType}"/>
+        <h:inputHidden id="templateCertId" value="#{certificationScheduleList.templateCertId}"/>
+        
+        <!-- Schedules -->
+        <a4j:commandButton style="display:none"
+          action="#{certificationScheduleList.delete}"
+          id="deleteScheduleButton" oncomplete="refreshGrid(Ext.getCmp('certificationSchedulesGrid'));Ext.getCmp('spViewport').doLayout();"/>
+        <h:commandButton style="display:none"
+         id="editScheduleButton"
+         action="#{certificationScheduleList.editScheduledCertificationAction}" />
+
+        <!-- Events -->
+        <a4j:commandButton style="display:none"
+          action="#{certificationEventsList.delete}"
+          id="deleteEventButton" oncomplete="refreshGrid(Ext.getCmp('certificationEventsGrid'));Ext.getCmp('spViewport').doLayout();"/>
+        <h:commandButton style="display:none"
+         id="editEventButton"
+         action="#{certificationEventsList.editEventAction}" />
+         
+        <!-- Results -->
+        <a4j:commandButton style="display:none"
+          action="#{taskResult.delete}"
+          id="deleteResultButton" oncomplete="refreshGrid(Ext.getCmp('certificationResultsGrid'));Ext.getCmp('spViewport').doLayout()"/>
+        <a4j:commandButton style="display:none"
+            action="#{taskResult.terminate}"
+            id="terminateButton" oncomplete="refreshGrid(Ext.getCmp('certificationResultsGrid'))"/>
+        <h:commandButton style="display:none"
+                         action="#{taskResult.viewResultAction}"
+                         id="viewResultsButton" />
+
+         <!-- Certification Groups-->
+        <h:commandButton style="display:none"
+         id="viewCertificationGroup"
+         action="#{certGroupList.viewCertificationGroup}" />
+
+        
+        <h:commandButton style="display:none"
+                         action="#{certificationScheduleList.newCertificationAction}"
+                         id="newCertificationButton" />
+
+        <h:commandButton id="newEventButton"
+                         style="display: none"
+                         action="#{certificationEventsList.newEventAction}"
+                         value="#{msgs.cert_event_new_cert_event_btn}" />
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

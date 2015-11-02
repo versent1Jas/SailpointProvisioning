@@ -1,0 +1,549 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+
+  <ui:define name="title">
+      <h:outputFormat value="#{msgs.view_identity}" rendered="#{identity.identityPresent and !identity.workgroup}">
+          <f:param value="#{identity.displayableName}"/>
+      </h:outputFormat>
+      <h:outputFormat value="#{msgs.view_workgroup}" rendered="#{identity.identityPresent and identity.workgroup}">
+          <f:param value="#{identity.displayableName}"/>
+      </h:outputFormat>
+      
+      <h:outputText value="#{msgs.identity_not_found}" rendered="#{!identity.identityPresent}" />
+  </ui:define>
+
+  <ui:define name="subtitle">
+    <ui:fragment rendered="#{identity.showPager}">
+      <ui:include src="/identity/identityPager.xhtml">
+        <ui:param name="prevIdentityId" value="#{identity.pager.prevIdentityId}" />
+        <ui:param name="currentIdentityIndex" value="#{identity.pager.currentIdentityIndex}" />
+        <ui:param name="totalIdentities" value="#{sp:size(identity.pager.identityIds)}"/>
+        <ui:param name="nextIdentityId" value="#{identity.pager.nextIdentityId}" />
+      </ui:include>
+    </ui:fragment>
+  </ui:define>
+
+  <!-- only need showHide, could factor out a more generic set? -->
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/identity">
+      <src>identity.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/roles">
+      <src>roles.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ExportMonitor.js?#{debug.revision}</src> 
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src> 
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/StyleHelper.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/DateTimeInput.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/attributeEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/MoveLinkWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/identity.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/NameWithTooltip.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleAssignmentWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/VTypes.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/identity/IdentityHistory.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/AccessRequestStatusGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/accessRequests/AccessRequestsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/RowExpander.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CellActionPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/TableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/GroupFactorySelector.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateRange.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/identityEntitlementsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/identityEntitlementRolesGrid.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/EmailWindow.js?#{debug.revision}</src>
+    </sp:script>
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript">
+      helpKey = 'IDENTITY';
+      var ajaxLock = false;
+      var controlledScopesMultiSuggest;
+
+      //pass these to advanced search fields defined in AccessRequestStatusGrid.js
+      var jsonFilterRequesterIdentity = null;
+      var jsonFilterRequesteeIdentity = null;
+
+      var sp = new SailPoint.state.StateProvider({
+          stateIds: ['#{identity.snapshotsHelper.identityHistoryGridState.name}', '#{identityEntitlementList.gridState.name}', '#{identityEntitlementRoleList.gridState.name}'],
+          states:   ['#{identity.snapshotsHelper.identityHistoryGridState.state}','#{identityEntitlementList.gridState.state}', '#{identityEntitlementRoleList.gridState.state}']
+      });
+      Ext.state.Manager.setProvider(sp);
+
+      <ui:fragment rendered="#{not empty gridConfigBean.uiConfigJson['myAccessRequestGridColumns']}">
+          var accessRequestGridColConf = #{gridConfigBean.uiConfigJson['myAccessRequestGridColumns']};
+      </ui:fragment>
+    
+      <ui:fragment rendered="#{not empty gridConfigBean.uiConfigJson['identityEntitlementGridColumns']}">
+          var identityEntitlementGridMetaData = #{gridConfigBean.uiConfigJson['identityEntitlementGridColumns']};
+      </ui:fragment>
+    
+      <ui:fragment rendered="#{not empty gridConfigBean.uiConfigJson['identityEntitlementRoleGridColumns']}">
+          var identityRoleEntitlementGridMetaData = #{gridConfigBean.uiConfigJson['identityEntitlementRoleGridColumns']};
+      </ui:fragment>
+      
+      Ext.onReady(function() {
+          
+           Ext.QuickTips.init();
+           
+           SailPoint.Identity.loadMaskMsg = '#{msgs.loading_data}';
+           
+           var tabPanelItems = [
+               {title: '#{msgs.attributes}', contentEl: 'attributesContent', tabIndex: 0},
+               {title: '#{msgs.entitlements}', contentEl: 'entitlementsContent', tabIndex: 1}, 
+               {id: 'linksContentPanel', title: '#{msgs.application_account}', contentEl: 'linksContent', tabIndex: 2}
+           ];
+           
+           <c:if test="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'MonitorIdentityPolicy')}">
+               tabPanelItems.push({
+                   title: '#{msgs.policy}',
+                   contentEl: 'policyContent',
+                   tabIndex: 3
+               });
+           </c:if>
+           
+           <c:if test="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'MonitorIdentityHistory')}">
+               tabPanelItems.push({
+                   title: '#{msgs.history}',
+                   contentEl: 'historyContent',
+                   tabIndex: 4
+               });
+           </c:if>
+    
+           <c:if test="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'FullAccessIdentityRiskModel')}">
+               tabPanelItems.push({
+                   title: '#{msgs.risk}',
+                   contentEl: 'scoreContent',
+                   tabIndex: 5
+               });
+           </c:if>
+    
+           <c:if test="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'MonitorIdentityActivity')}">
+               tabPanelItems.push({
+                   title: '#{msgs.activity}',
+                   contentEl: 'activityContent',
+                   tabIndex: 6
+               });
+           </c:if>
+    
+           <c:if test="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'SetIdentityRights')}">
+               tabPanelItems.push({
+                   title: '#{msgs.user_rights}',
+                   contentEl: 'userRightsContent',
+                   tabIndex: 7
+               });
+           </c:if>
+           
+           <c:if test="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'MonitorIdentityEvents')}">
+               tabPanelItems.push({
+                   id: 'eventsContentPanel',
+                   title: '#{msgs.identity_events}',
+                   contentEl: 'eventContent',
+                   tabIndex: 8
+               });
+           </c:if>
+           
+           initIdentityTabPanel(tabPanelItems);
+      });
+
+      <!--//--><![CDATA[//><!--
+
+      function initAttributesTab() {
+          renderSuggests();
+
+          if(Ext.getDom('startDateDiv') && Ext.getDom('endDateDiv')) {
+            // disable the start and end checkboxes if there's no forwarding user
+            if (!#{identity.forwardingHelper.forwarding}) {
+                disableStartAndEndDates();
+            }
+
+            // toggle the date field displays to match their checkboxes
+            toggleDisplay(Ext.getDom('startDateDiv'), (!#{identity.forwardingHelper.forwardStart}));
+            toggleDisplay(Ext.getDom('endDateDiv'), (!#{identity.forwardingHelper.forwardEnd}));
+          }
+      }
+
+      function renderSuggests() {
+        /** We check for the existence of the suggest component to see if extjs has
+        already rendered it so that we don't render more than one suggest if the user
+        clicks on this tab more than once 
+        UPDATE: bug#21885 - UI rendering issue in IE8 and IE11 with Identity Forwarding User Display.
+                IE9 still had this issue. Don't use the id property when defining the Identity Suggest
+                and rerender the Ext component.
+        **/
+          if(!Ext.getCmp('controlledScopesSuggest') && Ext.getDom('controlledScopesMultiSuggest')) {
+            controlledScopesMultiSuggest = new SailPoint.MultiSuggest({
+              id:'controlledScopesSuggest',
+              renderTo: 'controlledScopesMultiSuggest',
+              suggestType: 'scope',
+              jsonData: #{identity.scopeHelper.controlledScopesJson},
+              inputFieldName: 'controlledScopes',
+              contextPath: CONTEXT_PATH
+            });
+          }
+
+          if(Ext.getDom('forwardingSuggest')) {
+        	  var forwardingSuggest = Ext.create('SailPoint.IdentitySuggest', {
+                renderTo: 'forwardingSuggest',
+                binding: 'forwarding',
+                width: 300,
+                listeners: {
+                    change: toggleStartAndEndDateFields,
+                    select: enableStartAndEndDates
+                },
+                baseParams: {context: 'Owner'}
+            }), iVal = '#{sp:escapeJavascript(identity.forwardingHelper.forward.displayName)}';
+            
+            if(iVal != ''){
+                forwardingSuggest.setRawValue(iVal);
+                SailPoint.Suggest.IconSupport.setIconDiv(forwardingSuggest, 'userIcon');
+            }
+          }
+      }
+
+      function initHistoryTab() {
+          var gridPageSize = #{identity.snapshotsHelper.identityHistoryGridState.pageSize};
+          if (!gridPageSize) {
+              gridPageSize = 10;
+          }
+
+          var gridStateStr = '#{identity.snapshotsHelper.identityHistoryGridState.JSON}';
+          var identityHistoryGridMetaData = #{identity.snapshotsHelper.identityHistoryColumnJSON};
+
+          SailPoint.Identity.History.initializeGrid(gridStateStr,
+                                                    identityHistoryGridMetaData,
+                                                    gridPageSize,
+                                                    '#{identity.snapshotsHelper.identityHistoryGridState.name}',
+                                                    '#{sp:escapeJavascript(identity.name)}');          
+      }
+      
+      function initAccessRequestsGrid() {
+          var wrapperPanel = Ext.getCmp('accessRequestsGridWrapPanel');
+          if (!wrapperPanel) {
+              return;
+          }
+          
+          var gridConf = {
+              id: 'identityAccessRequestGrid',
+              stateId: 'identitytAccessRequestGrid',
+              stateful: true,
+              columns: accessRequestGridColConf.columns,
+              disableActions: true,
+              isEventsTab: true,
+              identity: '#{identity.identityId}',
+              afterSearchButtonAction: SailPoint.identity.setTabPanelHeight
+          };
+            
+          var accessRequestGrid = new SailPoint.dashboard.AccessRequestStatusGrid(gridConf);
+          
+          accessRequestGrid.on('afterToggleExpando', function(isExpanding){
+              var curHeight = this.getSize().height;
+              this.setHeight(isExpanding ? curHeight + 220 : curHeight - 220);
+          }, wrapperPanel);
+          
+          // on most browsers the tab panel height is not set correctly if we 
+          // refresh the page while the events tab is active... so set it after 
+          // we load the data the first time
+          accessRequestGrid.getStore().on('load', function() {
+              SailPoint.identity.setTabPanelHeight();
+          }, null, { single: true });
+          
+          wrapperPanel.add(accessRequestGrid);
+
+          accessRequestGrid.getStore().load();
+      }
+
+      function initIdentityRequests() {
+          var wrapperPanel = Ext.create('Ext.panel.Panel', {
+              id: 'accessRequestsGridWrapPanel',
+              renderTo: 'accessRequestStatusGridMain',
+              layout: 'fit',
+              height: 300,
+              listeners: {
+                  afterrender: {
+                      fn: function() {
+                          initAccessRequestsGrid();
+                          
+                          // in IE7 we have to re-layout the tab and set the height after the A4J request
+                          if (Ext.isIE7) {
+                              Ext.getCmp('eventsContentPanel').doComponentLayout();
+                              SailPoint.identity.setTabPanelHeight();
+                          }
+                      }
+                  }
+              }
+          });
+      }
+
+      function initEventsTab() {
+        if (#{base.lcmEnabled}) {
+          initIdentityRequests();
+        }
+      }
+
+      function initEntitlementsTab() {
+
+          // we have this silly flag to control if the new or old role stuff is shown
+          if ( ! #{sp:getSystemConfigurationValue('enableAdminRoleChanges', false)} ) {
+              //
+              // Roles Grid
+              //
+              var rolesGridStateStr = '#{identityEntitlementRoleList.gridState.JSON}';
+              var rolesGrid = SailPoint.Define.Grid.IdentityEntitlementRoles.createGrid(
+                              '#{sp:escapeJavascript(identity.name)}',
+                              identityRoleEntitlementGridMetaData,
+                              rolesGridStateStr,
+                              '#{identityEntitlementRoleList.gridState.name}');
+       
+              var rolesWrapperPanel = new Ext.container.Container({
+                  id: 'IdentityEntitlementRolesWrapperPanel',
+                  items: [rolesGrid],
+                  layout: 'fit',
+                  renderTo: 'identityEntitlementRolesContainer'
+              }); 
+              
+              // Since we have a couple of orphan panels w/grids on the page,
+              // we have to go through all this to force each one to resize 
+              // appropriately when the other one resizes.  Otherwise the grid
+              // will get pushed out of view inside the container div.
+              rolesGrid.on('afterToggleExpando', function(isExpanding){
+                  var me = this;
+                  Ext.defer(function() {
+                      me.updateLayout({isRoot:false, defer:true});
+                      var wrap = Ext.getCmp('identityEntitlementsWrapperPanel');
+                      if(wrap) {
+                          wrap.items.get(0).getView().fireEvent('resize', null);
+                      }
+                  }, 100);
+              }, rolesWrapperPanel);
+    
+              var submitRoleOnEnter = new SailPoint.SubmitOnEnter(null, null, function(t) {
+                  return Ext.DomQuery.selectNode('.advSearchBtn', Ext.getDom(rolesGrid.getId() + '-identityRoleSearchForm'));
+              });
+              
+              var filterTextFields = document.getElementsByClassName('x-form-text', rolesGrid.getId() + '-identityRoleSearchForm');
+              filterTextFields.each(function (filterField) {
+                  submitRoleOnEnter.registerTextField(filterField);
+              });
+          } 
+
+          //
+          // Entitlements Grid
+          //
+          var gridStateStr = '#{identityEntitlementList.gridState.JSON}';
+          var entitlementsGrid = SailPoint.Define.Grid.IdentityEntitlements.createGrid(
+                      '#{sp:escapeJavascript(identity.name)}',
+                      identityEntitlementGridMetaData, 
+                      gridStateStr, 
+                      '#{identityEntitlementList.gridState.name}');
+
+          var wrapperPanel = new Ext.container.Container({
+              id: 'identityEntitlementsWrapperPanel',
+              items: [entitlementsGrid],
+              layout: 'fit',
+              renderTo: 'identityEntitlementsContainer'
+          });
+          
+          // Since we have a couple of orphan panels w/grids on the page,
+          // we have to go through all this to force each one to resize 
+          // appropriately when the other one resizes.  Otherwise the grid
+          // will get pushed out of view inside the container div.
+          entitlementsGrid.on('afterToggleExpando', function(isExpanding){
+              var me = this;
+              Ext.defer(function(){
+                  me.updateLayout({isRoot:false, defer:true});
+                  var wrap = Ext.getCmp('IdentityEntitlementRolesWrapperPanel');
+                  if(wrap) {
+                      wrap.items.get(0).getView().fireEvent('resize', null);
+                  }
+              }, 100);
+          }, wrapperPanel);
+
+          var submitOnEnter = new SailPoint.SubmitOnEnter(null, null, function(t){
+              return Ext.DomQuery.selectNode('.advSearchBtn', Ext.getDom(entitlementsGrid.getId() + '-identityEntitlementSearchForm'));
+          });
+          
+          var filterTextFields = document.getElementsByClassName('x-form-text', entitlementsGrid.getId() + '-identityEntitlementSearchForm');
+          filterTextFields.each(function (filterField) {
+              submitOnEnter.registerTextField(filterField);
+          });
+
+      }
+
+      //--><!]]>
+    </script>
+
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <a4j:outputPanel ajaxRendered="true">
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      </a4j:outputPanel>
+      <h:form styleClass="form" id="editForm">
+
+      <ui:fragment rendered="#{!identity.identityPresent}">
+        #{msgs.no_identity}
+      </ui:fragment>
+
+      <ui:fragment rendered="#{identity.identityPresent}">
+
+        <h:inputHidden id="id" value="#{identity.identityId}"/>
+        <h:inputHidden id="prevIdentityId" value="#{identity.pager.prevIdentityId}"/>
+        <h:inputHidden id="nextIdentityId" value="#{identity.pager.nextIdentityId}"/>
+      
+          <div id="identityTabs" ></div>  
+          
+          <a4j:outputPanel id="identityPanels">
+           
+            <!-- 1: Attributes Panel -->
+            <div id="attributesContent" class="x-hide-display">
+              <ui:include src="/define/identity/identityAttributes.xhtml"/>
+            </div>
+
+            
+            <!-- 2: Entitlements Panel -->
+            <div id="entitlementsContent" class="x-hide-display">
+              <ui:include src="/define/identity/identityEntitlements.xhtml"/>  
+            </div>
+            
+            
+            <!-- 3: Application Accounts -->
+            <div id="linksContent" class="x-hide-display">
+              <ui:include src="/define/identity/identityAccounts.xhtml"/>   
+            </div>
+
+
+            <!-- 4: Policy -->
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'MonitorIdentityPolicy')}">
+              <div id="policyContent" class="x-hide-display">
+                <ui:include src="/define/identity/identityPolicy.xhtml"/>  
+              </div>
+            </ui:fragment>
+
+
+            <!-- 5: History -->
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'MonitorIdentityHistory')}">
+              <div id="historyContent" class="x-hide-display">
+                <ui:include src="/define/identity/identityHistory.xhtml"/>  
+              </div>
+            </ui:fragment>
+
+
+            <!-- 6: Risk -->
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'FullAccessIdentityRiskModel')}">
+              <div id="scoreContent" class="x-hide-display">
+                <ui:include src="/define/identity/identityRisk.xhtml"/>  
+              </div>
+            </ui:fragment>
+            
+            
+            <!-- 7: Activity -->
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'MonitorIdentityActivity')}">
+              <div id="activityContent" class="x-hide-display">
+                <ui:include src="/define/identity/identityActivity.xhtml"/>
+              </div>
+            </ui:fragment>
+
+            <!-- 8: User Rights -->
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'SetIdentityRights')}">
+              <div id="userRightsContent" class="x-hide-display">
+                <ui:include src="/define/identity/identityRights.xhtml"/> 
+              </div>
+            </ui:fragment>
+            
+
+            <!-- 9: Events -->
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ViewIdentity') or sp:hasRight(facesContext, 'MonitorIdentityEvents')}">
+              <div style="height: 100%" id="eventContent" class="x-hide-display">
+                <ui:include src="/define/identity/identityEvents.xhtml"/> 
+              </div>
+            </ui:fragment>
+
+          </a4j:outputPanel>
+
+          <div class="buttonRow">
+            <ui:fragment rendered="#{identity.showSaveButton}">
+                <h:commandButton id="saveButton" action="#{identity.saveAction}" styleClass="primaryBtn" value="#{msgs.button_save}" />
+            </ui:fragment>
+            <h:commandButton id="cancelButton" action="#{identity.cancelAction}" styleClass="secondaryBtn" value="#{msgs.button_cancel}" />
+            <h:inputHidden value="#{identity.activeTab}" id="activeTab"/>
+          </div>
+
+          <h:inputHidden value="#{identity.snapshotsHelper.snapshotId}" id="snapshotId"/>
+          <h:commandButton  id="snapshotBtn"
+                            style="display:none"
+                            action="#{identity.snapshotsHelper.snapshotViewAction}"/>
+
+          <h:commandButton  id="nextBtn"
+                            style="display:none"
+                            action="#{identity.nextIdentity}"/>
+
+          <h:commandButton  id="prevBtn"
+                            style="display:none"
+                            action="#{identity.prevIdentity}"/>
+
+          <a4j:commandButton  id="tabUpdateBtn"
+                              action="#{identity.updateTab}"
+                              render="identityPanels"
+                              style="display:none"
+                              oncomplete="postTabUpdate()"/>
+
+
+      <div id="accountGroupWin"></div>
+
+      </ui:fragment>
+        <h:inputHidden id="workItemId" />
+        <h:inputHidden id="requestId" />
+        
+        <h:commandButton id="viewWorkItem" style="display:none" action="#{identity.viewWorkItem}">
+        </h:commandButton>
+        <h:commandButton id="viewRequestDetails" style="display:none" action="#{identity.viewIdentityRequestDetail}">
+        </h:commandButton>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

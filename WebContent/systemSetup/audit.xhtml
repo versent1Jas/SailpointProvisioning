@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.audit_conf}</ui:define>
+  
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'AUDIT_CONFIGURATION';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" 
+        errorClass="formError" fatalClass="formError"/>
+
+      <h:form id="configForm" styleClass="form">
+      
+        <div id="auditTabs" style="margin-top: 15px; width:95%"></div>   
+      
+        <div id="generalContent" class="x-hide-display">
+            <div class="paddedContainer">
+              <table class="spPaddedTable">
+                <tr>
+                  <td>
+                    <h:outputText styleClass="spContentTitle" 
+                      value="#{msgs.audit_general_actions}"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table cellspacing="0" cellpadding="2">
+                      <ui:repeat value="#{auditConfig.object.actions}" var="action">
+                        <tr>
+                          <td><h:outputText styleClass="titleColumn" value="#{sp:localizeKey(action.displayableName)}"/></td>
+                          <td>
+                            <h:selectBooleanCheckbox value="#{action.enabled}"/>
+                          </td>
+                        </tr>
+                      </ui:repeat>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+        </div>
+
+        <t:dataList value="#{auditConfig.attributeClassNames}" var="attrClass">
+          <div id="#{attrClass}Content" class="x-hide-display">
+              <div class="paddedContainer">
+                <table class="spPaddedTable">
+                  <tr>
+                    <td>
+                      <h:outputFormat styleClass="spContentTitle" value="#{msgs.audit_attribute_changes}">
+                            <f:param value="#{attrClass}"/>
+                       </h:outputFormat>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <table cellspacing="0" cellpadding="2">
+                        <t:dataList value="#{auditConfig.attributesByClass[attrClass]}" var="attr">
+                          <tr>
+                            <td><h:outputText styleClass="titleColumn" value="#{sp:localizeKey(attr.displayableName)}"/></td>
+                            <td>
+                              <h:selectBooleanCheckbox value="#{attr.enabled}"/>
+                            </td>
+                          </tr>
+                        </t:dataList>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+          </div>
+        </t:dataList>
+
+        <div id="classContent" class="x-hide-display">
+            <div class="paddedContainer">
+              <table class="width100 spPaddedTable">
+                <tr>
+                  <td>
+                    <h:outputText styleClass="spContentTitle" 
+                      value="#{msgs.audit_class_actions}"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table cellspacing="0" cellpadding="2">
+                      <ui:repeat value="#{auditConfig.object.classes}" var="auditClass">
+                        <tr>
+                          <td><h:outputText styleClass="titleColumn" value="#{auditClass.displayableName}"/></td>
+                          <td>
+                            <h:selectBooleanCheckbox value="#{auditClass.create}"/>
+                            <h:outputText styleClass="font10" value="#{msgs.create}"/>
+                          </td>
+                          <td>
+                            <h:selectBooleanCheckbox value="#{auditClass.update}"/>
+                            <h:outputText styleClass="font10" value="#{msgs.update}"/>
+                          </td>
+                          <td>
+                            <h:selectBooleanCheckbox value="#{auditClass.delete}"/>
+                            <h:outputText styleClass="font10" value="#{msgs.delete}"/>
+                          </td>
+                        </tr>
+                      </ui:repeat>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+        </div>
+          
+        <div class="buttonRow">
+          <a4j:commandButton id="visibleSaveButton" 
+            value="#{msgs.button_save}" styleClass="primaryBtn" onclick="confirmSave(isPageDirty, 'configForm:stealthSaveButton');" />
+          <a4j:commandButton id="visibleCancelButton" 
+               value="#{msgs.button_return_to_system_setup}" styleClass="secondaryBtn" onclick="confirmCancel(isPageDirty, 'configForm:stealthCancelButton');" />
+          <h:commandButton id="stealthSaveButton" style="display:none" action="#{auditConfig.saveAction}"/>
+          <h:commandButton id="stealthCancelButton" style="display:none" action="#{auditConfig.cancelAction}" immediate="true" />
+        </div>
+        
+        <script defer="defer" type="text/javascript">            
+
+          var isPageDirty = false;
+          
+          function makePageDirty() {
+            isPageDirty = true;
+          }
+
+          function initTabs() {
+
+            var tabContainer = Ext.get('auditTabs');
+            if (tabContainer == null) 
+                return;
+
+            var tabPanel = new Ext.TabPanel({
+                renderTo:'auditTabs',
+                border:false,
+                activeTab: 0,
+                plain: true,
+                width: $('auditTabs').clientWidth,
+                items: [
+                        {title: '#{msgs.audit_general_actions}', contentEl: 'generalContent'},
+                        <ui:repeat value="#{auditConfig.attributeClassNames}" var="attrClass">
+                        {title: '<h:outputFormat value="#{msgs.audit_attribute_changes}"><f:param value="#{attrClass}"/></h:outputFormat>', 
+                            contentEl: '#{attrClass}Content'},
+                        </ui:repeat>
+                        {title: '#{msgs.audit_class_actions}', contentEl: 'classContent'}              
+                ]
+            });
+          }
+
+          Ext.onReady(function() {
+            initTabs();
+          });
+        </script>
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

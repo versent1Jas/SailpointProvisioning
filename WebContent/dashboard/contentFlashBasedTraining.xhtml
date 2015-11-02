@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<h:head>
+</h:head>
+
+<body>
+
+<ui:composition>
+  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+    <div class="spBackground" id="spBackground">
+      <div class="spContent">
+
+        <ui:fragment rendered="#{not empty reference.content.arguments['tutorials']}"> 
+          <div class="spTabledContent">
+            <h:dataTable id="tutorialTbl" styleClass="spTable" cellspacing="0"
+              value="#{reference.content.arguments['tutorials']}" var="tutorial">
+              <f:facet name="header">
+                <h:outputText value="#{msgs.dash_identityiq_tutorials}" />
+              </f:facet>
+              <h:column>              
+                <h:outputLink onclick="javascript:launchFlash('#{tutorial['page']}');return false;">
+                  <h:outputText styleClass="textBold font10" value="#{msgs[tutorial['title_key']]}" />
+                </h:outputLink>
+              </h:column>
+              <h:column>
+                <h:outputText styleClass="font10" value="#{msgs[tutorial['description_key']]}" />
+              </h:column>
+            </h:dataTable>
+            <script>
+              makeTableMulticolored($('dashboardForm:tutorialTbl'), true, false, 'even', 'odd');
+            </script>
+          </div>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{empty reference.content.arguments['tutorials']}">
+          <div class="sectionHeader">#{msgs.dash_tutorials_none_available}</div>
+        </ui:fragment>
+
+    </div>
+  </div>
+  <script defer="defer">
+    function launchFlash(page) {
+       // IE7 handles the toolbar option differently, so in order to display the back/forward
+       // buttons we have to active the location bar. In other browsers we active the toolbar
+       var isIE7 =  /MSIE (7)/.test(navigator.userAgent);
+       var flashWindow = null;
+       
+       flashWindow =
+               window.open('#{base.requestContextPath}/tutorials/'+page,
+                           'IdentityIQFlash',
+                           'location='+ (isIE7 ? '1' : '0') +',menubar=no,titlebar=yes,'
+                            + 'toolbar= ' + (isIE7 ? '0' : '1')
+                            + ',scrollbars=yes,width=1024,height=750');
+        
+       if ( flashWindow != null ) flashWindow.focus();
+
+       return false;
+    }
+    
+  </script>
+</ui:composition>
+
+</body>
+</html>

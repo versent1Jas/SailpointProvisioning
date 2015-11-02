@@ -1,0 +1,251 @@
+
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2015 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(fieldname) {
+            var val = null;
+            var field = $(fieldname);
+            if ( field ) {
+               val = field.value;
+            }
+            return val;
+        }
+
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           var accountPanel = new Ext.Panel({
+               title : '#{sp:escapeJavascript(msgs.label_account)}',
+               contentEl: 'accountSettings'
+           }); 
+
+           var groupPanel = new Ext.Panel({
+               title : '#{sp:escapeJavascript(msgs.label_group)}',
+               contentEl: 'groupSettings'
+           }); 
+
+           var mainPanel = new Ext.TabPanel({
+               id: 'ADLdapTabPanel',
+               activeTab: 0,
+               deferredRender:false,
+               layoutOnTabChange:true,
+               defaults:{autoScroll: true},
+               width: 1140,
+               plain: true,
+               renderTo: 'tabbedConfigPanelDiv',
+               items : [ accountPanel, groupPanel ]
+           }); 
+           mainPanel.show();
+
+            // Used to resize the tabPanel when the Configuration tab is shown
+            Page.on('configSettingsLoaded', function() {
+                Ext.getCmp('ADLdapTabPanel').doComponentLayout();
+            });
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var authType = $('editForm:authType').value
+               if (authType != 'none') {
+                   var username = getFieldValue('editForm:username');
+                   Validator.validateNonBlankString(username, 
+                       "The application attribute 'User' must have a value.");
+               }
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               
+               return true;
+           });
+           
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{applicationObject.type} #{msgs.con_form_ldap_config_title}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+      
+      <div id="ldapSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+
+	  
+	    <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.iq_service_host}"/>
+            
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpIQHost" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_iq_service_host}"/>
+            </td>
+            <td>
+              <h:inputText id="IQServiceHost"
+                           value="#{applicationObject.attributes['IQServiceHost']}"
+                           size="40"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+	  
+	  
+	    <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.iq_service_port}"/>
+           
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpIQPort" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_iq_service_port}"/>
+            </td>
+            <td>
+              <h:inputText id="IQServicePort"
+                           value="#{applicationObject.attributes['IQServicePort']}"
+                           size="40"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_page_size}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPageSize" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ldap_page_size}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes['pageSize']}"
+                           size="10"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_auth_srch_atts}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpAuthSrchAtts" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ldap_auth_srch_atts}"/>
+            </td>
+            <td>
+              <h:inputTextarea style="width: 300px;" value="#{applicationObject.attributes['authSearchAttributes']}"
+                               converter="NewLineList"                                         
+                               rows="5" cols="20"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+	  <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_exchange}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpExchVer" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png"
+                              alt="#{help.help_con_form_manageExch}"/>
+            </td>
+            <td>
+		<h:selectOneMenu value="#{applicationObject.attributes[sp:concat(schemaType, 'exchangeversion')]}"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                  <f:selectItem itemValue="DEFAULT" itemLabel="-"/>                                 
+                  <f:selectItem itemValue="2007" itemLabel="2007"/>                                 
+                  <f:selectItem itemValue="2010" itemLabel="2010"/>
+                  <f:selectItem itemValue="2013" itemLabel="2013"/>
+                </h:selectOneMenu>                               
+            </td>
+          </tr>
+
+	   <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_lync}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpLyncServer" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                               alt="#{help.help_con_form_manageLync}"/>
+            </td>
+            <td>
+              <h:selectBooleanCheckbox value="#{applicationObject.attributes['manageLync']}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+                <td class='titleColumn certScheduleTitleCol'><h:outputText
+                        style='padding:5px'
+                        value="#{msgs.con_form_ldap_deltaIterationMode}" /></td>
+                <td class="certScheduleHelpCol"><h:graphicImage
+                        id="imgHlpDeltaMode" styleClass="helpIcon"
+                        url="/images/icons/dashboard_help_16.png"
+                        alt="#{help.help_con_form_deltaIterationMode}" /></td>
+                <td><h:selectOneMenu
+                        value="#{applicationObject.attributes['deltaIterationMode']}"
+                        disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                        readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                        <f:selectItem itemValue="DEFAULT" itemLabel="-" />
+                        <f:selectItem itemValue="dirSync" itemLabel="DirSync" />
+                        <f:selectItem itemValue="uSNChanged" itemLabel="uSNChanged" />
+                </h:selectOneMenu></td>
+          </tr>
+         </table>
+      </div>
+
+      <div class='spContent'>
+            <ui:include src="discoverDomains.xhtml"/>
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+      <div id='tabbedConfigPanelDiv'/>
+      <div style="display:none; border:0px">
+        <div id="accountSettings" class='spContent'>
+                <ui:include src="searchScopeAccount.xhtml"/>
+        </div>
+      </div>
+
+      <div style="display:none; border:0px">
+        <div id="groupSettings" class='spContent'>
+                <ui:include src="searchScopeGroup.xhtml"/>
+        </div>
+      </div>
+
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

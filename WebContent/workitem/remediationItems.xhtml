@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/RemediationItemGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/Workitem.js?#{debug.revision}</src>  
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+
+        // todo right now we have to pass vars around to the hidden jsf buttons.
+        // it would be nice to drop the hidden buttons and switch to using simple json
+        // posts to submit updates
+        var SELECTED_ID = null;
+        var ISCOMPLETE = null;
+
+
+	    var sp = new SailPoint.state.StateProvider({
+	      stateIds: ['#{workItem.gridState.name}'],
+	      states:   ['#{workItem.gridState.state}']
+	    });
+
+	    Ext.state.Manager.setProvider(sp);
+
+        var entityType = '#{workItem.accountGroupPermissionCertification ? "AccountGroupPermission" : "Identity"}';
+        var itemCount  = #{sp:size(workItem.object.remediationItems)};
+        var workItemEditable = #{workItem.editable};
+        var workItemId = '#{workItem.object.id}';
+        var ownerId = "#{workItem.owner != null ? workItem.owner.id : ''}";
+        var isOwnedByWorkgroup = #{workItem.ownedByWorkgroup};
+
+        var workItemsGrid;
+
+	    Ext.onReady(function(){
+	       Ext.QuickTips.init();
+           workItemsGrid = SailPoint.workitem.RemediationItemGrid.render('workItems-grid', '#{workItems.gridState.name}',
+                workItemId, entityType, itemCount, workItemEditable, ownerId, isOwnedByWorkgroup);
+	    }); // Ext.onReady
+
+	            
+
+
+      //--><!]]>
+    </script>
+
+  <a4j:commandButton id="a4jViewRemediationItemBtn"
+                     actionListener="#{workItem.saveNavigationHistoryActionListener}"
+                     oncomplete="viewRemediationItem(SELECTED_ID, !workItemEditable, IS_COMPLETE)"
+                     style="display: none" />
+
+  <a4j:commandButton id="a4jBulkRemediateItemsBtn"
+                     actionListener="#{workItem.saveNavigationHistoryActionListener}"
+                     oncomplete="prevalidateBulkComplete('#{workItem.object.id}', workItemsGrid.selModel)"
+                     style="display: none" />
+
+  <div style="margin:5px">
+      <div id="workItems-grid" style="width:100%"></div>
+
+  </div>
+
+</ui:composition>
+
+</body>
+</html>

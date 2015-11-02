@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+
+<body>
+<ui:composition>
+
+      <script type="text/javascript" defer="defer">
+          function editWorkgroupClick() {
+              if (workgroupsGrid)  {
+                  grid = workgroupsGrid; 
+              } 
+          }
+      </script>
+
+        <h:inputHidden id="currentWorkgroupObjectId"
+                       value="#{workgroupList.selectedId}"/>        
+
+        <t:saveState value="#{workgroupList.gridState}" />
+
+        <h:inputHidden id="WGsortColumn" value="#{workgroupList.gridState.sortColumn}" />
+        <h:inputHidden id="WGsortOrder" value="#{workgroupList.gridState.sortOrder}" />
+        <h:inputHidden id="WGfirstRow" value="#{workgroupList.gridState.firstRow}" />
+        <h:inputHidden id="WGpageSize" value="#{workgroupList.gridState.pageSize}" />
+        <h:inputHidden id="WGscrollPosition" value="#{workgroupList.gridState.scrollPosition}" />
+
+        <h:commandButton id="deleteWorkgroupButton" 
+                         style="display:none" 
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" 
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" 
+                         action="delete" 
+                         actionListener="#{workgroupList.deleteObject}" />
+
+        <h:commandButton id="editWorkgroupButton" 
+                         style="display:none"
+                         onclick="editWorkgroupClick();"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup, ViewWorkgroup')}" 
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup, ViewWorkgroup')}" 
+                         action="#{workgroupList.editAction}"/>
+
+        <!--djs: tmp hack -->
+        <br/>
+        <h:commandButton id="createWorkgroupButton" style="display:none"
+                         value="#{msgs.workgroup_create}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" 
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup')}" 
+                         action="#{workgroupList.createAction}"/>
+
+    
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.signoff}</ui:define>
+ <!-- PageName: signoff.xhtml -->
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+          <t:inputHidden id="id" value="#{workItem.object.id}"/>
+          
+          <ui:include src="summaryFieldset.xhtml"/>
+          <ui:include src="commentsFieldset.xhtml">
+ 	        <ui:param name="disableAddComments" value="true"/> 
+ 	      </ui:include>
+
+          <fieldset>
+            <legend>#{msgs.details}</legend>
+            <br/>
+
+            <!-- 
+              This is a convention recognized by viewResult
+            -->
+            <h:inputHidden id="TaskResultId" value="#{workItem.object.targetId}"/>
+
+            <c:choose>
+              <c:when test="#{workItem.object.targetId == null}">
+                <h:outputText styleClass="spContentTitle" value="#{msgs.no_task_result_found}"/>
+              </c:when>
+              <c:otherwise>
+                <h:commandLink id="goToResult" styleClass="spContentTitle" 
+                  value="#{msgs.workitem_signoff_click_to_view_result}"
+                  action="#{workItem.viewTaskResultAction}"/>
+              </c:otherwise>
+            </c:choose>
+          </fieldset>
+
+          <br/>
+        <div class="buttonRow">
+          <t:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" />
+          <t:commandButton style="display: none" id="rejectBtn" action="#{workItem.reject}" />
+
+          <ui:fragment rendered="#{workItem.editable}">
+
+            <input type="button"
+                   onclick="addComment('editForm:completeBtn', '#{sp:escapeJavascript(msgs.button_signoff)}', '#{sp:escapeJavascript(msgs.dialog_title_signoff_approval_comments)}'); return false;"
+                   value="#{msgs.button_signoff}"
+                   title="#{msgs.button_title_click_to_signoff}"
+                   class="primaryBtn"/>
+
+            <input type="button"
+                   onclick="addComment('editForm:rejectBtn', '#{sp:escapeJavascript(msgs.button_reject)}', '#{sp:escapeJavascript(msgs.dialog_title_signoff_rejection_comments)}'); return false;"
+                   value="#{msgs.button_reject}"
+                   title="#{msgs.button_title_click_to_reject}"
+                   class="primaryBtn"/>
+
+            <input type="button"
+                   onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false,  SailPoint.getWorkItemPriority());"
+                   value="#{msgs.button_forward}"
+                   title="#{msgs.button_title_click_to_forward}"
+                   class="primaryBtn"/>
+
+          </ui:fragment>
+          <h:commandButton action="#{workItem.save}"
+                           value="#{msgs.button_save}"
+                           title="#{msgs.button_title_click_to_save_work_item}"
+                           styleClass="primaryBtn"/>
+          <h:commandButton action="#{workItem.cancel}"
+                           immediate="true"
+                           value="#{msgs.button_cancel}"
+                           styleClass="secondaryBtn"/>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

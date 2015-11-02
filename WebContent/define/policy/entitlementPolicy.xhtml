@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>  
+ 
+   <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'ENTITLEMENT_POLICY';
+ 
+    var lock = false;
+    Ext.onReady(function(){
+        if (#{policy.constraintCount} > 0) {
+              
+            Ext.QuickTips.init();
+            
+            // data store
+            store = SailPoint.Store.createStore({
+                storeId:'entitlementStore',
+                fields : ['id', 'displayName','left','right', 'resultId', 'disabledState'],
+                autoLoad: false,
+                url: CONTEXT_PATH + '/define/policy/entitlementConstraintsDataSource.json',
+                root : 'constraints',
+                sorters: [{property: 'displayName', direction: 'ASC'}],
+                simpleSortMode : true
+            });
+
+            // display models
+            var cols = [{
+                header: '#{sp:escapeJavascript(msgs.rule)}',
+                dataIndex: 'displayName',
+                flex: 0.5,
+                sortable: true, 
+                hideable: true
+            },{
+                header: '#{sp:escapeJavascript(msgs.policy_constraint_any_of_these_entitlements)}',
+                dataIndex: 'left', 
+                flex: 1,
+                sortable: false,
+                hideable: true
+            },{
+                header: '#{sp:escapeJavascript(msgs.policy_constraint_conflict_with_these_entitlements)}',
+                dataIndex: 'right',
+                flex: 1,
+                sortable: false,
+                hideable: true
+            },{
+                header:'#{sp:escapeJavascript(msgs.simulate_policy_rule)}',
+                flex: 0.5,
+                id:'linkId',
+                hidden: !#{sp:hasRight(facesContext, 'ManagePolicy')},
+                renderer:SailPoint.Web.Define.Policy.SimulationWindows.ruleGridSimulationRenderer
+            }];
+
+            // display grid
+            var grid = new Ext.grid.Panel({
+                id: 'CDGrid',
+                renderTo: 'constraints-display',
+                store: store,
+                cls: 'selectableGrid',
+                columns: cols,
+                viewConfig: {
+                    stripeRows: true,
+                    scrollOffset: 0
+                }
+            });
+
+            grid.addListener('itemclick', clickRow);  
+            grid.addListener('itemcontextmenu', showContextMenu);  
+
+            store.load({params:{start:0, limit:20}});
+        } else {
+           $('constraints-display').innerHTML = '#{sp:escapeJavascript(msgs.no_rules_defined)}';
+        }
+        if(Ext.getCmp('CDGrid')) {
+            Ext.getCmp('CDGrid').updateLayout();
+        }
+    }); // Ext.onReady
+
+    function showContextMenu(gridView, record, HTMLitem, index, e, eOpts){
+        id = record.getId();
+        name = record.get('displayName');
+
+        var canEdit = #{sp:hasRight(facesContext, 'ManagePolicy')};
+        var viewEditText = (canEdit) ? '#{sp:escapeJavascript(msgs.menu_edit)}' : '#{sp:escapeJavascript(msgs.menu_view)}';
+        var viewEditIcon = (canEdit) ? "editBtn" : "viewDetailsBtn";
+
+        var contextMenu = new Ext.menu.Menu();
+        contextMenu.add(new Ext.menu.Item({text: viewEditText, 
+                                           handler: editHandler, 
+                                           iconCls: viewEditIcon}));
+        if (canEdit) {
+            contextMenu.add(new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_delete)}',
+                                               handler: deletePrompt,
+                                               iconCls: 'deleteBtn'}));
+        }
+
+        e.stopEvent();
+        contextMenu.showAt(e.xy);
+    }  
+
+
+    function clickRow (gridView, record, HTMLitem, index, e, eOpts){
+        var target = Ext.get(e.target);
+        //this is to differentiate simulation and edit by click events as
+        //there is only one listener.
+        if (target && (target.dom.parentNode.className.indexOf('fakeLink')) !== -1 ) {
+            //do nothing..
+        }
+        else {
+            editRule(record.getId());
+        }
+    }
+
+    function editHandler() {
+        editRule(id);
+    }
+
+    function editRule(editId) {
+        //If the user clicks edit more than one time, nasty Hibernate error, so lock the submit
+        //on first click.
+          if(!lock) {
+              lock = true;
+              $('mainForm:gridObjectId').value = editId;
+              $('mainForm:editButton').click();
+              setTimeout('lock=false', 1000);
+          }
+    }
+
+    function deletePrompt() {
+        Ext.MessageBox.confirm(Ext.String.format('#{msgs.confirm_delete_of}', name),
+                               Ext.String.format('#{msgs.verify_delete_of}', name),
+                               deleteRule);
+    }
+
+    function deleteRule(button, text) {
+        if (button == 'yes') {
+            $('mainForm:gridObjectId').value = id;
+            $('mainForm:deleteButton').click();
+        }
+    }
+
+    function preSave() {
+      var policyDescriptionCmp = Ext.getCmp('policyDescriptionHTMLCmp');
+
+      if(policyDescriptionCmp) {
+        $('mainForm:sessionDescription').value = policyDescriptionCmp.getCleanValue();
+      }
+    }
+    //--><!]]>
+    </script>
+
+  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+  <h:form styleClass="form" id="mainForm">
+
+   <h:inputHidden id="id" value="#{policy.object.id}"/>
+   <h:inputHidden id="isPolicy" value="#{policy.isPolicy}"/>
+
+      <div style="margin-top: 20px;" class="spContent">
+          <table border="0" cellpadding="5" cellspacing="0" class="width100 paddedTbl">
+          <tr >
+            <td colspan="2"><h:outputText value="#{msgs.title_entitlement_sod_policy}" styleClass="spContentTitle"/></td>
+          </tr>
+          <tr>
+            <td>
+              <ui:include src="policyCommon.xhtml">
+              </ui:include>
+            </td>
+           </tr>
+        </table>
+      </div>
+
+      <div id="AlertDiv" style="#{policy.policy.alert.enabled ? '' : 'display: none;'}">
+        <div class="spContent">
+          <ui:include src="../../include/workItemConfig.xhtml">
+            <ui:param name="mainForm" value="mainForm"/>
+            <ui:param name="config" value="#{policy.policy.alert}"/>
+            <ui:param name="title" value="#{msgs.alert_properties}"/>
+            <ui:param name="ownerTitle" value="#{msgs.label_observers}"/>
+            <ui:param name="ownerHelp" value="#{help.policy_alert_owners}"/>
+            <ui:param name="optionalWorkItem" value="true"/>
+            <ui:param name="manageRight" value="ManagePolicy" />
+          </ui:include>
+        </div>
+      </div>
+
+    <div class="spContent">
+      <table border="0" cellpadding="5" cellspacing="0" class="width100">
+        <tr>
+          <td colspan="2">
+            <h:outputText styleClass="spContentTitle" value="#{msgs.sod_policy_rules}"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <h:panelGrid id="entitlementPolicyTbl" rendered="true" styleClass="width100" columns="1">
+              <div id="constraints-display" style="width: 98%; padding: 5px"></div>
+            </h:panelGrid>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+              <h:commandButton id="newButton" value="#{msgs.create_new_rule}" styleClass="secondaryBtn" onclick="preSave()"
+                  action="#{policy.newConstraintAction}"/>
+            </ui:fragment>
+
+            <h:inputHidden id="gridObjectId"
+                           value="#{policy.session.constraintId}"/>
+  
+            <h:commandButton id="editButton" style="display:none" onclick="preSave()"
+                             action="#{policy.editConstraintAction}"/>
+
+            <h:commandButton id="deleteButton" style="display:none" onclick="preSave()"
+                             action="#{policy.deleteConstraintAction}"/>
+
+            <a4j:commandButton id="simulateButton" style="display:none" action="#{policy.simulatePolicyRuleAction}" onclick="preSave()"/>
+          </td>
+        </tr>
+      </table>
+      </div>
+  <div class="spacerDiv"/>
+
+  <div class="buttonRow">
+    <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+      <h:commandButton id="saveButton" action="#{policy.saveAction}" value="#{msgs.button_save}" styleClass="primaryBtn" onclick="preSave()"  />
+    </ui:fragment>
+    <h:commandButton id="cancelButton" action="#{policy.cancelAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+    <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+      <button id="simulatePolicyButton" type="button" class="secondaryBtn" style="#{(empty policy.object.arguments['taskResultId']) ? '' : 'display:none'}"
+              onclick="SailPoint.Web.Define.Policy.SimulationWindows.displaySimulationDialoguePrompt(true); return false;" >
+              #{msgs.button_simulation_run_simulation}
+      </button>
+      <button id="resultPolicyButton" type="button" class="secondaryBtn" style="#{(not empty policy.object.arguments['taskResultId']) ? '' : 'display:none'}"
+              onclick="SailPoint.Web.Define.Policy.SimulationWindows.displaySimulationResults(
+                      '#{policy.policy.name}','#{policy.policy.uid}',true,'mainForm:simHidPolicyButton'); return false;">
+              #{msgs.simulate_view_results}
+      </button>
+    </ui:fragment>
+    <h:commandButton style="display:none" id="simHidPolicyButton" action="#{policy.saveAndSimulatePolicyAction}" />
+  </div>
+  </h:form>
+
+</ui:composition>
+
+</body>
+</html>

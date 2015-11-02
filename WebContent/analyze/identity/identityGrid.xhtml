@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+  <sp:script>
+  	<src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/identityGrid.js?#{debug.revision}</src>
+  </sp:script>
+  <script>
+  
+    function initGrid() {
+      gridStateStr = '#{searchBean.gridState.JSON}';
+      
+      var gridMetaData = #{searchBean.columnJSON};
+      
+      SailPoint.Analyze.Grid.Identity.createGrid(gridMetaData.fields, gridMetaData.columns, gridStateStr, '#{ajaxUrl}', #{searchBean.gridState.pageSize});
+    }
+  
+    Ext.onReady(function(){
+      initGrid();
+    });
+    </script>
+    
+    <table class="width100" style="margin: 5px">
+      <tr>
+        <td style="white-space: nowrap" width="20%">
+          <div class="buttonRow">
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'FullAccessCertificationSchedule')}">
+              <input type="button" onclick="SailPoint.Analyze.Grid.Identity.scheduleCertification(grid)" value="#{msgs.button_schedule_cert}" class="primaryBtn"/>
+            </ui:fragment>
+
+            <input type="button" onclick="SailPoint.Analyze.Grid.Identity.searchForActivitiesOnIdentities(grid)" value="#{msgs.search_for_activities}" class="secondaryBtn"/>
+          </div>
+        </td>
+        <td>
+          <div style="display:none;margin:3px" class="formWarn" id="selectedCount"/>
+        </td>
+      </tr>
+    </table>
+  
+  </f:view>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD, GROUP_PROVISIONING" icon="enterpriseIcon" name="Oracle Applications Template" type="Oracle Applications - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="OraAppl"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="splConnectionAttributes">
+          <value>
+            <Map>
+              <entry key="START_DATE" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+import java.util.*;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.*;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.Operation.*;
+import java.text.SimpleDateFormat;
+import sailpoint.object.ProvisioningPlan.ObjectOperation;
+import sailpoint.object.ProvisioningPlan.ObjectRequest;
+
+List accounts = plan.getAccountRequests();
+if (accounts != null) {
+    for (AccountRequest req : accounts) {
+        AccountRequest.Operation op = req.getOperation();
+        String  username = req.getNativeIdentity();
+        if (userId != null) {
+            req.setNativeIdentity(username.toUpperCase());
+        }
+
+        if ((op == AccountRequest.Operation.Modify) || (op == AccountRequest.Operation.Create)) {
+            List attrRequests=req.getAttributeRequests() ;
+            int size  =  attrRequests.size();
+            for (AttributeRequest attrreq : attrRequests) {
+                String name = attrreq .getName();
+                sailpoint.object.ProvisioningPlan.Operation op = attrreq.getOperation();
+                if (name.equals("groups")) {
+                    if (attrreq.getOperation().equals(sailpoint.object.ProvisioningPlan.Operation.Add)) {
+                        Calendar currentDate = Calendar.getInstance();
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+                        String dateNow = formatter.format(currentDate.getTime());
+                        String attname = "START_DATE";
+                        AttributeRequest att = new AttributeRequest(attname, sailpoint.object.ProvisioningPlan.Operation.Set,dateNow );
+                        req.add(att);
+                        break;
+                    }
+                    else if (attrreq.getOperation().equals(sailpoint.object.ProvisioningPlan.Operation.Remove)) {
+                        Calendar currentDate = Calendar.getInstance();
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+                        String dateNow = formatter.format(currentDate.getTime());
+                        String attname = "START_DATE";
+                        AttributeRequest att = new AttributeRequest(attname, sailpoint.object.ProvisioningPlan.Operation.Set,dateNow );
+                        req.add(att);
+                        break;
+                    }
+                    else {
+                    }
+                }
+            }
+        }
+    }
+}
+
+List groupsOracleApplFull = plan.getObjectRequests();
+        if (groupsOracleApplFull!=null){
+            for (ObjectRequest req : groupsOracleApplFull ){
+                ObjectOperation op = req.getOp();
+                if((op==ObjectOperation.Create)||(op==ObjectOperation.Modify)){
+
+                       AttributeRequest groupIdAttr= req.getAttributeRequest("GROUP_ID");
+                       if(null != groupIdAttr)
+                        req.remove(groupIdAttr);
+                   AttributeRequest availableFromAttr = req.getAttributeRequest("AVAILABLE_FROM");
+                    if(null != availableFromAttr)
+                    {
+                       String modifiedAvailableFrom=null;
+                       String availableFrom = availableFromAttr.getValue().toString();
+                       if(availableFrom.equals("Oracle Application"))
+                          modifiedAvailableFrom="4";
+                       if(availableFrom.equals("Self_Service Web Application"))
+                          modifiedAvailableFrom="W";
+                      if(availableFrom.equals("4"))
+                          modifiedAvailableFrom="4";
+                     if(availableFrom.equals("W"))
+                          modifiedAvailableFrom="W";
+                      availableFromAttr.setValue(modifiedAvailableFrom);
+
+                    }
+   
+                    
+                    AttributeRequest startDateAttrTemp = req.getAttributeRequest("START_DATE");
+                    if(null==startDateAttrTemp){
+                        Calendar currentDate = Calendar.getInstance();
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+                        String dateNow = formatter.format(currentDate.getTime());
+                        String startDate = "START_DATE";
+                        AttributeRequest startDateAttr = new AttributeRequest(startDate,sailpoint.object.ProvisioningPlan.Operation.Set,dateNow );
+                        req.add(startDateAttr);
+                        }
+                }
+            }
+        }
+
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" name="USER_OE_PR" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Start Date" name="START_DATE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="End Date" name="END_DATE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Password Expiration Type" name="PASSWORD_EXPIRATION_TYPE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Number of Days" name="NUMBER_OF_DAY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Customer" multi="true" name="CUSTOMER" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Person" multi="true" name="PERSON" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Email Address" name="EMAIL_ADDRESS" remediationModificationType="None" required="true" type="boolean"/>
+        <AttributeDefinition displayName="Fax" name="FAX" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" name="GROUP_OE_PR" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Responsibility Key" name="RESPONSIBILITY_KEY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Start Date" name="START_DATE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="End Date" name="END_DATE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Responsibility Revoked" name="ORAAPPL_UG_REVOKE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Available From" name="AVAILABLE_FROM" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Date Group Name" name="DATA_GROUP_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Date Group Application Name" name="DATA_GROUP_APPL_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Menu Name" name="MENU_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Request Group Name" name="REQUEST_GROUP_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Request Group Application Name" name="REQUEST_GROUP_APPL_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Web Host Name" name="WEB_HOST_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Web Agent Name" name="WEB_AGENT_NAME" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" helpKey="User Name" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" helpKey="User Password" name="USER_PWD" required="true" section="" type="secret"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group ID" helpKey="Group name. Format should be (groupName*Parent Container)" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Parent Container" helpKey="Parent container for the new group" name="GROUP_OE_PR" required="true" section="" type="string"/>
+        <Field displayName="Responsibility Key" helpKey="Responsibility Key" name="RESPONSIBILITY_KEY" required="true" section="" type="string"/>
+        <Field displayName="Menu Name" helpKey="Menu Name" name="MENU_NAME" required="true" section="" type="string"/>
+        <Field displayName="Data Group Application Name" helpKey="Data Group Application Name" name="DATA_GROUP_APPL_NAME" required="true" section="" type="string"/>
+        <Field displayName="Data Group Name" helpKey="Data Group Name" name="DATA_GROUP_NAME" required="true" section="" type="string"/>
+        <Field defaultValue="Oracle Application" displayName="AVAILABLE FROM" helpKey="AVAILABLE FROM" name="AVAILABLE_FROM" reviewRequired="true" section="" type="string">
+          <AllowedValues>
+            <String>Oracle Application</String>
+            <String>Self_Service Web Application</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="Responsibility Key" helpKey="Responsibility Key" name="RESPONSIBILITY_KEY" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Menu Name" helpKey="Menu Name" name="MENU_NAME" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Start Date" helpKey="Start Date:format:yyyyMMdd" name="START_DATE" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Data Group Application Name" helpKey="Data Group Application Name" name="DATA_GROUP_APPL_NAME" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Data Group Name" helpKey="Data Group Name" name="DATA_GROUP_NAME" reviewRequired="true" section="" type="string"/>
+        <Field displayName="DESCRIPTION" helpKey="Description of the group" name="DESCRIPTION" reviewRequired="true" section="" type="string"/>
+        <Field displayName="END DATE" helpKey="End Date:format:yyyyMMdd" name="END_DATE" reviewRequired="true" section="" type="string"/>
+        <Field displayName="AVAILABLE FROM" helpKey="AVAILABLE FROM(input 4 for Oracle Application and W for Self_Service Web Application)" name="AVAILABLE_FROM" reviewRequired="true" section="" type="string">
+          <AllowedValues>
+            <String>4</String>
+            <String>W</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="REQUEST GROUP NAME" helpKey="REQUEST GROUP NAME" name="REQUEST_GROUP_NAME" reviewRequired="true" section="" type="string"/>
+        <Field displayName="WEB HOST NAME" helpKey="WEB HOST NAME" name="WEB_HOST_NAME" reviewRequired="true" section="" type="string"/>
+        <Field displayName="WEB AGENT NAME" helpKey="WEB AGENT NAME" name="WEB_AGENT_NAME" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Responsibility Revoked" helpKey="Shows Revoke Status of group" name="ORAAPPL_UG_REVOKE" readOnly="true" section="" type="string"/>
+        <Field displayName="Request Group Application Name" helpKey="Request Group Application Name" name="REQUEST_GROUP_APPL_NAME" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

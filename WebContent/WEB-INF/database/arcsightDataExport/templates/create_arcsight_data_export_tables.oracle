@@ -1,0 +1,38 @@
+create table identityiq.sptr_arcsight_export (
+    task_def_id varchar2(128 char) NOT NULL,
+    class_name varchar2(256 char) NOT NULL,
+    start_dt number(19,0) NOT NULL,
+    end_dt number(19,0) NOT NULL
+);
+
+create index identityiq.SPTR_IDX_ARCSIGHT_EXPORT_IDX1 on identityiq.sptr_arcsight_export (task_def_id);
+
+create table identityiq.sptr_arcsight_identity (
+    linkid varchar2(128 char) NOT NULL,
+    identityid varchar2(128 char) NOT NULL,
+    modified_dt timestamp DEFAULT systimestamp NOT NULL,
+    identity_display_name varchar2(128 char) DEFAULT NULL,
+    identity_firstname varchar2(128 char) DEFAULT NULL,
+    identity_lastname varchar2(128 char) DEFAULT NULL,
+    application_type varchar2(255 char) DEFAULT NULL,
+    application_host varchar2(128 char) DEFAULT NULL,
+    application_name varchar2(128 char) NOT NULL,
+    link_display_name varchar2(128 char) DEFAULT NULL,
+    entitlements clob DEFAULT NULL,
+    risk_score number(10,0) DEFAULT NULL,
+    PRIMARY KEY (linkid)
+);
+
+CREATE TABLE identityiq.sptr_arcsight_audit_event (
+    auditid varchar2(128 char) NOT NULL,
+    created_dt timestamp DEFAULT systimestamp NOT NULL,
+    owner varchar2(128 char) DEFAULT NULL,
+    source varchar2(128 char) DEFAULT NULL,
+    action varchar2(128 char) DEFAULT NULL,
+    target varchar2(255 char) DEFAULT NULL,
+    application varchar2(128 char) DEFAULT NULL,
+    account_name varchar2(256 char) DEFAULT NULL,
+    attribute_name varchar2(128 char) DEFAULT NULL,
+    attribute_value varchar2(450 char) DEFAULT NULL,
+    PRIMARY KEY (auditid)
+);

@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="chartPage.xhtml">
+
+  <ui:define name="chartTypeOptions">
+    <h:outputText styleClass="font10" value="#{msgs.label_task_type} "/> 
+    <select id="#{beanName}_typeOptions" class="font10"
+      onchange="$('dashboardForm:#{beanName}_argumentChartType').value=this.options[this.selectedIndex].value;$('dashboardForm:#{beanName}_chartType').value=this.options[this.selectedIndex].value;">
+      <ui:repeat value="#{chart.chartTypeOptions}" var="type">        
+        <ui:fragment rendered="#{type==reference.arguments['chartType']}">
+          <option selected="true" value="#{type}">#{sp:splitCamelCase(type)}</option>
+        </ui:fragment>
+        <ui:fragment rendered="#{!(type==reference.arguments['chartType'])}">
+          <option value="#{type}">#{sp:splitCamelCase(type)}</option>
+        </ui:fragment>
+      </ui:repeat>
+    </select>
+  </ui:define>
+  
+  <ui:define name="chartExtraOptions">
+    <tr class="even">
+      <td colspan="2">
+        <span  style="white-space: nowrap;" class="font10">
+          <h:outputText styleClass="font10" value="#{msgs.label_group}"/>
+          <h:selectOneMenu id="#{beanName}_groupSelect" styleClass="font10" value="#{chart.gFName}" 
+            onchange="reRender#{beanName}ComponentOptions();" style="width:130px">
+            <f:selectItems value="#{groupFactoryList.factoryOptions}" />
+          </h:selectOneMenu>
+        </span>
+      </td>
+      <td colspan="2" align="right">
+        <a4j:outputPanel id="#{beanName}_componentChoices">
+          <span class="font10" 
+            style="white-space:nowrap;">
+          	<h:outputText styleClass="font10" value="#{msgs.label_chart_value} "/>
+            <select id="#{beanName}_componentOptions" class="font10" style="width:120px"
+              onchange="$('dashboardForm:#{beanName}_selectedComponent').value=this.options[this.selectedIndex].value;">
+              <ui:repeat value="#{chart.componentOptions}" var="option">                  
+                <ui:fragment rendered="#{option==chart.gDName}">
+                  <option selected="true" value="#{option}">#{option}</option>
+                </ui:fragment>
+                <ui:fragment rendered="#{!(option==chart.gDName)}">
+                  <option value="#{option}">#{option}</option>
+                </ui:fragment>
+              </ui:repeat>
+            </select>
+          </span>
+        </a4j:outputPanel>
+      </td>
+    </tr>
+    <tr class="even">
+      <td colspan="2">
+        <span  style="white-space: nowrap;" class="font10">
+          <h:outputText styleClass="font10" value="#{msgs.label_date_range} "/>
+          <h:selectOneMenu id="#{beanName}_dateRange" styleClass="font10" value="#{chart.dateRange}">
+            <f:selectItems value="#{chart.dateRangeOptions}" />
+          </h:selectOneMenu>
+        </span>
+      </td>
+      <td colspan="2" align="right">
+        <a4j:commandButton styleClass="font10" value="Rerender" action="#{dashboard.updateReference}" 
+          render="dashboardForm:#{beanName}_violations" oncomplete="reRender#{beanName}Chart()"/>
+  	  </td>
+    </tr>
+  </ui:define>
+  
+  <ui:define name="chartBody">
+    <a4j:outputPanel id="#{beanName}_violations">
+
+      <ui:fragment rendered="#{!chart.renderChart}">
+        <div class="alert_message" id="runningText" style="padding-top:50px">
+          <span> #{msgs.msg_loading_chart}</span>
+        </div> 
+        <div id="modal_dialog_progress" class="alert_progress"></div>
+      </ui:fragment>
+      
+      <ui:fragment rendered="#{chart.renderChart and chart.timeseriesType}">
+        
+        <sp:chart id="#{beanName}XYChart" datasource="#{chart.groupHistoryXYDatasource}" 
+          type="#{reference.arguments['chartType']}" is3d="#{reference.arguments['chartIs3d']}" 
+          orientation="#{reference.arguments['chartOrientation']}"
+          alpha="75" startAngle="0" antialias="true" legend="true" 
+          width="#{sp:getChartWidth(reference.region)}" labels="true" outline="false" colors="#{colors}">
+        </sp:chart>
+          
+      </ui:fragment>
+      
+      <ui:fragment rendered="#{chart.renderChart and chart.categoryType}">
+
+        <sp:chart id="#{beanName}CategoryChart" datasource="#{chart.groupHistoryCategoryDatasource}" 
+          type="#{reference.arguments['chartType']}" is3d="#{reference.arguments['chartIs3d']}" 
+          orientation="#{reference.arguments['chartOrientation']}"
+          alpha="75" startAngle="0" antialias="true" legend="true" height="#{sp:getChartHeight(reference.region)}" 
+          width="#{sp:getChartWidth(reference.region)}" labels="true" outline="false" colors="#{colors}"
+          usemap="##{beanName}" uselinks="#{javascript}">
+        </sp:chart>
+          
+      </ui:fragment>
+    </a4j:outputPanel>
+    
+    <h:inputHidden id="#{beanName}_selectedComponent" value="#{chart.gDName}"/>
+    <h:inputHidden id="#{beanName}_argumentChartType" value="#{reference.arguments['chartType']}"/>
+    <h:inputHidden id="#{beanName}_chartType" value="#{chart.chartType}"/>
+
+    <a4j:commandButton id="#{beanName}_componentChoicesBtn" style="display:none"
+      action="#{chart.updateChoices}" render="dashboardForm:#{beanName}_componentChoices"
+      oncomplete="$('dashboardForm:#{beanName}_selectedComponent').value=$('#{beanName}_componentOptions').options[$('#{beanName}_componentOptions').selectedIndex].value;"/>
+      
+    <a4j:commandButton id="#{beanName}_chartBtn" style="display:none"
+      action="#{chart.viewChart}" render="dashboardForm:#{beanName}_violations"/>
+    
+    <script defer="defer">
+      setTimeout('reRender#{beanName}ComponentOptions()',500);
+      setTimeout('reRender#{beanName}Chart()',500);
+      
+      function reRender#{beanName}ComponentOptions() {
+        $('dashboardForm:#{beanName}_componentChoicesBtn').click();
+      }
+      
+      function reRender#{beanName}Chart(value) {
+        $('dashboardForm:#{beanName}_chartType').value=$('#{beanName}_typeOptions').options[$('#{beanName}_typeOptions').selectedIndex].value;
+        $('dashboardForm:#{beanName}_chartBtn').click();
+      }
+    </script>
+    
+  </ui:define>
+  
+  
+</ui:composition>
+</body>
+</html>

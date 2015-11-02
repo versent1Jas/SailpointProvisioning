@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Identity Search Results</ui:define>
+
+  <ui:define name="headerItems">
+  	<sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/analyze.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/entitlementMining.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+  	</sp:script>
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'IDENT_SEARCH_RESULTS';
+      //--><!]]>
+    </script>
+  
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+    
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form styleClass="form" id="editForm">
+        
+      <!-- For redirecting to the search page after session timeout -->
+      <ui:fragment rendered="#{null == identitySearch.searchItem.type}">
+          #{msgs.err_no_search_results}
+          <div>
+            <h:commandButton id="noSearchResultsBtn" action="#{identitySearch.cancel}" value="#{msgs.button_cancel}" styleClass="secondaryBtn"/>
+          </div>
+      </ui:fragment>
+    
+      <ui:fragment rendered="#{null != identitySearch.searchItem.type}">
+	        <!-- For selecting an individual identity from the list - redirects to identities page -->
+	        <h:inputHidden id="currentObjectId" value="#{identitySearch.selectedId}"/>
+	        
+	        <!--  Search for activities  -->
+	        <h:commandButton  style="display:none" 
+	                        id="searchActivitiesOnIdsButton" 
+	                        action="#{activitySearch.searchActivitiesForIdentitiesAction}"/>
+	        
+	        <h:inputHidden id="selectedIdentityIds"/>
+	        <h:inputHidden id="allSelected"/>
+	        
+	        <!--  Schedule a Certification -->
+	        <h:inputHidden id="certifyAll" value="#{identitySearch.bulkCertification.certifyAll}"/>
+	        <h:inputHidden id="idsToCertify" value="#{identitySearch.bulkCertification.selectedIdentities}" converter="java.util.List" />
+	        
+	        <h:commandButton  action="#{identitySearch.select}"
+	                          style="display:none" 
+	                          onclick="gridState.encodeGridState('editForm:')"
+	                          id="editButton"/> 
+	        
+	        <h:commandButton  action="#{identitySearch.scheduleCertificationAction}" 
+	                          rendered="#{sp:hasRight(facesContext, 'FullAccessCertificationSchedule')}"
+	                          style="display:none" 
+	                          id="scheduleCertificationBtn"/>
+	        
+	        
+	        <script type="text/javascript" defer="defer">
+	        <!--//--><![CDATA[//><!--    
+	          function cancelSchedule() {
+	            new Effect.BlindUp($('scheduleDetails'));
+	            setTimeout('Effect.Appear($(\'searchResults\'))', 1000);            
+	          }
+	          
+	          function showEntitlements() {
+	            if(!$('entitlementTbl') && !($('entitlementBreakdownProgress').visible())) {
+	              $('entitlementBreakdownProgress').style.display = '';
+	              SailPoint.resetTimeout();
+	              $('editForm:entitlementsBtn').click();
+	            }
+	          }
+	          
+	          function showSchedule() {
+	            var count = vCheckbox.count;
+	            var applyEffect;
+	            
+	            if(count > 1)
+	              var titleString = 'Schedule Certifications For (' + count + ') Identities'
+	            else
+	              var titleString = 'Schedule Certifications For (' + count + ') Identity'
+	            new Effect.BlindUp($('searchResults'));
+	            
+	            makeTableMulticolored($('identitiesSchedule'), false, false, "odd", "even");
+	            $('editForm:scheduleDetailsTitle').innerHTML = '<span>' + titleString + '. </div>';
+	            
+	            // IE7 dosen't support Effect.Appear, so in that browser we won't use it
+	            // since it's a nice effect in this context, it still is used for other browsers.
+	            if(/MSIE (7)/.test(navigator.userAgent)) {
+	              applyEffect = function () {
+	                $('scheduleDetails').style.display = '';
+	              }
+	            }else{
+	              applyEffect = function() {
+	                new Effect.Appear($('scheduleDetails'));
+	              }                
+	            }
+	            
+	            setTimeout(applyEffect, 1000);
+	            
+	            return;
+	          };
+	        //--><!]]>
+	        </script>
+	      
+	        <ui:include src="../searchResultsInclude.xhtml">
+	          <ui:param name="formName" value="editForm"/>
+	          <ui:param name="gridPage" value="identity/identityGrid.xhtml"/>
+	          <ui:param name="ajaxUrl" value="#{base.requestContextPath}/analyze/identity/identityDataSource.json" />
+	          <ui:param name="totalRows" value="#{identitySearch.count}"/>
+	          <ui:param name="searchType" value="Identity"/>
+	          <ui:param name="searchBean" value="#{identitySearch}"/>
+              <ui:param name="formName" value="editForm"/>
+	        </ui:include>        
+      </ui:fragment>
+    
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

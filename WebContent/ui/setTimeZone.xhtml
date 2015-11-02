@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:h="http://java.sun.com/jsf/html">
+<h:head>
+    <sp:script enabled="false" serveOffset="#{base.requestContextPath}/ui/js">
+        <src>#{base.requestContextPath}/ui/js/shared/util.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/prototype.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/ui/js/shared/timeZone.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+        <!--//--><![CDATA[//><!--
+        window.onload = function () {
+            SailPoint.TimeZone.getTimeZone('timeZoneForm');
+            $('timeZoneForm:initializeTimeZoneButton').click();
+        };
+        //--><!]]>
+    </script>
+</h:head>
+<body>
+<h:form id="timeZoneForm">
+    <h:commandButton id="initializeTimeZoneButton"
+                     action="#{base.initDetectedUserTimeZone}"
+                     style="display: none" />
+    <h:inputHidden id="timeZoneRawOffset" value="#{base.timeZoneRawOffset}"/>
+    <h:inputHidden id="timeZoneObservesDST" value="#{base.timeZoneObservesDST}"/>
+    <h:inputHidden id="timeZoneDSTStarts" value="#{base.timeZoneDSTStarts}"/>
+    <h:inputHidden id="timeZoneDSTEnds" value="#{base.timeZoneDSTEnds}"/>
+</h:form>
+</body>
+</html>

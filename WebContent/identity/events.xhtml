@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+  <ui:fragment rendered="#{!(empty identity.eventsHelper.events)}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_identity_events}"/>
+  
+    <div class="spTabledAjaxContent">
+      <table id="eventTbl" class="spTable spBusyTable" cellspacing="0">
+        <tr>
+          <th></th>
+          <th>#{msgs.identity_event_column_created}</th>
+          <th>#{msgs.identity_event_column_creator}</th>
+          <th>#{msgs.identity_event_column_due}</th>
+          <th>#{msgs.identity_event_column_summary}</th>
+        </tr>        
+
+        <ui:repeat value="#{identity.eventsHelper.events}" var="event">
+          <tr id='event_#{event.id}'>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'DeleteIdentitySnapshot')}">
+              <td width="1%" align="center"><h:selectBooleanCheckbox
+                value="#{identity.eventsHelper.eventSelections[event.id]}" /></td>
+            </ui:fragment>
+            <ui:fragment rendered="#{!sp:hasRight(facesContext, 'DeleteIdentitySnapshot')}">
+              <td/>
+            </ui:fragment>
+            <td width="300">
+              <h:outputText value="#{event.created}">
+                <f:convertDateTime type="both" dateStyle="medium" timeZone="#{identity.userTimeZone}"/>
+              </h:outputText>
+              <ui:fragment rendered="#{event.pendingDelete}">
+                <h:graphicImage width="16px"
+                                alt="#{msgs.identity_acct_pending_delete}"
+                                title="#{msgs.identity_acct_pending_delete}"
+                                height="16px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/pending_delete_16.png"/>
+              </ui:fragment>
+            </td>
+            <td><h:outputText value="#{event.creator}" /></td>
+            <td width="300">
+              <h:outputText value="#{event.due}">
+                <f:convertDateTime type="both" dateStyle="medium" timeZone="#{identity.userTimeZone}"/>
+              </h:outputText>
+            </td>
+            <td>
+              <ui:fragment rendered='#{event.type == "ProvisioningRequest"}'><a onclick="toggleEventDetails('#{event.id}', this);" class="disclosure"><h:outputText value="#{event.summary}" /></a></ui:fragment>
+              <ui:fragment rendered='#{event.type != "ProvisioningRequest"}'><h:outputText value="#{event.summary}" /></ui:fragment>
+            </td>
+          </tr>
+          <ui:fragment rendered='#{event.type == "ProvisioningRequest"}'>
+          <tr id='event_detail_#{event.id}' style='display:none' class='skip'>
+            <td colspan='6'>
+              <ui:include src="/identity/eventDetails.xhtml">
+                <ui:param name="event" value="#{event}"/>
+              </ui:include>
+            </td>
+          </tr>
+          </ui:fragment>
+        </ui:repeat>
+
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'DeleteIdentitySnapshot')}">
+          <tr>
+            <td colspan="15">
+              <a4j:commandButton  id="eventDeleteButton" 
+                                  value="#{msgs.button_delete}"
+                                  styleClass="secondaryBtn"
+                                  action="#{identity.eventsHelper.deleteEvents}" 
+                                  render="#{ajaxPanel}"/>
+            </td>
+          </tr>
+        </ui:fragment>
+      </table>
+
+      <script>
+        makeTableMulticolored($('eventTbl'), true, true, 'even', 'odd', 'skip');
+      </script>
+    </div>
+  </ui:fragment>
+
+
+
+  <ui:fragment rendered="#{!(empty identity.eventsHelper.pastIdentityEvents)}">
+
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_past_identity_events}"/>
+  
+    <div class="spTabledAjaxContent">
+      <table id="pastEventTbl" class="spTable spBusyTable" cellspacing="0">
+        <tr>
+          <th>#{msgs.past_identity_event_column_date}</th>
+          <th>#{msgs.past_identity_event_column_event}</th>
+          <th>#{msgs.past_identity_event_column_source}</th>
+          <th>#{msgs.past_identity_event_column_cause}</th>
+          <th>#{msgs.past_identity_event_column_summary}</th>
+        </tr>
+
+        <ui:repeat value="#{identity.eventsHelper.pastIdentityEvents}" var="pastEvent">
+          <tr>
+            <td class="nowrap">
+              <h:outputText value="#{pastEvent.date}">
+                <f:convertDateTime type="both" dateStyle="medium" timeZone="#{identity.userTimeZone}"/>
+              </h:outputText>
+            </td>
+            <td class="nowrap"><h:outputText value="#{pastEvent.event}" /></td>
+            <td>
+              <ui:fragment rendered="#{null != pastEvent.sourceInterfaceForEventsPage}">
+                <h:outputText value="#{pastEvent.sourceInterfaceForEventsPage}" />:
+              </ui:fragment>
+              <h:outputText value="#{pastEvent.source}" />
+            </td>
+            <td><h:outputText value="#{pastEvent.cause}" /></td>
+            <td><h:outputText value="#{pastEvent.summary}" /></td>
+          </tr>
+        </ui:repeat>
+      </table>
+
+      <script>
+        makeTableMulticolored($('pastEventTbl'), true, true, 'even', 'odd');
+      </script>
+    </div>
+  </ui:fragment>
+
+
+  
+  <ui:fragment rendered="#{empty identity.eventsHelper.events and empty identity.eventsHelper.pastIdentityEvents}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_no_identity_events}"/>
+    <br/><br/>
+  </ui:fragment> 
+
+  <ui:fragment rendered="#{base.lcmEnabled}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_identity_requests}"/>
+    <div id="accessRequestStatusGridMain" style="margin:10px;width:97%"></div>
+  </ui:fragment> 
+  
+</ui:composition>
+
+</body>
+</html>
+  

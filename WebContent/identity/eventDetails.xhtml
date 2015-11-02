@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+  <table class="spTable" cellspacing="1">
+    <tr>
+      <th>#{msgs.application}</th>
+      <th>#{msgs.label_operation}</th>
+      <th>#{msgs.attribute}</th>
+      <th>#{msgs.approvalitem_values}</th>
+    </tr>
+    <ui:repeat var="accReq" value="#{event.attributes['accountRequests']}">
+      <ui:repeat var="attributeRequest" value="#{accReq['attributeRequests']}">
+        <tr>
+          <td><h:outputText value="#{accReq['application']}" /></td>
+          <td><h:outputText value="#{attributeRequest['operation']}" /></td>
+          <td><h:outputText value="#{attributeRequest['name']}" /></td>
+          <td><h:outputText value="#{attributeRequest['value']}" /></td>
+        </tr>
+      </ui:repeat>
+    </ui:repeat>
+  </table>
+</ui:composition>
+
+</body>
+</html>
+

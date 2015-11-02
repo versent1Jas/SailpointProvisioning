@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+ 
+
+  <ui:fragment rendered="#{!(empty identity.violationsHelper.violations)}">
+     <h:outputText styleClass="spContentTitle" value="#{msgs.header_policy_violations}"/>
+    <div class="spTabledAjaxContent">
+      <table id="polViolationTbl" class="spTable" cellspacing="0" cellpadding="0">
+        <tr>
+          <th>#{msgs.detected}</th>
+          <th>#{msgs.policy}</th>
+          <th>#{msgs.policy_violation_owner}</th>
+          <th>#{msgs.rule}</th>
+          <th>#{msgs.summary}</th>
+        </tr>
+
+        <ui:repeat value="#{identity.violationsHelper.violations}" var="violation">
+          <tr>
+            <td>
+              <h:outputText value="#{violation.created}">
+                <f:convertDateTime type="both" dateSe="short" timeStyle="long" 
+                   timeZone="#{identity.userTimeZone}"/>
+              </h:outputText>
+            </td>
+            <ui:include src="/identity/policyColumns.xhtml">
+              <ui:param name="violation" value="#{violation}" />
+            </ui:include>
+          </tr>
+          <tr style="display:none" id="policyRow_#{violation.id}">
+           <td colspan="4" style="background:#fff">
+            <ui:include src="/identity/policyDetails.xhtml">
+              <ui:param name="violation" value="#{violation}" />
+            </ui:include>
+           </td>
+          </tr>
+        </ui:repeat>
+
+      </table>
+      <script>
+        makeTableMulticolored($('polViolationTbl'), true, false, 'even', 'odd');
+      </script>
+    </div>
+  </ui:fragment>
+  
+  <ui:fragment rendered="#{empty identity.violationsHelper.violations}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_no_policy_violations}"/>
+    <br/><br/>
+  </ui:fragment>
+
+</ui:composition>
+
+</body>
+</html>

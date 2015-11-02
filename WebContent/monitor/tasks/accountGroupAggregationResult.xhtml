@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+
+  <ui:composition>
+  
+  <div align="center">
+      <ui:include src="taskResultsStatsInclude.xhtml">
+        <ui:param name="attributes" value="#{taskResult.basicAttributes}" />
+        <ui:param name="captionName" value="#{taskResult.object.name}" />
+      </ui:include>
+
+      <c:forEach var="a" items="#{taskResult.complexAttributes}">
+
+        <c:forEach var="b" items="#{a.value}">
+          <div class="spacerDiv" />
+          <div class="spacerDiv" />
+          <table border="1" style="width: 50%" class="spTable">
+            <caption class="centeredColumn dashContentHeader">
+              <h:outputText value="#{b.name}" />
+              <h:outputText value="  " />
+              <h:outputText value="#{msgs.rept_task_result_title_attrs}" />
+            </caption>
+            <tbody>
+              <c:forEach var="c" items="#{b.taskStatistics}">
+                <tr>
+                  <th colspan="2"><h:outputText value="#{c.name}" /></th>
+                </tr>
+                <c:forEach var="d" items="#{c.statistics}" varStatus="loopStatus">
+                  <ui:remove><!-- index starts with zero add one to make first row an 'odd' css class --></ui:remove>
+                  <tr class="#{(loopStatus.index + 1) mod 2 eq 1 ? 'odd' : 'even'}">
+                      <td width="50%" class="leftAlignedColumn"><h:outputText value="#{sp:localizeKey(d.name)}" /></td>
+                      <td width="50%" class="leftAlignedColumn"><h:outputText value="#{d.data}" /></td>
+                  </tr>
+                </c:forEach>
+              </c:forEach>
+            </tbody>
+          </table>
+        </c:forEach>
+
+    </c:forEach>
+  </div>
+  
+  </ui:composition>
+
+</body>
+</html>

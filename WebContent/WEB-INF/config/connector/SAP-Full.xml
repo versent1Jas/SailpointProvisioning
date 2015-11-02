@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, PASSWORD, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, GROUP_PROVISIONING" icon="enterpriseIcon" name="SAPR3 Template" type="SAP - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="SAPR3"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+     import java.util.*;
+     import sailpoint.object.ProvisioningPlan.ObjectOperation;
+     import sailpoint.object.ProvisioningPlan.ObjectRequest;
+     import sailpoint.object.ProvisioningPlan.AttributeRequest;
+     import sailpoint.object.ProvisioningPlan.AccountRequest;
+
+List accounts = plan.getAccountRequests();
+if (accounts != null) {
+    for (AccountRequest req : accounts) {
+        AccountRequest.Operation op = req.getOperation();
+        if (op == AccountRequest.Operation.Create) {
+            String  username = req.getNativeIdentity();
+            if (userId != null) {
+                req.setNativeIdentity(username.toUpperCase());
+            }
+        }
+    }
+}
+List groupsSapr3 = plan.getObjectRequests();
+if (groupsSapr3 != null){
+    for (ObjectRequest req : groupsSapr3){
+        ObjectOperation op = req.getOp();
+        if(op == ObjectOperation.Create){
+            String groupId = req.getNativeIdentity();
+            if (groupId != null) {
+                req.setNativeIdentity(groupId.toUpperCase());
+            }
+        }
+    }
+}
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" type="string"/>
+        <AttributeDefinition displayName="Accounting number" name="ACCOUNT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Company name" name="ADDR_ADDR_COMP" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Alias" name="ADDR_ALIAS" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Building" name="ADDR_BUILDING" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Department" name="ADDR_DEPARTMENT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Fax list" multi="true" name="ADDR_FAX" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Fax list 46" multi="true" name="ADDR_FAX_46" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Floor" name="ADDR_FLOOR" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Function" name="ADDR_FUNCTION" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Email list" multi="true" name="ADDR_INTERNET" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Internet mail list" multi="true" name="ADDR_INTERNET_46" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Country for format" name="ADDR_NAMCOUNTRY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="First name" name="ADDR_NAME_FIRST" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="First Name 45" name="ADDR_NAME_FIRST_45" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Last name" name="ADDR_NAME_LAST" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Format" name="ADDR_NAME_TEXT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Special format" name="ADDR_NAMEFORMAT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Name prefix" name="ADDR_PREFIX1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Room number" name="ADDR_ROOMNUMBER" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Remote mail list" multi="true" name="ADDR_RML" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Remote mail list 46" multi="true" name="ADDR_RML_46" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Sort1" name="ADDR_SORT1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Sort2" name="ADDR_SORT2" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Telephone list" multi="true" name="ADDR_TEL" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Title" name="ADDR_TITLE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Title 610" name="ADDR_TITLE_610" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Title 620" name="ADDR_TITLE_620" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Academic title" name="ADDR_TITLE_ACA1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Telex list" multi="true" name="ADDR_TLX" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Teletex list" multi="true" name="ADDR_TTX" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="X400 list" multi="true" name="ADDR_X40" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="X400 list 40 to 45" multi="true" name="ADDR_X40_40_TO_45" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="CATT - test status" name="CATT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="CATT - test status 46" name="CATT_46" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Communication Language 620" name="COMM_LANG_620" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Communication Language 610" name="COMM_LANG_610" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Communication language" name="COMMUNICATION_LANG" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Cost center" name="COST_CENTER" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Date format" name="DATE_FORMAT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Decimal notation" name="DEC_FORMAT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Decimal notation 46" name="DEC_FORMAT_46" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Default language" name="DEFAULT_LANG" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Default language 610" name="DEFAULT_LANG_610" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Delete after output" name="DELETE_AFTER_PRINT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Login date" name="LOGIN_DATE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Login time" name="LOGIN_TIME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Output device" name="OUTPUT_DEVICE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Output device 46" name="OUTPUT_DEVICE_46" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Parameters" multi="true" name="PARAMETERS" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Last Password Updated By" name="PASSUPD_BY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Last Password Updated Date" name="PASSUPD_DATE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Last Password Updated Time" name="PASSUPD_TIME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Output immediately" name="PRINT_IMMED" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Handle user deactivation during update" name="SAP_USR_DACT_UPD" remediationModificationType="None" required="true" type="boolean"/>
+        <AttributeDefinition displayName="Inactive" name="SAP_USR_INVISIBLE" remediationModificationType="None" required="true" type="boolean"/>
+        <AttributeDefinition displayName="Start menu" name="START_MENU" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Start menu 46" name="START_MENU_46" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Time format" name="TIME_FORMAT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Time zone" name="TIME_ZONE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Deactivate user" name="USER_DEACTIVATE" remediationModificationType="None" required="true" type="boolean"/>
+        <AttributeDefinition displayName="User group (for authorization check)" name="USER_GROUP" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="User type" name="USER_TYPE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="User type 46" name="USER_TYPE_46" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="User type 46H" name="USER_TYPE_46H" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="User type 610" name="USER_TYPE_610" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Valid from" name="VALID_FROM" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Valid until" name="VALID_TO" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Group type" name="GROUP_TYPE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Profile Description" name="PROFILE_ACT_TEXT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="AGR_TEXT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Role type" name="AGR_TYPE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Generated Profile" name="AGR_GENERATED_PROF" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Simple roles (for composite roles)" multi="true" name="AGR_COMP_ROLES" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Last name" name="ADDR_NAME_LAST" required="true" section="" type="string"/>
+      </Template>
+      <Template name="group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group ID" helpKey="Group ID for sap profile supporting only profile creation" name="GROUP_ID" required="true" section="" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Description" name="DESCRIPTION" section="" type="string"/>
+        <Field displayName="Profile Description" name="PROFILE_ACT_TEXT" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="Profile" helpKey="SAP Profile name" name="GROUP_ID" required="true" section="" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="Profile Description" helpKey="Profile Text" name="PROFILE_ACT_TEXT" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

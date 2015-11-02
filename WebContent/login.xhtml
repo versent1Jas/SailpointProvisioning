@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:sp="http://sailpoint.com/ui">
+
+
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+<sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+<h:head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=8,10" />
+    <meta http-equiv="X-Frame-Options" content='#{base.allowXFrameOptions ? "allow" : "deny"}'/>
+  <c:if test="#{!(base.pinchZoomEnabled)}">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  </c:if>
+    <title>#{msgs.sailpoint_iiq}</title>
+
+    <link rel="SHORTCUT ICON"
+          href="#{base.requestContextPath}/images/icons/sailpoint.ico"/>
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        if (#{!base.allowXFrameOptions}) {
+            if (top.location != window.location) {
+                top.location.replace(window.location);
+            }
+        }
+
+        var CONTEXT_PATH = '#{base.requestContextPath}';
+
+        window.onload = function () {
+            SailPoint.TimeZone.getTimeZone('loginForm');
+            $('loginForm:accountId').focus();
+            $('loginForm:accountId').select();
+        };
+
+        //--><!]]>
+    </script>
+
+    <sp:script enabled="false">
+        <src>#{base.requestContextPath}/ui/js/shared/util.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/prototype.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/login.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/ui/js/shared/login.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/ui/js/shared/timeZone.js?#{debug.revision}</src>
+    </sp:script>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/">
+      <src>login.css</src>
+    </sp:style>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/">
+      <src>base.css</src>
+      <src>buttons.css</src>
+    </sp:style>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/">
+      <src>common.css</src>
+    </sp:style>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/brand">
+      <src>style.css</src>
+      <src>login.css</src>
+    </sp:style>
+
+    <c:if test="#{base.mobile}">
+      <sp:style serveOffset="#{base.requestContextPath}/css/">
+        <src>mobile.css</src>
+      </sp:style>
+    </c:if>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css">
+      <src>ext4-overrides.css</src>
+      <src>iiq-custom.css</src>
+    </sp:style>
+</h:head>
+
+<body id="loginBody">
+<div id="loginBackground">
+    <div id="logobar">
+    </div>
+    <div class="floater">
+    </div>
+    <div id="login">
+        <div id="loginPanel" class="loginPanel">
+            <div id="loginHeader" class="loginHeader">
+                <p>
+                  <h:outputText value="#{msgs.login_welcome}" escape="false" />
+                </p>
+            </div>
+            <!-- Error Message -->
+            <ui:fragment rendered="#{login.loginError}">
+                <div id="errorDiv" class="error">
+                    <h:message for="loginForm" showDetail="false" showSummary="true"/>
+                </div>
+            </ui:fragment>
+            <div>
+                <!-- Login form -->
+                <sp:sailpointForm id="loginForm">
+
+                    <h:inputHidden id="timeZoneRawOffset" value="#{login.timeZoneRawOffset}"/>
+                    <h:inputHidden id="timeZoneObservesDST" value="#{login.timeZoneObservesDST}"/>
+                    <h:inputHidden id="timeZoneDSTStarts" value="#{login.timeZoneDSTStarts}"/>
+                    <h:inputHidden id="timeZoneDSTEnds" value="#{login.timeZoneDSTEnds}"/>
+                    <h:inputHidden id="preLoginUrl" value="#{login.preLoginUrl}"/>
+
+                    <table cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                        <tr>
+                            <td colspan="2" class="label">
+                                <h:outputText value="#{msgs.label_username}"
+                                              styleClass="loginFormText textBold"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="input">
+                                <sp:inputText id="accountId" value="#{login.accountId}"
+                                              styleClass="loginFormText" required="false"
+                                              onkeypress="return SailPoint.Login.submitenter(this,event,'loginButtonDisplay')" tabindex="1"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><h:message for="accountId" styleClass="errorMessage"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="label topPadding">
+                                <h:outputText value="#{msgs.label_password}" styleClass="textBold"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="input">
+                                <sp:inputSecret id="password" value="#{login.password}" checkForEncrypted="false"
+                                                styleClass="loginFormText" redisplay="false"
+                                                onkeypress="return SailPoint.Login.submitenter(this,event,'loginButtonDisplay')"
+                                                required="false" tabindex="2"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><h:message for="password" styleClass="errorMessage"/></td>
+                        </tr>
+                        <tr>
+                            <ui:fragment rendered="#{!login.registrationEnabled}">
+                                <td></td>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{login.registrationEnabled}">
+                                <td class="label">
+                                 <span class="forgotPasswordLink">
+                                     <span style="font-size:9px;">
+                                       <h:commandLink
+                                               action="#{login.startRegistration}">#{msgs.login_reg_link}</h:commandLink>
+                                     </span>
+                                 </span>
+                                </td>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{!login.forgotPasswordEnabled}">
+                                <td></td>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{login.forgotPasswordEnabled}">
+                                <td align="right" class="label">
+                                 <span class="forgotPasswordLink">
+                                     <a id="forgotPassButtonLink" href="#"
+                                        onclick="$('loginForm:forgotPasswordButton').click()">
+                                         <span>#{msgs.forgot_password_link}</span>
+                                     </a>
+                                     <h:commandButton id="forgotPasswordButton" style="display:none" value=""
+                                                      action="#{login.userResetAction}">
+                                       <f:setPropertyActionListener target="#{login.userResetType}" value="passwordReset"/>
+                                     </h:commandButton>
+                                 </span>
+                                </td>
+                            </ui:fragment>
+                        </tr>
+                        <ui:fragment rendered="#{login.accountUnlockEnabled}">
+                        <tr>
+                          <td></td>
+                          <td align="right">
+                            <span class="forgotPasswordLink">
+                              <a id="unlockAccountButtonLink" href="javascript:void(0);" tabindex="50"
+                                onclick="$('loginForm:unlockAccountButton').click()">#{msgs.desktop_reset_unlock_account}</a>
+                              <h:commandButton id="unlockAccountButton" style="display:none" action="#{login.userResetAction}">
+                                <f:setPropertyActionListener target="#{login.userResetType}" value="accountUnlock" />
+                              </h:commandButton>
+                            </span>
+                          </td>
+                        </tr>
+                        </ui:fragment>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <div class="loginbuttonwrapper">
+                                  <input id="loginButtonDisplay" type="button" class="primaryBtn" value="#{msgs.button_login}" tabindex="3" role="button" onclick="this.disabled = true;SailPoint.Login.loginClick();" />
+                                  <div id="loginLoadingDisplay" style="display:none;" class="loginSpinner">
+                                    #{msgs.spinner_signing_in}
+                                  </div>
+                                  <h:commandButton id="loginButton" action="#{login.login}" style="display:none;"/>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </sp:sailpointForm>
+
+            </div>
+        </div>
+
+
+    </div>
+    <div id="loginFooter" class="loginFooter">
+        <div class="version">
+            <img src="images/LogoFooter.png" alt="Logo Footer"/>
+            <br/>
+            <h:outputFormat value="#{msgs.iiq_version}">
+                <f:param value="#{debug.version}"/>
+            </h:outputFormat>
+            &nbsp;
+            <h:outputText value="&#169; #{msgs.copy_right} "/>
+        </div>
+    </div>
+</div>
+<!-- Client locale: #{base.locale} -->
+<!-- Build: #{debug.fullVersion} -->
+</body>
+</html>

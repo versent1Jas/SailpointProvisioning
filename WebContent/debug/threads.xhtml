@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">IdentityIQ Threads</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_THREADS';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+
+    <div class="spContent" >
+      <table class="width100">
+        <tr>
+          <td><h:outputText value="Id" styleClass="spContentTitle"/></td>
+          <td><h:outputText value="Name" styleClass="spContentTitle"/></td>
+          <td><h:outputText value="Priority" styleClass="spContentTitle"/></td>
+          <td><h:outputText value="State" styleClass="spContentTitle"/></td>
+        </tr>
+        <ui:repeat value="#{debug.threads}" var="thread">
+          <tr><td colspan="4"><hr/></td></tr>
+          <tr>
+            <td><h:outputText value="#{thread.id}"/></td>
+            <td><h:outputText value="#{thread.name}"/></td>
+            <td><h:outputText value="#{thread.priority}"/></td>
+            <td><h:outputText value="#{thread.state}"/></td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td colspan="3">
+              <table>
+                <ui:repeat value="#{thread.stackTrace}" var="method">
+                  <tr><td style="padding-left: 20px;"><h:outputText value="#{method}"/></td></tr>
+                </ui:repeat>
+              </table>
+            </td>
+          </tr>
+        </ui:repeat>
+      </table>
+    </div>
+
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

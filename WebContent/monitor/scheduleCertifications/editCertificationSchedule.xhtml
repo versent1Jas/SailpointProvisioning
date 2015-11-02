@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+  <ui:define name="title">
+      <c:choose>
+          <c:when test="#{certificationSchedule.certificationGroupId != null}">#{msgs.cert_sched_title_details}</c:when>
+          <c:otherwise>#{(certificationSchedule.identityTrigger) ? msgs.title_edit_cert_event : msgs.title_edit_cert_schedule}</c:otherwise>
+      </c:choose> 
+  </ui:define>
+  <ui:define name="underTitle">
+    <ui:fragment rendered="#{certificationSchedule.certificationGroupId != null}">
+      <input type="button" 
+             class="secondaryBtn" 
+             style="margin: 6px 0 0 15px"
+             onclick="window.location.href='certificationGroup.jsf?certGroup=#{certificationSchedule.certificationGroupId}';return false;" 
+             value="#{msgs.cet_sched_back_to_cert}"/>
+    </ui:fragment>
+  </ui:define>
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+      <src>wizard.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/monitor/schedule-certifications">
+      <src>schedule-certifications.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/TextInserter.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/Wizard.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/trigger/Trigger.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/monitor/CertificationScheduleForm.js?#{debug.revision}</src>  
+    </sp:script>
+
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'CERTIFICATION_SCHEDULE';
+
+      //--><!]]>
+    </script>
+  </ui:define>
+  <ui:define name="body">
+    <f:view>
+      <script>
+      <!--//--><![CDATA[//><!--
+      Ext.onReady(function(){
+
+          var readOnly = #{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)};
+
+          var panels = [
+              { title: '#{sp:escapeJavascript(msgs.cert_sched_basic_tab)}', description: '#{sp:escapeJavascript(msgs.cert_sched_basic_desc)}', contentEl: 'basicOptions' },
+              { title: '#{sp:escapeJavascript(msgs.cert_sched_lifecycle_tab)}', description: '#{sp:escapeJavascript(msgs.cert_sched_lifecycle_desc)}', contentEl: 'lifecycleOptions' },
+              { title: '#{sp:escapeJavascript(msgs.cert_sched_notif_tab)}', description: '#{sp:escapeJavascript(msgs.cert_sched_notif_desc)}', contentEl: 'notificationOptions' },
+              { title: '#{sp:escapeJavascript(msgs.cert_sched_behavior_tab)}', description: '#{sp:escapeJavascript(msgs.cert_sched_behavior_desc)}', contentEl: 'behaviorOptions' },
+              { title: '#{sp:escapeJavascript(msgs.cert_sched_adv_tab)}', description: '#{sp:escapeJavascript(msgs.cert_sched_adv_desc)}', contentEl: 'advancedOptions' }
+          ];
+          
+          var itemsToDisable = Ext.select(".disabledRadio");
+          itemsToDisable.each(function(elem) {
+        	 elem.dom.disabled = true; 
+          });
+
+          var schedCertBtn = new Ext.Button({
+              id: 'schedule-cert-btn',
+              cls : 'primaryBtn',
+              handler: function() {
+                  // Disable the buttons while we're waiting.
+                  Ext.getCmp('schedulePanel').disableButtons();
+                  if (typeof certification_notifications != 'undefined') {
+                    certification_notifications.updateValue();
+                  }
+                  
+                  $('certificationScheduleForm:validateBtn').click();
+              },
+              text: '#{(certificationSchedule.identityTrigger) ? msgs.button_save_cert_event : msgs.button_schedule_cert}'
+          });
+          
+          var cancelBtn = new Ext.Button({
+              id: 'cancel-cert-btn',
+              handler: function() {
+                  // Disable the buttons while we're waiting.
+                  Ext.getCmp('schedulePanel').disableButtons();
+                  $('certificationScheduleForm:cancelBtn').click();
+              },
+              text: '#{sp:escapeJavascript(msgs.nav_cancel)}'
+          });
+          
+          var saveChangesBtn = new Ext.Button({
+              id: 'save-changes-btn',
+              cls : 'primaryBtn',
+              handler: function() {
+              
+
+            	if (typeof certification_notifications != 'undefined') {
+                  certification_notifications.updateValue();
+                }
+              
+            	Ext.getCmp('schedulePanel').disableButtons();
+                $('certificationScheduleForm:validateBtn').click();
+              },
+              text: '#{msgs.button_save_changes}'
+          });
+
+          var wizardButtons = [];          
+          if (!readOnly) {
+        	  wizardButtons = [schedCertBtn, cancelBtn];
+          } else {
+        	  if (#{!certificationSchedule.pastRemediationPhase and certificationSchedule.editable}) {
+        		  wizardButtons = [saveChangesBtn];
+        	  }else{
+        	      wizardButtons = [cancelBtn];
+        	  }
+          }
+          
+          SailPoint.CertificationScheduleForm.wizard = new SailPoint.Wizard({
+               id: 'schedulePanel',
+               summaryPanelWidth: 140,
+               panels: panels,
+               btns: wizardButtons
+          });
+          
+          var psh = {
+			onPanelSelected : function(selectedIndex) {
+				if(selectedIndex == 4) {
+					// TODO extjs4: figure out why we keep having to force the multisuggest to render
+					var appOwnSug = Ext.getCmp('certifyAppOwnersMultiSuggest');
+				    if(appOwnSug) {
+				    	appOwnSug.updateLayout();
+				    }
+				}
+			}
+          };
+          SailPoint.CertificationScheduleForm.wizard.addPanelSelectedHandler(psh);
+
+          // Put it in a viewport to let it take up the full page and resize well.
+          // The second parameter tells the viewport to wrap the component within
+          // the certificationScheduleForm.
+          var viewport = SailPoint.getViewport({
+              bodyContent: SailPoint.CertificationScheduleForm.wizard, 
+              wrappingForm: 'certificationScheduleForm',
+              title: '#{(certificationSchedule.identityTrigger) ? msgs.title_edit_cert_event : msgs.title_edit_cert_schedule}'
+          });
+          viewport.doLayout();
+      });
+      //--><!]]>
+      </script>
+
+      <h:form id="certificationScheduleForm">
+
+         <!--
+            Basic and Advanced option includes
+            - These are hidden until activated by the Advanced/Basic Tabs.
+          -->
+          <div class="x-hide-display" id="basicOptions">
+            <ui:include src="/monitor/scheduleCertifications/editCertificationBasic.xhtml">
+                <ui:param name="readOnly" value="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+            </ui:include>
+          </div>
+
+          <div class="x-hide-display" id="lifecycleOptions">
+            <table class="customWidth paddedTbl" cellpadding="5" cellspacing="0" style="background-color:#ffffff">
+              <tbody>
+                <ui:include src="scheduleCertificationsLifecycleInclude.xhtml">
+                    <ui:param name="readOnly" value="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                </ui:include>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="x-hide-display" id="notificationOptions">
+            <table class="customWidth paddedTbl" cellpadding="5" cellspacing="0" style="background-color:#ffffff">
+              <tbody>
+                <ui:include src="editCertificationNotifications.xhtml">
+                    <ui:param name="readOnly" value="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                </ui:include>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="x-hide-display" id="behaviorOptions">
+            <ui:include src="/monitor/scheduleCertifications/editCertificationBehavior.xhtml">
+                <ui:param name="readOnly" value="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+            </ui:include>
+          </div>
+
+          <div class="x-hide-display" id="advancedOptions">
+            <ui:include src="/monitor/scheduleCertifications/editCertificationAdvanced.xhtml">
+                <ui:param name="readOnly" value="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+            </ui:include>
+          </div>
+
+          <!--
+            Put whether any errors were detected in a hidden input that gets updated with every AJAX request.
+            This is used to determine whether the form can be submitted after validation.
+           -->
+          <a4j:outputPanel id="hasErrorsPanel" ajaxRendered="true">
+            <input type="hidden" id="certificationScheduleForm:errorMessageInput" name="certificationScheduleForm:errorMessageInput" value="#{certificationSchedule.hasErrors}"/>
+          </a4j:outputPanel>
+
+          <ui:fragment rendered="#{not certificationSchedule.pastRemediationPhase}">
+              <h:commandButton style="display:none"
+              id="scheduleCertifyBtn"
+              onclick="if (this.wasButtonClicked) return false; this.wasButtonClicked = true;"
+              action="#{certificationSchedule.scheduleCertification}"/>
+
+              <a4j:commandButton id="validateBtn" style="display:none"
+              action="#{certificationSchedule.validateFields}"
+              oncomplete="SailPoint.CertificationScheduleForm.postSubmit('certificationScheduleForm'); SailPoint.CertificationScheduleForm.confirmAndSubmit(#{sp:getSystemConfigurationValue('confirmRiskyCertificationSchedules', false)})"/>
+
+              <h:commandButton id="cancelBtn" style="display: none" immediate="true" action="#{certificationSchedule.cancelCertification}"/>
+          </ui:fragment>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

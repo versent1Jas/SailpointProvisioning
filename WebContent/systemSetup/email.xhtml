@@ -1,0 +1,101 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition>
+
+  <table class="paddedTbl" style="margin:5px">
+    <tr class="padBottom">
+      <td colspan="2">
+        <h:outputText styleClass="spContentTitle" value="#{msgs.sys_config_email_settings}"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right"><h:outputText value="#{msgs.sys_config_email_notifier_type}" /></td>
+      <td colspan="3" align="left">
+        <h:selectOneMenu id='emailNotifierType' value='#{systemConfig.object.attributes["emailNotifierType"]}'
+                         onchange="emailHelper.onNotifierTypeChange();makePageDirty();">
+          <f:selectItems value="#{systemConfig.emailNotifierTypes}" />
+        </h:selectOneMenu>
+      </td>
+    </tr>
+    <tr id='redirectingEmailAddressRow'>
+      <td align="right"><h:outputText value="#{msgs.sys_config_redirecting_email_address}" /></td>
+      <td colspan="3" align="left">
+        <h:inputText value='#{systemConfig.object.attributes["redirectingEmailNotifierAddress"]}' size="40"/>
+      </td>
+    </tr>
+    <tr id='redirectingFilenameRow'>
+      <td align="right"><h:outputText value="#{msgs.sys_config_redirecting_filename}" /></td>
+      <td colspan="3" align="left">
+        <h:inputText value='#{systemConfig.object.attributes["redirectingEmailNotifierFilename"]}' size="40"/>
+      </td>
+    </tr>
+    <tr id='smtpEncryptionTypeRow'>
+      <td align="right"><h:outputText value="#{msgs.con_form_sm_encryption}" /></td>
+      <td colspan="3" align="left">
+        <h:selectOneMenu id='smtpEncryptionType' 
+          value='#{systemConfig.smtpConfig.encryptionType}'
+          converter="sailpoint.object.Enum">
+          <f:selectItems value="#{systemConfig.smtpConfig.encryptionTypes}" />
+        </h:selectOneMenu>
+      </td>
+    </tr>
+    <tr id='smtpHostRow'>
+      <td align="right"><h:outputText value="#{msgs.sys_config_default_smtp_host}" /></td>
+      <td colspan="3" align="left">
+        <h:inputText value='#{systemConfig.object.attributes["defaultEmailHost"]}' size="40"/>
+      </td>
+    </tr>
+    <tr id='smtpPortRow'>
+      <td align="right"><h:outputText value="#{msgs.sys_config_default_smtp_port}" /></td>
+      <td colspan="3" align="left">
+        <h:inputText value='#{systemConfig.object.attributes["defaultEmailPort"]}' size="3"/>
+      </td>
+    </tr>
+    <tr id='smtpFromAddressRow'>
+      <td align="right"><h:outputText value="#{msgs.sys_config_default_from_address}" /></td>
+      <td colspan="3" align="left">
+        <h:inputText value='#{systemConfig.object.attributes["defaultEmailFromAddress"]}' size="40"/>
+      </td>
+    </tr>
+    <tr id='smtpUsernameRow'>
+      <td align="right"><h:outputText value="#{msgs.user_name}" /></td>
+      <td colspan="3" align="left">
+        <h:inputText value='#{systemConfig.smtpConfig.username}' autocomplete="off" size="40"/>
+      </td>
+    </tr>
+    <tr id='smtpPasswordRow'>
+      <td align="right"><h:outputText value="#{msgs.password}" /></td>
+      <td colspan="3" align="left">
+        <sp:inputSecret id='smtpPassword' value='#{systemConfig.smtpConfig.password}' redisplay='true' autocomplete="off" size="40"/>
+      </td>
+    </tr>
+    <tr id='smtpConfirmPasswordRow'>
+      <td align="right"><h:outputText value="#{msgs.confirm_password}" /></td>
+      <td colspan="3" align="left">
+        <sp:inputSecret id='smtpConfirmPassword' value='#{systemConfig.smtpConfig.confirmPassword}' redisplay='true' autocomplete="off" size="40"/>
+      </td>
+    </tr>
+    <tr>
+      <td align="right"><h:outputText value="#{msgs.sys_config_max_email_retries}" /></td>
+      <td colspan="3" align="left">
+        <h:inputText value="#{systemConfig.maxEmailRetries}" size="3">
+          <f:validateLongRange minimum="0" maximum="999" />
+        </h:inputText>
+      </td>
+    </tr>
+    <tr>
+      <td align="right"><h:outputText value="#{msgs.sys_config_suppress_duplicate_emails}" /></td>
+      <td colspan="3" align="left">
+        <h:selectBooleanCheckbox  value="#{systemConfig.object.attributes['suppressDuplicateEmails']}" onclick="makePageDirty();" />
+      </td>
+    </tr>
+  </table>
+
+</ui:composition>
+</body>
+</html>

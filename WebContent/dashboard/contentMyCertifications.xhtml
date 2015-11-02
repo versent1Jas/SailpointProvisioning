@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/certification">
+    <src>certification.css</src>
+  </sp:style>
+  
+  <h:inputHidden value="#{reference.arguments['viewDetails']}" id="myCertsViewDetails"/>
+  
+  <div>
+  <ui:fragment rendered="#{empty certificationPercent.openCertificationsForCurrentUser}">
+    <table class="width100" cellpadding="0" cellspacing="0">
+        <tr>
+          <td class="lightBlueBoxHeading" align="center">
+            <h:outputText value="#{msgs.msg_no_open_ceritications}" />
+     	  </td>
+      </tr>
+    </table>
+  </ui:fragment>
+  
+  <ui:fragment rendered="#{!empty certificationPercent.openCertificationsForCurrentUser}">
+    
+    <ui:include src="chart/chartMyCertificationStatus.xhtml">
+      <ui:param name="parentFormName" value="dashboardForm" />
+      <ui:param name="reference" value="#{reference}"/>
+    </ui:include>  
+    <br/>
+    
+      <table class="spBlueTable">      
+        <tr onclick="SailPoint.Dashboard.updateDashItem('#{reference.content.id}',#{(reference.arguments['viewDetails'] eq 'false') ? 'true' : 'false'}, $('dashboardForm:myCertsViewDetails'));showHideWithLock([$('certDetailsPaging'), $('certDetails')]);" 
+            onmouseover="this.className='pageInfoOrange';" onmouseout="this.className='';"
+            style="#{!(empty certificationPercent.openCertificationsForCurrentUser) ? 'cursor:pointer' : ''}">
+          <th>
+              <h:outputFormat value="#{msgs.chart_my_certs_label_identity}">
+                  <f:param value="#{base.loggedInUser.displayableName}"/>
+              </h:outputFormat>
+          </th>
+          <th align="center">          
+            <h:outputFormat value="${msgs.chart_my_certs_open_certs}">
+                <f:param value="#{certificationPercent.openCertificationsCountForCurrentUser}"/>
+            </h:outputFormat>
+          </th>
+        </tr>
+        
+        <tr>      
+          <td colspan="2" id="certDetailsPaging" style="#{(reference.arguments['viewDetails'] eq 'false') ? 'display:none' : ''}">
+            <a4j:commandButton  id="prevMyCertBtn"
+                                style="display:none"
+                                action="#{certificationPercent.prevCerts}" value="prev"
+                                render="myCertificationsPanel,myCertificationsPanelControls"
+                                oncomplete="setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500)"/>
+                                  
+            <a4j:commandButton  id="nextMyCertBtn"
+                                style="display:none"
+                                action="#{certificationPercent.nextCerts}"
+                                render="myCertificationsPanel,myCertificationsPanelControls"
+                                limitRender="true"
+                                oncomplete="setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500)"/> 
+            <a4j:outputPanel id="myCertificationsPanelControls"> 
+
+            <!-- Pager -->
+            <ui:include src="dashboardPager.xhtml">
+              <ui:param name="pageSize"   value="#{certificationPercent.maxCerts}" />
+              <ui:param name="totalRows"  value="#{certificationPercent.openCertificationsCountForCurrentUser}" />
+              <ui:param name="startIdx"   value="#{certificationPercent.offset}" />
+              <ui:param name="endIdx"     value="#{certificationPercent.end}" />
+              <ui:param name="prevBtn"    value="#{parentFormName}:prevMyCertBtn" />
+              <ui:param name="nextBtn"    value="#{parentFormName}:nextMyCertBtn" />
+              <ui:param name="objectType" value="#{msgs.certifications}" />
+              <ui:param name="statusText" value="#{certificationPercent.currentUserStatusText}" />
+            </ui:include>
+
+           </a4j:outputPanel>
+          </td>
+        </tr>
+        
+        <tr>
+          
+          <td colspan="2" id="certDetails" class="spBackground"
+            style="#{(reference.arguments['viewDetails'] eq 'false') ? 'display:none' : ''};padding:10px;">   
+            <a4j:outputPanel id="myCertificationsPanel"> 
+            <table class="width100">
+              <ui:repeat value="#{certificationPercent.openCertificationsForCurrentUser}" var="certificationBean"
+                rendered="#{!empty certificationPercent.openCertificationsForCurrentUser}">
+                <tr>
+                  <td colspan="4">
+                    <ui:include src="contentOwnerCertPercentInclude.xhtml">
+                      <ui:param name="certificationBean" value="#{certificationBean}" />
+                    </ui:include>
+                  </td>
+                </tr>
+              </ui:repeat>
+            </table>
+            </a4j:outputPanel>
+          </td>
+        </tr>
+      </table>
+  </ui:fragment>
+  </div>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web">
+      <src>dashboard.css</src>  
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/risk-scores">
+      <src>risk-scores.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/bandConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/compositeScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sorttable_v1.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+      // <![CDATA[
+      var currentRepeatId = 0;
+      var isMaximized = true;
+      var isPageDirty = false;
+      helpKey = 'RISK_SCORES';
+      // ]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+    
+    <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+    <h:form id="editForm">
+        <div id='policyViolationBaselineAccessRiskConfigInstructions' class="instructions">
+          <h:outputText value="#{sp:localizeKey(policyViolationBarConfig.instructions[policyviolationBarConfig.currentType])}"/>
+        </div>
+      
+        <div id="bandInfo" style="display:none;">
+          <ui:include src="/define/riskScores/bandsInclude.xhtml"/>
+        </div>
+        
+        <div class="spacerDiv"/>
+        
+      <div id="Separation of Duty Violation Baseline Access RiskConfig">
+        <table id="sodViolationsByPolicyTable" class="sysConfigTable">
+          <thead>
+            <tr><th class="dashContentHeader">
+              <img id="sodViolationsContractAll" onclick="contractContents($('sodViolationsByPolicyTable'));" src="#{base.requestContextPath}/images/icons/window_contract_all.png" class="dashContentExpandBtn" alt=""/>
+              <img id="sodViolationsExpandAll" onclick="expandContents($('sodViolationsByPolicyTable'));" src="#{base.requestContextPath}/images/icons/window_expand_all.png" class="dashContentExpandBtn" alt=""/>
+              <h:outputText value="#{msgs.violation_bar_section_violations_by_policy}" />
+            </th></tr>
+          </thead>
+          <tfoot><tr><td>
+            <div class="buttonRow">
+              <a4j:commandButton id="visibleSaveButton" onclick="confirmSave(isPageDirty, 'editForm:stealthSaveButton');" value="#{msgs.button_save}" styleClass="primaryBtn" />
+              <a4j:commandButton id="visibleCancelButton" onclick="confirmCancel(isPageDirty, 'editForm:stealthCancelButton');" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+              <h:commandButton style="display:none" id="stealthSaveButton" action="#{policyViolationBarConfig.saveChanges}" />
+              <h:commandButton style="display:none" id="stealthCancelButton" action="#{policyViolationBarConfig.cancelChanges}" />
+            </div>
+          </td></tr></tfoot>
+          <tbody>
+            <ui:repeat id="violations" value="#{policyViolationBarConfig.violations}" var="violation">
+              <tr><td>
+                <ui:fragment rendered="#{not empty violation.constraints}">
+                  <table class="dashTable sortable">
+                    <thead><tr><th class="sectionHeader" style="display: block">
+                      <img id="violations_#{sp:buildValidComponentIdIgnoringNulls(violation.name, true)}_expander" onclick="toggleExpansion($('violations_#{sp:buildValidComponentIdIgnoringNulls(violation.name, true)}_expander'));" src="#{base.requestContextPath}/images/icons/minus.png" class="dashContentExpandBtn" alt="" />
+                      <h:outputFormat value="#{msgs.named_violation}">
+                          <f:param value="#{violation.name}"/>
+                      </h:outputFormat>
+                    </th></tr></thead>
+                    <tbody><tr><td>
+                      <div id="violations_#{sp:buildValidComponentIdIgnoringNulls(violation.name, true)}_content">
+                          <div class="spTabledContent">
+                            <t:dataTable styleClass="spTable width100"
+                              headerClass="centeredColumn" 
+                              rowClasses="even, odd"
+                              columnClasses="leftAlignedColumn, indicatorSliderInputCombo"
+                              id="PVConfigTable"
+                              value="#{violation.constraints}" var="constraint"
+                              forceIdIndexFormula="#{sp:buildValidComponentIdIgnoringNulls(constraint.name, true)}">
+                    
+                              <h:column>
+                                <f:facet name="header">
+                                  <h:panelGroup>
+                                    <div id="pv#{sp:buildValidComponentIdIgnoringNulls(violation.name, true)}_#{sp:buildValidComponentIdIgnoringNulls(constraint.name, true)}SortDiv" style="cursor:pointer" onclick="ts_resortTable(this, 0); return false;">
+                                      <h:outputText value="#{msgs.rule}" />
+                                      <span class="sortarrow">&nbsp;&nbsp;&nbsp;</span>
+                                    </div>
+                                  </h:panelGroup>
+                                </f:facet>
+                
+                                <h:outputText id="constraint" value="#{constraint.name}" />
+                 
+                              </h:column>
+                                             
+                              <h:column>
+                                <f:facet name="header">
+                                  <h:outputText value="#{msgs.risk_level}"/>
+                                </f:facet>
+                                
+                                <h:panelGroup>
+                                  <div id="sliderWrapPV#{sp:buildValidComponentId(violation.name)}_#{sp:buildValidComponentId(constraint.name)}" class="sliderWrap">
+                                    <div id="sliderTrackPV#{sp:buildValidComponentId(violation.name)}_#{sp:buildValidComponentId(constraint.name)}" class="sliderLeft" />
+                                    <div id="sliderPV#{sp:buildValidComponentId(violation.name)}_#{sp:buildValidComponentId(constraint.name)}" class="slider">
+                                      <div id="handlePV#{sp:buildValidComponentId(violation.name)}_#{sp:buildValidComponentId(constraint.name)}" class="sliderHandle">
+                                        <img src="#{base.requestContextPath}/images/sliderHandle.gif" alt=""/>
+                                      </div>
+                                    </div>
+                                  </div>
+                                      
+                                  <img id="#{sp:buildValidComponentId(violation.name)}_#{sp:buildValidComponentId(constraint.name)}Indicator" class="dynamicRiskIndicator" src=""/>                          
+                                  <h:inputText id="constraintFactor" value="#{constraint.weight}" size="3"/>
+                                          
+                                  <script type="text/javascript" defer="defer">
+                                    // <![CDATA[
+                                    addIndicatorSliderData('Separation of Duty Violation Baseline Access RiskConfig',
+                                                           'handlePV#{sp:buildValidComponentId(violation.name)}_#{sp:buildValidComponentId(constraint.name)}', 
+                                                           'sliderPV#{sp:buildValidComponentId(violation.name)}_#{sp:buildValidComponentId(constraint.name)}', 
+                                                           '#{constraint.weight}', 
+                                                           $('editForm:violations:' + currentRepeatId + ':PVConfigTabl#{sp:buildValidComponentId(constraint.name)}:constraintFactor'),
+                                                           $('#{sp:buildValidComponentId(violation.name)}_#{sp:buildValidComponentId(constraint.name)}Indicator'));
+                                    // ]]>
+                                  </script>
+                                </h:panelGroup>
+                              </h:column>                                   
+                            </t:dataTable>
+                          </div>
+                      </div>
+                    </td></tr></tbody>
+                  </table>
+                </ui:fragment>
+                <ui:fragment rendered="#{empty violation.constraints}">
+                  <table class="dashTable"><thead><tr>
+                    <th class="sectionHeader leftAlignedColumn">
+                      <h:outputFormat value="#{msgs.violation_bar_section_policy}">
+                          <f:param value="#{violation.name}"/>
+                      </h:outputFormat>
+                    </th>
+                    <th class="indicatorSliderInputCombo">
+                      <h:panelGroup>
+                        <div id="sliderWrapPV#{sp:buildValidComponentId(violation.name)}" class="sliderWrap">
+                          <div id="sliderTrackPV#{sp:buildValidComponentId(violation.name)}" class="sliderLeft" />
+                          <div id="sliderPV#{sp:buildValidComponentId(violation.name)}" class="slider">
+                            <div id="handlePV#{sp:buildValidComponentId(violation.name)}" class="sliderHandle">
+                              <img src="#{base.requestContextPath}/images/sliderHandle.gif" alt=""/>
+                            </div>
+                          </div>
+                        </div>
+                           
+                        <img id="#{sp:buildValidComponentId(violation.name)}Indicator" class="dynamicRiskIndicator" src=""/>                          
+                        <h:inputText id="violationFactor" value="#{violation.weight}" size="3"/>
+                                
+                        <script type="text/javascript" defer="defer">
+                          // <![CDATA[
+                          addIndicatorSliderData('Separation of Duty Violation Baseline Access RiskConfig',
+                                                 'handlePV#{sp:buildValidComponentId(violation.name)}', 
+                                                 'sliderPV#{sp:buildValidComponentId(violation.name)}', 
+                                                 '#{violation.weight}', 
+                                                 $('editForm:violations:' + currentRepeatId + ':violationFactor'),
+                                                 $('#{sp:buildValidComponentId(violation.name)}Indicator'));
+                          // ]]>
+                        </script>
+                      </h:panelGroup>
+                    </th>
+                  </tr></thead></table>
+                </ui:fragment>
+                <script type="text/javascript" defer="defer">
+                  // <![CDATA[
+                  currentRepeatId++;                            
+                  // ]]>
+                </script>
+              </td></tr>
+            </ui:repeat>
+          </tbody>
+        </table>
+      </div>
+      <script type="text/javascript" defer="defer">
+        // <![CDATA[
+        initRiskSlidersOnLoad('Separation of Duty Violation Baseline Access RiskConfig');
+        // ]]>
+      </script>
+    </h:form>
+    </f:view>     
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

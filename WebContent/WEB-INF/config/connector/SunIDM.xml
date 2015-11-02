@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.SunIDMConnector" featuresString="PROVISIONING" name="Sun IDM Template" type="Sun IDM">
+    <Attributes>
+      <Map>
+        <entry key="includeOnlyAdmins" value="false"/>
+        <entry key="includeResources" value="true"/>
+        <entry key="password" value="configurator"/>
+        <entry key="rpcRouterURL" value="http://localhost:8080/idm/servlet/rpcrouter2"/>
+        <entry key="user" value="Configurator"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="accountId" identityAttribute="accountId" nativeObjectType="IIQUserView" objectType="account">
+        <AttributeDefinition name="dbId" type="string"/>
+        <AttributeDefinition name="accountId" type="string"/>
+        <AttributeDefinition name="email" type="string"/>
+        <AttributeDefinition name="firstname" type="string"/>
+        <AttributeDefinition name="lastname" type="string"/>
+        <AttributeDefinition name="fullname" type="string"/>
+        <AttributeDefinition multi="true" name="organization" type="string"/>
+        <AttributeDefinition multi="true" name="controlledOrganizations" type="string"/>
+        <AttributeDefinition multi="true" name="capabilities" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="adminRoles" schemaObjectType="group" type="string"/>
+        <AttributeDefinition multi="true" name="roles" type="string"/>
+        <AttributeDefinition multi="true" name="resources" type="string"/>
+        <AttributeDefinition multi="true" name="resourceAssignments" type="string"/>
+        <AttributeDefinition name="disabled" type="boolean"/>
+        <AttributeDefinition name="locked" type="boolean"/>
+      </Schema>
+      <Schema displayAttribute="roleName" identityAttribute="dbId" nativeObjectType="customIIQAdminRole" objectType="group">
+        <AttributeDefinition name="dbId" type="string"/>
+        <AttributeDefinition name="roleName" type="string"/>
+        <AttributeDefinition name="type" type="string"/>
+        <AttributeDefinition multi="true" name="organization" type="string"/>
+        <AttributeDefinition multi="true" name="assigners" type="string"/>
+        <AttributeDefinition multi="true" name="capabilities" type="string"/>
+        <AttributeDefinition multi="true" name="capabilitiesRule" type="string"/>
+        <AttributeDefinition multi="true" name="controlledOrganizations" type="string"/>
+        <AttributeDefinition multi="true" name="controlledOrganizationsRule" type="string"/>
+      </Schema>
+    </Schemas>
+  </Application>
+</ImportAction>

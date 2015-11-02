@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <h:form id="activitySearchForm">
+    <input name="searchType" type="hidden" value="Activity"/>
+    
+    <div style="display:none" class="width100" id="ActivityError"></div>
+    
+    <a4j:outputPanel ajaxRendered="true">
+      <ui:fragment rendered="#{(analyzeController.searchBean.mySearchItemsByType!=null) and (!empty analyzeController.searchBean.mySearchItemsByType)}">
+        <div class="spContent" >
+          <table class="width100" style="margin:5px"><tr><td>
+            <ui:include src="../searchUserItems.xhtml">
+              <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+              <ui:param name="formName" value="activitySearchForm"/>
+              <ui:param name="loadBtnName" value="activityLoadBtn"/>
+            </ui:include>
+          </td></tr>           
+          </table>
+        </div>
+      </ui:fragment>
+    </a4j:outputPanel>
+    
+    <a4j:outputPanel id="activityReRenderOnClear">
+      <div id="activitySearchCriteria" class="paddedContainer" >
+        <table class="width100" cellpadding="4" cellspacing="0">
+          <tr>
+            <td width="75%">
+              <div>
+                <h:outputText value="#{msgs.activity_search_criteria}" styleClass="spContentTitle"/>
+                <h:graphicImage id="imgHlpActivitySearchCriteria" 
+                                alt="#{analyzeController.searchBean.criteriaHelpMsg}"
+                                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/dashboard_help_16.png" />
+              </div>
+            </td>
+            <td width="25%">
+              <div>
+                <h:outputText value="#{msgs.activity_search_fields_to_display}" styleClass="spContentTitle"/>
+                <h:graphicImage id="imgHlpActivityGroupSearchDisplayFields" 
+                                alt="#{analyzeController.searchBean.displayHelpMsg}"
+                                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/dashboard_help_16.png" />
+              </div>
+            </td>
+          </tr>
+          <tr valign="top">
+            <td>
+              <div class="spTabledContent">
+                <a4j:outputPanel id="activityAttributes">
+                  <table id="actAttrbTbl" class="spTable" cellspacing="0">
+                    <tr>
+                      <th>
+                        <h:outputText value="#{msgs.activity_search_attributes}"/>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                        <div id="activityAttributes">
+                          <ui:include src="activityAttributes.xhtml">
+                            <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+                          </ui:include>                                    
+                        </div>                                    
+                      </td>
+                    </tr>
+                  </table>
+                </a4j:outputPanel>
+              </div>                  
+            </td>
+            <td>
+                <ui:include src="../searchDisplayFields.xhtml">
+                  <ui:param name="searchType" value="activity" />
+                  <ui:param name="searchBean" value="#{analyzeController.searchBean}" />
+                </ui:include>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <table>
+                <tr>
+                  <td>
+                    <input type="button" style="display:none" id="preSearchBtn" value="#{msgs.activity_search_button_run_search}" onclick="SailPoint.Analyze.validateSearch('activity')"/>
+                    <h:commandButton id="searchBtn" style="display:none" action="#{activitySearch.runQueryAction}"/> 
+                    <input type="button" style="display:none" id="clearBtn" value="#{msgs.activity_search_button_clear_search}" onclick="$('activitySearchForm:resetBtn').click()"/>
+                  </td>
+                  <td align="left">
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </a4j:outputPanel>
+    
+    <a4j:commandButton  id="updateTargetMode" 
+                        style="display:none" 
+                        action="#{analyzeController.searchBean.updateTargetMode}" 
+                        render="categoriesAndTargets"
+                        oncomplete="SailPoint.Utils.styleSelects();"/>
+                        
+    <a4j:commandButton  id="updateDateMode" 
+                        style="display:none" 
+                        action="#{analyzeController.searchBean.updateDateMode}" 
+                        render="timePeriodsAndDates"
+                        oncomplete="SailPoint.Utils.styleSelects();"/>
+    
+    <a4j:commandButton  id="updateIdentityMode" 
+                        style="display:none" 
+                        action="#{analyzeController.searchBean.updateIdentityMode}"
+                        render="ipopsAndIdentities"
+                        oncomplete="SailPoint.Analyze.Activity.renderOwners();"/>
+                        
+    <a4j:commandButton style="display:none" 
+                       action="#{analyzeController.searchBean.runQueryAction}"
+                       id="ajaxSearchBtn"
+                       onclick="SailPoint.Analyze.setButtonsDisabled('preActivitySearchBtn', 'clearBtn', true);"
+                       oncomplete="var gridPanel = Ext.getCmp('activitySearchResultsGrid');
+                                   gridPanel.isRefresh = true;
+                                   Ext.MessageBox.wait('#{sp:escapeJavascript(msgs.loading_data)}');
+                                   gridPanel.getStore().loadPage(1, {
+                                       params:{start:0},
+                                       callback: SailPoint.Activity.Search.displaySearchResults
+                                   });
+                                   SailPoint.Analyze.setButtonsDisabled('preActivitySearchBtn', 'clearBtn', false);"/>
+
+    <a4j:commandButton  style="display:none" 
+                        action="#{analyzeController.searchBean.clearSearchItem}"
+                        id="resetBtn"
+                        render="activityAttributes"
+                        onclick="SailPoint.Analyze.setButtonsDisabled('preActivitySearchBtn', 'clearBtn', true);
+                            SailPoint.Activity.Search.clearSearchFields();"
+                        oncomplete="SailPoint.Analyze.resetSearchName('activitySearchForm');
+                                    SailPoint.Analyze.Activity.initializeAttributes();
+                                    SailPoint.Activity.Search.clearSearchFields();
+                                    SailPoint.Analyze.setButtonsDisabled('preActivitySearchBtn', 'clearBtn', false);"/>
+    <a4j:commandButton id="rerenderSearchItemsBtn" action="none" render="" style="display:none"/>
+  </h:form>
+</ui:composition>
+
+</body>
+</html>

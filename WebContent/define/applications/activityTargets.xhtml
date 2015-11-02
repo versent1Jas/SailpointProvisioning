@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+  <ui:fragment>
+    <a4j:outputPanel id="activityTargetsData">
+      <div class="paddedContainer x-panel-body-default" style="margin: 0 5px;" > 
+        <div class="spTabledContent">
+          <t:dataTable styleClass="spTable" cellspacing="0" headerClass="spDataTableHeader" columnClasses="centeredColumn, leftAlignedColumn" rowClasses="even odd" value="#{activityDataSource.targets}" var="target">
+            <t:column rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+              <h:selectBooleanCheckbox id="targetToDelete" value="#{activityDataSource.selectedTargets[target]}"/>
+              <f:facet name="footer">
+                <h:panelGrid columns="1" columnClasses="centeredColumn" styleClass="width100">
+                  <a4j:commandButton id="deleteTargetsButton" value="#{msgs.button_delete}"
+                    styleClass="secondaryBtn"
+                    action="#{activityDataSource.deleteTargetsAction}" 
+                    render="activityTargetsData"/>
+                </h:panelGrid>
+              </f:facet>
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <h:outputText value="#{msgs.activity_targets}"/>
+              </f:facet>
+              <h:outputText value="#{target}"/>
+              <f:facet name="footer">
+                <h:panelGroup rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                  <h:inputText size="40" value="#{activityDataSource.addedTarget}"/>
+                  <span/>
+                  <a4j:commandButton id="addTargetButton" value="#{msgs.button_add_activity_target}"
+                    styleClass="primaryBtn"
+                    action="#{activityDataSource.addTargetAction}"
+                    render="activityTargetsData"/>
+                </h:panelGroup>
+              </f:facet>
+            </t:column>
+          </t:dataTable>
+
+          <ui:fragment rendered="#{!sp:hasRight(facesContext, 'ManageApplication') and empty activityDataSource.targets}">
+            #{msgs.no_activity_targets_defined}
+          </ui:fragment>
+        </div>
+      </div>
+    </a4j:outputPanel>
+
+  </ui:fragment>
+</body>
+</html>

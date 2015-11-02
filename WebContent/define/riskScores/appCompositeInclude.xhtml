@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+<table class="paddedTbl">
+  <tr>
+    <td colspan="4">
+      <h:outputText styleClass="spContentTitle" value="#{msgs.percent_contribution_from_comp_scores}"/>
+    </td>
+  </tr>
+
+  <ui:repeat value="#{applicationRisk.object.applicationScores}" var="score">
+    <ui:fragment rendered="#{!score.composite}">
+      <tr>
+        <td align="right"><h:outputText value="#{sp:localizeKey(score.displayableName)}" /></td>
+        <td>
+          <h:inputText value="#{score.weight}" size="5"  onchange="makePageDirty();"/>
+        </td>
+      </tr>
+    </ui:fragment>  
+  </ui:repeat>
+
+</table>
+
+</ui:composition>
+</body>
+</html>
+

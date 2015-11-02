@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+
+
+<ui:composition>
+
+   <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+   <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <f:view>
+  
+    <h:form id="workItemForwardPanelForm">
+
+      <h:inputHidden id="id" value="#{workItem.object.id}"/>
+      <h:inputHidden id="priority" value="#{workItem.priority}"/>
+      <div id='workItemNewOwnerDisplayableName' style='display:none'>#{workItem.newOwner.displayableName}</div>
+
+      <t:saveState id="nextPage" value="#{workItem.nextForwardPage}" />
+      <t:saveState id="forwardingCert" value="#{workItem.forwardingCertification}" />
+
+      <h:commandButton style="display: none" id="hiddenForwardBtn" action="#{workItem.forward}" />
+
+      <div id="workItemError" class="formError" style="visibility:hidden;"/>
+
+      <table class="paddedTbl">
+        <tr>
+          <td class="titleColumn">
+              <h:outputText value="#{msgs.label_forward_to}"/>
+              <h:outputText value="*" style="color:red" />
+          </td>
+          <td class="leftAlignedColumn">
+            <div id="ownerNameSuggest"></div>
+            <t:inputHidden id="ownerName" value="#{workItem.newOwner}">
+                <sp:convertIdentity />
+            </t:inputHidden>
+          </td>
+        </tr>
+        <tr>
+          <td class="titleColumn">
+            <h:outputText value="#{msgs.label_comments}"/>
+          </td>
+          <td class="leftAlignedColumn">
+            <h:inputTextarea rows="5" cols="46" id="comments"
+                             value="#{workItem.forwardComment}" />
+          </td>
+        </tr>
+      </table>
+    </h:form>
+  </f:view>
+</ui:composition>
+
+</body>
+</html>

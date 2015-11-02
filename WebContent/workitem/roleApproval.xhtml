@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+<!--
+  WorkItem renderer for role approvals being managed by a workfow case.
+  TODO: workflowDetails.xhtml is specific to roles, need to change  
+  the name!
+-->
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.role_approval}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ElectronicSignaturePopup.js?#{debug.revision}</src>
+    </sp:script>
+ <!-- PageName: roleApproval.xhtml -->
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+
+      Ext.onReady(function() {
+          
+          var oAuthId = "#{sp:escapeJavascript(workItem.originalAuthId)}";
+          var nAuthId = "#{sp:escapeJavascript(workItem.nativeAuthId)}";
+          
+          var approvalCallback = function(name, pass) {
+              if(name !== nAuthId && name !== oAuthId) {
+                  Ext.fly('editForm:signatureAuthId').dom.value = name;
+              }
+              Ext.fly('editForm:signaturePass').dom.value = pass;
+              Ext.fly('editForm:approveCmdBtn').dom.click();
+          };
+          
+          var btns = [
+              {
+                  text : '#{sp:escapeJavascript(msgs.button_save)}',
+                  passClick : 'editForm:saveCmdBtn',
+                  cls: 'secondaryBtn'
+              },
+              {
+                  text : '#{sp:escapeJavascript(msgs.button_cancel)}',
+                  passClick : 'editForm:cancelCmdBtn',
+                  cls: 'secondaryBtn'
+              }
+          ];
+          
+          if(#{workItem.editable}) {
+              btns.unshift({
+                      text : '#{sp:escapeJavascript(msgs.button_approve)}',
+                      handler : function() {
+                          var sm = "#{sp:escapeJavascript(workItem.signatureMeaning)}";
+                          if(sm !== "") {
+                              SailPoint.ESigPopup.show(nAuthId, oAuthId, sm, approvalCallback, null, null, SailPoint.ESigPopup.WorkItemType, '#{workItem.object.id}');
+                          }
+                          else {
+                              Ext.fly('editForm:approveCmdBtn').dom.click();
+                          }
+                      },
+                      cls: 'primaryBtn'
+                  },
+                  {
+                      text : '#{sp:escapeJavascript(msgs.button_reject)}',
+                      passClick : 'editForm:rejectCmdBtn',
+                      cls: 'primaryBtn'
+                  },
+                  {
+                      text : '#{sp:escapeJavascript(msgs.button_forward)}',
+                      passClick : 'editForm:forwardCmdBtn',
+                      cls: 'secondaryBtn'
+              });
+          }
+          
+          Ext.create('Ext.container.Container', {
+              renderTo : 'commandButtons',
+              defaultType : 'button',
+              layout : 'hbox',
+              defaults : {
+                  margin : '2'
+              },
+              defaultType : 'passthroughbutton',
+              items : btns,
+              cls: 'buttonRow'
+          });
+      });
+      
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+          <h:inputHidden id="signatureAuthId" value="#{workItem.signatureAuthId}"/>
+          <h:inputHidden id="signaturePass" value="#{workItem.signaturePass}"/>
+
+          <ui:include src="summaryFieldset.xhtml"/>
+          <ui:include src="commentsFieldset.xhtml"/>
+
+          <!-- TODO: the header should be pushed into workflowDetails.xhtml -->
+          <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.details}"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <ui:include src="workflowDetails.xhtml"/>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <br/>
+  
+          <h:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" />
+          <h:commandButton style="display: none" id="rejectBtn" action="#{workItem.reject}" />
+          <h:commandButton style="display: none" id="returnBtn" action="#{workItem.returnAction}" />
+          
+          <div id="commandButtons"/>
+          
+          <ui:fragment rendered="#{workItem.editable}">
+
+            <h:commandButton id="approveCmdBtn" onclick="addComment('editForm:completeBtn', '#{sp:escapeJavascript(msgs.button_approve)}', '#{sp:escapeJavascript(msgs.dialog_title_approval_comments)}'); return false;"
+                             value="#{msgs.button_approve}" title="#{msgs.button_title_click_to_approve}" style="display: none"/>
+            
+            <h:commandButton id="rejectCmdBtn" onclick="addComment('editForm:rejectBtn', '#{sp:escapeJavascript(msgs.button_reject)}', '#{sp:escapeJavascript(msgs.dialog_title_rejection_comments)}'); return false;"
+                             value="#{msgs.button_reject}" title="#{msgs.button_title_click_to_reject_request}" style="display: none"/>
+
+            <h:commandButton id="forwardCmdBtn" onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', true, SailPoint.getWorkItemPriority()); return false;"
+                             value="#{msgs.button_forward}" title="#{msgs.button_title_click_to_forward}" style="display: none"/>
+
+          </ui:fragment>
+          
+          <h:commandButton id="saveCmdBtn" action="#{workItem.save}" 
+                           value="#{msgs.button_save}" 
+                           title="#{msgs.button_title_click_to_save_work_item}" style="display: none"/>
+
+          <h:commandButton id="cancelCmdBtn" action="#{workItem.cancel}" immediate="true" value="#{msgs.button_cancel}" style="display: none"/>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

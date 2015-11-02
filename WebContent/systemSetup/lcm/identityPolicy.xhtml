@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+
+<h:head>
+<title>#{msgs.title_configure_system_settings}</title>
+</h:head>
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">#{msgs.title_configure_identity_provisioning_policy}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/include/template">
+      <src>template-editor.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/model/TemplateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateBooleanValue.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateFieldEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditorWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiText.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleCombo.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+    </sp:script>
+  </ui:define>
+
+  <ui:define name="body">
+
+    <f:view>
+      <h:form styleClass="form" id="editForm">
+
+        <script type="text/javascript">
+            var helpKey = 'LCM_PROVISIONING';
+
+            function beforeSave() {
+            	if(SailPoint.template.TemplateEditor.EditorPanel) {
+            	  SailPoint.template.TemplateEditor.EditorPanel.save();
+           	    }
+            	
+            	$('editForm:savePolicyBtn').click();
+            }
+            
+            Ext.onReady(function () {
+              SailPoint.template.TemplateEditor.PANEL_HEIGHT = 700;
+              //SailPoint.TemplateEditor.REQUIRED_FIELDS = ['name'];
+            });
+        </script>
+
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+
+        <div class="pageInfo">
+          <h:outputText value="#{msgs.info_configure_identity_provisioning_policy}"/>
+        </div>
+
+        <ui:include src="/include/template/templateEditor.xhtml">
+          <ui:param name="templateEditor" value="#{identityPolicy.templateEditor}"/>
+          <ui:param name="beanType" value="identity"/>
+          <ui:param name="showApplication" value="false"/>
+          <ui:param name="hideTitle" value="false"/>
+          <ui:param name="showUsageList" value="true"/>
+        </ui:include>
+
+		<a4j:outputPanel id="createAttributesPanel">
+        	<input type="hidden" id="createAttributes" name="createAttributes" value="#{identityPolicy.availableAttributes}"/>
+            <input type="hidden" id="passwordRequired" name="passwordRequired" value="#{identityPolicy.passwordRequired}"/>
+		</a4j:outputPanel>
+
+          <div class="buttonRow">
+            <input type="button" onclick="beforeSave();" class="primaryBtn" value="#{msgs.button_save}"/>
+            <h:commandButton action="#{identityPolicy.save}" id="savePolicyBtn" style="display:none"/>
+            <h:commandButton action="cancel" styleClass="secondaryBtn" value="#{msgs.button_cancel}"/>
+          </div>
+
+      </h:form>
+
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

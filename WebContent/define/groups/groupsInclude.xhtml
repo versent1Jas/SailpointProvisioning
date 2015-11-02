@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:a4j="http://richfaces.org/a4j">
+
+<body>
+
+<ui:composition>
+
+    
+        <br/>
+        
+        <h:inputHidden id="currentGroupObjectId"
+                       value="#{groupFactoryList.selectedId}"/>        
+      
+		<h:commandButton id="createGroupButton" style="display:none"
+		                 value="#{msgs.button_create_new_group}"
+                         action="#{groupFactoryList.createAction}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" 
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+				
+		<h:commandButton id="editGroupButton" 
+		                 style="display:none"
+                         action="#{groupFactoryList.editAction}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup, ViewWorkgroup, ViewGroups, ViewPopulations, ViewAccountGroups, ManagedAttributePropertyAdministrator, ManagedAttributeProvisioningAdministrator')}" 
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup, ViewWorkgroup, ViewGroups, ViewPopulations, ViewAccountGroups, ManagedAttributePropertyAdministrator, ManagedAttributeProvisioningAdministrator')}" />
+                         
+        <t:saveState value="#{groupFactoryList.gridState}" />
+        <h:inputHidden id="GsortColumn" value="#{groupFactoryList.gridState.sortColumn}" />
+        <h:inputHidden id="GsortOrder" value="#{groupFactoryList.gridState.sortOrder}" />
+        <h:inputHidden id="GfirstRow" value="#{groupFactoryList.gridState.firstRow}" />
+        <h:inputHidden id="GpageSize" value="#{groupFactoryList.gridState.pageSize}" />
+        <h:inputHidden id="GscrollPosition" value="#{groupFactoryList.gridState.scrollPosition}" />
+		
+		<h:commandButton id="deleteGroupButton" 
+		                 style="display:none" 
+                         action="#{groupFactoryList.deleteAction}" 
+		                 disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" 
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+      
+</ui:composition>
+
+</body>
+</html>

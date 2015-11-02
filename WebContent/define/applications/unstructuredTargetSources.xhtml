@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+  <ui:fragment>
+    <a4j:outputPanel id="unstructuredTargetsData">
+      <div class="spContent">
+        <div class="spTabledContent">
+          <t:dataTable styleClass="spTable" cellspacing="0" headerClass="spDataTableHeader" columnClasses="centeredColumn, leftAlignedColumn" rowClasses="even odd" value="#{targetSource.targets}" var="target">
+            <t:column rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+              <h:selectBooleanCheckbox id="targetToDelete" value="#{targetSource.selectedTargets[target]}"/>
+              <f:facet name="footer">
+                <h:panelGrid columns="1" columnClasses="centeredColumn" styleClass="width100">
+                  <a4j:commandButton id="deleteTargetsButton" value="#{msgs.button_delete}"
+                    styleClass="secondaryBtn"
+                    action="#{targetSource.deleteTargetsAction}" 
+                    render="unstructuredTargetsData"/>
+                </h:panelGrid>
+              </f:facet>
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <h:outputText value="targets"/>
+              </f:facet>
+              <h:outputText value="#{target}"/>
+              <f:facet name="footer">
+                <h:panelGroup rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                  <h:inputText size="40" value="#{targetSource.addedTarget}"/>
+                  <span/>
+                  <a4j:commandButton id="addTargetButton" value="add target}"
+                    styleClass="primaryBtn"
+                    action="#{targetSource.addTargetAction}"
+                    render="unstructuredTargetsData"/>
+                </h:panelGroup>
+              </f:facet>
+            </t:column>
+          </t:dataTable>
+
+          <ui:fragment rendered="#{!sp:hasRight(facesContext, 'ManageApplication') and empty targetSource.targets}">
+            No unstructured targets defined.}
+          </ui:fragment>
+        </div>
+      </div>
+    </a4j:outputPanel>
+
+  </ui:fragment>
+</body>
+</html>

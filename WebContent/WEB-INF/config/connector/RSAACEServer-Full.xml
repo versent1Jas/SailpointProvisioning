@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, AUTHENTICATE, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD" icon="enterpriseIcon" name="Ace Server Template" type="RSA ACE Server - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="AceServer"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED " value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" minable="true" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" minable="true" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" minable="true" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="First Name" minable="true" name="RU_PM_FIRST_NAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Last Name" minable="true" name="RU_PM_LAST_NAME" required="true" type="string"/>
+        <AttributeDefinition displayName="Security Domain" minable="true" name="RU_PM_SECURITY_DOMIAN" required="true" type="string"/>
+        <AttributeDefinition displayName="Data Store" minable="true" name="RU_PM_IDENTITY_SOURCE" required="true" type="string"/>
+        <AttributeDefinition displayName="Notes" minable="true" name="RU_PM_NOTES" required="true" type="string"/>
+        <AttributeDefinition displayName="Group" entitlement="true" managed="true" multi="true" name="groups" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" minable="true" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" minable="true" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Identity Source" minable="true" name="UG_PM_IDENTITY_SOURCE" required="true" type="string"/>
+        <AttributeDefinition displayName="Security Domain" minable="true" name="UG_PM_SECURITY_DOMIAN" required="true" type="string"/>
+        <AttributeDefinition displayName="Notes" minable="true" name="UG_PM_NOTES" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="USER ID" helpKey="Mandatory field to create the user" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" helpKey="Mandatory field to create the user" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="First Name" helpKey="Mandatory field : first name for user" name="RU_PM_FIRST_NAME" required="true" type="string"/>
+        <Field displayName="Last Name" helpKey="Mandatory field : last name for user" name="RU_PM_LAST_NAME" required="true" type="string"/>
+        <Field displayName="Notes" helpKey="Mandatory field : additional notes for user" name="RU_PM_NOTES" required="true" type="string"/>
+      </Template>
+      <Template name="Group Create" schemaObjectType="group" usage="Create">
+        <Field displayName="GROUP_ID" helpKey="Mandatory field : Group ID to create the group " name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Notes" helpKey="Editable field : additional notes for group" name="UG_PM_NOTES" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="Modify Group" schemaObjectType="group" usage="Update">
+        <Field displayName="IDENTITY SOURCE" helpKey="Read Only field for reference" name="UG_PM_IDENTITY_SOURCE" readOnly="true" section="" type="string"/>
+        <Field displayName="SECURITY DOMIAN" helpKey="Read Only field for reference" name="UG_PM_SECURITY_DOMIAN" readOnly="true" section="" type="string"/>
+        <Field displayName="Notes" helpKey="Editable field : additional notes for group" name="UG_PM_NOTES" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

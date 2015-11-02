@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD, GROUP_PROVISIONING, SYNC_PROVISIONING" icon="databaseIcon" name="Oracle Full Template" type="Oracle Database - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="Oracle"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <ClusterScript>
+        <Source>
+                            String cluster = null;
+                            Object host = application.getAttributeValue("host");
+                            Object port = application.getAttributeValue("port");
+                            if (host != null) {
+                               cluster = host.toString();
+                               if (port != null)
+                                   cluster += ":" + port.toString();
+                            }
+                            return cluster;
+                      </Source>
+      </ClusterScript>
+      <PlanInitializerScript>
+        <Source>
+                              import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                              import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                              import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                              import sailpoint.object.ProvisioningPlan.AccountRequest;
+                              import sailpoint.object.ProvisioningPlan;
+             
+                          List accounts = plan.getAccountRequests();
+                              if (accounts != null) {
+                                    for (AccountRequest req : accounts) {
+                                      AccountRequest.Operation op = req.getOperation();
+                                      if (op == AccountRequest.Operation.Delete) {
+                                        AttributeRequest att = new AttributeRequest("CASCADE", "false");
+                                        req.add(att);
+                                  }
+                                    }
+                              }
+ 
+
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" type="string"/>
+        <AttributeDefinition displayName="Authentication Method" name="AUTHENTICATION" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Default TableSpace" name="DEFAULT_TS" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Temporary TableSpace" name="TEMP_TS" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Quota" multi="true" name="QUOTA" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="User Profile" name="PROFILE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="System Privileges" multi="true" name="SYSTEM_PRIVILEGES" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Granted as a Default Role" multi="true" name="DEFAULT_ROLES_PM" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Password Expiration" name="EXPIRE_PM1" remediationModificationType="None" required="true" type="boolean"/>
+        <AttributeDefinition displayName="Common Name" name="CN_PM1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Country" name="C_PM1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Organization" name="O_PM1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Organization Unit" name="OU_PM1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="State" name="ST_PM1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Location" name="L_PM1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Last Password Change Time" name="PASSWORD_UPD_TIME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Last Login Time" name="LOGIN_TIME" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Authentication" name="AUTHENTICATION_PM" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Role Password" name="PASSWORD_PM1" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Type" name="GROUP_TYPE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="System Privileges" multi="true" name="SYSTEM_PRIVILEGES" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Granted Roles" multi="true" name="ROLES_PM" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Profile Parameters" multi="true" name="PROFILE_PARAMETERS" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" helpKey="User Name" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="System Privileges#Admin Option" helpKey="Format is : (System Privileges#Admin Option)" multi="true" name="SYSTEM_PRIVILEGES" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group ID" helpKey="Group name for creting role or profile on oracle server(for Profile give name like (PROFILE:(Profile name)) For Role give name like (ROLE:(Role name)))" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="GROUP TYPE" helpKey="Type of the group: which either can be PROFILE or can be ROLE" name="GROUP_TYPE" required="true" type="string">
+          <AllowedValues>
+            <String>PROFILE</String>
+            <String>ROLE</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="PROFILE PARAMETERS" helpKey="Field to set profile parameters(Filled only in case of PROFILE)" multi="true" name="PROFILE_PARAMETERS" reviewRequired="true" section="" type="string"/>
+        <Field displayName="SYSTEM PREVILEGES" helpKey="Fields to set system previleges to this Role(Filled only in case of ROLE)" multi="true" name="SYSTEM_PRIVILEGES" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Granted Roles" helpKey="Fields to grant permission to this ROLE(Filled only in case of ROLE)" multi="true" name="ROLES_PM" reviewRequired="true" section="" type="string"/>
+        <Field defaultValue="None" displayName="Authentication" helpKey="Field to set Authentication type for ROLE(Filled only in case of ROLE)" name="AUTHENTICATION_PM" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>External</String>
+            <String>Global</String>
+            <String>None</String>
+            <String>Password</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Role Password" helpKey="Field to set the password for role if authentication is set to password(Filled only in case of ROLE and that too if authentication is set to Password)" name="PASSWORD_PM1" reviewRequired="true" type="secret"/>
+        <Field displayName="GROUP TYPE" helpKey="Type of the group: which either can be PROFILE or can be ROLE" name="GROUP_TYPE" readOnly="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

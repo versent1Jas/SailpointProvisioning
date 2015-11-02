@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  
+  <ui:define name="title">#{msgs.host_config_host_configuration}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridRenderers.js?#{debug.revision}</src>
+    </sp:script>
+    
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+    <h:form styleClass="form" id="hostConfigForm">
+
+      <div id="hostConfigGridContainer"></div>
+
+      <br/>
+
+      <span style="width:20px"/>
+
+      <h:commandButton styleClass="secondaryBtn" value="#{msgs.button_return_to_system_setup}" action="backToSystemSetup"/>
+
+    </h:form>
+
+    <script type="text/javascript">
+    Ext.onReady(function() {
+      var hostConfigClosure = (function(){
+          var cols = {
+              "columns": [
+                      {
+                        "dataIndex": "name",
+                        "flex": null,
+                        "header": "#{msgs.host_config_header_name}",
+                        "hidden": false,
+                        "hideable": false,
+                        "pluginClass": null,
+                        "renderer": null,
+                        "sortable": true,
+                        "width": null
+                      },
+                      {
+                        "dataIndex": "requestThreads",
+                        "flex": null,
+                        "header": "#{msgs.host_config_header_request_threads}",
+                        "hidden": false,
+                        "hideable": true,
+                        "pluginClass": null,
+                        "renderer": null,
+                        "sortable": false,
+                        "width": null
+                      },
+                      {
+                        "dataIndex": "taskThreads",
+                        "flex": null,
+                        "header": "#{msgs.host_config_header_task_threads}",
+                        "hidden": false,
+                        "hideable": true,
+                        "pluginClass": null,
+                        "renderer": null,
+                        "sortable": false,
+                        "width": null
+                      },
+                      {
+                        "dataIndex": "cpuUsage",
+                        "flex": null,
+                        "header": "#{msgs.host_config_header_cpu_usage}",
+                        "hidden": false,
+                        "hideable": true,
+                        "pluginClass": null,
+                        "renderer": 'SailPoint.grid.GridRenderers.renderPercentBar',
+                        "sortable": false,
+                        "width": 220
+                      },
+                      {
+                        "dataIndex": "heartbeat",
+                        "flex": null,
+                        "header": "#{msgs.host_config_header_heartbeat}",
+                        "hidden": false,
+                        "hideable": true,
+                        "pluginClass": null,
+                        "renderer": "SailPoint.Date.DateTimeRenderer",
+                        "sortable": true,
+                        "width": null
+                      },
+                      {
+                        "dataIndex": "inactive",
+                        "flex": null,
+                        "header": "#{msgs.host_config_header_status}",
+                        "hidden": false,
+                        "hideable": true,
+                        "pluginClass": null,
+                        "renderer": "SailPoint.grid.GridRenderers.renderIsOnline",
+                        "sortable": true,
+                        "width": null
+                      }
+                    ],
+              "fields": [
+                      {
+                        "mapping": "name",
+                        "name": "name",
+                        "type": "auto"
+                      },
+                      {
+                        "mapping": "requestThreads",
+                        "name": "requestThreads",
+                        "type": "auto"
+                      },
+                      {
+                        "mapping": "taskThreads",
+                        "name": "taskThreads",
+                        "type": "auto"
+                      },
+                      {
+                        "mapping": "cpuUsage",
+                        "name": "cpuUsage",
+                        "type": "auto"
+                      },
+                      {
+                        "mapping": "heartbeat",
+                        "name": "heartbeat",
+                        "type": "auto"
+                      },
+                      {
+                        "mapping": "inactive",
+                        "name": "inactive",
+                        "type": "auto"
+                      }
+                    ],
+              "groupField": null,
+              "id": "id",
+              "root": "objects",
+              "sortInfo": null,
+              "totalProperty": "count"
+          };
+          var store = SailPoint.Store.createRestStore({
+              fields: cols.fields,
+              url: SailPoint.getRelativeUrl('/rest/hosts'),
+              method : 'GET',
+              autoLoad: true,
+              remoteSort: true
+          });
+          var hostConfigGrid = new SailPoint.grid.PagingGrid({
+              id: 'hostConfigGrid',
+              store: store,
+              renderTo: 'hostConfigGridContainer',
+              title: '#{msgs.host_config_table_title}',
+              columns: cols.columns,
+              pageSize: 10,
+              emptyText:"#{msgs.host_config_none_found}",
+              viewConfig: {stripeRows: true}
+          });
+      }());
+    }); // Ext.onReady
+    </script>
+    </f:view>
+  </ui:define>
+    
+</ui:composition>
+</body>
+</html>

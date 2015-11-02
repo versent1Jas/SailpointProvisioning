@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+   Start up help for certification grid view ui. It is typically used for complex screens
+   doing several things on the same screen for example.
+-->
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+<ui:composition>
+
+  <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+
+    var StartUpHelpCertificationEntity = {
+
+            init: function() {
+               var startUpHelp  = new SailPoint.StartUpHelp({
+                   // note the single quotes in the startupHelpContent assignment
+                   // startupHelpContent with the double quotes in the content
+                   startupHelpContent: '#{sp:escapeJavascript(msgs.startup_help_certification_entity_view_content)}',
+                   startupHelpTitle: "#{sp:escapeJavascript(msgs.startup_help_certification_entity_view_title)}",
+                   actionButton: "startupHelpCertificationEntityBtn",
+                   stateField: "currentState"   
+               });
+               startUpHelp.show();
+            }
+          };
+
+          Ext.onReady(function() {
+              StartUpHelpCertificationEntity.init();
+          });
+
+   //--><!]]>
+  </script>
+
+  <h:inputHidden id="currentState" value="#{certification.displayStartUpHelpCertificationEntityView}" />
+  
+  <a4j:commandButton id="startupHelpCertificationEntityBtn" 
+                   actionListener="#{certification.updateDisplayStartUpHelpCertificationEntityView}" 
+                   style="display:none"/>
+
+</ui:composition>
+
+</body>
+</html>

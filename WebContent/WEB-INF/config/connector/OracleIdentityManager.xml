@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.integration.oim.OIMConnector" featuresString="PROVISIONING, PROXY, ENABLE, UNLOCK" name="OIM Template" type="Oracle Identity Manager">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="OIMAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="Display Name" identityAttribute="User Login" nativeObjectType="User" objectType="account">
+        <AttributeDefinition internalName="Users.First Name" name="First Name" type="string"/>
+        <AttributeDefinition internalName="Users.Middle Name" name="Middle Name" type="string"/>
+        <AttributeDefinition internalName="Users.Last Name" name="Last Name" type="string"/>
+        <AttributeDefinition internalName="Users.Xellerate Type" name="Design Console Access" type="string"/>
+        <AttributeDefinition internalName="Users.Email" name="Email" type="string"/>
+        <AttributeDefinition internalName="Users.Manager Login" name="Manager" type="string"/>
+        <AttributeDefinition internalName="Organizations.Organization Name" name="Organization" type="string"/>
+        <AttributeDefinition internalName="Users.Role" name="User Type" type="string"/>
+        <AttributeDefinition internalName="Users.Display Name" name="Display Name" type="string"/>
+        <AttributeDefinition internalName="Users.User ID" name="User Login" type="string"/>
+        <AttributeDefinition internalName="Users.Start Date" name="Start Date" type="date"/>
+        <AttributeDefinition internalName="Users.End Date" name="End Date" type="date"/>
+        <AttributeDefinition internalName="Users.Provisioning Date" name="Provisioning Date" type="date"/>
+        <AttributeDefinition internalName="Users.Deprovisioning Date" name="Deprovisioning Date" type="date"/>
+        <AttributeDefinition entitlement="true" internalName="Groups.Group Name" managed="true" multi="true" name="Roles" schemaObjectType="group" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Display Name" identityAttribute="Name" nativeObjectType="Role" objectType="group">
+        <AttributeDefinition internalName="Groups.Group Name" name="Name" type="string"/>
+        <AttributeDefinition internalName="Groups.Role Display Name" name="Display Name" type="string"/>
+        <AttributeDefinition internalName="Groups.E-mail" name="Email" type="string"/>
+        <AttributeDefinition internalName="Groups.Role Description" name="Description" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Create Oracle Identity Manager User" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_oim_cp_ln" name="Users.Last Name" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_mi_cp_org" name="Organizations.Organization Name" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_mi_cp_ut" name="Users.Role" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_mi_cp_xt" name="Users.Xellerate Type" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

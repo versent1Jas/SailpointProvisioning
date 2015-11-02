@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+           buildTooltips();
+        });
+    </script>
+    <f:view>
+      <table>
+        <tr>
+          <td><h:outputText styleClass="sectionHeader" value="#{msgs.attributes}"/></td>
+        </tr>
+        <tr>
+          <td>
+              <h:panelGrid columns="2">
+                <h:outputText styleClass="textBold" value="#{msgs.iq_service_host}"/>
+                <h:inputText value="#{targetSource.object.configuration['IQServiceHost']}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+                <h:outputText styleClass="textBold" value="#{msgs.iq_service_port}"/>
+                <h:inputText value="#{targetSource.object.configuration['IQServicePort']}"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+             </h:panelGrid>
+          </td>
+        </tr>
+      </table>
+      <h:panelGrid columns="1">
+
+        <div id="siteCollectionConfig" class="submenuContentBox" style="border:0px">
+            <div class="spContent">
+            
+              <table width="100%">
+                <tr>
+                  <td>
+            
+              <a4j:outputPanel id="siteCollectionsTable">
+                <table class="width100" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <h:outputText styleClass="sectionHeader" value="${msgs.col_form_sharepoint_title}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <h:outputText styleClass="font10" value="${msgs.col_form_sharepoint_subtitle}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <table class="spTable">
+                        <thead>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <th style="text-align:center">
+                                <h:selectBooleanCheckbox id="selectAllToggleSites" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/>
+                              </th>
+                              <th/>
+                            </ui:fragment>
+                              <th> 
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_sharepoint_siteURL}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpSharePointSiteURL"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{help.help_con_form_SharePoint_URL}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+
+                              <th style="text-align:left">
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_sharepoint_user}"/>
+                                    </td>
+                                    <td>
+                                       <h:graphicImage id="imgHlpSharePointUser"
+                                                       styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                       alt="#{help.help_con_form_SharePoint_User_Unstructured}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+
+                              <th style="text-align:left"> 
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_sharepoint_password}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpSharePointPassword"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{help.help_con_form_SharePoint_Password}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+
+                              <th style="text-align:left"> 
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_from_sharepoint_targetTypeFilter}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpSharePointTargetType"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{help.help_con_form_SharePoint_targetTypeFilter}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+
+                               
+                             <th style="text-align:left"> 
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_from_sharepoint_siteFilterType}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpSharePointSiteFilterType"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{help.help_con_form_SharePoint_siteFilterType}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+
+                              <th style="text-align:left">
+
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_from_sharepoint_sitefilters}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpSharePointSiteFilter"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{help.help_form_sharepoint_sitefilter}"/>
+                                  </td>
+                                </tr>
+                              </table>
+
+                            </th>
+                          </tr>
+                        </thead>
+                        <tfoot>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <td class="spDataTableHeader centeredColumn">
+                                  <a4j:commandButton id='removeSite' value="#{msgs.button_delete}" styleClass="secondaryBtn" action="#{targetSource.removeSites}" render="siteCollectionsTable"/>
+                              </td>
+                              <td class="spDataTableHeader centeredColumn">
+                                  <a4j:commandButton id='addSite' value="#{msgs.button_add}" styleClass="primaryBtn" action="#{targetSource.addSite}" render="siteCollectionsTable"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <h:inputText value="#{targetSource.newSite.object.siteCollectionUrl}" size="25"/> 
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <h:inputText value="#{targetSource.newSite.object.user}" size="15"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <sp:inputSecret value="#{targetSource.newSite.object.password}" autocomplete="off" size="10" redisplay="true"/>
+                              </td>
+                                                  <td class="spDataTableHeader">
+                                  <h:inputText value="#{targetSource.newSite.object.targetTypesFilter}" size="15"/>
+                              </td>
+
+                               <td class="spDataTableHeader">
+                                  <h:selectOneMenu value="#{targetSource.newSite.object.filterType}">
+                                    <f:selectItem itemValue="Include" itemLabel="Include"/>
+                                    <f:selectItem itemValue="Exclude" itemLabel="Exclude"/>
+                                  </h:selectOneMenu>
+                                </td>
+                                                  <td class="spDataTableHeader">
+                                  <h:inputText value="#{targetSource.newSite.siteInclusionFilter}" size="30" redisplay="true"/>
+                              </td>
+
+                            </ui:fragment>
+                          </tr>
+                        </tfoot>
+                        <tbody>
+                          <ui:repeat value="#{targetSource.sites}" var="site">
+                            <tr>
+                              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <td class="centeredColumn">
+                                    <h:selectBooleanCheckbox styleClass="toggleable" id="#{share.id}checkbox" value="#{targetSource.selectedShares[site.id]}"/>
+                                  </td>
+                                  <td/>
+                              </ui:fragment>
+                              <td><h:inputText value="#{site.object.siteCollectionUrl}" size="25"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+
+                              <td><h:inputText value="#{site.object.user}" size="15"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+
+                              <td><sp:inputSecret value="#{site.object.password}" size="10" redisplay="true"
+                                                    autocomplete="off"
+                                                    disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                    readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                
+                                                          <td><h:inputText value="#{site.object.targetTypesFilter}" redisplay="true" size="15"
+                                                    disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                    readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+
+
+                                                           <td>
+                                  <h:selectOneMenu value="#{site.object.filterType}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                   
+                                    <f:selectItem itemValue="Include" itemLabel="Include"/>
+                                    <f:selectItem itemValue="Exclude" itemLabel="Exclude"/>
+                               
+                                  </h:selectOneMenu>
+                                </td>
+                              <td><h:inputText value="#{site.siteInclusionFilter}" size="30" redisplay="true"
+                                                    disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                    readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+
+                            </tr>
+                          </ui:repeat>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </a4j:outputPanel>
+
+                  </td>
+                </tr>
+              </table>
+
+            </div> <!-- spContent -->
+        </div> <!-- siteCollectionConfig -->
+      </h:panelGrid>
+
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

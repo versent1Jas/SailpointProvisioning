@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.MicrosoftForefrontIdentityManager" featuresString="PROVISIONING, PROXY, UNLOCK, PASSWORD, ENABLE" name="Microsoft Forefront Identity Manager Template" type="Microsoft Forefront Identity Manager">
+    <Attributes>
+		<Map>
+            <entry key="formPath" value="MicrosoftFIMAttributesForm.xhtml"/>
+        </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+          import sailpoint.object.ProvisioningPlan.AccountRequest;
+          import sailpoint.object.ProvisioningPlan.AttributeRequest;
+          import sailpoint.object.ProvisioningPlan.ObjectOperation;
+          import sailpoint.object.ProvisioningPlan.ObjectRequest;
+          import sailpoint.api.SailPointContext;
+          import sailpoint.object.Application;
+          import sailpoint.object.Identity;
+          import sailpoint.object.Link;
+          import sailpoint.tools.Util;
+          import sailpoint.object.ProvisioningPlan;
+          
+              
+          List accounts = plan.getAccountRequests();
+          if (accounts != null) 
+          {
+            for (AccountRequest req : accounts) 
+            {
+              AccountRequest.Operation op = req.getOperation();
+             
+              if (op != AccountRequest.Operation.Create)
+              {
+                // find the Link for this account
+                Application app = context.getObject(Application.class, req.getApplication());
+                if(app != null)
+                {
+                  if(app.getProxy() != null) 
+                  {
+                      Link link = identity.getLink(app, req.getNativeIdentity());
+                      if (link == null) 
+                      {
+                          // should never happen, on an Operation.Delete
+                          // print("Missing link!");
+                      }
+                      else 
+                      {
+                          String attname = "mvaccountName";
+                          Object value = link.getAttribute(attname);
+                          AttributeRequest att = new AttributeRequest(attname, value);
+                          req.add(att);
+                          String mvcsDNAtt = "mvcsDN";
+                          Object value = link.getAttribute(mvcsDNAtt);
+                          AttributeRequest mvcsAtt = new AttributeRequest(mvcsDNAtt, value);
+                          req.add(mvcsAtt);
+                      }
+                  } else {
+                      Link link = identity.getLink(app, req.getNativeIdentity());
+                      if (link == null) 
+                      {
+                          // should never happen, on an Operation.Delete
+                          // print("Missing link!");
+                      } 
+                      else 
+                      {
+                          String attname = "accountName";
+                          Object value = link.getAttribute(attname);
+                          AttributeRequest att = new AttributeRequest(attname, value);
+                          req.add(att);
+                      }
+                  }
+                }
+              }
+            }
+          }
+        </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+        <Schema displayAttribute="accountName" identityAttribute="DN" includePermissions="true" nativeObjectType="Person" objectType="account">
+			  <AttributeDefinition name="accountName" type="string"/> 
+			  <AttributeDefinition name="ad_UserCannotChangePassword" type="string"/> 
+			  <AttributeDefinition name="address" type="string"/> 
+			  <AttributeDefinition name="assistant" type="string"/> 
+			  <AttributeDefinition name="authNWFLockedOut" type="string"/> 
+			  <AttributeDefinition name="authNWFRegistered" type="string"/> 
+			  <AttributeDefinition name="c" type="string"/> 
+			  <AttributeDefinition name="city" type="string"/> 
+			  <AttributeDefinition name="cn" type="string"/> 
+			  <AttributeDefinition name="co" type="string"/> 
+			  <AttributeDefinition name="comment" type="string"/> 
+			  <AttributeDefinition name="company" type="string"/> 
+			  <AttributeDefinition name="costCenter" type="string"/> 
+			  <AttributeDefinition name="costCenterName" type="string"/> 
+			  <AttributeDefinition name="country" type="string"/> 
+			  <AttributeDefinition name="creator" type="string"/> 
+			  <AttributeDefinition name="deleteTime" type="string"/> 
+			  <AttributeDefinition name="department" type="string"/> 
+			  <AttributeDefinition name="description" type="string"/> 
+			  <AttributeDefinition name="displayName" type="string"/> 
+			  <AttributeDefinition name="division" type="string"/> 
+			  <AttributeDefinition name="domain" type="string"/> 
+ 			  <AttributeDefinition name="DN" type="string"/> 
+			  <AttributeDefinition name="email" type="string"/> 
+			  <AttributeDefinition name="employeeEndDate" type="string"/> 
+			  <AttributeDefinition name="employeeStartDate" type="string"/> 
+			  <AttributeDefinition name="expirationTime" type="string"/> 
+			  <AttributeDefinition name="employeeID" type="string"/> 
+			  <AttributeDefinition name="employeeStatus" type="string"/> 
+			  <AttributeDefinition name="employeeType" type="string"/> 
+			  <AttributeDefinition name="facsimileTelephoneNumber" type="string"/> 
+			  <AttributeDefinition name="firstName" type="string"/> 
+			  <AttributeDefinition name="freezeCount" type="string"/> 
+			  <AttributeDefinition name="freezeLevel" type="string"/> 
+			  <AttributeDefinition name="generationQualifier" type="string"/> 
+			  <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" schemaObjectType="group" type="string"/> 
+			  <AttributeDefinition name="homePhone" type="string"/> 
+			  <AttributeDefinition name="info" type="string"/> 
+			  <AttributeDefinition name="initials" type="string"/> 
+			  <AttributeDefinition name="jobTitle" type="string"/> 
+			  <AttributeDefinition name="l" type="string"/> 
+			  <AttributeDefinition name="lastName" type="string"/> 
+			  <AttributeDefinition name="lastResetAttemptTime" type="string"/> 
+			  <AttributeDefinition name="location" type="string"/> 
+			  <AttributeDefinition name="loginName" type="string"/> 
+			  <AttributeDefinition name="manager" type="string"/> 
+			  <AttributeDefinition name="member" type="string"/> 
+			  <AttributeDefinition name="memberOf" type="string"/> 
+			  <AttributeDefinition name="mobilePhone" type="string"/> 
+			  <AttributeDefinition name="mail" type="string"/> 
+			  <AttributeDefinition name="mailNickname" type="string"/> 
+			  <AttributeDefinition name="middleName" type="string"/> 
+			  <AttributeDefinition name="mobile" type="string"/> 
+			  <AttributeDefinition name="o" type="string"/> 
+			  <AttributeDefinition name="objectID" type="string"/> 
+			  <AttributeDefinition name="objectSid" type="string"/> 
+			  <AttributeDefinition name="objectType" type="string"/> 
+			  <AttributeDefinition name="officeFax" type="string"/> 
+			  <AttributeDefinition name="officeLocation" type="string"/> 
+			  <AttributeDefinition name="officePhone" type="string"/> 
+			  <AttributeDefinition name="otherMailbox" type="string"/> 
+			  <AttributeDefinition name="ou" type="string"/> 
+			  <AttributeDefinition name="pager" type="string"/> 
+			  <AttributeDefinition name="personalTitle" type="string"/> 
+			  <AttributeDefinition name="photo" type="string"/> 
+			  <AttributeDefinition name="physicalDeliveryOfficeName" type="string"/> 
+			  <AttributeDefinition name="postOfficeBox" type="string"/> 
+			  <AttributeDefinition name="postalAddress" type="string"/> 
+			  <AttributeDefinition name="postalCode" type="string"/> 
+			  <AttributeDefinition name="proxyAddressCollection" type="string"/> 
+			  <AttributeDefinition name="register" type="string"/> 
+			  <AttributeDefinition name="registrationRequired" type="string"/> 
+			  <AttributeDefinition name="resetPassword" type="string"/> 
+			  <AttributeDefinition name="secretary" type="string"/> 
+			  <AttributeDefinition name="seeAlso" type="string"/> 
+			  <AttributeDefinition name="sIDHistory" type="string"/> 
+			  <AttributeDefinition name="sn" type="string"/> 
+			  <AttributeDefinition name="st" type="string"/> 
+			  <AttributeDefinition name="street" type="string"/> 
+			  <AttributeDefinition name="telephoneNumber" type="string"/> 
+			  <AttributeDefinition name="title" type="string"/> 
+			  <AttributeDefinition name="uid" type="string"/> 
+			  <AttributeDefinition name="userCertificate" type="string"/> 
+			  <AttributeDefinition name="userSMIMECertificate" type="string"/> 
+			  <AttributeDefinition name="givenName" type="string"/> 
+			  <AttributeDefinition name="expectedRulesList" type="string"/> 
+			  <AttributeDefinition name="detectedRulesList" type="string"/> 
+			  <AttributeDefinition name="csObjectID" type="string"/> 
+			  
+        </Schema>
+        <Schema displayAttribute="accountName" identityAttribute="DN" nativeObjectType="Group" objectType="group">
+			  <AttributeDefinition name="accountName" type="string"/> 
+			  <AttributeDefinition name="cn" type="string"/> 
+			  <AttributeDefinition name="creator" type="string"/> 
+			  <AttributeDefinition name="csObjectID" type="string"/> 
+			  <AttributeDefinition name="deleteTime" type="string"/> 
+			  <AttributeDefinition name="description" type="string"/> 
+			  <AttributeDefinition name="displayedOwner" type="string"/> 
+			  <AttributeDefinition name="displayName" type="string"/> 
+			  <AttributeDefinition name="domain" type="string"/> 
+  			  <AttributeDefinition name="DN" type="string"/> 
+			  <AttributeDefinition name="email" type="string"/> 
+			  <AttributeDefinition name="expirationTime" type="string"/> 
+			  <AttributeDefinition name="mail" type="string"/> 
+			  <AttributeDefinition name="mailNickname" type="string"/> 
+			  <AttributeDefinition name="manager" type="string"/> 
+			  <AttributeDefinition multi="true" name="member" type="string"/> 
+			  <AttributeDefinition name="memberFilter" type="string"/> 
+			  <AttributeDefinition name="membershipAddWorkflow" type="string"/> 
+			  <AttributeDefinition name="membershipLocked" type="string"/> 
+			  <AttributeDefinition name="o" type="string"/> 
+			  <AttributeDefinition name="objectID" type="string"/> 
+			  <AttributeDefinition name="objectType" type="string"/> 
+			  <AttributeDefinition name="ou" type="string"/> 
+			  <AttributeDefinition name="owner" type="string"/> 
+			  <AttributeDefinition name="seeAlso" type="string"/> 
+			  <AttributeDefinition name="scope" type="string"/> 
+			  <AttributeDefinition name="temporal" type="string"/> 
+			  <AttributeDefinition name="type" type="string"/> 
+			  <AttributeDefinition name="uid" type="string"/> 
+			  <AttributeDefinition name="expectedRulesList" type="string"/> 
+			  <AttributeDefinition name="detectedRulesList" type="string"/> 
+			  <AttributeDefinition name="objectSid" type="string"/> 
+			  <AttributeDefinition name="sIDHistory" type="string"/>
+        </Schema>
+    </Schemas>
+  <Templates>
+    <Template name="Create FIM Metaverse Person" schemaObjectType="account" usage="Create">
+      <Field displayName="accountName" name="accountName" required="true" reviewRequired="true" type="string"/>
+      <Field displayName="address" name="address" reviewRequired="true" type="string"/>
+      <Field displayName="displayName" name="displayName" reviewRequired="true" type="string"/>
+      <Field displayName="city" name="city" reviewRequired="true" type="string"/>
+      <Field displayName="employeeID" name="employeeID" reviewRequired="true" type="string"/>
+      <Field displayName="employeeType" name="employeeType" reviewRequired="true" type="string"/>
+      <Field displayName="firstName" name="firstName" reviewRequired="true" type="string"/>
+      <Field displayName="lastName" name="lastName" reviewRequired="true" type="string"/>
+    </Template>
+  </Templates>
+ </Application>
+</ImportAction>

@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <div style="margin:5px" class="width100">
+    <h:outputText style="display:none" id="templateApplicationName" value="#{sp:getDisplayNameForId('Application', templateEditor.templateDTO.purview)}"/>
+    <h:outputText style="display:none" id="templateApplicationId" value="#{templateEditor.templateDTO.purview}"/>        
+
+    <a4j:outputPanel id="templateFields">
+      <input type="hidden" value="#{templateEditor.templateDTO.JSON}" id="templateFieldJSON" name="templateFieldJSON" />
+      <h:inputHidden value="#{templateEditor.templateDTO.description}" id="templateDescr"/>
+      <h:inputHidden value="#{templateEditor.templateDTO.owner}" id="templateOwner"/>
+      <h:inputHidden value="#{templateEditor.templateDTO.ownerType}" id="templateOwnerType"/>
+      <h:outputText style="display:none" id="templateRuleName" value="#{templateEditor.templateDTO.ownerRuleName}"/> 
+    </a4j:outputPanel>
+
+    <h:inputHidden value="#{templateEditor.templateDTO.name}" id="templateName" size="60"/>
+    <h:inputHidden value="#{templateEditor.templateId}" id="templateId"/>
+    <h:inputHidden value="#{templateEditor.templateDTO.fieldsString}" id="templateFieldsString"/>
+
+    <a4j:outputPanel id="templatesJSON">
+      <input id="templatesJSON" name="templatesJSON" value="#{templateEditor.simpleJSON}" type="hidden" style="width:800px"/>
+    </a4j:outputPanel>
+    <t:inputText id="templateApplication"
+              style="display:none"
+              value="#{templateEditor.templateDTO.purview}"
+              forceId="true">
+    </t:inputText>
+  </div>
+</ui:composition>
+
+</body>
+</html>

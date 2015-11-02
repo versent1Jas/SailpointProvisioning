@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+  <td>
+    <h:outputText value="#{violation.policyName}" />
+  </td>
+  <td>
+    <h:outputText value="#{violation.owner}" /> <!-- owner name is already the display name here -->
+  </td>
+  <td>
+    <a onclick="showHideWithLock([$('policyRow_#{violation.id}'), $('policy_#{violation.id}')], null, 0.5, {fn1:SailPoint.identity.setTabPanelHeight, fn2:SailPoint.Utils.toggleDisclosureDiv, args:{link:this, div:[$('policyRow_#{violation.id}'), $('policy_#{violation.id}')]}});"
+       title="#{msgs.info_rule_description}" class="disclosure">
+      <h:outputText value="#{violation.constraint}" />
+    </a>
+    <span class="newEntitlementTxt"><h:outputText value="#{(isNewViolation) ? msgs.bracket_new : ''}" /></span>
+  </td>
+  <td><h:outputText escape="false" value="#{violation.summary}" /></td>
+
+</ui:composition>
+</body>
+</html>

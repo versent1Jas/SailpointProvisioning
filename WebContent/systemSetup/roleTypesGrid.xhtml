@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Include to manage the ObjectAttribute list of an ObjectConfig.
+
+  Required arguments:
+
+    config
+      an instanceof ObjectConfigBean
+
+-->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>  
+
+    <script type="text/javascript">
+
+    Ext.onReady(function(){
+
+        Ext.QuickTips.init();
+
+        // data store
+        var typesStore = SailPoint.Store.createStore({
+            fields: ['name', {name:'description',type:'string'}],
+            autoLoad: false,
+            url: CONTEXT_PATH + '/systemSetup/roleTypesDataSource.json',
+            root: 'types',
+            simpleSortMode : true,
+            sorters: [{property: 'name', direction: 'ASC'}]
+        });
+
+        // display models    
+        var cols = [{
+            header: '#{sp:escapeJavascript(msgs.name)}', 
+            dataIndex: 'name', 
+            flex : 1,
+            sortable: true, 
+            hideable: true
+        },{
+            header: '#{sp:escapeJavascript(msgs.oconfig_label_description)}', 
+            dataIndex: 'description',
+            flex : 3,
+            sortable: true, 
+            hideable: true
+        }];
+        
+        // grid
+        var typesGrid = new Ext.grid.Panel({
+            id: 'typesGrid',
+            renderTo: 'types-grid',
+            store: typesStore,
+            columns: cols,
+            listeners: { 
+                itemclick: clickTypeRow, 
+                itemcontextmenu: showTypeContextMenu,
+                activate: refreshTypePanel
+            },
+            viewConfig: {
+                stripeRows: true
+            },
+            bbar: [{text: '#{sp:escapeJavascript(msgs.oconfig_button_new_role_type)}',
+                    handler: newType}]
+        });
+                    
+        typesStore.load({params:{start:0, limit:20}});    
+        //typesGrid.render();
+    }); // Ext.onReady
+            
+    function showTypeContextMenu(gridView, record, HTMLitem, index, e, eOpts){
+        id = record.getId();
+        name = record.get('name');
+
+        var contextMenu = new Ext.menu.Menu();
+        contextMenu.add(
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_edit)}', 
+                               handler: editTypeRow,
+                               iconCls: 'editBtn'}),
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_delete)}', 
+                               handler: deleteTypePrompt, 
+                               iconCls: 'deleteBtn'})
+        );          
+          
+        e.stopEvent();
+        contextMenu.showAt(e.xy);
+    }  
+
+    function newType (button, e) {
+        $('mainform:newTypeButton').click();
+    }
+
+    function clickTypeRow (gridView, record, HTMLitem, index, e, eOpts){
+        $('mainform:currentTypeId').value = record.getId();
+        $('mainform:editTypeButton').click();
+    }
+    
+    function editTypeRow() {
+        // there's no functional difference btwn this and clickApplication
+        $('mainform:currentTypeId').value = id;
+        $('mainform:editTypeButton').click();
+    }
+    
+    function deleteTypePrompt() {
+        $('mainform:currentTypeId').value = id;
+        Ext.MessageBox.confirm('Confirm delete of "' + name + '"?', 
+                               'Are you sure you want to delete "' + name + '"?', 
+                               deleteTypeRow);
+    }
+
+    function deleteTypeRow(button, text) {
+        if (button == 'yes') {
+            $('mainform:currentTypeId').value = id;
+            $('mainform:deleteTypeButton').click();
+        }
+    }
+
+    function refreshTypePanel(component) {
+        component.getStore().load({params:{start:0, limit:20}});
+    }  
+    
+    </script>
+
+  <h:panelGrid id="typesTbl" rendered="true" 
+    styleClass="width100" columns="1" cellpadding="0" cellspacing="0">
+          
+    <div class="spContentTitle">
+      <h:outputText value="#{msgs.oconfig_section_role_types}" styleClass="spContentTitle"/>
+    </div>
+
+    <div id="types-grid" style="width:100%"></div>
+          
+    <h:inputHidden id="currentTypeId"
+      value="#{config.session.typeId}"/>
+
+    <h:commandButton id="editTypeButton" style="display:none"
+      action="#{config.editTypeAction}"/>
+
+    <h:commandButton id="deleteTypeButton" style="display:none" 
+      action="#{config.deleteTypeAction}"/>
+
+    <h:commandButton id="newTypeButton" style="display:none"
+      action="#{config.newTypeAction}" />
+
+  </h:panelGrid>
+
+</ui:composition>
+
+</body>
+</html>

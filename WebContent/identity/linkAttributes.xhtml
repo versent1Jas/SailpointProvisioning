@@ -1,0 +1,78 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+  <table border="0">
+    <ui:repeat value="#{attributes}" var="attribute">
+	    <ui:fragment rendered="#{not attribute.internal}">
+	    <tr>
+	        <td style="padding: 2px; padding-right: 5px" class="title" valign="top">
+	          <h:outputText value="#{attribute.displayName}"/>
+	        </td>
+	        <td style="padding: 2px" class="wide">
+	          <table>
+	                    <ui:repeat value="#{attribute.values}" var="attrDefinition">
+	                      <tr><td style="padding: 0px;" align="top">
+	                          <ui:fragment rendered="#{attrDefinition['description'] != null and attrDefinition['value'] != null}">
+	                                <span class="entitlementValues" style="display:#{link.displayEntitlementDescription ? 'none' : ''}">
+	                                  <span id="name_#{link.id}_#{sp:buildValidComponentId(sp:getGroupDisplayableName(link.applicationName, attribute.name, attrDefinition['value']))}">
+	                                   <ui:include src="entitlementText.xhtml">
+	                                       <ui:param name="isDescriptionMode" value="false"/>
+	                                       <ui:param name="value" value="#{attrDefinition['value']}"/>
+	                                       <ui:param name="description" value="#{attrDefinition['description']}"/>
+	                                       <ui:param name="application" value="#{link.applicationName}"/>
+	                                       <ui:param name="attribute" value="#{attribute.name}"/>
+	                                       <ui:param name="showInfoIcon" value="true"/>
+	                                       <ui:param name="infoIconAltText" value="#{attrDefinition['description']}"/>
+	                                   </ui:include>
+	                                 </span>
+	                                </span>
+	                                <span class="entitlementDescriptions" style="display:#{link.displayEntitlementDescription ? '' : 'none'}">
+	                                  <span id="description_#{link.id}_#{sp:buildValidComponentId(sp:getGroupDisplayableName(link.applicationName, attribute.name, attrDefinition['value']))}">
+	                                    <ui:include src="entitlementText.xhtml">
+	                                        <ui:param name="isDescriptionMode" value="true"/>
+	                                        <ui:param name="value" value="#{attrDefinition['value']}"/>
+	                                        <ui:param name="description" value="#{attrDefinition['description']}"/>
+	                                        <ui:param name="application" value="#{link.applicationName}"/>
+	                                        <ui:param name="attribute" value="#{attribute.name}"/>
+	                                        <ui:param name="showInfoIcon" value="true"/>
+	                                        <ui:param name="infoIconAltText" value="#{attrDefinition['value']}"/>
+	                                    </ui:include>
+	                                  </span>
+	                                </span>
+	                          </ui:fragment>
+	                          <ui:fragment rendered="#{attrDefinition['description'] == null}">
+	                            <span>
+	                               <ui:include src="entitlementText.xhtml">
+	                                   <ui:param name="description" value="#{attrDefinition['value']}"/>
+	                                   <ui:param name="value" value="#{attrDefinition['value']}"/>
+	                                   <ui:param name="application" value="#{link.applicationName}"/>
+	                                   <ui:param name="attribute" value="#{attribute.name}"/>
+                                       <ui:param name="infoIconAltText" value="#{attrDefinition['value']}"/>
+	                               </ui:include>
+	                            </span>
+	                          </ui:fragment>
+	                    </td></tr>
+	                    </ui:repeat>
+	          </table>
+	        </td>
+	      </tr>
+        <ui:fragment rendered="#{attribute.lastExtended}">
+	        <tr>
+	            <td colspan="2">
+	                <hr/> 
+	            </td>
+	        </tr>
+        </ui:fragment>
+      </ui:fragment>
+    </ui:repeat>
+  </table>
+
+</body>
+</html>

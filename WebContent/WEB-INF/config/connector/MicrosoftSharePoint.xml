@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.SharePointRWConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, MANAGER_LOOKUP, UNSTRUCTURED_TARGETS" icon="enterpriseIcon" name="Microsoft SharePoint Template" type="Microsoft SharePoint">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="SharePointRWAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="DisplayName" identityAttribute="AccountName" nativeObjectType="User" objectType="account">
+        <AttributeDefinition name="AccountName" type="string">
+        <Description>Login name of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DisplayName" type="string">
+        <Description>Display name of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UserName" type="string">
+        <Description>sAMAccountName of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Title" type="string">
+        <Description>Title of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="FirstName" type="string">
+        <Description>First name of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LastName" type="string">
+        <Description>Last Name of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PreferredName" type="string">
+        <Description>Preferred name of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WorkPhone" type="string">
+        <Description>Office phone number of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Fax" type="string">
+        <Description>Fax number of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Email" type="string">
+        <Description>E-mail address of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WorkEmail" type="string">
+        <Description>Office email address of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Office" type="string">
+        <Description>Office location of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Manager" type="string">
+        <Description>Manager of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OwnedGroups" type="string">
+        <Description>Groups that the user owns.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="IsSiteAuditor" type="boolean">
+        <Description>Specifies whether the user is a site collection auditor.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="IsSiteAdmin" type="boolean">
+        <Description>Specifies whether the user is a site collection administrator.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ID" type="string">
+        <Description>Member ID for the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SID" type="string">
+        <Description>Unique security ID for the network account of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UserProfile_GUID" type="string">
+        <Description>GUID of the User Profile.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Path" type="string">
+        <Description>Account Path</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Notes" type="string">
+        <Description>Notes</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="Groups" schemaObjectType="group" type="string">
+        <Description>Collection of groups of which the user is a member.</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="GroupName" featuresString="PROVISIONING" identityAttribute="GroupName" nativeObjectType="Group" objectType="group">
+        <AttributeDefinition name="GroupName" remediationModificationType="None" type="string">
+        <Description>Name of the group.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition correlationKey="1" name="DisplayName" remediationModificationType="None" type="string">
+        <Description>Name of the group.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Description" remediationModificationType="None" type="string">
+        <Description>Description for the group.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Owner" remediationModificationType="None" type="string">
+        <Description>Name of the group owner.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ID" remediationModificationType="None" type="string">
+        <Description>Identifier (ID) for the group.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AllowMembersEditMembership" remediationModificationType="None" type="string">
+        <Description>Who can edit the membership.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AllowRequestToJoinLeave" remediationModificationType="None" type="string">
+        <Description>Whether to allow users to request for membership of the group.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OnlyAllowMembersViewMembership" remediationModificationType="None" type="string">
+        <Description>Who can view the membership of the group.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AutoAcceptRequestToJoinLeave" remediationModificationType="None" type="string">
+        <Description>Whether membership requests are automatically accepted.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="RequestToJoinLeaveEmailSetting" remediationModificationType="None" type="string">
+        <Description>Membership requests to this e-mail address.</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_sp_AccountName" helpKey="help_con_prov_policy_sp_AcountName" name="AccountName" required="true" section="" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_sp_GroupName" name="GroupName" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_sp_Permission" multi="true" name="Permission" section="" type="string">
+          <AllowedValues>
+            <String>Read</String>
+            <String>Design</String>
+            <String>Contribute</String>
+            <String>Full Control</String>
+            <String>View Only</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_sp_DefaultUser" helpKey="help_con_prov_policy_sp_DefaultUser" name="DefaultUser" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_sp_Description" name="Description" section="" type="string"/>
+        <Field displayName="con_prov_policy_sp_Groupowner" helpKey="help_con_prov_policy_sp_Owner" name="Owner" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_sp_Email" helpKey="help_con_prov_policy_sp_EmailRequest" name="RequestToJoinLeaveEmailSetting" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_sp_ViewMembership" helpKey="help_con_prov_policy_sp_ViewMembership" name="OnlyAllowMembersViewMembership" reviewRequired="true" section="" type="string" value="Group Members">
+          <AllowedValues>
+            <String>Group Members</String>
+            <String>Everyone</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_sp_AutoAccRequest" helpKey="help_con_prov_policy_sp_AutoAccept" name="AutoAcceptRequestToJoinLeave" reviewRequired="true" section="" type="string" value="NO">
+          <AllowedValues>
+            <String>YES</String>
+            <String>NO</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_sp_AllowMembership" helpKey="help_con_prov_policy_sp_AllowMembership" name="AllowRequestToJoinLeave" reviewRequired="true" section="" type="string" value="NO">
+          <AllowedValues>
+            <String>YES</String>
+            <String>NO</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_sp_EditMembership" helpKey="help_con_prov_policy_sp_EditMembership" name="AllowMembersEditMembership" reviewRequired="true" section="" type="string" value="Group Owner">
+          <AllowedValues>
+            <String>Group Owner</String>
+            <String>Group Members</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

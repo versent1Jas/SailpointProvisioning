@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, ENABLE, SEARCH, NO_PERMISSIONS_PROVISIONING, DIRECT_PERMISSIONS, PASSWORD" icon="internetIcon" name="AWS IAM" type="AWS IAM">
+    <Attributes>
+      <Map>
+        <entry key="connectorClass" value="openconnector.connector.aws.AWSConnector"/>
+        <entry key="formPath" value="AWSAttributesForm.xhtml"/>
+        <entry key="encrypted" value="kid,secret"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="UserName" identityAttribute="UserName" includePermissions="true" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="UserName" remediationModificationType="None" required="true" type="string">
+            <Description>User Name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UserId" remediationModificationType="None" required="true" type="string">
+            <Description>User ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Path" remediationModificationType="None" required="true" type="string">
+            <Description>Path of the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Arn" remediationModificationType="None" required="true" type="string">
+            <Description>Amazon Resource Name of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CreateDate" remediationModificationType="None" required="true" type="string">
+            <Description>User Creation date</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="Access Keys" remediationModificationType="None" required="true" type="string">
+            <Description>User Access Keys</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="Signing Certificates" remediationModificationType="None" required="true" type="string">
+            <Description>User Signing certificates</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Has Password" remediationModificationType="None" required="true" type="string">
+            <Description>Password Status</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="Multi-Factor Authentication Device" remediationModificationType="None" required="true" type="string">
+            <Description>Multi-Factor Authentication Device</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="Groups" remediationModificationType="None" schemaObjectType="group" type="string">
+            <Description>Groups of the user</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="GroupName" featuresString="PROVISIONING, NO_PERMISSIONS_PROVISIONING" identityAttribute="GroupName" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="GroupName" remediationModificationType="None" required="true" type="string">
+            <Description>Group Name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="GroupId" remediationModificationType="None" required="true" type="string">
+            <Description>Group ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Path" remediationModificationType="None" required="true" type="string">
+            <Description>Group Path</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Arn" remediationModificationType="None" required="true" type="string">
+            <Description>Amazon Resource Name of the Group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CreateDate" remediationModificationType="None" required="true" type="string">
+            <Description>Group Creation date</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="GroupPermissions" remediationModificationType="None" required="true" type="string">
+            <Description>Group Permissions</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_AWSIAM_user_name" helpKey="help_con_form_AWSIAM_user_name" name="UserName" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_AWSIAM_Password" helpKey="help_con_form_AWSIAM_Password" name="password" required="true" section="" type="secret"/>
+      </Template>
+      <Template name="create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_AWSIAM_Group_Name" helpKey="help_con_form_AWSIAM_Group_name" name="GroupName" required="true" section="" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_AWSIAM_Path" helpKey="help_con_form_AWSIAM_Path" name="Path" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

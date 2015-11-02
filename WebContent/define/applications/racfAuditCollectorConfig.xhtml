@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+  <ui:composition>
+    <table class="width100" cellpadding="0" cellspacing="0">
+      <tr>
+        <td>
+          <div id="submenu-main">
+            <div id="submenu-tabs">
+              <ul id="submenu-links">
+                <li id="button0" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('transportSettingsContent', 'button0')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.transport_settings} </span>
+                </li>
+                <li id="button1" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('logFileSettingsContent', 'button1')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.log_file_settings} </span>
+                </li>
+                <li id="button3" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('targetsContent', 'button3')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.activity_targets} </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="transportSettingsContent" class="submenuContentBox" style="border:0px">
+              <div class="spContent">
+                <table class="width100" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <a4j:outputPanel id="transportSettingsTable">
+                        <div class="spTabledAjaxContent">
+                          <table class="spTable" cellspacing="0" cellpadding="0">
+                            <thead>
+                              <tr><th colspan="2"><h:outputText value="#{msgs.transport_settings}"/></th></tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td width="25%"><h:outputText value="#{msgs.transport_type}"/></td>
+                                <td>
+                                  <h:selectOneMenu id="fileTransportValue" value="#{activityDataSource.object.configuration['filetransport']}" onchange="SailPoint.LogFileCollectorConfig.updateTransportSettings();"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                    <f:selectItem itemValue="local" itemLabel="#{msgs.transport_type_local}"/>
+                                    <f:selectItem itemValue="ftp" itemLabel="#{msgs.transport_type_ftp}"/>
+                                    <f:selectItem itemValue="scp" itemLabel="#{msgs.transport_type_scp}"/>
+                                  </h:selectOneMenu>
+                                </td>
+                              </tr>
+                              <h:panelGroup rendered="#{activityDataSource.object.configuration['filetransport'] == 'ftp'}">
+                                <tr>
+                                   <td><h:outputText value="#{msgs.ftp_user}" /></td>
+                                  <td><h:inputText size="50" value="#{activityDataSource.object.configuration['ftpuser']}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                   <td><h:outputText value="#{msgs.ftp_password}" /></td>
+                                  <td><sp:inputSecret size="50" value="#{activityDataSource.object.configuration['ftppassword']}" redisplay="true"
+                                                      autocomplete="off"
+                                                      disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                      readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                   <td><h:outputText value="#{msgs.ftp_host}" /></td>
+                                  <td><h:inputText size="50" value="#{activityDataSource.object.configuration['ftphost']}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                              </h:panelGroup>
+                              <h:panelGroup  rendered="#{activityDataSource.object.configuration['filetransport'] == 'scp'}">
+                                <tr>
+                                  <td><h:outputText value="#{msgs.scp_user}" /></td>
+                                  <td><h:inputText size="50" value="#{activityDataSource.object.configuration['scpuser']}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                  <td><h:outputText value="#{msgs.scp_password}"/></td>
+                                  <td><sp:inputSecret size="50" value="#{activityDataSource.object.configuration['scppassword']}" redisplay="true"
+                                                      autocomplete="off"
+                                                      disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                      readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                  <td><h:outputText value="#{msgs.scp_host}"/></td>
+                                  <td><h:inputText size="50" value="#{activityDataSource.object.configuration['scphost']}"
+                                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                                <tr>
+                                  <td><h:outputText value="#{msgs.scp_private_key}"/></td>
+                                  <td><h:inputTextarea cols="50" value="#{activityDataSource.object.configuration['scpPrivateKey']}"
+                                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                                </tr>
+                              </h:panelGroup>
+                            </tbody>
+                          </table>
+                        </div>
+                                                
+                        <script defer="defer">
+                          reapplyStyles();
+                        </script>
+                      </a4j:outputPanel>
+                      
+                      <a4j:commandButton id="updateTransportSettings" style="display:none" action="#{activityDataSource.updateTransportSettings}" render="transportSettingsTable"/>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+          </div>  <!-- transportSettingsContent -->
+          
+          <div id="logFileSettingsContent" class="submenuContentBox" style="display:none; border:0px">
+              <div class="spContent">
+                <table class="width100" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <div class="spTabledContent">
+                        <table class="spTable" cellspacing="0">
+                          <thead>
+                            <tr><th colspan="2"><h:outputText value="#{msgs.log_file_settings}"/></th></tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td width="25%"><h:outputText value="#{msgs.log_file_name}"/></td>
+                              <td><h:inputText size="50" value="#{activityDataSource.object.configuration['file']}"
+                                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                            </tr>
+                            <tr>
+                              <td><h:outputText value="#{msgs.log_file_lines_to_skip}" /></td>
+                              <td>
+                                <h:inputText id="linesToSkip" value="#{activityDataSource.object.configuration['linesToSkip']}" size="4"
+                                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <f:validateLongRange minimum="0"/>
+                                </h:inputText>
+                                <h:message for="linesToSkip" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td><h:outputText value="#{msgs.log_file_filter_nulls}" /></td>
+                              <td><h:selectBooleanCheckbox value="#{activityDataSource.object.configuration['shouldFilterNulls']}"
+                                                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+          </div>  <!-- logFileSettingsContent -->
+
+          <div id="targetsContent" class="submenuContentBox" style="display:none; border:0px">
+            <ui:include src="activityTargets.xhtml"/>
+          </div> <!-- targetsContent -->
+        </td>
+      </tr>
+    </table>    
+  </ui:composition>
+</body>
+</html>

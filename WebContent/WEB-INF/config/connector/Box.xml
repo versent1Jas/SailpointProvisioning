@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+<Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, ENABLE, SEARCH" icon="internetIcon" name="Box" type="Box">
+  <Attributes>
+    <Map>
+      <entry key="BOX_URL_20" value="api.box.com"/>
+      <entry key="formPath" value="BoxNetAttributesForm.xhtml"/>
+      <entry key="connectorClass" value="openconnector.connector.BoxNetConnector"/>
+      <entry key="groupEntitlementAttr" value="memberof"/>
+      <entry key="group_membership_access_level" value="member"/>
+      <entry key="encrypted" value="client_secret,access_token,refresh_token"/>
+    </Map>
+  </Attributes>
+  <Schemas>
+    <Schema displayAttribute="name" identityAttribute="id" nativeObjectType="user" objectType="account">
+      <AttributeDefinition name="id" remediationModificationType="None" type="string">
+        <Description>User ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="name" remediationModificationType="None" type="string">
+        <Description>User name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="login" remediationModificationType="None" type="string">
+        <Description>Email id used to login</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="role" remediationModificationType="None" type="string">
+        <Description>User role</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="memberof" remediationModificationType="None" schemaObjectType="group" type="string">
+        <Description>Member of</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="space_amount" remediationModificationType="None" type="int">
+        <Description>Space allocated to the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="max_upload_size" remediationModificationType="None" type="int">
+        <Description>The maximum individual file size in bytes this user can have</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="is_sync_enabled" remediationModificationType="None" type="boolean">
+        <Description>Whether the user can use sync</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="job_title" remediationModificationType="None" type="string">
+        <Description>The user's job title, displayed on their profile page</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="phone" remediationModificationType="None" type="string">
+        <Description>The user's phone number, displayed on their profile page</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="address" remediationModificationType="None" type="string">
+        <Description>Address</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="language" remediationModificationType="None" type="string">
+        <Description>User language</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="status" remediationModificationType="None" type="string">
+        <Description>User is enable or disable</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="can_see_managed_users" remediationModificationType="None" type="boolean">
+        <Description>User is managed user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="is_exempt_from_device_limits" remediationModificationType="None" type="boolean">
+        <Description>user from Enterprise device limits</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="is_exempt_from_login_verification" remediationModificationType="None" type="boolean">
+        <Description>user can use two-factor authentication</Description>
+      </AttributeDefinition>
+       <AttributeDefinition name="enterprise" remediationModificationType="None" type="string">
+        <Description>User enterprise</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="name" featuresString="PROVISIONING" identityAttribute="id" nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="id" remediationModificationType="None" type="string">
+        <Description>Group ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="name" remediationModificationType="None" type="string">
+        <Description>group name</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <Templates>
+    <Template name="account" schemaObjectType="account" usage="Create">
+      <Field displayName="con_prov_policy_box_direct_Name" helpKey="help_prov_policy_salesforce_direct_Enterusername" name="name" required="true" type="string"/>
+      <Field displayName="con_prov_policy_box_direct_LoginId" helpKey="help_prov_policy_salesforce_direct_emailId" name="login" required="true" type="string"/>
+      <Field displayName="con_prov_policy_box_direct_Spaceamount" helpKey="help_prov_policy_salesforce_direct_Storage" name="space_amount" reviewRequired="true" type="long"/>
+      <Field displayName="con_prov_policy_box_direct_Unlimited" helpKey="help_prov_policy_salesforce_direct_unlimited" name="unlimited" reviewRequired="true" type="string">
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>Yes</String>
+              <String>No</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="con_prov_policy_box_direct_Role" helpKey="help_prov_policy_salesforce_direct_Boxrole" name="role" reviewRequired="true" type="string">
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>coadmin</String>
+              <String>user</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+     <Field displayName="con_prov_policy_box_direct_Inactiveaccount" helpKey="help_prov_policy_salesforce_direct_Statusinactive" name="status" reviewRequired="true" type="boolean"/>
+     </Template>
+    <Template name="create group" schemaObjectType="group" usage="Create">
+      <Field displayName="con_prov_policy_box_direct_CreateGroupName" helpKey="help_prov_policy_salesforce_direct_groupname" name="name" required="true" type="string"/>
+    </Template>
+    <Template name="update group" schemaObjectType="group" usage="Update">
+      <Field displayName="con_prov_policy_box_direct_UpdateGroupName" name="name" reviewRequired="true" section="" type="string"/>
+    </Template>
+  </Templates>
+</Application>
+</ImportAction>

@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+  <f:view>
+
+    <style>
+        .jscalendar-DB-table-style {
+            position: absolute; 
+            left: 150px; 
+            top: -175px;    
+        }
+    </style>
+
+    <div class="spAjaxContent" id="attributesContentContainer">    
+      <a4j:outputPanel id="attributeContentA4J">
+        <table class="width100" style="margin:10px;">
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityAttribute') and !identity.attributesHelper.attributesEditable and identity.attributesHelper.attributeEditAvailable}">
+            <tr><td>
+              <span style="padding-left:10px" onclick="$('editForm:attributeEditBtn').click();">
+                <h:outputText styleClass="smallFakeLink" value="#{msgs.button_edit}"/>
+              </span>
+              <a4j:commandButton id="attributeEditBtn" style="display:none" action="#{identity.attributesHelper.toggleEditMode}" render="attributeContentA4J"
+                                 oncomplete="if ($('identityAttributeEditorTable')) {
+                                                 SailPoint.style.alternateTableRows('identityAttributeEditorTable');
+                                                 SailPoint.initAttributeEditor('identityAttributeEditorTable');
+                                             }"/>
+            </td></tr>
+          </ui:fragment>
+          <tr>
+            <td style="padding-left:10px; padding-right:10px; padding-bottom:10px" colspan="2">
+              <ui:fragment rendered="#{!identity.attributesHelper.attributesEditable}">
+                <ui:include src="/identity/identityAttributes.xhtml">
+                  <ui:param name="identityBean" value="#{identity}"/>
+                  <ui:param name="managerIsLink" value="#{identity.canViewManager}"/>
+                  <ui:param name="showIdentityLinks" value="true"/>
+                </ui:include>
+              </ui:fragment>
+              <ui:fragment rendered="#{identity.attributesHelper.attributesEditable}">
+                <ui:include src="/include/attributeEditor.xhtml">
+                  <ui:param name="tableId" value="identityAttributeEditorTable"/>
+                  <ui:param name="attributeEditor" value="#{identity.attributesHelper.attributeEditor}" />
+                  <ui:param name="leftColumnClass" value="title"/>
+                  <ui:param name="rightColumnClass" value="wide"/>
+                  <ui:param name="labelStyle" value="padding:5px"/>
+                  <ui:param name="withColon" value="true"/>
+                </ui:include>
+              </ui:fragment>
+            </td>
+          </tr>
+
+        </table>
+      </a4j:outputPanel>
+    
+        <table class="width100" style="margin:10px;">
+    
+          <ui:fragment rendered="#{!identity.hasSystemAdminCapability
+              and (sp:hasRight(facesContext, 'SetIdentityPassword') or sp:hasRight(facesContext, 'SetIdentityCapability')) or (identity.systemAdmin)}">
+            <tr>
+              <td style="padding:10px" valign="top" colspan="2">
+                <h:outputLink value="javascript:void(0)" onclick="showHideWithLock($('passwordField'), null, null, SailPoint.identity.setTabPanelHeight);">
+                  <h:outputText styleClass="font10" value="#{msgs.change_password}"/>
+                </h:outputLink>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:10px;#{(identity.passwordHelper.passwordError) ? '' : 'display:none'}" valign="top" colspan="2" id="passwordField">
+    
+                <h:outputText styleClass="spContentTitle" value="#{msgs.password}"/><br/>
+    
+                <!-- Silly hidden password field to capture Firefox's auto-fill of the
+                     password from the login page -->
+                <input type="password" name="ignorePassword" style="display:none"/>
+    
+                <table class="spTable" style="border-top:1px #ccc solid; border-bottom:1px #ccc solid;">
+                  <tr class="even">
+                    <td class="title">#{msgs.label_password}</td>
+                    <td class="wide">
+                      <sp:inputSecret id="identityPassword" value="#{identity.passwordHelper.password}" size="40"
+                        styleClass="loginFormText" redisplay="true"
+                        autocomplete="off"
+                        readonly="#{!sp:hasRight(facesContext, 'SetIdentityPassword')}"
+                        disabled="#{!sp:hasRight(facesContext, 'SetIdentityPassword')}"
+                        encrypt="false"
+                        onfocus="this.select();"/>
+                      <h:message styleClass="formError" for="identityPassword" />
+                    </td>
+                  </tr>
+                  <tr class="odd">
+                    <td class="title">#{msgs.label_confirm_password}</td>
+                    <td class="wide">
+                      <sp:inputSecret id="confirmPassword" value="#{identity.passwordHelper.confirmPassword}" size="40"
+                        styleClass="loginFormText" redisplay="true"
+                        autocomplete="off"
+                        readonly="#{!sp:hasRight(facesContext, 'SetIdentityPassword')}"
+                        disabled="#{!sp:hasRight(facesContext, 'SetIdentityPassword')}"
+                        encrypt="false"
+                        onfocus="this.select();"/>
+                    </td>
+                  </tr>
+                  <tr class="even">
+                    <td align="right">
+                      <h:selectBooleanCheckbox value="#{identity.passwordHelper.expirePassword}"/>
+                    </td>
+                    <td>
+                      <sp:outputText value="#{msgs.require_password_change}"/>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </ui:fragment>
+    
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityForwarding')}">
+            <tr>
+              <td style="padding:10px" valign="top" colspan="2">
+                <h:outputLink value="javascript:void(0)" onclick="showHideWithLock($('forwardingField'), null, null, SailPoint.identity.setTabPanelHeight);">
+                  <h:outputText styleClass="font10" value="#{msgs.change_forwarding_user}"/>
+                </h:outputLink>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:10px;#{(identity.forwardingHelper.forwardingError || (identity.forwardingHelper.forward != null)) ? '' : 'display:none'}" valign="top" colspan="2" id="forwardingField">
+    
+                <h:outputText styleClass="spContentTitle" value="#{msgs.forwarding_user}"/><br/>
+    
+                <table class="spTable" style="border-top:1px #ccc solid; border-bottom:1px #ccc solid;">
+                  <tr class="even">
+                    <td class="title">#{msgs.forwarding_user}</td>
+                    <td class="wide">
+                      <div id="forwardingSuggest"></div>
+                      <t:inputHidden id="forwarding" value="#{identity.forwardingHelper.forward}" forceId="true">
+                         <sp:convertIdentitySuggestItem />
+                      </t:inputHidden> 
+                    </td>
+                  </tr>
+                  <tr class="odd">
+                    <td>&nbsp;</td>
+                    <td>
+                       <h:selectBooleanCheckbox id="forwardingStart" value="#{identity.forwardingHelper.forwardStart}"
+                           onclick="toggleDisplay($('startDateDiv'), !(this.checked));"/>
+                       <h:outputText id="startLabel" style="margin-left: 4px"
+                           value="#{msgs.forwarding_user_start_date}" />
+                       <span id="startDateDiv" style="display: none">
+                           <sp:inputDate id="startDate" type="date" popupCalendar="true" ampm="false" addResources="false"
+                               imageLocation="/scripts/myfacescalendar"
+                               javascriptLocation="/scripts/myfacescalendar"
+                               styleLocation="/scripts/myfacescalendar"
+                               value="#{identity.forwardingHelper.forwardStartDate}"
+                               styleClass="tomahawkInputDate"/>
+                       </span>
+                    </td>
+                  </tr>
+                  <tr class="even">
+                    <td>&nbsp;</td>
+                    <td>
+                       <h:selectBooleanCheckbox id="forwardingEnd" value="#{identity.forwardingHelper.forwardEnd}"
+                           onclick="toggleDisplay($('endDateDiv'), !(this.checked));"/>
+                       <h:outputText id="endLabel" style="margin-left: 4px"
+                           value="#{msgs.forwarding_user_end_date}" />
+                       <span id="endDateDiv" style="display: none">
+                           <sp:inputDate id="endDate" type="date" popupCalendar="true" ampm="false" addResources="false" 
+                                        imageLocation="/scripts/myfacescalendar"
+                                        javascriptLocation="/scripts/myfacescalendar"
+                                        styleLocation="/scripts/myfacescalendar"
+                                        value="#{identity.forwardingHelper.forwardEndDate}"
+                                        styleClass="tomahawkInputDate"/>
+                       </span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </ui:fragment>
+    
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityControlledScope') or sp:hasRight(facesContext, 'SetIdentityRole')}">
+            <tr>
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityRole')}"></ui:fragment>
+            </tr>
+          </ui:fragment>
+    
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'UnlockIdentity') and identity.locked}">
+            <tr>
+              <td style="padding:10px" valign="top" colspan="2">
+                <h:commandLink styleClass="font10" value="#{msgs.unlock_identity}" action="#{identity.unlockIdentity}"/>
+              </td>
+            </tr>
+          </ui:fragment>
+    
+        </table>
+    </div>
+  </f:view>
+</html>

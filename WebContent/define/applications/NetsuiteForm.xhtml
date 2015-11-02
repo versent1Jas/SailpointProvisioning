@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var accountID = getFieldValue('editForm:accountId');
+               Validator.validateNonBlankString(accountID, "#{msgs.con_form_netsuite_accntidnotnull}");
+        
+               var emailID = getFieldValue('editForm:email');
+               Validator.validateNonBlankString(emailID, "#{msgs.con_form_netsuite_adminemailnotnull}");
+                           
+                           var passwordOfAdmin = getFieldValue('editForm:password');
+                           Validator.validateNonBlankString(passwordOfAdmin, "#{msgs.con_form_netsuite_adminpasswordnotnull}");
+                           
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_netsuite_credentials}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_netsuite_accountID}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpAccountID" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_netsuite_accountID}"/>
+
+            </td>
+            <td valign="center">
+              <sp:inputSecret id="accountId"
+                           value="#{applicationObject.attributes['accountId']}"
+                           size="80"
+						   redisplay="true"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+            
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_netsuite_roleID}"/>
+            </td>
+			<td valign="top">
+            <h:outputText size="1" style="color: white;" value=""/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpRoleID" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_netsuite_roleID}"/>
+            </td>
+            
+            <td>
+              <h:inputText id="roleID"
+                           value="#{applicationObject.attributes['roleID']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+		  
+		  
+		  <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_netsuite_administratorEmail}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpEmail" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_netsuite_administratorEmail}"/>
+            </td>
+            <td>
+              <h:inputText id="email"
+                           value="#{applicationObject.attributes['email']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+           
+          </tr>
+          
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_netsuite_administratorPassword}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_netsuite_password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="password"
+                               size="50" 
+                               value="#{applicationObject.attributes['password']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+             
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_netsuite_pageSize}"/>
+            </td>
+			<td valign="top">
+            <h:outputText size="1" style="color: white;" value=""/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPagesize" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_netsuite_fetchSize}"/>
+            </td>
+            
+            <td>
+              <h:inputText id="PageSize"
+                           value="#{applicationObject.attributes['PageSize']}"
+                           size="5"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+						   type="number">
+						   <f:validateLongRange minimum="1" maximum="1000" />
+                           </h:inputText>
+						   <h:message for="PageSize" />
+            </td>
+          </tr>
+		  
+		  
+		  <tr>
+		  </tr>
+
+        </table>
+
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

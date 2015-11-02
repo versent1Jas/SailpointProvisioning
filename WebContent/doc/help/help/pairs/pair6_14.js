@@ -1,0 +1,26 @@
+var pairs =
+{
+"send":{"text":1}
+,"text":{"message":1}
+,"message":{"verification":1}
+,"verification":{"code":1}
+,"code":{"use":1}
+,"use":{"feature":1}
+,"feature":{"your":1}
+,"your":{"administrator":1,"identityiq":1,"mobile":1}
+,"administrator":{"activate":1}
+,"activate":{"option":1}
+,"option":{"mobile":1}
+,"mobile":{"telephone":1,"phone":1}
+,"telephone":{"number":1}
+,"number":{"configured":1,"contain":1,"including":1}
+,"configured":{"your":1}
+,"identityiq":{"account":1}
+,"account":{"your":1}
+,"phone":{"number":1}
+,"contain":{"complete":1}
+,"complete":{"number":1}
+,"including":{"area":1}
+,"area":{"code":1}
+}
+;Search.control.loadWordPairs(pairs);

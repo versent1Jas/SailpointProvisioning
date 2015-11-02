@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.reports}</ui:define>
+
+  <ui:define name="headerItems">
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+    
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/monitor/tasks">
+      <src>tasks.css</src>
+    </sp:style>
+
+    <sp:script>
+        <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/tasks.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/DefaultGrouping.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/ReportsGrids.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'REPORTS';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+        <a4j:outputPanel ajaxRendered="true">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+        </a4j:outputPanel>
+        <h:form styleClass="form" id="editForm">
+        <script type="text/javascript" defer="defer">
+          // <![CDATA[
+          function getCancelButtonName() {
+            return 'editForm:cancelViewResultButton';
+          }
+          Ext.onReady(function () {
+              // Set the browser tabId so we know which tab to associate results with.
+              setBrowserTabId();
+          });
+          //]]>
+        </script>
+        
+        <h:inputHidden id="tabId" value="#{reportDefinitions.tabId}"/>
+        
+        <ui:include src="/analyze/reports/viewReportsGrid.xhtml">
+          <ui:param name="definitionListBean" value="#{reportDefinitions}"/> 
+          <ui:param name="resultsListBean" value="#{reportResults}"/>     
+          <ui:param name="scheduleListBean" value="#{reportSchedules}"/>    
+        </ui:include>
+        
+        <ui:include src="/monitor/tasks/taskDefinitionInclude.xhtml">
+          <ui:param name="definitionListBean" value="#{reportDefinitions}"/>          
+        </ui:include>
+        
+        <ui:include src="/monitor/tasks/taskResultInclude.xhtml">
+          <ui:param name="resultsListBean" value="#{reportResults}"/>          
+        </ui:include>
+        
+        <ui:include src="/monitor/tasks/taskScheduleInclude.xhtml">
+          <ui:param name="scheduleListBean" value="#{reportSchedules}"/>
+        </ui:include>
+        
+        <h:inputHidden id="newDefId" value="#{reportDefinitions.newDefId}"/>
+        
+        <h:commandButton style="display:none"
+                         action="#{reportDefinitions.newTask}"
+                         id="createReportButton" />
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+  <c:choose>
+    <c:when test="#{certificationList.count gt 0}"> 
+  
+    <div id="certificationStatus-grid" style="width:100%"></div>
+    <script type="text/javascript">
+      
+      Ext.onReady(function(){        
+        
+        var gridWidth = $('certificationStatus-grid').clientWidth;
+        var certificationStatusStore;
+        
+        Ext.QuickTips.init();
+        
+        var certificationStatusFilter = new Ext.Action({
+            text: '#{sp:escapeJavascript(msgs.advanced_search)}',
+            scale: 'medium',
+            handler: function(){  
+              certificationStatusFilterForm.toggleCollapse();
+            }
+        });
+      
+        var certificationStatusFilterForm = Ext.getCmp('certificationStatusFilterForm');
+        if (certificationStatusFilterForm) {
+            certificationStatusFilterForm.destroy();
+        }
+        
+        certificationStatusFilterForm = new Ext.Panel({
+          id:'certificationStatusFilterForm',
+          region: 'north',
+          frame:false,
+          collapsed: true,
+          bodyStyle:'padding:5px',
+          cls:'x-panel-no-border',
+          width: gridWidth,
+          items: [{
+            layout:'column',
+            items:[{
+              columnWidth:.30,              
+              items:[{
+                xtype:'label',
+                text: '#{msgs.completed} '
+              },
+              new Ext.form.ComboBox({
+                name: 'frmCertCompleted',
+                id: 'frmCertCompleted',
+                listWidth:100,
+                width:100,
+                store:[
+                  ['Yes', "#{msgs['yes']}"],
+                  ['No', "#{msgs['no']}"]
+                ]
+              }),
+              {
+                xtype:'label',
+                text: '#{msgs.signed} '
+              },
+              new Ext.form.ComboBox({ 
+                name: 'frmCertSigned',
+                id: 'frmCertSigned',
+                width:100,
+                listWidth:100,
+                store:[
+                  ['Yes', "#{msgs['yes']}"],
+                  ['No', "#{msgs['no']}"]
+                ]
+              })]
+            },{
+              columnWidth:.70,
+              items:[{
+                xtype:'label',
+                text: '#{msgs.phase} '
+              },
+              new Ext.form.ComboBox({
+                name: 'frmCertPhase',
+                id: 'frmCertPhase',
+                listWidth:200,
+                width:200,
+                store:[
+                  <c:forEach items="#{certification.phases}" var="phase" varStatus="vStatus">
+                  <h:outputText rendered="#{!vStatus.first}" value=","/>
+                  ['#{phase}', '#{msgs[phase.messageKey]}']
+                  </c:forEach>  
+                ]
+              }),
+              {
+                xtype:'label',
+                text: '#{sp:escapeJavascript(msgs.type)}'
+              },
+              new Ext.form.ComboBox({
+                name:'frmCertType',
+                id: 'frmCertType',
+                width:200,
+                listWidth:200,
+                store:[
+                  <c:forEach items="#{certification.types}" var="type" varStatus="vStatus">
+                  <h:outputText rendered="#{!vStatus.first}" value=","/>
+                  ['#{type}', '#{msgs[type.messageKey]}']
+                  </c:forEach>  
+                ]
+              })]
+            }]
+          }],
+          buttons: [{
+              text:'#{sp:escapeJavascript(msgs.button_filter)}',
+              handler:function(){
+                grid.getStore().getProxy().extraParams['name'] = Ext.getCmp('certificationStatusSearchField').getValue();
+                grid.getStore().getProxy().extraParams['type'] = Ext.getCmp('frmCertType').getValue();
+                grid.getStore().getProxy().extraParams['phase'] = Ext.getCmp('frmCertPhase').getValue();
+                grid.getStore().getProxy().extraParams['completed'] = Ext.getCmp('frmCertCompleted').getValue();
+                grid.getStore().getProxy().extraParams['signed'] = Ext.getCmp('frmCertSigned').getValue();
+                grid.getStore().load({params:{start:0, limit:10}});
+              }
+          },{
+              text: '#{sp:escapeJavascript(msgs.button_reset)}',
+              cls : 'secondaryBtn',
+              handler: function(){
+                Ext.getCmp('frmCertType').reset();
+                Ext.getCmp('frmCertPhase').reset();
+                Ext.getCmp('frmCertCompleted').reset();
+                Ext.getCmp('frmCertSigned').reset();
+                Ext.getCmp('certificationStatusSearchField').reset();
+                grid.getStore().getProxy().extraParams['name'] = '';
+                grid.getStore().getProxy().extraParams['type'] = '';
+                grid.getStore().getProxy().extraParams['phase'] = '';
+                grid.getStore().getProxy().extraParams['completed'] = '';
+                grid.getStore().getProxy().extraParams['signed'] = '';
+                grid.getStore().load({params:{start:0,limit:10}});
+              }
+          }]
+      });
+        
+        function viewCertItem() {
+          SailPoint.Dashboard.viewCertificationItem(gDbId);
+        }
+    
+        function forwardCertificationFromMenu() {
+          forwardCertificationWorkItem(gDbId, 'viewDashboard');
+        }
+        
+        function gridClicked(gridView, record, HTMLitem, index, e, eOpts){
+          gDbId = record.getId();
+          SailPoint.Dashboard.viewCertificationItem(gDbId);
+        }
+        
+        function renderPercent (value, p, r) {
+          return Ext.String.format('#{sp:escapeJavascript(msgs.percent_complete_with_count)}', value, r.get('completedItems'), r.get('totalItems'));
+        } 
+        
+        function contextMenu(gridView, record, HTMLitem, index, e, eOpts){
+          var contextMenu = new Ext.menu.Menu();
+          gDbId = record.getId();
+          gIsCertification = true;
+          gMenu = contextMenu;
+  
+          // if the certification has been completed and signed then disable
+          // the menu item to forward it
+          var disableForward = false;
+          if (!SailPoint.Utils.isNullOrEmpty(record.data.signed)) {
+              if (record.data.signed !== "N/A") 
+                  disableForward = true;
+          }
+
+          contextMenu.add(
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_view_details)}', handler: viewCertItem, iconCls: 'viewDetailsBtn'}),
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_forward)}', handler: forwardCertificationFromMenu, iconCls: 'forwardBtn', disabled:(disableForward)})
+          );          
+            
+          e.stopEvent();
+          contextMenu.showAt(e.xy);
+        }
+           
+        var gridMetaData = #{certificationList.dashboardColumnJSON};
+        
+        var gridId = '#{certificationList.dashboardGridState.name}';
+        var oldGrid = Ext.getCmp(gridId);
+        var oldStore;
+        if (oldGrid) {
+            // If there is a previously existing grid that got rerendered out of existence
+            // we can re-use its store.
+            certificationStatusStore = oldGrid.getStore();
+            // Clean up the old grid so that it doesn't collide with the one we're about to render
+            oldGrid.destroy();
+        }
+        
+        if (!certificationStatusStore) {
+            certificationStatusStore = SailPoint.Store.createStore({                
+                url: CONTEXT_PATH + '/dashboard/contentCertificationCompletionStatusDataSource.json',
+                root: 'certifications',
+                fields: gridMetaData.fields,
+                remoteSort: true,
+                pageSize: 10
+              });
+        }
+        
+        grid = new Ext.grid.Panel({
+          id: gridId,
+          stateId: '#{certificationList.dashboardGridState.name}',
+          stateful: true,
+          store: certificationStatusStore,
+          cls: 'smallFontGrid selectableGrid wrappingGrid',
+          columns : gridMetaData.columns,
+          listeners: { itemclick: gridClicked, itemcontextmenu: contextMenu},
+          viewConfig: {
+            scrollOffset: 0,        
+            stripeRows:true
+          },
+          width:gridWidth,          
+          bbar: {
+              xtype : 'pagingtoolbar',
+              pageSize: 10,
+              store: certificationStatusStore,
+              displayInfo: true
+          }
+        });
+        
+        var ct = new Ext.Panel({
+          renderTo:'certificationStatus-grid',
+          width:gridWidth,
+          items: [certificationStatusFilterForm, grid],
+          tbar: [
+            {
+              xtype : 'searchfield',
+              id:'certificationStatusSearchField',
+              store : certificationStatusStore,
+              paramName:'name',
+              emptyText:'#{sp:escapeJavascript(msgs.label_filter_by_access_review_name)}',
+              width:250,
+              storeLimit:10
+            }, ' ',
+            certificationStatusFilter              
+          ]
+        });
+        
+        certificationStatusStore.load({params:{start:0, limit:10}});
+    });
+        
+    </script>
+    </c:when>
+    <c:otherwise>
+      <table class="width100" cellpadding="0" cellspacing="0">
+        <tr>
+          <td class="lightBlueBoxHeading" align="center"><h:outputText value="#{msgs.msg_no_certifications_found}" />
+          </td>
+        </tr>
+      </table>
+    </c:otherwise>
+  </c:choose>
+</ui:composition>
+
+</body>
+</html>

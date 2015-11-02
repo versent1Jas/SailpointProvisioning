@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+  </sp:script>
+
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+    <h:outputText styleClass="spContentTitle" value="#{msgs.application_account}"/>
+
+    <div class="spTabledAjaxContent">
+        <table id="appAcctTbl" class="spTable" cellspacing="0">
+            <tr>
+                <th>#{msgs.application}</th>
+                <ui:fragment rendered="#{identity.linksHelper.linkInstances}">
+                    <th>#{msgs.instance}</th>
+                </ui:fragment>
+                <th>#{msgs.account_name}</th>
+                <th></th>
+                <th>#{msgs.label_last_refresh}</th>
+            </tr>
+
+
+            <ui:repeat value="#{identity.linksHelper.links}" var="link">
+                <tr>
+
+                   <td valign="top">
+                        <a onclick="showLinkDetails('#{sp:escapeHTMLElementId(link.id)}', '#{link.id}', null, null, this);"
+                           title="#{msgs.info_app_account_details}"
+                           class="disclosure" style="margin-left:5px">
+                            <h:outputText value="#{link.applicationName}"/>
+                        </a>
+                    </td>
+
+                    <ui:fragment rendered="#{identity.linksHelper.linkInstances}">
+                        <td valign="top">
+                            <h:outputText value="#{link.instance}"/>
+                        </td>
+                    </ui:fragment>
+
+                    <td valign="top">
+                        <h:outputText value="#{link.displayableName}"/>
+                    </td>
+
+                    <td valign="top">
+                        <ui:repeat value="#{identity.linksHelper.iconMapping[link.id]}" var="icon">
+                            <h:graphicImage width="16px"
+                                            alt="#{icon.title}"
+                                            title="#{icon.title}"
+                                            height="16px" style="cursor:pointer; padding: 0 7px 0 7px"
+                                            url="#{icon.source}"/>
+                        </ui:repeat>
+                    </td>
+
+                    <td valign="top">
+                        <h:outputText value="#{link.lastRefresh}">
+                            <f:convertDateTime type="date" dateStyle="medium" timeZone="#{identity.userTimeZone}"/>
+                        </h:outputText>
+                    </td>
+
+                </tr>
+                <tr class="skip">
+                    <td colspan="5" style="padding: 0;">
+                      <!-- Link Details -->
+                      <div class="detailsPanel" id="linkDetails_#{sp:escapeHTMLElementId(link.id)}" style="display:none">
+                        <div class="detailsPanelTitleBarOrange">
+                          <h:graphicImage alt="#{msgs.identity_acct_expando_button_close}"
+                                            title="#{msgs.identity_acct_expando_button_close}"
+                                            value="/images/icons/CloseDelete.png"
+                                            onclick="showHideWithLock($('linkDetails_#{sp:escapeHTMLElementId(link.id)}'), null, 100, resizeIdentityDetailsContainer);"
+                                            styleClass="detailsPanelClose"/>
+                          <h:outputFormat value="#{msgs.identity_acct_expando_title_acct}">
+                            <f:param value="#{link.displayableName}"/>
+                          </h:outputFormat>
+                        </div>
+
+                        <div class="detailsPanelContent">
+                          <div id="linkContent_#{sp:escapeHTMLElementId(link.id)}" style="padding-bottom: 10px;"/>
+                        </div>
+                      </div>
+                    </td>
+                </tr>
+            </ui:repeat>
+
+        </table>
+        <script>
+            makeTableMulticolored($('appAcctTbl'), true, true, 'even', 'odd', 'skip');
+        </script>
+    </div>
+
+</ui:composition>
+</body>
+</html>

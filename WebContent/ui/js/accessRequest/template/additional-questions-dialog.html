@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<div class="additional-questions-dialog">
+  <sp-aria-errors></sp-aria-errors>
+
+  <div class="account-selection" ng-if="ctrl.isAccountSelection()">
+    <div class="section-light">
+      <div ng-show="ctrl.getCurrentStep().nonUniqueAssignmentError" class="alert alert-danger reader-error" aria-hidden="true">
+        {{ 'ui_acct_select_non_unique_assignment_error' | spTranslate : ctrl.getCurrentStep().accountSelection.identityName : ctrl.getCurrentStep().accessRequestItem.displayableName }}
+      </div>
+
+      <!-- Required Role -->
+      <div ng-if="ctrl.getCurrentStep().provisioningTarget.roleName" class="row m-b-sm">
+        <div class="col-xs-12">
+          <p class="h5">{{'ui_acct_select_required_role' | spTranslate : ctrl.getCurrentStep().accessRequestItem.displayableName}}</p>
+          <p class="h5"><em><b>{{ctrl.getCurrentStep().provisioningTarget.roleName}}</b></em></p>
+        </div>
+      </div>
+      <div class="row select-account-current-target-row">
+        <div class="col-xs-6">
+          <p aria-hidden="true" class="h5 text-muted">
+            <i class="fa fa-user"></i>
+            <span>{{'ui_acct_select_identity' | spTranslate}} </span>
+          <span class="badge hidden-xs" sp-animate-change="ctrl.getCurrentStep().identityIdx" sp-animate-change-class="fadeInDown">
+            {{ctrl.getCurrentStep().identityIdx + 1}}
+          </span>
+          <span class="badge visible-xs-inline-block">
+            {{ctrl.getCurrentStep().appIdx + 1}}
+          </span>
+            <span> {{'ui_acct_select_identity_of' | spTranslate}} </span>
+            <span>{{ctrl.getCurrentStep().getTotalIdentities()}}</span>
+          </p>
+          <span aria-live="assertive" class="sr-only">{{'ui_acct_select_info_sr' | spTranslate : ctrl.getCurrentStep().accessRequestItem.displayableName : ctrl.getCurrentStep().accountSelection.identityName : ctrl.getCurrentStep().provisioningTarget.applicationName}}</span>
+          <div aria-hidden="true">
+            <p class="h5 p-t">{{ctrl.getCurrentStep().accountSelection.identityName}}</p>
+          </div>
+        </div>
+        <div aria-hidden="true" class="col-xs-6">
+          <p class="h5 text-muted"><i class="fa fa-desktop"></i>
+            <span>{{'ui_acct_select_app' | spTranslate}} </span>
+          <span class="badge hidden-xs" sp-animate-change="ctrl.getCurrentStep().appIdx" sp-animate-change-class="fadeInDown">
+            {{ctrl.getCurrentStep().appIdx + 1}}
+          </span>
+            <span class="badge visible-xs-inline-block">{{ctrl.getCurrentStep().appIdx + 1}}</span>
+            <span> {{'ui_acct_select_app_of' | spTranslate}} </span>
+            <span>{{ctrl.getCurrentStep().accountSelection.provisioningTargets.length}}</span>
+          </p>
+          <p class="h5 p-t">{{ctrl.getCurrentStep().provisioningTarget.applicationName}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <!-- ACCOUNTS -->
+      <div ng-repeat="accountInfo in ctrl.getCurrentStep().provisioningTarget.accountInfos">
+        <div class="row">
+          <div class="col-xs-12">
+            <!-- Disable selecting this account if there is an existing assignment and only one app needs a decision,
+                 since in that case it will never be a valid selection -->
+            <sp-access-request-select-button
+                sp-selected="{{ctrl.getCurrentStep().isAccountSelected(accountInfo)}}"
+                sp-on-select="ctrl.getCurrentStep().selectAccount(accountInfo)"
+                sp-on-deselect="ctrl.getCurrentStep().clearSelection()"
+                sp-label="{{accountInfo.displayName}}"
+                sp-disabled="accountInfo.getExistingAssignment() && ctrl.getCurrentStep().accountSelection.provisioningTargets.length === 1">
+            </sp-access-request-select-button>
+
+            <span class="v-middle h5"><b role="presentation">{{accountInfo.displayName}}</b></span>
+            <!-- Application with instances -->
+            <p ng-if="accountInfo.getInstance()" class="help-block select-indent">{{'ui_acct_select_account_on_instance' | spTranslate : accountInfo.getInstance()}}</p>
+            <!-- Unique Accounts -->
+            <p ng-if="accountInfo.getExistingAssignment()" class="help-block select-indent">{{'ui_acct_select_prev_selected' | spTranslate : accountInfo.getExistingAssignment()}}</p>
+          </div>
+        </div>
+        <div ng-if="!$last || ctrl.getCurrentStep().provisioningTarget.allowCreate" class="line line-dashed line-lg pull-in"></div>
+      </div>
+      <div ng-if="ctrl.getCurrentStep().provisioningTarget.allowCreate" >
+        <div class="row">
+          <div class="col-xs-12">
+            <sp-access-request-select-button
+                sp-selected="{{ctrl.getCurrentStep().isCreateAccountSelected()}}"
+                sp-on-select="ctrl.getCurrentStep().selectCreateAccount()"
+                sp-on-deselect="ctrl.getCurrentStep().clearSelection()"
+                sp-label="{{'ui_acct_select_create_new' | spTranslate}}">
+            </sp-access-request-select-button>
+            <span class="v-middle h5"><b>{{'ui_acct_select_create_new' | spTranslate}}</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-selection" ng-if="ctrl.isRoleAssignmentSelection()">
+    <div class="section-light">
+      <div class="row">
+        <div class="col-xs-12">
+          <p class="h5">{{'ui_role_assignment_select_instructions' | spTranslate}}</p>
+        </div>
+      </div>
+    </div><!-- end role selection header -->
+    <div class="panel-body">
+      <div ng-repeat="assignedRole in ctrl.getCurrentStep().ambiguousAssignedRoles">
+        <!-- ACCOUNTS -->
+        <div class="row">
+          <div class="role-option col-xs-12">
+            <sp-access-request-select-button
+                sp-selected="{{ctrl.getCurrentStep().isRoleSelected(assignedRole)}}"
+                sp-on-select="ctrl.getCurrentStep().selectRole(assignedRole)"
+                sp-on-deselect="ctrl.getCurrentStep().deselectRole()"
+                sp-label="{{assignedRole.name}}">
+            </sp-access-request-select-button>
+            <span class="h5"><b>{{assignedRole.name}}</b></span>
+            <p ng-if="assignedRole.assigner" class="assigner">{{'ui_role_assignment_assigned_by' | spTranslate : assignedRole.assigner : (assignedRole.created | date:'shortDate')}}</p>
+            <p ng-if="!assignedRole.assigner" class="assigner">{{'ui_role_assignment_assigned_on' | spTranslate : (assignedRole.created | date:'shortDate')}}</p>
+            <p class="summary" ng-if="assignedRole.assignmentNote"><sp-more-less-toggle text="{{assignedRole.assignmentNote}}"></sp-more-less-toggle></p>
+          </div>
+        </div>
+        <div ng-if="!$last" class="line line-dashed line-lg pull-in"></div>
+      </div>
+    </div><!-- end role list -->
+  </div><!-- end role selection -->
+
+  <div class="panel-footer">
+    <button id="cancelAcctSelBtn" tabindex="50" class="btn btn-link btn-sm pull-left" ng-click="ctrl.cancel()">
+      {{'ui_button_cancel' | spTranslate}}
+    </button>
+
+    <button id="prevBtn"
+            tabindex="50"
+            ng-if="ctrl.isShowPrevious()"
+            class="btn btn-white btn-sm"
+            ng-click="ctrl.previous()"
+            sp-focus-changer="#closeModalDialogBtn"
+            sp-focus-changer-click="true">
+      {{'ui_acct_select_back' | spTranslate}}
+    </button>
+    <button id="saveBtn"
+            tabindex="50"
+            ng-disabled="ctrl.isSaveDisabled()"
+            aria-disabled="{{ ctrl.isSaveDisabled() }}"
+            class="btn btn-sm"
+            ng-class="{ 'btn-info': ctrl.hasMoreSteps(), 'btn-success': !ctrl.hasMoreSteps() }"
+            ng-click="ctrl.save()"
+            sp-focus-changer="#closeModalDialogBtn"
+            sp-focus-changer-click="true">
+      {{ ctrl.getSaveButtonLabel() | spTranslate }}
+    </button>
+  </div>
+</html>

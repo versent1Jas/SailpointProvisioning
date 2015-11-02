@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+  <ui:composition>
+    <f:view>
+        <h:inputHidden id="id" value="#{activity.object.id}"/>
+        <table class="width100" cellpadding="0" cellspacing="0" style="border: 0px">
+
+          <tr>
+            <td class="odd" style="text-align:right; font-weight:bold; padding:4px">Date</td>
+            <td class="odd" style="text-align:left; padding:4px">
+              <h:outputText id="name" value="#{activity.object.timeStamp}">
+                <f:convertDateTime type="both" dateStyle="short" timeStyle="short" timeZone="#{identity.userTimeZone}"/>
+              </h:outputText>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="odd" style="text-align:right; font-weight:bold; padding:4px">Action</td>
+            <td class="odd" style="text-align:left; padding:4px">
+              <h:outputText value="#{activity.object.action}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="odd" style="text-align:right; font-weight:bold; padding:4px">Target</td>
+            <td class="odd" colspan="2" style="text-align:left; padding:4px">
+              <h:outputText value="#{activity.object.target}" /></td>
+          </tr>
+
+          <tr>
+            <td class="odd" style="text-align:right; font-weight:bold; padding:4px">Result</td>
+            <td class="odd" colspan="2" style="text-align:left; padding:4px">
+              <h:outputText value="#{activity.object.result}" /></td>
+          </tr>
+
+          <tr>
+            <td class="odd" style="text-align:right; font-weight:bold; padding:4px">Source</td>
+            <td class="odd" colspan="2" style="text-align:left; padding:4px">
+              <h:outputText value="#{activity.object.sourceApplication}" />/
+              <h:outputText value="#{activity.object.dataSource}" />
+            </td>
+          </tr>
+
+          <c:forEach items="#{activity.additionalFieldNames}" var="fieldName">
+            <tr>
+              <td class="odd" style="text-align:right; font-weight:bold; padding:4px">
+                <h:outputText id="name" value="#{fieldName}"/>
+              </td>
+              <td class="odd" colspan="2" style="text-align:left; padding:4px">
+                <h:outputText rendered="#{fieldName ne 'incidentLink'}" value="#{activity.additionalFields[ fieldName ]}" />
+                <h:outputLink rendered="#{fieldName eq 'incidentLink'}" value="#{activity.additionalFields[ fieldName ]}">
+                    <h:outputText value="#{activity.additionalFields[ fieldName ]}" />
+                </h:outputLink>
+              </td>
+            </tr>
+          </c:forEach>
+
+        </table>
+    </f:view>
+  </ui:composition>
+</html>

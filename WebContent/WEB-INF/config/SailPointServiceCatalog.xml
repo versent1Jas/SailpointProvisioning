@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2015 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+  
+ <!-- This flag enables the display and search-ability of the externalTicketId -->        
+ <ImportAction name="merge">
+   <Configuration name="SystemConfiguration">
+     <Attributes>
+       <Map>
+         <entry key="lcmShowExternalTicketId" value="true"/>
+       </Map>
+     </Attributes>
+   </Configuration>
+ </ImportAction>
+
+ <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="NO_AGGREGATION, PROVISIONING" name="SailPointServiceCatalog" type="ServiceNow">
+   <Attributes>
+     <Map>
+       <entry key="connectorClass" value="openconnector.connector.ServiceNowTicketConnector"/>
+       <entry key="ticketDataGenerationRule" value="ServiceNow Example Ticket Plan Generation Rule"/>
+       <entry key="url" value=" "/>
+       <entry key="username" value=" "/>
+	   <entry key="password" value=" "/>
+     </Map>
+   </Attributes>
+  <Schemas>
+   <Schema displayAttribute="servicenow_number" featuresString="PROVISIONING" identityAttribute="servicenow_number" nativeObjectType="ticket" objectType="ticket">
+     <AttributeDefinition name="transaction_id" type="string">
+       <Description>Transaction ID</Description>
+     </AttributeDefinition>
+     <AttributeDefinition name="result" type="string">
+       <Description>Result</Description>
+     </AttributeDefinition>
+     <AttributeDefinition name="result_code" type="string">
+       <Description>Result Code</Description>
+     </AttributeDefinition>
+     <AttributeDefinition name="transaction_date" type="string">
+       <Description>Transaction Date</Description>
+     </AttributeDefinition>
+     <AttributeDefinition name="data" type="string">
+       <Description>Data</Description>
+     </AttributeDefinition>
+   </Schema>
+  </Schemas>
+ </Application>
+
+</sailpoint>

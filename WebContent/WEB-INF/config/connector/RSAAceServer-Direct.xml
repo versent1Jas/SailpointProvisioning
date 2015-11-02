@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, AUTHENTICATE, SEARCH, UNLOCK, ENABLE, PASSWORD, CURRENT_PASSWORD, DIRECT_PERMISSIONS, SYNC_PROVISIONING" icon="enterpriseIcon" name="RSA Template" type="RSA Authentication Manager - Direct">
+    <Attributes>
+      <Map>
+        <entry key="connectorClass" value="openconnector.connector.RSAConnector"/>
+        <entry key="formPath" value="RSAAttributesForm.xhtml"/>
+        <entry key="encrypted" value="cmdClientPassword"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="userID" identityAttribute="guid" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="userID" type="string">
+          <Description>name by which the entity is known by</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="firstName" type="string">
+          <Description>first name of the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="middleName" type="string">
+          <Description>middle name of the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="lastName" type="string">
+          <Description>last name for which the entity is known by</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="notes" type="string">
+          <Description>notes or description for the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="email" type="string">
+          <Description>Email of the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="guid" type="string">
+          <Description>Guid of the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="certificateDN" type="string">
+          <Description>certificate DN of the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="securityDomain" type="string">
+          <Description>Security Domain Name to which entity belongs</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="identitySource" type="string">
+          <Description>Identity Source Name to which entity belongs</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="lastModifiedBy" type="string">
+          <Description>Admin or user which modified the entity last time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="lastModifiedOn" type="string">
+          <Description>Last time when the entity was modified</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="accountStartDate" type="string">
+          <Description>Time when the entity was created</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="accountExpireDate" type="string">
+          <Description>Time when the entity will get expired</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="lastLogin" type="string">
+          <Description>Last time when the entity was logged in</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="forceChangePassword" type="boolean">
+          <Description>Whether or not user need to change the password during next logon</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="roles" type="string">
+          <Description>roles</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" schemaObjectType="group" type="string">
+          <Description>Group Membership</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="groupName" featuresString="PROVISIONING" identityAttribute="guid" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="groupName" type="string">
+          <Description>name by which the entity is known by</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="notes" type="string">
+          <Description>notes or description for the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="guid" type="string">
+          <Description>Guid of the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="identitySource" type="string">
+          <Description>Identity Source to which entity belongs</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="securityDomain" type="string">
+          <Description>Security Domain to which entity belongs</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_UserID" name="userID" required="true" type="string"/>
+        <Field displayName="con_prov_policy_Password" name="password" required="true" type="secret"/>
+        <Field displayName="con_prov_policy_LastName" name="lastName" required="true" type="string"/>
+        <Field displayName="con_prov_policy_FirstName" name="firstName" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_Email" name="email" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_ChangePassAtNextLogon" name="forceChangePassword" reviewRequired="true" type="boolean" value="false"/>
+        <Field displayName="con_prov_policy_AssignNextToken" helpKey="help_con_prov_policy_AssignNextToken" name="nextAvailableToken" reviewRequired="true" type="boolean" value="false"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_GroupName" name="groupName" required="true" type="string"/>
+        <Field displayName="con_prov_policy_Notes" helpKey="help_con_prov_policy_Description" name="notes" type="string"/>
+        <Field displayName="con_prov_policy_SecurityDomain" helpKey="help_con_prov_policy_SecurityDomain" name="securityDomain" readOnly="true" type="string"/>
+        <Field displayName="con_prov_policy_IdentitySource" helpKey="help_con_prov_policy_IdentitySource" name="identitySource" readOnly="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

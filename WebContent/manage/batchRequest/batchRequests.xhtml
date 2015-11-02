@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.batch_req_title}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/batchRequests/BatchRequestsGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" >
+        helpKey = 'BATCHREQUESTS';
+
+      function initGrid() {
+        gridStateStr = '#{batchRequestList.gridState.JSON}';
+        gridMetaData = #{batchRequestList.columnJSON}
+        
+        return SailPoint.Manage.Grid.BatchRequests.createGrid(gridMetaData, gridStateStr, #{batchRequestList.gridState.pageSize}, '#{batchRequestList.gridState.name}'); 
+      }
+
+
+     Ext.onReady(function(){
+        var grid = initGrid();
+        
+        var bodyItems = [];
+        
+        grid.region = 'center';
+        bodyItems.push(grid);
+        
+        var bodyPanel = new Ext.Panel({
+            border: false,
+            layout: 'border',
+            items: bodyItems 
+        });
+        
+        var viewportConfig = {
+          bodyContent: bodyPanel,
+          title: "Batch Requests Viewport"
+        };
+
+        var viewport = SailPoint.getViewport(viewportConfig);
+        viewport.doLayout();
+
+      }); // Ext.onReady
+
+    </script>
+
+  </ui:define>
+
+  <ui:define name="body">
+
+    <f:view>
+
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError"/>
+
+      <h:form id="editForm">
+
+        <h:panelGrid id="batchRequestsTbl" rendered="true" styleClass="width100" columns="1">
+          <h:inputHidden id="batchRequestId" value="#{batchRequestList.selectedId}"/>
+
+          <h:commandButton style="display:none" action="#{batchRequestList.select}" id="viewDetailsButton"/>
+          <h:commandButton style="display:none" action="#{batchRequestList.terminate}" id="terminateButton"/>
+          <h:commandButton style="display:none" action="#{batchRequestList.delete}" id="deleteButton"/>
+
+          <h:commandButton action="#{batchRequestList.newBatchRequest}" style="display:none"
+            value="#{msgs.button_new_app}" id="newBatchRequestHiddenBtn" />
+
+          <t:saveState value="#{batchRequestList.gridState}" />
+        </h:panelGrid>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

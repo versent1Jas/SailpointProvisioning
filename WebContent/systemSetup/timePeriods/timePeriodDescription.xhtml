@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+    <h:panelGroup rendered="#{timePeriod.classifier == 'DateRange'}">
+      <h:panelGrid columns="2" columnClasses="title, leftAlignedColumn">
+        <h:outputText value="#{msgs.label_begins_on}"/>
+        <h:outputText value="#{timePeriod.formattedInitParameters['startDate']}"/>
+        <h:outputText value="#{msgs.label_ends_on}"/>
+        <h:outputText value="#{timePeriod.formattedInitParameters['endDate']}"/>
+      </h:panelGrid>
+    </h:panelGroup>
+
+    <h:panelGroup rendered="#{timePeriod.classifier == 'DateSet'}">
+      <h:outputText styleClass="title" value="#{msgs.label_the_following_dates}"/>
+      <h:panelGrid columns="1" columnClasses="leftAlignedColumn indentedColumn">
+        <ui:repeat value="#{timePeriod.formattedInitParameters['dates']}" var="date">
+          <div><h:outputText value="#{date}"/></div>
+        </ui:repeat>
+      </h:panelGrid>
+    </h:panelGroup>
+
+    <h:panelGroup rendered="#{timePeriod.classifier == 'DaysOfWeek'}">
+      <h:outputText styleClass="title" value="#{msgs.label_following_days_of_week}"/>
+      <h:panelGrid columns="1" columnClasses="leftAlignedColumn indentedColumn">
+        <ui:repeat value="#{timePeriod.formattedInitParameters['days']}" var="day">
+          <div><h:outputText value="#{day}"/></div>
+        </ui:repeat>
+      </h:panelGrid>
+    </h:panelGroup>
+
+    <h:panelGroup rendered="#{timePeriod.classifier == 'TimeOfDayRange'}">
+      <h:panelGrid columns="2" columnClasses="title, leftAlignedColumn">
+        <h:outputText value="#{msgs.label_starting_at}"/>
+        <h:outputText value="#{timePeriod.formattedInitParameters['startTime']}"/>
+        <h:outputText value="#{msgs.label_ending_at}"/>
+        <h:outputText value="#{timePeriod.formattedInitParameters['endTime']}"/>
+      </h:panelGrid>
+    </h:panelGroup>
+</ui:composition>
+
+</body>
+</html>

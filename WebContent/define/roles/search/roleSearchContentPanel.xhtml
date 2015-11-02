@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <h:form id="roleSearchForm">
+    <input name="searchType" type="hidden" value="Role"/>
+    <ui:include src="../../../analyze/role/roleSearchContents.xhtml">
+      <ui:param name="withAjax" value="true"/>
+    </ui:include>
+    
+    <h:inputHidden id="currentObjectId" value="#{analyzeController.searchBean.selectedId}"/>
+
+    <h:commandButton  action="#{analyzeController.searchBean.select}"
+                      style="display:none" 
+                      id="editButton"/>
+                      
+    <input id="ajaxEditButton" type="button" style="display:none" 
+           onclick="Ext.getCmp('roleTabPanel').setActiveTab('roleViewerPanel');
+                    var selModel = Ext.getCmp('roleSearchResultsGrid').getSelectionModel();
+                    var record = selModel.getSelection();
+                    SailPoint.Role.forceSelection(selModel, record[0], 0, null);"/>
+  </h:form>
+  <h:form id="searchSaveForm">
+    <h:inputHidden id="searchType" value="#{analyzeController.searchBean.searchType}" />
+    <h:inputHidden id="currentObjectId" value="#{analyzeController.searchBean.selectedId}"/>
+    <h:inputHidden value="#{analyzeController.reportName}"/>
+    <h:inputHidden id="searchItemName" value="#{analyzeController.searchBean.searchItemName}"/>
+    <h:inputHidden id="searchItemDescription" value="#{analyzeController.searchBean.searchItemDescription}"/>    
+
+    <h:commandButton id="pdf" style="display:none" action="#{analyzeController.searchBean.exportToPDF}"/>
+    <h:commandButton id="csv" style="display:none" action="#{analyzeController.searchBean.exportToCSV}"/>    
+            
+    <a4j:commandButton style="display:none" id="terminateExportButton" action="#{analyzeController.searchBean.terminateExport}" limitRender="true"/>
+
+    <a4j:commandButton  style="display:none" 
+                        id="saveQueryAsReport" 
+                        value="Save Query as Report" 
+                        action="#{analyzeController.searchBean.saveAsReportAction}"
+                        render="saveResults"
+                        oncomplete="Ext.getCmp('roleSearchResultsGridResultsMessagePanel').displayMessage($('saveResultsContents'));
+                                    Ext.getCmp('spViewport').updateLayout();
+                                    SailPoint.Analyze.reRenderSearchItems($('searchSaveForm:searchType').value);"/>
+ 
+    <a4j:commandButton  style="display:none" 
+                        id="rememberQuery" 
+                        action="#{analyzeController.searchBean.saveQueryAction}"
+                        render="saveResults"
+                        oncomplete="Ext.getCmp('roleSearchResultsGridResultsMessagePanel').displayMessage($('saveResultsContents'));
+                                    Ext.getCmp('spViewport').updateLayout();
+                                    SailPoint.Analyze.reRenderSearchItems($('searchSaveForm:searchType').value);"/>
+   
+    <a4j:outputPanel id="saveResults">
+      <div id="saveResultsContents" style="display:none">
+        <h:messages errorClass="formError" infoClass="formInfo"/>
+      </div>
+    </a4j:outputPanel>
+
+  </h:form>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+
+        function toggleCredentials(authType) {
+            if (authType == "basic") {
+                $('editForm:username').disabled = false;
+                $('editForm:password').disabled = false;
+                $('editForm:oauthBearerToken').disabled = true;
+            } else {
+                $('editForm:username').disabled = true;
+                $('editForm:password').disabled = true;
+                $('editForm:oauthBearerToken').disabled = false;
+            }
+        }
+        
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // Make sure the correct fields are enabled/disabled.
+           toggleCredentials($('editForm:authType').value);
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var fileName = getFieldValue('editForm:host');
+               Validator.validateNonBlankString(fileName, "#{msgs.con_form_scim_error_host_required}");
+
+
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_scim_config_title}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_scim_base_url}"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpHostName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_scim_base_url}"/>
+
+            </td>
+            <td>
+              <h:inputText id="host"
+                           value="#{applicationObject.attributes['host']}"
+                           size="40"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_scim_auth_type}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpAuthType" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_scim_auth_type}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="authType" 
+                                value="#{applicationObject.attributes['authType']}" 
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                onchange="toggleCredentials(this.value)">
+                  <f:selectItem itemValue="basic" itemLabel="#{msgs.con_form_scim_auth_type_basic}"/>
+                  <f:selectItem itemValue="oauthBearer" itemLabel="#{msgs.con_form_scim_auth_type_oauth_bearer}"/>
+                  <f:selectItem itemValue="oauthV1" itemLabel="#{msgs.con_form_scim_auth_type_oauth_v1}"/>
+              </h:selectOneMenu>                                
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_scim_username}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpUser" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_scim_username}"/>
+            </td>
+            <td>
+              <h:inputText id="username"
+                           value="#{applicationObject.attributes['user']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_scim_password}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_scim_password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="password"
+                               size="20" 
+                               value="#{applicationObject.attributes['password']}" redisplay="true"
+                               autocomplete="off"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_scim_oauth_bearer_token}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpOAuthBearerToken" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_scim_oauth_bearer_token}"/>
+            </td>
+            <td>
+              <sp:inputSecret id="oauthBearerToken"
+                           value="#{applicationObject.attributes['oauthBearerToken']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_scim_content_type}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpContentType" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_scim_content_type}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="contentType" 
+                                value="#{applicationObject.attributes['contentType']}" 
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                  <f:selectItem itemValue="json" itemLabel="#{msgs.con_form_scim_content_type_json}"/>
+                  <f:selectItem itemValue="xml" itemLabel="#{msgs.con_form_scim_content_type_xml}"/>
+              </h:selectOneMenu>                                
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_scim_etag_required}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpEtagRequired" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_scim_etag_required}"/>
+
+            </td>
+            <td>
+              <h:selectBooleanCheckbox id="etagRequired"
+                                       value="#{applicationObject.attributes['etagRequired']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+        </table>
+
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+   <sp:script>
+       <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+       <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+       <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+       <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+       <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?#{debug.revision}</src>
+       <src>#{base.requestContextPath}/scripts/sailpoint/form/EntitlementSelector.js?#{debug.revision}</src>
+   </sp:script>
+
+
+  <script type="text/javascript">
+
+      Ext.onReady(function () {
+
+          var checkBox1 = $('editForm:startDateSelect');
+          toggleDisplay($('startDateDiv'), !(checkBox1.checked));
+
+          var checkBox2 = $('editForm:endDateSelect');
+          toggleDisplay($('endDateDiv'), !(checkBox2.checked));
+
+          var checkBox3 = $('editForm:completionStartDateSelect');
+          toggleDisplay($('completionStartDateDiv'), !(checkBox3.checked));
+
+          var checkBox4 = $('editForm:completionEndDateSelect');
+          toggleDisplay($('completionEndDateDiv'), !(checkBox4.checked));
+
+          SailPoint.MultiSuggest.renderSuggests();
+                        
+          Ext.create('SailPoint.form.EntitlementSelector', {binding:'editForm:entitlements', width:450, gridRenderTo:'entitlementsDiv'});
+      });
+  </script>
+ 
+  <table class="width100" cellspacing="0" cellpadding="3">
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <tr>
+        <td colspan="2" width="30%">
+          <sp:outputText styleClass="spContentTitle" value="#{msgs.user_report_options}"/>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_approvers}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["approver"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                    <div class="suggestInput multi identity">
+                        <t:inputHidden value="#{taskDefinition.argMap['approver'].objectListValue}" forceId="true">
+                            <sp:convertList />
+                        </t:inputHidden>
+                        <input type="hidden" class="suggestRawInput" name="suggestInput1" value="#{sp:basicJSONDataConverted(taskDefinition.argMap['approver'].objectListValue,'IdentityListConverter')}"/>
+                    </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_requesters}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["requestor"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+
+                    <div class="suggestInput multi identity">
+                        <t:inputHidden value="#{taskDefinition.argMap['requestor'].objectListValue}" forceId="true">
+                            <sp:convertList />
+                        </t:inputHidden>
+                        <input type="hidden" class="suggestRawInput" name="suggestInput2" value="#{sp:basicJSONDataConverted(taskDefinition.argMap['requestor'].objectListValue,'IdentityListConverter')}"/>
+                    </div>
+
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable">
+                <tr>
+                    <th><sp:outputText value="#{msgs.report_filter_apps}"/></th>
+                </tr>
+                <tr>
+                    <td><sp:outputText style="font-size:11px"
+                                      value='#{taskDefinition.argMap["applications"].argument.description}'/></td>
+                </tr>
+                <tr>
+                  <td valign="top">
+
+                    <div class="suggestInput multi application">
+                        <t:inputHidden value="#{taskDefinition.argMap['applications'].objectListValue}" forceId="true">
+                            <sp:convertList />
+                        </t:inputHidden>
+                        <input type="hidden" class="suggestRawInput" name="suggestInput3" value="#{sp:basicJSONDataConverted(taskDefinition.argMap['applications'].objectListValue,'ApplicationListConverter')}"/>
+                    </div>
+
+                  </td>
+                </tr>
+              </table>
+            </div>
+        </td>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_entitlements}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["entitlements"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                    <div id="entitlementsDiv" />
+                    <h:inputHidden id="entitlements" value='#{taskDefinition.argMap["entitlements"].objectJsonValue}' />
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+      <tr>
+      <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+              <table class="spTable">
+                  <tr>
+                      <th colspan="2"><sp:outputText value="#{msgs.report_filter_request_start_and_end}"/></th>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-size:11px"
+                                                    value='#{taskDefinition.argMap["creationDateStart"].argument.description}'/>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.start_date}"/></td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <h:selectBooleanCheckbox id="startDateSelect"
+                                                   value="#{taskDefinition.argMap['creationDateStart'].bound}"
+                                                   onclick="toggleDateDisplay($('startDateDiv'), !(this.checked));"/>
+                      </td>
+                      <td>
+                          <div id="startDateDiv">
+                              <sp:inputDate timeZone="#{base.userTimeZoneId}"  type="date" id="startDate" popupCalendar="true" ampm="true"
+                                           addResources="false" imageLocation="/scripts/myfacescalendar"
+                                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                           value='#{taskDefinition.argMap["creationDateStart"].dateValue}' styleClass="tomahawkInputDate"/>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">
+                          <a4j:outputPanel ajaxRendered="true">
+                              <h:message for="startDate" styleClass="formError"/>
+                          </a4j:outputPanel>
+                      </td>
+                  </tr>
+
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-size:11px"
+                                                    value='#{taskDefinition.argMap["creationDateEnd"].argument.description}'/>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.end_date}"/></td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <h:selectBooleanCheckbox id="endDateSelect"
+                                                   value="#{taskDefinition.argMap['creationDateEnd'].bound}"
+                                                   onclick="toggleDateDisplay($('endDateDiv'), !(this.checked));"/>
+                      </td>
+                      <td>
+                          <div id="endDateDiv">
+                              <sp:inputDate timeZone="#{base.userTimeZoneId}"  type="date" id="endDate" popupCalendar="true" ampm="true"
+                                           addResources="false" imageLocation="/scripts/myfacescalendar"
+                                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                           value='#{taskDefinition.argMap["creationDateEnd"].dateValue}' styleClass="tomahawkInputDate"/>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">
+                          <a4j:outputPanel ajaxRendered="true">
+                              <h:message for="endDate" styleClass="formError"/>
+                          </a4j:outputPanel>
+                      </td>
+                  </tr>
+              </table>
+          </div>
+      </td>
+      <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+              <table class="spTable">
+                  <tr>
+                      <th colspan="2"><sp:outputText value="#{msgs.report_filter_completion_start_and_end}"/></th>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-size:11px"
+                                                    value='#{taskDefinition.argMap["completionDateStart"].argument.description}'/>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.start_date}"/></td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <h:selectBooleanCheckbox id="completionStartDateSelect"
+                                                   value="#{taskDefinition.argMap['completionDateStart'].bound}"
+                                                   onclick="toggleDateDisplay($('completionStartDateDiv'), !(this.checked));"/>
+                      </td>
+                      <td>
+                          <div id="completionStartDateDiv">
+                              <sp:inputDate timeZone="#{base.userTimeZoneId}"  type="date" id="completionStartDate" popupCalendar="true" ampm="true"
+                                           addResources="false" imageLocation="/scripts/myfacescalendar"
+                                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                           value='#{taskDefinition.argMap["completionDateStart"].dateValue}' styleClass="tomahawkInputDate"/>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">
+                          <a4j:outputPanel ajaxRendered="true">
+                              <h:message for="completionStartDate" styleClass="formError"/>
+                          </a4j:outputPanel>
+                      </td>
+                  </tr>
+
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-size:11px"
+                                                    value='#{taskDefinition.argMap["completionDateEnd"].argument.description}'/>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.end_date}"/></td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <h:selectBooleanCheckbox id="completionEndDateSelect"
+                                                   value="#{taskDefinition.argMap['completionDateEnd'].bound}"
+                                                   onclick="toggleDateDisplay($('completionEndDateDiv'), !(this.checked));"/>
+                      </td>
+                      <td>
+                          <div id="completionEndDateDiv">
+                              <sp:inputDate timeZone="#{base.userTimeZoneId}"  type="date" id="completionEndDate" popupCalendar="true" ampm="true"
+                                           addResources="false" imageLocation="/scripts/myfacescalendar"
+                                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                           value='#{taskDefinition.argMap["completionDateEnd"].dateValue}' styleClass="tomahawkInputDate"/>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">
+                          <a4j:outputPanel ajaxRendered="true">
+                              <h:message for="completionEndDate" styleClass="formError"/>
+                          </a4j:outputPanel>
+                      </td>
+                  </tr>
+              </table>
+          </div>
+      </td>
+
+      </tr>
+      <tr>
+
+      <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.report_filter_status}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["status"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectOneMenu id="status" value="#{taskDefinition.argMap['status'].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.rept_lcm_request_status_stat_completed}" itemValue="completed" />
+                    <f:selectItem itemLabel="#{msgs.rept_lcm_request_status_stat_approved}" itemValue="approved" />
+                    <f:selectItem itemLabel="#{msgs.rept_lcm_request_status_stat_rejected}" itemValue="rejected" />
+                    <f:selectItem itemLabel="#{msgs.rept_lcm_request_status_stat_pending}" itemValue="pending" />
+                    <f:selectItem itemLabel="#{msgs.rept_lcm_request_status_stat_cancelled}" itemValue="cancelled" />
+                  </h:selectOneMenu>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_target_identity}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["targetIdentity"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+
+                    <div class="suggestInput multi identity">
+                        <t:inputHidden value="#{taskDefinition.argMap['targetIdentity'].objectListValue}" forceId="true">
+                            <sp:convertList />
+                        </t:inputHidden>
+                        <input type="hidden" class="suggestRawInput" name="suggestInput4" value="#{sp:basicJSONDataConverted(taskDefinition.argMap['targetIdentity'].objectListValue,'IdentityListConverter')}"/>
+                    </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </ui:fragment>
+  </table>
+</ui:composition>
+</body>
+</html>

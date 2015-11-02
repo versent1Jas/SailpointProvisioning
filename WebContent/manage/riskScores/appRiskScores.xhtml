@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.app_risk_scores}</ui:define>
+  
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/riskScores/ApplicationRiskScoresGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript">
+
+    helpKey = 'APPLICATION_RISK';
+    
+    var sp = new SailPoint.state.StateProvider({
+      stateIds: ['#{applicationScores.gridState.name}'],
+      states:   ['#{applicationScores.gridState.state}']
+    });
+    Ext.state.Manager.setProvider(sp);  
+
+    var gridMetaData = #{applicationScores.columnJSON};
+    
+    Ext.onReady(function(){
+      
+      Ext.QuickTips.init();
+      var gridStateStr = '#{applicationScores.gridState.JSON}';
+      var canEdit = false;
+      <c:if test="#{sp:hasRight(facesContext, 'ManageApplication')}">
+          canEdit = true;
+      </c:if>
+      var gridConf = SailPoint.Manage.Grid.AppRiskScores.createGrid(gridMetaData.fields, gridMetaData.columns, gridStateStr, '#{applicationScores.gridState.name}', canEdit);
+      
+      var viewport = SailPoint.getViewport({
+          bodyContent: gridConf,
+          title: '#{sp:escapeJavascript(msgs.app_risk_scores)}'
+      });
+      viewport.doLayout();
+    }); // Ext.onReady
+
+    
+    </script>
+
+   </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form styleClass="form" id="editForm">
+        
+        <h:inputHidden id="currentObjectId" value="#{applicationScores.selectedId}"/>
+        <h:commandButton style="display:none" id="editButton" action="#{applicationScores.select}" />
+
+      </h:form>
+      
+    </f:view>
+  </ui:define>
+  
+</ui:composition>
+
+</body>
+
+</html>

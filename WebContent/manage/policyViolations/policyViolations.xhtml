@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//Dtd XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/tr/xhtml1/Dtd/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+
+
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+<ui:define name="title">#{msgs.title_policy_violations}</ui:define>
+
+<ui:define name="headerItems">
+  <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+    <src>menuButton.css</src>
+  </sp:style>
+
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/policy-violations">
+    <src>policy-violations.css</src>
+  </sp:style>
+
+  <sp:script>
+  <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+  <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+  <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+  <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+  <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+  <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+  <src>#{base.requestContextPath}/scripts/sailpoint/component/AssignmentForm.js?#{debug.revision}</src>
+  <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/policyViolations/policyViolation.js?#{debug.revision}</src>
+  <src>#{base.requestContextPath}/scripts/sailpoint/component/menuButton.js?#{debug.revision}</src>
+</sp:script>
+
+    <script type="text/javascript" defer="defer">
+helpKey = 'POLICY_VIOLATION_VIEWER';
+    var actionChoiceStore = [
+        <c:forEach items="#{policyViolationAction.actionChoices}" var="actionChoice" varStatus="vStatus">
+        <h:outputText rendered="#{!vStatus.first}" value=","/>
+          {text: '#{actionChoice.label}', value:'#{actionChoice.value}'}
+        </c:forEach>
+    ];
+      function setAction(scope) {
+        $('selectedAction').value = this;
+        submitAction(scope);
+      };
+      Ext.onReady(function() {
+        SailPoint.Component.MenuButton.renderMenuButton('#{msgs.violation_decision_select_decision}', actionChoiceStore, setAction, 'decisionButton');
+      });
+    </script>
+</ui:define>
+<ui:define name="subtitle">
+    <div id="subtitle" class="highlight">
+      <h:inputHidden id="selectedAction"/>
+    </div>
+  </ui:define>
+<ui:define name="body">
+
+<f:view>
+
+<h:form styleClass="form" id="violationListForm">
+
+<!-- ****************************************************************************
+
+  HIDDEN BUTTONS AND FIELDS AND STUFF
+
+**********************************************************************************  -->
+
+
+<div style="display:none">
+
+
+    <h:inputHidden id="violationIds"
+                   value="#{policyViolationAction.violationIds}" converter="java.util.List"/>
+    <h:inputHidden id="allSelected" value="#{policyViolationAction.allSelected}" />
+
+    <h:inputHidden id="ownerName" value="#{policyViolationAction.ownerName}"/>
+    <h:inputHidden id="ownerId" value="#{policyViolationAction.ownerId}"/>
+    <h:inputHidden id="comments" value="#{policyViolationAction.comments}"/>
+    <h:inputHidden id="description" value="#{policyViolationAction.description}"/>
+    <sp:inputDate id="expiration" value="#{policyViolationAction.expiration}" 
+                 type="date" popupCalendar="true"
+                 timeZone="#{base.userTimeZoneId}" 
+                 imageLocation="/scripts/myfacescalendar"
+                 javascriptLocation="/scripts/myfacescalendar"
+                 styleLocation="/scripts/myfacescalendar"
+                 addResources="false"
+                 styleClass="tomahawkInputDate"/>
+    <h:inputHidden id="expireNextCertification" value="#{policyViolationAction.expireNextCertification}"/>
+
+    <a4j:commandButton id="refreshLiveGridButton" action="#{policyViolations.refresh}"
+                       render="policyDetailPanel"/>
+
+    <t:saveState value="#{policyViolations.gridState}" />
+    <h:inputHidden id="sortColumn" value="#{policyViolations.gridState.sortColumn}" />
+    <h:inputHidden id="sortOrder" value="#{policyViolations.gridState.sortOrder}" />
+    <h:inputHidden id="firstRow" value="#{policyViolations.gridState.firstRow}" />
+    <h:inputHidden id="pageSize" value="#{policyViolations.gridState.pageSize}" />
+
+    <h:commandButton  id="selectedPolicyViolationButton"
+                      action="#{policyViolations.policyViolationDetail}"/>
+
+    <h:commandButton id="certifyButton" action="#{policyViolationAction.certify}"/>
+
+    <h:commandButton id="delegateButton" action="#{policyViolationAction.delegate}"/>
+
+    <h:commandButton id="delegateJSButton" action="#{policyViolationAction.delegateFromJS}"/>
+
+    <h:commandButton id="mitigateButton" action="#{policyViolationAction.mitigate}"/>
+
+    <h:commandButton id="mitigateJSButton" action="#{policyViolationAction.mitigateFromJS}"/>
+
+</div>
+
+<!-- ****************************************************************************
+
+  BEGIN main body
+
+**********************************************************************************  -->
+
+     <ui:include src="policyViolationsGrid.xhtml"/>
+
+</h:form>
+
+</f:view>
+</ui:define>
+</ui:composition>
+
+</body>
+</html>

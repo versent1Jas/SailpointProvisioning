@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+<ui:composition>  
+
+  <ui:param name='summary' value="#{taskResult.object.attributes['workflowSummary']}"/>
+
+  <!-- make it resemble the expanding details panel, need more here! -->
+  <div class="baseWindow expandPanel">
+    <div id="expandPanelContent" class="baseWindowBody expandPanelBody" >
+      <table class="wide" cellpadding="5" cellspacing="5" style="font-size:12px">
+        <tr>
+          <td class="titleColumn"><h:outputText value="#{msgs.label_current_workflow_step}:"/></td>
+          <td><h:outputText value="#{summary.step}"/></td>
+        </tr>
+      </table>
+    </div>
+    <div class="baseWindowFooter expandPanelFooter"><img src="#{base.requestContextPath}/images/blank.gif" style="display:none"/></div>
+  </div>
+
+  <br/>
+
+  <!-- interactions -->
+  <ui:fragment rendered="#{summary.interactionCount > 0}">
+
+    <h:outputText styleClass="spContentTitle" value="#{msgs.task_workflow_header_interactions}"/>
+    <div class="spTabledContent">
+      <table class="spTable" cellspacing="0" cellpadding="0" id="approvalsTbl">
+        <tr>
+          <th><h:outputText value="#{msgs.owner}"/></th>
+          <th><h:outputText value="#{msgs.type}"/></th>
+          <th><h:outputText value="#{msgs.request}"/></th>
+          <th><h:outputText value="#{msgs.status}"/></th>
+          <th><h:outputText value="#{msgs.started}"/></th>
+          <th><h:outputText value="#{msgs.completed}"/></th>
+        </tr>
+
+        <ui:repeat value="#{summary.interactions}" var="app">
+          <tr>
+            <td><h:outputText value="#{app.owner}"/></td>
+            <td><h:outputText value="#{sp:localizeKey(app.typeKey)}"/></td>
+            <td><h:outputText value="#{app.request}"/></td>
+            <td><h:outputText value="#{sp:localizeKey(app.stateKey)}"/></td>
+            <td>
+              <h:outputText value="#{app.startDate}">
+                <f:convertDateTime type="both" dateStyle="short" timeStyle="medium" timeZone="#{taskResult.userTimeZone}"/>
+              </h:outputText>
+            </td>
+            <td>
+              <h:outputText value="#{app.endDate}">
+                <f:convertDateTime type="both" dateStyle="short" timeStyle="medium" timeZone="#{taskResult.userTimeZone}"/>
+              </h:outputText>
+            </td>
+          </tr>
+        </ui:repeat>
+
+      </table>
+    </div>
+  </ui:fragment>
+
+  <br/>
+
+</ui:composition>
+
+</body>
+</html>

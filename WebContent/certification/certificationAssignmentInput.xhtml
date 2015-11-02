@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+<ui:composition>
+
+
+
+    <ui:fragment rendered="#{not actionBeanParam.readOnly}">
+
+
+        <script type="text/javascript" >
+
+          
+            var debug = {};
+
+            // ignoring this for the time being. Is it really necessary?
+            var disableQuickAssign =#{actionBeanParam.assignmentSelected};
+
+
+            // get the list of combo options which will populate the rght side (quickAssign) combo
+            var assignmentOptions =  #{actionBeanParam.quickAssignmenOptionsJson};
+
+            var assigneeSelect = Ext.create('SailPoint.AssigneeSelector', {
+                quickAssignOptions : assignmentOptions['quickAssignmentOptions'],
+                id:'certificationAssignmentInputOwner',
+                renderTo: 'ownerNameSuggest',
+                width: 600,
+                allowBlank:false,
+                valueField: 'name',
+                baseParams: {context: 'Owner'}
+            });
+
+            var curVal = '#{actionBeanParam.ownerName}';
+            if (curVal != '')
+                assigneeSelect.assigneeSuggest.setValue(curVal);
+
+        </script>
+
+
+        <div id="ownerNameSuggest"></div>
+        
+
+    </ui:fragment>
+
+    <ui:fragment rendered="#{actionBeanParam.readOnly}">
+        <h:outputText value="#{sp:getDisplayNameForName('Identity', actionBeanParam.ownerName)}" />
+    </ui:fragment>
+
+</ui:composition>
+</html>
+

@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/commonCertificationReportArgs.js?#{debug.revision}</src>
+    </sp:script>
+
+<ui:fragment render='#{taskDefinition.argValues != null}'>
+
+<script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+    
+    Ext.onReady(function () {
+        var appSuggest = new SailPoint.BaseSuggest({
+            baseParams: {'suggestType': 'application'},
+            renderTo: 'applicationSuggest', 
+            binding: 'application', 
+            value: '#{sp:getDisplayNameForId("Application", taskDefinition.argMap["application"].value)}',
+            width: 300,
+            initialData: '#{taskDefinition.argMap["application"].value}'
+            });
+
+
+        SailPoint.Report.Certification.initializeCommonArgs();
+    }); 
+    //--><!]]>
+</script>
+
+</ui:fragment>
+
+
+<table class="width100" cellspacing="0" cellpadding="3">
+<ui:fragment render='#{taskDefinition.argValues != null}'>
+
+<!-- Add common fields - dates, tags, etc... -->
+<ui:include src="certificationReportCommonArgs.xhtml" />
+
+<tr>
+    <td width="45%" valign="top">
+        <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0" border="0">
+                <tr>
+                    <th><sp:outputText value="#{msgs.report_filter_apps} "/><h:outputText styleClass="requiredText" value="*"/></th>
+                </tr>
+                <tr>
+                  <td>
+                    <sp:outputText style="font-size:11px"
+                      value='#{taskDefinition.argMap["application"].argument.description}'/>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">
+                    <div id="applicationSuggest"></div>
+                    <t:inputHidden id="application" 
+                                   value='#{taskDefinition.argMap["application"].value}'
+                                   required="true"
+                                   forceId="true">
+                    </t:inputHidden>
+
+                    <a4j:outputPanel ajaxRendered="true">
+                      <br/><br/>
+                      <h:message styleClass="formError" for="application" />
+                    </a4j:outputPanel>
+                  </td>
+                </tr>
+            </table>
+        </div>
+    </td>
+
+    <td valign="top">&nbsp;</td>
+
+</tr>
+
+</ui:fragment>
+</table>
+
+</ui:composition>
+</body>
+</html>

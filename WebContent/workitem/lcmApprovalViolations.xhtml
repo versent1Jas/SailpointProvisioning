@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+    <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>      
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/NameWithTooltip.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/BaseCertificationGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/RowExpander.js?#{debug.revision}</src>       
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/certification/CertificationItemExpander.js?#{debug.revision}</src>        
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/WorkItemViolations.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">    
+    <!--//--><![CDATA[//><!--
+
+    Ext.onReady(function() 
+        {
+        try 
+            {
+            SailPoint.lcm.initWorkItemViolationsGrid('#{workitemId}');
+            } 
+        catch(err)
+            {
+            SailPoint.FATAL_ERR_JAVASCRIPT(err, "Error initializing LCM request violations view.");
+            }
+        });
+    
+    //--><!]]>
+    </script>
+
+  <ui:fragment rendered="#{!violationReview}">
+      <div class="spTabledContent" style="margin:5px">
+        <table class="spTable" cellspacing="0" cellpadding="0">
+          <tr>
+            <th><h:outputText value="#{msgs.policy_violations}"/></th>
+          </tr>
+          <tr>
+            <td>
+                <div class='formWarn'>#{msgs.approval_violations}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+                <div id="lcmRequestViolations"></div>
+            </td>
+          </tr>
+        </table>
+      </div>
+  </ui:fragment>
+
+  <!-- We show a simpler view for violation review -->
+  <ui:fragment rendered="#{violationReview}">
+    <div id="lcmRequestViolations"></div>
+  </ui:fragment>
+
+
+
+</ui:composition>
+
+</body>
+</html>

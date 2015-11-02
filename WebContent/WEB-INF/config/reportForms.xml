@@ -1,0 +1,1418 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Initialization file for SailPoint report forms.
+-->
+<sailpoint>
+
+  <!-- ====================================================================
+
+   Base Report Form.  This is the default template form used when creating
+   a form.
+
+ ========================================================================= -->
+
+
+  <Form name="Report Form Skeleton" type="Report" hidden="true">
+    <Attributes>
+    <Map>
+      <entry key="isWizard" value="true"/>
+      <entry key="labelAlign" value="top"/>
+    </Map>
+  </Attributes>
+  <Button action="save" label="button_save"/>
+  <Button action="preview" label="button_preview"/>
+  <Button action="exec" label="button_save_and_exec"/>
+  <Button action="cancel" label="button_cancel"/>
+  <Section columns="2" label="label_standard_properties" name="Standard Properties">
+    <Field columnSpan="2" displayName="label_name" name="name" required="true" value="ref:name"/>
+    <Field defaultValue="Rename" displayName="label_previous_result_action" name="resultActions" value="ref:resultActions">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <List>
+              <String>Rename</String>
+              <String>task_result_action_rename_old</String>
+            </List>
+            <List>
+              <String>RenameNew</String>
+              <String>task_result_action_rename_new</String>
+            </List>
+            <List>
+              <String>Cancel</String>
+              <String>task_result_action_cancel</String>
+            </List>
+            <List>
+              <String>Delete</String>
+              <String>task_result_action_delete</String>
+            </List>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field displayName="label_scope" name="resultScope" type="Scope" value="ref:resultScope">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source>
+                  import sailpoint.api.ScopeService;
+                  ScopeService scopeSvc = new ScopeService(context);
+                  return !scopeSvc.isScopingEnabled();
+                </Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="label_description" displayType="textarea" name="description" value="ref:description"/>
+    <Field displayName="label_email_recipients" multi="true" name="emailIdentities" type="Identity"
+           value="ref:emailIdentities"/>
+    <Field displayName="label_allow_concurrency" name="allowConcurrency" type="boolean" value="ref:allowConcurrency"/>
+    <Field displayName="rept_form_label_email_format" name="emailFileFormat" type="string" value="ref:emailFileFormat"
+           displayType="checkbox" multi="true">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <List>
+              <String>PDF</String>
+              <String>rept_form_email_format_pdf</String>
+            </List>
+            <List>
+              <String>CSV</String>
+              <String>rept_form_email_format_csv</String>
+            </List>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+          import java.util.*;
+          import sailpoint.tools.Util;
+          import sailpoint.web.messages.MessageKeys;
+
+          List errors = null;
+          List emailRecips = form.getField("emailIdentities").getValue();
+          List fileTypes = form.getField("emailFileFormat").getValue();
+
+          if (!Util.isEmpty(emailRecips) && Util.isEmpty(fileTypes)){
+            errors = new ArrayList();
+            errors.add(MessageKeys.REPT_FORM_ERR_NO_EMAIL_FORMAT);
+          }
+
+          return errors;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>
+    <Field displayName="label_require_signoff" name="signoffRequired" type="boolean" value="ref:signoffRequired" postBack="true"/>
+    <Field columnSpan="2" hidden="true" name="workItemConfigPanel">
+      <Attributes>
+        <Map>
+          <entry key="contentEl" value="workItemConfig"/>
+          <entry key="xtype" value="panel"/>
+          <entry key="hidden" value="script: return signoffRequired == null || signoffRequired == false"/>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+  <Section columns="2" label="label_report_layout" name="layout">
+    <Field displayName="rept_arg_sort" name="sort" value="ref:sort">
+      <Attributes>
+        <Map>
+          <entry key="xtype" value="sortinput"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="rept_arg_group_by" name="gridGrouping" value="ref:gridGrouping"/>
+    <Field columnSpan="2" displayName="rept_arg_columns" multi="true" name="columns" value="ref:columns" helpKey="rept_arg_columns_help">
+      <Attributes>
+        <Map>
+          <entry key="xtype" value="itemselector"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="rept_form_field_disable_summary" helpKey="rept_form_help_disable_summary" name="disableSummary" type="boolean" value="ref:disableSummary"/>
+    <Field displayName="rept_form_field_disable_detail" helpKey="rept_form_help_disable_detail" name="disableDetail" type="boolean" value="ref:disableDetail"/>
+  </Section>
+  </Form>
+
+
+  <Form name="Privileged Access Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_priv_access_section_priv_account_attrs" name="Privileged Account Attributes">
+      <Attributes>
+        <Map>
+          <entry key="subtitle" value="rept_priv_access_section_instructions"/>
+        </Map>
+      </Attributes>
+    </Section>
+    <Section columns="2" label="rept_priv_access_section_account_props" name="Account Properties">
+      <Field columnSpan="1" displayName="rept_identity_roles_field_app" helpKey="rept_identity_roles_help_app" name="applications" type="Application" multi="true" value="ref:applications"/>
+    </Section>
+    <Section columns="2" label="rept_priv_access_section_identity_props" name="Identity Properties"/>
+    <Section columns="2" label="rept_priv_access_section_identity_extended_props" name="Identity Extended Properties"/>
+  </Form>
+
+  <Form name="User Activity Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_identity_roles_section_props" name="Identity Properties">
+      <Field columnSpan="1" displayName="report_filter_ids" helpKey="rept_input_app_activity_report_identities" name="identities" type="Identity" multi="true" value="ref:identities"/>
+      <Field columnSpan="1" displayName="report_filter_apps" helpKey="rept_input_app_activity_report_apps" name="applications" type="Application" multi="true" value="ref:applications"/>
+      <Field columnSpan="1" displayName="start_date" helpKey="rept_input_app_activity_report_start_date" name="startDate" type="date" value="ref:startDate"/>
+      <Field columnSpan="1" displayName="end_date" helpKey="rept_input_app_activity_report_end_date" name="endDate" type="date" value="ref:endDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field columnSpan="1" displayName="label_action" helpKey="rept_input_app_activity_report_action" name="action" type="string" multi="true" value="ref:action">
+        <AllowedValuesDefinition>
+            <Script>
+                <Source>
+                    import sailpoint.object.*;
+
+                    List items = new ArrayList();
+                    for(ApplicationActivity.Action action : ApplicationActivity.Action.values()) {
+                      List l2 = new ArrayList();
+                      l2.add(action.toString());
+                      l2.add(action.getMessageKey());
+                      items.add(l2);
+                    }
+                    return items;
+                </Source>
+            </Script>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field columnSpan="1" displayName="result" helpKey="rept_input_app_activity_report_result" name="result" type="string" multi="true" value="ref:result">
+        <AllowedValuesDefinition>
+            <Script>
+                <Source>
+                    import sailpoint.object.*;
+
+                    List items = new ArrayList();
+                    for(ApplicationActivity.Result result : ApplicationActivity.Result.values()) {
+                      List l2 = new ArrayList();
+                      l2.add(result.toString());
+                      l2.add(result.getMessageKey());
+                      items.add(l2);
+                    }
+                    return items;
+                </Source>
+            </Script>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field columnSpan="1" displayName="label_target" helpKey="rept_input_app_activity_report_target" name="target" value="ref:target"/>
+    </Section>
+  </Form>
+
+  <Form name="Role Members Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_role_members_section_opts" name="customProperties">
+      <Field name="disabled" displayName="rept_role_members_field_status" type="string" value="ref:disabled" helpKey="rept_role_members_help_status">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_role_members_filter_status_all</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>rept_role_members_filter_status_disabled</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>rept_role_members_filter_status_enabled</String>
+          </List>
+        </AllowedValues>
+      </Field>
+      <Field name="applications" displayName="rept_role_members_field_apps" value="ref:applications" helpKey="rept_role_members_help_apps" type="Application" multi="true"/>
+      <Field name="owners" displayName="rept_role_members_field_owners" value="ref:owners" helpKey="rept_role_members_help_owners" type="Identity" multi="true">
+        <Attributes>
+          <Map>
+            <entry key="identitySuggestFilter" value="Owner"/>
+          </Map>
+         </Attributes>
+      </Field>
+      <Field name="type" displayName="rept_role_members_field_type" value="ref:type" helpKey="rept_role_members_help_type" type="Bundle" multi="true">
+        <Attributes>
+          <Map>
+            <entry key="objectColumn" value="type"/>
+          </Map>
+         </Attributes>
+      </Field>
+      <Field name="showEmpty" displayName="rept_role_members_field_empty" value="ref:showEmpty" helpKey="rept_role_members_help_empty" type="string">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_role_members_opt_full_all</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>rept_role_members_opt_empty_roles</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>rept_role_members_opt_full_roles</String>
+          </List>
+        </AllowedValues>
+      </Field>
+     </Section>
+  </Form>
+
+  <Form name="Work Item Archive Report Form" type="Report" hidden="true">
+    <Section columns="2" name="customProperties" label="rept_workitem_section_workitem_props">
+       <Field displayName="report_filter_owners" helpKey="rept_input_work_item_report_owners" multi="true" name="owners" type="Identity" value="ref:owners">
+         <Attributes>
+            <Map>
+              <entry key="identitySuggestFilter" value="Owner"/>
+            </Map>
+          </Attributes>
+        </Field>
+       <Field displayName="report_filter_requesters" helpKey="rept_input_work_item_report_requesters" multi="true" name="requesters" type="Identity" value="ref:requesters"/>
+       <Field name="levels" displayName="report_filter_work_item_level" type="string" value="ref:levels" multi="true" helpKey="rept_input_work_item_report_priority">
+         <AllowedValuesDefinition>
+              <Script>
+                  <Source>
+                      import sailpoint.object.*;
+                      List l = new ArrayList();
+                      for(WorkItem.Level enumItem : WorkItem.Level.values()) {
+                        List l2 = new ArrayList();
+                        l2.add(enumItem.toString());
+                        l2.add(enumItem.getMessageKey());
+                        l.add(l2);
+                      }
+                      return l;
+                  </Source>
+              </Script>
+          </AllowedValuesDefinition>
+      </Field>
+      <Field name="types" displayName="report_filter_work_item_type" type="string" value="ref:types" multi="true" helpKey="rept_input_work_item_report_types">
+         <AllowedValuesDefinition>
+              <Script>
+                  <Source>
+                      <![CDATA[
+                      import sailpoint.object.*;
+                      List l = new ArrayList();
+                      for(WorkItem.Type enumItem : WorkItem.Type.values()) {
+                        if (enumItem != WorkItem.Type.Generic &&
+                              enumItem != WorkItem.Type.Test &&
+                              enumItem != WorkItem.Type.Event)
+                          {
+                            List l2 = new ArrayList();
+                            l2.add(enumItem.toString());
+                            l2.add(enumItem.getMessageKey());
+                            l.add(l2);
+                          }
+                      }
+                      return l;
+                      ]]>
+                  </Source>
+              </Script>
+          </AllowedValuesDefinition>
+       </Field>
+       <Field name="states" displayName="report_filter_work_item_state" type="string" value="ref:states" multi="true" helpKey="rept_input_work_item_report_states">
+         <AllowedValuesDefinition>
+              <Script>
+                  <Source>
+                    import sailpoint.object.*;
+                    return WorkItem.State.getWorkItemStatesList();
+                  </Source>
+              </Script>
+          </AllowedValuesDefinition>
+      </Field>
+      <Field name="statusOptions" displayName="report_filter_work_item_status_option" type="string" value="ref:statusOptions" helpKey="rept_input_work_item_report_status">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>work_item_status_all</String>
+          </List>
+          <List>
+            <String>active</String>
+            <String>work_item_status_active</String>
+          </List>
+          <List>
+            <String>archive</String>
+            <String>work_item_status_archived</String>
+          </List>
+        </AllowedValues>
+      </Field>
+      <Field columnSpan="1" displayName="rept_workitem_field_reminders_min" helpKey="rept_workitem_help_reminders_min" name="remindersMin" type="int" value="ref:remindersMin"/>
+      <Field columnSpan="1" displayName="rept_workitem_field_reminders_max" helpKey="rept_workitem_help_reminders_max" name="remindersMax" type="int" value="ref:remindersMax"/>
+    </Section>
+  </Form>
+
+  <Form name="Mitigation Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_miti_section_label" name="customProperties">
+      <Field displayName="rept_miti_filter_exp_date" helpKey="rept_input_mitigation_report_exp_dt" name="expirationDate" type="date" value="ref:expirationDate">
+       <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_miti_filter_identities" helpKey="rept_input_mitigation_report_identities" multi="true" name="identities" type="Identity" value="ref:identities"/>
+      <Field displayName="rept_miti_filter_actors" helpKey="rept_input_mitigation_report_mgrs" multi="true" name="managers" type="Identity" value="ref:managers"/>
+      <Field displayName="rept_miti_filter_roles" helpKey="rept_input_mitigation_report_biz_roles" multi="true" name="roles" type="Bundle" value="ref:businessRoles"/>
+    </Section>
+  </Form>
+
+  <Form name="Policy Violation Report Form" type="Report" hidden="true">
+      <Section columns="2"
+          label="rept_pol_viol_properties_secion"
+          name="customProperties">
+          <Field displayName="rept_pol_viol_filter_identities"
+              helpKey="rept_input_violation_report_identities"
+              multi="true" name="identities" type="Identity"
+              value="ref:identities" />
+          <Field displayName="rept_pol_viol_filter_policy"
+              helpKey="rept_input_violation_report_policies"
+              multi="true" name="policies" type="Policy"
+              filterString="template == false" value="ref:policies" />
+          <Field
+              displayName="rept_pol_viol_filter_active"
+              helpKey="rept_input_violation_report_status"
+              displayType="radio" name="status"
+              type="String" value="ref:status">
+              <AllowedValuesDefinition>
+                  <Value>
+                      <List>
+                          <List>
+                              <String>null</String>
+                              <String>rept_input_violation_report_status_all</String>
+                          </List>
+                          <List>
+                              <String>active</String>
+                              <String>rept_input_violation_report_active</String>
+                          </List>
+                          <List>
+                              <String>completed</String>
+                              <String>rept_input_violation_report_inactive</String>
+                          </List>
+                      </List>
+                  </Value>
+              </AllowedValuesDefinition>
+          </Field>
+          <Field displayName="rept_pol_viol_filter_viol_date"
+              helpKey="rept_input_violation_report_violation_date"
+              name="violationDate" type="date"
+              value="ref:violationDate" />
+          <Field displayName="rept_pol_viol_filter_viol_status"
+              helpKey="rept_pol_viol_help_viol_status"
+              name="actualStatus" type="String" multi="true"
+              value="ref:actualStatus">
+              <AllowedValuesDefinition>
+                  <Script>
+                      <Source>
+                          import sailpoint.object.*;
+
+                          List l = new ArrayList();
+                          for(PolicyViolation.Status pv : PolicyViolation.Status.values()) {
+                          List l2 = new ArrayList();
+                          l2.add(pv.toString());
+                          l2.add(pv.getMessageKey());
+
+                          l.add(l2);
+                          }
+                          return l;
+                      </Source>
+                  </Script>
+              </AllowedValuesDefinition>
+          </Field>
+      </Section>
+  </Form>
+
+  <Form name="Application Owner Access Review Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="createStartDate" required="false" type="date" value="ref:createStartDate"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="createEndDate" required="false" type="date" value="ref:createEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedStartDate" required="false" type="date" value="ref:signedStartDate"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedEndDate" required="false" type="date" value="ref:signedEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="dueStartDate" required="false" type="date" value="ref:dueStartDate"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="dueEndDate" required="false" type="date" value="ref:dueEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_apps"  helpKey="rept_cert_help_apps" name="applications" multi="true" required="false" type="Application" value="ref:applications"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Manager Access Review Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="createStartDate" required="false" type="date" value="ref:createStartDate"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="createEndDate" required="false" type="date" value="ref:createEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedStartDate" required="false" type="date" value="ref:signedStartDate"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedEndDate" required="false" type="date" value="ref:signedEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="dueStartDate" required="false" type="date" value="ref:dueStartDate"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="dueEndDate" required="false" type="date" value="ref:dueEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_mangers"  helpKey="rept_cert_help_mangers" name="managers" multi="true" filterString="managerStatus==true" required="false" type="Identity" value="ref:managers"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Advanced Access Review Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_startl" name="creationDateStart" required="false" type="date" value="ref:creationDateStart"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="creationDateEnd" required="false" type="date" value="ref:creationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedDateStart" required="false" type="date" value="ref:signedDateStart"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedDateEnd" required="false" type="date" value="ref:signedDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="expirationDateStart" required="false" type="date" value="ref:expirationDateStart"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="expirationDateEnd" required="false" type="date" value="ref:expirationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_groups"  helpKey="rept_cert_help_groups" name="groups" multi="true" required="false" type="GroupDefinition" value="ref:groups"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Revocation Report Form" type="Report" hidden="true">
+    <Section columns="2" name="customProperties" label="rept_remed_progress_section_role_props">
+       <Field displayName="rept_remed_progress_field_create_start"  helpKey="rept_remed_progress_help_create_start" name="creationStartDate" required="false" type="date" value="ref:creationStartDate"/>
+       <Field displayName="rept_remed_progress_field_create_end"  helpKey="rept_remed_progress_help_create_end" name="creationEndDate" required="false" type="date" value="ref:creationEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+       <Field displayName="rept_remed_progress_field_signed_start"  helpKey="rept_remed_progress_help_signed_start" name="signedStartDate" required="false" type="date" value="ref:signedStartDate"/>
+       <Field displayName="rept_remed_progress_field_signed_end"  helpKey="rept_remed_progress_help_signed_end" name="signedEndDate" required="false" type="date" value="ref:signedEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+       <Field displayName="rept_remed_progress_field_due_start"  helpKey="rept_remed_progress_help_due_start" name="expirationStartDate" required="false" type="date" value="ref:expirationStartDate"/>
+       <Field displayName="rept_remed_progress_field_due_end"  helpKey="rept_remed_progress_help_due_end" name="expirationEndDate" required="false" type="date" value="ref:expirationEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+       <Field displayName="rept_remed_progress_field_apps"  helpKey="rept_remed_progress_help_apps" name="applications" multi="true" required="false" type="Application" value="ref:applications"/>
+       <Field displayName="rept_remed_progress_field_groups"  helpKey="rept_remed_progress_help_groups" name="groups" multi="true" required="false" type="GroupDefinition" value="ref:groups"/>
+       <Field displayName="rept_remed_progress_field_tags"  helpKey="rept_remed_progress_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+       <Field displayName="rept_remed_progress_field_cert_group"  helpKey="rept_remed_progress_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+    </Section>
+  </Form>
+
+  <Form name="Certification Activity by Application Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="createStartDate" required="false" type="date" value="ref:createStartDate"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="createEndDate" required="false" type="date" value="ref:createEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedStartDate" required="false" type="date" value="ref:signedStartDate"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedEndDate" required="false" type="date" value="ref:signedEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="dueStartDate" required="false" type="date" value="ref:dueStartDate"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="dueEndDate" required="false" type="date" value="ref:dueEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_apps"  helpKey="rept_cert_help_apps" name="applicationNames" multi="true" required="false" type="Application" value="ref:applicationNames"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Role Membership Access Review Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="createStartDate" required="false" type="date" value="ref:createStartDate"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="createEndDate" required="false" type="date" value="ref:createEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedStartDate" required="false" type="date" value="ref:signedStartDate"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedEndDate" required="false" type="date" value="ref:signedEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="dueStartDate" required="false" type="date" value="ref:dueStartDate"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="dueEndDate" required="false" type="date" value="ref:dueEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_identities"  helpKey="rept_cert_help_identities" name="identities" multi="true" required="false" type="Identity" value="ref:identities"/>
+      <Field displayName="rept_cert_field_roles"  helpKey="rept_cert_help_roles" name="roles" multi="true" required="false" type="Bundle" value="ref:roles"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Role Composition Access Review Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="createStartDate" required="false" type="date" value="ref:createStartDate"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="createEndDate" required="false" type="date" value="ref:createEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedStartDate" required="false" type="date" value="ref:signedStartDate"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedEndDate" required="false" type="date" value="ref:signedEndDate">
+         <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="dueStartDate" required="false" type="date" value="ref:dueStartDate"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="dueEndDate" required="false" type="date" value="ref:dueEndDate">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_roles"  helpKey="rept_cert_help_roles" name="roles" multi="true" required="false" type="Bundle" value="ref:roles"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Account Group Membership Access Review Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="creationDateStart" required="false" type="date" value="ref:creationDateStart"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="creationDateEnd" required="false" type="date" value="ref:creationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedDateStart" required="false" type="date" value="ref:signedDateStart"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedDateEnd" required="false" type="date" value="ref:signedDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="expirationDateStart" required="false" type="date" value="ref:expirationDateStart"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="expirationDateEnd" required="false" type="date" value="ref:expirationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_apps"  helpKey="rept_cert_help_apps" name="applications" multi="true" required="false" type="Application" value="ref:applications"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Account Group Permissions Access Review Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="creationDateStart" required="false" type="date" value="ref:creationDateStart"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="creationDateEnd" required="false" type="date" value="ref:creationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedDateStart" required="false" type="date" value="ref:signedDateStart"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedDateEnd" required="false" type="date" value="ref:signedDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="expirationDateStart" required="false" type="date" value="ref:expirationDateStart"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="expirationDateEnd" required="false" type="date" value="ref:expirationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_apps"  helpKey="rept_cert_help_apps" name="applications" multi="true" required="false" type="Application" value="ref:applications"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Application Account Attributes Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_app_properties_section" name="customProperties">
+      <Field displayName="rept_app_account_attrs_label_app" postBack="true" helpKey="rept_app_account_attrs_help_app" name="application" required="true" type="Application" value="ref:application"/>
+      <Field displayName="rept_app_account_attrs_label_identity_status" helpKey="rept_app_account_attrs_help_inactive" name="inactive" required="false" type="string" value="ref:inactive">
+        <AllowedValues>
+          <List>
+            <String> </String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>rept_app_account_attrs_filter_inactive</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>rept_app_account_attrs_filter_active</String>
+          </List>
+        </AllowedValues>
+      </Field>
+    </Section>
+  </Form>
+
+  <Form name="Role Change Management Report Form" type="Report" hidden="true">
+    <Section columns="2" name="customProperties" label="report_role_profiles_comp_section_role_props">
+      <Field columnSpan="1" displayName="rept_change_mgmt_field_change_date_start"
+             helpKey="rept_change_mgmt_help_change_date_start" name="createStart" type="date" value="ref:createStart"/>
+      <Field columnSpan="1" displayName="rept_change_mgmt_field_change_date_end"
+             helpKey="rept_change_mgmt_help_change_date_end" name="createEnd" type="date" value="ref:createEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field name="disabled" displayName="rept_change_mgmt_label_status" type="string" value="ref:disabled"
+             helpKey="rept_change_mgmt_help_status">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_change_mgmt_option_status_all</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>rept_change_mgmt_option_status_disabled</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>rept_change_mgmt_option_status_enabled</String>
+          </List>
+        </AllowedValues>
+      </Field>
+      <Field name="type" displayName="rept_change_mgmt_label_type" value="ref:type"
+             helpKey="rept_change_mgmt_help_type" type="Bundle" multi="true">
+        <Attributes>
+          <Map>
+            <entry key="objectColumn" value="type"/>
+          </Map>
+         </Attributes>
+      </Field>
+      <Field name="applications" displayName="rept_change_mgmt_label_apps" value="ref:applications"
+             helpKey="rept_change_mgmt_help_apps" type="Application" multi="true"/>
+      <Field name="owners" displayName="rept_change_mgmt_label_owners" value="ref:owners"
+             helpKey="rept_change_mgmt_help_owners" type="Identity" multi="true">
+        <Attributes>
+          <Map>
+            <entry key="identitySuggestFilter" value="Owner"/>
+          </Map>
+        </Attributes>
+      </Field>
+    </Section>
+  </Form>
+
+   <Form name="User Authentication Question Status Report Form" type="Report" hidden="true">
+      <Section columns="2" label="rept_users_auth_section_identity_props" name="Identity Attributes"/>
+      <Section columns="2" label="rept_users_auth_section_extended" name="Identity Extended Attributes"/>
+      <Section columns="2" label="rept_users_auth_section_identity_details" name="Additional Identity Properties">
+        <Field columnSpan="1" displayName="rept_users_auth_field_app" helpKey="rept_users_auth_help_app" name="applications" type="Application" multi="true" value="ref:applications"/>
+        <Field columnSpan="1" displayName="rept_users_auth_field_capability" helpKey="rept_users_auth_help_capability" name="capabilities" type="Capability" multi="true" value="ref:capabilities"/>
+        <Field columnSpan="1" displayName="rept_users_auth_field_roles" helpKey="rept_users_auth_help_roles" name="businessRoles" type="Bundle" multi="true" value="ref:businessRoles"/>
+        <Field columnSpan="1" displayName="rept_users_auth_field_group_def" helpKey="rept_users_auth_help_group_def" name="groupDefinitions" type="GroupDefinition" multi="true" value="ref:groupDefinitions"/>
+        <Field columnSpan="1" displayName="rept_users_auth_field_last_refresh_start" helpKey="rept_users_auth_help_last_refresh_start" name="lastRefreshStart" type="date" value="ref:lastRefreshStart"/>
+        <Field columnSpan="1" displayName="rept_users_auth_field_last_refresh_end" helpKey="rept_users_auth_help_last_refresh_end" name="lastRefreshEnd" type="date" value="ref:lastRefreshEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+        <Field columnSpan="1" displayName="rept_users_auth_field_last_login_start" helpKey="rept_users_auth_help_last_login_start" name="lastLoginStart" type="date" value="ref:lastLoginStart"/>
+        <Field columnSpan="1" displayName="rept_users_auth_field_last_login_end" helpKey="rept_users_auth_help_last_login_end" name="lastLoginEnd" type="date" value="ref:lastLoginEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      </Section>
+   </Form>
+
+  <Form name="Entitlement Owner Access Review Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+      <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="creationDateStart" required="false" type="date" value="ref:creationDateStart"/>
+      <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="creationDateEnd" required="false" type="date" value="ref:creationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedDateStart" required="false" type="date" value="ref:signedDateStart"/>
+      <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedDateEnd" required="false" type="date" value="ref:signedDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="expirationDateStart" required="false" type="date" value="ref:expirationDateStart"/>
+      <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="expirationDateEnd" required="false" type="date" value="ref:expirationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="rept_cert_field_apps"  helpKey="rept_cert_help_apps" name="applications" multi="true" required="false" type="Application" value="ref:applications"/>
+      <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+      <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+      <Field displayName="rept_cert_field_show_exclusions"  helpKey="rept_cert_help_show_exclusions" name="exclusions" required="false" type="boolean" value="ref:exclusions"/>
+    </Section>
+  </Form>
+
+  <Form name="Identity Entitlements Report Search Fields" type="Report" hidden="true">
+    <Section columns="2" label="rept_identity_entitlement_arguments" name="customProperties">
+
+      <Field name="identity" displayName="identities"
+             helpKey="help_rept_identity_entitlement_identities"
+             multi="true"
+             type="Identity"
+             value="ref:identity" />
+
+      <Field name="application" displayName="applications"
+             helpKey="help_rept_identity_entitlement_applications"
+             multi="true"
+             type="Application"
+             value="ref:application" />
+
+      <Field name="attribute" displayName="rept_identity_entitlement_grid_attributes"
+             helpKey="help_rept_identity_entitlement_attributes"
+             multi="true"
+             type="IdentityEntitlement"
+             value="ref:attribute">
+        <Attributes>
+          <Map>
+            <entry key="objectColumn" value="name"/>
+          </Map>
+         </Attributes>
+      </Field>
+
+      <Field name="entitlementValue" displayName="rept_identity_entitlement_grid_entitlements"
+             helpKey="help_rept_identity_entitlement_entitlements"
+             multi="true"
+             type="IdentityEntitlement"
+             value="ref:entitlementValue">
+         <Attributes>
+          <Map>
+            <entry key="objectColumn" value="value"/>
+          </Map>
+         </Attributes>
+      </Field>
+
+      <Field name="accountId" displayName="rept_identity_entitlement_grid_accounts"
+             helpKey="help_rept_identity_entitlement_accounts"
+             multi="true"
+             type="IdentityEntitlement"
+             value="ref:accountId">
+         <Attributes>
+          <Map>
+            <entry key="objectColumn" value="nativeIdentity"/>
+          </Map>
+         </Attributes>
+      </Field>
+
+      <Field name="instance" displayName="rept_identity_entitlement_grid_instances"
+             helpKey="help_rept_identity_entitlement_instances"
+             multi="true"
+             type="IdentityEntitlement"
+             value="ref:instance">
+         <Attributes>
+          <Map>
+            <entry key="objectColumn" value="instance"/>
+          </Map>
+         </Attributes>
+      </Field>
+
+      <Field name="assigner" displayName="rept_identity_entitlement_grid_assigners"
+             helpKey="help_rept_identity_entitlement_assigners"
+             multi="true"
+             type="IdentityEntitlement"
+             value="ref:assigner">
+        <Attributes>
+          <Map>
+            <entry key="objectColumn" value="assigner"/>
+          </Map>
+        </Attributes>
+      </Field>
+
+      <Field name="source" displayName="identity_entitlements_source"
+             helpKey="help_rept_identity_entitlement_sources"
+             multi="true"
+             value="ref:source" >
+        <AllowedValues>
+          <List>
+            <String>Aggregation</String>
+            <String>source_aggregation</String>
+          </List>
+          <List>
+            <String>LCM</String>
+            <String>source_lcm</String>
+          </List>
+          <List>
+            <String>Rule</String>
+            <String>source_rule</String>
+          </List>
+          <List>
+            <String>Task</String>
+            <String>source_task</String>
+          </List>
+          <List>
+            <String>WebServices</String>
+            <String>source_web_service</String>
+          </List>
+        </AllowedValues>
+      </Field>
+
+      <Field name="aggregationState" displayName="identity_entitlements_aggregation_state_display"
+             helpKey="help_rept_identity_entitlement_agg_state"
+             value="ref:aggregationState">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>Connected</String>
+            <String>txt_true</String>
+          </List>
+          <List>
+            <String>Disconnected</String>
+            <String>txt_false</String>
+          </List>
+        </AllowedValues>
+      </Field>
+
+      <Field name="type" displayName="srch_input_def_entitlement_type"
+             helpKey="help_rept_identity_entitlement_types"
+             value="ref:type">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>Entitlement</String>
+            <String>entitlement</String>
+          </List>
+          <List>
+            <String>Permission</String>
+            <String>permission</String>
+          </List>
+
+        </AllowedValues>
+      </Field>
+
+      <Field name="allowed" displayName="identity_entitlements_role_allowed"
+             helpKey="help_rept_identity_entitlement_allowed"
+             value="ref:allowed">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>txt_true</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>txt_false</String>
+          </List>
+        </AllowedValues>
+      </Field>
+
+      <Field name="grantedByRole" displayName="rept_identity_entitlement_grid_additional"
+             helpKey="help_rept_identity_entitlement_only_additional" 
+             value="ref:grantedByRole">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>txt_true</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>txt_false</String>
+          </List>
+
+        </AllowedValues>
+      </Field>
+
+      <Field name="certified" displayName="rept_identity_entitlement_grid_certified"
+             helpKey="help_rept_identity_entitlement_certified"
+             value="ref:certified">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>txt_true</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>txt_false</String>
+          </List>
+
+        </AllowedValues>
+      </Field>
+
+     <Field name="pendingCertification" displayName="rept_identity_entitlement_grid_pending_certification"
+            helpKey="help_rept_identity_entitlement_pending_certification"
+            value="ref:pendingCertification">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>txt_true</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>txt_false</String>
+          </List>
+
+        </AllowedValues>
+      </Field>
+
+      <Field name="currentRequest" displayName="rept_identity_entitlement_grid_requested"
+              helpKey="help_rept_identity_entitlement_requested"
+              value="ref:currentRequest">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>txt_true</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>txt_false</String>
+          </List>
+
+        </AllowedValues>
+      </Field>
+
+      <Field name="pendingRequest" displayName="rept_identity_entitlement_grid_pending_request"
+             helpKey="help_rept_identity_entitlement_pending_request"
+             value="ref:pendingRequest">
+        <AllowedValues>
+          <List>
+            <String>null</String>
+            <String>rept_app_account_attrs_filter_include_all</String>
+          </List>
+          <List>
+            <String>true</String>
+            <String>txt_true</String>
+          </List>
+          <List>
+            <String>false</String>
+            <String>txt_false</String>
+          </List>
+        </AllowedValues>
+      </Field>
+
+    </Section>
+  </Form>
+
+  <Form name="Identity Effective Access Options Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_identity_effective_access_report_section_identity_attrs" name="Identity Attributes"/>
+    <Section columns="2" label="rept_identity_effective_access_report_section_identity_extended" name="Identity Extended Attributes"/>
+    <Section columns="2" label="rept_identity_roles_section_props" name="Identity Properties">
+      <Field columnSpan="1" displayName="rept_identity_roles_field_app" helpKey="rept_identity_roles_help_app" name="applications" type="Application" multi="true" value="ref:applications"/>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_capability" helpKey="rept_identity_roles_help_capability" name="capabilities" type="Capability" multi="true" value="ref:capabilities"/>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_roles" helpKey="rept_identity_roles_help_roles" name="businessRoles" type="Bundle" multi="true" value="ref:businessRoles"/>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_group_def" helpKey="rept_identity_roles_help_group_def" name="groupDefinitions" type="GroupDefinition" multi="true" value="ref:groupDefinitions"/>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_last_refresh" helpKey="rept_identity_roles_help_last_refresh" name="lastRefresh" type="string" value="ref:lastRefresh">
+        <Attributes>
+          <Map>
+            <entry key="xtype" value="daterange"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_last_login" helpKey="rept_identity_roles_help_last_login" name="lastLogin" type="string" value="ref:lastLogin">
+        <Attributes>
+          <Map>
+            <entry key="xtype" value="daterange"/>
+          </Map>
+        </Attributes>
+      </Field>
+    </Section>
+  </Form>
+
+  <Form name="Account Attributes Live Options Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_account_attrs_section_identity_attrs" name="Identity Attributes"/>
+    <Section columns="2" label="rept_account_attrs_section_identity_extended" name="Identity Extended Attributes"/>
+    <Section columns="2" label="rept_account_attrs_section_props" name="Identity Properties">
+      <Field columnSpan="1" displayName="rept_account_attrs_field_app" helpKey="rept_account_attrs_help_app" name="identityApplication" type="Application" multi="true" value="ref:identityApplication"/>
+      <Field columnSpan="1" displayName="rept_account_attrs_field_capability" helpKey="rept_account_attrs_help_capability" name="capabilities" type="Capability" multi="true" value="ref:capabilities"/>
+       <Field columnSpan="1" displayName="rept_account_attrs_field_group_def" helpKey="rept_account_attrs_help_group_def" name="groupDefinitions" type="GroupDefinition" multi="true" value="ref:groupDefinitions"/>
+      <Field columnSpan="1" displayName="rept_account_attrs_field_last_refresh" helpKey="rept_account_attrs_help_last_refresh" name="lastRefresh" type="string" value="ref:lastRefresh">
+        <Attributes>
+          <Map>
+            <entry key="xtype" value="daterange"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field columnSpan="1" displayName="rept_account_attrs_field_last_login" helpKey="rept_account_attrs_help_last_login" name="lastLogin" type="string" value="ref:lastLogin">
+        <Attributes>
+          <Map>
+            <entry key="xtype" value="daterange"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field columnSpan="1" displayName="rept_account_attrs_field_scopes_caps" helpKey="rept_account_attrs_help_scopes_caps" name="showScopes" type="boolean" value="ref:showScopes"/>
+    </Section>
+  </Form>
+
+  <Form name="Uncorrelated Accounts Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_uncorrelated_accounts_params_label" name="customProperties">
+      <Field name="correlatedApps" displayName="report_input_correlated_apps" type="Application"
+             value="ref:correlatedApps" multi="true" helpKey="rept_input_uncorrelated_ident_report_correlated_apps"
+             filterString="logical==false &amp;&amp; authoritative==false" />
+    </Section>
+  </Form>
+
+  <Form name="Applications Detail Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_app_section_label" name="customProperties">
+      <Field displayName="rept_app_filter_applications" helpKey="task_in_account_aggregation_applications" multi="true" name="applications" type="Application" value="ref:applications"/>
+      <Field displayName="rept_app_filter_owners" helpKey="rept_input_app_report_owners" multi="true" name="owners" type="Identity" value="ref:owners">
+        <Attributes>
+          <Map>
+            <entry key="identitySuggestFilter" value="Owner"/>
+          </Map>
+        </Attributes>
+      </Field>
+    </Section>
+   </Form>
+
+  <Form name="Delimited File Report Form" type="Report" hidden="true">
+      <Section columns="2" label="rept_del_file_secion_label" name="customProperties">
+          <Field displayName="rept_del_file_filter_applications" helpKey="rept_input_app_report_apps" name="applications" type="Application" multi="true" value="ref:applications"/>
+      </Section>
+  </Form>
+
+  <Form name="Base Identity Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_users_auth_section_identity_props" name="Identity Attributes"/>
+    <Section columns="2" label="rept_users_auth_section_extended" name="Identity Extended Attributes"/>
+    <Section columns="2" label="rept_identity_roles_section_props" name="Identity Properties">
+      <Field columnSpan="1" displayName="rept_identity_roles_field_app" helpKey="rept_identity_roles_help_app" name="identityApplications" type="Application" multi="true" value="ref:identityApplications"/>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_capability" helpKey="rept_identity_roles_help_capability" name="capabilities" type="Capability" multi="true" value="ref:capabilities"/>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_roles" helpKey="rept_identity_roles_help_roles" name="identityRoles" type="Bundle" multi="true" value="ref:identityRoles"/>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_group_def" helpKey="rept_identity_roles_help_group_def" name="groupDefinitions" type="GroupDefinition" multi="true" value="ref:groupDefinitions"/>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_last_refresh" helpKey="rept_identity_roles_help_last_refresh" name="lastRefresh" type="string" value="ref:lastRefresh">
+        <Attributes>
+          <Map>
+            <entry key="xtype" value="daterange"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field columnSpan="1" displayName="rept_identity_roles_field_last_login" helpKey="rept_identity_roles_help_last_login" name="lastLogin" type="string" value="ref:lastLogin">
+        <Attributes>
+          <Map>
+            <entry key="xtype" value="daterange"/>
+          </Map>
+        </Attributes>
+      </Field>
+    </Section>
+  </Form>
+
+  <Form name="Application Account by Attribute Report Form" type="Report" hidden="true">
+    <Section columns="2" label="rept_account_by_attr_properties_section" name="Account Properties">
+      <Field displayName="rept_account_by_attr_label_app" postBack="true" helpKey="rept_account_by_attr_help_app" name="application" required="true" type="Application" value="ref:application"/>
+    </Section>
+  </Form>
+
+   <Form name="Identity Risk Report Form" type="Report" hidden="true">
+      <Section columns="2" label="rept_id_risk_section_identity_props" name="Identity Attributes"/>
+      <Section columns="2" label="rept_id_risk_section_extended" name="Identity Extended Attributes"/>
+      <Section columns="2" label="rept_id_risk_section_identity_details" name="Additional Identity Properties">
+        <Field columnSpan="1" displayName="rept_id_risk_field_app" helpKey="rept_id_risk_help_app" name="identityApplications" type="Application" multi="true" value="ref:identityApplications"/>
+        <Field columnSpan="1" displayName="rept_id_risk_field_capability" helpKey="rept_id_risk_help_capability" name="capabilities" type="Capability" multi="true" value="ref:capabilities"/>
+        <Field columnSpan="1" displayName="rept_id_risk_field_roles" helpKey="rept_id_risk_help_roles" name="identityBusinessRoles" type="Bundle" multi="true" value="ref:identityBusinessRoles"/>
+        <Field columnSpan="1" displayName="rept_id_risk_field_group_def" helpKey="rept_id_risk_help_group_def" name="groupDefinitions" type="GroupDefinition" multi="true" value="ref:groupDefinitions"/>
+        <Field columnSpan="1" displayName="rept_id_risk_field_last_refresh_start" helpKey="rept_id_risk_help_last_refresh_start" name="lastRefreshStart" type="date" value="ref:lastRefreshStart"/>
+        <Field columnSpan="1" displayName="rept_id_risk_field_last_refresh_end" helpKey="rept_id_risk_help_last_refresh_end" name="lastRefreshEnd" type="date" value="ref:lastRefreshEnd">
+          <Attributes>
+            <Map>
+              <entry key="endDate" value="true"/>
+            </Map>
+          </Attributes>
+        </Field>
+        <Field columnSpan="1" displayName="rept_id_risk_field_last_login_start" helpKey="rept_id_risk_help_last_login_start" name="lastLoginStart" type="date" value="ref:lastLoginStart"/>
+        <Field columnSpan="1" displayName="rept_id_risk_field_last_login_end" helpKey="rept_id_risk_help_last_login_end" name="lastLoginEnd" type="date" value="ref:lastLoginEnd">
+          <Attributes>
+            <Map>
+              <entry key="endDate" value="true"/>
+            </Map>
+          </Attributes>
+        </Field>
+      </Section>
+   </Form>
+
+   <Form name="Identity Forwarding Report Options Form" type="Report" hidden="true">
+      <Section columns="2" label="rept_usr_forward_section_identity_props" name="Identity Attributes"/>
+      <Section columns="2" label="rept_usr_forward_section_section_extended" name="Identity Extended Attributes"/>
+      <Section columns="2" label="rept_usr_forward_section_section_props" name="Identity Properties">
+        <Field columnSpan="1" displayName="rept_usr_forward_field_app" helpKey="rept_usr_forward_help_app" name="applications" type="Application" multi="true" value="ref:applications"/>
+        <Field columnSpan="1" displayName="rept_usr_forward_field_capability" helpKey="rept_usr_forward_help_capability" name="capabilities" type="Capability" multi="true" value="ref:capabilities"/>
+        <Field columnSpan="1" displayName="rept_usr_forward_field_roles" helpKey="rept_usr_forward_help_roles" name="businessRoles" type="Bundle" multi="true" value="ref:businessRoles"/>
+        <Field columnSpan="1" displayName="rept_usr_forward_field_group_def" helpKey="rept_usr_forward_help_group_def" name="groupDefinitions" type="GroupDefinition" multi="true" value="ref:groupDefinitions"/>
+        <Field columnSpan="1" displayName="rept_usr_forward_field_last_refresh" helpKey="rept_usr_forward_help_last_refresh" name="lastRefresh" type="string" value="ref:lastRefresh">
+          <Attributes>
+            <Map>
+              <entry key="xtype" value="daterange"/>
+            </Map>
+          </Attributes>
+        </Field>
+        <Field columnSpan="1" displayName="rept_usr_forward_field_last_login" helpKey="rept_usr_forward_help_last_login" name="lastLogin" type="string" value="ref:lastLogin">
+          <Attributes>
+            <Map>
+              <entry key="xtype" value="daterange"/>
+            </Map>
+          </Attributes>
+        </Field>
+      </Section>
+   </Form>
+
+   <Form name="Certification Signoff Report Form" type="Report" hidden="true">
+      <Section columns="2" label="rept_cert_custom_section_title" name="customProperties">
+        <Field displayName="rept_cert_field_create_start"  helpKey="rept_cert_help_create_start" name="creationDateStart" required="false" type="date" value="ref:creationDateStart"/>
+        <Field displayName="rept_cert_field_create_end"  helpKey="rept_cert_help_create_end" name="creationDateEnd" required="false" type="date" value="ref:creationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+        <Field displayName="rept_cert_field_signed_start"  helpKey="rept_cert_help_signed_start" name="signedDateStart" required="false" type="date" value="ref:signedDateStart"/>
+        <Field displayName="rept_cert_field_signed_end"  helpKey="rept_cert_help_signed_end" name="signedDateEnd" required="false" type="date" value="ref:signedDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+        <Field displayName="rept_cert_field_due_start"  helpKey="rept_cert_help_due_start" name="expirationDateStart" required="false" type="date" value="ref:expirationDateStart"/>
+        <Field displayName="rept_cert_field_due_end"  helpKey="rept_cert_help_due_end" name="expirationDateEnd" required="false" type="date" value="ref:expirationDateEnd">
+        <Attributes>
+          <Map>
+            <entry key="endDate" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+        <Field displayName="rept_cert_field_mangers"  helpKey="rept_cert_help_mangers" name="managers" multi="true" filterString="managerStatus==true" required="false" type="Identity" value="ref:managers"/>
+        <Field displayName="rept_cert_field_apps"  helpKey="rept_cert_help_apps" name="applications" multi="true" required="false" type="Application" value="ref:applications"/>
+        <Field displayName="rept_cert_field_groups"  helpKey="rept_cert_help_groups" name="groups" multi="true" required="false" type="GroupDefinition" value="ref:groups"/>
+        <Field displayName="rept_cert_field_tags"  helpKey="rept_cert_help_tags" name="tags" multi="true" required="false" type="Tag" value="ref:tags"/>
+        <Field displayName="rept_cert_field_cert_group"  helpKey="rept_cert_help_cert_group" name="certificationGroups" multi="true" required="false" type="CertificationGroup" value="ref:certificationGroups"/>
+        <Field displayName="rept_cert_signedoff" defaultValue="null"  helpKey="rept_cert_help_signedoff" name="signedOff" required="false" type="string" value="ref:signedOff">
+          <Attributes>
+            <Map>
+              <entry key="xtype" value="spBooleanCombo"/>
+            </Map>
+          </Attributes>
+        </Field>
+        <Field displayName="rept_cert_signoff_esigned" defaultValue="null"  helpKey="rept_cert_signoff_help_esigned" name="esigned"  required="false" type="string" value="ref:esigned">
+          <Attributes>
+            <Map>
+              <entry key="xtype" value="spBooleanCombo"/>
+            </Map>
+          </Attributes>
+        </Field>
+      </Section>
+    </Form>
+
+   <Form name="Role Profiles Details Report Custom Fields" type="Report" hidden="true">
+      <Section columns="2" name="customProperties" label="report_details_section_role_props">
+         <Field name="disabled" displayName="rept_role_details_field_status" type="string" value="ref:disabled" helpKey="rept_role_details_help_status">
+          <AllowedValues>
+            <List>
+              <String>null</String>
+              <String>report_role_profiles_comp_filter_status_all</String>
+            </List>
+            <List>
+              <String>true</String>
+              <String>report_role_profiles_comp_filter_status_disabled</String>
+            </List>
+            <List>
+              <String>false</String>
+              <String>report_role_profiles_comp_filter_status_enabled</String>
+            </List>
+          </AllowedValues>
+        </Field>
+        <Field name="applications" displayName="rept_role_details_field_apps" value="ref:applications" helpKey="rept_role_details_help_apps" type="Application" multi="true"/>
+        <Field name="owners" displayName="rept_role_details_field_owners" value="ref:owners" helpKey="rept_role_details_help_owners" type="Identity" multi="true">
+          <Attributes>
+            <Map>
+              <entry key="identitySuggestFilter" value="Owner"/>
+            </Map>
+          </Attributes>
+        </Field>
+        <Field name="type" displayName="rept_role_details_field_type" value="ref:type" helpKey="rept_role_details_help_type" type="Bundle" multi="true">
+          <Attributes>
+            <Map>
+              <entry key="objectColumn" value="type"/>
+            </Map>
+           </Attributes>
+        </Field>
+      </Section>
+    </Form>
+
+   <Form name="Role Profiles Composition Report Form" type="Report" hidden="true">
+      <Section columns="2" name="customProperties" label="report_role_profiles_comp_section_role_props">
+         <Field name="disabled" displayName="report_role_profiles_comp_filter_status" type="string" value="ref:disabled" helpKey="report_role_profiles_comp_help_status">
+          <AllowedValues>
+            <List>
+              <String>null</String>
+              <String>report_role_profiles_comp_filter_status_all</String>
+            </List>
+            <List>
+              <String>true</String>
+              <String>report_role_profiles_comp_filter_status_disabled</String>
+            </List>
+            <List>
+              <String>false</String>
+              <String>report_role_profiles_comp_filter_status_enabled</String>
+            </List>
+          </AllowedValues>
+        </Field>
+        <Field name="filters" displayName="report_role_profiles_comp_filter_profiles" type="string" value="ref:filters" helpKey="report_role_profiles_comp_help_profiles">
+          <AllowedValues>
+            <List>
+              <String>null</String>
+              <String>report_role_profiles_comp_filter_profiles_all</String>
+            </List>
+            <List>
+              <String>false</String>
+              <String>report_role_profiles_comp_filter_profiles_disabled</String>
+            </List>
+            <List>
+              <String>true</String>
+              <String>report_role_profiles_comp_filter_profiles_enabled</String>
+            </List>
+          </AllowedValues>
+        </Field>
+        <Field name="applications" displayName="report_role_profiles_comp_filter_apps" value="ref:applications" helpKey="report_role_profiles_comp_help_apps" type="Application" multi="true"/>
+        <Field name="owners" displayName="report_role_profiles_comp_filter_owners" value="ref:owners" helpKey="report_role_profiles_comp_help_owners" type="Identity" multi="true">
+          <Attributes>
+            <Map>
+              <entry key="identitySuggestFilter" value="Owner"/>
+            </Map>
+          </Attributes>
+        </Field>
+        <Field name="type" displayName="report_role_profiles_comp_filter_type" value="ref:type" helpKey="report_role_profiles_comp_help_type" type="Bundle" multi="true">
+          <Attributes>
+            <Map>
+              <entry key="objectColumn" value="type"/>
+            </Map>
+           </Attributes>
+        </Field>
+
+      </Section>
+    </Form>
+
+</sailpoint>

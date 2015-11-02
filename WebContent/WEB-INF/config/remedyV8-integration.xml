@@ -1,0 +1,432 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!--
+The custom Remedy Interrogatorre's task can fetch the status of the request from iiq, but there
+is nothing built-in to the product.  See comments for status values below to understand what
+the link is between what return and what's in Remedy.
+
+User can create incident and check status in remedyforce by modifying same remedyintegartion xml
+User need to provide correct endpoints, responseElement key, SOAP envelop and body details and
+need to map status map properly. 
+Eample of endpoint :
+Create incident: "https://TESTQA.sp.com/arsys/services/ARService?server=sp-s&amp;webService=HPD_IncidentInterface_Create_WS"/>
+Get Status: "https://TESTQA.sp.com/arsys/services/ARService?server=sp-s&amp;webService=HPD_GCS_IncidentInterface_WS"
+Example of responseElement:
+responseElement = Incident_Number
+responseElement = Status
+
+
+-->
+
+<sailpoint>
+
+<Rule language='beanshell' name='tst_RemedyIntegrationRule' type='Integration'>
+  <Description>
+    Use this rule to customize the data loaded into the provisioningPlan's 
+    integrationData object. The provisioningPlan and its integrationData 
+    object are used by Velocity to populate values in the XML templates for 
+    the web service calls.
+  </Description>
+  <Signature returnType='Attributes'>
+    <Inputs>
+      <Argument name='identity'>
+        <Description>
+          A sailpoint.object.Identity representing the person being remediated.
+        </Description>
+      </Argument>
+      <Argument name='plan'>
+        <Description>
+          A sailpoint.object.ProvisioningPlan representing remediation.
+        </Description>
+      </Argument>
+      <Argument name='context'>
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to 
+          query the database to find the Rule.
+        </Description>
+      </Argument>
+      <Argument name='log'>
+        <Description>
+          A Log object to help report and/or debug the Rule.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+    <![CDATA[
+    import java.util.ArrayList;
+    import java.util.List;
+    import sailpoint.object.Identity;
+      
+    Map map = (Map)plan.getIntegrationData();
+    map.put("identityName", identity.getName());
+    //System.out.println ("Plan: "  + plan.toXml());
+
+    if (identity.getFirstname() != null)  {
+      map.put("identityFirstname", identity.getFirstname());
+      }
+
+    if (identity.getLastname() != null)  {
+      map.put("identityLastname", identity.getLastname());
+      }
+     
+    List requesters = new ArrayList();
+    List planRequesters = plan.getRequesters();
+    if (planRequesters != null) {
+        for (int i = 0 ; i < planRequesters.size() ; i++) {
+            Identity req = (Identity)planRequesters.get(i);
+            requesters.add(req.getDisplayableName());
+            //System.out.println ("Requester: " + req.getDisplayableName()); 
+        }
+    } else
+        requesters.add("IIQRequestor");
+ 
+
+    map.put("requesters", requesters);
+
+    map.put("sourceId", plan.getSourceId());
+    map.put("sourceName", plan.getSourceName());
+    map.put("sourceType", plan.getSourceType());
+
+    ]]>
+  </Source>
+</Rule>
+
+
+<IntegrationConfig name="tst_RemedyIntegration"
+                   executor="sailpoint.integration.remedy.RemedyIntegrationExecutor"
+                   roleSyncStyle="none">
+
+            
+  <PlanInitializer>
+    <Reference class="sailpoint.object.Rule" name="tst_RemedyIntegrationRule"/>
+  </PlanInitializer>
+
+              
+   
+    <!--
+      Connection params.  Can also include username and password for 
+      SOAP authentication.
+    -->
+    <Attributes>
+      <Map>
+        <!-- set this to true and we will save a provisioining request object
+             which we will check to make sure that we don't send another provisioning
+             request with the same things -->
+        <entry key='saveProvisioningRequests' value='false'/>
+
+        <!-- no reason not to handle all request types, but the resources won't have 
+             support some by default.  TODO : think about adding the features -->
+        <entry key='operations' value='Create,Modify,Delete,Enable,Unlock,SetPassword'/>
+
+        <!-- date formatting for dateTime XML data type -->
+        <entry key="dateFormat" value="yyyy-MM-dd'T'HH:mm:ss"/>
+      
+        <!-- authentication -->
+        <entry key="username" value=""/>
+        <entry key="password" value=""/>    
+		
+		<!-- Now we can perform http authentication with attribute basicAuthType.
+		if addtional application is used for http authentication before request reaches remedy server we can set basicAuthType attribute value to 
+        true (ignorecase)with required httpUserName and httpUserPass (http password).
+
+		<entry key="basicAuthType" value="true"/>
+		<entry key="httpUserName" value=""/>
+		<entry key="httpUserPass" value=""/> -->
+
+        
+        <!-- configuration maps for the different integration methods require
+             at a minimum a responseElement and a soapMessage -->
+        <entry key="provision">
+            <value>
+                <Map>         
+			        <entry key="endpoint" value=""/> <!-- e.g http://vm-remedy8:8080/arsys/services/ARService?server=VM-Remedy8&amp;webService=CHG_ChangeInterface_Create_WS -->	
+		        <entry key="namespace" value="urn:CHG_ChangeInterface_Create_WS"/>     
+			        <entry key="prefix" value="ns0"/>     
+			        <entry key="responseElement" value="Infrastructure_Change_ID"/>    
+			        <entry key="soapMessage">
+			            <!-- XML template -->
+                  <value>
+                    <String><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:CHG_ChangeInterface_Create_WS">
+   <soapenv:Header>
+      <urn:AuthenticationInfo>
+         <urn:userName>$config.username</urn:userName>
+         <urn:password>$config.password</urn:password>
+      </urn:AuthenticationInfo>
+   </soapenv:Header>
+   <soapenv:Body>
+   	<urn:Change_Submit_Service>
+	
+	    <!--Optional:-->
+         <urn:Actual_End_Date></urn:Actual_End_Date>
+         <!--Optional:-->
+         <urn:Actual_Start_Date></urn:Actual_Start_Date>
+         <!--Optional:-->
+         <urn:Chg_Assignee_Support_Company></urn:Chg_Assignee_Support_Company>
+         <!--Optional:-->
+         <urn:Chg_Assignee_Support_Group></urn:Chg_Assignee_Support_Group>
+         <!--Optional:-->
+         <urn:Chg_Assignee_Support_Organization></urn:Chg_Assignee_Support_Organization>
+         <!--Optional:-->
+         <urn:Change_Manager></urn:Change_Manager>
+         <!--Optional:-->
+         <urn:Categorization_Tier_1></urn:Categorization_Tier_1>
+         <!--Optional:-->
+         <urn:Categorization_Tier_2></urn:Categorization_Tier_2>
+         <!--Optional:-->
+         <urn:Categorization_Tier_3></urn:Categorization_Tier_3>
+		 <urn:Change_Type>Change</urn:Change_Type>
+		 <!--Optional:-->
+         <urn:Change_Implementer></urn:Change_Implementer>
+         <!--Optional:-->
+         <urn:Chg_Implementer_Support_Company></urn:Chg_Implementer_Support_Company>
+         <!--Optional:-->
+         <urn:Chg_Implementer_Support_Group></urn:Chg_Implementer_Support_Group>
+         <!--Optional:-->
+         <urn:Chg_Implementer_Support_Organization></urn:Chg_Implementer_Support_Organization>
+         <!--Optional:-->
+         <urn:CI_Name></urn:CI_Name>
+         <urn:Company>My Company</urn:Company>
+         <!--Optional:-->
+         <urn:Chg_Manager_Support_Company></urn:Chg_Manager_Support_Company>
+         <urn:Summary>IdentityIQ provisioning request for: $provisioningPlan.integrationData.identityName</urn:Summary>
+         <urn:Notes>#foreach ($request in $provisioningPlan.accountRequests)
+#if ($request.attributeRequests)
+#foreach ($att in $request.attributeRequests)
+$request.application $att.operation $att.name $att.value
+#end
+#else
+$request.operation $request.application nativeIdentity $request.nativeIdentity
+#end
+#end
+Source Data:
+id= $provisioningPlan.integrationData.sourceId
+name= $provisioningPlan.integrationData.sourceName
+type= $provisioningPlan.integrationData.sourceType</urn:Notes>
+         <!--Optional:-->
+         <urn:Environment></urn:Environment>
+         <urn:First_Name>First Name</urn:First_Name>
+         <urn:Impact>2-Significant/Large</urn:Impact>
+         <urn:Last_Name>Last Name</urn:Last_Name>
+         <!--Optional:-->
+         <urn:Lead_Time></urn:Lead_Time>
+         <urn:Location_Company>My Company</urn:Location_Company>
+         <!--Optional:-->
+         <urn:Lookup_Keyword></urn:Lookup_Keyword>
+         <!--Optional:-->
+         <urn:Manufacturer></urn:Manufacturer>
+         <!--Optional:-->
+         <urn:Performance_Rating></urn:Performance_Rating>
+         <!--Optional:-->
+         <urn:Product_Cat_Tier_1></urn:Product_Cat_Tier_1>
+         <!--Optional:-->
+         <urn:Product_Cat_Tier_2></urn:Product_Cat_Tier_2>
+         <!--Optional:-->
+         <urn:Product_Cat_Tier_3></urn:Product_Cat_Tier_3>
+         <!--Optional:-->
+         <urn:Product_Model_Version></urn:Product_Model_Version>
+         <!--Optional:-->
+         <urn:Product_Name></urn:Product_Name>
+         <!--Optional:-->
+         <urn:Reason_For_Change></urn:Reason_For_Change>
+         <!--Optional:-->
+         <urn:Requested_End_Date></urn:Requested_End_Date>
+         <!--Optional:-->
+         <urn:Requested_Start_Date></urn:Requested_Start_Date>
+         <urn:Risk_Level>Risk Level 5</urn:Risk_Level>
+
+		<!--Optional:-->
+         <urn:Scheduled_End_Date></urn:Scheduled_End_Date>
+         <!--Optional:-->
+         <urn:Scheduled_Start_Date></urn:Scheduled_Start_Date>
+         <!--Optional:-->
+         <urn:Schema_Name></urn:Schema_Name>
+         <urn:Status>Draft</urn:Status>
+         <!--Optional:-->
+         <urn:Status_Reason></urn:Status_Reason>
+         <!--Optional:-->
+         <urn:Chg_Manager_Suuport_Group></urn:Chg_Manager_Suuport_Group>
+         <!--Optional:-->
+         <urn:Chg_Manager_Support_Organization></urn:Chg_Manager_Support_Organization>
+         <!--Optional:-->
+         <urn:Timing_Reason></urn:Timing_Reason>
+         <urn:Urgency>3-Medium</urn:Urgency>
+          <urn:Action>CREATE</urn:Action>
+         <!--Optional:-->
+         <urn:Priority></urn:Priority>
+         <!--Optional:-->
+         <urn:Region></urn:Region>
+         <!--Optional:-->
+         <urn:Site></urn:Site>
+         <!--Optional:-->
+         <urn:Site_Group></urn:Site_Group>
+         <!--Optional:-->
+         <urn:Req_By_Phone_Number></urn:Req_By_Phone_Number>
+         <!--Optional:-->
+         <urn:Req_By_Organization></urn:Req_By_Organization>
+         <!--Optional:-->
+         <urn:Req_By_Department></urn:Req_By_Department>
+         <!--Optional:-->
+         <urn:Req_By_Group></urn:Req_By_Group>
+         <!--Optional:-->
+         <urn:Business_Justification></urn:Business_Justification>
+         <!--Optional:-->
+         <urn:In_Production_Date></urn:In_Production_Date>
+         <!--Optional:-->
+         <urn:Middle_Name></urn:Middle_Name>
+         <!--Optional:-->
+         <urn:Req_For_Department></urn:Req_For_Department>
+         <!--Optional:-->
+         <urn:Req_For_Phone_Number></urn:Req_For_Phone_Number>
+         <!--Optional:-->
+         <urn:Req_For_Organization></urn:Req_For_Organization>
+         <!--Optional:-->
+         <urn:Work_Info_Summary></urn:Work_Info_Summary>
+         <!--Optional:-->
+         <urn:Work_Info_Notes></urn:Work_Info_Notes>
+         <!--Optional:-->
+         <urn:Work_Info_Type>General Information</urn:Work_Info_Type>
+         <!--Optional:-->
+         <urn:Work_Info_Date></urn:Work_Info_Date>
+         <!--Optional:-->
+         <urn:Work_Info_Source></urn:Work_Info_Source>
+         <!--Optional:-->
+         <urn:Work_Info_Locked>Yes</urn:Work_Info_Locked>
+         <!--Optional:-->
+         <urn:Work_Info_View_Access>Internal</urn:Work_Info_View_Access>
+         <!--Optional:-->
+         <urn:Req_For_Company></urn:Req_For_Company>
+         <!--Optional:-->
+         <urn:Req_For_First_Name></urn:Req_For_First_Name>
+         <!--Optional:-->
+         <urn:Req_For_Middle_Name></urn:Req_For_Middle_Name>
+         <!--Optional:-->
+         <urn:Req_For_Last_Name></urn:Req_For_Last_Name>
+         <!--Optional:-->
+         <urn:Req_For_Internet_Email></urn:Req_For_Internet_Email>
+         <!--Optional:-->
+         <urn:ServiceCI></urn:ServiceCI>
+         <!--Optional:-->
+         <urn:ServiceCI_ReconID></urn:ServiceCI_ReconID>
+         <!--Optional:-->
+         <urn:Template_InstanceID></urn:Template_InstanceID>
+         <!--Optional:-->
+         <urn:Change_Target_Date></urn:Change_Target_Date>
+         <!--Optional:-->
+         <urn:Change_Coordinator></urn:Change_Coordinator>
+         <urn:Class>Normal</urn:Class>
+         <!--Optional:-->
+         <urn:ASLOGID></urn:ASLOGID>
+         <!--Optional:-->
+         <urn:CAB_Manager_Login></urn:CAB_Manager_Login>
+         <!--Optional:-->
+         <urn:ChgImpLoginID></urn:ChgImpLoginID>
+      </urn:Change_Submit_Service>
+   </soapenv:Body>
+ </soapenv:Envelope>
+ ]]>
+	                     </String>
+			            </value>
+			        </entry>
+			    </Map>
+			</value>
+    </entry>
+
+
+
+
+            <!-- mapping of remedy request status values to the  
+             possible status values in the IIQ (RequestStatus class) -->
+        <entry key="statusMap">
+            <value>
+                <Map>
+                    <entry key="Cancelled" value="committed" />
+                    <entry key="Draft" value="inProcess" />
+                    <entry key="Pending" value="inProcess" />
+                </Map>
+            </value>
+        </entry>
+
+
+    <entry key="getRequestStatus">
+      <value>
+        <Map>
+          		<entry key="endpoint" value=""/> <!--e.g
+				http://vm-remedy8:8080/arsys/services/ARService?server=VM-Remedy8&amp;webService=CHG_ChangeInterface_WS -->
+			        <entry key="namespace" value="urn:CHG_ChangeInterface_WS"/>     
+			        <entry key="prefix" value="ns0"/>     
+          <entry key="responseElement" value="Change_Request_Status"/>
+          <entry key="soapMessage">
+            <!-- XML template -->
+            <value>
+              <String><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:CHG_ChangeInterface_WS">
+   <soapenv:Header>
+      <urn:AuthenticationInfo>
+         <urn:userName>$config.username</urn:userName>
+         <urn:password>$config.password</urn:password>
+      </urn:AuthenticationInfo>
+   </soapenv:Header>
+   <soapenv:Body>
+      <urn:Change_Query_Service>
+         <urn:Infrastructure_Change_ID>$requestID</urn:Infrastructure_Change_ID>
+      </urn:Change_Query_Service>
+   </soapenv:Body>
+</soapenv:Envelope>
+]]>
+                            </String>
+                        </value>
+                    </entry>
+                </Map>
+            </value>
+        </entry>
+      </Map>
+    </Attributes>
+   
+    <ManagedResources>
+      <ManagedResource>
+        <ApplicationRef>
+          <Reference class="sailpoint.object.Application" name="Active_Directory" />
+        </ApplicationRef>
+      </ManagedResource>
+      <ManagedResource>
+        <ApplicationRef>
+          <Reference class="sailpoint.object.Application" name="Procurement_System"/>
+        </ApplicationRef>
+      </ManagedResource>
+      </ManagedResources>
+    
+  </IntegrationConfig>
+
+
+
+  <!-- This relies on sailpoint.custom.RemedyInterrogator which
+       we can use to test getStatus until it's baked into the ui -->
+
+<TaskDefinition name='Remedy Interrogator' type='Generic' executor='sailpoint.custom.RemedyInterrogator'>
+  <Attributes>
+    <Map>
+      <entry key="remedyConfig" value="tst_RemedyIntegration"/>
+    </Map>
+  </Attributes>
+  <Description>
+    Query Remedy for status of IIQ-generated tickets
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name='ticketId' type='string' multi='false' required='true'>
+        <Prompt>Remedy ticket ID</Prompt>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name='ticketStatus' type='String'>
+        <Prompt>Ticket Status:</Prompt>
+      </Argument>
+    </Returns>
+  </Signature>
+</TaskDefinition>
+  
+
+</sailpoint>

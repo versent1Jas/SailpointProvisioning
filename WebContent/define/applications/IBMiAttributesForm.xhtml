@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+  <ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'applicationObject';
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+            String host = getRequiredStringAttribute(host);
+            String user = getRequiredStringAttribute(user);
+            String password = getEncryptedAttribute(password);
+            String proxy = getStringAttribute(proxyServer);
+            boolean useSSL = getBooleanAttribute(useSSL);
+
+               var host = getFieldValue('editForm:host');
+               Validator.validateNonBlankString(host, "#{msgs.con_form_ibmi_hostnotnull}");
+               var scbport = getFieldValue('editForm:user');
+               Validator.validateNonBlankString(scbport, "#{msgs.con_form_ibmi_usernotnull}");
+                var user = getFieldValue('editForm:password');
+               Validator.validateNonBlankString(user, "#{msgs.con_form_ibmi_pswdnotnull}");
+
+
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+                }
+
+               //return false will kill cancel the save
+               return true;
+           });
+        });
+       //--><!]]>
+    </script>
+
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_ibmi_consetting}"/><br/>
+
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+      <div id="accountSettings" class='spContent'>
+
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ibmi_host}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpHostName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_ibmi_hostname}"/>
+            </td>
+            <td valign="center">
+              <h:inputText id="host"
+                           value="#{applicationObject.attributes['host']}"
+                           redisplay="true"
+                           size="80"
+                           requiredMessage="#{msgs.con_form_ibmi_hostname}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ibmi_username}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpUserName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_ibmi_username}"/>
+            </td>
+            <td valign="center">
+              <h:inputText id="user"
+                           value="#{applicationObject.attributes['user']}"
+                           redisplay="true"
+                           size="80"
+                           requiredMessage="#{msgs.con_form_ibmi_usernames}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"/>
+            </td>
+          </tr>
+
+          <tr>
+           <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ibmi_password}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpUsrPasswd" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_ibmi_password}"/>
+            </td>
+            <td valign="center">
+              <sp:inputSecret id="password"
+                           value="#{applicationObject.attributes['password']}"
+                           redisplay="true"
+                           size="80"
+                           requiredMessage="#{msgs.con_form_ibmi_userpassword}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ibmi_proxyserver}"/>
+            </td>
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpProxyServer" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_ibmi_proxyserver}"/>
+            </td>
+            <td valign="center">
+              <h:inputText id="proxyServer"
+                           value="#{applicationObject.attributes['proxyServer']}"
+                           redisplay="true"
+                           size="80"
+                           requiredMessage="#{msgs.con_form_ibmi_proxysrv}"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_ibmi_ssl}"/>
+            </td>
+            <td class="certScheduleHelpCol" valign="middle">
+               <h:graphicImage id="imgHlpIsSudoUsr" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                             alt="#{msgs.help_con_form_ibmi_usessl}"/>
+            </td>
+            <td valign="center">
+              <h:selectBooleanCheckbox id="useSSL"
+                  value="#{applicationObject.attributes['useSSL']}"
+                  requiredMessage="#{msgs.con_form_ibmi_usessl}"
+                  disabled="#{!sp:hasRight(facesContext, 'ManageapplicationObject')}"/>
+            </td>
+          </tr>
+    </table>
+
+    <br/>
+    <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_ibmi_partitioning}"/><br/>
+
+      <table class="spTable" style="border:0px" cellspacing="0">
+          <tr id='partitionsRow_'>
+            <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ibmi_partition_statements}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpPartitioningStatements_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.help_con_form_ibmi_partitions}"/>
+            </td>
+            <td>
+                  <h:inputTextarea id='partitions_'
+                                   converter="NewLineList"
+                                   value="#{applicationObject.attributes['partitionStatements']}"
+                                   rows="5" cols="10"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                   style="text-transform:uppercase"/>
+            </td>
+          </tr>
+        </table>
+        </div>
+        <div id='formErrorsBottom' class="formError" style="display:none"/>
+      </f:view>
+  </ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+    <tr id="#{idName}ReminderHeader" style="display: #{(hide) ? 'none' : ''}">
+      <td class="titleColumnWithWrap certScheduleTitleCol">
+        <h:outputText value="#{enabledText}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEml#{idName}" styleClass="helpIcon"
+            url="/images/icons/dashboard_help_16.png" alt="#{enabledHelp}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <h:selectBooleanCheckbox
+          id="#{idName}ReminderSelect"
+          value="#{notifBean.enabled}"
+          onclick="SailPoint.CertificationScheduleForm.toggleScheduleEmailOptions('#{idName}EscalationStartDaysBeforeEnd', '#{idName}EscalationMaxReminders', this, $('#{idName}ReminderConfig'));"
+          disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+          readonly="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}" />
+      </td>
+    </tr>
+    <tr id="#{idName}ReminderOptions" style="display: #{(hide) ? 'none' : ''}">
+      <td width="25%" colspan="2"></td>
+      <td colspan="6">
+      <div id="#{idName}ReminderConfig" style="display:none">
+      <table class="width100">
+        <thead>
+          <tr><th colspan="5" class="dashContentHeader">
+            <h:outputText value="#{msgs.label_reminder_policy}" />
+          </th></tr>
+        </thead>
+        <tbody>
+          <tr style="display: #{(hideTrigger) ? 'none' : ''}">
+            <td class="titleColumnWithWrap certScheduleTitleCol"><h:outputText value="#{msgs.label_reminder_days_before}" /></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEmlStart#{idName}"
+              styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{startHelp}"/>
+            </td>
+            <td class="certScheduleOptionCol">
+              <h:inputText id="#{idName}ReminderStart" value="#{notifBean.startHowManyDays}" size="3"
+                           disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+                           readonly="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"/>
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message for="#{idName}ReminderStart" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+          <tr>
+            <td class="titleColumnWithWrap certScheduleTitleCol"><h:outputText value="#{msgs.label_reminder_frequency}" /></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEmlFreq#{idName}"
+              styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{freqHelp}"/>
+            </td>
+            <td class="certScheduleOptionCol">
+                <!--
+                    If you make any changes here check js function SailPoint.CertificationScheduleForm.toggleEscalationEvent
+                -->
+                <t:selectOneRadio 
+                  id='#{idName}reminderFreq' 
+                  value='#{notifBean.once}' 
+                  disabled='#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}'
+                  layout='spread'>
+                  <f:selectItem itemLabel='&#160;#{msgs.frequency_once}' itemValue='#{true}'/>
+                  <f:selectItem itemLabel='&#160;#{msgs.frequency_once_every}' itemValue='#{false}'/>
+                </t:selectOneRadio>
+                <t:radio for='#{idName}reminderFreq' index='0'/><br/>
+                <t:radio for='#{idName}reminderFreq' index='1'/><h:outputText value='&#160;&#160;&#160;'/><h:inputText id="#{idName}ReminderFrequencyDays" 
+                                                                                                                       disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+                                                                                                                       value="#{notifBean.onceEveryHowManyDays}" size="3"/><h:outputText value="&#160;#{msgs.days}"/>
+                <a4j:outputPanel ajaxRendered="true">
+                  <h:message for="#{idName}ReminderFrequencyDays" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                </a4j:outputPanel>
+            </td>
+          </tr>
+          <tr>
+            <td class="titleColumnWithWrap certScheduleTitleCol"><h:outputText
+              value="#{msgs.label_reminder_email_template}" /></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEmlTemplate#{idName}"
+             styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{templateHelp}"/>
+            </td>
+            <td class="certScheduleOptionCol"><h:selectOneMenu id="#{idName}EmailTemplates"
+                     value="#{notifBean.emailTemplateId}"
+                     disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+                     readonly="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}">
+                <f:selectItems value="#{certificationSchedule.emailTemplatesNew}" />
+              </h:selectOneMenu>
+
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message for="#{idName}EmailTemplates" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      </td>
+    </tr>
+    <tr style="display: none"><td>
+      <script defer="defer" type="text/javascript">
+        <!--//--><![CDATA[//><!--
+    
+          if($('certificationScheduleForm:#{idName}ReminderSelect')!=null) {
+            if($('certificationScheduleForm:#{idName}ReminderSelect').checked)
+              $('#{idName}ReminderConfig').style.display = '';
+           }            
+        //--><!]]>
+      </script>
+    </td></tr>
+</ui:composition>
+
+</body>
+</html>

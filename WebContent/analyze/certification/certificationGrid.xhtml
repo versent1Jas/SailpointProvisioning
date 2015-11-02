@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+  <script>
+    var vCheckbox = null;
+    gridStateStr = '#{searchBean.gridState.JSON}';
+    gridState = new SailPoint.GridState(JSON.parse(gridStateStr));
+    
+    Ext.onReady(function(){
+      
+      <!--//--><![CDATA[//><!--
+      var sInfo = [{property: 'name', direction: 'ASC' }, {property: 'id', direction: 'ASC'}];
+      if(gridState && gridState._getValue('sortColumn')){
+        sInfo = [{property: gridState._getValue('sortColumn'), direction: gridState._getValue('sortOrder') }, {property: 'id', direction: 'ASC'}]
+      }
+      //--><!]]>
+
+      function renderPercent (value, p, r) {
+        return Ext.String.format('#{sp:escapeJavascript(msgs.percent_complete_with_count)}', value, r.get('completedEntities'), r.get('totalEntities'));
+      }      
+      
+      
+      var gridMetaData = #{searchBean.columnJSON};
+      
+      var storeFields = gridMetaData.fields;
+      storeFields.push('completedEntities');
+      storeFields.push('totalEntities');
+      
+      
+      var store = SailPoint.Store.createStore({
+          url: '#{ajaxUrl}',
+          root: 'results',
+          fields: storeFields,
+          remoteSort: true,
+          sorters: sInfo,
+          pageSize: 25
+      });
+      
+      // create the grid
+      grid = new Ext.grid.Panel({
+          store: store,
+          cls: 'smallFontGrid selectableGrid',
+          columns: gridMetaData.columns,
+          viewConfig: {
+            stripeRows:true
+          },
+          listeners: { itemclick: handleClick, itemcontextmenu: contextMenu },
+          renderTo:'example-grid',
+          width:$('example-grid').clientWidth,
+          bbar: {
+              xtype : 'pagingtoolbar',
+              store: store,
+              displayInfo: true
+          }
+      });
+      
+      store.load({params:{start:0, limit:25}});
+      
+    });
+    </script>
+  
+  </f:view>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition>
+
+  <f:view>
+    <h:form id="editForm">
+      <script type="text/javascript" defer="defer">
+        // <![CDATA[
+        var isPageDirty = false;
+        helpKey = 'RISK_SCORES';
+        var inputIndicatorPairs = [];
+        
+        function initCompensatedScoreSample(category, controlId, isReducer, maxValue) {
+            var updatedSampleValue;
+            
+            var isReducer = $('editForm:' + category + 'CCConfigTabl' + controlId + ':' + category + 'IsReducer').value;
+            
+            if (isReducer == 'true') {
+                $('editForm:' + category + 'CCConfigTabl' + controlId + ':' + category + 'Factor').isReducer = true;
+                updatedSampleValue = Math.round((1.0 - $('editForm:' + category + 'CCConfigTabl' + controlId + ':' + category + 'Factor').value / 100.0) * 1000);
+            } else {
+                $('editForm:' + category + 'CCConfigTabl' + controlId + ':' + category + 'Factor').isReducer = false;
+                updatedSampleValue = Math.round($('editForm:' + category + 'CCConfigTabl' + controlId + ':' + category + 'Factor').value);
+            }
+            
+            if (updatedSampleValue > 1000) {
+                updatedSampleValue = 1000;
+            }
+            
+            // Save this information until the color store has been loaded.  
+            // At that point we can safely initialize the indicators in the onReady block at the bottom of this page
+            inputIndicatorPairs.push({
+                indicator: $('compensatedScoreIndicatorFor' + category + '_' + controlId), 
+                input: $('editForm:' + category + 'CCConfigTabl' + controlId + ':' + category + 'Factor')
+            });            
+        }
+        // ]]>
+      </script>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <div class="pageInfo">
+        <div id='#{configDiv}Instructions' class="instructions">
+          <h:outputText value="#{sp:localizeKey(instructions)}"/>
+        </div>
+      </div>
+      <div id="#{configDiv}">
+        <table class="width100">          
+          <tfoot><tr><td>
+            <div class="buttonRow">
+              <a4j:commandButton id="visibleSaveButton" onclick="confirmSave(isPageDirty, 'editForm:stealthSaveButton');" value="#{msgs.button_save}" styleClass="primaryBtn" />
+              <a4j:commandButton id="visibleCancelButton" onclick="confirmCancel(isPageDirty, 'editForm:stealthCancelButton');" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+              <h:commandButton style="display:none" id="stealthSaveButton" action="#{riskScoreConfig.saveChangesAction}" />
+              <h:commandButton style="display:none" id="stealthCancelButton" action="#{riskScoreConfig.cancelChangesAction}" />
+            </div>
+          </td></tr></tfoot>
+          
+          <tbody>
+            <tr><td>
+                  <div class="spTabledContent">
+                    <t:dataTable styleClass="spTable"
+                      headerClass="centeredColumn"
+                      rowClasses="even, odd"
+                      columnClasses="leftAlignedColumn, compensatingControlColumn"
+                      id="#{category}CCConfigTable"
+                      value="#{compensationSet}" 
+                      var="compensatingControl"
+                      forceIdIndexFormula="#{compensatingControl.id}">
+                      <h:column>
+                        <f:facet name="header">
+                          <h:outputText value="#{msgs.compensating_control}"/>
+                        </f:facet>
+                        
+                        <h:outputFormat value="#{sp:localize(compensatingControl.description)}">
+                            <f:param value="#{categoryName}"/>
+                        </h:outputFormat>
+                        
+                      </h:column>
+                      <h:column>
+                        <f:facet name="header">
+                          <h:outputText value="#{msgs.compensation_factor}" />
+                        </f:facet>
+            
+                        <table class="width100"><tbody><tr>
+                          <td><img id="compensatedScoreIndicatorFor#{category}_#{compensatingControl.id}" class="dynamicRiskIndicator" src=""/></td>
+                          <td>
+                            <div id="sliderWrap#{category}CC#{compensatingControl.id}" class="sliderWrap">
+                              <div id="sliderTrack#{category}CC#{compensatingControl.id}" class="sliderLeft" />
+                              <div id="slider#{category}CC#{compensatingControl.id}" class="slider">
+                                <div id="handle#{category}CC#{compensatingControl.id}" class="sliderHandle">
+                                  <img src="#{base.requestContextPath}/images/sliderHandle.gif" alt=""/>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <h:outputText id="#{category}PercentageComments" value="#{compensatingControl.percentageComments} "/>            
+                            <h:inputText id="#{category}Factor" value="#{compensatingControl.factor}" size="3"/>
+                            <h:outputText value="%"/>            
+                            <span style="display:none" id="compensatedScoreFor#{category}_#{compensatingControl.id}"/>
+                            <h:inputHidden id="#{category}IsReducer" value="#{compensatingControl.reducer}"/>
+                          </td>
+                        </tr></tbody></table>
+                        
+                        <script type="text/javascript" defer="defer">
+                          // <![CDATA[
+                          addFactorSliderData('#{configDiv}',
+                                              'handle#{category}CC#{compensatingControl.id}', 
+                                              'slider#{category}CC#{compensatingControl.id}',
+                                              'compensatedScoreFor#{category}_#{compensatingControl.id}', 
+                                              'compensatedScoreIndicatorFor#{category}_#{compensatingControl.id}', 
+                                              '#{compensatingControl.factor}',
+                                              '#{compensatingControl.minValue}', 
+                                              '#{compensatingControl.maxValue}', 
+                                              '#{compensatingControl.increment}', 
+                                              $('editForm:#{category}CCConfigTabl#{compensatingControl.id}:#{category}Factor'));
+
+                          // todo il8n comparison to a hard coded string
+                          initCompensatedScoreSample('#{category}', '#{compensatingControl.id}', '#{compensatingControl.percentageComments}' == 'Decreases Risk by', '#{compensatingControl.maxValue}');
+                          // ]]>
+                        </script>
+                      
+                      </h:column>
+                    </t:dataTable>
+                  </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+      <script type="text/javascript" >
+        // <![CDATA[
+        Ext.onReady(function() {
+            var neutralColorStore = new SailPoint.Risk.NeutralColorStore({id: 'neutralColorStore'});
+            neutralColorStore.load({
+                callback: function(record, options, success) {
+                    if (success) {
+                        var i;
+                        initRiskSlidersOnLoad.call(this, '#{configDiv}');
+                        for (i = 0; i < inputIndicatorPairs.length; ++i) {
+                            var inputValue;
+                            var colorStore = Ext.StoreMgr.lookup('neutralColorStore');
+                            var inputElement = inputIndicatorPairs[i].input;
+                            if (inputElement.isReducer == true) {
+                                inputValue = Math.round(1000.0 - (10.0 * inputElement.value));
+                            } else {
+                                inputValue = Math.round(inputElement.value);
+                                if (inputValue > 1000) {
+                                    inputValue = 1000;
+                                }
+                            }
+                  
+                            inputIndicatorPairs[i].indicator.src = colorStore.getImageUrlForScore(inputValue);
+                        }
+                    }
+                }
+            });
+        });
+        // ]]>
+      </script>
+    </h:form>
+  </f:view>  
+</ui:composition>
+
+</body>
+</html>

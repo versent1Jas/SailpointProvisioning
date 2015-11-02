@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.NTConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD, CURRENT_PASSWORD" icon="directory1Icon" name="Windows Local Template" type="Windows Local - Direct">
+    <Attributes>
+      <Map>
+        <entry key="retryableErrors">
+          <value>
+            <List>
+              <String>Errors returned from IQService. The network path was not found.</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="disableNonLocalLookup">
+          <value>
+            <Boolean>True</Boolean>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="sAMAccountName" identityAttribute="sAMAccountName" nativeObjectType="user" objectType="account">
+        <AttributeDefinition name="AutoUnlockInterval" type="string">
+          <Description>Time interval for auto unlocking of locked user account</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Disabled" type="string">
+          <Description>Flag to indicate if the user is disabled.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Description" type="string">
+          <Description>User's description</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DirectoryPath" type="string">
+          <Description>Fully qualified directory path WinNt://...</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="FullName" type="string">
+          <Description>User's fullname</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" schemaObjectType="group" type="string">
+          <Description>List of groups assigned to a user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="HomeDirectory" type="string">
+          <Description>Location of the user's home directory</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Lockedout" type="string">
+          <Description>Flag to indicate a user is locked out</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MaxStorage" type="string">
+          <Description>The maximum amount of disk space the user can use.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MinPasswordLength" type="string">
+          <Description>Minimum length of the user's password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Name" type="string">
+          <Description>Name of the account unqualified SAMAccountName</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="objectSid" type="string">
+          <Description>Windows SID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PasswordAge" type="string">
+          <Description>Time duration of the password in use. This property indicates the number of seconds that have elapsed since the password was last changed.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PasswordExpired" type="string">
+          <Description>Indicates if the password is expired</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PasswordNotRequired" type="string">
+          <Description>Flag to indicate if the user requires a password.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PasswordUnchangeable" type="string">
+          <Description>Flag to indicate if the user password can be changed.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Profile" type="string">
+          <Description>User's Profile</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PrimaryGroupID" type="string">
+          <Description>Id of the user's primary group.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="sAMAccountName" type="string">
+          <Description>Fully qualified version of the sAMAccountName</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UserFlags" type="string">
+          <Description>User Flag defined in ADS_USER_FLAG_ENUM</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="BadPasswordAttempts" type="int">
+          <Description>Number of consecutive  Bad Password Attempts made last time</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LoginScript" type="string">
+          <Description>File path of Login script file</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="HomeDirDrive" type="string">
+          <Description>Home Directory Drive of the user.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PasswordNeverExpires" type="string">
+          <Description>Flag to indicate if the password never expires.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MaxPasswordAge" type="string">
+          <Description>Indicates the maximum time interval, in seconds, after which the password must be changed.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MinPasswordAge" type="string">
+          <Description>Indicates the minimum time interval, in seconds, before the password can be changed.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LastLogin" type="string">
+          <Description>Date and time when user logged in last time</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="sAMAccountName" featuresString="PROVISIONING" identityAttribute="sAMAccountName" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="Description" type="string">
+          <Description>Group's description</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DirectoryPath" type="string">
+          <Description>Fully qualified directory path WinNt://...</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="MemberGroups" type="string">
+          <Description>List of groups assigned to a group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="GroupType" type="string">
+          <Description>Windows SID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="Members" type="string">
+          <Description>List of users assigned to a group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="objectSid" type="string">
+          <Description>Windows SID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="sAMAccountName" type="string">
+          <Description>Fully qualified version of the sAMAccountName</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Create User" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_wl_sAMAccountName" helpKey="help_con_prov_policy_wl_sAMAccountName" name="sAMAccountName" required="true" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_wl_Password" helpKey="help_con_prov_policy_wl_Password" name="password" required="true" reviewRequired="true" type="secret"/>
+        <Field displayName="con_prov_policy_wl_Description" helpKey="help_con_prov_policy_wl_Description" name="Description" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_wl_FullName" helpKey="help_con_prov_policy_wl_FullName" name="FullName" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_wl_Disable" helpKey="help_con_prov_policy_wl_Disable" name="IIQDisabled" reviewRequired="true" type="string" value="false">
+          <AllowedValues>
+            <String>true</String>
+            <String>false</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_wl_PasswordExpired" helpKey="help_con_prov_policy_wl_PasswordExpired" name="PasswordExpired" reviewRequired="true" type="string" value="true">
+          <AllowedValues>
+            <String>true</String>
+            <String>false</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_wl_PasswordUnchangeable" helpKey="help_con_prov_policy_wl_PasswordUnchangeable" name="PasswordUnchangeable" reviewRequired="true" type="string" value="false">
+          <AllowedValues>
+            <String>true</String>
+            <String>false</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_wl_PasswordNeverExpires" helpKey="help_con_prov_policy_wl_PasswordNeverExpires" name="PasswordNeverExpires" reviewRequired="true" type="string" value="false">
+          <AllowedValues>
+            <String>true</String>
+            <String>false</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_wl_sAMAccountName" helpKey="help_con_prov_policy_wl_groupsAMAccountName" name="sAMAccountName" required="true" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_wl_Description" helpKey="help_con_prov_policy_wl_groupDescription" name="Description" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_wl_GroupType" helpKey="help_con_prov_policy_wl_GroupType" name="GroupType" readOnly="true" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_wl_objectSid" helpKey="help_con_prov_policy_wl_objectSid" name="objectSid" readOnly="true" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_wl_DirectoryPath" helpKey="help_con_prov_policy_wl_DirectoryPath" name="DirectoryPath" readOnly="true" reviewRequired="true" type="string"/>
+		<Field displayName="con_prov_policy_wl_GroupMembers" helpKey="help_con_prov_policy_wl_GroupMembers" multi="true" name="MemberGroups" readOnly="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

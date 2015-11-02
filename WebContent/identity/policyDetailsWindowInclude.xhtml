@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core">>
+<body>
+
+<ui:composition>
+
+  <table  class="spPaddedTable">
+    <tr>
+      <ui:include src="/identity/policyGenericDetails.xhtml">
+        <ui:param name="noPolicy" value="true"/>
+        <ui:param name="noRule" value="true"/>
+        <ui:param name="noSummary" value="true"/>
+      </ui:include>
+    </tr>
+    <tr>  
+      <c:if test='#{violationView.identityPageRenderer != null and violationView.identityPageRenderer != "policyGenericDetails.xhtml"}'>
+        <ui:include src="#{violationView.identityPageRenderer}">
+          <ui:param name="noPolicy" value="true"/>
+          <ui:param name="noRule" value="true"/>
+          <ui:param name="noSummary" value="true"/>
+        </ui:include>
+      </c:if>
+    </tr>
+  </table>
+
+</ui:composition>
+</body>
+</html>

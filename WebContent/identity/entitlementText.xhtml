@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <span>
+    <ui:fragment rendered="#{sp:isGroupAttribute(application, attribute)}">
+    <h:outputLink class='unboldFakeLink'
+                  onclick="viewAccountGroup('#{sp:escapeJavascript(application)}', '#{attribute}', '#{sp:escapeJavascript(value)}' );return false;">
+      <h:outputText escape="false"
+                    value="#{isDescriptionMode ? sp:insertWordBreak(description, false) : sp:insertWordBreak(sp:getGroupDisplayableName(application, attribute, value), true)}"/>
+    </h:outputLink>
+  </ui:fragment>
+
+    <ui:remove><!-- Just like above, but no link is required because there is no popup for non-group entitlements --></ui:remove>
+    <ui:fragment rendered="#{not sp:isGroupAttribute(application, attribute)}">
+      <h:outputText 
+        value="#{isDescriptionMode ? sp:insertWordBreak(description, false) : sp:insertWordBreak(value, true)}" 
+        escape="false"/>
+    </ui:fragment>  
+  </span>
+  
+  <span class="entitlementDescriptionsSpan">
+    <ui:remove>
+      <!-- It's crucial that the tooltip be on the same line as its container's opening tag because otherwise a whitspace node gets inserted and interferes with the registered tooltip -->
+    </ui:remove>
+    <span class="descriptionText" style="display:none"><span><h:outputText value="#{infoIconAltText}" escape="false" /> </span></span>
+    <h:graphicImage rendered="#{showInfoIcon}" value="/images/icons/info.png" />
+  </span>
+</ui:composition>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+<table class="paddedTbl">
+  <ui:repeat value="#{applicationRisk.object.applicationScores}" var="score">
+    <ui:fragment rendered="#{!score.composite}">
+
+      <tr>
+        <td colspan="4">
+          <h:outputText styleClass="spContentTitle" value="#{sp:localizeKey(score.displayableName)}"/>
+        </td>
+      </tr>
+      <tr>
+        <td align="right"><h:outputText value="#{msgs.score_def_prompt_disabled}" /></td>
+        <td width="15px">
+          <h:graphicImage
+            width="12px" height="12px"
+            id="imgHlpAppRishDisabled" 
+            alt="#{help.help_apprisk_disabled}"
+            style="cursor:pointer;padding: 0px 7px 0px 7px"
+            value="/images/icons/dashboard_help_16.png"/>
+        </td>
+        <td>
+          <h:selectBooleanCheckbox
+            value="#{score.disabled}" onclick="makePageDirty();"/>
+        </td>
+      </tr>
+  
+      <ui:fragment rendered="#{score.signature != null}">
+        <ui:repeat value="#{score.signature.arguments}" var="arg">
+          <tr>
+            <td align="right"><h:outputText value="#{sp:localizeKey(arg.prompt)}" /></td>
+            <ui:fragment rendered="#{arg.helpKey == null}">
+              <td/>
+            </ui:fragment>
+            <ui:fragment rendered="#{arg.helpKey != null}">
+              <td>
+                <h:graphicImage
+                  width="12px" height="12px"
+                  id="imgHlp_#{arg.helpKey}" 
+                  alt="#{help[arg.helpKey]}"
+                  style="cursor:pointer;padding: 0px 7px 0px 7px"
+                  url="/images/icons/dashboard_help_16.png"/>
+              </td>
+            </ui:fragment>
+            <td>
+              <h:inputText value="#{score.arguments[arg.name]}" onchange="makePageDirty();"
+                size="#{arg.type == 'int' ? '5' : '40'}"/>
+            </td>
+          </tr>
+        </ui:repeat>
+      </ui:fragment>
+
+      <ui:fragment rendered="#{score.signature == null}">
+        <tr>
+          <td align="right"><h:outputText value="#{msgs.score_def_prompt_attr_name}" /></td>
+          <td width="15px">
+            <h:graphicImage
+              width="12px" height="12px"
+              id="imgHlpAppRiskAttribute" 
+              alt="#{help.help_apprisk_attribute}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td>
+            <h:inputText value="#{score.arguments['attribute']}" size="40"  onchange="makePageDirty();"/>
+          </td>
+        </tr>
+        <tr>
+          <td align="right"><h:outputText value="#{msgs.score_def_prompt_attr_value}" /></td>
+          <td width="15px">
+            <h:graphicImage
+              width="12px" height="12px" 
+              id="imgHlpAppRiskValue" 
+              alt="#{help.help_apprisk_value}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td>
+            <h:inputText value="#{score.arguments['value']}" size="40"  onchange="makePageDirty();"/>
+          </td>
+        </tr>
+        <tr>
+          <td align="right"><h:outputText value="#{msgs.score_def_prompt_attr_sensitivity}" /></td>
+          <td width="15px">
+            <h:graphicImage
+              width="12px" height="12px" 
+              id="imgHlpAppRiskSensitivity" 
+              alt="#{help.help_apprisk_sensitivity}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td>
+            <h:inputText value="#{score.arguments['sensitivity']}" size="5"  onchange="makePageDirty();"/>
+          </td>
+        </tr>
+      </ui:fragment>
+
+    </ui:fragment>  
+  </ui:repeat>
+</table>
+
+</ui:composition>
+</body>
+</html>
+
+

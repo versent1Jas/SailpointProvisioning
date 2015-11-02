@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+  <body>
+    <ui:composition>
+      <table class="spTable width100" cellspacing="0" border="1" id="accountSchemaMap">
+        <tr>
+          <div class="spContentTitle">
+            <h:outputText value="#{msgs.app_reconf_account}"/>
+          </div>
+        </tr>
+        <tr>
+          <th width="50%"><h:outputText value="#{msgs.app_reconf_previous_schema_attr}"/></th>
+          <th width="50%"><h:outputText value="#{msgs.app_reconf_new_app_schema_attr}"/></th>
+
+          <ui:repeat value="#{applicationObject.appReconfigAttributeList}" var="accountSchemaItem">
+
+            <ui:fragment rendered="#{accountSchemaItem.type == 'account'}" id="accountAttributes">
+              <tr>
+                <td align="center">
+                  <h:outputText id="accountAttrName" 
+                                value="#{accountSchemaItem.oldApplicationAttribute}" 
+                                name="accountAttrName"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                size="50"/>
+                </td>
+                <td align="center">
+                  <h:selectOneMenu id="newAppAccAttribute"
+                                   value="#{accountSchemaItem.newApplicationAttribute}"
+                                   rendered="#{sp:hasRight(facesContext, 'ManageApplication')}"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                     <f:selectItem itemValue="" itemLabel="#{msgs.select_one}"/>
+                       <f:selectItems value="#{applicationObject.newApplicationAccountSelectList}"/>
+                     </h:selectOneMenu>
+                </td> 
+              </tr> 
+            </ui:fragment>
+
+          </ui:repeat>
+        </tr>
+      </table>
+      <script>
+        makeTableMulticolored($('accountSchemaMap'), true, false, 'even', 'odd');
+      </script>
+
+      <ui:fragment rendered="#{applicationObject.groupSchemaEmpty == false and ( applicationObject.newAppGroupAttributes != null)}">
+        <br/><br/>
+        <table class="spTable width100" cellspacing="0" border="1" id="groupSchemaMap">
+          <tr>
+            <div class="spContentTitle">
+              <h:outputText value="#{msgs.app_reconf_group}"/>
+            </div>
+          </tr>
+          <tr>
+          <th width="50%"><h:outputText value="#{msgs.app_reconf_previous_schema_attr}" /></th>
+          <th width="50%"><h:outputText value="#{msgs.app_reconf_new_app_schema_attr}" /></th>
+
+          <ui:repeat value="#{applicationObject.appReconfigAttributeList}" var="groupSchemaItem">
+
+            <ui:fragment rendered="#{groupSchemaItem.type == 'group'}" id="groupAttributes">
+              <tr>
+                <td align="center">
+                  <h:outputText id="groupAttrName" 
+                                value="#{groupSchemaItem.oldApplicationAttribute}" 
+                                name="groupAttrName"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                size="50"/>
+                </td>
+                <td align="center">
+                  <h:selectOneMenu id="newAppGrpAttribute"
+                                   value="#{groupSchemaItem.newApplicationAttribute}"
+                                   rendered="#{sp:hasRight(facesContext, 'ManageApplication')}"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                     <f:selectItem itemValue="" itemLabel="#{msgs.select_one}"/>
+                       <f:selectItems value="#{applicationObject.newApplicationGroupSelectList}"/>
+                     </h:selectOneMenu>
+                </td>
+              </tr>
+            </ui:fragment>
+
+          </ui:repeat>
+        </tr>
+      </table>
+      <script>
+        makeTableMulticolored($('groupSchemaMap'), true, false, 'even', 'odd');
+      </script>
+    </ui:fragment>
+
+       <br/><br/>
+       <div>
+         <h:panelGrid columns="3" columnClasses="nowrap vertical-align, none" styleClass="paddedTbl topAlignTbl appInfoTable">
+            <h:panelGroup>
+              <h:outputText styleClass="titleColumn" id="addMissingAttr" value="#{msgs.app_reconf_add_missing_attr}"/>
+            </h:panelGroup>
+
+            <h:graphicImage id="imgHlpAddMissingAttr" 
+                            styleClass="helpIcon" 
+                            url="/images/icons/dashboard_help_16.png" 
+                            alt="#{help.help_app_reconf_add_missing_attr}"/>
+
+            <h:selectBooleanCheckbox value="#{applicationObject.addMissingAttr}"
+                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+            <h:panelGroup>
+              <h:outputText styleClass="titleColumn" id="keepExtraAttr" value="#{msgs.app_reconf_keep_extra_attr}"/>
+            </h:panelGroup>
+
+            <h:graphicImage id="imgHlpKeepExtraAttr" 
+                            styleClass="helpIcon" 
+                            url="/images/icons/dashboard_help_16.png" 
+                            alt="#{help.help_app_reconf_keep_extra_attr}"/>
+
+            <h:selectBooleanCheckbox value="#{applicationObject.keepExtraAttr}"
+                                     disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                     readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+         </h:panelGrid>
+         <br/>
+           <h1 align="right">
+              <h:commandButton styleClass="secondaryBtn" 
+                               id="saveAppReconfBtn" 
+                               action="#{applicationObject.reconfigSchema}"
+                               value="#{msgs.app_reconf_save_mapping}"/>
+           </h1>
+       </div>
+
+     </ui:composition>
+    </body>
+</html>

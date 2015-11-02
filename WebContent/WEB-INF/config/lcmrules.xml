@@ -1,0 +1,947 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Rules used by LCM
+-->
+<sailpoint>
+
+<Rule type='FieldValue' language="beanshell" name="Check Password Policy">
+  <Source>
+    <![CDATA[
+       import sailpoint.api.PasswordPolice;
+       import sailpoint.object.Application;
+       import sailpoint.object.Identity;
+       import java.util.List;
+       import java.util.ArrayList;
+       import sailpoint.api.PasswordPolicyException;
+       import sailpoint.tools.Util;
+       import sailpoint.tools.Message;
+       import sailpoint.tools.GeneralException;
+
+       List msgs = new ArrayList();
+
+       String passVal = (String)value;
+
+       try {
+           String appname = field.getApplication();
+           if (appname == null) {
+              // temporary support old WorkItems
+              String fname = field.getName();
+              int colon = fname.indexOf(":");
+              if (colon > 0)
+                 appname = fname.substring(0, colon);
+              else
+                 log.error("Unable to determine application name from field");
+           }
+           Application app = context.getObjectByName(Application.class, appname);
+          
+           PasswordPolice police = new PasswordPolice(context);
+           police.checkPassword(app, identity, passVal);
+       }
+       catch (PasswordPolicyException pe) {
+           List messages = pe.getAllMessages();
+           for (Message msg : messages) {
+               msgs.add(msg.getMessage());
+           }
+       }
+       catch (GeneralException ge) {
+           msgs.add(ge.getMessage());
+       }
+
+       return ( Util.size(msgs) > 0 ) ? msgs: null;
+    ]]>
+  </Source>
+</Rule>
+
+<Rule name="LCM Build Owner Approvals">
+  <ReferencedRules>
+    <Reference class="sailpoint.object.Rule" name="Approval Library"/>
+  </ReferencedRules>
+  <Source>
+    <![CDATA[
+       import sailpoint.object.ApprovalSet;
+       import sailpoint.object.ProvisioningPlan;
+       import sailpoint.workflow.IdentityLibrary;
+
+       //
+       // Attributes needed in the rule context: 
+       //
+       // plan - ProvisioningPlan object 
+       //
+       // approvalSet - An ApprovalSet representing the "cart"
+       // 
+       // fallbackApprover - String representing who gets the approval
+       //                    if we can't resolve one.  
+       //
+       // identityName - name of the identity being operated on
+       //
+       //
+       List approvals = new ArrayList();
+       if ( approvalSet != null ) {
+           // 
+           // Build a map of owner to ApprovalSet from each of the things in the plan 
+           // 
+           Map ownerMap = buildOwnerMap("owner", approvalSet, plan, fallbackApprover, identityName, !IdentityLibrary.isElectronicSignatureEnabled(wfcontext));
+           if ( ownerMap != null) {
+               approvals = buildApprovalsFromMap(ownerMap, identityName, launcher);
+           } 
+       }
+       return ( Util.size(approvals) > 0 ) ? approvals : null;
+    ]]>
+  </Source>
+</Rule>
+
+<Rule name="LCM Build Identity Approvers">
+  <ReferencedRules>
+    <Reference class="sailpoint.object.Rule" name="Approval Library"/>
+  </ReferencedRules>
+  <Source>
+    <![CDATA[
+       import sailpoint.object.ApprovalSet;
+       import sailpoint.object.ProvisioningPlan;
+       import sailpoint.object.WorkItem.State;
+       import sailpoint.workflow.IdentityLibrary;
+       import sailpoint.tools.Util;
+
+       //
+       // Attributes needed in the rule context: 
+       //
+       // plan - ProvisioningPlan object 
+       //
+       // approvalScheme - String indicating how approvals should be generated
+       //   none - disabled
+       //   manager - the current manager gets the approval
+       //   newManager - the current manager if the manager changd
+       //   securityOfficer - the configured security officer
+       // 
+       // approvalSet - An ApprovalSet representing the "cart"
+       //
+       // fallbackApprover - String representing who gets the approval
+       //                    if we can't resolve one.  
+       //
+       // identityName - name of the identity being operated on
+       //
+       // launcher - name of the identity that launched the request
+       //
+       // securityOfficerName - The name of the securityOfficer to be used
+       //                       for approvals.
+       //
+
+       // Not all callers pass in securityOfficerName.  If not defined, just set
+       // it to null so we don't run into an error when we try to reference it.
+       if (void == securityOfficerName) {
+           securityOfficerName = null;
+       }
+
+       List approvers = new ArrayList();
+       if ( approvalSet != null ) {
+           List items = approvalSet.getItems();
+           // By default there is one item for all of the edits
+           ApprovalItem item = null;
+           if ( Util.size(items) > 0 ) 
+               item = items.get(0); 
+
+           if ( item != null ) {
+               approvers = getApproverNames(approvalScheme, item, plan, identityName, securityOfficerName);
+               if ( approvers != null && approvers.size() == 0 && fallbackApprover != null ) {
+                   if ( log.isDebugEnabled() ) { 
+                       log.debug("Approver could not be resolved using fallbackApprover '"+fallbackApprover+"'.");
+                   }
+                   approvers.add(fallbackApprover);
+               } 
+               // If the launcher is an approver remove them from the list
+               if ( approvers != null && approvers.contains(launcher) ) {
+                   Map args = wfcontext.getArguments();
+                   String esig = null;
+                   if ( args != null ) 
+                       esig = (String)args.get("approverElectronicSignature");
+ 
+                   if ( !IdentityLibrary.isElectronicSignatureEnabled(wfcontext) && Util.isNullOrEmpty(esig) ) {
+                       approvers.remove(launcher);
+                       // If this is the only approver automaticaly
+                       // mark the item approved.
+                       if ( Util.size(approvers) == 0 ) {
+                           item.setState(WorkItem.State.Finished);
+                           item.setOwner(launcher);
+                       }
+                   }
+               }
+           }
+       }
+       return approvers;
+    ]]>
+  </Source>
+</Rule>
+
+<Rule name="LCM Validate Identity Name"  language="beanshell" type="Validation">
+  <Source>
+    <![CDATA[
+      import sailpoint.api.*;
+      import sailpoint.object.*;
+      import sailpoint.tools.*;
+      import sailpoint.api.*;
+      import sailpoint.web.messages.MessageKeys;
+
+      QueryOptions qo = new QueryOptions();
+      Filter filter  = Filter.ignoreCase(Filter.eq("name", value));
+      qo.add(new Filter[]{filter});
+      qo.addFilter(ObjectUtil.buildWorkgroupInclusiveIdentityFilter());
+      int count = SailPointFactory.getCurrentContext().countObjects(Identity.class,qo);
+      List messages = new ArrayList();
+      if (count>0) {
+          Message msg = new Message();
+          msg.setKey(MessageKeys.LCM_CREATE_IDENTITY_NAME_ERROR);
+          messages.add(msg);
+      }
+      return messages;
+    ]]>
+  </Source>
+</Rule>
+
+<Rule name="LCM Validate Password"  language="beanshell" type="Validation">
+  <Source>
+    <![CDATA[
+      import java.util.*;
+      import sailpoint.api.PasswordPolice;
+      import sailpoint.api.PasswordPolicyException; 
+      
+      List errors = null;
+      
+      try {
+          PasswordPolice pp = new PasswordPolice(context);
+          pp.checkPassword(null, value, false);
+      }
+      catch (PasswordPolicyException ppe) {
+          errors = new ArrayList();
+          errors.addAll(ppe.getAllMessages());
+      }
+      
+      return errors;
+    ]]>
+  </Source>
+</Rule>
+
+<!--
+  - LCM Rule library 
+  -->
+<Rule name="LCM Workflow Library">
+  <Source>
+    <![CDATA[
+      import sailpoint.api.Provisioner;
+      import sailpoint.api.SailPointFactory;
+      import sailpoint.api.SailPointContext;
+      import sailpoint.object.ApprovalSet;
+      import sailpoint.object.ApprovalItem;
+      import sailpoint.object.AuditEvent;
+      import sailpoint.object.Comment;
+      import sailpoint.object.Field;
+      import sailpoint.object.Form;
+      import sailpoint.object.Filter;
+      import sailpoint.object.Identity;
+      import sailpoint.object.ProvisioningPlan;
+      import sailpoint.object.ProvisioningPlan.AccountRequest;
+      import sailpoint.object.ProvisioningPlan.AttributeRequest;
+      import sailpoint.object.ProvisioningProject;
+      import sailpoint.object.QueryOptions;
+      import sailpoint.object.SignOffHistory;
+      import sailpoint.object.Source;
+      import sailpoint.object.Workflow;
+      import sailpoint.object.WorkItem;
+      import sailpoint.object.WorkItem.OwnerHistory;
+      import sailpoint.server.Auditor;
+      import sailpoint.tools.Util;
+      import sailpoint.workflow.IdentityLibrary;
+      import sailpoint.workflow.WorkflowContext;
+
+      /**
+       * Build an event per forward so there is a record 
+       * that the owner changed from the original 
+       * owner.
+       */
+      public void auditWorkItemOwnerHistory(WorkItem item) {
+          List ownerHistories = item.getOwnerHistory();
+          if ( Util.size(ownerHistories) > 0 ) {
+              String action = "Forward";
+              if ( Auditor.isEnabled(action) ) {
+                  for ( OwnerHistory history : ownerHistories ) {
+                      AuditEvent event = new AuditEvent();
+                      event.setTrackingId(wfcontext.getWorkflow().getProcessLogId());
+                      event.setAction(action);
+                      event.setTarget(item.getTargetName());
+                      event.setAttribute("workitem", item.getName());
+                      String oldOwner = history.getOldOwner();
+                      if ( oldOwner != null ) 
+                          event.setAttribute("oldOwner", oldOwner);
+                      String source = history.getEffectiveSource();
+                      event.setSource(source);
+                      String comment = history.getComment();
+                      if ( comment != null ) 
+                          event.setAttribute("comment", comment);
+                      String newOwner = history.getNewOwner();
+                      if ( newOwner != null ) 
+                          event.setAttribute("newOwner", newOwner);
+
+                      // djs: for now set this in both places to avoid needing
+                      // to upgrade.  Once we have ui support for "interface"
+                      // we can remove the map version
+                      event.setAttribute("interface", Source.LCM.toString());
+                      event.setInterface(Source.LCM.toString());
+
+                      Auditor.log(event);
+                  }
+              }
+          }
+      }
+
+      /**
+       * Build a single "comment" event for all of the comments
+       * that were entered during a workitems lifecycle.
+       */
+      public void auditWorkItemComments(WorkItem item) {
+          List comments = item.getComments();
+          if ( Util.size(comments) > 0 ) {
+              String action = "Comment";
+              if ( Auditor.isEnabled(action) ) {
+                  AuditEvent event = new AuditEvent();
+                  event.setTrackingId(wfcontext.getWorkflow().getProcessLogId());
+                  event.setAction(action);
+                  event.setTarget(item.getTargetName());
+                  event.setAttribute("workitem", item.getName());
+
+                  List commentStrings = new ArrayList();
+                  for ( Comment comment : comments ) {
+                      commentStrings.add(comment.toString());
+                  }
+                  event.setAttribute("comments", commentStrings);
+                  // djs: for now set this in both places to avoid needing
+                  // to upgrade.  Once we have ui support for "interface"
+                  // we can remove the map version
+                  event.setAttribute("interface", Source.LCM.toString());
+                  event.setInterface(Source.LCM.toString());
+                  Auditor.log(event);
+              }
+          }
+      }
+
+      /**
+       * Determine the name to use as the "source" of an LCM work item
+       * completion audit.  This should be the name of the identity that
+       * closed the item.  This will be different than the item owner if the
+       * owner is a work group.
+       */
+     public String getAuditSource(WorkItem item) {
+
+         String actor = context.getUserName();
+         Identity ident = context.getObjectByName(Identity.class, actor);
+         if (ident != null)
+             actor = ident.getDisplayName();
+         else {
+             // must be in the background with a pseudo system name
+             // fall back to item owner
+             ident = item.getOwner();
+             if (ident != null)
+                 actor = ident.getDisplayName();
+             else 
+                 actor = launcher;
+         }
+
+         return actor;
+     }
+
+      public void auditDecisions(WorkItem item) {
+          if ( item == null )  return; 
+
+          // there is only one Signoff, duplicated for each approval item
+          SignOffHistory signoff = null;
+          List signoffs = item.getSignOffs();
+          if (signoffs != null && signoffs.size() > 0)
+              signoff = (SignOffHistory)signoffs.get(0);
+
+          ApprovalSet approvalSet = (ApprovalSet)item.get("approvalSet");
+          if ( ( approvalSet != null ) && ( !approvalSet.isEmpty() ) ) {
+              for ( ApprovalItem it : approvalSet.getItems() ) {
+
+                  /** Assimilate the form field changes back into the attribute requests before
+                  * creating the audit event so that the correct data is stored in the audit event. **/
+                  List attrs = it.getIIQAttributes();
+                  Form form = (Form)item.get("workItemForm");
+                  if(attrs!=null && form!=null) {
+                    for(AttributeRequest attr : attrs) {
+                      
+                      Field field = form.getField(it.getApplication()+":"+attr.getName());
+                      if(field!=null) {
+                        attr.setValue(field.getValue());
+                      }
+                    }
+                    it.setValue(flattenAttributeRequests(attrs));                 
+                  }
+                                    
+                  AuditEvent event = new AuditEvent();
+                  event.setAction(AuditEvent.ActionApproveLineItem);
+                  event.setSource(getAuditSource(item));
+                  event.setTarget(identityName);
+
+                  event.setApplication(it.getApplication());
+                  event.setAccountName(it.getNativeIdentity());
+                  event.setInstance(it.getInstance());
+                  event.setAttributeName(it.getName());
+                  event.setAttributeValue(it.getCsv());                  
+                  
+                  // electronic signature
+                  if (signoff != null) {
+                     String meaning = signoff.getText();
+                     if (meaning != null) {
+                         event.setAttribute("esignatureSigner", 
+                                            signoff.getSignerDisplayableName());
+                         event.setAttribute("esignatureText", meaning);
+                         // what else, date?
+                     }
+                 }
+
+                  Date start = it.getStartDate();
+                  if ( start != null ) 
+                      event.setAttribute("startDate", start);
+                  Date end = it.getEndDate();
+                  if ( end != null ) 
+                      event.setAttribute("endDate", end);
+
+                  event.setAttribute("currentStep", wfcontext.getStep().getName());
+
+                  // group them by a generatedId
+                  event.setTrackingId(wfcontext.getWorkflow().getProcessLogId());
+                  String interfaceName = wfcontext.getString("interface");
+                  if ( interfaceName == null)
+                      interfaceName = Source.LCM.toString();
+
+                  // djs: for now set this in both places to avoid needing
+                  // to upgrade.  Once we have ui support for "interface"
+                  // we can remove the map version
+                  event.setAttribute("interface", interfaceName);
+                  event.setInterface(interfaceName);
+
+                  event.setAttribute("operation", it.getOperation());
+                  event.setAttribute("requester", launcher);
+
+                  List comments = it.getComments();
+                  if ( Util.size(comments) > 0 ) {
+                      event.setAttribute("completionComments", comments);
+                  }
+
+                  String requesterComments = it.getRequesterComments();
+                  if ( Util.getString(requesterComments) != null )
+                      event.setAttribute("requesterComments", requesterComments);
+
+                  String taskResultId = wfcontext.getString(Workflow.VAR_TASK_RESULT);
+                  if ( taskResultId != null ) {
+                      event.setAttribute(Workflow.VAR_TASK_RESULT, taskResultId);
+                  }
+
+                  if ( !it.isApproved() ) {
+                      event.setAction(AuditEvent.ActionRejectLineItem);
+                  }
+
+                  if ( Auditor.isEnabled(event.getAction()) ) {
+                      Auditor.log(event);
+                      wfcontext.getSailPointContext().commitTransaction();
+                  }
+              }
+          }
+      }
+
+      public void auditManualAction(WorkItem item) {
+          if ( Auditor.isEnabled(AuditEvent.ManualChange) ) {
+              ApprovalSet set = (ApprovalSet)item.get("approvalSet");
+              if ( set != null ) {
+                  List items = set.getItems();
+                  if ( Util.size(items) > 0 ) {
+                      int num = 0 ;
+                      for ( ApprovalItem it : items  ) { 
+                          num++;
+                          AuditEvent event = IdentityLibrary.buildBaseEvent(wfcontext, it);
+                          event.setSource(getAuditSource(item));
+                          event.setAction(AuditEvent.ManualChange);
+                          event.setAttribute("requester", wfcontext.getString("launcher"));
+                          event.setAttribute("op", it.getOperation());
+                          List comments = it.getComments();
+                          if ( Util.size(comments) > 0 ) {
+                              event.setAttribute("completionComments", comments);
+                          }
+                          Auditor.log(event);
+                      }
+                      if ( num > 0 ) 
+                          wfcontext.getSailPointContext().commitTransaction();
+                  }
+              } else {
+                  throw new GeneralException("ApprovalSet not found in the afterscript.");
+              }
+          } 
+      }
+
+      /**
+       * After an approval has been made apply the changes from the workitem back into the
+       * cart. (approvalSet)
+       */
+      public void assimilateWorkItemApprovalSet(WorkflowContext wfcontext, WorkItem item, ApprovalSet approvalSet) {
+         if (item == null) {
+              // must not be a leaf approval...
+              return;
+          }
+          // Assimilate all of the approvalItem changes into our gloval
+          // approval set
+          // 
+          // Also audit the comments and forwarding thats happend
+          ApprovalSet set = (ApprovalSet)item.get("approvalSet");
+          if ( set != null ) {
+              // Global completion comments will apply to each of the items
+              // If there are completion comments append them
+              // to any other completion comments, but typically its 
+              // one or the other
+              String completionComments = item.getCompletionComments();
+              String ownerName = null;
+              Identity id = item.getOwner();
+              if ( id != null ) {
+                  ownerName = id.getName();
+              }
+              approvalSet.assimilate(set, ownerName, completionComments, true);
+          } else {
+              throw new GeneralException("ApprovalSet not found in the afterscript.");
+          }
+          auditWorkItemOwnerHistory(item);
+          auditWorkItemComments(item);
+          wfcontext.getSailPointContext().commitTransaction();
+      }
+
+      /**
+       * Convert the approvalScheme to csv and check for the approvalType.
+       */
+      public boolean isApprovalEnabled(String approvalScheme, String approvalType) {
+          if ( approvalScheme != null )  {
+              List schemes = Util.csvToList(approvalScheme);
+              if ( Util.size(schemes) > 0 ) {
+                  if ( schemes.contains(approvalType) ) {
+                      return true;
+                  }
+              }
+          }
+          return false;
+      }
+
+      public String getManagerName(String identityName, String launcher, String fallbackApprover) {
+          String managerName = getIdentityProperty(identityName, "manager.name");
+          if ( managerName != null ) {
+              if ( managerName.compareTo(launcher) == 0 ) {
+                  managerName = null;
+              } 
+          } else {
+             managerName = fallbackApprover;
+          }
+          return managerName;
+      }
+
+      /**
+       * Take an ApprovalSet and allow filtering of rejected items and 
+       * allow clearing decisions. If includeRejected is false, only non rejected 
+       * items will be copied into the new approvalSet.   If forceDecision is
+       * true all of the previous decisions will be cleared forcing the new
+       * approver to make a decision on all items.
+       */
+      public ApprovalSet filterApprovalSet(ApprovalSet masterSet, String includeRejected, 
+                                           boolean forceDecision) {
+          ApprovalSet filtered = new ApprovalSet();
+          if ( masterSet != null ) {
+              List items = masterSet.getItems();
+              if ( !Util.otob(includeRejected) ) {
+                  items = new ArrayList();
+                  for ( ApprovalItem item : masterSet.getItems() ) {
+                      if ( !item.isRejected() ) {
+                          items.add(item);
+                      }
+                  }
+              }
+ 
+              if ( Util.size(items) > 0 )  {
+                  for ( ApprovalItem item : items ) {
+                      if ( forceDecision ) { 
+                          item.setState(null);
+                      }
+                      filtered.add(item); 
+                  } 
+              } 
+          }
+          return filtered;
+      }
+    ]]>
+  </Source>
+</Rule>
+
+<Rule name="LCM Build Identity ApprovalSet">
+  <ReferencedRules>
+    <Reference class="sailpoint.object.Rule" name="Approval Library"/>
+  </ReferencedRules>
+  <Source>
+    <![CDATA[
+      import sailpoint.object.ProvisioningPlan;
+      import sailpoint.object.ProvisioningPlan.AttributeRequest;
+      import sailpoint.object.ProvisioningPlan.AccountRequest;
+      import sailpoint.object.ApprovalSet;
+      import sailpoint.object.ApprovalItem;
+      import sailpoint.object.Attributes;
+      import sailpoint.tools.Util;
+
+      ApprovalSet set = new ApprovalSet();
+      if ( plan != null ) {
+          List accountRequests = plan.getAccountRequests();
+          for ( AccountRequest request : accountRequests ) {
+              ApprovalItem item = new ApprovalItem();
+              item.setApplication(request.getApplication());
+              item.setInstance(request.getInstance());
+              item.setNativeIdentity(request.getNativeIdentity());
+              item.setOperation(request.getOperation().toString());
+              List attrRequestFlat = flattenAttributeRequests(request.getAttributeRequests());
+              if ( attrRequestFlat != null ) {
+                  item.setValue(attrRequestFlat);
+              } 
+              Attributes attributes = getAttributeRequestArguments(request.getAttributeRequests());
+              item.setAttributes(attributes);
+              
+              // for these requests comments come in on the plan
+              String comments = plan.getComments();
+              if ( Util.getString(comments) != null ) {
+                  item.setRequesterComments(comments);
+              }
+              set.add(item);
+          }
+
+          // while we are here lets annotate the plan with previousValues
+          if ( flow.equals("IdentityEditRequest") ) {
+              AccountRequest iiqRequest = plan.getAccountRequest("IIQ");    
+              if ( iiqRequest != null ) {
+                  List attributeRequests = iiqRequest.getAttributeRequests();
+                  if ( Util.size(attributeRequests) > 0 ) {
+                      Identity id = context.getObject(Identity.class, identityName);
+                      if ( id != null )  {
+                          for ( AttributeRequest req : attributeRequests ) {
+                              String name = req.getName();
+                              if ( name != null ) {
+                                  // We have to be carefull here, if we see manager display
+                                  // the displayName
+                                  Object prevValue = id.getAttribute(name);
+                                  if ( prevValue != null ) {
+                                      if (name.equals("manager") ) {
+                                          String displayName = getIdentityProperty((String)prevValue, "displayName");
+                                          if ( displayName != null ) {
+                                              prevValue = displayName;
+                                          }
+                                      }
+                                      else if (prevValue instanceof Identity) {
+                                          prevValue = (String)prevValue.getDisplayableName();
+                                      }
+                                      else {
+                                      }
+                                      req.put(ProvisioningPlan.ARG_PREVIOUS_VALUE, prevValue);
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+      return set;
+    ]]>
+  </Source>
+</Rule>
+
+<!--
+  -  A RequestObjectSelector rule that generates a Fiter to return objects in the requestor's authorized scopes.
+  -->
+  <Rule language="beanshell" name="Objects in Requestor's Authorized Scopes" type="RequestObjectSelector">
+  <Description>
+    This rule returns either a Filter object that will be used to search for objects in the requestor's authorized scopes,
+    the boolean value 'true' to indicate that everything should be returned (i.e. no restrictions) 
+    or the boolean value 'false' to indicate that no objects are available for this user
+  </Description>
+  <Signature returnType="sailpoint.object.QueryInfo">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="requestor" type="sailpoint.object.Identity">
+        <Description>
+          Identity that is making the Life Cycle Manager request.
+        </Description>
+      </Argument>
+      <Argument name="requestee" type="sailpoint.object.Identity">
+        <Description>
+          Identity on whose behalf the Life Cycle Manager request is being made.  In the case of bulk requests,
+          this argument will be set to null when determining the roles that are visible to the requestor.
+          It will be provided once a selection has been made in order to determine whether or not the given requestee
+          should have access to the selected role.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="filter">
+        <Description>
+          Either a Filter object that will be used to search for accessible Objects, the boolean value 'true' to indicate that everything should be
+          returned (i.e. no restrictions) or the boolean value 'false' to indicate that no objects are available for this population 
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+    <![CDATA[
+      import sailpoint.api.ScopeService;
+      
+      ScopeService scopeService = new ScopeService(context);
+      return scopeService.getControlledScopesQueryInfo(requestor);
+    ]]>
+  </Source>
+</Rule>
+
+<!--
+  -  A RoleSelector rule that generates a Fiter to return roles in the requestee's assigned scope.
+  -->
+<Rule language="beanshell" name="Objects in Requestee's Assigned Scope" type="RequestObjectSelector">
+  <Description>This rule returns a Filter that restricts objects to those in the requestee's assigned scope</Description>
+  <Signature returnType="sailpoint.object.QueryInfo">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="requestor" type="sailpoint.object.Identity">
+        <Description>
+          Identity that is making the Life Cycle Manager request.
+        </Description>
+      </Argument>
+      <Argument name="requestee" type="sailpoint.object.Identity">
+        <Description>
+          Identity on whose behalf the Life Cycle Manager request is being made.  In the case of bulk requests,
+          this argument will be set to null when determining the objects that are visible to the requestor.
+          It will be provided once a selection has been made in order to determine whether or not the given requestee
+          should have access to the selected role.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="filter">
+        <Description>
+          Either a Filter object that will be used to search for accessible Objects, the boolean value 'true' to indicate that everything should be
+          returned (i.e. no restrictions) or the boolean value 'false' to indicate that no objects are available for this population 
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+    <![CDATA[
+      import sailpoint.api.ScopeService;
+      import sailpoint.object.Identity;
+      import sailpoint.object.Scope;
+      import sailpoint.object.QueryOptions;
+      import sailpoint.object.QueryInfo;
+
+      ScopeService scopeService = new ScopeService(context);
+      QueryInfo scopeQueryInfo;
+      if (requestee == null) {
+          scopeQueryInfo = new QueryInfo(new QueryOptions());
+      } else {
+          scopeQueryInfo = scopeService.getAssignedScopeQueryInfo(requestee);
+      }
+      
+      return scopeQueryInfo;
+    ]]>
+  </Source>
+</Rule>
+
+<!--
+  -  A RequestObjectSelector rule that generates a Fiter to return objects in the requestee's assigned scope.
+  -->
+  <Rule language="beanshell" name="Objects in Requestor's Authorized Scopes or Requestee's Assigned Scope" type="RequestObjectSelector">
+  <Description>This rule returns a Filter that restricts roles to those in the requestor's authorized scopes or the requestee's assigned scope</Description>
+  <Signature returnType="sailpoint.object.QueryInfo">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="requestor" type="sailpoint.object.Identity">
+        <Description>
+          Identity that is making the Life Cycle Manager request.
+        </Description>
+      </Argument>
+      <Argument name="requestee" type="sailpoint.object.Identity">
+        <Description>
+          Identity on whose behalf the Life Cycle Manager request is being made.  In the case of bulk requests,
+          this argument will be set to null when determining the roles that are visible to the requestor.
+          It will be provided once a selection has been made in order to determine whether or not the given requestee
+          should have access to the selected role.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="filter">
+        <Description>
+          A Filter object that will be used to search for accessible objects.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+    <![CDATA[
+        import sailpoint.api.ScopeService;
+        import sailpoint.object.Filter;
+        import sailpoint.object.Identity;
+        import sailpoint.object.QueryInfo;
+        import sailpoint.object.QueryOptions;        
+
+        ScopeService scopeService = new ScopeService(context);
+        QueryInfo requestorQueryInfo =  scopeService.getControlledScopesQueryInfo(requestor);
+        QueryInfo requesteeQueryInfo;
+        if (requestee == null) {
+            requesteeQueryInfo = null;
+        } else {
+            requesteeQueryInfo =  scopeService.getAssignedScopeQueryInfo(requestee);
+        }
+
+        QueryInfo scopeQueryInfo;
+        if (requesteeQueryInfo == null || requesteeQueryInfo.isReturnNone()) {
+            // Either no requestee was available or the requestee doesn't have anything in scope.  
+            // Only apply the requestor QueryInfo in either case.
+            scopeQueryInfo = requestorQueryInfo;
+        } else if (requestorQueryInfo != null && !requestorQueryInfo.isReturnNone()) {
+            if (requestorQueryInfo.isReturnAll() || requesteeQueryInfo.isReturnAll()) {
+                // If either the requestor or requestee has access to everything create a QueryInfo that grants
+                // access to everything
+                scopeQueryInfo = new QueryInfo(new QueryOptions());
+            } else {
+                // Both requestee and requestor filters exist so 'or' them
+                scopeQueryInfo = new QueryInfo(Filter.or(requestorQueryInfo.getFilter(), requesteeQueryInfo.getFilter()), false);
+            }
+        } else {
+            // The requestor doesn't have access to anything so only return whatever the requestee has access to
+            scopeQueryInfo = requesteeQueryInfo;
+        }
+
+        return scopeQueryInfo;
+    ]]>
+  </Source>
+</Rule>
+
+  
+<!--
+  -  A RequestObjectSelector rule that generates a Fiter to return objects owned by the requestor
+  -->
+<Rule language="beanshell" name="Objects Owned by the Requestor" type="RequestObjectSelector">
+  <Description>This rule returns a Filter that restricts objects to those that the requestor or one of their workgroups owns</Description>
+  <Signature returnType="sailpoint.object.QueryInfo">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="requestor" type="sailpoint.object.Identity">
+        <Description>
+          Identity that is making the Life Cycle Manager request.
+        </Description>
+      </Argument>
+      <Argument name="requestee" type="sailpoint.object.Identity">
+        <Description>
+          Identity on whose behalf the Life Cycle Manager request is being made.  In the case of bulk requests,
+          this argument will be set to null when determining the objects that are visible to the requestor.
+          It will be provided once a selection has been made in order to determine whether or not the given requestee
+          should have access to the selected object.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="filter">
+        <Description>
+          A Filter object that will be used to search for accessible Objects.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+    <![CDATA[
+      import sailpoint.object.Filter;
+      import sailpoint.object.Identity;
+      import sailpoint.object.QueryOptions;
+      import sailpoint.object.QueryInfo; 
+      return new QueryInfo(QueryOptions.getOwnerScopeFilter(requestor, "owner"), false);
+    ]]>
+  </Source>
+</Rule>
+  <!--
+  -  A RequestObjectSelector rule that returns a QueryInfo set to return all object without filter
+  -->
+<Rule language="beanshell" name="All Objects" type="RequestObjectSelector">
+  <Description>Allows all objects to be selected (no filtering)</Description>
+  <Signature returnType="sailpoint.object.Filter">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="requestor" type="sailpoint.object.Identity">
+        <Description>
+          Identity that is making the Life Cycle Manager request.
+        </Description>
+      </Argument>
+      <Argument name="requestee" type="sailpoint.object.Identity">
+        <Description>
+          Identity on whose behalf the Life Cycle Manager request is being made.  In the case of bulk requests,
+          this argument will be set to null when determining the roles that are visible to the requestor.
+          It will be provided once a selection has been made in order to determine whether or not the given requestee
+          should have access to the selected role.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="filter">
+        <Description>
+          A Filter object that will be used to search for accessible request objects.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>import sailpoint.object.QueryInfo;
+
+return new QueryInfo(null, false);</Source>
+</Rule>
+
+</sailpoint>

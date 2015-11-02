@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+   Categories summary top portion of the scorecard viewer.
+   Shared between certification level and identity level for maximum reusability. 
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+<ui:composition>
+
+  <ui:fragment rendered="#{scorecard eq null}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.msg_no_scorecard}"/>
+    <br/><br/>
+  </ui:fragment>
+
+  <ui:fragment rendered="#{scorecard != null}">
+    <table cellspacing="0" cellpadding="2" class="width100 customWidth">
+      <tr>
+        <td>
+          <h:outputText styleClass="spContentTitle" value="#{msgs.title_scorecard}"/>
+        </td>
+        <td align="right">
+          <h:outputText styleClass="spContentTitle" value="#{msgs.label_composite_score} #{scorecard.composite}"/>
+        </td>
+        <td width="10%">
+          <div class="riskIndicator ri_#{sp:getScoreColor(scorecard.composite)}">&nbsp;</div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">  
+          <div class="paddedContainer">
+            <table id="riskScoreTbl" class="spTable" cellspacing="0">
+              <tr>
+                <th>#{msgs.label_score_category}</th>
+                <th>#{msgs.label_base_score}</th>
+                <ui:fragment rendered="#{scorecard.compensated}">
+                  <th>#{msgs.label_compensated_score}</th>
+                </ui:fragment>
+              </tr>            
+  
+              <ui:repeat value="#{scorecard.scores}" var="score" varStatus="status">
+                <tr class="#{status.even ? 'even' : 'odd'}">
+                  <td align="left">
+                    <h:outputText value="#{sp:localizeKey(score.categoryDisplayName)}"/>
+                  </td>
+                  <td>
+                    <div class="riskIndicator ri_#{sp:getScoreColor(score.score)}">
+                        <h:outputText value="#{score.score}"/>
+                    </div>
+                  </td>
+                  <ui:fragment rendered="#{scorecard.compensated}">
+                    <ui:fragment rendered="#{score.compensated}">
+                      <td>
+                        <div class="riskIndicator ri_#{sp:getScoreColor(score.compensatedScore)}">
+                            <h:outputText value="#{score.compensatedScore}"/>
+                        </div>
+                      </td>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{!score.compensated}">
+                      <td>
+                        <h:outputText value="--------"/>
+                      </td>
+                    </ui:fragment>
+                  </ui:fragment>
+                </tr>
+              </ui:repeat>
+            </table>  
+          </div>
+        </td>
+      </tr>
+    </table>
+  </ui:fragment>          
+  
+</ui:composition>
+
+</body>
+</html>

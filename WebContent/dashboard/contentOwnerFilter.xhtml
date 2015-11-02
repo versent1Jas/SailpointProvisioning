@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script>
+        Ext.onReady(function () {
+            var ownerSuggest = new SailPoint.IdentitySuggest({
+                id: 'dashboardSearchByCertifier',
+                renderTo: 'identityCertifierSuggest', 
+                binding: 'identityCertifier', 
+                value: '#{sp:escapeJavascript(certificationPercentList.ownerFilter.displayableName)}',
+                width: 200,
+                listConfig : {width : 300},
+                baseParams: {context: 'Owner'}
+            });
+        }); 
+    </script>
+    
+  <div style="margin-top:10px; margin-bottom:10px">
+    <table border="0" class="dashWidth100" cellpadding="0" >
+      <tr>
+        <td width="50%" style="text-align: right">
+            <h:outputText value="#{msgs.cont_owner_certifier} " styleClass="font10" style="font-weight: bold; text-align:right; margin-right:10px"/>
+        </td>
+        <td width="200px">
+            <div id="identityCertifierSuggest"></div>
+            <t:inputHidden id="identityCertifier" value="#{certificationPercentList.ownerFilter}" forceId="true">
+                <sp:convertIdentity />
+            </t:inputHidden>
+        </td>
+        <td align="left">
+          <a4j:commandButton  id="resetOwnerCertPanel" 
+                              styleClass="secondaryBtn" 
+                              style="margin:5px;"
+                              action="#{certificationPercentList.resetOwner}"
+                              value="#{msgs.button_reset}"
+                              render="ownerFilterPanel, #{contentOwnerPanel}"/>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" style="text-align: right"> 
+          <h:outputText styleClass="font10" style="font-weight: bold; text-align:right; margin-right:10px" value="#{msgs.show_subordinate_with_no_access_review}" />
+        </td>
+        <td colspan="2">
+          <h:selectBooleanCheckbox id="showEmptySubordinates" value="#{certificationPercentList.showEmptySubordinates}" />
+        </td>
+      </tr>
+      <tr>
+        <td style="vertical-align: top; text-align: center" colspan="3">
+          
+          <a4j:commandButton  id="refreshOwnerCertPanel" 
+                              styleClass="primaryBtn"
+                              style="margin:5px 5px;" 
+                              onclick="SailPoint.Dashboard.displayLoadingMessage('Owner');" 
+                              action="#{certificationPercentList.refreshOwner}" 
+                              value="#{msgs.dash_comp_content_owner_filter_button_show_certs}" 
+                              render="ownerFilterPanel, #{contentOwnerPanel}" 
+                              oncomplete="SailPoint.Dashboard.hideLoadingMessage('Owner');setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500);"/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <h:message for="identityCertifier" styleClass="formError"/>
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <script type="text/javascript" defer="defer">
+    function refocusTheEnterIfNeeded(keyupEvent) {
+      // Prevent navigation to the risk page.  For some reason the browser
+      // Thinks we're pressing a chart button if we hit 'enter' after entering
+      // a filter value
+      if (keyupEvent &amp;&amp; keyupEvent.keyCode &amp;&amp; keyupEvent.keyCode != 13) {
+        return false;
+      }
+      
+      if (keyupEvent &amp;&amp; keyupEvent.which &amp;&amp; keyupEvent.which != 13) {
+        return false;
+      }
+      
+      $('dashboardForm:refreshOwnerCertPanel').focus();
+    }   
+    
+  </script>
+  
+</ui:composition>
+
+</body>
+</html>

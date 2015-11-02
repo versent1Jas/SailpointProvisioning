@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+        Ext.onReady(function () {
+            var classSuggest = Ext.create('SailPoint.Suggest', {
+                id: 'classSuggestCmp',
+                renderTo: 'classSuggestDiv',
+                binding: 'classSuggest',
+                store:{
+                    fields: ['id', 'displayName'],
+                    data: [{
+                        'id': '', 'displayName': '#{msgs.label_sync_classes_all}'
+                    },{
+                        'id': 'Application', 'displayName': '#{msgs.application}'
+                    },{
+                        'id': 'Bundle', 'displayName': '#{msgs.role}'
+                    }, {
+                        'id': 'Policy', 'displayName': '#{msgs.policy}'
+                    }]
+                },
+                value: '#{taskDefinition.argMap['syncClass'].value}',
+                editable: false
+            });
+            
+            classSuggest.on('select', function(combo, selectedRecords, options) {
+                var selectedClass = selectedRecords[0].get('id');
+                var objectsSuggest = Ext.getCmp('objectsMultiSuggestCmp');
+                objectsSuggest.suggest.getStore().getProxy().extraParams['selectedClass'] = selectedClass;
+                objectsSuggest.clear();
+                objectsSuggest.reload();
+                Ext.getCmp('objectsMultiSuggestCmp').setDisabled(!selectedClass.length || (selectedClass.length === 0));
+            }, classSuggest);
+
+            
+            var objectsMultiSuggest = Ext.create('SailPoint.MultiSuggest', {
+                id: 'objectsMultiSuggestCmp',
+                renderTo: 'objectsMultiSuggest',
+                suggestType: 'describableObject',
+                extraParams: { 'selectedClass': '#{taskDefinition.argMap['syncClass'].value}'},
+                contextPath: CONTEXT_PATH,
+                inputFieldName: 'objectsSuggest',
+                jsonData: #{sp:referencedJSONData(taskDefinition.argMap['syncClass'].value, taskDefinition.argMap['syncObjects'].value)},
+                sortable:true,
+                sortOnAdd:false,
+                disabled: !classSuggest.getValue() || classSuggest.getValue().length === 0
+            });
+            
+            var sourceSuggest = new SailPoint.Suggest({
+                renderTo: 'sourceSuggestDiv',
+                binding: 'sourceSuggest',
+                editable: false,
+                store:{
+                    fields: ['id', 'displayName'],
+                    data: [{
+                        'id': 'Map', 'displayName': '#{msgs.task_sync_description_source_map}'
+                    },{
+                        'id': 'LocalizedAttribute', 'displayName': '#{msgs.task_sync_description_source_localized_attribute}'
+                    }]
+                },
+                value: '#{empty(taskDefinition.argMap['syncSource'].value) ? 'Map' : taskDefinition.argMap['syncSource'].value}'
+            });
+        });    
+    </script>
+    
+    <table>
+      <tr>
+        <td colspan="2">
+          <h:outputText styleClass="spContentTitle" value="#{msgs.sync_description_task_options}"/>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <div class="spTabledContent">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th colspan="2" ><h:outputText value="#{msgs.aggregate_task_exec_options}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText value="#{taskDefinition.argMap['syncClass'].argument.prompt}"/></td>
+                <td>
+                  <div id="classSuggestDiv"/>
+                  <t:inputHidden id="classSuggest" value="#{taskDefinition.argMap['syncClass'].value}" forceId="true"/>
+                </td>
+              </tr>
+              <tr>
+                <td><sp:outputText value="#{taskDefinition.argMap['syncObjects'].argument.prompt}"/></td>
+                <td>
+                  <div id="objectsMultiSuggest"></div>
+                  <t:inputHidden id="objectsSuggest" 
+                                 value="#{taskDefinition.argMap['syncObjects'].value}" forceId="true">
+                  </t:inputHidden>
+                </td>
+              </tr>
+              <tr>
+                <td><sp:outputText value="#{taskDefinition.argMap['syncSource'].argument.prompt}"/></td>
+                <td>
+                  <div id="sourceSuggestDiv"/>
+                  <t:inputHidden id="sourceSuggest" value="#{taskDefinition.argMap['syncSource'].value}" forceId="true"/>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+
+	</sp:script>
+
+	<script type="text/javascript">;
+        Ext.onReady(function () {
+            var applicationsMultiSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'applicationsMultiSuggest',
+                suggestType: 'application',
+                jsonData: #{sp:basicJSONDataConverted(
+                   taskDefinition.argMap['applications'].objectListValue,
+                   'ApplicationListConverter')},
+                inputFieldName: 'applicationsSuggest',
+                contextPath: CONTEXT_PATH
+            });       
+			
+			var localeComboBox = new SailPoint.form.ComboBox({
+				renderTo : 'localeComboBoxDiv',
+				datasourceUrl : '/rest/localizedAttribute/localeNames',
+				contextPath: CONTEXT_PATH,
+				editable:false,
+				triggerAction:'all',
+				valueField:'name',
+				displayField:'name'
+			}) ;
+			        
+			localeComboBox.on("select", function(combo, record) {
+				$('editForm:localeFilter').value = record.data.name;
+			});
+			
+        });   
+    </script>
+
+    <table class="width100">
+        <ui:fragment render='#{taskDefinition.argValues != null}'>
+            <tr>
+                <td colspan="3" width="30%"><sp:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.blank_entitlement_descr_report_opts}" /></td>
+            </tr>
+            <tr>
+                <td width="33%" valign="top">
+                    <div class="spTabledContent">
+                        <table class="spTable" cellspacing="0">
+                            <tr>
+                                <th><sp:outputText value="#{msgs.report_filter_apps}" /></th>
+                            </tr>
+                            <tr>
+                                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["applications"].argument.description}' /></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="applicationsMultiSuggest"></div>
+                                    <t:inputHidden id="applicationsSuggest"
+							                       value="#{taskDefinition.argMap['applications'].objectListValue}" forceId="true">
+							             <sp:convertList />
+							        </t:inputHidden>
+							    </td>
+							</tr>
+                        </table>
+                   </div>
+				</td>
+                <td width="33%" valign="top">
+                    <div class="spTabledContent">
+                        <table class="spTable" cellspacing="0">
+                            <tr>
+                                <th colspan="2"><sp:outputText value="#{msgs.report_filter_start_and_end}" /></th>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <sp:outputText style="font-size:11px"
+                                                   value='#{taskDefinition.argMap["startCreatedDate"].argument.description}' />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.start_date}" /></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <h:selectBooleanCheckbox id="startDateSelect"
+							                                 value="#{taskDefinition.argMap['startCreatedDate'].bound}"
+							                                 onclick="toggleDateDisplay($('startDateDiv'), !(this.checked));" />
+    							</td>
+    							<td>
+    							     <div id="startDateDiv">
+                                        <sp:inputDate timeZone="#{base.userTimeZoneId}" 
+                                                     type="date" 
+                                                     id="startDate"
+                                                     popupCalendar="true" 
+                                                     ampm="true"
+                                                     addResources="false" imageLocation="/scripts/myfacescalendar"
+                                                     javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                                     value='#{taskDefinition.argMap["startCreatedDate"].dateValue}'
+                                                     styleClass="tomahawkInputDate"/>
+                                     </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><a4j:outputPanel ajaxRendered="true">
+                                    <h:message for="startDate" styleClass="formError" />
+                                </a4j:outputPanel></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <sp:outputText style="font-size:11px"	
+                                                   value='#{taskDefinition.argMap["endCreatedDate"].argument.description}' />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><sp:outputText style="font-weight:bold" value="#{msgs.end_date}" /></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <h:selectBooleanCheckbox id="endDateSelect"
+                                                             value="#{taskDefinition.argMap['endCreatedDate'].bound}"
+                                                             onclick="toggleDateDisplay($('endDateDiv'), !(this.checked));" />
+                                </td>
+                                <td>
+                                    <div id="endDateDiv">
+                                        <sp:inputDate timeZone="#{base.userTimeZoneId}" 
+                                                     type="date" 
+                                                     id="endDate"
+                                                     popupCalendar="true" 
+                                                     ampm="true"
+                                                     addResources="false" imageLocation="/scripts/myfacescalendar"
+                                                     javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                                     value='#{taskDefinition.argMap["endCreatedDate"].dateValue}'
+                                                     styleClass="tomahawkInputDate" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <a4j:outputPanel ajaxRendered="true">
+                                        <h:message for="endDate" styleClass="formError" />
+                                    </a4j:outputPanel>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+				</td>
+                <td width="33%" valign="top">
+                    <div class="spTabledContent">
+                        <table class="spTable" cellspacing="0">
+                            <tr>
+                                <th><sp:outputText value="#{msgs.report_filter_locale}"/></th>
+                            </tr>
+                            <tr>
+                                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["localeFilter"].argument.description}'/></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="localeComboBoxDiv" />
+					               <t:inputHidden id="localeFilter" value='#{taskDefinition.argMap["localeFilter"].value}' />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>          
+                </td>
+			</tr>
+		</ui:fragment>
+	</table>
+	<script defer="defer">
+    <!--//--><![CDATA[//><!--
+    var checkBox1 = $('editForm:startDateSelect');
+    toggleDisplay($('startDateDiv'), !(checkBox1.checked));
+      
+    var checkBox1 = $('editForm:endDateSelect');
+    toggleDisplay($('endDateDiv'), !(checkBox1.checked));
+	
+
+    //--><!]]>
+    </script>
+</ui:composition>
+</body>
+</html>

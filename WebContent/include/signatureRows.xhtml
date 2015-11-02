@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:remove><!--
+  This is a relatively general include that should be able
+  to render any Signature and bind to an attribute map.
+  
+  This was started for custom risk scores, then expanded to
+  custom policies.  Eventually we need to merge this with
+  the much more complex signature renderer for task definitions.
+
+  You must pass these parameters:
+
+    signature   - a Signature object
+    target      - an object with a Map property "attributes" 
+    manageRight - an optional name of a SPRight require to edit the values
+
+  This include only renders rows so the signature fields
+  may be included in a table with other fields.  If you
+  want the entire table include signature.xhtml.
+
+--></ui:remove>
+<ui:composition>
+
+  <ui:repeat value="#{signature.arguments}" var="arg">
+    <tr>
+      <td align="right">
+        <h:outputText value="#{sp:localizeKey(arg.prompt)}" />
+      </td>
+      <ui:fragment rendered="#{arg.helpKey == null}">
+        <td/>
+      </ui:fragment>
+      <ui:fragment rendered="#{arg.helpKey != null}">
+        <td>
+          <h:graphicImage
+            width="12px" height="12px" alt="#{help[arg.helpKey]}"
+            id="imgHlp_#{arg.helpKey}"
+            style="cursor:pointer;padding: 0px 7px 0px 7px"
+            url="/images/icons/dashboard_help_16.png"/>
+        </td>
+      </ui:fragment>
+      <td>
+        <h:inputText value="#{target.attributes[arg.name]}" 
+          size="#{arg.type == 'int' ? '5' : '40'}"
+          disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+          readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"/>
+      </td>
+    </tr>
+  </ui:repeat>
+
+</ui:composition>
+
+</body>
+</html>

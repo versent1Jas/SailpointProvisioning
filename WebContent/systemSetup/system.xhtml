@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+
+<h:head>
+<title>#{msgs.title_configure_system_settings}</title>
+</h:head>
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">#{msgs.title_configure_system_settings}</ui:define>
+  
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>       
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/bandConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/emailHelper.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/systemSetup.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'SYSTEM_SETTINGS';
+        var ACTIVE_TAB = #{systemConfig.activeTab};
+        //--><!]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+    
+    <f:view>
+      <h:form styleClass="form" id="editForm">
+      
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>          
+          
+          <div id="systemSetupTabs" style="margin-top: 20px; width:95%"></div>          
+          
+          <div id="mailPanelContent" class="x-hide-display">
+              <ui:include src="/systemSetup/mailSettings.xhtml"/>
+          </div>
+          
+          <div id="workItemPanelContent" class="x-hide-display">
+              <ui:include src="/systemSetup/workItemSettings.xhtml"/>
+          </div>
+          
+           <div id="identitiesPanelContent" class="x-hide-display">
+              <ui:include src="/systemSetup/identitiesSettings.xhtml"/>
+          </div>
+          
+          <div id="rolePanelContent"  class="x-hide-display">
+              <div class="paddedContainer">
+                <ui:include src="/systemSetup/roles.xhtml"/>
+              </div>
+          </div>
+          
+          <div id="passwordPanelContent"  class="x-hide-display">
+              <div class="paddedContainer">
+                <ui:include src="/systemSetup/passwords.xhtml"/>
+              </div>
+          </div>
+          
+          <div id="miscPanelContent" class="x-hide-display">
+              <ui:include src="/systemSetup/miscellaneous.xhtml"/>
+          </div>
+          
+          <h:inputHidden id="activeTab" value="#{systemConfig.activeTab}"/>
+
+          <h:commandButton style="display:none" id="stealthSaveButton"
+            action="#{systemConfig.saveChangesAction}" />
+
+          <h:commandButton style="display:none" id="stealthCancelButton"
+            action="#{systemConfig.cancelChangesAction}" />
+            
+          <h:inputHidden id="maxScore" value="#{bandConfig.maxScore}" />
+          <div class="buttonRow">
+            <a4j:commandButton styleClass="primaryBtn" id="visibleSaveButton" 
+              value="#{msgs.button_save}" onclick="$('editForm:stealthSaveButton').click();" />
+        
+            <a4j:commandButton id="visibileCancelButton" styleClass="secondaryBtn" style="margin-left:5px"
+              value="#{msgs.button_return_to_system_setup}" onclick="confirmCancel(isPageDirty, 'editForm:stealthCancelButton');"  />
+          </div>
+          <div id="errorMessage" class="formError" style="display:none;" />
+        </h:form>
+      </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

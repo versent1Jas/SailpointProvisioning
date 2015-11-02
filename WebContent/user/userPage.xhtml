@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+<h:head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=8,10" />
+<c:if test="#{!(base.pinchZoomEnabled)}">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+</c:if>
+  <title>
+    <ui:insert name="title">#{msgs.sailpoint_iiq}</ui:insert>
+  </title>
+  <link rel="SHORTCUT ICON"
+        href="#{base.requestContextPath}/images/icons/sailpoint.ico"/>
+
+  <ui:remove><!-- **** Style Sheets **** --></ui:remove>
+  
+  <sp:style serveOffset="#{base.requestContextPath}/css">
+    <src>reset.css</src>
+    <src>common.css</src>
+    <src>tag-override.css</src>
+    <src>rounded.css</src>
+    <src>sp-components.css</src>
+    <src>CheckHeader.css</src>
+  </sp:style>
+
+  <ui:remove><!-- TODO: reference this only in the work item pages.--></ui:remove>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/workitem">
+    <src>work-item.css</src>
+  </sp:style>     
+
+  <sp:style serveOffset="#{base.requestContextPath}/scripts/ext-4.1.0/resources/css">
+    <src>iiq-extjs.css</src>
+  </sp:style>
+  
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint">
+    <src>base.css</src>
+    <src>menu.css</src>
+    <src>shared-icons.css</src>
+    <src>buttons.css</src>
+    <src>suggest.css</src>
+  </sp:style>
+
+  <ui:remove><!-- Overrides and custom should come after whatever they are overriding. --></ui:remove>
+  <sp:style serveOffset="#{base.requestContextPath}/css/brand">
+    <src>style.css</src>
+  </sp:style>
+
+  <sp:style serveOffset="#{base.requestContextPath}/css">
+    <src>ext4-overrides.css</src>
+    <src>iiq-custom.css</src>
+  </sp:style>
+
+  <ui:remove><!-- **** End Style Sheets **** --></ui:remove>
+
+  <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+      var CONTEXT_PATH = '#{base.requestContextPath}';
+
+      // default value that should get overwridden in each page that
+      // uses this template
+      var helpKey = 'MAIN';
+
+      // starts the session timeout monitoring process - only auto-logout if login is required.
+      if (#{not sp:getSystemConfigurationValue("allowUnauthenticatedEndUserPages", false)}) {
+          var windowTimeoutID = window.setInterval("$('sessionTimeoutForm:checkSessionBtn').click();", #{login.sessionTimeout});
+      }
+    //--><!]]>
+  </script>
+  
+  <ui:include src="../include/extjs.xhtml" />
+  
+  <sp:script enabled="false">
+    <src>#{base.requestContextPath}/scripts/prototype.js?#{debug.revision}</src>
+  </sp:script>
+
+  <sp:script enabled="false">
+    <src>#{base.requestContextPath}/scripts/scriptaculous-js-1.7.0/src/scriptaculous.js?#{debug.revision}</src>
+  </sp:script>
+  
+  <ui:include src="../include/iiqScriptBase.xhtml" />
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/menu.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/validation.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/startUpHelp.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/platform.js?#{debug.revision}</src>
+  </sp:script>
+
+  <ui:insert name="headerItems" />
+
+  <c:if test="#{base.mobile}">
+    <sp:style serveOffset="#{base.requestContextPath}/css/">
+      <src>mobile.css</src>
+    </sp:style>
+  </c:if>
+
+  <sp:script src='#{base.requestContextPath}/scripts/sailpoint/web/appPageBegin.js?#{debug.revision}'/>
+</h:head>
+
+<body>
+  <c:if test="#{!(base.loggedInUserName eq null)}">
+    <h:form id="navigationForm">
+      <ui:remove><!-- Hidden buttons used to manipulate navigation history. --></ui:remove>
+      <a4j:commandButton id="saveHistoryBtn"
+                         actionListener="#{navigationHistory.save}"
+                         style="display: none" />
+      <a4j:commandButton id="backBtn"
+                         actionListener="#{navigationHistory.back}"
+                         style="display: none" />
+      <a4j:commandButton id="homeBtn"
+                         action="#{navigationHistory.home}"
+                         style="display: none" />
+      <h:inputHidden id="beanName" value="#{navigationHistory.beanName}" />
+      <h:inputHidden id="objectId"/>
+    </h:form>
+    
+    <h:form id="sessionTimeoutForm">
+        <ui:remove><!-- Hidden button used to politely manage session timeouts. --></ui:remove>
+        <a4j:commandButton id="checkSessionBtn"
+                           action="ok"
+                           render="sessionExpiry"
+                           style="display: none" 
+                           oncomplete="isSessionTimedOut()" />
+        <h:inputHidden id="sessionExpiry" value="#{login.sessionExpiry}" />
+    </h:form>
+    
+  </c:if>
+
+  <ui:include src="userPageBody.xhtml" />
+
+  <script type="text/javascript" defer="defer">
+    <!--//--><![CDATA[//><!--
+      //The following script builds tooltips for pages that include the "?" help image
+      //on their page.  Script looks for images with "imgHlp" in their id and
+      //takes their alt text to build a tooltip.
+      buildTooltips();
+    //--><!]]>
+  </script>
+
+</body>
+</html>

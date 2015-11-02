@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">#{msgs.title_edit_preferences}</ui:define>
+
+  <ui:define name="headerItems">   
+  
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web">
+      <src>dashboard.css</src>
+    </sp:style>
+  	<sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src> 
+  	</sp:script>
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'EDIT_PREFERENCES';
+        
+        function toggleStartAndEndDateFields(suggest, newValue, oldValue) {
+            if ((newValue == null) || (newValue == "")) 
+                disableStartAndEndDates();   
+            else 
+                enableStartAndEndDates();
+        }
+        
+        function enableStartAndEndDates() {
+            $('mainForm:forwardingStart').disabled = false;
+            $('mainForm:startLabel').className = "normal";   
+
+            $('mainForm:forwardingEnd').disabled = false;
+            $('mainForm:endLabel').className = "normal";        
+        }
+        
+        function disableStartAndEndDates() {
+            toggleDisplay($('startDateDiv'), true);
+            $('mainForm:forwardingStart').disabled = true;
+            $('mainForm:forwardingStart').checked = false;
+            $('mainForm:startLabel').className = "disabled";        
+
+            toggleDisplay($('endDateDiv'), true);
+            $('mainForm:forwardingEnd').disabled = true;
+            $('mainForm:forwardingEnd').checked = false;
+            $('mainForm:endLabel').className = "disabled";            
+        }
+        
+        Ext.onReady(function () {
+            var forwardingSuggest = new SailPoint.IdentitySuggest({
+                id: 'forwardingSuggestCmp',
+                renderTo: 'forwardingSuggest', 
+                binding: 'forwarding',
+                width: 300,
+                listeners: {
+                    change: toggleStartAndEndDateFields,
+                    select: enableStartAndEndDates
+                },
+                baseParams: {context: 'Global'}
+            });
+            
+            var iVal = '#{sp:escapeJavascript(preferences.forward.displayName)}';
+            if(iVal != ''){
+            	forwardingSuggest.setRawValue(iVal);
+                SailPoint.Suggest.IconSupport.setIconDiv(forwardingSuggest, 'userIcon');
+            }
+
+            // disable the start and end checkboxes if there's no forwarding user
+            if (!#{preferences.forwarding}) {
+                disableStartAndEndDates();
+            }
+
+            // toggle the date field displays to match their checkboxes
+            toggleDisplay($('startDateDiv'), (!#{preferences.forwardStart}));
+            toggleDisplay($('endDateDiv'), (!#{preferences.forwardEnd}));
+        });        
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <sp:sailpointForm styleClass="form" id="mainForm">
+
+          <table border="0" cellpadding="5" cellspacing="0" class="width100 paddedTbl">
+            <tr>
+              <td>
+
+                <h:panelGrid columns="3" styleClass="paddedTbl">
+
+                  <c:if test="#{preferences.systemUser}">
+                    <h:outputText class="textBold" value="#{msgs.email_address}"/>
+                    <h:graphicImage id="imgHlp_systemUserEmail" width="12px" alt="#{help.help_preferences_email}"
+                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png" />
+                    <h:inputText id='email' value="#{preferences.user.email}" size="40"/>
+
+                    <h:outputText class="textBold" value="#{msgs.first_name}"/>
+                    <h:graphicImage id="imgHlp_FirstName" width="12px" alt="#{help.help_preferences_first_name}"
+                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png" />
+                    <h:inputText id='firstname' value="#{preferences.user.firstname}" size="40"/>
+
+                    <h:outputText class="textBold" value="#{msgs.last_name}"/>
+                    <h:graphicImage id="imgHlp_LastName" width="12px" alt="#{help.help_preferences_last_name}"
+                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png" />
+                    <h:inputText id='lastname' value="#{preferences.user.lastname}" size="40"/>
+                  </c:if>
+                  
+
+                  <h:outputText class="textBold" value="#{msgs.forwarding_user}"/>
+                  <h:graphicImage id="imgHlpForwardingUser" width="12px" alt="#{help.help_preferences_forward}"
+                     height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" />   
+                  <h:panelGroup> 
+                      <div id="forwardingSuggest"></div>     
+                      <t:inputHidden id="forwarding" value="#{preferences.forward}" forceId="true">
+                         <sp:convertIdentity />
+                      </t:inputHidden>
+                  </h:panelGroup>
+                  
+                  <h:outputText class="textBold" value=""/>
+                  <h:graphicImage id="imgHlpForwardingStartDate" width="12px" alt="#{help.help_preferences_forward_start_date}"
+                     height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" /> 
+                  <h:panelGroup>  
+                    <h:selectBooleanCheckbox id="forwardingStart" value="#{preferences.forwardStart}"
+                        onclick="toggleDisplay($('startDateDiv'), !(this.checked));"/>
+                    <h:outputText id="startLabel" style="margin-left: 4px"
+                        value="#{msgs.forwarding_user_start_date}" />
+                    <span id="startDateDiv" style="display: none">
+                        <sp:inputDate id="startDate" type="date" popupCalendar="true" ampm="false" addResources="false" 
+                                     imageLocation="/scripts/myfacescalendar"
+                                     javascriptLocation="/scripts/myfacescalendar"
+                                     styleLocation="/scripts/myfacescalendar"
+                                     value="#{preferences.forwardStartDate}"
+                                     styleClass="tomahawkInputDate"/>  
+                    </span>
+                  </h:panelGroup>
+                  
+                  <h:outputText class="textBold" value=""/>
+                  <h:graphicImage id="imgHlpForwardingEndDate" width="12px" alt="#{help.help_preferences_forward_end_date}"
+                     height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" />   
+                  <h:panelGroup>
+                    <h:selectBooleanCheckbox id="forwardingEnd" value="#{preferences.forwardEnd}" 
+                        onclick="toggleDisplay($('endDateDiv'), !(this.checked));"/>
+                    <h:outputText id="endLabel" style="margin-left: 4px"
+                        value="#{msgs.forwarding_user_end_date}" />
+                    <span id="endDateDiv" style="display: none">
+                        <sp:inputDate id="endDate" type="date" popupCalendar="true" ampm="true" addResources="false" 
+                                     imageLocation="/scripts/myfacescalendar"
+                                     javascriptLocation="/scripts/myfacescalendar"
+                                     styleLocation="/scripts/myfacescalendar"
+                                     value="#{preferences.forwardEndDate}"
+                                     styleClass="tomahawkInputDate"/>
+                    </span>
+                  </h:panelGroup>
+                  
+                  <h:outputText class="textBold" value="#{msgs.system_config_cert_page_list_detailed_view} "/>
+                  <h:graphicImage id="imgHlpListDetailedView" width="12px" alt="#{help.help_system_config_cert_page_list_detailed_view}"
+                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" />
+                  <h:selectOneRadio layout="lineDirection" id="listOrDetailed" 
+                                    value="#{preferences.detailedViewFilterSet}">
+                     <f:selectItem itemLabel="#{msgs.prefs_entitlement_display_default}" itemValue="null" />
+                     <f:selectItem id="preferCertList" itemLabel="#{msgs.label_list}" itemValue="false"/>
+                     <f:selectItem id="preferCertDetailed" itemLabel="#{msgs.label_detailed}" itemValue="true"/>
+                  </h:selectOneRadio> 
+
+                  <h:outputText class="textBold" value="#{msgs.system_config_cert_page_list_items_view} "/>
+                  <h:graphicImage id="imgHlpCertPageListItems" width="12px" alt="#{help.help_system_config_cert_page_list_items_view}"
+                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" /> 
+                  <h:selectOneRadio layout="lineDirection" id="certPageListItems" 
+                                    value="#{preferences.certPageListItems}">
+                     <f:selectItem itemLabel="#{msgs.prefs_entitlement_display_default}" itemValue="null" />
+                     <f:selectItem id="preferCertListWorkSheetView" itemLabel="#{msgs.label_worksheet_view}" itemValue="true"/>
+                     <f:selectItem id="preferCertListIdentityView" itemLabel="#{msgs.label_identity_view}" itemValue="false"/>
+                  </h:selectOneRadio> 
+
+                  <h:outputText class="textBold" value="#{msgs.prefs_display_entitlement_desc} "/>
+                  <h:graphicImage id="imgHlpExcludeEntsDisplay" width="12px" alt="#{help.help_preferences_show_entitlement_desc}"
+                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" />
+                  <h:selectOneRadio id="selectEntitlementDisplay" value="#{preferences.displayEntitlementDescription}" >
+                    <f:selectItem itemLabel="#{msgs.prefs_entitlement_display_default}" itemValue="null" />
+                    <f:selectItem itemLabel="#{msgs.prefs_entitlement_display_val}" itemValue="false" />
+                    <f:selectItem itemLabel="#{msgs.prefs_entitlement_display_desc}" itemValue="true" />
+                  </h:selectOneRadio>
+ 
+                  <h:outputText class="textBold" value="#{msgs.prefs_enable_startup_help} "/>
+                  <h:graphicImage id="imgHlpReEnableStartupHelp" width="12px" alt="#{help.help_preferences_reenable_startup_help}"
+                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" />
+                  <h:panelGrid columns="2">
+                  <a4j:commandButton id="resetPopupsButton"
+                     value="#{msgs.prefs_button_enable_popups}"
+                     styleClass="secondaryBtn"
+                     action="#{preferences.enablePopupsAction}"
+                     oncomplete="$('popupsResultsDiv').innerHTML = '#{sp:escapeJavascript(msgs.prefs_popups_enabled)}';"
+                     render="resetPopupsResultsPanel"/>
+                    <a4j:outputPanel id="resetPopupsResultsPanel">
+                      <div id="popupsResultsDiv" class="successText" >
+                        <h:outputText value="" />
+                      </div>
+                    </a4j:outputPanel>
+                  </h:panelGrid>
+
+                </h:panelGrid>
+              </td>
+            </tr>
+          
+            <tr>
+              <td style="padding:10px" valign="top" colspan="2">
+                <h:outputLink value="javascript:showHideWithLock($('passwordField'));">
+                  <h:outputText styleClass="font10" value="#{msgs.change_password}"/>
+                </h:outputLink>
+
+                <ui:fragment rendered="#{authQuestionConfig.authQuestionsEnabled}">
+                  <a style="padding-left: 10px" href="javascript: showHideWithLock($('authAnswers'));">
+                    <h:outputText styleClass="font10" value="#{msgs.edit_auth_answers}"/>
+                  </a>
+                </ui:fragment>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:10px;#{(preferences.passwordError) ? '' : 'display:none'}" valign="top" colspan="2" id="passwordField">
+                  <h:outputText styleClass="spContentTitle" value="#{msgs.password}"/><br/>
+                  
+                  <!-- Silly hidden password field to capture Firefox's auto-fill of the
+                       password from the login page -->
+                  <input type="password" name="ignorePassword" style="display:none"/>
+
+                  <table class="width100 preferencesPageSectionTable">
+                    <tr class="even" style="#{(preferences.requireCurrentPassword) ? '' : 'display:none'}">
+                      <td class="titleColumn">#{msgs.label_current_password}</td>
+                      <td>
+                        <sp:inputSecret id='currentPassword' value="#{preferences.currentPassword}" size="40" redisplay="true"
+                          styleClass="loginFormText"
+                          autocomplete="off"
+                          encrypt="false"
+                          onfocus="this.select();"/>
+                        <h:message styleClass="formError" for="currentPassword" />
+                      </td>
+                    </tr>
+                    <tr class="odd">
+                      <td class="titleColumn">#{msgs.label_new_password}</td>
+                      <td>
+                        <sp:inputSecret id='password' value="#{preferences.password}" size="40" redisplay="true"
+                          styleClass="loginFormText"
+                          autocomplete="off"
+                          encrypt="false"
+                          onfocus="this.select();"/>
+                        <h:message styleClass="formError" for="password" />
+                      </td>
+                    </tr>
+                    <tr class="odd">
+                      <td class="textBold">#{msgs.label_confirm_new_password}</td>
+                      <td>
+                        <sp:inputSecret id='confirmation' value="#{preferences.confirmation}" size="40" redisplay="true"
+                          styleClass="loginFormText"
+                          autocomplete="off"
+                          encrypt="false"
+                          onfocus="this.select();"/>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+            </tr>
+            <tr>
+              <td style="padding:10px;#{(preferences.authAnswersError) ? '' : 'display:none'}" valign="top" colspan="2" id="authAnswers">
+                <h:outputText styleClass="spContentTitle" value="#{msgs.auth_answers_section_heading}"/><br/>
+                
+                <ui:include src="/authAnswersInclude.xhtml">
+                  <ui:param name="authAnswersBeanParam" value="#{preferences.authenticationAnswersBean}" />
+                  <ui:param name="tableClass" value="preferencesPageSectionTable" />
+                </ui:include>
+              </td>
+            </tr>
+          </table>
+
+        <div class="buttonRow">
+          <h:commandButton id="saveButton" action="#{preferences.saveAction}" value="#{msgs.button_save}" styleClass="primaryBtn"/>
+          <h:commandButton id="cancelButton" action="#{preferences.cancelAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn"/>
+        </div>
+      </sp:sailpointForm>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

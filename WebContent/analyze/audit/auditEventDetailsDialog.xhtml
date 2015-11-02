@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+
+        Audit event details dialog
+
+        This simply displays all of the information for a given audit event,
+        regardless of the display fields selected for the search.
+
+-->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:a4j="http://richfaces.org/a4j"
+        xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+
+<f:view>
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+    <table class="spPaddedTable" style="background-color: white">
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['created'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.created}">
+                    <f:convertDateTime type="both" dateStyle="short" timeStyle="short" timeZone="#{base.userTimeZone}"/>
+                </h:outputText>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['audit.action'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{sp:localizeKey(auditEvent.action)}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['source'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.source}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['audit.target'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{sp:localizeKey(auditEvent.target)}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['audit.application'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.application}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['audit.instance'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.instance}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['accountName'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.accountName}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['attributeName'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.attributeName}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['attributeValue'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.attributeValue}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['string1'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.string1}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['string2'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.string2}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['string3'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.string3}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{sp:localizeKey(auditSearch.inputs['string4'].description)}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <h:outputText value="#{auditEvent.string4}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="titleColumn">
+                <h:outputText value="#{msgs.attributes}"/>
+            </td>
+            <td class="leftAlignedColumn">
+                <t:dataTable var="key" value="#{auditEvent.attributeKeys}" 
+                             rowClasses="odd,even" columnClasses="first,second" width="100%">
+                    <h:column>
+                      <sp:outputText value="#{key}" />
+                    </h:column>                
+                    <h:column>
+                      <ui:fragment rendered="#{sp:isCollection(auditEvent.attributes[key])}">
+                        <t:dataList var="item" value="#{auditEvent.attributes[key]}">
+                            <p style="margin-bottom:4px"><sp:outputText value="#{item}" /></p>
+                        </t:dataList>
+                      </ui:fragment>
+                      <ui:fragment rendered="#{!sp:isCollection(auditEvent.attributes[key])}">
+                        <!-- Use sp:outputText to localize any keys or Localizable objects -->
+                        <sp:outputText value="#{auditEvent.attributes[key]}" />
+                      </ui:fragment>
+                    </h:column>                
+                </t:dataTable>
+            </td>
+        </tr>
+    </table>
+
+</f:view>
+
+</ui:composition>
+
+</body>
+</html>

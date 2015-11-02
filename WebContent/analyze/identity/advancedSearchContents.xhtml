@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <h:form id="advancedIdentitySearchForm">
+    <input name="searchType" type="hidden" value="AdvancedIdentity"/>
+    <div style="display:none" class="width100" id="AdvancedIdentityError"></div>
+    <a4j:outputPanel ajaxRendered="true">
+      <ui:fragment rendered="#{(analyzeController.searchBean.mySearchItemsByType!=null) and (!empty analyzeController.searchBean.mySearchItemsByType)}">
+        <div class="spContent">
+          <table class="width100" style="margin:5px"><tr><td>
+          <ui:include src="../searchUserItems.xhtml">
+            <ui:param name="searchBean" value="#{analyzeController.searchBean}"/>
+            <ui:param name="formName" value="advancedIdentitySearchForm"/>
+            <ui:param name="loadBtnName" value="advancedIdentityLoadBtn"/>
+          </ui:include>
+          </td></tr>
+          </table>
+        </div>
+      </ui:fragment>
+    </a4j:outputPanel>
+    
+    <table id="advancedSearchWrapperTbl" class="width100">
+      <tr>
+        <td colspan="73%" valign="top">
+        <a4j:outputPanel id="advancedIdentityAttributesToRerender">
+          <ui:include src="/analyze/advanced/addFilters.xhtml">
+            <ui:param name="formName" value="advancedIdentitySearchForm"/>
+            <ui:param name="prefix" value="advancedSearch"/>
+            <ui:param name="backingBean" value="#{analyzeController.searchBean.searchBean}"/>
+            <ui:param name="errorDivId" value="selectedCount"/>
+            <ui:param name="isRendered" value="#{not (empty analyzeController.searchBean.searchBean.availableItemNames)}"/>
+            <ui:param name="notRenderedBecause" value="#{msgs.adv_identity_search_err_no_searchable_fields}"/>
+          </ui:include>
+          
+          <!-- NOT an spContent div, otherwise it looks odd with no msgs -->
+          <div class="padded10">
+            <table style="border-top:1px #ccc dotted" class="width100">
+              <tr>
+                <td align="left">
+                  <a4j:outputPanel ajaxRendered="true">
+                    <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                  </a4j:outputPanel>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </a4j:outputPanel>
+        </td>
+        <td width="2%">
+          &nbsp;
+        </td>
+        <td width="25%" valign="top">
+          <div id="advancedIdentityAttributes" class="paddedContainer">
+            <h:outputText styleClass="spContentTitle" value="#{msgs.adv_identity_search_choose_fields_to_display}"/>
+            <h:graphicImage id="imgHlpAdvancedIdentitySearchDisplay" 
+                            alt="#{analyzeController.searchBean.displayHelpMsg}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" />
+            <br/>
+            <table class="dashWidth100" >
+              <tr>
+                <td>
+
+                  <ui:include src="../searchDisplayFields.xhtml">
+                    <ui:param name="searchType" value="advancedIdentity" />
+                    <ui:param name="searchBean" value="#{analyzeController.searchBean}" />
+                  </ui:include>
+                </td>               
+              </tr>
+            </table>
+          </div>
+        </td>              
+        
+      </tr>
+    </table>
+    
+    
+    <input style="display:none" type="button" id="preSearchBtn" value="#{msgs.identity_search_button_run_search}" onclick="SailPoint.Analyze.validateSearch('advancedIdentitySearchForm', 'advancedIdentity');"/>
+    <h:commandButton id="searchBtn" style="display:none" action="#{analyzeController.searchBean.runQueryAction}"/>
+    <input style="display:none" type="button" id="clearBtn" value="#{msgs.identity_search_button_clear_search}" onclick="$('editForm:resetBtn').click()"/>
+    <a4j:commandButton style="display:none" 
+                       action="#{analyzeController.searchBean.runQueryAction}"
+                       id="ajaxSearchBtn"
+                       render="resultsCountSection"
+                       oncomplete="var gridPanel = Ext.getCmp('advancedIdentitySearchResultsGrid');
+                                   gridPanel.isRefresh = true;
+                                   Ext.MessageBox.wait('#{sp:escapeJavascript(msgs.loading_data)}');
+                                   gridPanel.getStore().loadPage(1, {
+                                       params:{start:0, limit: gridPanel.pageSize},
+                                       callback: SailPoint.Identity.Search.displayAdvancedSearchResults
+                                   });"/>    
+    <a4j:commandButton  style="display:none" 
+                        immediate="true" 
+                        action="#{analyzeController.searchBean.clearSearchItem}"
+                        id="resetBtn"
+                        render="advancedSearchfilterPnl,advancedSearchfilterErrorPnl"
+                        oncomplete="SailPoint.Identity.Search.clearAdvancedSearchFields(); SailPoint.Analyze.resetSearchName('advancedIdentitySearchForm');"/>
+    <h:commandButton style="display:none" id="clearSearchBtn" action="#{analyzeController.searchBean.clearSearchItem}"/>
+    <a4j:commandButton id="rerenderSearchItemsBtn" action="none" render="" style="display:none"/>
+  </h:form>
+</ui:composition>
+
+</body>
+</html>

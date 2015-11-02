@@ -1,0 +1,574 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:t="http://myfaces.apache.org/tomahawk"
+        xmlns:a4j="http://richfaces.org/a4j"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:c="http://java.sun.com/jstl/core"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+<ui:define name="title">
+    <h:outputText value="#{worksheetView.found ? msgs.access_cert_rept : msgs.cert_not_found}"/>
+</ui:define>
+
+<ui:define name="headerItems">
+    <style>
+            /*
+             This is applied to the comments column in the 'View History' grid
+             so that the text will wrap rather than begin truncated.
+            */
+        .x-grid-col-comments {
+            white-space: normal;
+            padding-right: 20px;
+        }
+    </style>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>cert-statusor.css</src>
+      <src>decision-button-group.css</src>
+      <src>image-radio.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/certification">
+      <src>certification.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/include">
+      <src>pager.css</src>
+    </sp:style>
+
+    <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/PanelField.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/LinkAttributeValueSuggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/AssignmentForm.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/EmailWindow.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRadio.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/Pager.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/JsfExtBridge.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/expandingPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/CertificationItemSecondPass.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/IdentityDetailPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/IdentityHistoryPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/certification/Certification.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCriteria.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/BaseDecisionDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/MitigationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/AccountOpConfirmationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/BulkCertificationConfirmationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/CommentsDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/DelegationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/DelegationRevocationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/EntityClassificationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/RemediationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/AccountOpConfirmationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/ChallengeDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/DelegationReviewDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/ViolationRemediationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/AssignedRoleRemediationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/MissingRequiredRolesDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/BulkSelectionCountConfirmationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/DependantDecisionConfirmationDialog.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/model/CertificationItem.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/model/Decision.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/certification/Decider.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/certification/LockedCertHandler.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/DecisionButtonGroup.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/DecisionMenu.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/CertificationStatusor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/NameWithTooltip.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/BaseCertificationGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/policyViolations/policyViolationDetails.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/certification/WorksheetGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/PanelField.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/LinkAttributeValueSuggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification/RemediationEditor.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/ElectronicSignaturePopup.js?#{debug.revision}</src>
+
+    </sp:script>
+
+    <script type="text/javascript">
+        <!--//--><![CDATA[//><!--
+        helpKey = 'CERTIFICATION_WORKSHEET';
+
+        SailPoint.WorksheetGridId = "worksheet-grid";
+
+        ImageRadio.disableClickOnMouseup = true;
+
+        // We need to keep the onclick even if the radio is disabled
+        // since we may enable disabled items
+        ImageRadio.allowDisabledOnClick = true;
+
+        SailPoint.viewCertification= function(id){
+            Ext.fly('editForm:selectedSubCertId').dom.value = id;
+            $('editForm:viewSubCertBtn').click();
+        }
+
+        SailPoint.CertificationConfig = {
+            certificationId:'#{worksheetView.certificationId}',
+            limitReassign : #{worksheetView.limitReassign},
+            defaultMitigationExpiration:#{worksheetView.defaultMitigationExpiration},
+            buttonsDisabled : #{!worksheetView.editable or ((certificationView != null) and !certificationView.editable) or (null != certificationView.signedOff)},
+            allowToolTips : #{sp:getSystemConfigurationValue('showCertificationIconTooltips', false)},
+            actionsRequiringComments: #{worksheetView.actionsRequiringComments},
+            bulkActions: #{worksheetView.bulkActionChoicesJson},
+            editable: #{worksheetView.editable},
+            signedOff: #{worksheetView.signedOff},
+            showCheckboxes : #{worksheetView.editable and (!certificationView.signedOff) and not empty certificationBulkAction.actionChoices},
+            mode:'worksheet',
+            mitigationDialogEnabled: #{worksheetView.mitigationDialogEnabled},
+            activeDelegations : #{worksheetView.activeDelegations},
+            defaultRevoker: '#{worksheetView.defaultRevoker}',
+            showRemediationDialog : #{worksheetView.showRemediationDialog},
+            promptForSignOff : #{worksheetView.promptForSignOff},
+            signatureMeaning: '#{sp:escapeJavascript(certification.signatureMeaning)}',
+            originalAuthId: '#{sp:escapeJavascript(certification.originalAuthId)}',
+            nativeAuthId: '#{sp:escapeJavascript(certification.nativeAuthId)}',
+            showSignoffPromptDialogOnStartup : #{worksheetView.showSignoffPromptOnStartup},
+            defaultRemediationModifiableOp: '#{sp:getSystemConfigurationValue('defaultRemediationModifiableOp', 'Modify')}',
+            bulkCertifySelectionCountForConfirmation: #{certEntityListView.bulkSelectionCountForConfirmation},
+            requireBulkCertifyConfirmation: #{certification.requireBulkCertificationConfirmation},
+            defaultAccountReassignAssignee : "#{worksheetView.defaultAccountReassignAssignee}"
+        };
+
+        // Init the decider. The decider handles the interaction
+        // between components on the page, as well as interactions
+        // with the server
+        var decider = SailPoint.Decider.init({
+            gridIds:[SailPoint.WorksheetGridId],
+            certificationConfig:SailPoint.CertificationConfig,
+            doLoadSecondPass : #{worksheetView.requiresSecondPass}
+        });
+
+        // Initialize the bulk action select box with the actions defined on our cert
+        var bulkActions = #{worksheetView.bulkActionChoicesJson};
+        var bulkActionStore = [];
+        if (SailPoint.CertificationConfig.bulkActions && SailPoint.CertificationConfig.bulkActions.length > 0){
+            SailPoint.CertificationConfig.bulkActions.each(function(item){
+                bulkActionStore.push([item.name, item.displayName]);
+            });
+        }
+
+        var vRadio = new SailPoint.VirtualRadioButton('certification-grid','itemDecision');
+
+        var sp = new SailPoint.state.StateProvider({
+            stateIds: ['#{worksheetView.gridState.name}'],
+            states:   ['#{worksheetView.gridState.state}']
+        });
+
+        var gridStateStr = '#{worksheetView.gridState.JSON}';
+        var gridStateId = "#{worksheetView.gridState.name}";
+
+        var gridMetaData = #{certificationIdentityItemsList.columnJSON};
+        var gridPageSize = #{worksheetView.gridState.pageSize};
+        var gridFirstRow = #{worksheetView.gridState.firstRow};
+        var gridCurrentPage = 1;
+        if (gridPageSize > 0)
+            gridCurrentPage = (gridFirstRow / gridPageSize) + 1;
+        
+        Ext.state.Manager.setProvider(sp);
+
+        Ext.onReady(function() {
+
+            Ext.QuickTips.init();
+
+            try{
+
+                if (bulkActionStore.length > 0){
+                    var bulkDecisionSelect = new Ext.form.ComboBox({
+                        id:'bulkDecisionSelect',
+                        renderTo:'bulkDecisionContainer',
+                        width : 170,
+                        store:bulkActionStore,
+                        editable:false,
+                        emptyText:'#{sp:escapeJavascript(msgs.cert_decision_bulk_select_decision)}',
+                        resetCombo : function(){
+                            this.reset();
+                            this.setRawValue(this.emptyText);
+                        },
+                        listConfig:{
+                            cls:'bulkActionDecisionSelectItems' // for selenium
+                        }
+                    });
+
+                    // When a decision has moved through the decider, the bulk action select
+                    // should return to it's 'Select Action' state
+                    decider.on('decisionProcessed', function(){
+                            this.reset();
+                            this.setRawValue(this.emptyText);
+                    }, bulkDecisionSelect);
+
+                    bulkDecisionSelect.on('select', function(combo, record, index){
+                        var decider = SailPoint.Decider.getInstance();
+                        decider.bulkDecide(combo.getValue(), SailPoint.WorksheetGridId);
+                    });
+                } else {
+                    $('bulkDecisionTable').hide();
+                }
+                
+                var gridWidth = $('certification-grid').clientWidth;
+
+
+                var storeUrl = '/manage/certification/certificationIdentityItemsJsonDataSource.json?certificationId='
+                        + SailPoint.CertificationConfig.certificationId;
+
+                var store = SailPoint.Store.createStore({
+                    url : SailPoint.getRelativeUrl(storeUrl),
+                    storeId : 'worksheetStore',
+                    remoteSort : true,
+                    parentGridId : SailPoint.WorksheetGridId,
+                    fields : gridMetaData.fields,
+                    totalCount : 'count',
+                    root:'objects',
+                    pageSize : gridPageSize,
+                    currentPage : gridCurrentPage,
+                    sorters : [{property: 'parent.identity', direction: 'ASC'}],
+                    simpleSortMode : true,
+                    timeout: 60000
+                });
+
+                store.on('load', function(store) {
+                  if (store.getTotalCount() == 0) {
+                    var showSubCertsBtn = $('editForm:showSubCerts');
+                    if (showSubCertsBtn) {
+                      showSubCertsBtn.click();
+                    }
+                  }
+                });
+
+                var worksheetGrid = Ext.create("SailPoint.certification.WorksheetGrid", {
+                    id : SailPoint.WorksheetGridId,
+                    gridStateStr : gridStateStr,
+                    editable : SailPoint.CertificationConfig.showCheckboxes,
+                    pageSize : gridPageSize,
+                    certificationId : SailPoint.CertificationConfig.certificationId,
+                    stateId : gridStateId,
+                    stateful : true,
+                    width : gridWidth,
+                    store : store,
+                    start : gridFirstRow,
+                    renderTo : 'certification-grid',
+                    viewConfig : {loadMask: true},
+                    hidebbar : (gridPageSize === 0),
+                    buttonsDisabled : SailPoint.CertificationConfig.buttonsDisabled,
+                    allowToolTips : SailPoint.CertificationConfig.allowToolTips,
+                    gridMetaData : gridMetaData,
+                    height : 500
+                });
+
+                worksheetGrid.on('entitySelected', function(record){
+                    $('editForm:selectedEntityId').value = record.get('parent-id');
+                    $('editForm:gotoDetailView').click();
+                });
+
+                worksheetGrid.initialLoad();
+
+                SailPoint.initExpanders('editForm');
+
+                SailPoint.StatusWidget = new SailPoint.CertificationStatusor({
+                    renderTo:'statusWidget'
+                });
+
+                var saveButton = new Ext.Button({
+                    id:'btnSave',
+                    text:'#{sp:escapeJavascript(msgs.cert_button_save_decisions)}',
+                    renderTo:'saveButton',
+                    hidden:true
+                });
+
+                var cancelButton = new Ext.Button({
+                    id:'btnCancel',
+                    text:'#{sp:escapeJavascript(msgs.cert_button_clear_decisions)}',
+                    cls : 'secondaryBtn',
+                    renderTo:'cancelButton',
+                    hidden:true
+                });
+
+                var backButton = new Ext.Button({
+                    id:'btnBack',
+                    text:'#{sp:escapeJavascript(msgs.cert_button_back)}',
+                    cls : 'secondaryBtn',
+                    renderTo:'backButton'
+                });
+              
+                var buttonsToHandle = [saveButton, cancelButton, backButton];
+
+                backButton.on('click', function(){
+                  try {
+                    $('editForm:backButton').click();
+                  }catch(e){}
+                });
+
+                decider.on('statusChange', function(decisionCount) {
+                    SailPoint.StatusWidget.setCount(decisionCount);
+                    if (decisionCount > 0) {
+                        Ext.getCmp('btnSave').show();
+                        Ext.getCmp('btnCancel').show();
+                    } else {
+                        Ext.getCmp('btnSave').hide();
+                        Ext.getCmp('btnCancel').hide();
+                    }
+                });
+                decider.on('beforeSave', function() {
+                  for (var i = 0; i < buttonsToHandle.length; i++) {
+                    buttonsToHandle[i].disable();
+                  }
+                });
+  
+                decider.on('afterSave', function() {
+                  for (var i = 0; i < buttonsToHandle.length; i++) {
+                    buttonsToHandle[i].enable();
+                  }
+                });
+              
+                // When the decider finishes processing, we should always
+                // un-check the checkboxes on the grid
+                decider.on('decisionProcessed', function() {
+                    this.deselectAll();
+                }, worksheetGrid);
+
+                cancelButton.on('click', decider.removeAll, decider);
+                saveButton.on('click', decider.save, decider);
+
+                var messagesPanel = new Ext.Panel({
+                    id:'messagesPanel',
+                    renderTo:'messagesDiv',
+                    height:125,
+                    style:'padding:5px',
+                    width: gridWidth,
+                    style:'margin-bottom:20px',
+                    autoScroll:true,
+                    hideMode:'display',
+                    hidden:true,
+                    title:'#{sp:escapeJavascript(msgs.cert_panel_errors_and_warnings)}'
+
+                });
+
+                if (SailPoint.CertificationConfig.showSignoffPromptDialogOnStartup){
+                    showSignCertificationWindow('#{worksheetView.certificationId}', '#{sp:escapeJavascript(certification.signatureMeaning)}', '#{sp:escapeJavascript(certification.originalAuthId)}', '#{sp:escapeJavascript(certification.nativeAuthId)}');
+                }
+
+            } catch(err){
+                SailPoint.FATAL_ERR_JAVASCRIPT(err, "Error initializing worksheet view.");
+            }
+        });
+        //--><!]]>
+
+    </script>
+</ui:define>
+
+<ui:define name="body">
+<f:view>
+
+
+
+<h:form styleClass="form" id="editForm">
+
+<!--
+
+    Hidden form fields and buttons. I use inputText here so I can easily
+    hide/show the values when testing
+
+-->
+<div style="display:none">
+
+  <ui:include src="../../include/gridStateInclude.xhtml">
+    <ui:param name="bean" value="#{worksheetView}"/>
+  </ui:include>
+  
+  <h:inputHidden id="certificationId" value="#{worksheetView.certificationId}"/>
+  <h:inputHidden id="signatureAuthId" value="#{certEntityListView.signatureAuthId}"/>
+  <h:inputHidden id="signaturePass" value="#{worksheetView.signaturePass}"/>
+  <h:inputText id="selectedSubCertId" value="#{worksheetView.subCertId}"/>
+  <h:inputText id="selectedEntityId" value="#{worksheetView.selectedEntityId}"/>
+  <h:commandButton id="gotoDetailView" action="#{worksheetView.detailView}"/>
+  <h:commandButton id="backButton" value="Back" action="#{worksheetView.back}"/>
+  <h:commandButton id="signCertificationBtn" action="#{worksheetView.sign}" />
+  <h:commandButton id="viewSubCertBtn" action="#{worksheetView.viewSubCert}" />
+  <h:inputHidden id="selectedWorkItemId" value="#{worksheetView.selectedWorkItemId}"/>
+  <h:commandButton style="display: none"
+                           id="viewWorkItemButton"
+                           action="#{worksheetView.viewWorkItem}" />
+</div>
+
+<a4j:commandButton style="display:none"
+    id="rerenderSummaryBtn"
+    render="certificationSummary"
+    onclick=""
+    oncomplete=""/>
+
+<a4j:outputPanel ajaxRendered="true" id="errorPanel">
+    <div id="errors">
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+    </div>
+</a4j:outputPanel>
+
+<ui:fragment rendered="#{!worksheetView.found}">
+    #{msgs.inst_no_cert}
+    <div>
+        <h:commandButton id="noCertFoundBtn" action="#{worksheetView.back}" value="#{msgs.button_cancel}"/>
+    </div>
+</ui:fragment>
+
+<div id="processingDiv" class="ext-el-mask-msg x-mask-loading" style="position:absolute;z-index:1;display: none">
+    <div>#{msgs.processing_spinner}</div>
+</div>
+
+<ui:fragment>
+    <t:saveState value="#{certification.subCertPager}"/>
+
+    <div id="certIdsLiveGridContainer">
+        <a4j:outputPanel id="certificationSummary">
+            <ui:include src="certificationSummary.xhtml">
+                <ui:param name="certificationBeanParam" value="#{certification}"/>
+                <ui:param name="entityList" value="#{false}"/>
+                <ui:param name="listViewProvider" value="#{worksheetView}" />
+            </ui:include>
+        </a4j:outputPanel>
+
+
+        <ui:include src="certificationFilters.xhtml">
+            <ui:param name="certificationListBeanParam" value="#{certificationIdentityItemsList}"/>
+            <ui:param name="certificationBeanParam" value="#{certificationView}"/>
+        </ui:include>
+
+
+        <div id="messagesDiv"></div>
+
+        <div style="width:100%">
+
+           <div id="statusWidget" style="float:right"></div>
+
+           <ui:include src="certificationLegend.xhtml">
+             <ui:param name="showRevokeAccount" value="#{worksheetView.revokeAccountAllowed and certificationView.type != 'DataOwner'}"/>
+             <ui:param name="showMitigate" value="#{true}"/>
+             <ui:param name="showDelegate" value="#{worksheetView.showDelegateLegend}"/>
+             <ui:param name="showApproveAccount" value="#{worksheetView.approveAccountAllowed}"/>
+             <ui:param name="showAccountReassign" value="#{worksheetView.allowAccountReassign}"/>
+             <ui:param name="showActionRequired" value="true"/>
+           </ui:include>
+
+
+
+         </div>
+
+         <div style="clear:both"></div>
+
+
+
+         <div id="certification-grid" class="width100"></div>
+
+
+
+        <table id="bulkDecisionTable" class="dashTable width100" style="margin-top: 5px">
+            <tr>
+                <td style="white-space: nowrap" width="20%">
+
+                    <div id="bulkDecisionContainer" style="margin:5px"></div>
+
+                </td>
+                <td>
+                    <div style="display:none;margin:3px" class="formWarn" id="selectedCount"/>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Email Help Link -->
+        <ui:fragment rendered="#{base.helpContact != null}">
+                    <span style="float: right">
+                    <h:outputText value=" | "/>
+                    <img src="#{base.requestContextPath}/images/icons/dashboard_help_12.png"/>
+                    <a href="mailto:${base.helpContact}">#{msgs.email_help_link}</a>
+                    </span>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{worksheetView.allowEntitlementDescriptionToggle}">
+            <div style="float: right;display:inline">
+                <h:outputText value=" | "/>
+                    <span class="entitlementDescriptions"
+                        style="display:#{worksheetView.displayEntitlementDescription ? '' : 'none'}">
+                    <h:graphicImage url="/images/icons/info.png" style="vertical-align:middle"/>
+                    <a href="javascript:switchEntitlementDescMode(false);">
+                        <h:outputText value="#{msgs.cert_show_entitlement_value}"/>
+                    </a>
+                    </span>
+                    <span class="entitlementValues"
+                        style="display:#{worksheetView.displayEntitlementDescription ? 'none' : ''}">
+                        <h:graphicImage url="/images/icons/info.png" style="vertical-align:middle"/>
+                        <a href="javascript:switchEntitlementDescMode(true);">
+                            <h:outputText value="#{msgs.cert_show_entitlement_desc}"/>
+                        </a>
+                </span>
+            </div>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{worksheetView.supportsExportToCSV}">
+                <span style="float: right">
+                  <h:outputText value=" | "/>
+                  <a href="javascript: exportToCSV()">
+                      <h:graphicImage url="/images/icons/export_csv.png" style="vertical-align:middle"/>
+                      <h:outputText value=" #{msgs.export_to_csv}"/>
+                  </a>
+
+
+                  <h:commandButton id="exportItemsToCSVBtn"
+                                   style="display:none"
+                                   action="#{certificationIdentityItemsList.exportToCSV}"/>
+
+                </span>
+        </ui:fragment>
+
+        <span style="float: right">
+          <a href="entityList.jsf?id=#{worksheetView.certificationId}">
+              <sp:outputText value="#{worksheetView.listViewMessageKey}"/>
+          </a>
+        </span>
+
+        <div id="buttons" style="margin-top:10px;">
+                <span id="backButton" style="float:left;margin-right:5px;display:inline-block"></span>
+                <span id="saveButton" style="float:left;margin-right:5px;display:inline-block"></span>
+                <span id="cancelButton" style="float:left;"></span>
+        </div>
+
+        <ui:fragment rendered="#{worksheetView.displayStartUpHelpCertificationGridView}">
+            <ui:include src="startupHelpCertificationGrid.xhtml"/>
+        </ui:fragment>
+    </div>
+</ui:fragment>
+
+
+<div id="accountGroupWin"></div>
+
+</h:form>
+</f:view>
+
+</ui:define>
+</ui:composition>
+
+</body>
+</html>

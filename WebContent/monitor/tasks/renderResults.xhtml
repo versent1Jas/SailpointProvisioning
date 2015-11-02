@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_task_result}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/expandingPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'TASK_RESULT';
+        Ext.onReady(function() {
+            SailPoint.initExpanders('editForm');
+        });
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <h:form id="editForm">
+      <script type="text/javascript" defer="defer">
+        // <![CDATA[
+        Ext.onReady(function () {
+            // Set the browser tabId so we know which tab to associate results with.
+            setBrowserTabId();
+        });
+        //]]>
+      </script>    
+      <h:inputHidden id="tabId" value="#{taskResults.tabId}"/>
+      <ui:include src="/monitor/tasks/renderInclude.xhtml">
+        <ui:param name="returnPage" value="viewTasks.jsf?resetTab=true#_resultsGrid"/>
+        <ui:param name="objects" value="#{msgs.tasks}"/>
+      </ui:include>
+    </h:form>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

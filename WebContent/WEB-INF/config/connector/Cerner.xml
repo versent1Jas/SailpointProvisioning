@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+               <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, PASSWORD, ENABLE, SEARCH, DIRECT_PERMISSIONS" icon="internetIcon" name="Cerner" type="Cerner">
+    <Attributes>
+      <Map>
+        <entry key="CAConnector" value="true"/>
+        <entry key="connectorClass" value="openconnector.connector.CernerConnector"/>
+        <entry key="formPath" value="CernerAttributesForm.xhtml"/>
+        <entry key="encrypted" value="targetID"/>
+        <entry key="isActive">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="displayName" groupAttribute="position" identityAttribute="ID" includePermissions="true" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="ID" remediationModificationType="None" type="string">
+        <Description>unique identifier of an account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="firstName" remediationModificationType="None" type="string">
+        <Description>first name for the personnel.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="lastName" remediationModificationType="None" type="string">
+        <Description>last name (surname) for the personnel.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="displayName" remediationModificationType="None" type="string">
+        <Description>display name for the personnel.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="middleName" remediationModificationType="None" type="string">
+        <Description>the middle name for the personnel.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="suffix" remediationModificationType="None" type="string">
+        <Description>the suffix (or list of suffixes) for the personnel.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="privilege" remediationModificationType="None" type="string">
+        <Description>the privileges assigned to the personnel</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="birthdate" remediationModificationType="None" type="string">
+        <Description>the date/time of birth for the personnel.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="gender" remediationModificationType="None" type="string">
+        <Description>the gender of the personnel.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="username" remediationModificationType="None" type="string">
+        <Description>the user name associated with the account. The value of the user name field must be unique within the system.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="directoryIndicator" remediationModificationType="None" type="string">
+        <Description>It contains an indicator of whether or not the user is an LDAP directory user.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="restriction" remediationModificationType="None" type="string">
+        <Description>the restrictions given to an account.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="title" remediationModificationType="None" type="string">
+        <Description>the title (or list of titles) for the personnel, Dr. Mr. etc</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="physicianInd" remediationModificationType="None" type="string">
+        <Description>an indicator of whether or not the personnel is a physician</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" name="position" remediationModificationType="None" schemaObjectType="group" type="string">
+        <Description>the position assigned to the personnel.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="beginEffectiveDateTime" remediationModificationType="None" type="string">
+        <Description>the date/time at which the personnel becomes/became effective</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="endEffectiveDateTime" remediationModificationType="None" type="string">
+        <Description>the date/time at which the personnel ceases/ceased to be effective.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="organizationGroup" remediationModificationType="None" type="string">
+        <Description>organization groups associated to the personnel</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="confidentialityLevel" remediationModificationType="None" type="string">
+        <Description>the confidentiality level that applies to the relationship with organization</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="personnelAlias" remediationModificationType="None" type="string">
+        <Description>It contains personnel alias information</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="credential" remediationModificationType="None" type="string">
+        <Description>It contains personnel credential information</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="address" remediationModificationType="None" type="string">
+        <Description>the personnel addresses information</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="organization" remediationModificationType="None" type="string">
+        <Description>the list of organizations assigned to the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="personnelGroup" remediationModificationType="None" type="string">
+        <Description>the personnel groups assigned to an account.</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="display" identityAttribute="ID" nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="ID" type="string">
+        <Description>unique identifier of a group</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="display" type="string">
+        <Description>display value of a group</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <Templates>
+    <Template name="account" schemaObjectType="account" usage="Create">
+      <Field displayName="con_prov_policy_Cerner_FirstName" helpKey="help_con_prov_policy_Cerner_FirstName" name="firstName" required="true" reviewRequired="true" section="Personnel Information" type="string"/>
+      <Field displayName="con_prov_policy_Cerner_LastName" helpKey="help_con_prov_policy_Cerner_lastName" name="lastName" required="true" reviewRequired="true" section="Personnel Information" type="string"/>
+      <Field displayName="con_prov_policy_Cerner_UserName" helpKey="help_con_prov_policy_Cerner_UserName" name="username" required="true" reviewRequired="true" section="Account Information" type="string">
+        <Script>
+          <Source>
+            return identity.getName();
+          </Source>
+        </Script>
+      </Field>
+      <Field displayName="con_prov_policy_Cerner_Password" helpKey="help_con_prov_policy_Cerner_Password" name="password" required="true" reviewRequired="true" section="Account Information" type="secret"/>
+      <Field displayName="con_prov_policy_Cerner_confLevel" name="formConfLevel" required="true" reviewRequired="true" type="string" value="Yes">
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>Yes</String>
+              <String>No</String>
+              <String>No Access</String>
+              <String>NonClinical</String>
+              <String>Psychiatric</String>
+              <String>ZRoutClinical</String>
+              <String>ZSecurity</String>
+              <String>ZUnknown  n</String>
+              <String>ZUnprotected</String>
+              <String>ZSensitive</String>
+              <String>Not Confidential</String>
+              <String>Confidential</String>
+              <String>Strictly Confidential</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <OwnerDefinition value=""/>
+    </Template>
+    <Template name="Update" schemaObjectType="account" usage="Update">
+      <Field displayName="con_prov_policy_Cerner_confLevel" name="formConfLevel" required="true" reviewRequired="true" type="string" value="Yes">
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>Yes</String>
+              <String>No</String>
+              <String>No Access</String>
+              <String>NonClinical</String>
+              <String>Psychiatric</String>
+              <String>ZRoutClinical</String>
+              <String>ZSecurity</String>
+              <String>ZUnknown  n</String>
+              <String>ZUnprotected</String>
+              <String>ZSensitive</String>
+              <String>Not Confidential</String>
+              <String>Confidential</String>
+              <String>Strictly Confidential</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <OwnerDefinition value=""/>
+    </Template>
+    <Template name="Delete" schemaObjectType="account" usage="Delete">
+      <OwnerDefinition value=""/>
+    </Template>
+    <Template name="Enable" schemaObjectType="account" usage="Enable">
+      <OwnerDefinition value=""/>
+    </Template>
+    <Template name="Disable" schemaObjectType="account" usage="Disable">
+      <OwnerDefinition value=""/>
+    </Template>
+    <Template name="Change Password" schemaObjectType="account" usage="ChangePassword">
+      <OwnerDefinition value=""/>
+    </Template>
+  </Templates>
+  </Application>
+</ImportAction>

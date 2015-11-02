@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:sp="http://sailpoint.com/ui">
+
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+<section class="panel">
+  <header class="panel-heading bg-light lter text-center">
+    <span class="h3 font-thin text-info">#{msgs.ui_reset_questions_title}</span>
+  </header>
+
+  <div class="panel-body">
+    <section>
+
+      <div class="form-group m-t-lg">
+        <div ng-repeat="a in answers">
+
+          <div class="form-group">
+            <table class="full-width">
+              <tr>
+                <td><label for="question_{{$index}}" ng-bind-html="getQuestionLabel({{$index}})"></label></td>
+                <td class="full-width">
+                  <select id="question_{{$index}}_IE" tabindex="50" class="form-control" ng-hide="!isIE"
+                          ng-model="q" ng-options="q.text for q in questions" ng-change="setAnswerId(a, q)">
+                    <option value="">#{msgs.auth_answers_select_question}</option>
+                  </select>
+                  <select id="question_{{$index}}" tabindex="50" class="form-control" ng-hide="isIE"
+                          ng-model="q" ng-options="q.text for q in questions | AuthQuestionFilter:$index:answers" ng-change="setAnswerId(a, q)">
+                    <option value="">#{msgs.auth_answers_select_question}</option>
+                  </select>
+                </td>
+              </tr>
+              <tr><td><br/></td></tr>
+              <tr>
+                <td><label class="col-sm-2 control-label">#{msgs.ui_reset_questions_answer}</label></td>
+                <td>
+                  <input id="answer_{{$index}}" tabindex="50" class="form-control" type="text" ng-model="a.answer"/>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="line line-dashed line-lg pull-in"></div>
+
+        </div>
+        <br/>
+        <sp-password-confirm ng-model="passwordModel" ng-show="showPasswordFields()"/>
+      </div>
+
+    </section>
+    <div id="alertDiv" role="alert" aria-live="rude" ng-bind-html="errorMessages"></div>
+  </div>
+
+  <footer class="panel-footer clearfix text-center bg-light lter">
+    <div class="inline">
+      <button id="cancelBtn" tabindex="51" class="btn btn-secondary" ng-click="cancel()">#{msgs.button_cancel}</button>
+    </div>
+    <div class="inline">
+      <button id="submitBtn" tabindex="50" class="btn btn-info" ng-click="submit()" aria-disabled="isDisableSubmit()"
+              ng-disabled="isDisableSubmit()">#{msgs.button_submit}</button>
+    </div>
+  </footer>
+</section>
+</html>

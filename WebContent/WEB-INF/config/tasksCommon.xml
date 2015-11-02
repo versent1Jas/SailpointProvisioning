@@ -1,0 +1,740 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+    <!--
+      This is the base definition for application account aggregation.
+      Commented out some of the more obscure attributes until we need
+      them and can describe them better.
+    -->
+
+    <TaskDefinition name="Account Aggregation" executor="sailpoint.task.ResourceIdentityScan"
+                    formPath="/monitor/tasks/accountAggregationTask.xhtml" progressInterval="5000"
+                    progressMode="String" template="true" type="AccountAggregation">
+        <Description>
+            Task template for application account scanning.
+        </Description>
+        <!-- optimization is no on by default -->
+        <Signature>
+            <Inputs>                
+                <Argument multi="true" name="applications" required="true" type="Application" helpKey="help_task_select_apps">
+                    <Prompt>task_in_account_aggregation_applications</Prompt>
+                </Argument>
+                <!--
+                This is obscure and hard to describe, assume that we're always scanning
+                accounts and make the Application author set up the default mapping.
+                        <Argument name='schema' type='string'>
+                          <Description>
+                            Optional name of the application object class to return in the
+                            account iterator. If not specified defaults to iterating over
+                            "account" objects with the default schema designated in the
+                            Application definition.
+                          </Description>
+                        </Argument>
+                -->
+                <!--
+o
+                Correlation rules are now defined on the Application.
+                We may still want another list of rules to use if the application rules
+                fail but this seems unlikely.  Keep it out for now.
+                Note that this still used by some of the unit tests.
+                        <Argument name='correlationRules' type='Rule'
+                          filterString='type == Rule.Type.Correlation' multi='true'>
+                          <Prompt>
+                            Select one or more correlation rules.  If none are selected,
+                            the designated identity attribute from the application is
+                            assumed to match the name of a IdentityIQ identity:
+                          </Prompt>
+                        </Argument>
+                -->
+                <!--
+                  Note that we have creation rules on the Application now too but
+                  that is intended primarily for setting the identity name.  It makes
+                  sense to also have a generic creation rule to assign the capabilities
+                  since that isn't application dependent.
+                -->
+                
+                <Argument filterString="type == Rule.Type.IdentityCreation" name="creationRule" type="Rule" helpKey="help_task_identity_creation_rule">
+                    <Prompt>task_in_account_aggregation_creation_rule</Prompt>
+                </Argument>
+                <Argument name="correlateEntitlements" type="boolean" helpKey="help_task_refresh_roles">
+                    <Prompt>task_in_account_aggregation_correlate_entitlements</Prompt>
+                </Argument>
+                <Argument name="checkPolicies" type="boolean" helpKey="help_task_apply_active_policies">
+                    <Prompt>task_in_account_aggregation_check_policies</Prompt>
+                </Argument>
+                <Argument name="refreshScorecard" type="boolean" helpKey="help_task_refresh_risk_scores">
+                    <Prompt>task_in_account_aggregation_refresh_scorecard</Prompt>
+                </Argument>
+                <Argument name="checkHistory" type="boolean" helpKey="help_task_maintain_history">
+                    <Prompt>task_in_account_aggregation_check_history</Prompt>
+                </Argument>
+                <Argument name='deltaAggregation' type='boolean' required='false' helpKey="help_task_delta_aggregation">
+                    <Prompt>task_in_account_aggregation_delta</Prompt>
+                </Argument>
+                <Argument name='checkDeleted' type='boolean' required='false' helpKey="help_task_detect_deleted_accts">
+                    <Prompt>task_in_account_aggregation_check_deleted</Prompt>
+                </Argument>
+                <Argument name="correlateScope" type="boolean" helpKey="help_task_refresh_scopes">
+                    <Prompt>task_in_account_aggregation_correlate_scope</Prompt>
+                </Argument>
+                <Argument name="noAutoCreateScopes" type="boolean" helpKey="help_task_disable_scope_autocreate">
+                    <Prompt>task_in_account_aggregation_no_auto_create_scopes</Prompt>
+                </Argument>
+                <Argument multi="true" name="logAllowedActions" type="string" helpKey="help_task_included_actions">
+                    <Prompt>task_in_account_aggregation_log_allowed_actions</Prompt>
+                </Argument>
+                <Argument name="refreshCertifications" type="boolean" helpKey="help_task_refresh_continuous_certs">
+                    <Prompt>task_in_account_aggregation_refresh_certifications</Prompt>
+                </Argument>
+                <Argument name="noOptimizeReaggregation" type="boolean" helpKey="help_task_no_optimize_reagg">
+                    <Prompt>task_in_account_aggregation_no_optimize_reagg</Prompt>
+                </Argument>
+                <Argument name="promoteManagedAttributes" type="boolean" helpKey="help_task_promote_managed_entitlements">
+                    <Prompt>task_in_account_aggregation_promote_managed_attributes</Prompt>
+                </Argument>
+                <Argument name="noAutoCreateApplications" type="boolean" helpKey="help_task_no_autocreate_apps">
+                    <Prompt>task_in_account_aggregation_no_autocreate_apps</Prompt>
+                </Argument>
+                <Argument name="updateMultiplexedSchemas" type="boolean">
+                    <Prompt>task_in_account_aggregation_update_schemas</Prompt>
+                </Argument>
+                <!--
+                For certification event processing we need to snapshot certain parts of the
+                identity when an account is aggregated (or the entire identity for rule-based
+                events).  This can potentially slow things down, but is required for events
+                to work correctly.  Only enable this option if you are seeing aggregation
+                performance problems and want to pull out all the stops.
+                        <Argument name="noTriggerSnapshotting" type="boolean">
+                            <Prompt>Check to prevent identity snapshots for events</Prompt>
+                        </Argument>
+                -->
+                <!--
+                Usually dangerous to do this from an aggregation since any scope that wasn't
+                encountered during scope correlation will be marked as dormant.  This should
+                only be used if all identities will be processed during aggregation.
+                        <Argument name='markDormantScopes' type='boolean' required='false'>
+                          <Prompt>Check to mark dormant scopes after aggregation:</Prompt>
+                        </Argument>
+                -->
+                <!--
+                In theory this is useful if you have an authoritative application
+                e.g. HR system, and secondary applications, and you are always
+                supposed to correlate from the secondary to the primary.-->
+                <Argument name='correlateOnly' type='boolean' helpKey="help_tasK_correlate_only">
+                  <Prompt>task_in_account_aggregation_correlate_only</Prompt>
+                </Argument>
+                
+                <!--
+                This is unlikely to be used except in development
+                        <Argument name='haltOnError' type='boolean' required='false'>
+                          <Prompt>Halt aggregation after the first account error:</Prompt>
+                        </Argument>
+                -->
+                <!--
+                This we decided not to show in the UI since it can be easily misused
+                        <Argument name='maxConnectionAge' type='int' required='false'>
+                          <Prompt>Clear caches after this many accounts:</Prompt>
+                        </Argument>
+                -->
+                <!--
+                        <Argument name='lockMode' type='string'>
+                          <Prompt>Type of lock to acquire: none, transaction, persistent:</Prompt>
+                        </Argument>
+                -->
+                <Argument name="enablePartitioning" type="boolean" helpKey="help_task_account_agg_enable_partitioning">
+                    <Prompt>task_in_account_aggregation_enable_partitioning</Prompt>
+                </Argument>
+
+                <Argument name="objectsPerPartition" type="int" helpKey="help_task_objects_per_partition">
+                    <Prompt>task_in_account_aggregation_objects_per_partition</Prompt>
+                </Argument>
+                <Argument name="sequential" type="boolean" helpKey="help_task_sequential">
+                    <Prompt>task_in_account_aggregation_sequential</Prompt>
+                </Argument>
+                <Argument name="checkDeletedThreshold" type="string" helpKey="help_task_check_deleted_threshold">
+                    <Prompt>task_in_account_aggregation_check_deleted_threshold</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="applications" type="string">
+                    <Prompt>task_out_account_aggregation_applications</Prompt>
+                </Argument>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_account_aggregation_total</Prompt>
+                </Argument>
+                <Argument name="ignored" type="int">
+                    <Prompt>task_out_account_aggregation_ignored</Prompt>
+                </Argument>
+                <Argument name="optimized" type="int">
+                    <Prompt>task_out_account_aggregation_optimized</Prompt>
+                </Argument>
+                <Argument name="created" type="int">
+                    <Prompt>task_out_account_aggregation_created</Prompt>
+                </Argument>
+                <Argument name="updated" type="int">
+                    <Prompt>task_out_account_aggregation_updated</Prompt>
+                </Argument>
+                <Argument name="deleted" type="int">
+                    <Prompt>task_out_account_aggregation_deleted</Prompt>
+                </Argument>
+                <Argument name="managerChanges" type="int">
+                    <Prompt>task_out_account_aggregation_manager_changes</Prompt>
+                </Argument>
+                <Argument name="detectedRoleChanges" type="int">
+                    <Prompt>task_out_account_aggregation_business_role_changes</Prompt>
+                </Argument>
+                <Argument name="exceptionChanges" type="int">
+                    <Prompt>task_out_account_aggregation_exception_changes</Prompt>
+                </Argument>
+                <Argument name="policies" type="string">
+                    <Prompt>task_out_account_aggregation_policies</Prompt>
+                </Argument>
+                <Argument name="policyViolations" type="int">
+                    <Prompt>task_out_account_aggregation_policy_violations</Prompt>
+                </Argument>
+                <Argument name="policyNotifications" type="int">
+                    <Prompt>task_out_account_aggregation_policy_notifications</Prompt>
+                </Argument>
+                <Argument name="scoresChanged" type="int">
+                    <Prompt>task_out_account_aggregation_scores_changed</Prompt>
+                </Argument>
+                <Argument name="snapshotsCreated" type="int">
+                    <Prompt>task_out_account_aggregation_snapshots_created</Prompt>
+                </Argument>
+                <Argument name="scopesCreated" type="int">
+                    <Prompt>task_out_account_aggregation_scopes_created</Prompt>
+                </Argument>
+                <Argument name="scopesCorrelated" type="int">
+                    <Prompt>task_out_account_aggregation_scopes_correlated</Prompt>
+                </Argument>
+                <Argument name="scopesSelected" type="int">
+                    <Prompt>task_out_account_aggregation_scopes_selected</Prompt>
+                </Argument>
+                <Argument name="scopesDormant" type="int">
+                    <Prompt>task_out_account_aggregation_scopes_dormant</Prompt>
+                </Argument>
+                <Argument name="unscopedIdentities" type="int">
+                    <Prompt>task_out_account_aggregation_unscoped_identities</Prompt>
+                </Argument>
+                <Argument name="certificationsCreated" type="int">
+                    <Prompt>task_out_account_aggregation_certifications_created</Prompt>
+                </Argument>
+                <Argument name="certificationsDeleted" type="int">
+                    <Prompt>task_out_account_aggregation_certifications_deleted</Prompt>
+                </Argument>
+                <Argument name="applicationsGenerated" type="int">
+                    <Prompt>task_out_account_aggregation_applications_generated</Prompt>
+                </Argument>
+                <Argument name="managedAttributesCreated" type="int">
+                    <Prompt>task_out_account_aggregation_managed_attributes_promoted</Prompt>
+                </Argument>
+                <Argument name="managedAttributesCreatedByApplication" type="string">
+                    <Prompt>task_out_account_aggregation_managed_attributes_promoted_by_app</Prompt>
+                </Argument>
+                <Argument name="identityEntitlementsCreated" type="int">
+                    <Prompt>task_out_account_aggregation_identityEntitlements_created</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+
+    <!--
+      base task for refreshing identity cubes.
+    -->
+    <TaskDefinition name="Identity Refresh" 
+                    executor="sailpoint.task.IdentityRefreshExecutor" 
+                    progressInterval="5000"
+                    progressMode="String" 
+                    template="true" 
+                    type="Identity">
+        <Description>
+            Template for identity refresh scans.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="filter" type="string" helpKey="help_task_filter_string">
+                    <Prompt>task_in_identity_refresh_filter</Prompt>
+                </Argument>
+                <Argument name="filterGroups" type="GroupDefinition" helpKey="help_task_group_list" multi="true">
+                    <Prompt>task_in_identity_refresh_filter_groups</Prompt>
+                </Argument>
+                <Argument name="thresholdDate" type="date">
+                    <Prompt>task_in_identity_refresh_threshold</Prompt>
+                </Argument>
+                <Argument name="excludeWindow" type="int">
+                    <Prompt>task_in_identity_refresh_exclude_window</Prompt>
+                </Argument>
+                <Argument name="includeWindow" type="int">
+                    <Prompt>task_in_identity_refresh_include_window</Prompt>
+                </Argument>
+                <Argument name="includeWindowModified" type="boolean" helpKey="help_task_include_modified">
+                    <Prompt>task_in_identity_refresh_include_modified</Prompt>
+                </Argument>
+                <Argument name="excludeInactive" type="boolean">
+                    <Prompt>task_in_identity_refresh_exclude_inactive</Prompt>
+                </Argument>
+                <!-- this is extremely slow and gets selected often by accident
+                <Argument name="refreshLinks" type="boolean" helpKey="help_task_refresh_app_acct_atts">
+                    <Prompt>task_in_identity_refresh_refresh_links</Prompt>
+                </Argument>
+                -->
+                <!--
+                <Argument name="pruneIdentities" type="boolean">
+                    <Prompt>task_in_identity_refresh_prune_identities</Prompt>
+                </Argument>
+                -->
+                <Argument name="promoteAttributes" type="boolean" helpKey="help_task_refresh_identity_atts">
+                    <Description>
+                        When true, the identity attributes will be recalculated from the
+                        application attributes.
+                    </Description>
+                    <Prompt>task_in_identity_refresh_promote_attributes</Prompt>
+                </Argument>
+                <Argument name="refreshIdentityEntitlements" type="boolean" helpKey="help_task_refresh_identity_entitlements">
+                    <Prompt>task_in_account_refresh_entitlements</Prompt>
+                </Argument>
+                <Argument name="refreshManagerStatus" type="boolean" helpKey="help_task_refresh_mgr_status">
+                    <Description>
+                        When true, the manager status for the identities will be refreshed.
+                        The manager status is true for an identity if there is any
+                        other identity that references the first identity as a manager.
+                    </Description>
+                    <Prompt>task_in_identity_refresh_refresh_manager_status</Prompt>
+                </Argument>
+                <Argument name="correlateEntitlements" type="boolean" helpKey="help_task_refresh_correlate_entitlements">
+                    <Prompt>task_in_identity_refresh_correlate_entitlements</Prompt>
+                </Argument>
+                <Argument name="provision" type="boolean" helpKey="help_task_provision_assigned_roles">
+                    <Prompt>task_in_identity_refresh_provision</Prompt>
+                </Argument>
+                <Argument name="noRoleDeprovisioning" type="boolean" helpKey="help_task_disable_deprovisioning">
+                    <Prompt>task_in_identity_refresh_no_role_deprovision</Prompt>
+                </Argument>
+                <Argument name="refreshRoleMetadata" type="boolean" helpKey="help_task_refresh_role_metadata">
+                    <Prompt>task_in_identity_refresh_refresh_role_metadata</Prompt>
+                </Argument>
+                <Argument name="enableManualAccountSelection" type="boolean" helpKey="help_task_enable_manual_account_selection">
+                    <Prompt>task_in_identity_refresh_enable_manual_account_selection</Prompt>
+                </Argument>
+                <Argument name="synchronizeAttributes" type="boolean" helpKey="help_task_synchronize_attributes">
+                    <Prompt>task_in_identity_refresh_synchronize_attributes</Prompt>
+                </Argument>
+                <Argument name="refreshScorecard" type="boolean" helpKey="help_task_refresh_risk_scores">
+                    <Prompt>task_in_identity_refresh_refresh_scorecard</Prompt>
+                </Argument>
+                <Argument name="checkHistory" type="boolean" helpKey="help_task_maintain_history">
+                    <Prompt>task_in_identity_refresh_check_history</Prompt>
+                </Argument>
+                <Argument name="refreshGroups" type="boolean" helpKey="help_task_refresh_group_scorecards">
+                    <Prompt>task_in_identity_refresh_refresh_groups</Prompt>
+                </Argument>
+                <Argument name="deleteDormantGroups" type="boolean" helpKey="help_task_refresh_delete_dormant_groups">
+                    <Prompt>task_in_identity_refresh_delete_dormant_groups</Prompt>
+                </Argument>
+                <Argument name="checkPolicies" type="boolean" helpKey="help_task_apply_active_policies">
+                    <Prompt>task_in_account_aggregation_check_policies</Prompt>
+                </Argument>
+                <Argument name="keepInactiveViolations" type="boolean">
+                    <Prompt>task_in_identity_refresh_keep_inactive_violations</Prompt>
+                </Argument>
+                <Argument name="policies" type="string" helpKey="help_task_policy_list">
+                    <Prompt>task_in_identity_refresh_policies</Prompt>
+                </Argument>
+                <Argument name="correlateScope" type="boolean" helpKey="help_task_refresh_scopes">
+                    <Prompt>task_in_identity_refresh_correlate_scope</Prompt>
+                </Argument>
+                <Argument name="noAutoCreateScopes" type="boolean" helpKey="help_task_disable_scope_autocreate">
+                    <Prompt>task_in_identity_refresh_no_auto_create_scopes</Prompt>
+                </Argument>
+                <Argument name="markDormantScopes" type="boolean" helpKey="help_task_mark_dormant_scopes">
+                    <Prompt>task_in_identity_refresh_mark_dormant_scopes</Prompt>
+                </Argument>
+                <Argument name="refreshCertifications" type="boolean" helpKey="help_task_refresh_continuous_certs">
+                    <Prompt>task_in_identity_refresh_refresh_certifications</Prompt>
+                </Argument>
+                <Argument name="processTriggers" type="boolean" helpKey="help_task_process_events">
+                    <Prompt>task_in_identity_refresh_process_triggers</Prompt>
+                </Argument>
+                <Argument name="refreshCompositeApplications" type="boolean" helpKey="help_task_refresh_comp_app_links">
+                    <Prompt>task_in_account_aggregation_refresh_composite_apps</Prompt>
+                </Argument>
+                <Argument name="promoteManagedAttributes" type="boolean" helpKey="help_task_promote_managed_entitlements">
+                    <Prompt>task_in_identity_refresh_promote_managed_attributes</Prompt>
+                </Argument>
+                <Argument name="refreshThreads" type="int" helpKey="help_task_number_of_threads">
+                    <Prompt>task_in_identity_refresh_threads</Prompt>
+                </Argument>
+                <Argument name="forceWorkflow" type="boolean" helpKey="help_task_force_workflow">
+                    <Prompt>task_in_identity_refresh_force_workflow</Prompt>
+                </Argument>
+                <Argument name="doManualActions" type="boolean" helpKey="help_task_manual_actions">
+                    <Prompt>task_in_identity_refresh_do_manual_actions</Prompt>
+                </Argument>
+                <Argument name="disableManagerLookup" type="boolean" 
+                          helpKey="help_task_disable_manager_lookup">
+
+                    <Prompt>task_in_identity_refresh_disable_manager_lookup</Prompt>
+                </Argument>
+                <Argument name="enablePartitioning" type="boolean" 
+                          helpKey="help_task_identity_refresh_enable_partitioning">
+
+                    <Prompt>task_in_identity_refresh_enable_partitioning</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_identity_refresh_total</Prompt>
+                </Argument>
+                <Argument name="linksRefreshed" type="int">
+                    <Prompt>task_out_identity_refresh_links_refreshed</Prompt>
+                </Argument>
+                <Argument name="linksRemoved" type="int">
+                    <Prompt>task_out_identity_refresh_links_removed</Prompt>
+                </Argument>
+                <Argument name="linksUnavailable" type="int">
+                    <Prompt>task_out_identity_refresh_links_unavailable</Prompt>
+                </Argument>
+                <Argument name="identitiesPruned" type="int">
+                    <Prompt>task_out_identity_refresh_identities_pruned</Prompt>
+                </Argument>
+                <Argument name="managers" type="int">
+                    <Prompt>task_out_identity_refresh_managers</Prompt>
+                </Argument>
+                <Argument name="detectedRoleChanges" type="int">
+                    <Prompt>task_out_identity_refresh_business_role_changes</Prompt>
+                </Argument>
+                <Argument name="exceptionChanges" type="int">
+                    <Prompt>task_out_identity_refresh_exception_changes</Prompt>
+                </Argument>
+                <Argument name="provisioningRequests" type="int">
+                    <Prompt>task_out_identity_refresh_provisioning_requests</Prompt>
+                </Argument>
+                <Argument name="provisioningErrors" type="int">
+                    <Prompt>task_out_identity_refresh_provisioning_errors</Prompt>
+                </Argument>
+                <Argument name="policies" type="string">
+                    <Prompt>task_out_identity_refresh_policies</Prompt>
+                </Argument>
+                <Argument name="policyViolations" type="int">
+                    <Prompt>task_out_identity_refresh_policy_violations</Prompt>
+                </Argument>
+                <Argument name="policyNotifications" type="int">
+                    <Prompt>task_out_identity_refresh_policy_notifications</Prompt>
+                </Argument>
+                <Argument name="scoresChanged" type="int">
+                    <Prompt>task_out_identity_refresh_scores_changed</Prompt>
+                </Argument>
+                <Argument name="snapshotsCreated" type="int">
+                    <Prompt>task_out_identity_refresh_snapshots_created</Prompt>
+                </Argument>
+                <Argument name="groupDefinitions" type="string">
+                    <Prompt>task_out_identity_refresh_group_definitions</Prompt>
+                </Argument>
+                <Argument name="groupIndexes" type="int">
+                    <Prompt>task_out_identity_refresh_group_indexes</Prompt>
+                </Argument>
+                <Argument name="scopesCreated" type="int">
+                    <Prompt>task_out_identity_refresh_scopes_created</Prompt>
+                </Argument>
+                <Argument name="scopesCorrelated" type="int">
+                    <Prompt>task_out_identity_refresh_scopes_correlated</Prompt>
+                </Argument>
+                <Argument name="scopesSelected" type="int">
+                    <Prompt>task_out_identity_refresh_scopes_selected</Prompt>
+                </Argument>
+                <Argument name="scopesDormant" type="int">
+                    <Prompt>task_out_identity_refresh_scopes_dormant</Prompt>
+                </Argument>
+                <Argument name="unscopedIdentities" type="int">
+                    <Prompt>task_out_identity_refresh_unscoped_identities</Prompt>
+                </Argument>
+                <Argument name="certificationsCreated" type="int">
+                    <Prompt>task_out_identity_refresh_certifications_created</Prompt>
+                </Argument>
+                <Argument name="certificationsDeleted" type="int">
+                    <Prompt>task_out_identity_refresh_certifications_deleted</Prompt>
+                </Argument>
+                <Argument name="triggersProcessed" type="int">
+                    <Prompt>task_out_identity_refresh_triggers_processed</Prompt>
+                </Argument>
+                <Argument name="workflowsLaunched" type="int">
+                    <Prompt>task_out_identity_refresh_workflows_launched</Prompt>
+                </Argument>
+                <Argument name="managedAttributesCreated" type="int">
+                    <Prompt>task_out_identity_refresh_managed_attributes_promoted</Prompt>
+                </Argument>
+                <Argument name="managedAttributesCreatedByApplication" type="string">
+                    <Prompt>task_out_identity_refresh_managed_attributes_promoted_by_app</Prompt>
+                </Argument>
+                <Argument name="identityEntitlementsCreated" type="int">
+                    <Prompt>task_out_account_aggregation_identityEntitlements_created</Prompt>
+                </Argument>
+                <Argument name="identityEntitlementsUpdated" type="int">
+                    <Prompt>task_out_account_aggregation_identityEntitlements_updated</Prompt>
+                </Argument>
+                <Argument name="unansweredAccountSelections" type="int">
+                  <Prompt>task_out_number_unanswered_accountselections</Prompt>
+                </Argument>
+                <Argument name="unansweredAccountSelectionIdentities" type="string">
+                  <Prompt>task_out_unanswered_identities</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Sequential Task Launcher" executor="sailpoint.task.SequentialTaskExecutor"
+                    progressInterval="5000" formPath="/monitor/tasks/sequentialTask.xhtml"
+                    progressMode="String" template="true" type="Generic">
+        <Description>
+            Template for creating a task that runs multiple other tasks.
+        </Description>
+        <Signature>
+          <Inputs>
+            <Argument multi="true" name="taskList" type="TaskDefinition">
+              <Prompt>task_sequential_task_list</Prompt>
+            </Argument>
+            <Argument name="trace" type="boolean">
+                <Prompt>task_sequential_trace</Prompt>
+            </Argument>
+            <Argument name="exitOnError" type="boolean">
+                <Prompt>task_sequential_exit_on_error</Prompt>
+            </Argument>
+            <Argument name="taskTimeOut" type="int">
+                <Prompt>task_sequential_task_timeout</Prompt>
+            </Argument>
+          </Inputs>
+          <Returns>
+            <Argument name='tasksRun' type='string'>
+              <Prompt>task_sequential_tasks_executed</Prompt>
+            </Argument>
+          </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="System Maintenance" executor="sailpoint.task.Housekeeper" resultAction="Delete"
+                    type="System" progressMode="String" template="true">
+        <Description>Prune identity snapshots, task results, and certifications. Perform other background maintenance tasks.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="pruneHistory" type="boolean" helpKey="help_task_prune_history">
+                    <Prompt>task_in_perform_maintenance_prune_history</Prompt>
+                </Argument>
+                <Argument name="pruneTaskResults" type="boolean" helpKey="help_task_prune_task_results">
+                    <Prompt>task_in_perform_maintenance_prune_task_results</Prompt>
+                </Argument>
+                <Argument name="pruneRequests" type="boolean" helpKey="help_task_prune_requests">
+                    <Prompt>task_in_perform_maintenance_prune_requests</Prompt>
+                </Argument>
+                <Argument name="pruneCertifications" type="boolean" helpKey="help_task_prune_certs">
+                    <Prompt>task_in_perform_maintenance_prune_certifications</Prompt>
+                </Argument>
+                <Argument name="automaticallyCloseCertifications" type="boolean" helpKey="help_task_autoclose_certs">
+                    <Prompt>task_in_perform_maintenance_automatically_close_certifications</Prompt>
+                </Argument>
+                <Argument name="finishCertifications" type="boolean" helpKey="help_task_finish_certs">
+                    <Prompt>task_in_perform_maintenance_finish_certifications</Prompt>
+                </Argument>
+                <Argument name="finisherThreads" type="int" helpKey="help_task_number_of_threads">
+                    <Prompt>task_in_perform_maintenance_certification_finisher_threads</Prompt>
+                </Argument>
+                <Argument name="phaseCertifications" type="boolean" helpKey="help_task_phase_certs">
+                    <Prompt>task_in_perform_maintenance_phase_certifications</Prompt>
+                </Argument>
+                <Argument name="scanRemediations" type="boolean" helpKey="help_task_scan_remediations">
+                    <Prompt>task_in_perform_maintenance_scan_remediations</Prompt>
+                </Argument>
+                <Argument name="transitionContinuousCertifications" type="boolean" helpKey="help_task_transition_continuous_certs">
+                    <Prompt>task_in_perform_maintenance_transition_cont_certs</Prompt>
+                </Argument>
+                <Argument name="forwardInactiveWorkItems" type="boolean" helpKey="help_task_forward_inactive_workitems">
+                    <Prompt>task_in_perform_maintenance_forward_inactive_work_items</Prompt>
+                </Argument>
+                <Argument name="denormalizeScopes" type="boolean" helpKey="help_task_denormalize_scopes">
+                    <Prompt>task_in_perform_maintenance_denormalize_scopes</Prompt>
+                </Argument>
+                <Argument name="pruneBatchRequests" type="boolean" helpKey="help_task_prune_batch_requests">
+                    <Prompt>task_in_perform_maintenance_prune_batch_requests</Prompt>
+                </Argument>
+                <Argument name="pruneSyslogEvents" type="boolean" helpKey="help_task_prune_syslog_events">
+                    <Prompt>task_in_perform_maintenance_prune_syslog_events</Prompt>
+                </Argument>
+                <Argument name="processWorkflowEvents" type="boolean" helpKey="help_task_proces_workflow_events">
+                    <Prompt>task_in_perform_maintenance_process_workflow_events</Prompt>
+                </Argument>
+                <Argument name="workflowThreads" type="int" helpKey="help_task_process_workflow_threads">
+                    <Prompt>task_in_perform_maintenance_workflow_threads</Prompt>
+                </Argument>
+                <Argument name="workflowThreadTimeoutSeconds" type="int" helpKey="help_task_process_workflow_thread_timeout">
+                    <Prompt>task_in_perform_maintenance_workflow_thread_timeout</Prompt>
+                </Argument>   
+            </Inputs>
+            <Returns>
+                <Argument name="historiesPruned" type="int">
+                    <Prompt>task_out_perform_maintenance_histories_pruned</Prompt>
+                </Argument>
+                <Argument name="taskResultsPruned" type="int">
+                    <Prompt>task_out_perform_maintenance_task_results_pruned</Prompt>
+                </Argument>
+                <Argument name="requestsPruned" type="int">
+                    <Prompt>task_out_perform_maintenance_requests_pruned</Prompt>
+                </Argument>
+                <Argument name="syslogEventsPruned" type="int">
+                    <Prompt>task_out_perform_maintenance_syslog_events_pruned</Prompt>
+                </Argument>
+                <Argument name="certificationsArchived" type="int">
+                    <Prompt>task_out_perform_maintenance_certifications_archived</Prompt>
+                </Argument>
+                <Argument name="certificationsPruned" type="int">
+                    <Prompt>task_out_perform_maintenance_certifications_pruned</Prompt>
+                </Argument>
+                <Argument name="certificationsAutomaticallyClosed" type="int">
+                    <Prompt>task_out_perform_maintenance_certifications_automatically_closed</Prompt>
+                </Argument>
+                <Argument name="certificationItemsAutomaticallyDecided" type="int">
+                    <Prompt>task_out_perform_maintenance_certification_items_automatically_decided</Prompt>
+                </Argument>
+                <Argument name="certificationsFinished" type="int">
+                    <Prompt>task_out_perform_maintenance_certifications_finished</Prompt>
+                </Argument>
+                <Argument name="certificationsFinishFailures" type="int">
+                    <Prompt>task_out_perform_maintenance_certification_finish_failures</Prompt>
+                </Argument>
+                <Argument name="certificationsPhased" type="int">
+                    <Prompt>task_out_perform_maintenance_certifications_phased</Prompt>
+                </Argument>
+                <Argument name="remediationsScanned" type="int">
+                    <Prompt>task_out_perform_maintenance_remediations_scanned</Prompt>
+                </Argument>
+                <Argument name="continuousCertsProcessed" type="int">
+                    <Prompt>task_out_perform_maintenance_cont_certs_processed</Prompt>
+                </Argument>
+                <Argument name="itemsTransitionedToCertificationRequired" type="int">
+                    <Prompt>task_out_perform_maintenance_items_to_cert_required</Prompt>
+                </Argument>
+                <Argument name="itemsTransitionedToCertificationOverdue" type="int">
+                    <Prompt>task_out_perform_maintenance_items_to_overdue</Prompt>
+                </Argument>
+                <Argument name="inactiveWorkItemsForwarded" type="int">
+                    <Prompt>task_out_perform_maintenance_inactive_work_items_forwarded</Prompt>
+                </Argument>
+                <Argument name="scopesDenormalized" type="int">
+                    <Prompt>task_out_perform_maintenance_scopes_denormalized</Prompt>
+                </Argument>
+                <Argument name="emailsSuppressed" type="String">
+                    <Prompt>task_out_emails_suppressed</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Identity Request Maintenance" executor="sailpoint.task.IdentityRequestMaintenance" 
+                    resultAction="Delete"
+                    type="System" progressMode="String" template="true">
+        <Description>Prune and Verify Identity Request objects.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="maxAge" type="int">
+                    <Prompt>task_in_identity_request_prune</Prompt>
+                </Argument>
+                <Argument name="scanRequests" type="boolean">
+                    <Prompt>task_in_identity_request_scan</Prompt>
+                </Argument>
+                <Argument name="maxVerificationDays" type="int">
+                    <Prompt>task_in_identity_request_verification_timeout</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="requestsScanned" type="String">
+                    <Prompt>task_out_identity_request_scanned</Prompt>
+                </Argument>
+                <Argument name="requestsPruned" type="String">
+                    <Prompt>task_out_identity_request_pruned</Prompt>
+                </Argument>
+                <Argument name="requestsTimedout" type="String">
+                    <Prompt>task_out_identity_request_verification_timeout</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    <TaskDefinition name="Encrypted Data Synchronization Task" 
+                    executor="sailpoint.task.EncryptedDataSyncExecutor" 
+                    resultAction="Rename"
+                    type="System" 
+                    progressMode="String" 
+                    progressInterval="5000" 
+                    template="true">
+        <Description>A task that can be used to re-encrypt all encrypted data using the newest key in the keystore. 
+                     It can be used to change the public/private keys that can be used for IQService comm.
+                     It also can be used to convert all encrypted identity secrets to hashing, 
+                     including Identity password, Identity and application password history, 
+                     authentication question answers.</Description> 
+        <Signature>
+            <Inputs>
+                <Argument name="disableApplicationSync" type="boolean">
+                    <Prompt>task_in_key_sync_disable_applications</Prompt>
+                </Argument>
+                <Argument name="disableIdentitySync" type="boolean">
+                    <Prompt>task_in_key_sync_disable_identities</Prompt>
+                </Argument>
+                <Argument name="disableIntegrationSync" type="boolean">
+                    <Prompt>task_in_key_sync_disable_integration</Prompt>
+                </Argument>                
+                <Argument name="convertIdentitySecretToHashing" type="boolean">
+                    <Prompt>task_in_key_convert_identity_secret_to_hashing</Prompt>
+                </Argument>                
+            </Inputs>
+            <Returns>
+                <Argument name="applicationsRefreshed" type="String">
+                    <Prompt>task_out_applications_synced</Prompt>
+                </Argument>
+                <Argument name="identitiesRefreshed" type="String">
+                    <Prompt>task_out_identities_synced</Prompt>
+                </Argument>
+                <Argument name="integrationConfigsRefreshed" type="String">
+                    <Prompt>task_out_integrations_synced</Prompt>
+                </Argument>
+                <Argument name="linksUpdated" type="String">
+                    <Prompt>task_out_links_updated</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name='SyncEncryptedDataTask'/>
+        </RequiredRights>
+    </TaskDefinition>
+    
+    <TaskDefinition name="IQService Public Key Exchange Task" 
+                    executor="sailpoint.task.IQServiceKeyExchangeTask" 
+                    resultAction="Rename"
+                    type="System" 
+                    progressMode="String" 
+                    progressInterval="5000" 
+                    template="true">
+        <Description>A task that can be used used to change the public keys that are used for IQService communications.</Description> 
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" 
+                          required="false" type="Application" 
+                          helpKey="help_task_iqservice_key_exchange_select_apps">
+                    <Prompt>task_in_iqservice_key_exchange_apps</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="iqServiceKeysExchanged" type="String">
+                    <Prompt>task_out_iqservices_key_exchange_updated</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name='IQServicePublicKeyExchangeTask'/>
+        </RequiredRights>
+    </TaskDefinition>
+    
+</sailpoint>

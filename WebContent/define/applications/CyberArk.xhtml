@@ -1,0 +1,510 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+      function deriveDivId(field, field2) {
+          var tokens = field.split("_"); 
+          // we want the last token may be null
+          var nameSpace = tokens[tokens.length - 1];
+          return field2 + nameSpace;
+      }
+
+      function hideDiv(divId) {
+          var delimitedField = $(divId);
+          if ( delimitedField ) {
+              delimitedField.style.display = "none";
+          } else 
+              alert("div not found.")
+      }
+
+      function showDiv(divId) {
+          var delimitedField = $(divId);
+          if ( delimitedField ) {
+              delimitedField.style.display = "";
+          }
+      }
+      function toggleParsingSections(name, parsingMethod) {
+          var regexps = deriveDivId(name, "regexps_")
+          var delimited = deriveDivId(name, "delimited_")
+          if ( parsingMethod == "delimited" ) {
+            hideDiv(regexps);
+            showDiv(delimited);
+          } else {
+            showDiv(regexps);
+            hideDiv(delimited);
+          }
+        }
+
+        function changeTransport(select) {
+          if ( select ) {
+            var name = select.name;
+            if ( name ) {
+              var transport = getSelectedRadioInput(name);
+              toggleCredentialsSection(name, transport);
+            }
+          }
+        }
+
+        function toggleCredentialsSection(name, transport) {
+          var credentials = deriveDivId(name, "transportCredentials_")
+          if ( transport == "local" ) {
+            hideDiv(credentials);
+          } else {
+            showDiv(credentials);
+          }
+        }
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        
+        function changePartitionOption(select) {
+            if ( select ) {
+              var name = select.name;
+              if ( name ) {
+                var partitionOption = getSelectedRadioInput(name);
+                var numberOfObjectsInput = deriveDivId(name, "partitionSizeConfig_");
+                if ( partitionOption == "manual" ) {
+                  showDiv(numberOfObjectsInput);
+                } else {
+                  hideDiv(numberOfObjectsInput);
+                }
+              }
+            }
+          }
+        
+        function setRadioInput(inputID, value) {
+            var radioInputs = $(document.getElementsByName(inputID));
+            var selectedInput;
+            for (i = 0; i < radioInputs.length && !selectedInput; ++i) {
+              var inputElement = radioInputs.item(i);
+              if ( inputElement.value == value ) {
+                inputElement.checked = true;
+              } else {
+                inputElement.checked = false;
+              }
+            }
+            return selectedInput;
+          }
+        
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           var transport = getSelectedRadioInput("editForm:transport_");
+           toggleCredentialsSection("editForm:transport_",transport);
+           
+           var partitionMode = getSelectedRadioInput("editForm:partitionOption_");
+           if ( partitionMode == null || partitionMode === undefined) {
+               setRadioInput("editForm:partitionOption_", "auto");
+           } else 
+           if ( partitionMode != null && partitionMode == "manual") {
+               showDiv("partitionSizeConfig_");
+           } else {
+               hideDiv("partitionSizeConfig_");
+           }   
+           
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var fileName = getFieldValue('editForm:filename');
+               
+               Validator.validateNonBlankString(fileName, '#{sp:escapeJavascript(msgs.con_form_error_no_filename)}');
+               
+         
+               // Validate tht if we are using manual mode the number of objects per partition is valid integer greater then zero
+               var partitionOption = getSelectedRadioInput("editForm:partitionOption_");
+               if ( partitionOption != null && partitionOption == "manual" ) {
+                   Validator.validateGreaterThanOrEqual("editForm:partitionObjectCount_", 1, '#{sp:escapeJavascript(msgs.con_form_error_partition_size_to_small)}');
+                   Validator.validateLength($("editForm:partitionObjectCount_").value, 10, '#{sp:escapeJavascript(msgs.con_form_error_partition_size_to_large)}');
+               }
+               
+               // Validate that the 'Number of lines to skip' field is valid integer greater then zero and should not be more then 10 digit long
+               var linesToSkip = getFieldValue('editForm:linesToSkip');
+               if ( linesToSkip != null && linesToSkip != "") {
+                   Validator.validateGreaterThanOrEqual('editForm:linesToSkip', 1, '#{sp:escapeJavascript(msgs.con_form_CyberArk_error_number_of_objects_to_skip_small)}');
+                   Validator.validateLength($('editForm:linesToSkip').value, 10, '#{sp:escapeJavascript(msgs.con_form_CyberArk_error_number_of_objects_to_skip_large)}');
+               }
+               
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+	<h:outputText styleClass="sectionHeader" value="#{msgs.con_form_CyberArk_settings}"/><br/><br/>
+	<h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_section_file}"/><br/>
+	<div id='formErrorsBottom' class="formError" style="display:none"/>
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_CyberArk_file}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpfile_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_CyberArk_file}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="filename"
+                           value="#{applicationObject.attributes[sp:concat(schemaType,'file')]}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_encoding}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpFileEncoding_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_encoding}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'fileEncoding')]}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+         </table>
+
+      </div>
+
+		<br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_transport}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_delimited_fileTransport}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpFileTransport_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_filetransport}"/>
+              </td>
+              <td>
+                <h:selectOneRadio id="transport_#{nameSpace}" 
+                                  onclick="changeTransport(this);" 
+                                  value="#{applicationObject.attributes[sp:concat(schemaType,'filetransport')]}">
+                  <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportLocal}" itemValue="local"/>
+                  <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportFTP}" itemValue="ftp"/>
+                  <f:selectItem itemLabel="#{msgs.con_form_delimited_fileTransportSCP}" itemValue="scp"/>
+                </h:selectOneRadio>
+              </td>
+            </tr>
+          </table>
+       <div id='transportCredentials_#{nameSpace}'>
+  
+            <table class="spTable" style="border:0px" cellspacing="0">
+
+              <tr>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_transportHost}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpHost_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_transportHost}"/>
+                </td>
+                <td>
+                  <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'host')]}"
+                               size="40"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+              <tr>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_transportUser}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpUser_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_transportUser}"/>
+                </td>
+                <td>
+                  <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'transportUser')]}"
+                               size="40"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+              <tr>
+                  <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_transportPw}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpPw_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_transportPw}"/>
+                </td>
+                <td>
+                  <sp:inputSecret value="#{applicationObject.attributes['transportUserPassword']}"
+                                  size="40" redisplay="true"
+                                  autocomplete="off"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+            </table>
+          </div>
+        
+        <br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_filtering}"/><br/>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_linesToSkip}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpSkip_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_skipLines}"/>
+            </td>
+            <td>
+              <h:inputText id="linesToSkip" 
+              value="#{applicationObject.attributes[sp:concat(schemaType,'numberOfLinesToSkip')]}"
+                           size="3"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_commentCharacter}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpComment_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_commentChar}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'commentCharacter')]}"
+                           size="1"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+        </table>  
+        
+        <br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_partitioning}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_delimited_partitionConfig}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpPartitionOption_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_delimited_partitionConfig}"/>
+              </td>
+              <td>
+                <h:selectOneRadio id="partitionOption_#{nameSpace}" 
+                                  onclick="changePartitionOption(this);" 
+                                  value="#{applicationObject.attributes[sp:concat(schemaType,'partitionMode')]}">
+                  <f:selectItem itemLabel="#{msgs.con_form_delimited_Auto}" itemValue="auto"/>
+                  <f:selectItem itemLabel="#{msgs.con_form_delimited_UserDefined}" itemValue="manual"/>
+                </h:selectOneRadio>
+              </td>
+            </tr>
+          </table>
+           
+           <div id='partitionSizeConfig_#{nameSpace}' style="display:none"> 
+            <table class="spTable" style="border:0px" cellspacing="0">          
+              <tr>
+                 <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='titleColumn certScheduleTitleCol' value="#{msgs.con_form_delimited_objectCount}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpPartitionObjectCount_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.con_help_delimited_partitionObjectCount}"/>
+                </td>
+                <td>
+                  <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType,'partitionObjectCount')]}"
+                             id="partitionObjectCount_${nameSpace}"
+                             size="10"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+            </table>            
+          </div>
+
+        <h:outputText class="sectionHeader" value="#{msgs.con_form_delimited_rules}"/>
+      
+          <table class="spTable width100" style="border:0px" cellspacing="0">
+  
+          <tr>
+            <td class="titleColumn certScheduleTitleCol" >
+              <h:outputText style='padding:5px' value="#{msgs.con_form_delimited_buildMap}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpParsingBuildMap"
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_buildMap}"/>
+  
+            </td>
+            <td>
+              <h:selectOneMenu id="buildMapRule" style="width:300px"
+                               value="#{applicationObject.attributes['buildMapRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{applicationObject.buildMapRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td width="100%">
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:buildMapRule').value, 
+                                                           'BuildMap',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+          <tr>
+            <td class="titleColumn certScheduleTitleCol" >
+              <h:outputText styleClass="titleColumn certScheduleTitleCol" style='padding:5px' value="#{msgs.con_form_delimited_preIterate}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPreIterate"
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_preIterate}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="preiterateRule" style="width:300px"
+                                 value="#{applicationObject.attributes['preIterateRule']}"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{applicationObject.preIterateRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td width="100%">
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:preiterateRule').value, 
+                                                           'PreIterate',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+          <tr>
+            <td class="titleColumn certScheduleTitleCol" >
+              <h:outputText styleClass="titleColumn certScheduleTitleCol" style='padding:5px' value="#{msgs.con_form_delimited_postIterate}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id='imgHlpPostIterate'
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_postIterate}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="postIterateRule" style="width:300px"
+                               value="#{applicationObject.attributes['postIterateRule']}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+              <f:selectItems value="#{applicationObject.postIterateRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td width="100%">
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:postIterateRule').value, 
+                                                           'PostIterate',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+          <tr>
+            <td class="titleColumn certScheduleTitleCol" >
+              <h:outputText styleClass="titleColumn certScheduleTitleCol" style='padding:5px' value="#{msgs.con_form_delimited_transformation}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpMapToObjectRule_#{nameSpace}"
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_transformation}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="transformationRule" style="width:300px"
+                                 value="#{applicationObject.attributes['mapToResourceObjectRule']}"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{applicationObject.transformationRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td width="100%">
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:transformationRule').value, 
+                                                           'Transformation',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+          <tr>
+            <td class="titleColumn certScheduleTitleCol" >
+              <h:outputText styleClass="titleColumn certScheduleTitleCol" style='padding:5px' value="#{msgs.con_form_delimited_mergeMaps}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpMergeMapsRule"
+                              styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_mergeMaps}"/>
+            </td>
+            <td>
+              <h:selectOneMenu id="mergeMapsRule" style="width:300px"
+                                 value="#{applicationObject.attributes['mergeMapsRule']}"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{applicationObject.mergeMapsRules}" />
+              </h:selectOneMenu>
+            </td>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <td width="100%">
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:mergeMapsRule').value, 
+                                                           'MergeMaps',
+                                                           $('editForm:refreshConnectorRulesButton'))" />
+            </td>
+            </ui:fragment>
+          </tr>
+        </table>
+        
+        <a4j:commandButton id="refreshConnectorRulesButton"
+                           style="display:none"
+                           immediate="true"
+                           render="connectorRulesPanel"/>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+      
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

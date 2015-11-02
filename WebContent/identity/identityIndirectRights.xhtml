@@ -1,0 +1,71 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <h:outputText styleClass="spContentTitle" value="#{msgs.header_indirect_rights}"/>
+  <br/><br/>
+  <ui:fragment rendered="#{!(empty identity.indirectHelper.indirectCapabilities)}"> 
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_indirect_capabilities}"/>
+    <div class="spTabledAjaxContent">
+      <table class="spTable" cellspacing="0" id="indirectCapabilities">
+        <tr style="white-space:nowrap">
+          <th style="white-space:nowrap" width="20%">#{msgs.name}</th>
+          <th style="white-space:nowrap" width="80%">Workgroup(s)</th>
+        </tr>
+                                        
+        <ui:repeat value="#{identity.indirectHelper.indirectCapabilities}" var="cap">
+          <tr style="vertical-align: top;">
+            <td>
+               <div style="width:100%">
+                  <h:outputText value="#{cap.name}" /> 
+                </div>
+            </td>
+            <td><h:outputText value="#{cap.assignedBy}" /></td>
+          </tr>
+        </ui:repeat>
+      </table>
+    </div>
+  </ui:fragment>
+
+  <ui:fragment rendered="#{identity.scopeHelper.showScopeControls and !(empty identity.indirectHelper.indirectScopes)}"> 
+    <h:outputText styleClass="spContentTitle" value="${msgs.header_indirect_scopes}"/>
+    <div class="spTabledAjaxContent">
+      <table class="spTable" cellspacing="0" id="indirectScopes">
+        <tr style="white-space:nowrap">
+          <th style="white-space:nowrap" width="20%">#{msgs.name}</th>
+          <th style="white-space:nowrap" width="80%">Workgroup(s)</th>
+        </tr>
+                                        
+        <ui:repeat value="#{identity.indirectHelper.indirectScopes}" var="scope">
+          <tr style="vertical-align: top;">
+            <td>
+               <div style="width:100%">
+                  <h:outputText value="#{scope.name}" /> 
+                </div>
+            </td>
+            <td><h:outputText value="#{scope.assignedBy}" /></td>
+          </tr>
+        </ui:repeat>
+      </table>
+
+      <script>
+        makeTableMulticolored($('indirectCapabilities'), true, false, 'even', 'odd', 'skip');
+        makeTableMulticolored($('indirectScopes'), true, false, 'even', 'odd', 'skip');
+      </script>
+    </div>
+  </ui:fragment>
+
+</ui:composition>
+
+</body>
+
+</html>

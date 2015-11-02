@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+  <table class="dashWidth100" style="margin:0px 0px 3px 0px;">
+    <tr>
+      <td style="padding: 3px; padding-right: 5px;text-align:left" class="title">
+        <ui:fragment rendered="#{not hideAttrName}">
+          
+          <div class="entitlementValues" style="display:#{showEntitlementDescription ? 'none' : 'inline'}">
+            <span class="entitlementTxt" id="name_#{itemId}">
+              <span style="display:none">#{permission.target}</span>
+              #{msgs.on} <h:outputText value=" #{permission.target} "/>
+              <h:graphicImage url="/images/icons/info.png"
+                            style="#{(descriptionMap['-'][permission.target] eq null) ? 'display:none' : ''}"/>
+            </span>
+          </div>
+          
+          <div class="entitlementDescriptions" style="display:#{showEntitlementDescription ? 'inline' : 'none'}">
+            <span class="entitlementTxt" id="description_#{itemId}">
+              <span style="display:none"><h:outputText escape="false" value="#{descriptionMap['-'][permission.target]}"/></span>
+              #{msgs.on} <h:outputText value=" #{(descriptionMap['-'][permission.target] eq null) ? permission.target : descriptionMap['-'][permission.target]} "/>
+              <h:graphicImage url="/images/icons/info.png"
+                            style="#{(descriptionMap['-'][permission.target] eq null) ? 'display:none' : ''}"/>
+            </span>
+          </div>
+        </ui:fragment>
+      
+        <ui:fragment rendered="#{permission.annotation != null}">
+          ( <span class="entitlementTxt"><h:outputText value="#{permission.annotation}"/>)</span>
+        </ui:fragment>
+        
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 2px" class="wide">
+        <div class="entitlementTxt" style="padding-left:20px">
+          <ui:repeat value="#{permission.rightsList}" var="currentRight">
+            <h:outputText value="#{(not sp:isFirstElement(currentRight, permission.rightsList)) ? ', ' : ''}" />
+        
+            <span class="#{(showRolesForEntitlements) ? sp:getEntitlementKey(applicationName, instance, nativeIdentity, permission.target, currentRight) : ''}">
+              <h:outputText value="#{currentRight}"/>
+              <ui:fragment rendered="#{flagNewEntitlements and (null != newPermissionMap[permission.target]) and newPermissionMap[permission.target][currentRight]}">
+                <span class="newEntitlementTxt">#{msgs.bracket_new}</span>
+              </ui:fragment>
+            </span>
+          </ui:repeat>
+        </div>
+      </td>
+    </tr>
+  </table>  
+  
+</ui:composition>
+</body>
+</html>

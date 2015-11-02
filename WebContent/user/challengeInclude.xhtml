@@ -1,0 +1,402 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="#{templateParam}">
+
+  <ui:define name="title">
+    <ui:fragment rendered="#{null != challengeItem.object}">
+      <h:outputFormat value="#{msgs.title_challenge}">
+        <f:param value="#{challengeItem.challengeDescription}" />
+      </h:outputFormat>
+    </ui:fragment>
+    <ui:fragment rendered="#{null == challengeItem.object}">
+      <h:outputText value="#{msgs.title_challenge_not_found}" />
+    </ui:fragment>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'CHALLENGE';
+      //--><!]]>
+    </script>
+    <ui:fragment rendered="#{null != challengeItem.object}">
+      <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+      </sp:script>
+    </ui:fragment>
+  </ui:define>
+
+  <ui:define name="body">
+
+    <f:view>
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+
+        Ext.onReady(function() {
+          addDescriptionTooltips();
+        });
+      //--><!]]>
+    </script>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+
+      <h:form styleClass="form" id="editForm">
+
+        <ui:fragment rendered="#{null == challengeItem.object}">
+          <h:outputText value="#{msgs.warn_challenge_not_found}" />
+  
+          <div>
+            <h:commandButton action="cancel" immediate="true" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+          </div>
+        </ui:fragment>
+  
+        <ui:fragment rendered="#{null != challengeItem.object}">
+
+          <div class="instructions">
+            <h:outputText value="#{msgs.inst_challenge}" escape="false" />
+          </div>
+
+          <h:inputHidden id="id" value="#{challengeItem.object.id}"/>
+
+          <style type="text/css">
+                table.padded-table td { padding:4px; }
+          </style>
+
+          <table style="margin-top: 10px; " class="padded-table dynamicColumnCell" >
+            <tr>
+              <td class="titleColumn">
+                <h:outputText value="#{msgs.inst_challenge_due_by}" />
+              </td>
+              <td class="leftAlignedColumn">
+                <h:outputText value="#{challengeItem.challengeExpiration}">
+                  <f:convertDateTime type="date" dateStyle="short" timeZone="#{challengeItem.userTimeZone}"/>
+                </h:outputText>
+              </td>
+            </tr>
+
+            <c:choose>
+                    <!-- BUSINESS ROLE -->
+                    <c:when test="#{challengeItem.businessRole != null}">
+
+                      <!-- Custom rendering. -->
+                      <c:if test="#{null != challengeItem.certification.customItemRowsInclude}">
+                        <ui:include src="#{challengeItem.certification.customItemRowsInclude}">
+                          <ui:param name="item" value="#{challengeItem.businessRole}" />
+                          <ui:param name="itemType" value="Bundle" />
+                        </ui:include>
+                      </c:if>
+
+                      <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                        <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_business_role}</td>
+                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                          <a onclick="SailPoint.RoleDetailPanel.toggle( '#{challengeItem.businessRole.roleId}', '#{challengeItem.businessRole.identityId}', #{challengeItem.businessRole.assigned}, 'roleDetails_#{challengeItem.businessRole.roleId}', null, this)"
+                             title="#{msgs.cert_item_see_entitlements_granted_to_role}"
+                             class="disclosure">
+                            <h:outputText value="#{challengeItem.businessRole.name}" />
+                          </a>
+                        </td>
+                      </tr>
+                      <tr >
+                        <td colspan="2">
+                          <div id="roleDetails_#{challengeItem.businessRole.roleId}" style='' class="customWidth roleDetailsExpando"></div>
+                        </td>
+                      </tr>
+                      <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                        <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_description}</td>
+                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                          <h:outputText value="#{challengeItem.businessRole.description}" />
+                        </td>
+                      </tr>
+                      <!-- entitlement history goes here. Expanded using the 'View History' menu item -->
+                      <tr class="#{(base.oddOrEvenBooleanNoFlip) ? 'odd' : 'even'}" style="display:none">
+                        <td colspan="2">
+                          <div id="decisionHistory_#{challengeItem.businessRole.id}" class="customWidth"></div>
+                        </td>
+                      </tr>
+                    </c:when>
+
+                    <!-- EXCEPTION -->
+                    <c:when test="#{challengeItem.exception != null}">
+                      <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                        <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_application}</td>
+                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                          <ui:fragment rendered="#{challengeItem.exception.showApplicationDetails}">
+	                          <a href="javascript:showHideApplicationDetails('#{challengeItem.exception.id}');"
+	                             title="${msgs.info_app_details}"
+	                             class="disclosure" style="margin-left:5px">
+	                            <h:outputText value="#{challengeItem.exception.application}" />
+	                          </a>
+                          </ui:fragment>
+                          <h:outputText rendered="#{!challengeItem.exception.showApplicationDetails}"
+                                        value="#{challengeItem.exception.application}" />
+                        </td>
+                      </tr>
+                      <ui:fragment rendered="#{challengeItem.exception.showApplicationDetails}">
+	                      <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}"
+	                          id="applicationDetailsTR_#{challengeItem.exception.id}" style="display:none">
+	                        <td></td>
+	                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'} dynamicColumnCell">
+	                          <!-- Application details. -->
+	                          <ui:fragment rendered="#{challengeItem.exception.firstInGroup}">
+	                            <ui:include src="../manage/certification/applicationDetails.xhtml">
+	                              <ui:param name="exceptionItem" value="#{challengeItem.exception}" />
+	                            </ui:include>
+	                          </ui:fragment>
+	                        </td>
+	                      </tr>
+                      </ui:fragment>
+                      <tr class="#{(null != oddRowClass) ? oddRowClass : 'odd'}">
+                        <td class="#{(null != titleColClass) ? titleColClass : 'title'}"><h:outputText
+                                value="#{challengeItem.accountGroupEntity ? msgs.account_group : msgs.user_name}"/></td>
+                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                          <ui:fragment rendered="#{!challengeItem.accountGroupEntity and challengeItem.exception.showAccountDetails}">
+
+                            <a onclick="showLinkDetails('#{sp:escapeHTMLElementId(challengeItem.exception.linkSnapshot.id)}', null, '#{challengeItem.exception.id}', 'true', this);"
+                               title="#{msgs.info_app_account_details}"
+                               class="disclosure" style="margin-left:5px">
+                              <h:outputText value="#{challengeItem.exception.accountId}" />
+                            </a>
+                          </ui:fragment>
+                          <h:outputText value="#{challengeItem.exception.accountId}"
+                                  rendered="#{!challengeItem.accountGroupEntity and !challengeItem.exception.showAccountDetails}"/>
+                          <h:outputText value="#{challengeItem.certification.currentCertificationIdentity.accountGroup}"
+                                  rendered="#{challengeItem.accountGroupEntity}"/>
+                        </td>
+                      </tr>
+
+                      <ui:fragment rendered="#{!challengeItem.accountGroupEntity and challengeItem.exception.showAccountDetails}">
+	                      <tr class="#{(null != oddRowClass ) ? oddRowClass : 'odd'}" id="linkDetailsTR_#{sp:escapeHTMLElementId(challengeItem.exception.linkSnapshot.id)}" style="display:none">
+	                        <td></td>
+	                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'} dynamicColumnCell"> <!-- Link Details -->
+	                            <div class="detailsPanel" id="linkDetails_#{sp:escapeHTMLElementId(challengeItem.exception.linkSnapshot.id)}" style="display:none">
+	                              <div class="detailsPanelTitleBar">
+	                                <h:graphicImage alt="#{msgs.identity_acct_expando_button_close}"
+	                                                title="#{msgs.identity_acct_expando_button_close}"
+	                                                value="/images/icons/CloseDelete.png"
+	                                                onclick="showHideWithLock($('linkDetails_#{sp:escapeHTMLElementId(challengeItem.exception.linkSnapshot.id)}'));"
+	                                                styleClass="detailsPanelClose"/>
+	                                  <h:outputFormat value="#{msgs.identity_acct_expando_title_acct}">
+	                                      <f:param value="#{challengeItem.exception.linkSnapshot.displayableName}"/>
+	                                  </h:outputFormat>
+	                              </div>
+	
+	                              <div class="detailsPanelContent">
+	                                <div id="linkContent_#{sp:escapeHTMLElementId(challengeItem.exception.linkSnapshot.id)}" style="padding-bottom: 10px;"></div>
+	                              </div>
+	                            </div>
+	                        </td>
+	                      </tr>
+                      </ui:fragment>
+
+				      <!-- Don't show entitlements for revoke accounts -->
+				      <ui:fragment rendered="#{!challengeItem.exception.accountGroupMembership and ('RevokeAccount' != challengeItem.exception.status)}">
+				          <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+				            <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_entitlements}</td>
+				            <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+				              <ui:include src="../identity/entitlementsList.xhtml">
+				                <ui:param name="entitlement" value="#{challengeItem.exception.exceptionEntitlements}" />
+				                <ui:param name="isExceptional" value="true" />
+				                <ui:param name="showEntitlementDescription" value="#{challengeItem.certification.displayEntitlementDescription}" />
+				                <ui:param name="descriptionMap" value="#{challengeItem.exception.entitlementDescriptionsMap}" />
+				              </ui:include>
+				            </td>
+				          </tr>
+				      </ui:fragment>
+				      
+                      <ui:fragment rendered="#{challengeItem.exception.accountGroupMembership}">
+                          <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                            <td class="#{(null != titleColClass) ? titleColClass : 'title'}">Description</td>
+                            <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                                #{challengeItem.exception.accountGroupDescription}
+                            </td>
+                          </tr>
+                      </ui:fragment>
+                    </c:when>
+
+                    <!-- VIOLATION -->
+                    <c:when test="#{challengeItem.violation != null}">
+
+                      <!-- Custom rendering. -->
+                      <c:if test="#{null != challengeItem.certification.customItemRowsInclude}">
+                        <ui:include src="#{challengeItem.certification.customItemRowsInclude}">
+                          <ui:param name="item" value="#{challengeItem.violation}" />
+                          <ui:param name="itemType" value="Violation" />
+                        </ui:include>
+                      </c:if>
+
+                      <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                        <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_policy}</td>
+                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                          <h:outputText value="#{challengeItem.violation.violation.policyName}" />
+                        </td>
+                      </tr>
+                      <tr class="#{(null != oddRowClass) ? oddRowClass : 'odd'}">
+                        <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_rule}</td>
+                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                          <h:outputText value="#{challengeItem.violation.violation.constraint}" />
+                        </td>
+                      </tr>
+                      <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                        <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_summary}</td>
+                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                          <h:outputText value="#{challengeItem.violation.violation.summary}" />
+                        </td>
+                      </tr>
+                      <tr class="#{(null != oddRowClass) ? oddRowClass : 'odd'}">
+                        <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_compensating_control}</td>
+                        <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                          <h:outputText value="#{challengeItem.violation.violation.compensatingControl}" />
+                        </td>
+                      </tr>
+
+                    </c:when>
+
+
+                    <!-- Role composition certification  - role relationship -->
+                     <c:when test="#{challengeItem.businessRoleRelationshipBean != null}">
+
+                        <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                         <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{challengeItem.businessRoleRelationshipBean.type}</td>
+                         <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                           <a onclick="javascript: SailPoint.RoleDetailPanel.toggle( '#{challengeItem.businessRoleRelationshipBean.roleId}', '', false, 'roleDetails_#{challengeItem.businessRoleRelationshipBean.roleId}', null, this)"
+                              title="#{msgs.click_to_see_entitlements_granting_role}"
+                              class="disclosure">
+                             <h:outputText value="#{challengeItem.businessRoleRelationshipBean.name}" />
+                           </a>
+                         </td>
+                       </tr>
+                          <tr >
+                         <td colspan="2">
+                             <!-- hidden role detail expando div -->
+                             <div id="roleDetails_#{challengeItem.businessRoleRelationshipBean.roleId}" style='' class="roleDetailsExpando"></div>
+                         </td>
+                       </tr>
+                        <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                         <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_description}</td>
+                         <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                           <h:outputText value="#{challengeItem.businessRoleRelationshipBean.description}" />
+                         </td>
+                       </tr>
+
+                     </c:when>
+
+                   <!-- Role composition certification  - granted scopes and rights -->
+                     <c:when test="#{challengeItem.businessRoleGrantBean != null}">
+
+                       <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                         <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{challengeItem.businessRoleGrantBean.type}</td>
+                         <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                             <h:outputText value="#{challengeItem.businessRoleGrantBean.name}" />
+                         </td>
+                       </tr>
+
+                        <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                         <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_description}</td>
+                         <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                           <h:outputText value="#{challengeItem.businessRoleRelationshipBean.description}" />
+                         </td>
+                       </tr>
+
+                     </c:when>
+
+                   <!-- Role composition certification - profiles -->
+                     <c:when test="#{challengeItem.profile != null}">
+
+                        <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                         <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.profile}</td>
+                         <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                           <a onclick="showHideWithLock($('profileDetails_#{challengeItem.profile.id}'), null, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'profileDetails_#{challengeItem.profile.id}'}));"
+                              title="#{msgs.click_to_see_entitlements_granting_profile}"
+                              class="disclosure">
+                             <h:outputFormat value="#{msgs.profile_for_named_entity}" >
+                               <f:param value="#{challengeItem.profile.applicationName}" />
+                             </h:outputFormat>
+                           </a>
+                         </td>
+                       </tr>
+
+                       <tr >
+                         <td colspan="2">
+                             <ui:include src="/manage/certification/profileDetailsPanel.xhtml">
+                                 <ui:param name="profile" value="#{challengeItem.profile}" />
+                             </ui:include>
+                         </td>
+                       </tr>
+
+                       <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                         <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.application}</td>
+                         <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                           <h:outputText value="#{challengeItem.profile.applicationName}" />
+                         </td>
+                       </tr>
+
+                        <tr class="#{(null != evenRowClass) ? evenRowClass : 'even'}">
+                         <td class="#{(null != titleColClass) ? titleColClass : 'title'}">#{msgs.label_description}</td>
+                         <td class="#{(null != dataColClass) ? dataColClass : 'wide'}">
+                           <h:outputText value="#{challengeItem.profile.description}" />
+                         </td>
+                       </tr>
+                     </c:when>
+            </c:choose>
+
+          </table>
+
+          <div style="margin-top: 10px">
+            <div>
+              <b>
+                <h:outputText value="#{msgs.inst_challenge_reason_for_removal}" />
+                <f:verbatim>&amp;nbsp;</f:verbatim>
+                <h:outputText value="#{sp:getDisplayNameForName('Identity', challengeItem.certificationItemBean.action.actorName)}" />
+              </b>
+            </div>
+            <h:inputTextarea rows="5" cols="55" readonly="true" disabled="true"
+                             value="#{challengeItem.certificationItemBean.action.comments}" />
+          </div>
+
+          <div style="margin-top: 10px">
+            <div>
+              <b><h:outputText value="#{msgs.inst_reason_for_challenge}" /></b>
+            </div>
+            <h:inputTextarea id="challengeComments" rows="5" cols="55"
+                             readonly="#{not challengeItem.editable}"
+                             disabled="#{not challengeItem.editable}"
+                             value="#{challengeItem.challengeComments}" />
+          </div>
+          <div class="buttonRow">
+            <ui:fragment rendered="#{challengeItem.editable}">
+              <h:commandButton id="challengeBtn" 
+                               action="#{challengeItem.challenge}" 
+                               value="#{msgs.button_challenge}" 
+                               styleClass="primaryBtn"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{showCancelButton}">
+              <h:commandButton id="cancelBtn" 
+                               action="#{challengeItem.cancel}" 
+                               value="#{msgs.button_cancel}" 
+                               immediate="true" 
+                               styleClass="secondaryBtn"/>
+            </ui:fragment>
+          </div>
+        </ui:fragment>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

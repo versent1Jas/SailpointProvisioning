@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">
+    <h:outputFormat value="#{msgs.app_attributes}">
+      <f:param value="#{editedEntitlementApp.application.name}"/>
+    </h:outputFormat>
+  </ui:define>
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/risk-scores">
+      <src>risk-scores.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/bandConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/compositeScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/entitlementBARConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+      // <![CDATA[
+      helpKey = 'RISK_SCORES';
+      
+      function attributeSelected(selector) {
+    	  var attribute = selector.value;
+    	  
+    	  var valueSelect = Ext.getCmp('attrValueCombo');
+    	  
+    	  if (attribute) {
+    		  valueSelect.setAttribute(attribute);
+    		  valueSelect.getStore().load();
+    		  
+    		  valueSelect.setDisabled(false);
+    	  } else {
+    		  valueSelect.clearValue();
+    		  valueSelect.setDisabled(true);
+    	  }
+      }
+      
+      Ext.onReady(function() {
+          EntitlementAttributesPage.initPage(); 
+    	  var valueSelect = Ext.create('SailPoint.form.ManagedAttributeValueCombo', {
+    		  id: 'attrValueCombo',
+    		  renderTo: 'attrValueSelect',
+    		  applicationName: '#{editedEntitlementApp.application.applicationId}',
+    		  forceSelection: true,
+              disabled: true,
+              listeners: {
+            	  select: function(combo, records, eOpts) {
+            		  Ext.get('editForm:attributes:attrValue').dom.value = records[0].get('value');
+            	  }
+              }
+    	  });
+      });      
+      // ]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+  
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form id="editForm" onsubmit="EntitlementsPage.confirmSubmit(EntitlementAttributesPage);">
+        <div id="bandInfo" style="display:none;">
+          <ui:include src="bandsInclude.xhtml"/>
+        </div>
+        
+        <ui:param name="appName" value="#{sp:buildValidComponentId(editedEntitlementApp.application.name)}"/>
+        
+          <div class="spContent">
+            <div id="#{appName}_AttributesConfigTable" class="spTabledContent">
+              <t:dataTable styleClass="spTable"
+                columnClasses="centeredColumn, , , "
+                rowClasses="even, odd"
+                footerClass="spDataTableFooter"
+                id="attributes"
+                value="#{editedEntitlementApp.application.attributes}" var="attributes"
+                forceIdIndexFormula="#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}">
+                <h:column>
+                  <f:facet name="header">
+                    <h:panelGroup>
+                      <div style="width:100%; text-align: center">
+                        <h:selectBooleanCheckbox id="selectAllToggle" value="false" onclick="checkAllAttributes(this.id, this.checked);"/>
+                      </div>
+                    </h:panelGroup>
+                  </f:facet>
+      
+                  <h:selectBooleanCheckbox id="deleteAttributeFlag" value="#{attributes.checked}"/>
+                  
+                  <f:facet name="footer">
+                    <h:panelGroup>
+                      <div style="width:100%; text-align: center">
+                        <a4j:commandButton id="deleteAttributesButton" render="editForm:#{sp:buildValidComponentId(editedEntitlementApp.application.id)}Attributes" onclick="EntitlementsPage.confirmDelete(EntitlementAttributesPage);" value="#{msgs.button_delete}" styleClass="secondaryBtn" />
+                        <h:commandButton id="stealthDeleteAttributesButton" reRender="editForm:#{sp:buildValidComponentId(editedEntitlementApp.application.id)}Attributes" action="#{attributesRiskConfig.deleteAttributes}" style="display:none"/>
+                      </div>
+                    </h:panelGroup>
+                  </f:facet>                
+                </h:column>
+                
+                <h:column>
+                  <f:facet name="header">
+                    <h:panelGroup>
+                      <div style="width:100%; text-align: left">
+                        <h:outputText value="#{msgs.attribute}"/>
+                      </div>
+                    </h:panelGroup>
+                  </f:facet>
+                  
+                  <h:outputText value="#{attributes.attribute}"/>
+                  
+                  <f:facet name="footer">
+                    <h:selectOneMenu id="attrAttribute" value="#{attributesRiskConfig.newAttribute.attribute}" onchange="attributeSelected(this);">
+                      <f:selectItems id="attributeSelections" value="#{editedEntitlementApp.application.availableAttributes}"/>
+                    </h:selectOneMenu>
+                  </f:facet>
+                </h:column>
+      
+                <h:column>
+                  <f:facet name="header">
+                    <h:panelGroup>
+                      <div style="width:100%; text-align: left">
+                        <h:outputText value="#{msgs.value}"/>
+                      </div>
+                    </h:panelGroup>
+                  </f:facet>
+
+                  <h:inputText value="#{attributes.value}"/>
+                  
+                  <f:facet name="footer">
+                    <h:panelGroup>
+	                  <div id="attrValueSelect"></div>
+	                  <h:inputHidden id="attrValue" value="#{attributesRiskConfig.newAttribute.value}"/>
+                    </h:panelGroup>
+                  </f:facet>
+                </h:column>
+                  
+                <h:column>
+                  <f:facet name="header">
+                    <h:panelGroup>
+                      <div style="width:100%; text-align: left">
+                        <h:outputText value="#{msgs.attribute_weight}"/>
+                      </div>
+                    </h:panelGroup>
+                  </f:facet>
+                  
+                  <h:panelGroup>
+                    <div id="sliderWrapAttr#{appName}_#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}" class="sliderWrap">
+                      <div id="sliderTrackAttr#{appName}_#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}" class="sliderLeft" />
+                      <div id="sliderAttr#{appName}_#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}" class="slider">
+                        <div id="handleAttr#{appName}_#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}" class="sliderHandle">
+                          <img src="#{base.requestContextPath}/images/sliderHandle.gif" alt=""/>
+                        </div>
+                      </div>
+                    </div>
+      
+                    <img id="#{appName}_#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}Indicator" class="dynamicRiskIndicator" src=""/>
+                    <h:inputText id="attrFactor" value="#{attributes.weight}" size="3"/>
+                    <script type="text/javascript" defer="defer">
+                      // <![CDATA[
+                        addIndicatorSliderData('#{appName}_AttributesConfigTable',
+                                               'handleAttr#{appName}_#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}', 
+                                               'sliderAttr#{appName}_#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}', 
+                                               '#{attributes.weight}', 
+                                               $('editForm:attribute#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}:attrFactor'),
+                                               $('#{appName}_#{sp:buildValidComponentIdIgnoringNulls(attributes.attribute, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.value, true)}_#{sp:buildValidComponentIdIgnoringNulls(attributes.hashCode, true)}Indicator'),
+                                               '#{appName}_AttributesConfigTable');
+                      // ]]>
+                    </script>
+                  </h:panelGroup>
+
+                  <f:facet name="footer">
+                    <h:panelGroup>
+                      <div style="width: 100%; text-align: left">
+                        <a4j:commandButton id="addAttributesButton" value="#{msgs.button_add}" styleClass="primaryBtn" onclick="EntitlementsPage.confirmAdd(EntitlementAttributesPage);"/>
+                        <h:commandButton id="stealthAddAttributesButton" style="display:none" action="#{attributesRiskConfig.saveNewAttribute}"/>
+                      </div>
+                    </h:panelGroup>
+                  </f:facet>
+                </h:column>
+              </t:dataTable>
+            </div>
+            <div class="buttonRow">
+              <a4j:commandButton id="saveAttributesButton" render="editForm" onclick="EntitlementsPage.confirmSave(EntitlementAttributesPage);" value="#{msgs.button_save}" styleClass="primaryBtn" />
+              <h:commandButton id="stealthSaveButton" action="#{attributesRiskConfig.saveChanges}" style="display:none"/>
+              <span width="20px"/>
+              <a4j:commandButton id="cancelButton" render="editForm" onclick="EntitlementsPage.confirmCancel(EntitlementAttributesPage);" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+              <h:commandButton style="display:none" id="stealthCancelButton" action="#{attributesRiskConfig.cancelChanges}" />              
+            </div>
+          </div>
+
+        <script type="text/javascript" defer="defer">
+          // <![CDATA[
+          initRiskSlidersOnLoad('#{appName}_AttributesConfigTable');
+          // ]]>
+        </script>  
+      </h:form>
+    </f:view> 
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

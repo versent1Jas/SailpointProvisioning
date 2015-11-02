@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+
+   THIS FILE IS OBSOLETE AND SHOULD BE DELETED
+
+->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.work_item_type_approval}</ui:define>
+
+  <ui:define name="headerItems">
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/workItem.js?#{debug.revision}</src>
+  </sp:script>
+   <!-- PageName: approval.xhtml -->
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+
+          <ui:include src="summaryFieldset.xhtml"/>
+          <ui:include src="commentsFieldset.xhtml"/>
+
+          <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.details}"/></th>
+              </tr>
+              <tr>
+                <td>
+                 <ui:include src="approvalDetails.xhtml"/>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <br/>
+  
+          <h:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" />
+          <h:commandButton style="display: none" id="rejectBtn" action="#{workItem.reject}" />
+          <h:commandButton style="display: none" id="returnBtn" action="#{workItem.returnAction}" />
+          
+          <ui:fragment rendered="#{workItem.editable}">
+
+            <h:commandButton onclick="addComment('editForm:completeBtn', '#{sp:escapeJavascript(msgs.button_approve)}', '#{sp:escapeJavascript(msgs.dialog_title_approval_comments)}'); return false;"
+                             value="#{msgs.button_approve}" title="#{msgs.button_title_click_to_approve}" styleClass="primaryBtn"/>
+
+            <h:commandButton onclick="addComment('editForm:rejectBtn', '#{sp:escapeJavascript(msgs.button_reject)}', '#{sp:escapeJavascript(msgs.dialog_title_rejection_comments)}'); return false;"
+                             value="#{msgs.button_reject}" title="#{msgs.button_title_click_to_reject}" styleClass="primaryBtn"/>
+
+            <h:commandButton onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false, SailPoint.getWorkItemPriority()); return false;"
+                             value="#{msgs.button_forward}" title="#{msgs.button_title_click_to_forward}" styleClass="primaryBtn"/>
+
+            <!-- this turns out to not be very useful                
+            <h:commandButton onclick="addComment('editForm:returnBtn', 'Return to Sender', 'Return Comments'); return false;"
+                             value="Return" title="Click this button to return the work item to the requestor with no action."/>
+            -->
+
+          </ui:fragment>
+
+          <h:commandButton action="#{workItem.save}" 
+                           value="#{msgs.button_save}"
+                           styleClass="primaryBtn"
+                           title="#{msgs.button_title_click_to_save_work_item}"/>
+          
+          <h:commandButton action="#{workItem.cancel}" immediate="true" value="#{msgs.button_cancel}" />
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, PASSWORD, ENABLE" icon="databaseIcon" name="DB2 Template" type="DB2 - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="DB2"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="User ID" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="USER_ID" minable="true" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" minable="true" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" schemaObjectType="group" type="string"/>
+        <AttributeDefinition displayName="Account Type" minable="true" name="DB2_RU_TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="Databases" minable="true" multi="true" name="DB2_RU_DBS" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" minable="true" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" minable="true" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="DB2 Version" minable="true" name="DB2_UG_VERSION" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="USER_ID" helpKey="user name to create" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Container" helpKey="container is the dbname" name="USER_OE_PR" required="true" section="" type="string"/>
+        <Field displayName="Account Type" helpKey="Type of account to create" name="DB2_RU_TYPE" required="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

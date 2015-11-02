@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OracleDBConnector" featuresString="DISCOVER_SCHEMA, PROVISIONING, SYNC_PROVISIONING, AUTHENTICATE, PASSWORD, ENABLE, SEARCH, DIRECT_PERMISSIONS" icon="databaseIcon" name="Oracle Template" type="Oracle Database - Direct">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="OracleDBConnectorForm.xhtml"/>
+        <entry key="useExecuteQuery">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="USERNAME" identityAttribute="USERNAME" nativeObjectType="DBA_USERS" objectType="account">
+        <AttributeDefinition name="USERNAME" remediationModificationType="None" type="string"> <Description>User name </Description></AttributeDefinition>
+        <AttributeDefinition name="USER_ID" remediationModificationType="None" type="string"> <Description>User ID </Description></AttributeDefinition>
+        <AttributeDefinition name="ACCOUNT_STATUS" remediationModificationType="None" type="string"> <Description>Account status </Description></AttributeDefinition>
+        <AttributeDefinition name="DEFAULT_TABLESPACE" remediationModificationType="None" type="string"> <Description>Default tablespace </Description></AttributeDefinition>
+        <AttributeDefinition name="TEMPORARY_TABLESPACE" remediationModificationType="None" type="string"> <Description>Temporary tablespace </Description></AttributeDefinition>
+        <AttributeDefinition name="AUTHENTICATION_TYPE" remediationModificationType="None" required="true" type="string"> <Description>Authentication type </Description></AttributeDefinition>
+        <AttributeDefinition managed="true" name="PROFILE" remediationModificationType="None" type="string"> <Description>Profiles assigned to the user </Description></AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="ROLES" remediationModificationType="None" schemaObjectType="group" type="string"> <Description>Roles assigned to the user </Description></AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="SYSTEM_PRIVILEGES" remediationModificationType="None" type="string"> <Description>System privileges assigned to the user </Description></AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="ROLE" featuresString="PROVISIONING" identityAttribute="ROLE" nativeObjectType="DBA_ROLES" objectType="group">
+        <AttributeDefinition name="ROLE" type="string"> <Description>Role name </Description></AttributeDefinition>
+        <AttributeDefinition name="PASSWORD_REQUIRED" remediationModificationType="None" type="string"> <Description>Password is required or not </Description></AttributeDefinition>
+        <AttributeDefinition name="AUTHENTICATION_TYPE" remediationModificationType="None" required="true" type="string"> <Description>Authentication type </Description></AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="ROLES" remediationModificationType="None" type="string"> <Description>Roles assigned to the role </Description></AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="SYSTEM_PRIVILEGES" type="string"> <Description>System privileges assigned to the role </Description></AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Create User" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_oracle_user_name" helpKey="help_con_form_oracle_username" name="USERNAME" required="true" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_oracle_Password" helpKey="help_con_form_oracle_password" name="password" required="true" reviewRequired="true" type="secret"/>
+        <Field displayName="con_prov_policy_oracle_Default_Tablespace" helpKey="help_con_form_oracle_Default_Tablespace" name="DEFAULT_TABLESPACE" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_oracle_Temporary_Tablespace" helpKey="help_con_form_oracle_Temporary_Tablespace" name="TEMPORARY_TABLESPACE" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_oracle_Profile" helpKey="help_con_form_oracle_Profile" name="PROFILE" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_oracle_Role" helpKey="help_con_form_oracle_Role" name="ROLE" required="true" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_oracle_Granted_Roles" helpKey="help_con_form_oracle_Role_Name" multi="true" name="ROLES" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_oracle_System_Privileges" helpKey="help_con_form_oracle_System_Privileges" multi="true" name="SYSTEM_PRIVILEGES" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

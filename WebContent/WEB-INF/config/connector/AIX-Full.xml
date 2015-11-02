@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="AUTHENTICATE, PROVISIONING, GROUP_PROVISIONING, PASSWORD, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE" icon="enterpriseIcon" name="AIX Template" type="AIX - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="AIX42"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="USER_ID" groupAttribute="Groups" identityAttribute="USER_ID" objectType="account">
+        <AttributeDefinition displayName="User Name" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Groups" entitlement="true" managed="true" multi="true" name="Groups" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Home Directory" name="HOME" required="true" type="string"/>
+        <AttributeDefinition displayName="Login Shell" name="SHELL" required="true" type="string"/>
+        <AttributeDefinition displayName="UID" name="UID" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="GROUP_ID" identityAttribute="GROUP_ID" objectType="group">
+        <AttributeDefinition displayName="Group Name" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Group" name="GROUP_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="GID" name="GID" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="con_form_aix_full_userid" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="con_form_aix_full_password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="con_form_aix_full_parent" name="USER_OE_PR" section="" type="string"/>
+        <Field displayName="con_form_aix_full_group" name="UG_DEF" type="string"/>
+        <Field displayName="con_form_aix_full_home" name="HOME" type="string"/>
+        <Field displayName="con_form_aix_full_shell" name="SHELL" type="string"/>
+      </Template>
+      <Template name="create group" usage="Create">
+        <Field displayName="con_form_aix_full_groupname" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="con_form_aix_full_gid" helpKey="help_con_aix_group" name="GID" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_form_aix_full_gid" helpKey="help_con_aix_group" name="GID" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

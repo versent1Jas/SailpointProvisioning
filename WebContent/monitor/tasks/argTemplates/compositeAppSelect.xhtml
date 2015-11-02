@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+  </sp:script>
+
+
+    <script type="text/javascript">
+
+      <!--//--><![CDATA[//><!--
+
+       if (!Page.renderSuggests){
+            Page.renderSuggests = true;
+            Ext.onReady(function () {
+                SailPoint.Suggest.renderSuggests();
+            });
+        }
+      //--><!]]>
+    </script>
+
+    <c:if test="#{argVal.argument.multi eq 'false'}">
+        <div class="suggestInput compositeApp">
+            <span class="suggestRawInput" value='#{sp:getDisplayNameForId("Application", argVal.objectValue)}'/>
+            <t:inputHidden id="#{argVal.argument.name}_suggest" value="#{argVal.objectValue}" required="#{argVal.argument.required}" forceId="true">
+            </t:inputHidden>
+        </div>
+    </c:if>
+
+    <c:if test="#{argVal.argument.multi eq 'true'}"> 
+         <div class="suggestInput compositeApp multi">
+            <span style="display:none" class="suggestRawInput">#{sp:basicJSONDataConverted(argVal.objectListValue,"ApplicationListConverter")}</span>
+            <t:inputHidden id="#{argVal.argument.name}_suggest" value="#{argVal.objectListValue}" required="#{argVal.argument.required}" forceId="true">
+                <sp:convertList/>
+            </t:inputHidden>
+        </div>
+    </c:if>
+
+    <a4j:outputPanel ajaxRendered="true">
+      <h:message styleClass="formError" for="#{argVal.argument.name}_suggest" />
+    </a4j:outputPanel>  
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:sp="http://sailpoint.com/ui"
+    xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+    <ui:composition>
+
+        <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+      Ext.onReady(function() {
+          SailPoint.SystemSetup.Login.enableOrDisableLockoutDuration();
+		  toggleDisplay($('authQuestionContainer'), #{!authQuestionConfig.authQuestionsEnabled});
+      });
+      //--><!]]>
+  </script>
+
+        <div class="paddedContainer">
+            <ui:fragment rendered="#{base.lcmEnabled}">
+                <h:outputText value="#{msgs.auth_question_conf_enabled}" />
+                <h:graphicImage id="imgHlpEnableAuthQuestions"
+                    styleClass="helpIcon"
+                    alt="#{help.help_enable_auth_question}"
+                    url="/images/icons/dashboard_help_16.png" />
+                <h:selectBooleanCheckbox
+                    value="#{authQuestionConfig.authQuestionsEnabled}"
+                    onclick="showHideWithLock($('authQuestionContainer'), this); SailPoint.SystemSetup.Login.updateLoginPanel();"
+                    onchange="SailPoint.SystemSetup.Login.makePageDirty();" />
+            </ui:fragment>
+
+            <table id="authQuestionContainer" class="spTable">
+                <tr>
+                    <th><span class="spContentTitle">#{msgs.auth_question_conf}</span></th>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="width100">
+                            <div>
+                                <div class="spContentTitle">
+                                    <h:outputText
+                                        value="#{msgs.auth_question_conf_questions_subtitle}" />
+                                </div>
+
+                                <div class="pageInfo"
+                                    style="margin: 5px">
+                                    <div class="instructions">
+                                        <h:outputText
+                                            value="#{msgs.auth_question_conf_instr2}" />
+                                    </div>
+                                    <div class="instructions">
+                                        <h:outputText
+                                            value="#{msgs.auth_question_conf_instr3}" />
+                                    </div>
+                                </div>
+
+
+                                <a4j:outputPanel id="questionsPanel"
+                                    ajaxRendered="true">
+
+                                    <h:inputHidden
+                                        id="selectedQuestionId"
+                                        value="#{authQuestionConfig.selectedQuestionId}" />
+
+                                    <t:dataList
+                                        value="#{authQuestionConfig.questions}"
+                                        var="question">
+                                        <div style="margin: 5px">
+                                            <h:inputText size="100"
+                                                class="authQuestion"
+                                                value="#{question.displayedQuestion}" />
+
+                                            <f:verbatim>&amp;nbsp;</f:verbatim>
+                                            <ui:fragment
+                                                rendered="#{sp:size(authQuestionConfig.questions) > 1}">
+                                                <h:graphicImage
+                                                    class="compactMultiSelectControl"
+                                                    url="/images/icons/minus.png"
+                                                    height="12"
+                                                    width="12"
+                                                    onclick="SailPoint.SystemSetup.Login.removeQuestion('#{question.id}');" />
+                                            </ui:fragment>
+
+                                            <ui:fragment
+                                                rendered="#{sp:isLastElement(question, authQuestionConfig.questions)}">
+                                                <h:graphicImage
+                                                    class="compactMultiSelectControl"
+                                                    url="/images/icons/plus.png"
+                                                    height="12"
+                                                    width="12"
+                                                    onclick="SailPoint.SystemSetup.Login.addQuestion('#{question.id}');" />
+                                            </ui:fragment>
+                                        </div>
+                                    </t:dataList>
+
+                                    <a4j:commandButton
+                                        id="addQuestionBtn"
+                                        style="display: none"
+                                        action="#{authQuestionConfig.addQuestion}"
+                                        oncomplete="SailPoint.SystemSetup.Login.updatePassResetPanel();" />
+                                    <a4j:commandButton
+                                        id="removeQuestionBtn"
+                                        style="display: none"
+                                        action="#{authQuestionConfig.removeQuestion}"
+                                        oncomplete="SailPoint.SystemSetup.Login.updatePassResetPanel();" />
+                                </a4j:outputPanel>
+                            </div>
+
+                            <table class="spContent">
+                                <tr>
+                                    <td colspan="2"><span
+                                        class="spContentTitle"> <h:outputText
+                                                value="#{msgs.auth_question_conf_settings_subtitle}" />
+                                    </span></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputText
+                                            value="#{msgs.auth_question_conf_num_questions_for_authn}" />
+                                    </td>
+                                    <td><h:inputText
+                                            id="numQuestionsForAuthn"
+                                            size="3"
+                                            value="#{authQuestionConfig.numQuestionsForAuthn}"
+                                            onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+                                            <f:validateLongRange
+                                                minimum="0" />
+                                        </h:inputText> <a4j:outputPanel
+                                            ajaxRendered="true">
+                                            <h:message
+                                                errorClass="formError"
+                                                for="numQuestionsForAuthn" />
+                                        </a4j:outputPanel></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputText
+                                            value="#{msgs.auth_question_conf_num_answers_required}" /></td>
+                                    <td><h:inputText
+                                            id="numAnswersRequired"
+                                            size="3"
+                                            value="#{authQuestionConfig.numAnswersRequired}"
+                                            onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+                                            <f:validateLongRange
+                                                minimum="0" />
+                                        </h:inputText> <a4j:outputPanel
+                                            ajaxRendered="true">
+                                            <h:message
+                                                errorClass="formError"
+                                                for="numAnswersRequired" />
+                                        </a4j:outputPanel></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputText
+                                            value="#{msgs.auth_question_conf_prompt_for_answers_after_login}" /></td>
+                                    <td><h:selectBooleanCheckbox
+                                            value="#{authQuestionConfig.promptForAnswersAfterLogin}"
+                                            onchange="SailPoint.SystemSetup.Login.makePageDirty();" /></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputText
+                                            styleClass="smallText"
+                                            value="#{msgs.auth_question_conf_prompt_for_answers_description}" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputText
+                                            value="#{msgs.auth_question_conf_max_auth_question_failures}" />
+                                    </td>
+                                    <td><h:inputText
+                                            id="maxAuthQuestionFailures"
+                                            onchange="SailPoint.SystemSetup.Login.enableOrDisableLockoutDuration(); SailPoint.SystemSetup.Login.makePageDirty();"
+                                            size="3"
+                                            value="#{authQuestionConfig.maxAuthQuestionFailures}">
+                                            <f:validateLongRange
+                                                minimum="0" />
+                                        </h:inputText> <a4j:outputPanel
+                                            ajaxRendered="true">
+                                            <h:message
+                                                errorClass="formError"
+                                                for="maxAuthQuestionFailures" />
+                                        </a4j:outputPanel></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputText
+                                            value="#{msgs.auth_question_conf_auth_question_lockout_duration_minutes}" /></td>
+                                    <td><h:inputText
+                                            id="authQuestionLockoutDurationMinutes"
+                                            size="3"
+                                            value="#{authQuestionConfig.authQuestionLockoutDurationMinutes}"
+                                            onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+                                            <f:validateLongRange
+                                                minimum="0" />
+                                        </h:inputText> <a4j:outputPanel
+                                            ajaxRendered="true">
+                                            <h:message
+                                                errorClass="formError"
+                                                for="authQuestionLockoutDurationMinutes" />
+                                        </a4j:outputPanel></td>
+                                </tr>
+                                <tr>
+                                    <td><h:outputText
+                                            styleClass="smallText"
+                                            value="#{msgs.auth_question_conf_auth_question_lockout_duration_description}" /></td>
+                                    <td></td>
+                                </tr>
+
+                            </table>
+
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </ui:composition>
+
+</body>
+</html>

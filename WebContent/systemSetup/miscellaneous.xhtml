@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+  <ui:composition>
+
+    <div class="paddedContainer">
+      <table style="width: 90%; margin: 5px">
+
+        <tr valign="top">
+          <td>
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom">
+                <td colspan="2"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_other_obj_expirations}" />
+                </td>
+              </tr>
+
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.label_snapshot_deletion} " /></td>
+                <td align="left"><t:inputText
+                    id="identitySnapshotMaxAge" size="5"
+                    value='#{systemConfig.object.attributes["identitySnapshotMaxAge"]}'
+                    onchange="makePageDirty();">
+                    <f:validateLongRange minimum="0" maximum="99999" />
+                  </t:inputText></td>
+              </tr>
+
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.label_task_result_deletion} " /></td>
+                <td align="left"><t:inputText id="taskResultMaxAge"
+                    size="5"
+                    value='#{systemConfig.object.attributes["taskResultMaxAge"]}'
+                    onchange="makePageDirty();">
+                    <f:validateLongRange minimum="0" maximum="99999" />
+                  </t:inputText></td>
+              </tr>
+
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.label_certification_archive} " /></td>
+                <td align="left"><t:inputText
+                    id="certificationMaxAge" size="5"
+                    value='#{systemConfig.object.attributes["certificationMaxAge"]}'
+                    onchange="makePageDirty();">
+                    <f:validateLongRange minimum="0" maximum="99999" />
+                  </t:inputText></td>
+              </tr>
+
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.label_certification_archive_deletion} " /></td>
+                <td align="left"><t:inputText
+                    id="certificationArchiveMaxAge" size="5"
+                    value='#{systemConfig.object.attributes["certificationArchiveMaxAge"]}'
+                    onchange="makePageDirty();">
+                    <f:validateLongRange minimum="-1" maximum="99999" />
+                  </t:inputText></td>
+              </tr>
+
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.label_lock_timeout} " /></td>
+                <td align="left"><t:inputText id="lockTimeout"
+                    size="5"
+                    value='#{systemConfig.object.attributes["persistentLockTimeout"]}'
+                    onchange="makePageDirty();">
+                    <f:validateLongRange minimum="0" maximum="999" />
+                  </t:inputText></td>
+              </tr>
+
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.label_provisioning_request_expiration} " /></td>
+                <td align="left"><t:inputText id="provReqExpiration"
+                    size="5"
+                    value='#{systemConfig.object.attributes["provisioningRequestExpirationDays"]}'
+                    onchange="makePageDirty();">
+                    <f:validateLongRange minimum="0" maximum="999" />
+                  </t:inputText></td>
+              </tr>
+
+            </table>
+          </td>
+          <td valign="top">
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom">
+                <td colspan="3"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_syslog}" /></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_syslog_enabled}  " /></td>
+                <td align="left"><h:selectBooleanCheckbox
+                    id="enableSyslog"
+                    value="#{systemConfig.enableSyslog}"
+                    onclick="makePageDirty();" /></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_syslog_level}  " /></td>
+                <td align="left"><h:selectOneMenu id="syslogLevel"
+                    value="#{systemConfig.syslogLevel}"
+                    onchange="makePageDirty();">
+                    <f:selectItem itemValue="FATAL"
+                      itemLabel="#{msgs.sys_config_syslog_level_fatal}" />
+                    <f:selectItem itemValue="ERROR"
+                      itemLabel="#{msgs.sys_config_syslog_level_error}" />
+                    <f:selectItem itemValue="WARN"
+                      itemLabel="#{msgs.sys_config_syslog_level_warn}" />
+                  </h:selectOneMenu></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_syslog_prune_age}  " /></td>
+                <td align="left"><t:inputText id="syslogPruneAge"
+                    size="3" value="#{systemConfig.syslogPruneAge}"
+                    onchange="makePageDirty();">
+                    <f:validateLongRange minimum="0" />
+                  </t:inputText></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom padTopHi">
+                <td colspan="3"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_ui_prefs}" /></td>
+              </tr>
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.system_config_role_modeler_perf}" />
+                </td>
+                <td width="15px">
+                  <h:graphicImage
+                    id="imgHlpRoleModelerPerf" width="12px" height="12px"
+                    alt="#{help.help_system_config_role_modeler_perf}"
+                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox
+                    id="enableRoleModelerPerf"
+                    value="#{systemConfig.object.attributes['disableRoleModelerTreeView']}"
+                    onclick="makePageDirty();" />
+                </td>
+              </tr>
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.system_config_maximum_bundles_page}" />
+                </td>
+                <td width="15px"><h:graphicImage
+                    id="imgHlpMaxBundles" width="12px" height="12px"
+                    alt="#{help.help_system_config_maximum_bundles_page}"
+                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png" /></td>
+                <td><t:inputText id="maxBundlesSelect" size="3"
+                    value="#{systemConfig.bundlesUIDisplayLimit}"
+                    onchange="makePageDirty();">
+                    <f:validateLongRange minimum="0" maximum="1000" />
+                  </t:inputText></td>
+              </tr>
+              <tr>
+                <td align="right"><h:outputText
+                    value="#{msgs.label_show_unsupported_alert} " /></td>
+                <td>&nbsp;</td>
+                <td align="left"><h:selectBooleanCheckbox
+                    id="enableUnsupportedBrowserNotification"
+                    value="#{systemConfig.object.attributes['unsupportedBrowserNotification']}"
+                    onclick="makePageDirty();" /></td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top">
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom">
+                <td colspan="2"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_file_prefs}" /></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_temp_dir}" /></td>
+                <td><t:inputText id="temporaryDir"
+                    value="#{systemConfig.temporaryDirectory}"
+                    onchange="makePageDirty();">
+                  </t:inputText></td>
+              </tr>
+            </table>
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom padTopHi">
+                <td colspan="2"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_system_help}" /></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_help_email_address}" /></td>
+                <td><t:inputText id="helpEmailAddress"
+                    value="#{systemConfig.helpEmailAddress}"
+                    onchange="makePageDirty();">
+                  </t:inputText></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom padTopHi">
+                <td colspan="3"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_localize_attribues}" /></td>
+              </tr>
+
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_localize_attribues_applications}  " />
+                </td>
+                <td align="left"><h:selectBooleanCheckbox
+                    id="enableApplicationLocalization"
+                    value="#{systemConfig.object.attributes['enableLocalizeApplicationDescriptions']}"
+                    onclick="makePageDirty();" /></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_localize_attribues_roles}  " />
+                </td>
+                <td align="left"><h:selectBooleanCheckbox
+                    id="enableRoleLocalization"
+                    value="#{systemConfig.object.attributes['enableLocalizeRoleDescriptions']}"
+                    onclick="makePageDirty();" /></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_localize_attribues_policies}  " />
+                </td>
+                <td align="left"><h:selectBooleanCheckbox
+                    id="enablePolicyLocalization"
+                    value="#{systemConfig.object.attributes['enableLocalizePolicyDescriptions']}"
+                    onclick="makePageDirty();" /></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_localize_attributes_managed_attributes}  " />
+                </td>
+                <td align="left"><h:selectBooleanCheckbox
+                    id="enableManagedAttributeLocalization"
+                    value="#{systemConfig.object.attributes['enableLocalizeManagedAttributeDescriptions']}"
+                    onclick="makePageDirty();" /></td>
+              </tr>
+            </table>
+          </td>
+
+          <td valign="top">
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom padTopHi">
+                <td colspan="3"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_lang_title}" />
+                </td>
+              </tr>
+
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_lang_default}  " />
+                </td>
+                <td align="left">
+                  <h:selectOneMenu id="defaultLang"
+                    value="#{systemConfig.defaultLanguage}"
+                    onchange="makePageDirty();">
+                    <f:selectItems value="#{systemConfig.supportedLanguagesItems}" />
+                  </h:selectOneMenu>
+                </td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_lang_supported}  " />
+                </td>
+                <td><t:inputText id="supportedLangs"
+                    size='40'
+                    value="#{systemConfig.supportedLanguages}"
+                    onchange="makePageDirty();">
+                  </t:inputText>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td valign="top">
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom padTopHi">
+                <td colspan="3"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_tab_workflows}" /></td>
+              </tr>
+
+              <tr>
+                <td align="right"><h:outputText value="#{msgs.sys_config_workflow_managed_attribute}" /></td>
+                <td width="15px">
+                  <h:graphicImage id="imgHlpGroup"
+                    width="12px" height="12px" alt="#{help.help_sys_config_workflow_managed_attribute}"
+                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png"/>
+                </td>
+                <td>
+                  <h:selectOneMenu
+                    value='#{systemConfig.object.attributes["workflowManagedAttribute"]}'
+                    onchange="makePageDirty();">
+                    <f:selectItems value="#{systemConfig.managedAttributeWorkflows}" />
+                  </h:selectOneMenu> 
+                </td>
+              </tr>
+          
+              <tr>
+                <td align="right"><h:outputText value="#{msgs.sys_config_workflow_password_intercept}" /></td>
+                <td width="15px">
+                  <h:graphicImage id="imgHlpPasswordIntercept"
+                    width="12px" height="12px" alt="#{help.help_sys_config_workflow_password_intercept}"
+                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png"/>
+                </td>
+                <td>
+                  <h:selectOneMenu 
+                    value='#{systemConfig.object.attributes["workflowPasswordIntercept"]}'
+                    onchange="makePageDirty();">
+                    <f:selectItems value="#{systemConfig.passwordInterceptWorkflows}" />
+                  </h:selectOneMenu> 
+                </td>
+              </tr>
+            </table>
+          </td>
+
+          <td valign="top">
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom padTopHi">
+                <td colspan="3"><h:outputText
+                    styleClass="spContentTitle"
+                    value="#{msgs.sys_config_misc_caches}" /></td>
+              </tr>
+
+              <tr>
+                <td align="right"><h:outputText value="#{msgs.sys_config_misc_async_cache}" /></td>
+                <td width="15px">
+                  <h:graphicImage id="imgHlpAsyncCache"
+                    width="12px" height="12px" alt="#{help.help_sys_config_misc_async_cache}"
+                    style="cursor:pointer;padding: 0px 7px 0px 7px"
+                    url="/images/icons/dashboard_help_16.png"/>
+                </td>
+                <td align="left"><h:selectBooleanCheckbox
+                    id="asyncCache"
+                    value="#{systemConfig.object.attributes['asyncCacheRefresh']}"
+                    onclick="makePageDirty();" />
+                </td>
+              </tr>
+            </table>
+          </td>
+
+
+        </tr>
+
+        <tr>
+          <td valign="top">
+            <table class="paddedTbl" style="margin: 5px">
+              <tr class="padBottom padTopHi">
+                <td colspan="3"><h:outputText styleClass="spContentTitle"
+                    value="#{msgs.sys_config_tab_reports}"/></td>
+              </tr>
+              <tr>
+                <td><h:outputText
+                    value="#{msgs.sys_config_csv_delimiter}  "/>
+                </td>
+                <td width="15px">
+                  <h:graphicImage
+                      id="imgHlpCsvDelimiter" width="12px" height="12px"
+                      alt="#{help.help_sys_config_csv_delimiter}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                </td>
+                <td>
+                  <t:inputText id="jasperCsvDelimiter" size='5'
+                     value="#{systemConfig.jasperCsvDelimiter}"
+                     onchange="makePageDirty();">
+                  </t:inputText>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+  </ui:composition>
+</body>
+</html>

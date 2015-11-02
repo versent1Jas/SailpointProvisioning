@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//Dtd XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/tr/xhtml1/Dtd/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2011 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+    <ui:define name="title">#{msgs.title_manage_workitems}</ui:define>
+
+    <ui:define name="headerItems">
+    
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web">
+      <src>dashboard.css</src>
+    </sp:style>
+    
+    <sp:script>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/EmailWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+      
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/BooleanGridEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+      
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/Workitem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/dashboard.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/workItemGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/mySubordinates.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" defer="defer">
+        <!--//--><![CDATA[//><!--
+            helpKey = 'MANAGE_WORK_ITEMS';
+        //--><!]]>
+        var stateIds = ['#{workItemManageList.gridState.name}', '#{workItemArchive.gridState.name}'];
+        var sp = new SailPoint.state.StateProvider({
+            stateIds: stateIds,
+            states: ['#{workItemManageList.gridState.state}', '#{workItemArchive.gridState.state}']
+        });
+        Ext.state.Manager.setProvider(sp);
+    </script>
+   
+    <style type="text/css">
+         .x-form-num-field {
+            display: block;
+         }
+         .x-toolbar-default-docked-top {
+             border: none !important;
+         }
+    </style>
+    </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+        <ui:include src="/manage/workItems/contentManage.xhtml">
+            <ui:param name="workItemManageList" value="#{workItemManageList}" />
+        </ui:include>
+        
+        <h:inputHidden id="frmOwner" value=""/>
+        <h:inputHidden id="frmRequestor" value=""/>
+        <h:inputHidden id="frmAssignee" value=""/>
+
+      </h:form>
+      
+      <!-- Duplicate the dashboard form items here so we can leverage the existing functions in dashboard.js -->
+      <h:form id="dashboardForm">
+      
+        <h:inputHidden id="selectedIdWI" value="#{workItemManageList.selectedId}"/>
+        
+        <h:commandButton id="viewCertificationButtonWI" style="display:none"
+          action="#{workItemManageList.viewCertification}"/>
+          
+        <h:commandButton id="viewWorkItemButton" style="display:none"
+          action="#{workItemManageList.viewWorkItem}"/>
+          
+        <h:commandButton id="viewWorkItemArchiveButton" style="display:none"
+          action="#{workItemManageList.viewWorkItemArchive}"/>
+          
+      </h:form>
+      
+      <div id="priorityEditorDialogCt"/>
+    </f:view>
+  </ui:define>
+</ui:composition>
+    
+</body>
+</html>

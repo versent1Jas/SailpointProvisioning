@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+  <ui:composition>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+  </sp:script>
+  <script type="text/javascript">
+      
+        Ext.onReady(function () {
+                 var idSuggest = new SailPoint.MultiSuggest({
+                    renderTo: 'emailRecipientMultiSuggest',
+                    suggestType: 'identity',
+                    jsonData: #{sp:basicJSONDataCustomFieldsConverted(systemConfig.identities, null,'IdentityNameListConverter')},
+                    baseParams: {context: 'Owner'},
+                    inputFieldName : 'identitySuggest',
+                    valueField:'name',
+                    border:'true',
+                    contextPath: CONTEXT_PATH
+                    }); 
+                
+                 onEmailNotifyChange("#{systemConfig.emailNotify}");
+        });   
+
+         function onEmailNotifyChange(arg){
+             var emailTemplate = $('emailTemplate');
+             var emailRecipient = $('emailID');
+             if(arg === "Disabled"){
+                emailTemplate.style.display="none";
+                emailRecipient.style.display="none";
+             }
+             else{ 
+                emailTemplate.style.display="";
+                emailRecipient.style.display="";
+             }
+             emailHelper.updateLayoutOnEmailNotifyChange();
+         }
+    </script>
+    <div class="paddedContainer">
+
+      <ui:include src="email.xhtml" />
+
+      <table class="paddedTbl" style="margin: 5px">
+        <tr class="padBottom padTopHi">
+          <td colspan="2"><h:outputText styleClass="spContentTitle"
+              value="#{msgs.sys_config_email_templates}" /></td>
+        </tr>
+
+        <ui:repeat value="#{systemConfig.mailSettingsHelper.mailSettings}" var="mailSetting">
+          <tr>
+            <td align="right"><h:outputText
+                value=" #{mailSetting.name}" /></td>
+            <td align="left"><h:selectOneMenu 
+                value='#{mailSetting.value}'
+                onchange="makePageDirty();">
+                <f:selectItems value="#{systemConfig.emailTemplates}" />
+              </h:selectOneMenu></td>
+          </tr>
+        </ui:repeat>
+
+        <tr class="padBottom padTopHi">
+            <td colspan="2"><h:outputText styleClass="spContentTitle" value="#{msgs.label_email_task_alert}" /></td>
+        </tr>
+        <tr>
+            <td align="right"><h:outputText value="#{msgs.label_email_notification}" /></td>
+                <td align="left"><h:selectOneMenu id="emailNotify" 
+                             onchange="onEmailNotifyChange(this.value);"
+                         value="#{systemConfig.emailNotify}">
+                 <f:selectItems value="#{systemConfig.emailNotifyOptions}" />
+             </h:selectOneMenu></td>
+        </tr>
+
+        <tr id="emailTemplate">
+            <td align="right"><h:outputText 
+                         value="#{msgs.label_task_email_template}" /></td>
+                 <td align="left"><h:selectOneMenu id="emailNotifyTemplate" 
+                         value="#{systemConfig.emailTemplate}">
+            <f:selectItems  value="#{systemConfig.emailTemplates}" />
+            </h:selectOneMenu></td>
+        </tr>
+        <tr id="emailID">
+            <td align="right"><h:outputText                           
+                       value='#{sp:escapeJavascript(msgs.label_email_recipients)}' />
+            </td>
+            <td align="left">
+            <div id="emailRecipientMultiSuggest"></div> 
+               <t:inputHidden id="identitySuggest" value="#{systemConfig.identities}" forceId="true">
+               <sp:convertList />
+               </t:inputHidden>
+               <a4j:outputPanel ajaxRendered="true">
+               <h:message styleClass="formError" for="identitySuggest" />
+               </a4j:outputPanel>
+            </td>
+        </tr>
+      </table>
+    </div>
+  </ui:composition>
+</body>
+</html>

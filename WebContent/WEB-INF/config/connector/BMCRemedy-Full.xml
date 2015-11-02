@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, AUTHENTICATE, SEARCH, UNSTRUCTURED_TARGETS, PASSWORD" icon="enterpriseIcon" name="Remedy Template" type="BMC Remedy - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="Remedy"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="Groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" minable="true" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" minable="true" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" minable="true" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Full Name" minable="true" name="Remedy_full_name" required="true" type="string"/>
+        <AttributeDefinition displayName="License type" minable="true" name="Remedy_license_type" required="true" type="string"/>
+        <AttributeDefinition displayName="Full License type" minable="true" name="Remedy_ft_license_type" required="true" type="string"/>
+        <AttributeDefinition displayName="Creator" minable="true" name="Remedy_user_creator" required="true" type="string"/>
+        <AttributeDefinition displayName="Groups" entitlement="true" managed="true" multi="true" name="Groups" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" minable="true" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" minable="true" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Id" minable="true" name="Remedy_group_id" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Type" minable="true" name="Remedy_group_type" required="true" type="string"/>
+        <AttributeDefinition displayName="Long Group Name" minable="true" name="Remedy_long_group_name" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Creator" minable="true" name="Remedy_group_creator" required="true" type="string"/>
+        <AttributeDefinition displayName="Category" minable="true" name="Remedy_group_category" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="USER ID" helpKey="Mandatory field : Remedy account ID" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" helpKey="Mandatory field : Password for Remedy account" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Full Name" helpKey="Mandatory field : Full name for Remedy user" name="Remedy_full_name" required="true" type="string"/>
+        <Field displayName="Remedy_license_type" helpKey="Mandatory field : Remedy license type. eg.:-Floating" name="Remedy_license_type" required="true" type="string">
+          <AllowedValues>
+            <String>Read</String>
+            <String>Fixed</String>
+            <String>Floating</String>
+            <String>Restricted Read</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Full License type" helpKey="Mandatory field : Remedy full license type. eg.:-Floating" name="Remedy_ft_license_type" required="true" type="string">
+          <AllowedValues>
+            <String>Fixed</String>
+            <String>Floating</String>
+            <String>None</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Creator" helpKey="Mandatory field : Remedy user creator .eg.:- Demo" name="Remedy_user_creator" required="true" type="string"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group Name" helpKey="Mandatory field : Group ID by which gorup is to be created" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Remedy_group_id" helpKey=" Mandatory field : Remedy group ID" name="Remedy_group_id" required="true" section="" type="string"/>
+        <Field displayName="Long_group_name" helpKey="Mandatory field : Remedy long group name" name="Remedy_long_group_name" required="true" type="string"/>
+        <Field displayName="Remedy_group_creator" helpKey="Mandatory field : Remedy group creator eg.:- Demo " name="Remedy_group_creator" required="true" type="string"/>
+        <Field displayName="Rem_group_category" helpKey="Mandatory field : Select the remedy group category in drop down" name="Remedy_group_category" required="true" type="string">
+          <AllowedValues>
+            <String>Regular</String>
+            <String>Dynamic</String>
+            <String>Computed</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Remedy_group_type" helpKey="Mandatory field : Select the remedy group type" name="Remedy_group_type" required="true" type="string">
+          <AllowedValues>
+            <String>None</String>
+            <String>View</String>
+            <String>Change</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Modify" schemaObjectType="group" usage="Update">
+        <Field displayName="Long_group_name" helpKey="Editable field : Remedy long group name" name="Remedy_long_group_name" reviewRequired="true" type="string"/>
+        <Field displayName="Remedy_group_id" helpKey="Editable field : Remedy group id" name="Remedy_group_id" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Remedy_group_type" helpKey="Editable field : Remedy group type" name="Remedy_group_type" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>None</String>
+            <String>View</String>
+            <String>Change</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

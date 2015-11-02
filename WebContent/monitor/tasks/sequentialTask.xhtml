@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+        Ext.onReady(function () {
+            var tasksMultiSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'tasksMultiSuggest',
+                suggestType: 'task',
+                jsonData: #{sp:basicJSONDataConverted(
+                   taskDefinition.argMap['taskList'].objectListValue,
+                   'TaskDefinitionListConverter')},
+                contextPath: CONTEXT_PATH,
+                inputFieldName: 'tasksSuggest',
+                sortable:true,
+                sortOnAdd:false
+            });
+        });    
+    </script>
+
+    <div class="spTabledContent">
+      <table id="argumentTbl" class="argumentTbl argumentTblNoHelp customWidth paddedTbl" cellspacing="0">
+        <tr>
+          <th colspan="2"><h:outputText styleClass="spContentTitle" value="#{msgs.aggregate_task_options}"/></th>
+        </tr>
+        <tr>
+          <td><sp:outputText value="#{taskDefinition.argMap['taskList'].argument.prompt}"/></td>
+          <td>
+            <div id="tasksMultiSuggest"></div>
+            <t:inputHidden id="tasksSuggest" 
+                           value="#{taskDefinition.argMap['taskList'].objectListNameValue}" forceId="true">
+                <sp:convertList />
+            </t:inputHidden>
+          </td>
+        </tr>
+        <tr>
+          <td><sp:outputText value="#{taskDefinition.argMap['taskTimeOut'].argument.prompt}"/></td>
+          <td>
+            <h:inputText id="taskTimeoutInput" size="10" value="#{taskDefinition.argMap['taskTimeOut'].value}" required="false"/>
+          </td>
+        </tr>
+        <tr>
+          <td><sp:outputText value="#{taskDefinition.argMap['trace'].argument.prompt}"/></td>
+          <td>
+            <h:selectBooleanCheckbox value="#{taskDefinition.argMap['trace'].booleanValue}"/>
+          </td>
+        </tr>
+        <tr>
+          <td><sp:outputText value="#{taskDefinition.argMap['exitOnError'].argument.prompt}"/></td>
+          <td>
+            <h:selectBooleanCheckbox value="#{taskDefinition.argMap['exitOnError'].booleanValue}"/>
+          </td>
+        </tr>
+      </table>
+    </div>
+  <script defer="defer">
+    makeTableMulticolored($('argumentTbl'),true,false, "even", "odd" );
+  </script>
+</ui:composition>
+
+</body>
+</html>

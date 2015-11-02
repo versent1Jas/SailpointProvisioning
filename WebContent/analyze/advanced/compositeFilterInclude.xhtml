@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>    
+  <td colspan="3">
+    <div class="spAjaxLightBlueTabledContent">
+      <table class="spLightBlueTable width100" id="#{prefix}compositeFiltersTbl1"
+        style="border-right:1px #999 solid;border-left:1px #999 solid">
+        <tr>
+          <th>
+            <h:outputText styleClass="font10 textBold" value="Operation"/>
+          </th>
+          <th><h:outputText styleClass="font10" value="#{msgs.field}"/></th>
+          <th><h:outputText styleClass="font10" value="#{msgs.search_type}"/></th>
+          <th><h:outputText styleClass="font10" value="#{msgs.value}"/></th>
+        </tr>
+        <t:dataList value="#{filter.children}" var="childFilter">
+          <ui:fragment rendered="#{childFilter.displayable}">
+          <tr>
+        
+            <ui:fragment rendered="#{childFilter.firstElement}">
+              <td rowspan="#{filter.childrenCount}" width="10%"
+                style="border-right:1px #ccc solid; text-align:center">
+                <h:selectOneMenu styleClass="font10" 
+                  rendered="#{(filter.childrenCount > 1)}"
+                  value="#{filter.operation}"
+                  onchange="$('#{formName}:#{prefix}changeOperator').click()"
+                  disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}">
+                  <f:selectItem itemLabel="#{msgs.filter_and}" itemValue="AND"/>
+                  <f:selectItem itemLabel="#{msgs.filter_or}" itemValue="OR"/>
+                </h:selectOneMenu>
+              </td>
+            </ui:fragment>
+          
+            <ui:fragment rendered="#{!childFilter.composite}">
+              <ui:include src="leafFilterInclude.xhtml">
+                <ui:param name="filterOp" value="#{filter.operation}"/>
+                <ui:param name="filter" value="#{childFilter}"/>
+                <ui:param name="prefix" value="#{prefix}"/>
+              </ui:include>
+            </ui:fragment>
+            
+            <ui:fragment rendered="#{childFilter.composite}">
+              <ui:include src="compositeFilterInclude2.xhtml">
+                <ui:param name="filter2" value="#{childFilter}"/>
+                <ui:param name="prefix" value="#{prefix}"/>
+              </ui:include>
+            </ui:fragment>
+          </tr>
+          </ui:fragment>
+        </t:dataList>
+      </table>
+    </div>
+    <script>
+      makeTableMulticolored($('#{prefix}compositeFiltersTbl1'), true, false, 'even', 'odd');
+      
+    </script>
+  </td>
+</ui:composition>
+
+</body>
+</html>

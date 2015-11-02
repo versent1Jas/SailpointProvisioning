@@ -1,0 +1,44 @@
+-- PH 11/10/2010
+
+Added a abort() method to the Ajax requests as part of bug 6572.
+
+Added to line 1008:
+
+Ajax.Request.prototype.abort = function() {
+  // prevent and state change callbacks from being issued
+  this.transport.onreadystatechange = Prototype.emptyFunction;
+  // abort the XHR
+  this.transport.abort();
+  // update the request counter
+  Ajax.activeRequestCount--;
+};
+
+-- JB 08/24/2012 bug#12922
+
+Modified line 1444:
+
+// Sailpoint bug#12992
+var filter = element.getStyle('filter');
+if (!filter)
+    filter = "";
+element.style.filter = filter.replace(/alpha\([^\)]*\)/gi,'') +
+  'alpha(opacity='+value*100+')';
+//END Sailpoint bug#12992
+
+-- PJ 8/31/2012 bug#12922
+
+This is related to bug#12922. It fixes the other cases when filter might get used.
+
+var useOpacity = (typeof document.createElement("div").style.opacity != 'undefined');
+var useFilter = !useOpacity && (typeof document.createElement("div").style.filter != 'undefined');
+
+-- MLH 3/26/2013 bug #14768
+
+Remove ('Connection' : 'close') HTTP header.
+
+-- CGA 7/31/2013 bug #17229
+Modified line 1456: 
+
+      if (element.style)
+          element.style[name.camelize()] = value;
+      else element[name.camelize()] = value;

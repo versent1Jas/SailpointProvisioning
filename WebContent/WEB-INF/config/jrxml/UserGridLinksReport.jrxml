@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"  ?>
+<!-- Created with iReport - A designer for JasperReports -->
+<!DOCTYPE jasperReport PUBLIC "//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<jasperReport
+		 name="UserGridLinksReport"
+		 columnCount="1"
+		 printOrder="Vertical"
+		 orientation="Landscape"
+		 pageWidth="200"
+		 pageHeight="25"
+		 columnWidth="200"
+		 columnSpacing="0"
+		 leftMargin="0"
+		 rightMargin="0"
+		 topMargin="0"
+		 bottomMargin="0"
+		 whenNoDataType="NoPages"
+		 isTitleNewPage="false"
+		 isSummaryNewPage="false">
+	<property name="ireport.scriptlethandling" value="0" />
+	<property name="ireport.encoding" value="UTF-8" />
+	<import value="java.util.*" />
+	<import value="net.sf.jasperreports.engine.*" />
+	<import value="net.sf.jasperreports.engine.data.*" />
+	<import value="sailpoint.reporting.datasource.*" />
+
+	<style 
+		name="SailPointBlueBackWhiteFront"
+		isDefault="false"
+		mode="Opaque"
+		forecolor="#FFFFFF"
+		backcolor="#025588"
+		vAlign="Middle"
+		leftPadding="5"
+		isStyledText="false"
+		fontName="Arial"
+		fontSize="12"
+		isBold="true"
+		
+		isBlankWhenNull="true"
+	/>
+	<style 
+		name="alternateText"
+		isDefault="false"
+		mode="Opaque"
+		forecolor="#000000"
+		backcolor="#FFFFFF"
+		fontName="Arial"
+		fontSize="12"
+		isBlankWhenNull="true"
+	>
+
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($P{rowcount}.intValue() % 2 == 0)]]></conditionExpression>
+			<style 
+				isDefault="false"
+				backcolor="#E6EFF3"
+			/>
+		</conditionalStyle>
+	</style>
+	<style 
+		name="Heading"
+		isDefault="false"
+		mode="Opaque"
+		forecolor="#000000"
+		backcolor="#CCDEE7"
+		fontName="Arial"
+		fontSize="14"
+		isBold="true"
+	/>
+	<style 
+		name="NormalText"
+		isDefault="false"
+		vAlign="Middle"
+		fontName="Arial"
+		fontSize="12"
+		isBlankWhenNull="true"
+	/>
+
+	<parameter name="id" isForPrompting="false" class="java.lang.String"/>
+	<parameter name="rowcount" isForPrompting="true" class="java.lang.Integer">
+		<defaultValueExpression ><![CDATA[new Integer("1")]]></defaultValueExpression>
+	</parameter>
+	<queryString><![CDATA[select l.*, a.name as appName from spt_link l, spt_application a 
+where l.identity_id = $P{id} AND a.id = l.application
+order by appName]]></queryString>
+
+	<field name="id" class="java.lang.String"/>
+	<field name="created" class="java.lang.Long"/>
+	<field name="modified" class="java.lang.Long"/>
+	<field name="native_identity" class="java.lang.String"/>
+	<field name="last_refresh" class="java.lang.Long"/>
+	<field name="identityId" class="java.lang.String"/>
+	<field name="application" class="java.lang.String"/>
+	<field name="attributes" class="java.lang.String"/>
+	<field name="idx" class="java.lang.Integer"/>
+	<field name="appName" class="java.lang.String"/>
+
+		<background>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</background>
+		<title>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</title>
+		<pageHeader>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</pageHeader>
+		<columnHeader>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</columnHeader>
+		<detail>
+			<band height="25"  isSplitAllowed="true" >
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true" evaluationTime="Now" hyperlinkType="None"  hyperlinkTarget="Self" >
+					<reportElement
+						style="NormalText"
+						mode="Opaque"
+						x="0"
+						y="0"
+						width="180"
+						height="20"
+						key="textField"
+						isPrintWhenDetailOverflows="true"/>
+					<box topBorder="None" topBorderColor="#000000" topPadding="3" leftBorder="None" leftBorderColor="#000000" leftPadding="5" rightBorder="None" rightBorderColor="#000000" bottomBorder="None" bottomBorderColor="#000000"/>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font fontName="Arial"  size="10" isBold="false"/>
+					</textElement>
+				<textFieldExpression   class="java.lang.String"><![CDATA[$F{appName}]]></textFieldExpression>
+				</textField>
+			</band>
+		</detail>
+		<columnFooter>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</columnFooter>
+		<pageFooter>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</pageFooter>
+		<summary>
+			<band height="0"  isSplitAllowed="true" >
+			</band>
+		</summary>
+</jasperReport>

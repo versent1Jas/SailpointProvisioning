@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <ui:define name="title">
+    <h:outputFormat value="#{msgs.lcm_manage_accounts_title}">
+      <f:param value="#{accountsRequest.identityName}" />
+    </h:outputFormat>
+  </ui:define>
+
+  <ui:define name="headerItems">
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+    <src>image-radio.css</src>
+  </sp:style>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+    <src>lcm.css</src>
+  </sp:style>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/ApplicationSelector.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRadio.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/accountsGridSupport.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/manageAccounts.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/AccountRequest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/lcmRenderers.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessCartItemsWindow.js?#{debug.revision}</src>
+  </sp:script>
+  
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'MANAGE_ACCOUNTS';
+      //--><!]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="subtitle">
+    <ui:include src="requestHeaderInclude.xhtml">
+      <ui:param name="bean" value="#{accountsRequest}"/>
+    </ui:include>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+      <script type="text/javascript">
+      Ext.onReady(function(){
+        var disableAutoRefreshAcctStatusApps = #{accountsRequest.disableAutoRefreshAccountStatusApps};  
+        var currentRequests = SailPoint.AccountRequest.createList(#{accountsRequest.currentRequestsJSON});
+        var gridMetaData = #{accountsRequest.columnJSON};
+        var accountOperations = #{accountsRequest.operationsJSON};
+        var acctOnly = #{accountsRequest.allowAccountOnlyRequests};
+        var appsAvailable = #{accountsRequest.allowAccountOnlyRequests and accountsRequest.accountOnlyAppsAvailable};
+        SailPoint.LCM.ManageAccounts.initializeGrid(gridMetaData, '#{accountsRequest.identityId}', accountOperations, acctOnly, appsAvailable, currentRequests, disableAutoRefreshAcctStatusApps);
+      }); 
+      </script>
+      <h:form id="editForm">
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+        
+        <div class="pageInfo">
+          <h:outputText value="#{accountsRequest.pageInfo}"/>          
+        </div>
+        
+        <div id="noChangesError" class="formError" style="margin:10px 0;display:none">#{msgs.lcm_manage_accounts_error_no_changes}</div>
+        
+        <div class="spacerDiv"></div>
+
+          <div class="spContent">
+            <div style="margin:10px">
+              <h:outputText styleClass="sectionHeader" value="#{msgs.lcm_manage_accounts_current_accounts}" style="display:block;margin-bottom:10px"/>
+
+              <ui:fragment rendered="#{accountsRequest.allowManageExistingAccounts}">
+                <ui:include src="manageAccountsLegend.xhtml"/>
+              </ui:fragment>
+              <div id="manageAccountsContainer" style="width:100%"></div>
+
+              <div class="spacerDiv"></div>
+            </div>
+          </div>
+
+          <ui:fragment rendered="#{accountsRequest.allowAccountOnlyRequests}">
+            <div class="spContent">
+              <div style="margin:10px">
+                <h:outputText styleClass="sectionHeader" value="#{msgs.lcm_manage_accounts_new_account}" style="display:block;margin-bottom:10px"/>
+  
+                <table class="spPaddedTable">
+                  <tr>
+                    <td class="titleColumn">#{msgs.lcm_manage_accounts_application}</td>
+                    <td class="leftAlignedColumn">
+                      <div id="applicationSelector" />
+                    </td>
+                  </tr>
+                </table>
+  
+                <div class="spacerDiv"></div>
+              </div>
+            </div>
+          </ui:fragment>
+      
+        <h:outputText style="display:none" value="#{accountsRequest.refreshStatusSummary}" id="refreshSummaryStatus"/>
+        <h:inputHidden id="linkId" value="#{accountsRequest.linkId}"/>
+        <h:inputHidden id="requestsJSON" value="#{accountsRequest.requestsJSON}"/>
+
+        <div class="buttonRow">
+          <h:commandButton action="#{accountsRequest.submitRequest}" value="#{msgs.button_submit}" onclick="return SailPoint.LCM.ManageAccounts.submit()" styleClass="primaryBtn"/>
+          <h:commandButton action="#{accountsRequest.back}" value="#{msgs.button_cancel}" styleClass="secondaryBtn"/>
+        </div>
+        
+        <a4j:commandButton style="display:none" 
+                           action="#{accountsRequest.refreshLinkStatus}" 
+                           id="refreshLinkStatusBtn"
+                           render="refreshSummaryStatus, refreshLinkStatusBtn"
+                           oncomplete="SailPoint.LCM.ManageAccounts.refreshButtonComplete()"/>
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+</body>
+</html>

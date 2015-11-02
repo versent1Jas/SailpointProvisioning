@@ -1,0 +1,19 @@
+var pairs =
+{
+"post":{"approval":1,"new":1}
+,"approval":{"approval":1,"line":1,"item":1}
+,"line":{"item":1}
+,"item":{"comments":1,"type":1}
+,"comments":{"post":1,"button":1,"dialog":1}
+,"new":{"comment":1}
+,"comment":{"click":1,"text":1}
+,"click":{"comments":1,"post":1}
+,"button":{"approval":1}
+,"type":{"your":1}
+,"your":{"comment":1}
+,"text":{"box":1}
+,"box":{"bottom":1}
+,"bottom":{"comments":1}
+,"dialog":{"click":1}
+}
+;Search.control.loadWordPairs(pairs);

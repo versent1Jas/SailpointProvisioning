@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">
+    #{msgs.entitlement_bar_title}
+  </ui:define>
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/risk-scores">
+      <src>risk-scores.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/bandConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/compositeScoringConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/entitlementBARConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript">
+      // <![CDATA[
+      helpKey = 'RISK_SCORES';
+      // ]]>
+      
+      Ext.onReady(function() {
+        var appStore = SailPoint.Store.createStore({
+            url: SailPoint.getRelativeUrl('/define/riskScores/entitlementBARAppDataSource.json'),
+            root: 'objects',
+            fields: [ 'id', 'displayName' ]
+        });
+            
+        var appSuggest = new SailPoint.Suggest(
+            {
+            renderTo: 'appSelectionDropDownSuggest',
+            binding: 'editForm:applicationEntitlements:appSelectionDropDown',
+            pageSize: 10,
+            emptyText: '#{sp:escapeJavascript(msgs.select_one)}',
+            valueField: 'displayName',
+            store: appStore,
+            width: 300
+            });           
+        });
+    </script>       
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form id="editForm">
+        <div class="pageInfo">
+          <div id='Entitlement Baseline Access RiskConfigInstructions' class="instructions">
+            <h:outputText value="#{sp:localizeKey(entitlementsBarConfig.instructions)}"/>
+          </div>
+        </div>
+      
+        <div id="bandInfo" style="display:none;">
+          <ui:include src="bandsInclude.xhtml"/>
+        </div>
+      
+        <div id="Entitlement Baseline Access RiskConfig">
+          <div id="entitlementsMainPanel">
+            <table id="entitlementsByApplicationTable" class="width100">
+
+              <tfoot>
+                <tr><td>
+                  <div class="buttonRow">
+                    <h:commandButton id="saveButton" action="#{entitlementsBarConfig.saveChanges}" value="#{msgs.entitlement_bar_button_save}" styleClass="primaryBtn" />
+                    <h:commandButton id="cancelButton" action="#{entitlementsBarConfig.cancelChanges}" value="#{msgs.entitlement_bar_button_cancel}" styleClass="secondaryBtn" />
+                  </div>
+                </td></tr>
+              </tfoot>
+              
+              <tbody>
+                <tr><td>
+                  <div class="spTabledContent">
+                      <t:dataTable styleClass="spTable"
+                        rowClasses="even,odd"
+                        columnClasses="dataTableCheckboxColumn , , , , "
+                        id="applicationEntitlements"
+                        value="#{entitlementsBarConfig.applicationEntitlements}" var="app"
+                        forceIdIndexFormula="#{sp:buildValidComponentIdIgnoringNulls(app.name, true)}">
+                        <h:column headerClass="dataTableCheckboxColumn">
+                          <f:facet name="header">
+                            <h:selectBooleanCheckbox id="selectAllToggle" value="false" onclick="checkAllAttributes(this.id, this.checked);"/>
+                          </f:facet>
+              
+                          <h:selectBooleanCheckbox id="deleteApplicationFlag" value="#{app.checked}"/>
+    
+                          <f:facet name="footer">
+                            <h:panelGroup styleClass="width100 centeredColumn">
+                              <a4j:commandButton id="removeApplicationButton" styleClass="secondaryBtn" action="#{entitlementsBarConfig.removeApplications}" value="#{msgs.entitlement_bar_button_delete}" />
+                            </h:panelGroup>
+                          </f:facet>
+                        </h:column>                    
+                        
+                        <h:column>
+                          <f:facet name="header">
+                            <h:outputText value="#{msgs.entitlement_bar_grid_col_app}"/>
+                          </f:facet>
+                          
+                          <h:outputText value="#{app.name}"/>
+                          
+                          <f:facet name="footer">
+                            <div class="width100">
+                              <div id="appSelectionDropDownSuggest" class="entitlementsSuggestWrapper"></div>
+                              <h:inputHidden id="appSelectionDropDown" />
+
+                              <a4j:commandButton id="addApplicationButton" styleClass="primaryBtn applicationAddButton" render="editForm" action="#{entitlementsBarConfig.addApplication}" value="#{msgs.entitlement_bar_button_add}"/>
+                            </div>
+                          </f:facet>
+                        </h:column>
+                        
+                        <h:column>
+                          <f:facet name="header">
+                            <h:outputText value="#{msgs.entitlement_bar_grid_col_account_weight}"/>
+                          </f:facet>
+                          <h:inputText id="accountWeight" value="#{app.accountWeight}" size="5"/>
+                        </h:column>
+
+                        <h:column>
+                          <f:facet name="header">
+                            <h:outputText value="#{msgs.entitlement_bar_grid_col_permissions}"/>
+                          </f:facet>
+                          <h:commandLink id="appPermission" action="#{entitlementsBarConfig.configurePermission}">
+                            <f:param name="editedApp" value="#{app.name}"/>
+                            <h:outputText value="#{msgs.entitlement_bar_link_conf_permissions}" />
+                          </h:commandLink>
+                        </h:column>
+              
+                        <h:column>
+                          <f:facet name="header">
+                            <h:outputText value="#{msgs.entitlement_bar_grid_col_attributes}"/>
+                          </f:facet>
+                          <h:commandLink id="appAttribute" action="#{entitlementsBarConfig.configureAttribute}">
+                            <f:param name="editedApp" value="#{app.name}"/>
+                            <h:outputText value="#{msgs.entitlement_bar_link_conf_attributes}" />
+                          </h:commandLink>
+                        </h:column>
+                      </t:dataTable>
+                  </div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>          
+        </div>
+        <script type="text/javascript" defer="defer">
+          // <![CDATA[
+          initRiskSlidersOnLoad('Entitlement Baseline Access RiskConfig');
+          // ]]>
+        </script>     
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

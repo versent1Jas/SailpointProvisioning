@@ -1,0 +1,44 @@
+<tabset type="tabs" class="bg-light" justified="true">
+  <tab heading="{{'ui_my_approvals_detail_tab_approval_details' | spTranslate}}">
+    <ul class="list-group no-radius">
+      <li class="list-group-item" ng-repeat="approvalDetail in approvalDetails">
+        <strong>{{approvalDetail.label}}:</strong>
+        {{approvalDetail.value}}
+      </li>
+    </ul>
+  </tab>
+
+  <tab select="loadIdentityDetails()"
+       heading="{{'ui_my_approvals_detail_tab_identity_details' | spTranslate}}">
+    <div role="presentation" sp-loading-mask="identityDetails">
+      <ul class="list-group no-radius">
+        <li class="list-group-item" ng-repeat="identityDetail in identityDetails">
+          <strong>{{identityDetail.label}}:</strong>
+          {{identityDetail.value}}
+        </li>
+      </ul>
+    </div>
+  </tab>
+
+  <tab select="loadForwardingHistory()"
+       heading="{{'ui_my_approvals_detail_tab_forwarding_history' | spTranslate}}">
+    <div role="presentation" sp-loading-mask="forwardingHistory.$resolved">
+      <div ng-show="forwardingHistory.length > 0" class="tab-pane-bordered panel-body bg-white">
+        <section class="chat-list">
+          <sp-chat-message 
+              text="{{history.comment}}"
+              emptytext="{{ 'ui_approval_details_forward_without_comment' | spTranslate }}"
+              sender="{{ 'ui_my_approvals_forwarding_history_from_to' | spTranslate:history.previousOwner:history.newOwner }}"
+              timestamp="{{history.date | date:'short'}}"
+              ng-repeat="history in forwardingHistory"
+              right="{{isRightAligned(history.previousOwner)}}" />
+        </section>
+      </div>
+      <div ng-show="forwardingHistory.length === 0" role="presentation" class="panel">
+        <div class="panel-body">
+          {{ 'ui_approval_details_no_forwarding_history' | spTranslate }}
+        </div>
+      </div>
+    </div>
+  </tab>
+</tabset>

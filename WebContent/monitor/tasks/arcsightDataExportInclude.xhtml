@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+  <ui:composition>
+
+    <sp:script enabled="false">
+      <src>#{base.requestContextPath}/scripts/sailpoint/tasks/arcsightDataExportDDLDialog.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+
+            Ext.onReady(function () {
+                var radios = Ext.query("input[name='editForm:arcsightIdentitiesExportMode']");
+                if (radios[0].checked === false && radios[1].checked === false){
+                    radios[0].checked = true;
+                }
+
+                radios = Ext.query("input[name='editForm:arcsightAuditsExportMode']");
+                if (radios[0].checked === false && radios[1].checked === false){
+                    radios[0].checked = true;
+                }
+            });
+
+            function setDefaults(type){
+                var radios = Ext.query("input[name='editForm:"+type+"ExportMode']");
+                if (radios[0].checked === true || radios[1].checked === true){
+                    return;
+                }
+                radios[1].checked = true;
+
+            }
+
+    //--><!]]>
+    </script>
+
+    <div style="width: 97%;">
+      <table class="spTable" cellspacing="0">
+        <tr>
+          <th colspan="2">#{msgs.task_data_export_datasource_parms}</th>
+        </tr>
+        <tr>
+          <td><sp:outputText
+              value="#{taskDefinition.argMap['database'].argument.prompt}" />
+            <h:outputText styleClass="requiredText" value="*" /> <h:graphicImage
+              id="imgHlpTaskDef#{taskDefinition.argMap['database'].argument.name}"
+              rendered="#{taskDefinition.argMap['database'].argument.helpKey != null}"
+              styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png"
+              alt="#{help[taskDefinition.argMap['database'].argument.helpKey]}" />
+          </td>
+          <td><h:selectOneMenu id="database"
+              value="#{taskDefinition.argMap['database'].value}">
+              <f:selectItem itemLabel="DB2" itemValue="DB2"></f:selectItem>
+              <f:selectItem itemLabel="Oracle" itemValue="Oracle"></f:selectItem>
+              <f:selectItem itemLabel="MS SQL Server"
+                itemValue="SqlServer"></f:selectItem>
+              <f:selectItem itemLabel="MySQL" itemValue="MySQL"></f:selectItem>
+            </h:selectOneMenu></td>
+        </tr>
+        <tr>
+          <td><sp:outputText
+              value="#{taskDefinition.argMap['username'].argument.prompt}" />
+            <h:outputText styleClass="requiredText" value="*" /> <h:graphicImage
+              id="imgHlpTaskDef#{taskDefinition.argMap['username'].argument.name}"
+              rendered="#{taskDefinition.argMap['username'].argument.helpKey != null}"
+              styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png"
+              alt="#{help[taskDefinition.argMap['username'].argument.helpKey]}" />
+          </td>
+          <td><h:inputText size="40" id="username"
+              value="#{taskDefinition.argMap['username'].value}"
+              required="true" /> <a4j:outputPanel ajaxRendered="true">
+              <h:message styleClass="formError" for="username" />
+            </a4j:outputPanel></td>
+        </tr>
+        <tr>
+          <td><sp:outputText
+              value="#{taskDefinition.argMap['password'].argument.prompt}" />
+            <h:outputText styleClass="requiredText" value="*" /> <h:graphicImage
+              id="imgHlpTaskDef#{taskDefinition.argMap['password'].argument.name}"
+              rendered="#{taskDefinition.argMap['password'].argument.helpKey != null}"
+              styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png"
+              alt="#{help[taskDefinition.argMap['password'].argument.helpKey]}" />
+          </td>
+          <td><sp:inputSecret size="40" id="password"
+              value="#{taskDefinition.argMap['password'].value}"
+              redisplay="true" autocomplete="off" required="true" /> <a4j:outputPanel
+              ajaxRendered="true">
+              <h:message styleClass="formError" for="password" />
+            </a4j:outputPanel></td>
+        </tr>
+        <tr>
+          <td><sp:outputText
+              value="#{taskDefinition.argMap['driverClass'].argument.prompt}" />
+            <h:outputText styleClass="requiredText" value="*" /> <h:graphicImage
+              id="imgHlpTaskDef#{taskDefinition.argMap['driverClass'].argument.name}"
+              rendered="#{taskDefinition.argMap['driverClass'].argument.helpKey != null}"
+              styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png"
+              alt="#{help[taskDefinition.argMap['driverClass'].argument.helpKey]}" />
+          </td>
+          <td><h:inputText size="40" id="driverClass"
+              value="#{taskDefinition.argMap['driverClass'].value}"
+              required="true" /> <a4j:outputPanel ajaxRendered="true">
+              <h:message styleClass="formError" for="driverClass" />
+            </a4j:outputPanel></td>
+        </tr>
+        <tr>
+          <td><sp:outputText
+              value="#{taskDefinition.argMap['dbUrl'].argument.prompt}" />
+            <h:outputText styleClass="requiredText" value="*" /> <h:graphicImage
+              id="imgHlpTaskDef#{taskDefinition.argMap['dbUrl'].argument.name}"
+              rendered="#{taskDefinition.argMap['dbUrl'].argument.helpKey != null}"
+              styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png"
+              alt="#{help[taskDefinition.argMap['dbUrl'].argument.helpKey]}" />
+          </td>
+          <td><h:inputText size="40" id="dbUrl"
+              value="#{taskDefinition.argMap['dbUrl'].value}"
+              required="true" /> <a4j:outputPanel ajaxRendered="true">
+              <h:message styleClass="formError" for="dbUrl" />
+            </a4j:outputPanel></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button type="button"
+              onclick="SailPoint.showarcsightDataExportDDLDialog()">#{msgs.task_data_export_gen_ddl}</button>
+          </td>
+        </tr>
+      </table>
+
+      <table class="spPaddedTable" cellspacing="4">
+        <tr>
+          <th>#{msgs.task_data_export_opts}</th>
+        </tr>
+        <tr>
+          <td><h:selectBooleanCheckbox
+              value="#{taskDefinition.argMap['exportIdentities'].booleanValue}"
+              onclick="setDefaults('identities')" />&nbsp;&nbsp; <sp:outputText
+              value="#{taskDefinition.argMap['exportIdentities'].argument.prompt}" /></td>
+        </tr>
+        <tr>
+          <td>
+            <table style="margin-left: 30px">
+              <tr>
+                <td valign="top"><sp:outputText
+                    value="#{taskDefinition.argMap['identitiesExportMode'].argument.prompt}" /></td>
+                <td><h:selectOneRadio id="arcsightIdentitiesExportMode" value="#{taskDefinition.argMap['identitiesExportMode'].value}">
+                      <f:selectItem itemLabel="#{msgs.task_data_export_full}" itemValue="full" />
+                      <f:selectItem itemLabel="#{msgs.task_data_export_incremental}" itemValue="incremental" />
+                    </h:selectOneRadio>
+                  </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td><h:selectBooleanCheckbox value="#{taskDefinition.argMap['exportAudits'].booleanValue}" 
+              onclick="setDefaults('audits')"/>&nbsp;&nbsp;
+              <sp:outputText value="#{taskDefinition.argMap['exportAudits'].argument.prompt}"/>
+          </td>
+        </tr>
+            <tr>
+                <td >
+                    <table style="margin-left:30px">
+                        <tr>
+                            <td valign="top"><sp:outputText value="#{taskDefinition.argMap['auditsExportMode'].argument.prompt}"/></td>
+                            <td>
+                                 <h:selectOneRadio id="arcsightAuditsExportMode" value="#{taskDefinition.argMap['auditsExportMode'].value}">
+                                  <f:selectItem itemLabel="#{msgs.task_data_export_full}" itemValue="full" />
+                                  <f:selectItem itemLabel="#{msgs.task_data_export_incremental}" itemValue="incremental" />
+                                </h:selectOneRadio>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+      </table>
+    </div>
+  </ui:composition>
+</body>
+</html>

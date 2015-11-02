@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <ui:define name="headerItems">
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+    <src>image-radio.css</src>
+  </sp:style>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+    <src>lcm.css</src>
+    <src>request-access.css</src>
+  </sp:style>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/TextField.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRadio.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/summaryOfChanges.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/lcmRenderers.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/lcmCreateAccountRequest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/AccountRequest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessEditDetailsWindow.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/VTypes.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/NativeIdentityCombo.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/NameWithTooltip.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+  </sp:script>
+  
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'SUMMARY';
+      //--><!]]>
+    </script>
+    <script type="text/javascript">
+      localizedConfirm = function(){
+          Ext.Msg.buttonText = {
+                  yes: '#{msgs.button_yes}',
+                  no: '#{msgs.button_no}'
+              };
+          var cfg = {
+                  title: '#{msgs.lcm_summary_cancel_title}',
+                  icon: Ext.Msg.QUESTION,
+                  msg: '#{msgs.lcm_summary_cancel_detail}',
+                  buttons: Ext.Msg.YESNO,
+                  callback: function(btn) {
+                      if(btn=='yes') {
+                          $('editForm:cancelBtn').click();
+                        }
+                      },
+                  myLabels: true
+              };
+          Ext.Msg.show(cfg);
+      }
+    </script>
+  </ui:define>
+  
+   <ui:define name="title">#{msgs.quicklink_request_access} - #{msgs.lcm_breadcrumb_review}</ui:define>
+   <ui:define name="breadCrumbs">
+    <ul>
+      <li class="past"><h:commandLink value="#{msgs.lcm_breadcrumb_select_identity}" action="#{submitRequest.back2}"/></li>
+      <li class="past"><h:commandLink value="#{submitRequest.backMessage}" action="#{submitRequest.back}"/></li>
+      <li class="present last">#{msgs.lcm_breadcrumb_review}</li>
+    </ul>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+      <script type="text/javascript">
+      Ext.onReady(function(){
+        var gridMetaData = #{submitRequest.columnJSON};
+        var dateField;
+        SailPoint.LCM.RequestAccess.assignableTypes = #{accessRequest.assignableTypes};         
+        SailPoint.LCM.SummaryChanges.permittedRolesGridMetaData = #{accessRequest.columnJSON}; 
+        
+        SailPoint.LCM.RequestAccess.identityId = '#{submitRequest.identityId}';
+        
+        if(#{submitRequest.bulk}) {
+          var chosenGridMetaData = #{requestPopulation.columnJSON};
+          SailPoint.LCM.SummaryChanges.initializeSelectedGrid(chosenGridMetaData);
+        }
+        SailPoint.LCM.SummaryChanges.initializeActivationDates();
+        SailPoint.LCM.SummaryChanges.initializeGrid(gridMetaData, #{submitRequest.bulk});
+        
+      }); 
+      </script>
+      <h:form id="editForm">
+      
+        
+        <a4j:outputPanel ajaxRendered="true">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+        </a4j:outputPanel>
+        
+        
+        <table class="width100">
+          <tr>
+            <td style="width:60%">
+              <div class="pageInfo">
+                <h4>
+                  <ui:fragment rendered="#{!(submitRequest.identityId == null)}">
+                    #{msgs.lcm_summary_title_for} 
+                    <a href="#" onclick="SailPoint.IdentityDetailPopup.showForLcmRequest('#{accessRequest.identityId}','#{sp:escapeJavascript(accessRequest.identityNameAttribute)}'); return false;">
+                      <h:outputText value="#{submitRequest.identityName}" />
+                    </a>
+                  </ui:fragment>
+                  
+                  <ui:fragment rendered="#{submitRequest.identityId == null}">
+                    <h:outputText value="#{msgs.lcm_summary_title_short}"/>
+                  </ui:fragment>
+                </h4>
+                
+                <p><h:outputText value="#{msgs.lcm_summary_description}" rendered="#{!(accessRequest.bulk)}"/>
+                <h:outputText value="#{msgs.lcm_summary_bulk_description}" rendered="#{accessRequest.bulk}"/> 
+                <h:outputText value=" " />
+                <h:outputText value="#{msgs.lcm_summary_activation_edit_details_description}" rendered="#{submitRequest.activationEditingEnabled and (submitRequest.flowName eq accessRequest.flowName)}" /></p>
+              </div>
+            </td>
+            <td>          
+              <div id="pageControls">          
+                <table>             
+                    <ui:fragment rendered="#{submitRequest.priorityEditingEnabled or (submitRequest.activationEditingEnabled and (submitRequest.flowName eq accessRequest.flowName))}">
+                      <tr>
+                        <td class="padded" colspan="2">
+                            <h4 class="request-options">#{msgs.lcm_summary_request_options}</h4>
+                        </td>
+                      </tr>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{submitRequest.priorityEditingEnabled}">
+                      <tr> 
+                        <td class="padded">
+                          <h:outputText styleClass="textBold" value="#{msgs.priority}:"/>
+                        </td>
+                        <td class="padded">
+                          <h:selectOneMenu id="prioritySelection" value="#{submitRequest.priority}">
+                            <f:selectItems value="#{submitRequest.prioritySelectItems}"/>
+                          </h:selectOneMenu>
+                        </td>
+                      </tr>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{submitRequest.activationEditingEnabled and (submitRequest.flowName eq accessRequest.flowName)}">
+                      <tr>
+                        <td class="padded">
+                          <h:outputText styleClass="textBold" value="#{msgs.lcm_summary_role_activation}:"/>
+                        </td>
+                        <td class="padded">
+                          <div id="cartActivationDate"></div>
+                        </td>
+                        <td class="padded">
+                          <h:outputText styleClass="textBold" value="#{msgs.lcm_summary_role_deactivation}:"/>
+                        </td>
+                        <td class="padded">
+                          <div id="cartDeActivationDate"></div>
+                        </td>
+                      </tr>
+                    </ui:fragment>
+                </table>          
+              </div>
+            </td>
+          </tr>
+        </table>       
+        
+        
+        <ui:fragment rendered="#{submitRequest.bulk}">
+          
+          <div style="margin:5px 0">
+            <h:outputText styleClass="sectionHeader" value="#{msgs.lcm_summary_chosen_identities}"/>
+          </div>
+        
+          <div id="summaryIdentitiesContainer"></div>
+          
+          <a4j:commandButton action="#{requestPopulation.removeIdentity}" id="removeBtn" style="display:none"
+              oncomplete="Ext.getCmp('chosenIdentityGrid').loadAfterDelete()"/>
+
+          <h:inputHidden value="#{requestPopulation.identityId}" id="identityId"/>
+        
+          <div class="spacerDiv"></div>
+        
+          <div style="margin:5px 0">
+            <h:outputText styleClass="sectionHeader" value="#{msgs.lcm_summary_requested_access}"/>
+          </div>
+        </ui:fragment>        
+        
+        <div id="summaryChangesContainer"></div>       
+        
+        <ui:fragment rendered="#{submitRequest.showComments}">
+          <div class="spacerDiv"></div>
+          <p><h:outputText styleClass="textBold padded" value="#{msgs.lcm_request_comments}:"/><br/>
+          <h:inputTextarea value="#{submitRequest.comments}" rows="5" style="width:680px"/></p>
+        </ui:fragment>
+        
+        <table class="paddedTbl">          
+          <tr>
+            <ui:fragment rendered="#{!(empty submitRequest.currentRequests)}">
+            <td>
+                <input type="button" onclick="SailPoint.LCM.SummaryChanges.Submit()"
+                  id="submitBtn" value="#{msgs.button_submit}" class="primaryBtn" />
+                  
+                <a4j:commandButton action="#{submitRequest.submit}" style="display:none" id="submitCmdBtn"
+                  onclick="SailPoint.LCM.SummaryChanges.UpdateProgress(true, #{!(submitRequest.bulk)})"/>
+            </td>
+            </ui:fragment>
+            <td>
+              <input type="button" id="cancelInputBtn" value="#{msgs.button_cancel}" onclick="SailPoint.LCM.SummaryChanges.cancelPrompt()" class="secondaryBtn"/>
+              <h:commandButton action="#{submitRequest.cancel}"  id="cancelBtn" style="display:none"/>
+            </td>
+            <td><h:commandButton id="requestBackBtn" action="#{submitRequest.back}" value="#{submitRequest.backButtonText}" styleClass="secondaryBtn"/></td>
+          </tr>
+        </table>
+        <a4j:commandButton action="#{submitRequest.removeRequest}" style="display:none" id="removeRequestBtn" oncomplete="SailPoint.LCM.SummaryChanges.finishUpdateRequests()"/>
+        <a4j:commandButton action="#{submitRequest.updateComment}" style="display:none" id="updateCommentBtn" oncomplete="SailPoint.LCM.SummaryChanges.finishUpdateRequests()"/>
+        <a4j:commandButton action="#{submitRequest.updateAssignmentNote}" style="display:none" id="updateAssignmentNoteBtn" oncomplete="SailPoint.LCM.SummaryChanges.finishUpdateRequests()"/>
+        <a4j:commandButton render="submitStatus" id="updateProgress" style="display:none"/>
+        <a4j:commandButton action="viewDashboard" id="dashboardBtn" style="display:none"/>
+        <a4j:commandButton action="#{submitRequest.updateRequest}" style="display:none" id="updateRequestBtn" oncomplete="SailPoint.LCM.SummaryChanges.finishUpdateRequests()"/>
+        
+        <a4j:outputPanel id="submitStatus" style="display:none">
+          <span id="totalItems">#{submitRequest.monitor.percentComplete}</span>
+        </a4j:outputPanel>
+        
+        <h:inputHidden id="requestsJSON" value="#{submitRequest.requestsJSON}"/>
+        <h:inputHidden id="requestComment" value="#{submitRequest.requestComment}"/>
+        <h:inputHidden id="assignmentNote" value="#{submitRequest.assignmentNote}"/>
+        <h:inputHidden id="requestId" value="#{submitRequest.requestId}"/>
+        <h:inputHidden id="activationDate" value="#{submitRequest.activationDate}" converter="sailpoint.object.Date" />
+        <h:inputHidden id="deactivationDate" value="#{submitRequest.deactivationDate}" converter="sailpoint.object.Date" />
+        <h:inputHidden id="nativeIdentity" value="#{submitRequest.nativeIdentity}" converter="sailpoint.object.Date" />
+        
+        <input id="allowActivationEditing" name="allowActivationEditing" value="#{submitRequest.activationEditingEnabled}" type="hidden"/>
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+</body>
+</html>

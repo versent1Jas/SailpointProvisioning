@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+      
+  <body>
+    <ui:composition template="/appPage.xhtml">
+      <ui:define name="title">#{msgs.conf_time_periods}</ui:define>
+      
+      <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+          <!--//--><![CDATA[//><!--
+          helpKey = 'TIME_PERIOD_CONFIGURATION';
+          //--><!]]>
+        </script>  
+      </ui:define>
+      
+      <ui:define name="body">
+        <f:view>
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+          <h:form styleClass="form" id="editForm">
+            <h:inputHidden id="editedTimePeriod" value="#{timePeriodState.editedTimePeriodId}"/>
+          
+            <div id='instructionPanel' class="pageInfo">
+              <h:outputText value="#{msgs.inst_time_periods}"/>
+            </div>
+          
+              <div class="spContent">
+                <div class="spTabledContent">
+                  <t:dataTable
+                    styleClass="width100 spTable"
+                    rowClasses="ricoLG_evenRow, ricoLG_oddRow"
+                    headerClass="spDataTableHeader centeredColumn"
+                    id="timePeriodList"
+                    value="#{timePeriodList.objects}"
+                    var="timePeriod"
+                    forceIdIndexFormula="#{timePeriod.id}">
+      
+                    <h:column>
+                      <f:facet name="header">
+                        <h:outputText value="#{msgs.time_periods}"/>
+                      </f:facet>
+                      
+                      <h:commandButton id="editLink" class="secondaryBtn" value="#{sp:localizeKey( timePeriod.name )}" onclick="$('editForm:editedTimePeriod').value = '#{timePeriod.id}';" action="#{timePeriodActions.editTimePeriod}"/>                      
+                    </h:column>
+                    
+                    <h:column>
+                      <f:facet name="header">
+                        <h:outputText value="#{msgs.description}"/>
+                      </f:facet>
+                      
+                      <ui:include src="timePeriodDescription.xhtml">
+                        <ui:param name="timePeriod" value="#{timePeriod}" />
+                      </ui:include>     
+                    </h:column>
+                  </t:dataTable>                  
+                </div>
+                <div class="buttonRow">
+                  <h:commandButton styleClass="secondaryBtn" value="#{msgs.button_return_to_system_setup}" action="backToSystemSetup"/>
+                </div>
+              </div>
+          </h:form>
+        </f:view>
+      </ui:define>
+    </ui:composition>
+  </body>
+</html>

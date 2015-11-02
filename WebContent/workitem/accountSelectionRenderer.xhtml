@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputFormat value="#{msgs.workitem_account_selection_title}">
+      <f:param value="#{workItem.attributes['identityDisplayName']}" />
+    </h:outputFormat>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/accountSelection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+        helpKey = 'WORK_ITEM';
+
+        var accountSelections = #{sp:toJSON(workItem.attributes['accounts'])};
+        
+        Ext.onReady(function() {
+            SailPoint.web.workitem.AccountSelection.getInstance(accountSelections, #{!workItem.editable});
+        });
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+
+          <!-- Only display this information if we are not in the middle of a workflow session. -->
+          <ui:fragment rendered="#{!workItem.inWorkflowSession}">
+            <ui:include src="summaryFieldset.xhtml"/>
+            <ui:include src="commentsFieldset.xhtml"/>
+          </ui:fragment>
+
+          <!-- TODO: the header should be pushed into workflowDetails.xhtml -->
+          <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th colspan="2"><h:outputText value="#{msgs.details}"/></th>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <div class="pageInfo">
+                    <div>
+                      #{msgs.workitem_account_selection_instructions}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <ui:repeat value="#{workItem.attributes['accounts']}" var="accountSelection">
+                    <div style="margin-bottom: 20px">
+                      <div class="sectionHeader">
+                        #{sp:getDisplayNameForId('Application', accountSelection.applicationId)}
+                      </div>
+      
+                      <div style="margin-left: 10px">
+                        <ui:fragment rendered="#{not empty workItem.accountSelectionReasonsByApp[accountSelection.applicationId]}">
+                          <div class="pageInfo">
+                            <h:outputFormat value="#{msgs.workitem_account_selection_reasons}">
+                              <f:param value="#{sp:getDisplayNameForId('Application', accountSelection.applicationId)}" />
+                            </h:outputFormat>
+  
+                            <ul>
+                              <ui:repeat value="#{workItem.accountSelectionReasonsByApp[accountSelection.applicationId]}" var="reason">
+                                <li>#{reason}</li>
+                              </ui:repeat>
+                            </ul>
+                          </div>
+                        </ui:fragment>
+        
+                        <div style="margin-top: 5px">
+                          <div id="accountSelector_#{accountSelection.applicationId}" />
+                          <h:inputTextarea style="display: none"
+                                           id="accountSelectorNativeIdentity"
+                                           styleClass="accountSelector_#{accountSelection.applicationId}"
+                                           value="#{accountSelection.selectedNativeIdentities}"
+                                           converter="NewLineList" />
+                        </div>
+                      </div>
+                    </div>
+                  </ui:repeat>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <br/>
+          <div class="buttonRow">
+            <ui:fragment rendered="#{workItem.editable}">
+
+              <h:commandButton onclick="return SailPoint.web.workitem.AccountSelection.getInstance(accountSelections).save();"
+                               action="#{workItem.complete}"
+                               value="#{msgs.button_complete}"
+                               title="#{msgs.button_title_click_when_finished}"
+                               styleClass="primaryBtn"/>
+
+              <h:commandButton onclick="return SailPoint.web.workitem.AccountSelection.getInstance(accountSelections).save();"
+                               action="#{workItem.save}"
+                               value="#{msgs.button_save}"
+                               title="#{msgs.button_title_click_to_save_work_item}"
+                               styleClass="primaryBtn"/>
+
+              <h:commandButton onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false, SailPoint.getWorkItemPriority()); return false;"
+                               value="#{msgs.button_forward}"
+                               title="#{msgs.button_title_click_to_forward}" 
+                               styleClass="primaryBtn"/>
+
+            </ui:fragment>
+            <ui:fragment rendered="#{!workItem.editable}">
+              <h:commandButton action="#{workItem.save}"
+                               value="#{msgs.button_save}"
+                               title="#{msgs.button_title_click_to_save_work_item}"
+                               styleClass="primaryBtn"/>
+            </ui:fragment>
+            <h:commandButton action="#{workItem.cancel}" 
+                             immediate="true" 
+                             value="#{msgs.button_cancel}" 
+                             styleClass="secondaryBtn"/>
+          </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

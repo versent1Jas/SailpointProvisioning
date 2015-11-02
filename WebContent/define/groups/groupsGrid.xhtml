@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+        
+    <div id="groups-grid" class="width100"></div>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/groupGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script>  
+    
+    var sp = new SailPoint.state.StateProvider({
+      stateIds: ['#{groupFactoryList.gridState.name}',
+                 '#{groupDefinitionList.ipopGridState.name}',
+                 '#{workgroupList.gridState.name}'],
+                 
+      states:   ['#{groupFactoryList.gridState.state}',
+                 '#{groupDefinitionList.ipopGridState.state}',
+                 '#{workgroupList.gridState.state}']
+    });
+    Ext.state.Manager.setProvider(sp);
+    
+    
+    Ext.onReady(function(){
+      Ext.QuickTips.init(); 
+      var gridWidth = $('groups-grid').clientWidth;  
+      var grids = [];
+      
+      
+      <c:if test="#{sp:hasRight(facesContext, 'FullAccessGroup, ViewGroups')}">
+          
+          groupFields = [
+                         'id',
+                         'name',
+                         'factoryAttribute',
+                         'description',
+                         'enabled'
+                     ];
+          groupColumns = [];
+          <c:forEach items="#{groupFactoryList.columns}" var="col" varStatus="vStatus">
+          groupColumns.push({
+                header: '#{sp:localizeKey(col.headerKey)}',
+                dataIndex: '#{col.dataIndex}',
+                sortable: #{col.sortable}, 
+                <c:if test="#{col.percentWidth gt 0}">
+                width: (gridWidth * (#{col.percentWidth}/100)),
+                </c:if>
+                <c:if test="#{!(col.renderer == null)}">
+                renderer: SailPoint.Define.Grid.Group.#{col.renderer},
+                </c:if>
+                hideable: #{col.hideable}
+          });
+          </c:forEach>
+          
+          groupStateStr = '#{groupFactoryList.gridState.JSON}';
+          var groupsGrid = SailPoint.Define.Grid.Group.createGroupsGrid(groupFields, groupColumns, groupStateStr, #{groupFactoryList.gridState.pageSize}, '#{groupFactoryList.gridState.name}', gridWidth);          
+          grids.push(groupsGrid);
+          
+      </c:if>
+      <c:if test="#{sp:hasRight(facesContext, 'FullAccessGroup, ViewPopulations')}">
+          popFields = [
+                       'id',
+                       'name',
+                       'description',
+                       'visibility',
+                       'owner',
+                       'indexed'
+                   ];
+          
+          popColumns = [];
+          <c:forEach items="#{groupDefinitionList.ipopColumns}" var="col" varStatus="vStatus">
+          popColumns.push({
+                header: '#{sp:localizeKey(col.headerKey)}',
+                dataIndex: '#{col.dataIndex}',
+                sortable: #{col.sortable}, 
+                <c:if test="#{col.percentWidth gt 0}">
+                width: (gridWidth * (#{col.percentWidth}/100)),
+                </c:if>
+                <c:if test="#{!(col.renderer == null)}">
+                renderer: SailPoint.Define.Grid.Group.#{col.renderer},
+                </c:if>
+                hideable: #{col.hideable}
+          });
+          </c:forEach>
+
+          popStateStr = '#{groupDefinitionList.ipopGridState.JSON}';
+          var popsGrid = SailPoint.Define.Grid.Group.createPopsGrid(popFields, popColumns, popStateStr, #{groupDefinitionList.gridState.pageSize}, '#{groupDefinitionList.gridState.name}', gridWidth);
+          grids.push(popsGrid);
+              
+      </c:if>
+
+      <c:if test="#{sp:hasRight(facesContext, 'FullAccessGroup, ManageWorkgroup, ViewWorkgroup')}">
+
+          workgroupFields = [
+             'id',
+             'name',
+             'description',
+             'modified'
+           ];
+
+          workgroupColumns = [];
+          <c:forEach items="#{workgroupList.columns}" var="col" varStatus="vStatus">
+          workgroupColumns.push({
+                header: '#{sp:localizeKey(col.headerKey)}', 
+                dataIndex: '#{col.dataIndex}',
+                sortable: #{col.sortable}, 
+                <c:if test="#{col.percentWidth gt 0}">
+                width: (gridWidth * (#{col.percentWidth}/100)),
+                </c:if>
+                <c:if test="#{!(col.renderer == null)}">
+                renderer: SailPoint.Define.Grid.Group.#{col.renderer},
+                </c:if>
+                hideable: #{col.hideable}
+          });
+          </c:forEach>
+    
+          workgroupStateStr = '#{workgroupList.gridState.JSON}';
+          var workgroupGrid = SailPoint.Define.Grid.Group.createWorkgroupsGrid(workgroupFields, workgroupColumns, workgroupStateStr, #{workgroupList.gridState.pageSize}, '#{workgroupList.gridState.name}', gridWidth);
+          grids.push(workgroupGrid);
+
+      </c:if>
+      
+      var tabPanel = SailPoint.Define.Grid.Group.createPanel('#{state.activeTab}', grids, gridWidth); 
+
+      var viewport = SailPoint.getViewport({
+          bodyContent: tabPanel,
+          title: "#{msgs.title_group_configuration}"
+      });
+    });
+    
+    </script>
+   
+</ui:composition>
+
+</body>
+</html>

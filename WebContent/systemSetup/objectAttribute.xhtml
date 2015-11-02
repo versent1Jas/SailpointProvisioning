@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Include to edit one ObjectAttributeDTO.
+
+  Required arguments:
+
+    config
+      an instance of ObjectConfigBean, with a selected attribute
+
+  There is stuff in here for editing Identity attribute but the migration
+  is not yet complete.  This will not be used.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:param name="attribute" value="#{config.session.attribute}"/>    
+
+  <ui:define name="title">#{config.object.name == "Bundle" ? msgs.oconfig_title_role_attribute : msgs.oconfig_title_attribute}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/DateTimeInput.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/objectAttribute.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+
+    Ext.onReady(function() {
+        var comboFromArray = new Ext.form.field.ComboBox({
+            store: {
+                fields: ['value','displayName'],
+                data: #{objectConfig.categoriesJson}
+            },
+            typeAhead: true,
+            forceSelection: false,
+            triggerAction: 'all',
+            selectOnFocus:true,
+            renderTo: 'categorycombo',
+            value: '#{attribute.categoryName}',
+            valueField: 'value',
+            displayField: 'displayName',
+            listeners: {
+                change: function(field, newVal, oldVal, opts) {
+                    Ext.get("mainForm:category").dom.value=newVal;
+                }
+            }
+        });
+        toggleRequiredAndEditable(); 
+  });
+
+    function toggleRequiredAndEditable() {
+        var requiredCheck = $( "mainForm:required" ),
+            editableCheck = $( "mainForm:editable" );
+        if( editableCheck.checked ) {
+            requiredCheck.disabled = false;
+        } else {
+            requiredCheck.disabled = true;
+            requiredCheck.checked = false;
+        }
+    };
+    //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="mainForm">
+ 
+        <h:inputHidden id="id" value="#{config.object.id}"/>
+
+        <div class="paddedContainer">
+          <table class="width100 spTable">
+            <thead><tr><th colspan="2">
+              <h:outputText value="#{msgs.oconfig_section_attribute}"/>
+            </th></tr></thead>
+            <tbody>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_attribute_name}"/>
+                </td>
+                <td>
+                  <h:inputText id="attribute" value="#{attribute.name}"/><h:outputText styleClass="requiredText" value="*"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_display_name}"/>
+                </td>
+                <td>
+                  <h:inputText id="displayName" value="#{attribute.displayName}"/>
+                </td>
+              </tr>
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_type}"/>
+                </td>
+                <td>
+                  <h:selectOneMenu id="type" value="#{attribute.type}" onchange="objectAttributeHelper.onTypeSelectionChange();">
+                    <f:selectItems  value="#{attribute.types}"/>
+                  </h:selectOneMenu>
+                </td>
+              </tr>
+<!--
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_multi}"/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox id="multi" value="#{attribute.multi}"/>
+                </td>
+              </tr>
+-->
+              <tr>
+                <td width="25%">
+                  <h:outputText value="#{msgs.oconfig_label_description}"/>
+                </td>
+                <td>
+                  <h:inputTextarea value="#{attribute.description}" cols="60" rows="4"/>
+                </td>
+              </tr>
+			  <tr>
+				<td width="25%"><h:outputText value="#{msgs.oconfig_label_category_name}" /></td>
+				<td><span id="categorycombo"><h:inputText id="category" value="#{attribute.categoryName}" style="display:none"/></span></td>
+			  </tr>
+              <ui:fragment rendered="#{not attribute.standard}">
+                <tr>
+                  <td>
+                    <h:outputText value="#{msgs.oconfig_label_searchable}"/>
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox id="searchable" value="#{attribute.searchable}" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h:outputText value="#{msgs.oconfig_label_editable}"/>
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox id="editable" 
+                      value="#{attribute.editable}" onclick="toggleRequiredAndEditable()"/>
+                  </td>
+                </tr>
+                <tr id='isRequiredPanel' style='display:none'>
+                  <td>
+                    <h:outputText value="#{msgs.required}"/>
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox id="required" 
+                      value="#{attribute.required}" />
+                  </td>
+                </tr>
+                <tr id='allowedValuesPanel' style='display:none'>
+                	<td><h:outputText value="#{msgs.oconfig_label_allowedValues}"/></td>
+                	<td>
+                      <h:inputTextarea id='allowedValues' 
+                       rendered="true"
+                       converter="NewLineList"
+                       value="#{attribute.allowedValues}"
+                       rows="5" cols="20"
+                       disabled="false"
+                       readonly="false"/>
+                    </td>
+                </tr>
+				<tr>
+					<td width="25%"><h:outputText value="#{msgs.label_default_value}" /></td>
+					<td>
+						<h:inputText id="defaultValueString" style="display:none"/> 
+						<h:selectOneMenu id="defaultValueBoolean" style="display:none">
+							<f:selectItem itemLabel="False" itemValue="false" />
+							<f:selectItem itemLabel="True" itemValue="true" />
+						</h:selectOneMenu>
+						<div id="defaultValueDate" class="dateField" style="display:none">
+              				<h:inputHidden />
+            			</div>
+						<h:selectOneMenu id="defaultValueRule" style="display:none">
+							<f:selectItems value="#{util.allRules}"/>
+						</h:selectOneMenu>
+		                <div id="defaultValueIdentitySuggest" style="display:none">
+			                <t:inputHidden id="defaultValueIdentity" forceId="true">
+			                    <sp:convertIdentity/>
+			                </t:inputHidden>
+		                </div>
+						<h:outputText id='defaultValueError' style="display:none" value="#{msgs.oconfig_error_default_not_in_allowed}" class="formError"/>
+					</td>
+				</tr>
+              </ui:fragment>
+            </tbody>
+          </table>
+        </div>
+
+		<h:inputHidden id="defaultValue" value="#{attribute.defaultValueString}" />
+
+    <div class="buttonRow">
+			<h:commandButton id="saveButton" styleClass="primaryBtn" action="#{config.saveAttributeAction}"
+				value="#{msgs.button_save}" onclick="return objectAttributeHelper.setDefaultValue();"/>
+			<h:commandButton id="cancelButton" styleClass="secondaryBtn" immediate="true"
+				action="#{config.cancelAttributeAction}"
+				value="#{msgs.button_cancel}"  />
+		</div>
+  
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

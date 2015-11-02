@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_group_configuration}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+        helpKey = 'GROUPS';        
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form styleClass="form" id="editForm">
+      
+        <h:inputHidden id="currentObjectId"/>
+                       
+        <ui:include src="/define/groups/groupsGrid.xhtml" />
+        
+        <ui:include src="/define/groups/groupsInclude.xhtml" />
+        
+        <ui:include src="/define/groups/popsInclude.xhtml" /> 
+
+        <ui:include src="/define/groups/workgroupsInclude.xhtml" />
+        
+      </h:form>
+
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

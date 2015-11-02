@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>   
+<sp:script>
+  <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+</sp:script>
+  <div id="#{type}-grid" style="width:100%;"></div>
+
+  <script type="text/javascript">
+    Ext.ns("SailPoint", "SailPoint.workitem");
+
+    SailPoint.workitem.renderAssigneeColumn = function(colValue, colMetadata, record, rowIndex){
+        if (record.get('workgroupName') !== ''){
+            colMetadata.tdCls = 'editableColumnCombo';
+        }
+        return colValue;
+    };
+
+    function init#{type}() {
+      var gridWidth = $('#{type}-grid').clientWidth;
+      
+      var typeStoreData = 
+      [
+        <c:forEach items="#{workItem.types}" var="type" varStatus="vStatus">
+          <h:outputText rendered="#{!vStatus.first}" value=","/>
+          {key:"#{type}", value:"#{sp:escapeJavascript(msgs[type.messageKey])}"}
+        </c:forEach>  
+      ];
+      
+	var typeStore = SailPoint.Store.createStore({
+		autoLoad : true,
+		model : 'SailPoint.model.KeyValue',
+		proxyType : 'memory',
+		data : typeStoreData,
+		simpleSortMode: true,
+		sorters: [{property : 'value', direction: 'ASC'}]
+	});
+
+      var priorityStoreData = 
+      [
+        <c:forEach items="#{workItem.levels}" var="level" varStatus="vStatus">
+          <h:outputText rendered="#{!vStatus.first}" value=","/>
+          {key:"#{level}", value:"#{sp:escapeJavascript(msgs[level.messageKey])}"}
+        </c:forEach>
+      ];
+      
+      var priorityStore = SailPoint.Store.createStore({
+    	  autoLoad : true,
+    	  proxyType : 'memory',
+          model : 'SailPoint.model.KeyValue',
+          data : priorityStoreData
+      });
+
+      var completerStoreData = 
+      [
+        <c:if test="#{type == 'manage'}">
+        <c:forEach items="#{workItemManageList.completers}" var="cm" varStatus="vStatus">
+          <h:outputText rendered="#{!vStatus.first}" value=","/>
+          {key:"#{cm}", value:"#{cm}"}
+        </c:forEach>
+        </c:if>
+      ];
+      
+      var completerStore = SailPoint.Store.createStore({
+    	  autoLoad : true,
+    	  proxyType : 'memory',
+          model : 'SailPoint.model.KeyValue',
+          data : completerStoreData
+      });
+      
+      var gridMetaInfo = #{itemListBean.columnJSON};
+
+      var workgroups = [];
+      <c:forEach items="#{itemListBean.loggedInUsersWorkgroupNames}" var="grp">
+      workgroups.push('#{sp:escapeJavascript(grp)}');
+      </c:forEach>
+
+      
+      
+      
+      //Archive fields/columns are only used for manage listType.
+      var archiveColumns = [];
+      var archiveFields = ['id','certificationId'];
+      <c:if test="#{type == 'manage'}">
+        var archiveGridMeta = #{workItemManageList.archiveColumnJSON};
+        archiveColumns = archiveGridMeta.columns;
+        archiveFields = archiveGridMeta.fields;
+      </c:if>
+
+      
+      var gridStateStr = '#{itemListBean.gridState.JSON}';
+      var gridState = new SailPoint.GridState(JSON.parse(gridStateStr));
+      
+      var sInfo = [{property: 'name', direction: 'ASC' }];
+      if(gridState &amp;&amp; gridState._getValue('sortColumn')){
+          sInfo = [{property: gridState._getValue('sortColumn'), direction: gridState._getValue('sortOrder') }];
+      }
+
+      var activeTab = "#{itemListBean.activeTab}";
+      var gridId = "#{itemListBean.gridState.name}";
+      SailPoint.Dashboard.Grid.WorkItem.create#{type}("#{type}", gridMetaInfo.fields, gridMetaInfo.columns, gridId,
+            priorityStore, typeStore, workgroups, "#{base.loggedInUser.name}", archiveFields, archiveColumns, activeTab, sInfo, completerStore);
+      Ext.getCmp(gridId).disableForwarding = #{disableForwarding};     
+    }
+    
+    Ext.onReady(function(){
+        init#{type}();
+    });
+    
+  </script>
+
+  <script type="text/javascript" defer="defer">
+    // Bug 902 - The JSF-generated clearFormHiddenParams_editForm function does
+    // not get loaded with the modal dialog in IE.  To prevent a javascript
+    // error in the command buttons onclick handler, we'll stub out this method
+    // if it is not defined.
+    if ('undefined' == typeof(clearFormHiddenParams_editForm)) {
+        clearFormHiddenParams_editForm = function() {};
+    }
+  </script>
+
+</ui:composition>
+
+</body>
+</html>

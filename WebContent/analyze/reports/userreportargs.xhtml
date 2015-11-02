@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/userreportargs.js?#{debug.revision}</src>
+	</sp:script>
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            SailPoint.Report.User.initialize();   
+            if('#{taskDefinition.argMap['groupFactory'].value}' !='')
+              SailPoint.Report.User.updateGroup($('editForm:taskGroupFactory'));
+        });    
+    </script>
+
+  <table class="width100" cellspacing="0" cellpadding="3">
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <tr>
+        <td colspan="3" width="30%">
+          <sp:outputText styleClass="spContentTitle" value="#{msgs.user_report_options}"/>
+        </td>
+      </tr>
+      <tr>
+        <td rowspan="3" width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText  value="#{msgs.report_filter_usr_attrs}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{msgs.inst_usr_attr_filter}'/></td>
+              </tr>
+              <tr>
+                <td id="emailTd">
+                  <table >
+                    <c:forEach items="#{taskDefinition.searchableIdentityAttributes}" var="attr">
+                      <ui:fragment rendered="#{attr.name != 'manager'}">
+                        <tr><td>
+                          <sp:outputText style="font-weight:bold" value="#{attr.displayableName}"/><br/>
+                          <h:inputText id="searchable#{sp:buildValidComponentId(attr.name)}" size='40' value='#{taskDefinition.argMap[attr.name].value}'>
+                            <f:validateLength maximum="40"/>
+                          </h:inputText>
+                        </td></tr>
+                        <tr><td>
+                          <a4j:outputPanel ajaxRendered="true">
+                            <h:message styleClass="formError" for="searchable#{sp:buildValidComponentId(attr.name)}"/>
+                          </a4j:outputPanel>
+                        </td></tr>
+                      </ui:fragment>
+                    </c:forEach>
+                    
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+        
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_groups}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["groupFactory"].argument.description}'/></td>
+                
+              </tr>
+              <tr>
+                <td>
+                
+                
+                  <div id="groupsMultiSuggest"></div>
+                            
+                  <t:inputHidden id="groupsSuggest"
+                                 value="#{taskDefinition.argMap['groupDefinition'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>
+                  
+                  <div id="groupsSuggestInfo" style="display:none">
+                    #{sp:basicJSONDataConverted(taskDefinition.argMap['groupDefinition'].objectListValue,'GroupDefinitionListConverter')}
+                  </div>
+                </td>
+              </tr>
+              
+            </table>
+            
+          </div>
+        </td>
+      </tr>
+      <tr>        
+        <td width="50%"  valign="top">        
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th colspan="2"><sp:outputText value="#{msgs.report_filter_last_refresh}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["lastRefresh"].argument.description}'/></td>
+                <td align="left">
+                  <h:selectBooleanCheckbox id="lastRefreshSelect" value="#{taskDefinition.argMap['lastRefresh'].bound}" 
+                    onclick="toggleDateDisplay($('lastRefreshDiv'), !(this.checked));" />
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" align="left">
+                  <div id="lastRefreshDiv">
+                    <table>
+                      <tr><td>
+                        <h:selectOneMenu styleClass="font10" value="#{taskDefinition.argMap['lastRefreshType'].value}">
+                          <f:selectItem itemLabel="#{msgs.before}" itemValue="Before" />
+                          <f:selectItem itemLabel="#{msgs.after}" itemValue="After" />
+                        </h:selectOneMenu>
+                        </td><td>
+                        <sp:inputDate timeZone="#{base.userTimeZoneId}" type="date" id="lastRefresh" popupCalendar="true"  ampm="true"
+                                     addResources="false" imageLocation="/scripts/myfacescalendar"
+                                     javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                     value='#{taskDefinition.argMap["lastRefresh"].dateValue}' styleClass="tomahawkInputDate"/>
+                      </td></tr>
+                    </table>
+                    <table style="margin-top:5px">
+                      <tr><td>
+                          <sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["noLastRefresh"].argument.description}'/>
+                        </td><td>
+                          <h:selectBooleanCheckbox value='#{taskDefinition.argMap["noLastRefresh"].booleanValue}'/>
+                      </td></tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <a4j:outputPanel ajaxRendered="true">
+                    <h:message for="lastRefresh" styleClass="formError"/>
+                  </a4j:outputPanel>
+                </td>
+              </tr>
+            </table>
+          </div>        
+        </td>
+      </tr>
+      <tr>      
+        <td width="50%" valign="top">        
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th colspan="2"><sp:outputText value="#{msgs.report_filter_last_login}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["lastLogin"].argument.description}'/></td>
+                <td align="left">
+                  <h:selectBooleanCheckbox id="lastLoginSelect" value="#{taskDefinition.argMap['lastLogin'].bound}" 
+                    onclick="toggleDateDisplay($('lastLoginDiv'), !(this.checked));" />
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" align="left">
+                  <div id="lastLoginDiv">
+                    <table>
+                      <tr><td>
+                        <h:selectOneMenu styleClass="font10" value="#{taskDefinition.argMap['lastLoginType'].value}">
+                          <f:selectItem itemLabel="#{msgs.before}" itemValue="Before" />
+                          <f:selectItem itemLabel="#{msgs.after}" itemValue="After" />
+                        </h:selectOneMenu>
+                        </td><td>
+                        <sp:inputDate timeZone="#{base.userTimeZoneId}" type="date" id="lastLogin" popupCalendar="true"  ampm="true"
+                                     addResources="false" imageLocation="/scripts/myfacescalendar"
+                                     javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                     value='#{taskDefinition.argMap["lastLogin"].dateValue}' styleClass="tomahawkInputDate"/>
+                      </td></tr>
+                    </table>
+                    <table style="margin-top:5px">
+                      <tr><td>
+                          <sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["noLastLogin"].argument.description}'/>
+                        </td><td>
+                          <h:selectBooleanCheckbox value='#{taskDefinition.argMap["noLastLogin"].booleanValue}'/>
+                      </td></tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <a4j:outputPanel ajaxRendered="true">
+                    <h:message for="lastLogin" styleClass="formError"/>
+                  </a4j:outputPanel>
+                </td>
+              </tr>
+            </table>
+          </div>        
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_mgrs}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["managers"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>         
+                  <div id="managersMultiSuggest"></div>
+                  <t:inputHidden id="managers"
+                                 value="#{taskDefinition.argMap['managers'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>  
+                  <div id="managerSuggestInfo" style="display:none">
+                    #{sp:basicJSONDataConverted(taskDefinition.argMap['managers'].objectListValue,'IdentityListConverter')}
+                  </div>                
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>       
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th colspan="2"><sp:outputText value="#{msgs.report_filter_role}"/></th>
+              </tr>
+              <tr>
+                <td colspan="2"><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["businessRoles"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <div id="businessRolesMultiSuggest"></div>
+                  <t:inputHidden id="businessRoles"
+                                 value="#{taskDefinition.argMap['businessRoles'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>      
+                  <div id="roleSuggestInfo" style="display:none">
+                    #{sp:basicJSONDataConverted(taskDefinition.argMap['businessRoles'].objectListValue,'BundleListConverter')}
+                  </div>          
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["noBusinessRoles"].argument.description}'/>
+                </td>
+                <td>
+                  <h:selectBooleanCheckbox value='#{taskDefinition.argMap["noBusinessRoles"].booleanValue}'/>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>        
+      </tr>
+      <tr>
+        <ui:fragment rendered="#{!empty taskDefinition.multiIdentityAttributes}">
+          <td width="50%" valign="top">        
+            <div class="spTabledContent" style="margin:15px"> 
+              <table class="spTable" cellspacing="0">
+                <tr>
+                  <th><sp:outputText value="#{msgs.userreport_section_multiattrs}"/></th>
+                </tr>
+                <tr>
+                  <td><sp:outputText style="font-size:11px" value='#{msgs.inst_usr_multiattr_filter}'/></td>
+                </tr>
+                <c:forEach items="#{taskDefinition.multiIdentityAttributes}" var="attr">
+                  <tr>
+                    <td>
+                      <sp:outputText style="font-weight:bold" value="#{attr.displayableName}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                       <h:selectOneMenu value='#{taskDefinition.customArgMap[sp:concat("operator.",attr.name)]}'>
+                         <f:selectItem itemLabel="#{msgs.filter_op_AND} " itemValue="AND"/>
+                         <f:selectItem itemLabel="${msgs.filter_op_OR} " itemValue="OR"/>
+                       </h:selectOneMenu>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <h:inputTextarea value="#{taskDefinition.customArgMap[attr.name]}" cols="45" rows="5"/>
+                    </td>
+                  </tr>
+                </c:forEach>
+              </table>
+            </div>
+          </td>
+        </ui:fragment>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_apps}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["applications"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <div id="applicationsMultiSuggest"></div>
+                  <t:inputHidden id="applicationsSuggest"
+                                 value="#{taskDefinition.argMap['applications'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>   
+                  <div id="applicationSuggestInfo" style="display:none">
+                    #{sp:basicJSONDataConverted(taskDefinition.argMap['applications'].objectListValue,'ApplicationListConverter')}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_capabilities}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{msgs.label_capabilities}'/></td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectManyListbox value='#{taskDefinition.argMap["capabilities"].objectListValue}'>
+                    <f:selectItems value="#{base.allCapabilityItems}"/>
+                  </h:selectManyListbox>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+        <td width="50%"  valign="top">        
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th colspan="2"><sp:outputText value="#{msgs.report_filter_inactive_users}"/></th>
+              </tr>
+              <tr>
+                <td colspan="2"><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["inactive"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td align="left">
+                  <h:selectBooleanCheckbox id="useInactiveSelect" 
+                    onclick="toggleDisabled($('editForm:inactiveSelect'), !$('editForm:useInactiveSelect').checked);"
+                    value="#{taskDefinition.argMap['useInactive'].booleanValue}"/>
+                </td>
+                <td>
+                  <h:selectOneMenu id="inactiveSelect" value="#{taskDefinition.argMap['inactive'].value}">
+                    <f:selectItem itemLabel="#{msgs.usr_status_active}" itemValue="false"/>
+                    <f:selectItem itemLabel="#{msgs.usr_status_inactive}" itemValue="true"/>
+                  </h:selectOneMenu>
+                </td>
+              </tr>              
+            </table>
+          </div>        
+        </td>
+      </tr>
+    </ui:fragment>
+    <a4j:commandButton style="display:none" id="groupUpdateBtn"
+              action="#{scoreCategoryList.updateChoices}" render="editForm:componentSelect"
+              oncomplete="$('editForm:componentSelect').value = $('editForm:taskGroupDefinition').value;"/>
+  </table>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+  <div class="content">
+
+    <a4j:commandButton id="a4jForwardCertBtn"
+                       actionListener="#{listViewProvider.saveNavigationHistoryActionListener}"
+                       oncomplete="forwardCertificationWorkItem(gSubCertId, null, limitReassignments);"
+                       style="display: none" />
+
+    <a4j:commandButton onclick="$('subCertsDiv').toggle();"
+                       oncomplete="$('subCertsPagerDiv').toggle(); toggleAccessReviewDisclosure();"
+                       render="subCertPanel,subCertPagerPanel"
+                       style="display: none"
+                       id="expandSubCerts"/>
+
+    <a4j:commandButton onclick="$('subCertsDiv').show();"
+                       oncomplete="$('subCertsPagerDiv').show();"
+                       render="subCertPanel,subCertPagerPanel"
+                       style="display: none"
+                       id="showSubCerts"/>
+
+    <a4j:commandButton onclick=""
+                       oncomplete=""
+                       render="subCertPanel"
+                       style="display: none"
+                       id="rerenderSubCertPanel"/>
+    <table class="spRightMarginTable width100">
+      <tr>
+        <td style="align: left; width: 33%">
+          <b>
+            <a class="disclosure" onclick="$('editForm:expandSubCerts').click();">
+              <h:outputText value="#{msgs.cert_link_subord_access_revs}"/>
+            </a>
+          </b>
+        </td>
+        <td style="align: center; width: 33%">
+          <div id="workingDiv" class="waitingForDataDiv" style="position:absolute;z-index:1;display: none">
+            <h:graphicImage url="/images/progress.gif" style="padding:5px;vertical-align:middle"/>
+            #{msgs.loading_data}
+          </div>
+        </td>
+        <td style="align: right; white-space: nowrap; width: 1%">
+          <div id="subCertsPagerDiv" style="display: none">
+            <a4j:outputPanel id="subCertPagerPanel">
+              <ui:include src="/include/pager.xhtml">
+                <ui:param name="pagerParam" value="#{certification.subCertPager}" />
+                <ui:param name="reRender"   value="subCertPanel,subCertPagerPanel" />
+                <ui:param name="onClick"    value="Ext.get('workingDiv').show();" />
+                <ui:param name="onComplete" value="Ext.get('workingDiv').hide();" />
+              </ui:include>
+            </a4j:outputPanel>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div id="subCertsDiv" class="spTabledContent" style="display: none">
+      <a4j:outputPanel id="subCertPanel">
+        <h:dataTable styleClass="spTable" value="#{certification.subCertifications}"
+                     var="subCert" rowClasses="even, odd">
+          <h:column>
+            <f:facet name="header"><h:outputText value="#{msgs.name}"/></f:facet>
+            <a onclick="try { SailPoint.viewCertification('#{subCert.certification.id}') } catch (e) {}" style="cursor: pointer">#{subCert.shortName}</a>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">#{msgs.owner}</f:facet>
+            <ui:repeat value="#{subCert.certification.certifiers}" var="certifier">
+              <h:outputText value="#{(not sp:isFirstElement(certifier, subCert.certification.certifiers)) ? ', ' : ''}" />
+              <h:outputText value="#{sp:getDisplayNameForName('Identity', certifier)}" />
+            </ui:repeat>
+          </h:column>
+          <h:column>
+            <f:facet name="header"><h:outputText value="#{msgs.label_per_complete}"/> </f:facet>
+            <!-- List Items -->
+            <sp:progressBar
+              rendered="#{!entityList and subCert.certification.continuous}"
+              percentComplete="#{subCert.certification.itemPercentComplete}"
+              completedNum="#{subCert.certification.completedItems}"
+              totalNum="#{subCert.certification.totalItems}"
+              greenNum="#{subCert.certification.certifiedItems}"
+              yellowNum="#{subCert.certification.certificationRequiredItems}"
+              redNum="#{subCert.certification.overdueItems}">
+            </sp:progressBar>
+
+            <sp:progressBar
+              rendered="#{!entityList and !(subCert.certification.continuous)}"
+              totalNum="#{subCert.certification.totalItems}"
+              completedNum="#{subCert.certification.completedItems}"
+              remainingClass="progressBarRemainingDarkGray"
+              percentComplete="#{subCert.certification.itemPercentComplete}">
+            </sp:progressBar>
+
+            <!-- List Entities -->
+            <sp:progressBar
+              rendered="#{entityList and subCert.certification.continuous}"
+              percentComplete="#{subCert.certification.percentComplete}"
+              completedNum="#{subCert.certification.completedEntities}"
+              totalNum="#{subCert.certification.totalEntities}"
+              greenNum="#{subCert.certification.certifiedEntities}"
+              yellowNum="#{subCert.certification.certificationRequiredEntities}"
+              redNum="#{subCert.certification.overdueEntities}">
+            </sp:progressBar>
+
+            <sp:progressBar
+              rendered="#{entityList and !(subCert.certification.continuous)}"
+              totalNum="#{subCert.certification.totalEntities}"
+              completedNum="#{subCert.certification.completedEntities}"
+              remainingClass="progressBarRemainingDarkGray"
+              percentComplete="#{subCert.certification.percentComplete}">
+            </sp:progressBar>
+
+          </h:column>
+
+          <!-- Show open and completed for periodic. -->
+          <h:column rendered="#{not certification.object.continuous}">
+            <f:facet name="header"><h:outputText value="#{msgs.cert_stat_open}"/></f:facet>
+            <h:outputText value="#{(entityList) ? subCert.certification.openEntities : subCert.certification.openItems}" />
+          </h:column>
+          <h:column rendered="#{not certification.object.continuous}">
+            <f:facet name="header"><h:outputText value="#{msgs.cert_stat_completed}"/></f:facet>
+            <h:outputText value="#{(entityList) ? subCert.certification.completedEntities : subCert.certification.completedItems}" />
+          </h:column>
+
+          <!-- Show green/yellow/red for continuous - these are item-level stats. -->
+          <h:column rendered="#{certification.object.continuous and not entityList}">
+            <f:facet name="header"><h:outputText value="#{msgs.cert_sub_cert_state_certified}"/></f:facet>
+            <h:outputText value="#{subCert.certification.certifiedItems}" />
+          </h:column>
+          <h:column rendered="#{certification.object.continuous and not entityList}">
+            <f:facet name="header"><h:outputText value="#{msgs.cert_sub_cert_state_certification_required}"/></f:facet>
+            <h:outputText value="#{subCert.certification.certificationRequiredItems}" />
+          </h:column>
+          <h:column rendered="#{certification.object.continuous and not entityList}">
+            <f:facet name="header"><h:outputText value="#{msgs.cert_sub_cert_state_overdue}"/></f:facet>
+            <h:outputText value="#{subCert.certification.overdueItems}" />
+          </h:column>
+
+          <!-- Show green/yellow/red for continuous - these are entity-level stats. -->
+          <h:column rendered="#{certification.object.continuous and entityList}">
+            <f:facet name="header"><h:outputText value="#{msgs.cert_sub_cert_state_certified}"/></f:facet>
+            <h:outputText value="#{subCert.certification.certifiedEntities}" />
+          </h:column>
+          <h:column rendered="#{certification.object.continuous and entityList}">
+            <f:facet name="header"><h:outputText value="#{msgs.cert_sub_cert_state_certification_required}"/></f:facet>
+            <h:outputText value="#{subCert.certification.certificationRequiredEntities}" />
+          </h:column>
+          <h:column rendered="#{certification.object.continuous and entityList}">
+            <f:facet name="header"><h:outputText value="#{msgs.cert_sub_cert_state_overdue}"/></f:facet>
+            <h:outputText value="#{subCert.certification.overdueEntities}" />
+          </h:column>
+
+          <!-- Always show delegated - for continuous and periodic. -->
+          <h:column>
+            <f:facet name="header"><h:outputText value="#{msgs.cert_stat_delegated}"/></f:facet>
+            <h:outputText value="#{(entityList) ? subCert.certification.delegatedEntities : subCert.certification.delegatedItems}" />
+          </h:column>
+
+          <!-- Only display the actions if the cert is editable. -->
+          <h:column rendered="#{certification.editable and !certification.signedOff}">
+            <f:facet name="header">#{msgs.cert_sub_cert_action}</f:facet>
+            <div style="white-space: nowrap">
+              <ui:param name="returnDisplay" value="#{(certification.object.locked || subCert.certification.locked) ? 'none' : ''}"/>
+              <a style="display:#{returnDisplay}" href="javascript: SailPoint.Manage.Certification.showRescindChildCertificationWindow('#{subCert.certification.id}');">
+                <img src="#{base.requestContextPath}/images/icons/arrow_undo.png" title="#{msgs.cert_rescind_child_cert}" />
+              </a>
+              <a href="javascript: SailPoint.EmailWindow.open(null, 'certificationReminderEmailTemplate', '#{subCert.certification.id}');">
+                <img src="#{base.requestContextPath}/images/icons/mail_16.gif" title="#{msgs.cert_email_child_cert}" />
+              </a>
+              <a style="display:#{subCert.certification.finished != null ? 'none' : ''}" href="javascript: gSubCertId = '#{subCert.certification.id}';
+                                 limitReassignments = '#{subCert.limitReassignments}'; $('editForm:a4jForwardCertBtn').click();">
+                <img src="#{base.requestContextPath}/images/icons/delegate.gif" title="#{msgs.cert_forward_child_cert}" />
+              </a>
+            </div>
+          </h:column>
+
+        </h:dataTable>
+      </a4j:outputPanel>
+
+
+    </div>
+  </div>
+</ui:composition>
+
+</body>
+</html>

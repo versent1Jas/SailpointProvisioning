@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.MSSQLServerConnector" featuresString="DIRECT_PERMISSIONS, PROVISIONING, SYNC_PROVISIONING, SEARCH, UNLOCK, ENABLE, PASSWORD" icon="databaseIcon" name="Microsoft SQL Server Template" type="Microsoft SQL Server - Direct">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="MsSqlServerAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="native_identity" identityAttribute="native_identity" includePermissions="true" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="native_identity" name="native_identity" type="string"><Description>Native identity represented by default as loginName@serverName or loginName@databaseName</Description></AttributeDefinition>
+        <AttributeDefinition displayName="database_name" name="database_name" type="string"><Description>Database name of the login.</Description></AttributeDefinition>
+        <AttributeDefinition displayName="database_id" name="database_id" type="string"><Description>Database Id.</Description></AttributeDefinition>
+        <AttributeDefinition displayName="database_id" name="server_login" type="string"><Description>Server login associated to account</Description></AttributeDefinition>
+        <AttributeDefinition displayName="name" name="name" type="string"><Description>Account name</Description></AttributeDefinition>
+        <AttributeDefinition displayName="principal_id" name="principal_id" type="string"><Description>ID of database principal</Description></AttributeDefinition>
+        <AttributeDefinition displayName="type" name="type" type="string"><Description>Type of the login</Description></AttributeDefinition>
+        <AttributeDefinition displayName="type_desc" name="type_desc" type="string"><Description>Description type of the login</Description></AttributeDefinition>
+        <AttributeDefinition displayName="default_schema_name" name="default_schema_name" type="string"><Description>Name to be used when SQL name does not specify schema</Description></AttributeDefinition>
+        <AttributeDefinition displayName="create_date" name="create_date" type="string"><Description>Creation date of the login</Description></AttributeDefinition>
+        <AttributeDefinition displayName="modify_date" name="modify_date" type="string"><Description>Last modification date of the login</Description></AttributeDefinition>
+        <AttributeDefinition displayName="owning_principal_id" name="owning_principal_id" type="string"><Description>ID of the principal that owns this database principal</Description></AttributeDefinition>
+        <AttributeDefinition displayName="sid" name="sid" type="string"><Description>SID of the login</Description></AttributeDefinition>
+        <AttributeDefinition displayName="is_fixed_role" name="is_fixed_role" type="string"><Description>If  the value is 1, then this row represents an entry for one of the fixed database roles</Description></AttributeDefinition>
+        <AttributeDefinition displayName="server_name" name="server_name" type="string"><Description>Server name</Description></AttributeDefinition>
+        <AttributeDefinition displayName="DBUser" multi="true" name="DBUser" type="string"><Description>Database users which are associated to the login</Description></AttributeDefinition>
+        <AttributeDefinition displayName="roles" entitlement="true" managed="true" multi="true" name="roles" schemaObjectType="group" type="string"><Description>Roles assigned to the login</Description></AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="native_identity" featuresString="PROVISIONING" identityAttribute="native_identity" includePermissions="true" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="native_identity" name="native_identity" type="string"><Description>Native identity represented by default as groupName@serverName or groupName@databaseName</Description></AttributeDefinition>
+        <AttributeDefinition displayName="name" name="name" type="string"><Description>Group name</Description></AttributeDefinition>
+        <AttributeDefinition displayName="database_name" name="database_name" type="string"><Description>Database name in which group exists</Description></AttributeDefinition>
+        <AttributeDefinition displayName="database_id" name="database_id" type="string"><Description>Database ID in which group exists</Description></AttributeDefinition>
+        <AttributeDefinition displayName="principal_id" name="principal_id" type="string"><Description>Id of database principal</Description></AttributeDefinition>
+        <AttributeDefinition displayName="roles" multi="true" name="roles" type="string"><Description>Roles assigned to the group</Description></AttributeDefinition>
+        <AttributeDefinition displayName="server_name" name="server_name" type="string"><Description>Server name of the group</Description></AttributeDefinition>
+        <AttributeDefinition displayName="type_desc" name="type_desc" type="string"><Description>Description type of the group</Description></AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_MSSQL_Login_name" helpKey="help_con_form_MSSQL_Login_name" name="native_identity" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_MSSQL_Password" helpKey="help_con_form_MSSQL_password" name="password" reviewRequired="true" section="" type="secret"/>
+        <Field displayName="con_prov_policy_MSSQL_Account_Type" helpKey="help_con_form_MSSQL_Account_type" name="type_desc" required="true" type="string">
+          <AllowedValues>
+            <String>WINDOWS_LOGIN</String>
+            <String>SQL_LOGIN</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_MSSQL_User_Mapping" helpKey="help_con_form_MSSQL_User_Mapping" multi="true" name="DBUser" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_MSSQL_Native_Identity" helpKey="help_con_form_MSSQL_Native_Identity" name="native_identity" required="true" type="string"/>
+        <Field displayName="con_prov_policy_MSSQL_Group_Type" helpKey="help_con_form_MSSQL_Group_Type" name="type_desc" required="true" type="string">
+          <AllowedValues>
+            <String>DATABASE_ROLE</String>
+            <String>APPLICATION_ROLE</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_MSSQL_group_Password" helpKey="help_con_form_MSSQL_group_Password" name="password" reviewRequired="true" section="" type="secret"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

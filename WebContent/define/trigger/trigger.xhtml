@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_identity_trigger}</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+        helpKey = 'IDENTITY_TRIGGER';
+    </script>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>      
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/assignmentRuleSelector.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/trigger/Trigger.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      Ext.onReady(function () {
+          SailPoint.AssignmentRule.initializeSelectors();
+      });
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="editForm">
+      
+        <h:inputHidden id="id" value="#{identityTrigger.objectId}" />
+
+          <div class="spContent">
+            <t:saveState value="#{identityTrigger.trigger}" />
+            
+            <table class="customWidth paddedTbl">
+              <tbody>
+                <tr><td class="spContentTitle" colspan="8">#{msgs.identity_trigger_options_header}</td></tr>
+
+                <ui:include src="triggerInclude.xhtml">
+                  <ui:param name="trigger" value="#{identityTrigger.trigger}" />
+                  <ui:param name="formName" value="editForm" />
+                </ui:include>
+
+                <tr><td class="spContentTitle" colspan="8">#{msgs.identity_trigger_behavior_header}</td></tr>
+
+                <tr>
+                  <td class="titleColumn certScheduleTitleCol">
+                    <h:outputText value="#{msgs.identity_trigger_workflow}" />
+                    <h:outputText styleClass="requiredText" value="*"/>
+                  </td>
+                  <td class="certScheduleHelpCol">
+                    <h:graphicImage id="imgHlpEvtWf" styleClass="helpIcon"
+                    url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_trigger_workflow}"/>
+                  </td>
+                  <td class="certScheduleOptionCol" colspan="6" align="left">
+                    <h:selectOneMenu id="triggerWfSelect"
+                                     value="#{identityTrigger.workflowId}">
+                      <f:selectItems value="#{identityTrigger.workflows}"/>
+                    </h:selectOneMenu>
+                  </td>
+                </tr>
+              </tbody>
+
+              <tfoot>
+                <tr>
+                  <td colspan="2"/>
+                  <td colspan="6">
+                    <h:outputText styleClass="requiredText" value="*"/>
+                    <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        <br/>
+
+        <div class="buttonRow">
+          <h:commandButton id="saveButton" styleClass="primaryBtn" action="#{identityTrigger.saveAction}" value="#{msgs.button_save}"                         
+                           disabled="#{!sp:hasRight(facesContext, 'FullAccessIdentityTriggers')}"
+                           readonly="#{!sp:hasRight(facesContext, 'FullAccessIdentityTriggers')}" /> 
+          <h:commandButton id="cancelButton" styleClass="secondaryBtn" action="#{identityTrigger.cancelAction}" value="#{msgs.button_cancel}" />
+          </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

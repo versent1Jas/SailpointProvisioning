@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OracleAppsConnector" featuresString="PROVISIONING, ENABLE, PASSWORD, DISCOVER_SCHEMA, SYNC_PROVISIONING, AUTHENTICATE" icon="enterpriseIcon" name="Oracle Applications Template - Direct" type="Oracle Applications - Direct">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="OracleAppsAttributesForm.xhtml"/>
+        <entry key="DeprecatedConnector" value="true"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="USER_NAME" identityAttribute="USER_NAME" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="USER_NAME" type="string"/>
+        <AttributeDefinition name="USER_ID" type="string"/>
+        <AttributeDefinition name="START_DATE" type="string"/>
+        <AttributeDefinition name="END_DATE" type="string"/>
+        <AttributeDefinition name="DESCRIPTION" type="string"/>
+        <AttributeDefinition name="PASSWORD_DATE" type="string"/>
+        <AttributeDefinition name="PASSWORD_EXPR" type="string"/>
+        <AttributeDefinition name="PASSWORD_NO_OF_DAYS" type="string"/>
+        <AttributeDefinition name="EMAIL_ADDRESS" type="string"/>
+        <AttributeDefinition name="FAX" type="string"/>
+        <AttributeDefinition name="EMPLOYEE_ID" type="string"/>
+        <AttributeDefinition name="EMPLOYEE_NUMBER" type="string"/>
+        <AttributeDefinition name="FULL_NAME" type="string"/>
+        <AttributeDefinition name="CUSTOMER_ID" type="string"/>
+        <AttributeDefinition name="CUSTOMER_NAME" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="ROLES" schemaObjectType="group" type="string"/>
+      </Schema>
+      <Schema displayAttribute="RESPONSIBILITY_NAME" featuresString="PROVISIONING" identityAttribute="RESPONSIBILITY_NAME" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="RESPONSIBILITY_NAME" type="string"/>
+        <AttributeDefinition name="APPLICATION_NAME" type="string"/>
+        <AttributeDefinition name="RESPONSIBILITY_ID" type="string"/>
+        <AttributeDefinition name="RESPONSIBILITY_KEY" type="string"/>
+        <AttributeDefinition name="START_DATE" type="string"/>
+        <AttributeDefinition name="END_DATE" type="string"/>
+        <AttributeDefinition name="DESCRIPTION" type="string"/>
+        <AttributeDefinition name="STATUS" type="string"/>
+        <AttributeDefinition name="VERSION" type="string"/>
+        <AttributeDefinition name="WEB_HOST_NAME" type="string"/>
+        <AttributeDefinition name="WEB_AGENT_NAME" type="string"/>
+        <AttributeDefinition name="DATA_GROUP_APPL_NAME" type="string"/>
+        <AttributeDefinition name="REQUEST_GROUP_APPL_NAME" type="string"/>
+        <AttributeDefinition name="DATA_GROUP_ID" type="string"/>
+        <AttributeDefinition name="DATA_GROUP_NAME" type="string"/>
+        <AttributeDefinition name="MENU_NAME" type="string"/>
+        <AttributeDefinition name="REQUEST_GROUP_NAME" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+     <Template name="Create Account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_user_create_oracle_ebs_username" helpKey="help_con_prov_policy_user_create_oracle_ebs_username" name="USER_NAME" required="true" type="string"/>
+        <Field displayName="con_prov_policy_user_create_oracle_ebs_userpassword" helpKey="help_con_prov_policy_user_create_oracle_ebs_userpassword" name="password" required="true" type="secret"/>
+        <Field displayName="con_prov_policy_user_create_oracle_ebs_desc" helpKey="help_con_prov_policy_user_create_oracle_ebs_desc" name="DESCRIPTION" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_user_create_oracle_ebs_sd" helpKey="help_con_prov_policy_user_create_oracle_ebs_sd" name="START_DATE" required="true" type="string"/>
+        <Field displayName="con_prov_policy_user_create_oracle_ebs_ed" helpKey="help_con_prov_policy_user_create_oracle_ebs_ed" name="END_DATE" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_user_create_oracle_ebs_pass_exp" helpKey="help_con_prov_policy_user_create_oracle_ebs_pass_exp" name="PASSWORD_EXPR" reviewRequired="true" type="string" value="None">
+          <AllowedValues>
+            <String>None</String>
+            <String>Access</String>
+            <String>Days</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_user_create_oracle_ebs_pass_nod" helpKey="help_con_prov_policy_user_create_oracle_ebs_pass_nod" name="PASSWORD_NO_OF_DAYS" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_user_create_oracle_ebs_pass_permanent" helpKey="help_con_prov_policy_user_create_oracle_ebs_pass_permanent" name="PASSWORD_MODE" reviewRequired="true" type="boolean"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_respname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_respname" name="RESPONSIBILITY_NAME" required="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_appliname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_appliname" name="APPLICATION_NAME" required="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_desc" helpKey="help_con_prov_policy_grp_cre_ora_ebs_desc" name="DESCRIPTION" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_reskey" helpKey="help_con_prov_policy_grp_crt_ora_ebs_reskey" name="RESPONSIBILITY_KEY" required="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_sd" helpKey="help_con_prov_policy_grp_crt_ora_ebs_sd" name="START_DATE" required="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_ed" helpKey="help_con_prov_policy_grp_crt_ora_ebs_ed" name="END_DATE" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_res_vers" helpKey="help_con_prov_policy_grp_crt_ora_ebs_res_vers" name="PASSWORD_EXPR" reviewRequired="true" type="string" value="Oracle Application">
+          <AllowedValues>
+            <String>Oracle Application</String>
+            <String>Self_Service Web Application</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_data_grpname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_data_grpname" name="DATA_GROUP_NAME" required="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_data_grp_appliname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_data_grp_appliname" name="DATA_GROUP_APPL_NAME" required="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_menu_name" helpKey="help_con_prov_policy_grp_crt_ora_ebs_menu_name" name="MENU_NAME" required="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_req_grpname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_req_grpname" name="REQUEST_GROUP_NAME" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_req_grpappname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_req_grpappname" name="REQUEST_GROUP_APPL_NAME" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_reskey" helpKey="help_con_prov_policy_grp_crt_ora_ebs_reskey" name="RESPONSIBILITY_KEY" readOnly="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_appliname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_appliname" name="APPLICATION_NAME" readOnly="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_data_grpname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_data_grpname" name="DATA_GROUP_NAME" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_data_grp_appliname" helpKey="help_con_prov_policy_grp_crt_ora_ebs_data_grp_appliname" name="DATA_GROUP_APPL_NAME" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_menu_name" helpKey="help_con_prov_policy_grp_crt_ora_ebs_menu_name" name="MENU_NAME" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_status" helpKey="help_con_prov_policy_grp_crt_ora_ebs_status" name="STATUS" readOnly="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_sd" helpKey="help_con_prov_policy_grp_crt_ora_ebs_sd" name="START_DATE" required="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_ed" helpKey="help_con_prov_policy_grp_crt_ora_ebs_ed" name="END_DATE" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_grp_crt_ora_ebs_desc" helpKey="help_con_prov_policy_grp_cre_ora_ebs_desc" name="DESCRIPTION" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

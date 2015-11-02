@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:f="http://java.sun.com/jsf/core">
+<body>
+
+<!--
+ Render the panel with the filters for a certification.  Expected params:
+
+  - certificationBeanParam: The certification bean.
+  - certificationListBeanParam: The bean that lists the certification entities.
+ -->
+<ui:composition template="/expandingPanel.xhtml">
+  <ui:param name="styleOverride" value="overflow:visible"/>
+  <ui:param name="startCollapsed" value="true"/>
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+    </sp:script>
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css"
+      rel="stylesheet" type="text/css" />
+  </ui:define>
+
+  <ui:define name="panelTitle">#{msgs.filter}</ui:define>
+
+  <ui:define name="panelBody">
+    <script type="text/javascript">
+    //<![CDATA[
+
+
+      function getGrid(){
+        return SailPoint.WorksheetGridId ? Ext.getCmp(SailPoint.WorksheetGridId) :
+                  Ext.getCmp(SailPoint.EntityGridId);
+
+      }
+
+
+      function addGridFilter()
+      {
+        $('editForm:addFilterBtn').click();
+      }
+
+      function removeGridFilter(filterId)
+      {
+          $('editForm:selectedFilterId').value = filterId;
+          $('editForm:removeFilterBtn').click();
+      }
+
+      function unsavedChangesPrompt(btnId) {
+        var msg = SailPoint.Decider.getInstance().warnUnsaved();
+        if (msg){
+            if (confirm(msg)){
+                SailPoint.Decider.getInstance().removeAll();
+                $(btnId).click();
+            }
+        } else {
+            $(btnId).click();
+        }
+      }
+
+      function filterSelectionChanged(filterId)
+      {
+          $('editForm:selectedFilterId').value = filterId;
+          $('filterSelects'+ filterId).style.display = 'none';
+          $('progressImg'+ filterId).style.display = '';
+          $('editForm:refreshFiltersBtn').click();
+      }
+
+      function filterValueChanged()
+      {
+          $('editForm:filterValueChangedBtn').click();
+      }
+      
+      function resetPage()
+      {
+          getGrid().store.currentPage = 1;
+          getGrid().initialLoad();
+      }
+
+    //]]>
+    </script>
+
+    <h:inputHidden id="selectedFilterId" value="#{certificationListBeanParam.filter.selectedFilterId}" />
+
+    <a4j:commandButton id="addFilterBtn"
+                       action="#{certificationListBeanParam.filter.addFilter}"
+                       render="a4jFiltersPanel"
+                       style="display: none" />
+                       
+    <a4j:commandButton id="removeFilterBtn"
+                       action="#{certificationListBeanParam.filter.removeFilter}"
+                       render="a4jFiltersPanel"
+                       style="display: none" />
+                       
+    <a4j:commandButton id="refreshFiltersBtn"
+                       actionListener="#{certificationListBeanParam.filter.filterSelectionChanged}"
+                       render="a4jFiltersPanel"
+                       style="display: none" />
+                       
+    <a4j:commandButton id="filterValueChangedBtn"
+                       actionListener="#{certificationListBeanParam.filter.filterValueChanged}"
+                       render="a4jFiltersPanel"
+                       style="display: none" />
+
+    <a4j:commandButton id="filterBtn"
+                     action="#{certificationListBeanParam.search}"
+                     style="display: none" 
+                     render="a4jFilterString,errorPanel"
+                     oncomplete="resetPage();"/>
+                     
+    <a4j:commandButton id="resetBtn"
+                     action="#{certificationListBeanParam.reset}"
+                     style="display: none"
+                     render="a4jFiltersPanel, a4jFilterString"
+                     oncomplete="SailPoint.Manage.Certification.resetBtnOnComplete(); resetPage();"/>
+
+    <a4j:outputPanel id="a4jFiltersPanel">
+       
+      <table border="0" class="paddedTbl borderedTbl" id="filterTbl" style="width:99%;background:white">
+        <tr>
+          <td width="10%" align="left" style="white-space: nowrap">
+            <b>#{msgs.status} </b>
+          </td>
+          <td width="15%" align="left">
+            <h:selectOneMenu value="#{certificationListBeanParam.filter.status}"
+                             converter="sailpoint.object.Enum">
+              <f:selectItems value="#{certificationListBeanParam.filter.statusChoices}" />
+            </h:selectOneMenu>
+          </td>
+          <td width="15%" align="center" style="white-space: nowrap;display: #{certificationBeanParam.dataOwnerCertification || certificationBeanParam.accountGroupCertification || certificationBeanParam.businessRoleCertification ? 'none' : ''}">
+            <span style="font-weight:bold;">#{msgs.changes_detected} </span>
+          </td>
+          <td width="20%" style="vertical-align: middle;display: #{certificationBeanParam.dataOwnerCertification || certificationBeanParam.accountGroupCertification || certificationBeanParam.businessRoleCertification ? 'none' : ''}">
+            <span style="white-space: nowrap; vertical-align:middle;">
+              <h:selectOneRadio value="#{certificationListBeanParam.filter.hasDifferences}"
+                                style="display: inline;vertical-align:middle">
+                <f:selectItem itemLabel="#{msgs.yes}" itemValue="#{true}" />
+                <f:selectItem itemLabel="#{msgs.no}" itemValue="#{false}" />
+              </h:selectOneRadio>
+            </span>
+          </td>
+          <td width="30%" align="left">
+            <ui:fragment rendered="#{certificationListBeanParam.filter.allowAddFilter}">
+                <span class="fakeLink" onclick="addGridFilter();">#{msgs.filter_add}</span>
+            </ui:fragment>
+          </td>
+          <td width="10%" align="right" style="white-space: nowrap; vertical-align: middle; padding:0">
+            <span class="buttonRow">
+              <input type="button" onclick="unsavedChangesPrompt('editForm:filterBtn')" value="#{msgs.filter}" class='primaryBtn' />
+              <input type="button" onclick="unsavedChangesPrompt('editForm:resetBtn')" value="#{msgs.nav_reset}" class='secondaryBtn' />
+            </span>
+          </td>
+        </tr>
+        <ui:repeat value="#{certificationListBeanParam.filter.filters}" var="filter">
+          <tr>
+            <td align="left" style="white-space: nowrap">
+              <b>#{msgs.filter_by}</b>
+            </td>
+            <td colspan="#{certificationBeanParam.businessRoleCertification || certificationBeanParam.accountGroupCertification || certificationBeanParam.dataOwnerCertification ? 1 : 2}">
+              <h:selectOneMenu id="filterSelect" value="#{filter.propertyName}" onchange="filterSelectionChanged('#{filter.id}');">
+                <f:selectItems value="#{certificationListBeanParam.filter.additionalFilterChoices}" />
+              </h:selectOneMenu>
+            </td>
+            <td colspan="2">
+            <!-- Trey: Hack alert! here, we'ere using the validator attribute in an unintended fashion.  It's calling out to
+            CertificationFilter#preserveSelection in order to let the filter hold onto the value we had last selected.  While
+            the 'validator' attribute function isn't intended for such a thing, it stands in as a good candidate to do it.
+            Wanna Know More?  Bug 14038 -->
+              <span id="filterSelects#{filter.id}">
+                <ui:fragment rendered="#{filter.textFilter}"> <!-- CertificationFilter#isTextFilter : always false -->
+                  <h:inputText id="filterTextValue" styleClass="filterInputText " value="#{filter.value}" />
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.riskFilter}">
+                  <h:selectOneMenu value="#{filter.logicalOp}">
+                    <f:selectItems value="#{filter.logicalOpSelectItems}" />
+                  </h:selectOneMenu>
+                  <h:outputText value=" "/>
+                  <h:inputText id="filterRiskValue" styleClass="filterInputText" value="#{filter.value}"
+                    size="4" maxlength="4"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.booleanFilter}">
+                  <h:selectBooleanCheckbox value="#{filter.booleanValue}" />
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.level1SelectEnabled}">
+                  <h:selectOneMenu value="#{filter.value}" onchange="filterValueChanged();" validator="#{filter.preserveSelection}">
+                    <f:selectItems value="#{filter.level1SelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.level2SelectEnabled}">
+                  <h:selectOneMenu value="#{filter.value2}" validator="#{filter.preserveSelectionValue2}">
+                    <f:selectItems value="#{filter.level2SelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.identityFilter}" >
+                  <h:selectOneMenu value="#{filter.value}" validator="#{filter.preserveSelection}">
+                    <f:selectItems value="#{filter.identitySelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.BRFilter}">
+                  <h:selectOneMenu value="#{filter.value}" validator="#{filter.preserveSelection}">
+                    <f:selectItems value="#{filter.BRSelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.lastNameFilter}">
+                  <h:selectOneMenu value="#{filter.value}" validator="#{filter.preserveSelection}">
+                    <f:selectItems value="#{filter.lastNameSelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.firstNameFilter}">
+                  <h:selectOneMenu value="#{filter.value}" validator="#{filter.preserveSelection}">
+                    <f:selectItems value="#{filter.firstNameSelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.itemTypeFilter}">
+                  <h:selectOneMenu value="#{filter.value}">
+                    <f:selectItems value="#{filter.itemTypeSelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.roleTypeFilter}">
+                  <h:selectOneMenu value="#{filter.value}">
+                    <f:selectItems value="#{filter.roleTypeSelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.continuousStateFilter}">
+                  <h:selectOneMenu value="#{filter.value}">
+                    <f:selectItems value="#{filter.continuousStateSelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.yesNoFilter}">
+                  <h:selectOneRadio value="#{filter.booleanValue}"
+                                    style="display: inline; vertical-align: bottom; border-collapse: collapse">
+                    <f:selectItem itemLabel="#{msgs.yes}" itemValue="#{true}" />
+                    <f:selectItem itemLabel="#{msgs.no}" itemValue="#{false}" />
+                  </h:selectOneRadio>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.itemTextFilter}">
+                  <h:selectOneMenu value="#{filter.value}" validator="#{filter.preserveSelection}">
+                    <f:selectItems value="#{filter.itemSelectItems}" />
+                  </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{filter.dateFilter}">
+                  <h:selectOneMenu value="#{filter.logicalOp}">
+                    <f:selectItems value="#{filter.logicalOpSelectItems}" />
+                  </h:selectOneMenu>
+                  <sp:inputDate value="#{filter.dateValue}" type="both" 
+                               timeZone="#{base.userTimeZoneId}" 
+                               addResources="false" 
+                               imageLocation="/scripts/myfacescalendar"
+                               javascriptLocation="/scripts/myfacescalendar"
+                               styleLocation="/scripts/myfacescalendar" 
+                               ampm="true"
+                               styleClass="tomahawkInputDate"/>
+                </ui:fragment>
+
+              </span>
+              <span id="progressImg#{filter.id}"  style="display:none">
+                <h:graphicImage url="/images/progress.gif" />
+              </span>
+
+                <span>
+                <h:graphicImage url="/images/icons/minus.png" height="12" width="12" class="pointer" onclick="removeGridFilter('#{filter.id}');" />
+              </span>
+              <ui:fragment rendered="#{sp:isLastElement(filter, certificationListBeanParam.filter.filters)}">
+                <span>
+                  <h:graphicImage url="/images/icons/plus.png" height="12" width="12" class="pointer" onclick="addGridFilter();" />
+                </span>
+              </ui:fragment>
+
+            </td>
+          </tr>
+        </ui:repeat>
+      </table>
+      <script type="text/javascript" defer="defer">
+      //<![CDATA[
+        var submitOnEnter = new SailPoint.SubmitOnEnter("editForm:filterBtn");
+        var filterTextFields = document.getElementsByClassName('filterInputText','editForm:a4jFiltersPanel');
+        filterTextFields.each(function (filterField) {
+              submitOnEnter.registerTextField(filterField);
+          });
+      //]]>
+      </script>
+    </a4j:outputPanel>
+    <a4j:outputPanel id="a4jFilterString">
+      <input id="certificationFilterString" name="certificationFilterString" type="hidden" value="#{certificationListBeanParam.filter.filter}"/>
+    </a4j:outputPanel>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

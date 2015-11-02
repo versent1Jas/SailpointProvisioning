@@ -1,0 +1,1412 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+<!-- ====================================================================
+
+  Policy Violation
+
+========================================================================= -->
+
+<!--
+  Workflows can be attached to the Policy or the BaseConstraint.
+  If both exist, the one in BaseConstraint has prededence.
+  A typical use for this would be to request approval to determine
+  if the violation should allowed.  If the result is "approved" you
+  could either just delete the violation or make it look like
+  a mitigation from a certification.
+
+  Uses an example renderer in workitem/policyViolation.xhtml.  This
+  displays the same fields we show in other pages.
+-->
+
+<Workflow name='Policy Violation'
+          type='PolicyViolation'
+          handler='sailpoint.api.StandardWorkflowHandler'>
+
+  <Variable name='approvalObject' input='true'>
+    <Description>
+      PolicyViolation to process.  Note that we use approvalObject for
+      consistency with other workflows, but the violation has already
+      been persisted.  Calling the commit or rollback actions will 
+      have no effect.
+    </Description>
+  </Variable>
+
+  <Variable name='approver' input='true'>
+    <Description>
+      The user to receive the work item, normally the owner of 
+      the policy.
+    </Description>
+  </Variable>
+
+  <Variable name='violator' input='true'>
+    <Description>
+      The identity that has the violation.
+    </Description>
+  </Variable>
+
+  <Variable name='approved'>
+    <Description>
+      Internal variable automatically set logically true an Approval
+      process completes with no rejects.
+    </Description>
+  </Variable>
+
+  <Variable name='action'>
+    <Description>
+      Variable that may be set in the approval page to determine 
+      the action to take on this violation.  We handle violation approvals
+      differently than most work items.  There is no "reject" there
+      is a selection of an action (mitigate, remediate, delete, ignroe) 
+      followed by buttons that always post approval.
+    </Description>
+  </Variable>
+
+  <Variable name='expiration'>
+    <Description>
+      Variable that must be set to a Date (or the String representation
+      of a Date) in order to use the "mitigate" action.  This will
+      be tested in the call:mitigate handler and logged if it is invalid.
+      You may wish to have the worklfow do it's own validation.
+    </Description>
+  </Variable>
+
+  <Variable name='comments'>
+    <Description>
+      Variable that may be set to comments to be included with
+      a mitigation or remediation.
+    </Description>
+  </Variable>
+
+  <Variable name='remediatables' initializer='call:getRemediatables'>
+    <Description>
+      Variable that may be set to a list of things that can
+      be selected for remediation.  Currently this will only
+      be set for Role SOD violations.
+    </Description>
+  </Variable>
+
+  <Variable name='remediations'>
+    <Description>
+      Variable holding the remediatables selected in the work item.
+    </Description>
+  </Variable>
+
+  <Step name='Start'>
+    <Transition to='No Approver' 
+      when='approver == unbound || approver == null'/>
+  </Step>
+
+  <Step name='Approve'>
+    <Description>
+      The example page posts action values taken from the
+      names of the CertificationAction.Status enumeration
+      (Approved, Mitigated, Remediated, Acknowledged) plus
+      a few custom ones (Ignored, Deleted).
+    </Description>
+    <Approval owner='ref:approver' renderer='policyViolation.xhtml' 
+      send='launcher,approvalObject,remediatables' return='action,expiration,remediations,comments'>
+      <Arg name='workItemDescription' 
+        value='Review violation of policy $(script:approvalObject.getPolicyName();) on $(violator)'/>
+      <ValidatorScript>
+        <Source>
+            String error = null;
+            String action = (String)item.getAttribute("action");
+            if ("Mitigated".equals(action)) {
+                // make sure they've selected a date
+                Date expiration = item.getDate("expiration");
+                if (expiration == null) {
+                    // TODO: should make sure it's a valid date too
+                    error = "Please enter an expiration date";
+                }
+            }
+            else if ("Remediated".equals(action)) {
+                // make sure they've selected some remediatables
+                List remediations = item.getList("remediations");
+                if (remediatables != null &amp;&amp; 
+                    remediatables.size() > 0 &amp;&amp;
+                    (remediations == null || remediations.size() == 0)) {
+                    error = "Please select items to remediate";
+                }
+            }
+            else if (action == null || action.trim().length() == 0 ||
+                     "none".equals(action)) {
+                error = "Please select an action.";
+            }
+            return error;
+        </Source>
+      </ValidatorScript>
+    </Approval>
+    <Transition to='Mitigate' when='"Mitigated".equals(action)'/>
+    <Transition to='Remediate' when='"Remediated".equals(action)'/>
+    <Transition to='Delete' when='"Deleted".equals(action)'/>
+    <!-- should be Acknowledged -->
+    <Transition to='Ignore'/>
+  </Step>
+
+  <Step name='Mitigate' action='call:mitigateViolation'>
+    <Description>
+      Setup a mitigation expiration and other certification artifacts
+      that make it look like the violation was mitigated through
+      the normal cert process or the violation management pages.
+    </Description>
+    <Transition to='End'/>
+  </Step>
+
+  <Step name='Remediate' action='call:remediateViolation'>
+    <Description>
+      Setup a remediation and other certification artifacts
+      that make it look like the violation was mitigated through
+      the normal cert process or the violation management pages.
+    </Description>
+    <Arg name='remediations' value='ref:remediations'/>
+    <Transition to='End'/>
+  </Step>
+
+  <Step name='Delete' action='call:delete'>
+    <Description>
+      Delete the violation so it doesn't continue to show up in the UI.
+    </Description>
+    <Transition to='End'/>
+  </Step>
+
+  <Step name='Ignore' action='call:ignore'>
+    <Description>
+      Leave the violation in place.
+    </Description>
+    <Transition to='End'/>
+  </Step>
+
+  <Step name='No Approver' action='call:print'>
+    <Arg name='message' value='No approver for policy $(script:approvalObject.policyName)'/>
+  </Step>
+
+  <Step name='End'/>
+
+</Workflow>
+
+<!-- ====================================================================
+
+  Event
+
+========================================================================= -->
+
+<!--
+  Event workflows can be scheduled for evalution in the future.
+  The name of an identity is passed.  Other variables are user defined
+  typical examples will be dates for sunrise/sunset, role names for temporary
+  assignment/deassignment, etc.  
+-->
+
+<Workflow name='Identity Event' type='IdentityEvent'>
+
+  <Variable name='identityName'>
+    <Description>The name of the identity we're supposed to operate on.</Description>
+  </Variable>
+
+  <Step name='Operate' action='call:print'>
+    <Arg name='message' value='Workflow event on identity $(identityName)'/>
+  </Step>
+
+</Workflow>
+
+<!--
+  An example of scheduling an event workflow from a workflow.
+-->
+
+<Workflow name='Test Identity Event' type='IdentityEvent'>
+
+  <Variable name='identityName'>
+    <Description>The name of the identity we're supposed to operate on.</Description>
+  </Variable>
+
+
+  <Step name='Operate' action='call:print'>
+    <Arg name='message' value='Scheduling workflow event on identity $(identityName)'/>
+  </Step>
+
+  <Step name='Operate' action='call:scheduleWorkflowEvent'>
+    <Arg name='workflow' value='Identity Event'/>
+    <Arg name='delaySeconds' value='1'/>
+    <Arg name='identityName' value='ref:identityName'/>
+  </Step>
+
+</Workflow>
+
+  <!-- ====================================================================
+  
+    Model based form binding - Example for Create and Update Identity
+  
+  ========================================================================= -->
+  
+  <Workflow name='Example Model Based Form Binding Identity Create and Update'>
+  
+    <Description> 
+       An example workflow that illustrates creating and editing 
+       a workflow using the identity model.
+      
+       This workflow requires the form below named 
+       'Example Model Binding Identity Create and Update Form'
+       to also be imported.
+              
+    </Description>
+    
+    <Variable name='transient' initializer='false'>
+      <Description>
+        Set to false to cause workflow-related objects, such as approval
+        work items, to be saved in the database even if they are only
+        viewed by the person registering.
+      </Description>
+    </Variable>
+  
+    <Variable name='owner' initializer='spadmin'> 
+      <Description>Name of the user that will recieve the forms.</Description>
+    </Variable>
+    
+    <Variable name='trace' initializer='true'>
+      <Description>enable this to see stuff spit out to stdout</Description>  
+    </Variable>
+    
+    <Variable name='identityName' type='string'>
+      <Description>The name of the identity to edit, eventually this will come 
+                   from the Identity transformer.
+      </Description>
+    </Variable>
+    
+    <Variable name='identityId' type='string'>
+      <Description>The identity selector will post an Id, we need a name for
+                   most other sections.
+      </Description>
+    </Variable>
+  
+    <Variable name='identityModel' type='complex'>
+      <Description>The map model will be fetched from a transformer.</Description>
+    </Variable>
+     
+    <Variable name='plan'>
+      <Description>A plan that will be generated based on the diffs to perform provisioning. </Description>
+    </Variable>
+    
+    <Variable name='readOnlyForm'>
+      <Description>Read only form for confirmation dialog.</Description>
+    </Variable>
+    
+    <Variable name='formName' initializer='Example Model Binding Identity Create and Update Form'>
+       <Description>The name of the form that is used to edit the identity.</Description>
+    </Variable>
+    
+    <Variable name='basePath' initializer='identityModel'>
+       <Description>The formpath to the link we are interested in editing.</Description>
+    </Variable>
+    
+    <Variable initializer='serial' input='true' name='approvalMode'>
+      <Description>
+       A string that specifies how we should handle the approvals.  
+
+       By default this is serial since most of these request with
+       the exception of manager transfers will have only one approver.
+
+       parallel
+         Approvals are processed concurrently and there must be consensus,
+         we wait for all approvers to approve.  The first approver that
+         rejects terminates the entire approval.
+ 
+       parallelPoll 
+         Approvals are processed concurrently but consensus is not required.
+         All approvals will be process, we don't stop if there any
+         rejections.  
+
+       serial
+         Approvals are processed one at a time and there must be consensus.
+         The first approver that rejects terminates the entire approval.
+
+       serialPoll
+         Approvals are processed in order but consensus is not required.
+         All approvals will be processed, we don't stop if there are any
+         rejections.  In effect we are "taking a poll" of the approvers.
+
+       any
+        Approvals are processed concurrently, the first approver to 
+        respond makes the decision for the group.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='manager, newManager' input='true' name='approvalScheme'>
+      <Description>
+      A String that specifies how approvals should be generated for 
+      this workflow there are five built-in modes
+
+      none - disabled approvals
+
+      manager - The user's current manager will get approvals
+
+      newManager - The newly assigned manager will get approvals when 
+                   manager transfers occur. Otherwise the user's manager 
+                   current manager will be the approver.
+
+      </Description>
+    </Variable>    
+    
+    <Variable initializer='continue' input='true' name='policyScheme'>
+      <Description>
+        A String that specifies how policy checks effect the overall
+        process.
+
+        none - disabled policy checking
+
+        continue -  continue if policy violations are found
+
+        interactive -  allow requester to remove request items which are causing violations
+
+        fail -  this option will cause the workflow to terminate immediately if any policy violations are found.
+                Note that the requester will not be notified that the workflow has terminated.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='user,requester' input='true' name='notificationScheme'>
+      <Description>
+       A string that specifies who should be notified when the request has been complete.
+       The value can be null or a csv of one or more of the following options. 
+
+       none or null
+         disable notifications
+
+       user 
+         Identity that is being update will be notified.
+
+       manager
+         The manager of the Identity that is being updated will be notified.
+
+       requester
+         The person that has requested the update will be notified.
+      </Description>
+    </Variable>
+        
+    <Variable name='doRefresh' editable='true'>
+      <Description>
+        Set to true to cause an identity refresh after the changes in the plan
+        have been provisioned.  This is normally off, you might want this on
+        if you want modification of identity or link attributes to result in
+        an immediate re-evaluation of assigned and detected roles.
+      </Description>
+    </Variable>
+    
+    <Variable name="exitWorkflow">
+       <Description>
+         Value posted by the "Exit Workflow" form button, to indicate the workflow should end.
+         This is somethign handled in transitions on Approvals that have forms and gives
+         a way for customers to exit the workflow.
+       </Description>    
+    </Variable>
+    
+    <Step name='Collect UserName' icon='Approval' posX='28' posY='10'>
+      <Description>
+         Render a form with a single input that collects the Identity's user name to edit.
+      </Description>
+      
+      <Approval send='identityName,identityId' 
+                return='identityName, identityId, exitWorkflow'
+                owner='ref:owner' mode='serial'>
+      
+         <Form>    
+          <Section label='Select the identity and click Edit or click Create New for a new identity'>
+            <Field name='identityId' displayName='Select or Enter an Identity' type='Identity' filterString='workgroup == false'/>
+          </Section>          
+          <Button label='Create New' action='back'/>        
+          <Button label='Edit' action='next'/>
+          <Button label='Cancel' action='cancel'/>          
+          <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/>
+        </Form>
+        <Arg name='workItemDescription' value='Select a user to edit form'/> 
+       <AfterScript>     
+         <Source>
+           if ( Util.otob(trace) )
+             System.out.println("item : " + item.toXml());
+         </Source>
+       </AfterScript>
+      </Approval>    
+      <Transition to='end' when='exitWorkflow'/>
+    </Step>
+  
+    <Step name='Build Identity Model' icon='Task' resultVariable='identityModel' action='call:getIdentityModel' posX='186' posY='10'>
+      <Description>
+         For now, build a map of the data. Eventually this will use the Identity
+         transformer to build a Map based on an existing identityName, or 
+         Identity object.
+      </Description>
+      <Arg name='identityName' value='ref:identityName'/>  
+      <Arg name='identityId' value='ref:identityId'/>     
+    </Step>
+    
+    <Step name='Present Identity Form' icon='Approval' posX='376' posY='10'>
+      <Description>Present a form that allows editing values using the Identity Map Model.</Description>
+      <Approval send='identityModel, identityName' 
+                return='identityModel,exitWorkflow'
+                owner='ref:owner' mode='serial'>    
+        <Arg name='workItemForm' value='ref:formName'/>
+        <Arg name='workItemFormBasePath' value='ref:basePath'/>
+        <Arg name='workItemDescription'>
+           <Script>
+             <Source>
+                 String currentName = $(identityModel.name);
+                 if ( currentName  == null ) {
+                    return "Create new Identity";
+                 } 
+                 return "Edit Identity '" + currentName + "'";
+             </Source>
+           </Script>
+        </Arg>     
+        <AfterScript>     
+           <Source>
+           if ( Util.otob(trace) )
+             System.out.println("zeeitem : " + item.toXml());
+           </Source>
+        </AfterScript>
+       </Approval>
+       
+      <Transition to='end' when='exitWorkflow'/>            
+      <Transition to='Build Read Only Form' when='approved'/>      
+    </Step>
+      
+    <Step name='Build Read Only Form' icon='Task' posX='574' posY='126' resultVariable='readOnlyForm' 
+          action='call:buildReadOnlyForm'>
+      <Arg name='form' value='ref:formName'/>
+      <Arg name='includeExitButton' value='true'/>      
+    </Step>
+       
+    <Step name='Confirm Entered Values' icon='Approval' posX='764' posY='126'>
+      <Description>Present a confirmation form that is readonly and displays the values from the map 
+                   model as it was persisted in the previous step.</Description>
+      <Approval send='identityModel, identityName' 
+                return='exitWorkflow' owner='ref:owner' mode='serial'>    
+        <Arg name='workItemDescription'>
+           <Script>
+             <Source>
+                 String currentName = $(identityModel.name);
+                 if ( currentName  == null ) {
+                    currentName = "undefined";
+                 } 
+                 return "Confirm updates to '" + currentName + "'";
+             </Source>
+           </Script>
+        </Arg>     
+        <Arg name='workItemFormBasePath' value='ref:basePath'/>
+        <Arg name='workItemForm' value='ref:readOnlyForm'/> 
+      </Approval>
+      <Transition to='end' when='exitWorkflow'/>            
+      <Transition to='Present Identity Form' when='!approved'/>
+      <Transition to='Build Provisioning Plan' when='approved'/>        
+    </Step>
+        
+    <Step name='Build Provisioning Plan' icon='Task' resultVariable='plan' 
+          action='call:buildPlanFromIdentityModel' posX='970' posY='126' >
+          
+      <Description>
+         For now, build a map of the data. Eventually this will use the Identity
+         transformer to build a Map based on an existing identityName, or 
+         Identity object.
+      </Description>
+      <Arg name='identityModel' value='ref:identityModel'/>
+      
+      <Transition to='end' when='script:(plan == null)'/>
+    </Step>  
+    
+    <Step name='Provision Changes' icon='Task' posX='1184' posY='126'>
+      <Description>
+        Call the standard subprocess to initialize the request, this includes
+        auditing, building the approvalset, compiling the plan into 
+         project and checking policy violations.
+      </Description>
+      <WorkflowRef>
+        <Reference class='Workflow' name='LCM Create and Update'/>
+      </WorkflowRef>
+      <Arg name='flow' value='IdentityEditRequest'/>    
+      <Arg name='identityName'>
+        <Script>
+          <Source>
+             return $(identityModel.name);
+          </Source>
+        </Script>
+      </Arg>    
+      <Arg name='plan' value='ref:plan'/>
+      <Arg name='notificationScheme' value='ref:notificationScheme'/>
+      <Arg name='approvalMode' value='ref:approvalMode'/>
+      <Arg name='approvalScheme' value='ref:approvalScheme'/>
+      <Arg name='doRefresh' value='ref:doRefresh'/>
+      <Arg name='policyScheme' value='ref:policyScheme'/>
+      <Arg name='trace' value='ref:trace'/>
+    </Step>
+        
+    <Step name='end' icon='Stop'  posX='1277' posY='16'/>
+    
+  </Workflow>
+  
+  <!--
+  
+    Example Model Binding Identity Create and Update Form
+      
+    Form that drives the workflow above when creating and editing 
+    identity objects using the identity model.
+    
+   -->  
+  <Form name='Example Model Binding Identity Create and Update Form'>
+  
+    <Section label='User Info'>        
+      <Field name='name' displayName='Name' required='true' type='string'/>                    
+      <Field name='firstname' displayName='First Name' type='string' required='true' postBack='false'/>
+      <Field name='lastname' displayName='Last Name' type='string' required='true' postBack='false'/>    
+                 
+      <Field name='fullname' dependencies='firstname, lastname' 
+             readOnly='true' displayName='Full Name'  type='string' dynamic='false'>   
+             <!--    
+        <Script>
+          <Source>
+            <![CDATA[
+              if ( $(firstname) == null && $(lastname) == null )
+                  return null;   
+                  
+              return $(firstname) + " " + $(lastname);
+            ]]>
+          </Source>
+        </Script> 
+         -->
+      </Field>
+      
+      <Field name='email' displayName='Email Address' type='string' reviewRequired='true'/>
+      <Field name='manager' displayName='Manager' type='Identity'/>   
+      <Field name='protected' displayName='Protected' type='boolean'/>
+    </Section>
+            
+    <Section label='Identity Attributes'>        
+      <Field name='Department' displayName='Department'  type='string'/>
+      <Field name='costcenter' displayName='Cost Centers' type='string' multi='true'/>   
+      <Field name='inactive' displayName='Inactive' type='boolean'/>    
+      <Field name='startDate' displayName='Start Date' type='date'/>
+    </Section>
+                  
+    <Section label='Password'>
+      <Field displayName='Enter and confirm your password. Don&apos;t worry we will tell you if it is not the same.'
+             displayType='label'/>
+      <Field name='password' displayName='Password' type='secret'/>              
+      <Field name='confirmPassword' displayName='Confirm Password' type='secret'>          
+        <ValidationScript>
+          <Source>
+            <![CDATA[
+              import java.util.*;
+              import sailpoint.web.messages.MessageKeys;
+              import sailpoint.tools.Message;
+                
+              List errors = null;
+              String pw = $(password);
+              String cPw = $(confirmPassword);
+              if( (pw == null && cPw != null) || (pw != null && cPw == null) || (pw != null && !pw.equals(cPw)) ) {
+                   errors = new ArrayList();
+                   Message msg = new Message();
+                   msg.setKey(MessageKeys.ERROR_IDENTITY_CONFIRM_PASS_MISMATCH);
+                   errors.add(msg);
+               }
+              return errors;
+            ]]>
+          </Source>
+        </ValidationScript>         
+      </Field>
+    </Section>
+            
+    <Section label='Roles'>
+      <Field name='assignedRoles' displayName='Assigned Roles' type='Bundle' multi='true' filterString='type == "business"'/>               
+      <Field name='detectedRoles' displayName='Detected Roles' readOnly='true' type='Bundle'/>          
+    </Section>
+            
+    <Section label='User Rights'>
+      <Field name='capabilities' displayName='Capabilities' type='Capability' multi='true'/>                    
+      <Field name='workgroups' displayName='Workgroups' type='Identity' multi='true' filterString='workgroup == true'/>    
+      <Field name='assignedScope' displayName='Assigned Scope' type='Scope'/>
+      <Field name='controlledScopes' displayName='Authorized Scopes' type='Scope' multi='true'/>           
+      <Field name='controllsAssignedScope' displayName='Identity Controls Assigned Scope' defaultValue='System Setting'>    
+        <AllowedValues>
+          <String>System Setting</String>
+          <String>True</String>
+          <String>False</String>               
+        </AllowedValues>
+      </Field>
+    </Section>
+            
+    <Section label='Extended Identity Attributes'>
+      <Field name='regionOwner' displayName='Region Owner' type='Identity' filterString='workgroup == false'/>
+      <Field name='locationOwner' displayName='Location Owner' type='Identity' filterString='workgroup == false'/>            
+    </Section>
+          
+    <Button label='Next' action='next'/>
+    <Button label='Cancel' action='cancel'/>  
+    <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/>
+          
+  </Form>
+
+  <!-- ====================================================================
+  
+    Model based form binding - Updating an AD account
+    
+    NOTE!! : This requires that you have an Direct Connector based 
+    Active Directory application defined named AD. 
+    
+    Otherwise you'll have to change all of the "AD" References to the name
+    of your application.
+    
+    Additionally the AD application must include all of the attributes in
+    the form must also be added to the account schema.
+     
+  ========================================================================= -->
+      
+  <Workflow name='Example Model Based Form Binding Update AD Link'>
+  
+    <Description>    
+      A workflow that illustrates editing an existing ActiveDirectory Link
+      using the Identity Model.          
+    </Description>
+    
+     <Variable name='transient' initializer='false'>
+      <Description>
+        Set to false to cause workflow-related objects, such as approval
+        work items, to be saved in the database even if they are only
+        viewed by the person registering.
+      </Description>
+    </Variable>
+  
+    <Variable name='owner' initializer='spadmin'> 
+      <Description>Name of the user that will recieve the forms.</Description>
+    </Variable>
+    
+    <Variable name='trace' initializer='true'>
+      <Description>enable this to see stuff spit out to stdout</Description>  
+    </Variable>
+    
+    <Variable name='identityName' type='string'>
+      <Description>The name of the identity to edit, eventually this will come 
+                   from the Identity transformer.
+      </Description>
+    </Variable>
+    
+    <Variable name='identityId' type='string'>
+      <Description>The identity selector will post an Id, we need a name for
+                   most other sections.
+      </Description>
+    </Variable>
+  
+    <Variable name='identityModel'>
+      <Description>The map model will be fetched and built from a transformer.</Description>
+    </Variable>
+  
+    <Variable name='plan'>
+      <Description>A provisioning plan that will be generated by the transformer. </Description>
+    </Variable>
+    
+    <Variable name='readOnlyForm'>
+      <Description>Read only form for confirmation dialog.</Description>
+    </Variable>
+    
+    <Variable initializer='Example Model Binding Update AD Link Form' name='formName'>
+       <Description>The name of the form that is used to edit the link.</Description>
+    </Variable>
+    
+    <Variable initializer='identityModel.links[AD]' name='basePath'>
+       <Description>The formpath to the link we are interested in editing.</Description>
+    </Variable>
+    
+    <Variable initializer='serial' input='true' name='approvalMode'>
+      <Description>
+       A string that specifies how we should handle the approvals.  
+
+       By default this is serial since most of these request with
+       the exception of manager transfers will have only one approver.
+
+       parallel
+         Approvals are processed concurrently and there must be consensus,
+         we wait for all approvers to approve.  The first approver that
+         rejects terminates the entire approval.
+ 
+       parallelPoll 
+         Approvals are processed concurrently but consensus is not required.
+         All approvals will be process, we don't stop if there any
+         rejections.  
+
+       serial
+         Approvals are processed one at a time and there must be consensus.
+         The first approver that rejects terminates the entire approval.
+
+       serialPoll
+         Approvals are processed in order but consensus is not required.
+         All approvals will be processed, we don't stop if there are any
+         rejections.  In effect we are "taking a poll" of the approvers.
+
+       any
+        Approvals are processed concurrently, the first approver to 
+        respond makes the decision for the group.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='owner' input='true' name='approvalScheme'>
+      <Description>
+      A csv string that specifies how approvals should be generated for 
+      the incoming request.
+ 
+      The value can be any of the values below, combined together but
+      are always processed in this order:
+  
+      1. manager
+      2. owner
+      3. securityOfficer
+
+      Any rejected items from previous approvals will be omitted from the  
+      next phase of approvers.
+
+      none - disabled approvals
+
+      owner - the object owner gets the approval
+              For Role approvals this is the Role object owner. When dealing 
+              with things like Unlock and other account level changes 
+              the approvals will be assigned to the the application owner.
+
+      manager - The manager will get all approvals
+
+      securityOfficer - The identity named security the security in the variable
+                        securityOfficerName.
+
+      </Description>
+    </Variable>    
+    
+    <Variable initializer='continue' input='true' name='policyScheme'>
+      <Description>
+        A String that specifies how policy checks effect the overall
+        process.
+
+        none - disabled policy checking
+
+        continue -  continue if policy violations are found
+
+        interactive -  allow requester to remove request items which are causing violations
+
+        fail -  this option will cause the workflow to terminate immediately if any policy violations are found.
+                Note that the requester will not be notified that the workflow has terminated.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='user,requester' input='true' name='notificationScheme'>
+      <Description>
+       A string that specifies who should be notified when the request has been complete.
+       The value can be null or a csv of one or more of the following options. 
+
+       none or null
+         disable notifications
+
+       user 
+         Identity that is being update will be notified.
+
+       manager
+         The manager of the Identity that is being updated will be notified.
+
+       requester
+         The person that has requested the update will be notified.
+      </Description>
+    </Variable>
+        
+    <Variable name='doRefresh' editable='true'>
+      <Description>
+        Set to true to cause an identity refresh after the changes in the plan
+        have been provisioned.  This is normally off, you might want this on
+        if you want modification of identity or link attributes to result in
+        an immediate re-evaluation of assigned and detected roles.
+      </Description>
+    </Variable>
+    
+    <Variable name="exitWorkflow">
+       <Description>
+         Value posted by the "Exit Workflow" form button, to indicate the workflow should end.
+         This is somethign handled in transitions on Approvals that have forms and gives
+         a way for customers to exit the workflow.
+       </Description>    
+    </Variable>
+    
+    <Step name='Check for Example Application' posX='104' posY='10'>
+      <Script>
+        <Source>
+            import sailpoint.object.Application;
+            
+            Application app = context.getObjectByName(Application.class, "AD");
+            if ( app == null ) {
+                throw new Exception("This example workflow required an Active Directory application named AD , which could not be found.");
+            }
+        </Source>
+      </Script>    
+    </Step>
+    
+    <Step name='Collect UserName' icon='Approval' posX='290' posY='10'>
+      <Description>
+         Render a form with a single input that collects the Identity's user name to edit.
+      </Description>
+      
+      <Approval send='identityName,identityId' 
+                return='identityName, identityId, exitWorkflow'
+                owner='ref:owner' 
+                mode='serial'>
+      
+        <Form>
+          <Section label='Select an identity'>         
+            <Field name='identityId' displayName='Select or Enter an Identity' type='Identity'/>                   
+          </Section>
+          
+          <Button label='Edit' action='next'/>
+          <Button label='Cancel' action='cancel'/>       
+          <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/>
+           
+        </Form>
+        <Arg name='workItemDescription' value='Select a user for AD Account Edit'/> 
+        <AfterScript>     
+        <Source>
+           if ( Util.otob(trace) )
+             System.out.println("item : " + item.toXml());
+        </Source>
+        </AfterScript>
+      </Approval>    
+      
+      <Transition to='end' when='exitWorkflow'/>
+      <Transition to='Build Identity Model' when='approved'/>    
+      <Transition to='Collect Target Identity' when='!approved'/>                  
+    </Step>
+      
+    <Step name='Build Identity Model' icon='Task' resultVariable='identityModel' action='call:getIdentityModel' posX='448' posY='10'>
+      <Description>
+         For now, build a map of the data. Eventually this will use the Identity
+         transformer to build a Map based on an existing identityName, or 
+         Identity object.
+      </Description>
+      <Arg name='identityName' value='script: identityName'/>  
+      <Arg name='identityId' value='script: identityId'/>     
+      <Arg name='expandLinks' value='true'/>     
+      
+      <Transition to='Present Link Edit Form' when='script : $(identityModel.links[AD]) != null'/>
+    </Step>
+    
+    <Step name='Confirm New' icon='Approval' posX='558' posY='117'>
+      <Description>
+         Render a form with a single input that collects the Identity's user name to edit.
+      </Description>
+      
+      <Approval send='identityName,identityId' 
+                return='identityName, identityId, exitWorkflow'
+                owner='ref:owner' 
+                mode='serial'>      
+        <Form>
+          <Attributes>
+           <Map>
+             <entry key='pageTitle' value='Confirm creation of new account'/>
+           </Map>
+          </Attributes>
+          <Section>            
+            <Field name='confirmationLabel'>
+              <Attributes>
+                <Map>
+                  <entry key='xtype' value='label'/>
+                  <entry key='text' value='The user you selected DOES NOT have an AD account would you like to create one?'/>
+                </Map>
+              </Attributes>
+            </Field>
+          </Section>
+          <Button label='Yes' action='next'/>
+          <Button label='No' action='back'/>
+          <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/>
+        </Form>
+        <Arg name='workItemDescription' value='Confirm New Account'/> 
+        <AfterScript>     
+          <Source>
+             if ( Util.otob(trace) )
+               System.out.println("item : " + item.toXml());
+          </Source>
+        </AfterScript>
+      </Approval>
+      
+      <Transition to='end' when='exitWorkflow'/>
+      <Transition to='Collect UserName' when='!approved'/>            
+    </Step>
+        
+    <Step name='Present Link Edit Form' icon='Approval' posX='638' posY='10'>
+      <Description>Present a form that allows editing values from a users AD link.</Description>
+      <Approval send='identityModel, identityName, exitWorkflow' 
+                return='identityModel, exitWorkflow'
+                owner='ref:owner' mode='serial'>    
+        <Arg name='workItemFormBasePath' value='ref:basePath'/>               
+        <Arg name='workItemForm' value='ref:formName'/>
+        <Arg name='workItemDescription'>
+           <Script>
+             <Source>
+                 return "Edit AD Account for '" + $(identityModel.name) + "'";
+             </Source>
+           </Script>
+        </Arg>     
+        <AfterScript>     
+           <Source>
+           if ( Util.otob(trace) )
+             System.out.println("zeeitem : " + item.toXml());
+           </Source>
+        </AfterScript>
+       </Approval>                   
+      <Transition to='end' when='exitWorkflow'/>      
+      <Transition to='Confirm Delete' when='return Util.otob($(identityModel.links[AD].sys.delete));'/>    
+      <Transition to='Build Read Only Form' when='approved'/>    
+    </Step>
+    
+    <Step name='Confirm Delete' icon='Approval' posX='558' posY='117'>
+      <Approval send='identityModel,identityName,identityId' 
+                return='identityModel,identityName, identityId, exitWorkflow'
+                owner='ref:owner' 
+                mode='serial'>  
+        <Arg name='workItemFormBasePath' value='ref:basePath'/>               
+                    
+        <Form>
+          <Attributes>
+           <Map>
+             <entry key='pageTitle' value='Confirm delete of AD account for $(identityName)'/>
+           </Map>
+          </Attributes>
+          <Section>            
+            <Field name='confirmationLabel'>
+              <Attributes>
+                <Map>
+                  <entry key='xtype' value='label'/>
+                  <entry key='text'>
+                    <value>
+                      <Script>
+                        <Source>
+                            return "Are you sure you want to delete the AD account '"+ $(identityModel.links[AD].distinguishedName) +"' ?";
+                        </Source>
+                      </Script>
+                    </value>
+                  </entry>
+                </Map>
+              </Attributes>
+            </Field>
+          </Section>
+          <Button label='Yes' action='next'/>
+          <Button label='No' action='back'/>
+          <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/>
+        </Form>
+        <Arg name='workItemDescription' value='Confirm Deletion of AD Account'/> 
+        <AfterScript>     
+          <Source>
+             if ( Util.otob(trace) )
+               System.out.println("item : " + item.toXml());
+          </Source>
+        </AfterScript>
+      </Approval>
+      
+      <Transition to='end' when='exitWorkflow'/>
+      <Transition to='Build Provisioning Plan' when='approved'/>    
+      <Transition to='Collect UserName' when='!approved'/>            
+    </Step>
+  
+    <Step name='Build Read Only Form' icon='Task' posX='844' posY='10' resultVariable='readOnlyForm' 
+          action='call:buildReadOnlyForm'>
+      <Arg name='form' value='ref:formName'/>
+      <Arg name='includeExitButton' value='true'/>      
+    </Step>
+       
+    <Step name='Confirm Entered Values' icon='Approval' posX='1034' posY='10'>
+      <Description>Present a confirmation form that is readonly and displays the values from the  
+                   model as it was persisted in the previous step.</Description>
+      <Approval send='identityModel, identityName'
+                return='exitWorkflow' 
+                owner='ref:owner' mode='serial'>    
+         
+        <Arg name='workItemDescription' value='Confirm updates to $(identityName)'/>
+        <Arg name='workItemForm' value='ref:readOnlyForm'/> 
+        <Arg name='workItemFormBasePath' value='ref:basePath'/>               
+                
+      </Approval>              
+      <Transition to='end' when='exitWorkflow'/>      
+      <Transition to='Present Link Edit Form' when='!approved'/>   
+      <Transition to='Build Provisioning Plan' when='approved'/>        
+    </Step>
+    
+    <Step name='Build Provisioning Plan' icon='Task' resultVariable='plan' 
+          action='call:buildPlanFromIdentityModel' posX='1240' posY='10'  >
+          
+      <Description>
+         Call the Identity transformer and build a plan of the changes that
+         have to be provisioned.  If there are no new changes, do nothing..
+      </Description>
+      <Arg name='identityModel' value='ref:identityModel'/>
+      
+      <Transition to='end' when='script:(plan == null)'/>
+    </Step>  
+    
+    <Step name='Provision Changes' icon='Task'  posX='1454' posY='126'>
+      <Description>
+        Call the standard subprocess to initialize the request, this includes
+        auditing, building the approvalset, compiling the plan into 
+        project and checking policy violations.
+      </Description>
+      <WorkflowRef>
+        <Reference class='Workflow' name='LCM Provisioning'/>
+      </WorkflowRef>
+      <Arg name='flow' value='IdentityEditRequest'/>    
+      <Arg name='identityName'>
+        <Script>
+          <Source>
+             return $(identityModel.name);
+          </Source>
+        </Script>
+      </Arg>    
+      <Arg name='plan' value='ref:plan'/>
+      <Arg name='notificationScheme' value='ref:notificationScheme'/>
+      <Arg name='approvalMode' value='ref:approvalMode'/>
+      <Arg name='approvalScheme' value='ref:approvalScheme'/>
+      <Arg name='doRefresh' value='ref:doRefresh'/>
+      <Arg name='policyScheme' value='ref:policyScheme'/>
+      <Arg name='trace' value='$(trace)'/>
+    </Step>
+        
+    <Step name='end' icon='Stop' posX='1510' posY='10'/>
+    
+  </Workflow>
+
+  <!--  
+     Form that drives the editing of an AD link.  
+  -->
+  <Form name='Example Model Binding Update AD Link Form'>
+      
+    <Attributes>
+    
+      <Map>
+        <entry key="pageTitle">
+          <value>
+            <Script>
+              <Source>
+                 String str = null;                 
+                 if ( $(sys.id) == null )
+                     str = "Create AD Account for " + $(/name);
+                 else 
+                     str = "Update AD account for " + $(/name);
+                 return str;
+              </Source>
+            </Script>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+     
+    <Section label='IdentityIQ Info'>
+      <Field name='sys.identity' displayName='Identity Name' type='identity' postBack='true' readOnly='true'>        
+        <Script>         
+          <Source>          
+              if ( $(sys.id) != null ) {
+                  return $(sys.id);
+              }
+            return $(/name);
+          </Source>       
+        </Script>        
+      </Field>
+    </Section>
+    
+    <Section label='IIQ Link Info'>
+                          
+      <Field name='sys.displayName' displayName='Display Name' type='string' readOnly='true'>
+        <Attributes> 
+          <Map>
+            <entry key='hidden' value='script: return $(sys.id) == null;'/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field name='sys.nativeIdentity' displayName='Native Identity' type='string' readOnly='true'>
+        <Attributes> 
+          <Map>
+            <entry key='hidden' value='script: return $(sys.id) == null;'/>
+          </Map>
+        </Attributes>
+      </Field>       
+      
+      <Field name='sys.delete' displayName='Delete this account' helpKey='Select this checkbox and click next to delete this account on the underlying application' type='boolean' postBack='true'>
+        <Attributes> 
+          <Map>
+            <entry key='hidden' value='script: return $(sys.id) == null;'/>
+          </Map>
+        </Attributes>
+      </Field> 
+    </Section>
+          
+    <Section label='General'>
+      <Attributes>
+        <Map>
+          <entry key='hidden'>
+            <value>
+            <Script>
+              <Source>
+                 if ( sailpoint.tools.Util.otob($(sys.delete)) ) {
+                     return true;
+                 }
+                 return false
+              </Source>
+            </Script>
+            </value>
+          </entry>
+        </Map>      
+      </Attributes>
+            
+      <Field name='givenName' required='true' displayName='First Name' type='string' postBack='true'>
+        <Script>
+          <Source>   
+              String value = null;   
+              if ( $(sys.id) == null ) {
+                  value = $(/firstname);
+              } else {
+                  value = $(givenName);
+              }
+              return value;          
+          </Source>
+        </Script>
+      </Field> 
+      
+      <Field name='initials' displayName='Initials' type='string' postBack='true'/>
+      
+      <Field name='sn' required='true' displayName='Last Name' type='string' postBack='true'>    
+        <Script>
+          <Source>
+              String value = null;   
+              if ( $(sys.id) == null ) {
+                  value = $(/lastname);
+              } else {
+                  value = $(sn);
+              }
+              return value;       
+          </Source>
+        </Script>
+      </Field>       
+      
+      <Field name='displayName' displayName='Display Name' type='string' dynamic='true'>
+        <Script>
+          <Source>
+              String value = null;
+              if ( $(sys.id) == null ) {
+                  StringBuilder sb = new StringBuilder();                  
+                  if ( givenName != null ) {
+                    sb.append(givenName);
+                  }
+                  if ( initials != null ) {
+                    sb.append(" ");
+                    sb.append(initials);
+                  }
+                  if ( sn != null ) {
+                    sb.append(" ");
+                    sb.append(sn);
+                  }                
+                  if ( sb.length() > 0  ) {  
+                      value = sb.toString();
+                  } else {
+                     value = null;
+                  } 
+              } else {
+                  value = $(displayName);
+              }
+              return value;
+          </Source>
+        </Script>    
+        
+      </Field>
+      
+      <Field name='mail' displayName='Email' type='string' dynamic='true'>
+        <Script>
+          <Source>   
+              String value = null;
+              if ( $(sys.id) == null ) {
+                  value = $(/email);
+              } else {
+                  value = $(mail);
+              }
+              return value;       
+          </Source>
+        </Script>
+      </Field>  
+      
+      <Field name='description' displayName='Description' type='string'/>
+      <Field name='physicalDeliveryOfficeName' displayName='Office' type='string'/>
+      <Field name='telephoneNumber' displayName='Telephone Number' type='string'/> 
+
+      <Field name='wWWHomePage' displayName='Web Page' type='string'/>    
+      <Field name='manager' displayName='Managers DN' type='string'/>
+
+      <Field name='objectClass' displayName='Object Classes' type='string' multi='true' >         
+          <Attributes> 
+            <Map>
+              <entry key='hidden' value='script: return $(sys.id) == null;'/>
+            </Map>
+          </Attributes>
+      </Field>   
+    </Section>
+      
+    <Section label='Account Info'>
+    
+      <Attributes>
+        <Map>
+          <entry key='hidden'>
+            <value>
+            <Script>
+              <Source>
+                 if ( sailpoint.tools.Util.otob($(sys.delete)) ) {
+                     return true;
+                 }
+                 return false
+              </Source>
+            </Script>
+            </value>
+          </entry>
+        </Map>      
+      </Attributes>
+      
+      <Field name='IIQDisabled' displayName='Disabled' type='boolean'/>
+      <Field name='IIQLocked' displayName='Locked' type='boolean' readOnly="true"/>
+      <Field name='sAMAccountName' displayName='sAMAccountName' type='string' dynamic='true'>
+        <Attributes> 
+          <Map>
+            <entry key='readOnly' value='script: return $(sys.id) != null;'/>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source>   
+            <![CDATA[
+              String value = null;                 
+              if ( $(sys.id) == null ) {
+                 StringBuilder sb = new StringBuilder(); 
+                 if ( givenName != null ) {
+                     sb.append(givenName);
+                 }
+                 if ( sn != null ) {
+                     sb.append(".");
+                     sb.append(sn);
+                 }         
+                 // these can only be 20 chars
+                 value = sb.toString();
+                 if ( value != null && value.length() > 20 ) { 
+                     value = value.substring(0,20);
+                 }
+              } else {
+                 value = $(sAMAccountName);
+              }
+              return value;
+            ]]>       
+          </Source>
+        </Script>
+      </Field>
+      
+      <Field name='distinguishedName' displayName='Distinguished Name' type='string' dynamic='true' required='true'>
+        <Attributes> 
+          <Map>
+            <entry key='required' value='true'/>            
+            <entry key='readOnly' value='script: return $(sys.id) != null;'/>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source>
+              String dn = null;
+              if ( $(sys.id) == null ) {
+                  StringBuilder sb = new StringBuilder();
+                  sb.append("cn=");
+                  if ( givenName != null ) {
+                    sb.append(givenName);
+                  }
+                  if ( initials != null ) {
+                    sb.append(".");
+                    sb.append(initials);
+                  }
+                  if ( sn != null ) {
+                    sb.append(".");
+                    sb.append(sn);
+                  }                
+                  if ( sb.length() > 3  ) {  
+                      sb.append(",ou=linkTransformerTests,DC=test,DC=sailpoint,DC=com");
+                      dn = sb.toString();
+                  } else {
+                      dn = null;
+                  } 
+                  
+              } else {
+                  dn = $(sys.nativeIdentity);
+              }
+              return dn;
+          </Source>
+        </Script>        
+      </Field>       
+    </Section>
+    
+    <Section label='Password'>      
+      <Attributes>
+        <Map>
+          <entry key='hidden'>
+            <value>
+            <Script>
+              <Source>
+                 if ( sailpoint.tools.Util.otob($(sys.delete)) ) {
+                     return true;
+                 }
+                 return false
+              </Source>
+            </Script>
+            </value>
+          </entry>
+        </Map>      
+      </Attributes>    
+         
+      <Field name='password' displayName='Password' type='secret'/>
+             
+      <Field name='confirmPassword' displayName='Confirm Password' type='secret'>            
+        <ValidationScript>
+          <Source>
+            <![CDATA[
+              import java.util.*;
+              import sailpoint.web.messages.MessageKeys;
+              import sailpoint.tools.Message;
+
+              List errors = null;
+              String pw = $(password);
+              String cPw = $(confirmPassword);
+              if( (pw == null && cPw != null) || (pw != null && cPw == null) || (pw != null && !pw.equals(cPw)) ) {
+                   errors = new ArrayList();
+                   Message msg = new Message();
+                   msg.setKey(MessageKeys.ERROR_IDENTITY_CONFIRM_PASS_MISMATCH);
+                   errors.add(msg);
+               }
+              return errors;
+            ]]>
+          </Source>
+        </ValidationScript>         
+      </Field>
+    </Section>
+    
+    <Section label='Group Memberships'>
+      <Attributes>
+        <Map>
+          <entry key='hidden'>
+            <value>
+              <Script>
+                <Source>
+                 if ( sailpoint.tools.Util.otob($(sys.delete)) ) {
+                     return true;
+                 }
+                 return false
+                </Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>      
+      </Attributes>
+      <Field name='memberOf' displayName='Group Membership' type='ManagedAttribute' filterString='application.name == "AD" &amp;&amp; attribute == "memberOf"' multi='true'/>      
+    </Section>    
+            
+    <Button label='Next' action='next'/>  
+    <Button label='Cancel' action='cancel'/>
+    <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/>
+    
+  </Form>
+
+</sailpoint>

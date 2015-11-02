@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputFormat value="#{msgs.title_delete_scope}">
+      <f:param value="#{scopeDelete.object.displayableName}"/>
+    </h:outputFormat>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" >
+        helpKey = 'DELETE_SCOPE';
+        
+        Ext.onReady(function () {
+            var assignedScopeReplacement = new SailPoint.ScopeSuggest({
+                renderTo: 'assignedScopeReplacementSuggest', 
+                binding: 'assignedScopeReplacement', 
+                width: 200,
+                listConfig : {width : 300}
+                });
+
+            var controlledScopeReplacement = new SailPoint.ScopeSuggest({
+                renderTo: 'controlledScopeReplacementSuggest', 
+                binding: 'controlledScopeReplacement', 
+                width: 200,
+                listConfig : {width : 300}
+                });
+        });         
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+        <div class="spContent">
+          <div style="margin: 5px">
+            <h:form styleClass="form" id="editForm">
+              <h:inputHidden id="id" value="#{scopeDelete.objectId}" />
+              
+              <h:panelGrid columns="2">
+                <h:outputText styleClass="sectionHeader" value="#{msgs.assn_scope_repl}"/>
+                <h:panelGroup>
+                    <div id="assignedScopeReplacementSuggest"></div>
+  	              <t:inputHidden id="assignedScopeReplacement"         
+  	                           value="#{scopeDelete.assignedScopeReplacement}" forceId="true">
+  	                <sp:convertScope />
+  	              </t:inputHidden>
+  	          </h:panelGroup>
+      
+                <h:outputText styleClass="sectionHeader" value="#{msgs.ctrl_scope_repl}"/>
+                <h:panelGroup>
+                    <div id="controlledScopeReplacementSuggest"></div>
+  	              <t:inputHidden id="controlledScopeReplacement"       
+  	                           value="#{scopeDelete.controlledScopeReplacement}" forceId="true">
+  	                <sp:convertScope />
+  	              </t:inputHidden>
+                </h:panelGroup>
+      
+                <h:outputText styleClass="sectionHeader" value="#{msgs.del_child_scopes}"/>
+                <h:selectBooleanCheckbox value="#{scopeDelete.deleteChildren}"/>
+      
+                <h:panelGroup styleClass="buttonRow">
+                  <h:commandButton styleClass="primaryBtn" value="#{msgs.button_delete}" action="#{scopeDelete.delete}" />
+                  <h:commandButton styleClass="secondaryBtn" value="#{msgs.button_cancel}" action="#{scopeDelete.cancelAction}" />
+                </h:panelGroup>
+              </h:panelGrid>
+            </h:form>
+          </div>
+        </div>
+    </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

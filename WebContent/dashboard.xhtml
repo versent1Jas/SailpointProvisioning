@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+	<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+	<sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <ui:define name="title">#{msgs.dashboard}</ui:define>
+  <ui:define name="breadCrumbs"> <ui:include src="dashboard/dashboardControlsInclude.xhtml"/></ui:define>
+
+  <ui:define name="headerItems">
+  
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web">
+    <src>dashboard.css</src>
+  </sp:style>
+
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/include">
+    <src>pager.css</src>
+  </sp:style>
+
+	<sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ClickToolTip.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/dashboard.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/EmailWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/BooleanGridEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/Workitem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/workItemGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/mySubordinates.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+	</sp:script>
+      
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DASHBOARD';
+      //--><!]]>
+      Ext.onReady(function () {
+
+        var sp = new SailPoint.state.StateProvider({
+          stateIds: ['#{certificationList.dashboardGridState.name}',
+                     '#{signoffList.gridState.name}',
+                     '#{workItemList.gridState.name}',
+                     '#{workItemOutboxList.gridState.name}',
+                     '#{applicationScorecardList.gridState.name}',
+                     'dashboardAccessRequestGrid2',
+                     'dashMyAccessRequestGrid2'],
+          states:   ['#{certificationList.dashboardGridState.state}',
+                     '#{signoffList.gridState.state}',
+                     '#{workItemList.gridState.state}',
+                     '#{workItemOutboxList.gridState.state}',
+                     '#{applicationScorecardList.gridState.state}',
+                     '#{gridConfigBean.gridStateConfig["dashboardAccessRequestGrid2"].state}',
+                     '#{gridConfigBean.gridStateConfig["dashMyAccessRequestGrid2"].state}']
+        });
+        Ext.state.Manager.setProvider(sp);
+
+        SailPoint.Dashboard.initializeDashboard();
+      });
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+      <h:form id="dashboardForm">
+        <a4j:queue requestDelay="250"/>
+
+        <h:inputHidden id="contentId"       value="#{dashboard.contentId}" />
+        <h:inputHidden id="taskResultId"    value="#{dashboard.resultId}"/>
+        
+        <h:inputHidden id="selectedIdWI"    value="#{workItemList.selectedId}"/>
+        <h:inputHidden id="selectedIdCI"    value="#{certificationList.selectedId}"/>
+        <h:inputHidden id="referenceIndex"  value="#{chart.referenceIndex}"/>
+        <h:inputHidden id="dashType"        value="#{dashboard.dashboardType}"/>
+        <h:inputHidden id="quickLink"       value="#{dashboard.quickLinkName}"/>
+        <h:inputHidden id="identityId"      value="#{dashboard.identityId}"/>
+        
+        <a4j:outputPanel ajaxRendered="true">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+        </a4j:outputPanel>
+        
+        <ui:fragment  rendered="#{(dashboard.dashboardType eq 'My')}">
+            <ui:include src="dashboard/dashboardLCMInclude.xhtml"/>
+        </ui:fragment>
+        
+        <div class="vis-clear"></div>
+        
+        <div id="undoDiv" class="formInfo" style="display:none;">
+          <span>#{msgs.undo_remove_panel}</span>
+          <span style="color:seagreen;text-decoration:underline;cursor:pointer" id="undo">#{msgs.yes}&nbsp;</span>
+          <span style="color:tomato;text-decoration:underline;cursor:pointer" id="removeUndo">#{msgs.no}</span>
+        </div>      
+        
+        <div class="vis-clear"></div>
+        
+        <table id="dashTable" class="width100">
+          <tr>
+            <td colspan="3" class="dashTable">
+              <div class="#{dashboard.myDashboard.layout.type}" id="dashboard">
+                
+                <!-- Column -->
+                <c:forEach items="#{dashboard.myDashboard.layout.regions}" var="region">
+                <div class="dashColumn d#{region}" id="dashColumn#{region}">
+
+                  <!-- We used to have just one of these but we weed an update function per region because we
+                       multiple get fired and are getting thrown out by richfaces as a similar request. -->
+                  <a4j:jsFunction name="updateDashboard#{region}" action="#{dashboard.updateMyDashboard}">
+                    <a4j:param assignTo="#{dashboard.changedRegionName}" name="changedRegionName"/>
+                    <a4j:param assignTo="#{dashboard.changedRegionValue}" name="changedRegionValue"/>
+                  </a4j:jsFunction>
+
+                  <!-- Portlet -->
+                  <c:forEach items="#{dashboard.myDashboard.references}" var="reference">
+                    <c:if test="#{reference.region==region}">
+                      <div class="baseWindow dashContentPanel width100" id="#{reference.region}_#{reference.content.id}">
+                        
+                        <!-- Portlet Header -->
+                        <div class="baseWindowHeader dashContentHeader" id="#{reference.content.id}_header">
+                          <table class="width100" cellspacing="0">
+                            <tr>
+                              <td class="handle" id="handle_#{reference.content.id}" rel="#{region}">
+                                <h:outputText value="#{sp:localizeKey(reference.content.effectiveTitle)}"/>
+                              </td>
+                              <td width="33px" align="right">
+                                <table class="dashContentBtns">
+                                  <tr>
+                                    <td align="right">
+                                      <c:choose>
+                                        <c:when test="#{reference.minimized != 'true'}">
+                                          <h:graphicImage styleClass="dashContentExpandBtn"
+                                            url="/images/icons/minus.png"
+                                            style="float:none"
+                                            id="dashContentExpandBtn_#{reference.content.id}"/>
+                                        </c:when>
+                                        <c:otherwise>
+                                          <h:graphicImage styleClass="dashContentExpandBtn"
+                                            url="/images/icons/plus.png"
+                                            style="float:none"
+                                            id="dashContentExpandBtn_#{reference.content.id}"/>
+                                        </c:otherwise>
+                                      </c:choose> 
+                                    </td>
+                                    <td align="left">
+                                      <h:graphicImage styleClass="dashContentRemoveBtn  #{(reference.content.required) ? 'required' : ''}"
+                                        url="#{(reference.content.required) ? '/images/icons/CloseDelete_disabled.png' : '/images/icons/CloseDelete.png'}"
+                                        style="float:none"
+                                        id="dashContentRemoveBtn_#{reference.content.id}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </div>
+                        <!-- End Portlet Header -->
+                        <!-- Portlet Body -->
+                        
+                        <a4j:outputPanel layout="block" id="contentBodyPanel_#{reference.content.id}">
+
+                          <t:div rendered="#{!(reference.minimized)}">
+                            <div class="baseWindowBody dashContentBody" 
+                              id="#{reference.content.id}_outerBody">
+                              <div id="#{reference.content.id}_innerBody">
+                                <ui:include src="#{reference.content.effectiveSource}">
+                                  <ui:param name="parentFormName" value="dashboardForm" />
+                                  <ui:param name="reference" value="#{reference}"/>
+                                </ui:include>
+                              </div>
+                            </div>
+                          </t:div>
+                       
+                        </a4j:outputPanel>
+                        
+                        <a4j:commandButton  action="#{dashboard.expandContent}" 
+                                            id="contentBodyBtn_#{reference.content.id}"
+                                            style="display:none"
+                                            render="contentBodyPanel_#{reference.content.id}" />
+
+                        <a4j:commandButton  action="#{dashboard.noop}"
+                                            id="contentRefreshBtn_#{reference.content.id}"
+                                            style="display:none"
+                                            render="contentBodyPanel_#{reference.content.id}" />
+
+                        <!-- End Portlet Body -->
+                         
+                        <!-- Added blank.gif to footer as a placeholder for IE6 to correct height problem jbryant-->
+                        <div class="baseWindowFooter dashContentFooter"><img src="#{base.requestContextPath}/images/blank.gif" style="display:none"/></div>
+                       
+                     </div>
+                      <!-- End Portlet-->
+                    </c:if>
+                  </c:forEach>
+                </div>
+                </c:forEach>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <ui:include src="/certification/remediationGrid.xhtml">
+          <ui:param name="forwardPage" value="viewCertifications"/>
+        </ui:include>
+        
+        <h:selectBooleanCheckbox style="display:none" id="arrangeSelect">
+          <a4j:ajax event="click" listener="#{dashboard.updateMyDashboard}"/>
+        </h:selectBooleanCheckbox>
+
+        <a4j:commandButton id="removeButton"  action="#{dashboard.removeFromMyContent}"
+          style="display:none" />
+          
+        <a4j:commandButton id="undoButton"
+          action="#{dashboard.undoRemove}" style="display:none" />
+          
+        <a4j:commandButton id="dashItemUpdateButton"
+          action="#{dashboard.updateReference}" style="display:none" />
+          
+        <h:commandButton id="viewCertificationButtonCI" style="display:none"
+          action="#{certificationList.select}"/>
+          
+        <h:commandButton id="viewCertificationButtonWI" style="display:none"
+          action="#{workItemList.viewCertification}"/>
+          
+        <h:commandButton id="viewWorkItemButton" style="display:none"
+          action="#{workItemList.viewWorkItem}"/>
+          
+        <h:commandButton id="riskScoresButton" style="display:none"
+          action="#{scoreCategoryList.applyFilter}"/>
+          
+        <h:commandButton id="viewResultBtn" style="display:none"
+          action="#{dashboard.viewTaskResult}"/>
+          
+        <h:commandButton id="changeDashTypeBtn" style="display:none"
+          action="#{dashboard.switchDashType}"/>
+          
+        <h:commandButton id="chooseQuickLinkBtn" style="display:none"
+          action="#{dashboard.chooseQuickLink}"/>
+        
+        <!-- Email Help Link -->
+        <ui:fragment rendered="#{base.helpContact != null}">
+                   <span style="float: right;margin-top:3px">
+                   <img src="#{base.requestContextPath}/images/icons/dashboard_help_12.png" />
+                   <a href="mailto:${base.helpContact}">#{msgs.email_help_link}</a>
+                   </span>
+        </ui:fragment>        
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  
+  <ui:fragment rendered="#{'Modify' != provisioningPlan.accountRequests[0].operation}">  
+    <h:outputText value="#{provisioningPlan.accountRequests[0].operation}" />
+    <h:outputText value=" "/>
+    <h:outputText value="#{sp:escapeJavascript(sp:commify(provisioningPlan.accountRequests[0].nativeIdentity))}" />
+  </ui:fragment>
+  
+  <ui:fragment rendered="#{'Modify' == provisioningPlan.accountRequests[0].operation}">
+    <ui:fragment rendered="#{0 ne sp:size(provisioningPlan.accountRequests[0].attributeRequests)}">
+      <h:outputText escape="false" value="#{msgs[provisioningPlan.accountRequests[0].attributeRequests[0].operation.messageKey]}" />
+      <h:outputText value=" "/>
+      <h:outputText value="#{sp:commify(provisioningPlan.accountRequests[0].attributeRequests[0].value)}" />
+      <h:outputText escape="false" value=" #{msgs.to} " rendered="#{'Add' == provisioningPlan.accountRequests[0].attributeRequests[0].operation}" />
+      <h:outputText escape="false" value=" #{msgs.from} " rendered="#{'Remove' == provisioningPlan.accountRequests[0].attributeRequests[0].operation}" />
+      <h:outputText escape="false" value=" #{msgs.on} " rendered="#{'Set' == provisioningPlan.accountRequests[0].attributeRequests[0].operation}" />
+      <h:outputText value="#{provisioningPlan.accountRequests[0].attributeRequests[0].name}" />
+      <h:outputText escape="false" value=" #{msgs.for} "/>
+      <h:outputText value="#{sp:escapeJavascript(sp:commify(provisioningPlan.accountRequests[0].nativeIdentity))}" />
+    </ui:fragment>
+  
+    <ui:fragment rendered="#{0 ne sp:size(provisioningPlan.accountRequests[0].permissionRequests)}">
+      <h:outputText escape="false" value="#{msgs[provisioningPlan.accountRequests[0].permissionRequests[0].operation.messageKey]}" />
+      <h:outputText value=" "/>
+      <h:outputText value="#{sp:commify(provisioningPlan.accountRequests[0].permissionRequests[0].rightsList)}" />
+      <h:outputText escape="false" value=" #{msgs.to} " rendered="#{'Add' == provisioningPlan.accountRequests[0].permissionRequests[0].operation}" />
+      <h:outputText escape="false" value=" #{msgs.from} " rendered="#{'Remove' == provisioningPlan.accountRequests[0].permissionRequests[0].operation}" />
+      <h:outputText escape="false" value=" #{msgs.on} " rendered="#{'Set' == provisioningPlan.accountRequests[0].permissionRequests[0].operation}" />
+      <h:outputText value="#{provisioningPlan.accountRequests[0].permissionRequests[0].target}" />
+      <h:outputText escape="false" value=" #{msgs.for} "/>
+      <h:outputText value="#{sp:escapeJavascript(sp:commify(provisioningPlan.accountRequests[0].nativeIdentity))}" />
+    </ui:fragment>
+    
+  </ui:fragment>
+
+  <ui:fragment rendered="#{(sp:size(provisioningPlan.objectRequests) gt 0)}">
+    <h:outputFormat value="#{msgs.remed_remove_profile_from_role}" rendered="#{provisioningPlan.objectRequests[0].attributeRequests[0].name eq 'profiles'}">
+        <f:param value="#{provisioningPlan.objectRequests[0].attributeRequests[0].displayValue}" />
+        <f:param value="'#{provisioningPlan.objectRequests[0].targetReference.name}'"/>
+    </h:outputFormat>
+    <h:outputFormat value="#{msgs.remed_remove_child_from_role}" rendered="#{provisioningPlan.objectRequests[0].attributeRequests[0].name eq 'children'}">
+        <f:param value="#{provisioningPlan.objectRequests[0].attributeRequests[0].value.name}" />
+        <f:param value="'#{provisioningPlan.objectRequests[0].targetName}'"/>
+    </h:outputFormat>
+    <h:outputFormat value="#{msgs.remed_remove_permitted_role}" rendered="#{provisioningPlan.objectRequests[0].attributeRequests[0].name eq 'permittedRole'}">
+        <f:param value="#{provisioningPlan.objectRequests[0].attributeRequests[0].value.name}" />
+        <f:param value="'#{provisioningPlan.objectRequests[0].targetName}'"/>
+    </h:outputFormat>
+    <h:outputFormat value="#{msgs.remed_remove_required_role}" rendered="#{provisioningPlan.objectRequests[0].attributeRequests[0].name eq 'requiredRole'}">
+        <f:param value="#{provisioningPlan.objectRequests[0].attributeRequests[0].value.name}" />
+        <f:param value="'#{provisioningPlan.objectRequests[0].targetName}'"/>
+    </h:outputFormat>
+    <h:outputFormat value="#{msgs.remed_remove_granted_scope_from_role}" rendered="#{provisioningPlan.objectRequests[0].attributeRequests[0].name eq 'roleGrantedScope'}">
+        <f:param value="#{provisioningPlan.objectRequests[0].attributeRequests[0].value.name}" />
+        <f:param value="'#{provisioningPlan.objectRequests[0].targetName}'"/>
+    </h:outputFormat>
+    <h:outputFormat value="#{msgs.remed_remove_granted_capability}" rendered="#{provisioningPlan.objectRequests[0].attributeRequests[0].name eq 'roleGrantedCapability'}">
+        <f:param value="#{provisioningPlan.objectRequests[0].attributeRequests[0].value.name}" />
+    </h:outputFormat>
+  </ui:fragment>
+  <ui:fragment rendered="#{(sp:size(provisioningPlan.accountRequests) gt 1) or (sp:size(provisioningPlan.accountRequests[0].attributeRequests) gt 1) or (sp:size(provisioningPlan.accountRequests[0].permissionRequests) gt 1) or (sp:size(provisioningPlan.objectRequests) gt 1) or (sp:size(provisioningPlan.objectRequests) gt 1) or (sp:size(provisioningPlan.objectRequests[0].attributeRequests) gt 1) }">...</ui:fragment>
+</ui:composition>
+
+</body>
+</html>

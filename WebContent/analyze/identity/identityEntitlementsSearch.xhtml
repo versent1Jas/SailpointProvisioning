@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"      
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+
+    <script type="text/javascript">
+    //<![CDATA[
+      function addEntitlementFilter() {    	
+          
+          // Clear the validation error message
+          var errorDiv = $('errorMessages');
+          if ( errorDiv ) {
+              errorDiv.innerHTML = ""; 
+              errorDiv.style.display = 'none';
+          }
+          
+          var errors = [];
+          if (SailPoint.Utils.getValueFromElement($('applicationSelector'), null) === null) {
+              errors.push("application");
+          }
+          if (SailPoint.Utils.getValueFromElement($('attributeSuggest'), null) === null) {
+              errors.push("attribute");
+          }
+          
+          if (SailPoint.Utils.getValueFromElement($('entitlementSuggest'), null) === null) {
+              errors.push("entitlement value");
+          }
+          
+          if ( errors.length > 0 ) {
+              errorDiv.innerHTML = "Missing required field(s) '" +  errors.join() + "'. Each filter must include an application, attribute, and entitlement value.";
+              errorDiv.style.display = '';              
+          } else {
+              $('identitySearchForm:identityEntitlementFilterAddBtn').click();
+              SailPoint.Analyze.Identity.clearIdentityEntitlements();
+          }
+      }
+
+      function removeEntitlementFilter(filterId) {
+          $('identitySearchForm:identityEntitlementSelectedFilter').value = filterId;
+          $('identitySearchForm:identityEntitlementFilterRemoveBtn').click();
+      }
+
+    //]]>
+    </script>
+    <table class="width100" cellspacing="0">
+    
+      <tr>        
+        <td valign="top">
+         <div id="errorMessages" class="formError" style="display:none"/>  
+          
+         <div id="filterEntitlementsSection" class="spContent">
+            <div>
+              <div id="entitlementAddPanel">              
+                <h:outputText styleClass="sectionHeader" value="#{msgs.srch_input_entitlement_filters}" style="display:block;margin-bottom:10px"/>
+                <a4j:outputPanel id="identityEntitlementsSearchFilters">                                        
+                  <table class="spPaddedTable">
+                    <tr>
+                      <th>&nbsp;&nbsp;</th>
+                      <th>#{msgs.lcm_request_entitlements_application}</th>
+                      <th>#{msgs.lcm_request_entitlements_attribute}</th>
+                      <th>#{msgs.lcm_request_entitlements_value}</th>
+                    </tr>                
+                    <t:dataList value="#{searchBean.identityEntitlementFilter.filters}" var="filter">
+                      <tr>                    
+                        <td>
+                          <h:graphicImage url="/images/icons/minus.png"
+                                          height="12" width="12"
+                                          class="pointer" 
+                                          onclick="removeEntitlementFilter('#{filter.id}');" />
+                        </td>
+                        <td>#{filter.application}</td>
+                        <td>#{filter.attributeName}</td>
+                        <td>#{filter.displayValue}</td>
+                      </tr>
+                    </t:dataList>
+                    <tr>
+                      <td>                    
+                        <a4j:commandButton  id="identityEntitlementFilterAddBtn"
+                              style="display:none"
+                              action="#{searchBean.identityEntitlementFilter.addFilter}"
+                              render="identityEntitlementsSearchFilters"/>  
+                              
+                        <a4j:commandButton  id="identityEntitlementFilterResetBtn"
+                              style="display:none"
+                              action="#{searchBean.identityEntitlementFilter.reset}"
+                              render="identityEntitlementsSearchFilters"/>
+                              
+                        <a4j:commandButton  id="identityEntitlementFilterRemoveBtn"
+                              style="display:none"
+                              action="#{searchBean.identityEntitlementFilter.removeFilter}"
+                              render="identityEntitlementsSearchFilters"/>    
+                              
+                        <h:inputHidden id="identityEntitlementSelectedFilter" value="#{searchBean.identityEntitlementFilter.selectedFilterId}" />        
+                      </td>
+                    </tr>                   
+                  </table>  
+                </a4j:outputPanel>
+                      
+                <div style='margin: 5px 5px 5px 5px;'>
+                <h:outputText value="#{msgs.srch_input_entitlement_filter_subtitle}" style="display:block;margin-bottom:10px"/>    
+                <table class="spPaddedTable">
+                  <tr>
+                    <td style="vertical-align: middle;" class="titleColumn">#{msgs.lcm_request_entitlements_application}</td>
+                    <td class="leftAlignedColumn">
+                      <div id="applicationSelectorDiv"></div>
+                      <div id="applicationSelectorVal" style="display:none"></div>                      
+                      <t:inputHidden id="applicationSelector" value='#{searchBean.identityEntitlementFilter.current.application}' forceId="true">
+                      </t:inputHidden>                      
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td style="vertical-align: middle;" class="titleColumn">#{msgs.lcm_request_entitlements_attribute}</td>
+                    <td class="leftAlignedColumn">
+                      <div id="attributeSuggestDiv"></div>    
+                      <div id="attributeSuggestVal" style="display:none"></div>
+                      <t:inputHidden id="attributeSuggest" value='#{searchBean.identityEntitlementFilter.current.attributeName}' forceId="true">
+                      </t:inputHidden>                       
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td style="vertical-align: middle;" class="titleColumn">#{msgs.lcm_request_entitlements_value}</td>
+                    <td class="leftAlignedColumn">
+                      <table>
+                        <tr>
+                          <td style="padding: 0px">
+                            <div id="entitlementSuggestDiv"></div>
+                            <div id="entitlementSuggestVal" style="display:none"></div>
+                            <t:inputHidden id="entitlementSuggest" value='#{searchBean.identityEntitlementFilter.current.attributeValue}' forceId="true">
+                            </t:inputHidden> 
+                          </td>
+                          <td style="padding-left: 3px"><h:graphicImage id="valueDescriptionHover" style="display: none" value="/images/icons/info.png" /></td>
+                          <td style="padding-left: 2px;padding-right: 2px;">
+                            <h:commandButton id="identityEntitlementFilterAdd" value="#{msgs.button_add}" onclick='addEntitlementFilter();return false;' styleClass="secondaryBtn" />
+                          </td>         
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                </div>
+              </div>
+            </div>
+          </div> <!--  filterEntitlementsSection -->
+        </td>
+      </tr>
+      
+    </table>
+    
+    <table>
+      <tr>            
+        <td valign="top">  
+          <h:outputText styleClass="sectionHeader" value="#{msgs.srch_input_entitlement_meta_data}" style="display:block;margin-bottom:10px;"/>
+          <h:outputText value="#{msgs.srch_input_meta_subtitle}" style="display:block;margin-bottom:2px;margin-left:10px;"/>
+        </td>
+      </tr>
+    </table>
+    
+    <div style='margin: 0px 10px 10px 10px;'>  
+    
+    <table>
+      <tr>
+        <td valign="top">
+          <h:outputText styleClass="subSectionHeader" value="#{msgs.srch_input_certification}"/>
+          <table cellpadding="5" cellspacing="0" class="width100 nowrap">
+            <tr>
+                <td><h:outputText styleClass="textBold"
+                    value="#{sp:localizeKey(searchBean.inputs['isEntitlementCertEmpty'].description)}" />
+                </td>
+                <td colspan="2"><h:selectOneMenu
+                    id="entitlementMissingCurrentCert"
+                    value="#{searchBean.inputs['isEntitlementCertEmpty'].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                    <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                </h:selectOneMenu></td>
+            </tr>            
+
+            <tr>
+                <td><h:outputText styleClass="textBold"
+                    value="#{sp:localizeKey(searchBean.inputs['isEntitlementPendingCert'].description)}" />
+                </td>
+                <td colspan="2"><h:selectOneMenu
+                    id="entitlementPendingCert"
+                    value="#{searchBean.inputs['isEntitlementPendingCert'].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                    <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                </h:selectOneMenu></td>
+                
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+      
+      <tr>
+        <td valign="top"> 
+        
+          <h:outputText styleClass="subSectionHeader" value="#{msgs.srch_input_request}"/>
+          <table cellpadding="5" cellspacing="0" class="width100 nowrap">
+            <tr>
+                <td><h:outputText styleClass="textBold"
+                    value="#{sp:localizeKey(searchBean.inputs['isEntitlementRequestEmpty'].description)}" />
+                </td>
+                <td colspan="2"><h:selectOneMenu
+                    id="entitlementMissingRequest"
+                    value="#{searchBean.inputs['isEntitlementRequestEmpty'].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                    <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                </h:selectOneMenu></td>
+            </tr>
+            
+            <tr>
+                <td><h:outputText styleClass="textBold"
+                    value="#{sp:localizeKey(searchBean.inputs['isEntitlementPendingRequest'].description)}" />
+                </td>
+                <td colspan="2"><h:selectOneMenu
+                    id="entitlementPendingRequest"
+                    value="#{searchBean.inputs['isEntitlementPendingRequest'].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                    <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                </h:selectOneMenu></td>
+              </tr>
+          </table>        
+        </td>
+      </tr>  
+      
+      <tr>
+        <td valign="top">
+          <h:outputText styleClass="subSectionHeader" value="#{msgs.srch_input_other}"/>
+            <table cellpadding="5" cellspacing="0" class="width100 nowrap">                      
+              <tr>
+                <td><h:outputText styleClass="textBold"
+                    value="#{sp:localizeKey(searchBean.inputs['entitlementConnectionStatus'].description)}" />
+                </td>
+                <td colspan="2"><h:selectOneMenu
+                    id="entitlementConnectionStatus"
+                    value="#{searchBean.inputs['entitlementConnectionStatus'].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.connected}" itemValue="Connected" />
+                    <f:selectItem itemLabel="#{msgs.disconnected}" itemValue="Disconnected" />
+                </h:selectOneMenu></td>
+              </tr>
+              
+              <tr>
+                <td><h:outputText styleClass="textBold"
+                    value="#{sp:localizeKey(searchBean.inputs['isEntitlementAssigned'].description)}" />
+                </td>
+                <td colspan="2"><h:selectOneMenu
+                    id="isEntitlementAssigned"
+                    value="#{searchBean.inputs['isEntitlementAssigned'].value}">
+                    <f:selectItem itemLabel="" itemValue="" />
+                    <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                    <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                </h:selectOneMenu></td>
+              </tr>
+              
+           </table>
+        </td>
+              
+      </tr>  
+      
+      </table>
+    </div>        
+  </f:view>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+    <ImportAction name='include' value='WEB-INF/config/tasksCommonRunnable.xml'/>
+
+    <!--***********************************************************
+
+    TaskDefinition - Runnables
+
+    *************************************************************-->
+
+    <TaskDefinition  name="Refresh Entitlement Correlation">
+        <Attributes>
+            <Map>
+                <entry key="correlateEntitlements" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>
+            Refresh the business role assignments of all identities.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition"  name="Identity Refresh"/>
+        </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition  name="Refresh Risk Scores">
+        <Attributes>
+            <Map>
+                <entry key="refreshScorecard" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>
+            Refresh the risk scores of all identities.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition"  name="Identity Refresh"/>
+        </Parent>
+    </TaskDefinition>
+    
+    <TaskDefinition  name="Refresh Role Indexes">
+        <Description>
+            Refresh the statistics of all roles.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition"  name="Role Index Refresh"/>
+        </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition  name="Refresh Groups">
+        <Attributes>
+            <Map>
+                <entry key="refreshGroups" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>
+            Refresh indexes for all identity groups.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition"  name="Identity Refresh"/>
+        </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition  name="Check Active Policies">
+        <Attributes>
+            <Map>
+                <entry key="checkPolicies" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>
+            Check default policies and refresh the policy violation
+            status on each identity.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition"  name="Identity Refresh"/>
+        </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition  name="Refresh Continuous Certifications">
+        <Attributes>
+            <Map>
+            </Map>
+        </Attributes>
+        <Description>
+            Refresh all continuous certifications to become up-to-date with
+            the current state of the identities in the system.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition"  name="Continuous Certification Refresh"/>
+        </Parent>
+    </TaskDefinition>
+
+    <!--
+      Be careful with the name of this one, there is a subclass
+      in the unit tests that references it by name.
+    -->
+    <TaskDefinition executor="sailpoint.task.WorkItemExpirationScanner" name="Check Expired Work Items" type="System">
+        <Description>Send reminders, escalate, or expire items.</Description>
+        <Signature>
+            <Returns>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_check_expired_work_items_total</Prompt>
+                </Argument>
+                <Argument name="totalWorkItems" type="int">
+                    <Prompt>task_out_check_expired_work_items_work_items_total</Prompt>
+                </Argument>
+                <Argument name="totalCertItems" type="int">
+                    <Prompt>task_out_check_expired_work_items_cert_items_total</Prompt>
+                </Argument>
+                <Argument name="expirations" type="int">
+                    <Prompt>task_out_check_expired_work_items_expirations</Prompt>
+                </Argument>
+                <Argument name="reminders" type="int">
+                    <Prompt>task_out_check_expired_work_items_reminders</Prompt>
+                </Argument>
+                <Argument name="escalations" type="int">
+                    <Prompt>task_out_check_expired_work_items_escalations</Prompt>
+                </Argument>
+                <Argument name="pushes" type="int">
+                    <Prompt>task_out_check_expired_work_items_pushes</Prompt>
+                </Argument>
+                <Argument name="emailsSuppressed" type="String">
+                    <Prompt>task_out_emails_suppressed</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition executor="sailpoint.task.MitigationExpirationScanner" name="Check Expired Mitigations"
+                    type="System">
+        <Description>Send notifications when mitigations expire.</Description>
+        <Signature>
+            <Returns>
+                <Argument name="identities" type="int">
+                    <Prompt>task_out_check_expired_mitigations_identities</Prompt>
+                </Argument>
+                <Argument name="expired" type="int">
+                    <Prompt>task_out_check_expired_mitigations_expired</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      This isn't meant to be launched from the generic launch page
+      though that would be nice to support.  The signature is largely
+      for documenttion.  Should we have a template?
+    -->
+    <TaskDefinition executor="sailpoint.task.RoleMiningTask" hidden="true" name="Role Mining" type="System">
+        <Description>
+            Performs undirected role mining.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="configId" required="true" type="string">
+                    <Prompt>task_in_role_mining_config_id</Prompt>
+                </Argument>
+                <Argument name="filter" type="string">
+                    <Prompt>task_in_role_mining_filter</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="totalInstances" type="int">
+                    <Prompt>task_out_role_mining_total_instances</Prompt>
+                </Argument>
+                <Argument name="totalRoles" type="int">
+                    <Prompt>task_out_role_mining_total_roles</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      Default task for role synchronization with IDM systems.
+      The task itself doesn't have any options, its behavior is
+      determined by the IntegrationConfigs.  There is a hidden
+      input "role" that will perform a synchronization on a 
+      single role rather than all of them.  This is used in
+      workflows if you want to do a synchronization immediately
+      after a role is edited.  It is not in the task signature
+      because we don't want this exposed in the launch UI.
+    -->
+    <TaskDefinition name="Synchronize Roles" 
+      executor="sailpoint.task.RoleSynchronizer" type="System">
+        <Description>
+            Synchronize roles with identity management systems.
+        </Description>
+        <Signature>
+            <Returns>
+                <Argument name="updates" type="int">
+                    <Prompt>task_out_role_sync_updates</Prompt>
+                </Argument>
+                <Argument name="updateFailures" type="int">
+                    <Prompt>task_out_role_sync_update_failures</Prompt>
+                </Argument>
+                <Argument name="deletes" type="int">
+                    <Prompt>task_out_role_sync_deletes</Prompt>
+                </Argument>
+                <Argument name="deleteFailures" type="int">
+                    <Prompt>task_out_role_sync_delete_failures</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition  name="Role Overlap Analysis"
+        resultRenderer="impactAnalysis.xhtml">
+        <Attributes>
+            <Map>
+                <entry key="doOverlapAnalysis" value="true"/>
+                <entry key="noImpactAnalysis" value="true"/>
+                <entry key="baseResultName" value="Overlap Analysis - "/>
+            </Map>
+        </Attributes>
+        <Description>
+            Run overlap analysis on a selected role.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition"  name="Impact Analysis"/>
+        </Parent>
+        <Signature>
+            <Inputs>
+                <Argument name="targetRole" required="true" type="Bundle">
+                    <Prompt>task_in_overlap_role</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="roles" type="string">
+                    <Prompt>task_out_impact_analysis_roles</Prompt>
+                </Argument>
+                <Argument name="profiles" type="string">
+                    <Prompt>task_out_impact_analysis_profiles</Prompt>
+                </Argument>
+                <Argument name="totalIdentities" type="int">
+                    <Prompt>task_out_impact_analysis_total_identities</Prompt>
+                </Argument>
+                <Argument name="totalLosses" type="int">
+                    <Prompt>task_out_impact_analysis_total_losses</Prompt>
+                </Argument>
+                <Argument name="totalGains" type="int">
+                    <Prompt>task_out_impact_analysis_total_gains</Prompt>
+                </Argument>
+                <Argument name="totalConflicts" type="int">
+                    <Prompt>task_out_impact_analysis_total_conflicts</Prompt>
+                </Argument>
+                <Argument name="analysis" type="complex"/>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+</sailpoint>

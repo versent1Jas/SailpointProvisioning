@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <a4j:commandButton id="updateSelectedEntitlements" style="display:none" 
+      action="#{roleEditor.profileMiningEditor.updateSelectedEntitlements}"
+      render="entitlementMiningProfileEditPanel"
+      oncomplete="var entitlementMiningWindow = Ext.getCmp('entitlementMiningPanel');
+                  var entitlementProfilePanel = Ext.getCmp('entitlementProfilePanel');
+                  entitlementMiningWindow.getLayout().setActiveItem('entitlementProfilePanel');
+                  $('entitlementProfileDiv').style.display = '';"/>
+  <div id="entitlementProfileDiv" class="spAjaxContent">
+    <div class="spContentBody" style="padding:12px">
+      <ui:param name="profile" value="#{roleEditor.profileMiningEditor.baseProfile}"/>
+      <ui:param name="miningBean" value="#{roleEditor.profileMiningEditor.miningBean}"/>
+      
+      <div><h:outputText class="sectionHeader" value="#{msgs.description}"/></div>
+      <div><h:inputTextarea id="editedEntitlementProfileDescription" value="#{profile.description}" cols="40" rows="3"/></div>
+
+      <div class="spacerDiv"/>
+
+      <a4j:outputPanel id="entitlementMiningProfileEditPanel">
+        <div><h:outputText class="sectionHeader" value="#{msgs.profiles_from_entitlements}"/></div>
+
+        <div class="width100">
+          <ui:repeat value="#{miningBean.appEntitlementBuckets}" var="appBucketMap">  
+            <h:outputText class="sectionHeader" value="#{appBucketMap['appName']} Entitlements"
+                          style="#{(empty appBucketMap['appBuckets']) ? 'display: none' : 'display: '}"/>
+            <h:panelGroup style="#{(empty appBucketMap['appBuckets']) ? 'display: none' : 'display: '}">
+            
+              <div class="spAjaxTabledContent" style="width:98%">
+                <table class="spTable" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th width="25%"><h:outputText value="#{msgs.label_name}"/></th>
+                      <th width="35%"><h:outputText value="#{msgs.label_value}"/></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ui:repeat value="#{appBucketMap['appBuckets']}" var="ent">
+                      <ui:fragment rendered="#{ent.attr.selected}">
+                        <tr class="#{sp:isOdd(ent.id) ? 'even' : 'odd'}">
+                          <td><h:outputText value="#{ent.attr.name}"/></td>
+                          <td><h:outputText value="#{ent.attr.displayValue}"/></td>
+                        </tr>
+                      </ui:fragment>
+                    </ui:repeat>
+                  </tbody>
+                </table>
+              </div>    
+            </h:panelGroup>
+          </ui:repeat>
+        </div>
+        <div class="spacerDiv"/>
+        <div>
+          <h:panelGroup style="#{(empty entitlementProfileMiningBean.miningBean.selectedBuckets) ? 'display: none' : 'display: '}">
+            <div><h:outputText class="sectionHeader" value="#{msgs.profiles_from_groupings}"/></div>
+            <div class="spAjaxTabledContent">
+              <table class="spTable" cellspacing="0">
+                <thead>
+                  <tr>
+                    <th><h:outputText value="#{msgs.label_group_name}"/></th>
+                    <th><h:outputText value="#{msgs.entitlements}"/></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ui:repeat value="#{entitlementProfileMiningBean.miningBean.selectedBuckets}" var="group">
+                    <tr class="#{sp:isOdd(group.id) ? 'even' : 'odd'}" >
+                      <td><h:outputText  value="#{group.name}"/></td>
+                      <td>
+                        <table class="spLightBlueTable width100">
+                          <thead><tr>
+                            <th><h:outputText value="#{msgs.label_name}"/></th>
+                            <th><h:outputText value="#{msgs.label_value}"/></th>
+                          </tr></thead>
+                          <tbody>
+                            <ui:repeat value="#{group.childBuckets}" var="child">
+                              <tr>
+                                <td><h:outputText styleClass="font10" value="#{child.attr.name}"/></td>
+                                <td><h:outputText styleClass="font10" value="#{child.attr.displayValue}"/></td>
+                              </tr>
+                            </ui:repeat>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </ui:repeat>
+                </tbody>
+              </table>
+            </div>
+          </h:panelGroup>
+        </div>
+      </a4j:outputPanel>
+    </div>
+  </div>
+</ui:composition>
+</body>
+</html>

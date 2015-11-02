@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition> 
+        
+    <div id="certifications-grid" style="width:100%"></div>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/VTypes.js?#{debug.revision}</src>     
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/tasks.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/monitor/scheduleCertification/ScheduleCertificationsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/monitor/scheduleCertification/schedulesGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/monitor/scheduleCertification/eventsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateField.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateRange.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src> 
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/monitor/scheduleCertification/CertificationsGrid.js?#{debug.revision}</src>    
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/certification/Renderers.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/PercentRangeInput.js?#{debug.revision}</src>
+        
+    </sp:script>
+
+    <script>
+      var stateIds = ['#{certificationScheduleList.gridState.name}',
+                      '#{certificationEventsList.gridState.name}',
+                      'certificationGroupsGrid'];
+      var sp = new SailPoint.state.StateProvider({
+        stateIds: stateIds,
+        states : ['#{certificationScheduleList.gridState.state}',
+                  '#{certificationEventsList.gridState.state}',
+                  "#{gridConfigBean.gridStateConfig['certificationGroupsGrid'].state}"]
+      });
+      
+      Ext.state.Manager.setProvider(sp);
+
+      var scheduleGridMetaData = #{certificationScheduleList.columnJSON};
+
+      var eventGridMetaData = #{certificationEventsList.columnJSON};
+
+      var fields = [];
+      fields.push(scheduleGridMetaData.fields);
+      fields.push(eventGridMetaData.fields);
+
+
+      var groupsGridConf = #{gridConfigBean.uiConfigJson['certificationsTableColumns']};
+      var groupsGridColumns = groupsGridConf.columns;
+      fields.push(groupsGridConf.fields);
+      
+      Ext.onReady(function(){
+        Ext.QuickTips.init();
+
+        var tabPanelConf = SailPoint.Monitor.Grid.Certifications.createPanel('#{state.activeTab}', stateIds, fields, scheduleGridMetaData.columns, eventGridMetaData.columns, groupsGridColumns);
+
+        var viewport = SailPoint.getViewport({
+            bodyContent: tabPanelConf,
+            title: "#{msgs.title_scheduled_certs}",
+            subtitleId: 'editForm'
+        });
+        viewport.doLayout();
+      });
+    </script>
+
+</ui:composition>
+
+</body>
+</html>

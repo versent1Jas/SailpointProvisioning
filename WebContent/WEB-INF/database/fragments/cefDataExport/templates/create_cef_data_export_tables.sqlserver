@@ -1,0 +1,75 @@
+use identityiq;
+
+create table identityiq.sptr_cef_export (
+    task_def_id nvarchar(128) not null,
+    class_name nvarchar(256) not null,
+    start_dt numeric(19,0) not null,
+    end_dt numeric(19,0) not null
+);
+GO
+
+create index sptr_idx_export_task on identityiq.sptr_cef_export (task_def_id);
+GO
+
+create index sptr_idx_export_class on identityiq.sptr_cef_export (class_name);
+GO
+
+create table identityiq.sptr_cef_identity (
+    created_dt datetime,
+    hostname nvarchar(128) not null,
+    cef_version nvarchar(128) not null,
+    device_vendor nvarchar(128) not null,
+    device_product nvarchar(128) not null,
+    device_version nvarchar(128) not null,
+    signature_id nvarchar(128) not null,
+    name nvarchar(128) not null,
+    severity nvarchar(128) not null,
+    extension  nvarchar(max) null,
+    primary key (signature_id)
+);
+GO
+
+create table identityiq.sptr_cef_link (
+    created_dt datetime,
+    hostname nvarchar(128) not null,
+    cef_version nvarchar(128) not null,
+    device_vendor nvarchar(128) not null,
+    device_product nvarchar(128) not null,
+    device_version nvarchar(128) not null,
+    signature_id nvarchar(128) not null,
+    name nvarchar(128) not null,
+    severity nvarchar(128) not null,
+    extension  nvarchar(max) null,
+    primary key (signature_id)
+);
+GO
+
+create table identityiq.sptr_cef_audit_event (
+    created_dt datetime,
+    hostname nvarchar(128) not null,
+    cef_version nvarchar(128) not null,
+    device_vendor nvarchar(128) not null,
+    device_product nvarchar(128) not null,
+    device_version nvarchar(128) not null,
+    signature_id nvarchar(128) not null,
+    name nvarchar(128) not null,
+    severity nvarchar(128) not null,
+    extension nvarchar(max) null,
+    primary key (signature_id)
+);
+GO
+
+create table identityiq.sptr_cef_syslog_event (
+    created_dt datetime,
+    hostname nvarchar(128) not null,
+    cef_version nvarchar(128) not null,
+    device_vendor nvarchar(128) not null,
+    device_product nvarchar(128) not null,
+    device_version nvarchar(128) not null,
+    signature_id nvarchar(128) not null,
+    name nvarchar(128) not null,
+    severity nvarchar(128) not null,
+    extension  nvarchar(max) null,
+    primary key (signature_id)
+);
+Go

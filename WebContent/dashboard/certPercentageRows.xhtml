@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <ui:repeat value="#{certPercentageRows}" var="certPercent">
+
+    <tr style="#{showCertPercentageRows ? '' : 'display:none;'} #{(certPercent.totalItems gt 0 or certPercent.hasOpenCert) ? 'cursor:pointer' : ''}" 
+        onmouseover="this.style.backgroundColor='#FFFFCC'" onmouseout="this.style.backgroundColor=''">              
+      <td valign="middle">
+        <h:outputLink value="javascript: SailPoint.EmailWindow.open('#{certPercent.recipientId}', '#{certPercent.openCertsEmailTemplate}')">
+          <h:graphicImage url="/images/icons/mail_16.gif" />
+        </h:outputLink>
+      </td>
+      
+      <td onclick="SailPoint.Dashboard.toggleCertPercentDisplay('#{certsPanel}_details#{certPercent.id}', '#{certPercent.hasOpenCert}', $('#{certsPanel}_showDetails_#{certPercent.id}'));">            
+        <h:outputText styleClass="font10" value="#{certPercent.name}" />
+      </td>
+      
+      <td colspan="2" onclick="SailPoint.Dashboard.toggleCertPercentDisplay('#{certsPanel}_details#{certPercent.id}', '#{certPercent.hasOpenCert}', $('#{certsPanel}_showDetails_#{certPercent.id}'));"> 
+        <ui:fragment rendered="#{!certPercent.hasOpenCert}">
+          <h:outputText style="margin-left: 10px" styleClass="font10"
+            value="#{msgs.msg_no_open_ceritications}"/>
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{certPercent.hasOpenCert}">
+          <sp:progressBar 
+            rendered="#{certPercent.hasContinuous}"           
+            totalNum="#{certPercent.totalItems}"
+            completedNum="#{certPercent.completedItems}"
+            greenNum="#{certPercent.certifiedItems}"
+            yellowNum="#{certPercent.certificationRequiredItems}"
+            redNum="#{certPercent.overdueItems}"
+            percentComplete="#{sp:round(certPercent.percentComplete)}">
+          </sp:progressBar> 
+          
+          <sp:progressBar   
+            rendered="#{!(certPercent.hasContinuous)}"          
+            totalNum="#{certPercent.totalItems}"
+            completedNum="#{certPercent.completedItems}"
+            remainingClass="progressBarRemainingDarkGray"
+            percentComplete="#{sp:round(certPercent.percentComplete)}">
+          </sp:progressBar>
+          
+        </ui:fragment>
+         
+      </td>
+    </tr>
+    <tr id="#{certsPanel}_details#{certPercent.id}" style="#{(!(empty certPercent.certifications) and certPercent.showCerts) ? '' : 'display:none'}" >
+      
+      <td colspan="4" class="spLightGray">
+      
+      <span id="#{certsPanel}_showDetails_#{certPercent.id}"  class="#{(certPercent.hasOpenCert) ? '' : 'empty'}">
+        <a4j:commandButton  style="display:none"
+                            onclick="$('dashboardForm:certPercentToLoad').value = '${certPercent.id}';"
+                            action="#{certPercent.loadCerts}"
+                            render="#{certsPanel}"
+                            oncomplete="SailPoint.Dashboard.clearHeights('dashContentPanel')"/>
+      </span>
+      
+      <span id="#{certsPanel}_prevDetails_#{certPercent.id}" class="#{(certPercent.hasOpenCert) ? '' : 'empty'}">
+        <a4j:commandButton  style="display:none"
+                            action="#{certPercent.prevCerts}" value="prev"
+                            render="#{certsPanel}"
+                            oncomplete="SailPoint.Dashboard.clearHeights('dashContentPanel')"/>
+      </span>
+      
+      <span id="#{certsPanel}_nextDetails_#{certPercent.id}" class="#{(certPercent.hasOpenCert) ? '' : 'empty'}">              
+        <a4j:commandButton  style="display:none"
+                            action="#{certPercent.nextCerts}"
+                            render="#{certsPanel}"
+                            oncomplete="SailPoint.Dashboard.clearHeights('dashContentPanel')"/>
+      </span>
+      
+      <a4j:outputPanel id="certDetails#{certPercent.id}">
+        <h:inputHidden id="offset_#{certPercent.id}" value="#{certPercent.offset}"/>
+      
+        <ui:fragment rendered="#{empty certPercent.certifications}">
+          <h:graphicImage url="/images/progress.gif"/> 
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{!empty certPercent.certifications}">
+          <table cellpadding="0" cellspacing="0" class="width100" >
+            <tr>
+              <td align="left" class="spBlue textBold" style="width:16px">
+                <ui:fragment rendered="#{certPercent.certificationsCount gt certPercent.maxCerts }">                            
+                  <h:graphicImage alt="next" url="/images/icons/left_circle_blue_16.png"
+                    style="vertical-align:bottom;cursor:pointer;" 
+                    rendered="#{certPercent.offset gt 0}"
+                    onclick="SailPoint.Dashboard.loadCerts($('#{certsPanel}_prevDetails_#{certPercent.id}'))"/>
+                </ui:fragment>                        
+              </td>
+              <td class="spBlue textBold">
+
+               <h:outputFormat styleClass="font10" value="#{msgs.chart_my_certs_details}">
+                    <f:param value="#{certPercent.certificationsCount}"/>
+               </h:outputFormat>
+              </td>
+              <td class="spBlue">
+                <ui:fragment rendered="#{certPercent.certificationsCount gt certPercent.maxCerts }">
+                  <h:outputFormat value="#{msgs.chart_my_certs_range}">
+                    <f:param value="#{certPercent.start}"/>
+                     <f:param value="#{certPercent.end}"/>
+                  </h:outputFormat>
+                </ui:fragment>
+              </td>
+              <td align="right" class="spBlue textBold" style="width:16px">
+                <ui:fragment rendered="#{certPercent.certificationsCount gt certPercent.maxCerts }">                            
+                  <h:graphicImage alt="next" url="/images/icons/right_circle_blue_16.png"
+                    style="vertical-align:bottom;cursor:pointer;" 
+                    rendered="#{(certPercent.end lt certPercent.certificationsCount)}"
+                    onclick="SailPoint.Dashboard.loadCerts($('#{certsPanel}_nextDetails_#{certPercent.id}'))"/>
+                </ui:fragment>
+              </td>
+            </tr>           
+            
+            <ui:repeat value="#{certPercent.certifications}" var="certificationBean">
+              <tr>
+                <td colspan="4">
+                  <ui:include src="contentOwnerCertPercentInclude.xhtml">
+                    <ui:param name="certificationBean" value="#{certificationBean}" />
+                  </ui:include>
+                </td>
+              </tr>
+            </ui:repeat>
+          </table>
+          
+        </ui:fragment>
+      </a4j:outputPanel>
+      </td>
+    </tr>
+  </ui:repeat>
+</ui:composition>
+
+</body>
+</html>

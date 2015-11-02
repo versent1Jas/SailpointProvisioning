@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showIncludedApplications}">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+
+        var readOnly = #{readOnly};
+
+        Ext.onReady(function() {
+            var certifyIncludedAppMultiSuggest = new SailPoint.MultiSuggest({
+                id: 'certifyIncludedAppMultiSuggestCmp',
+                renderTo: 'certifyIncludedAppMultiSuggest',
+                suggestType: 'application',
+                jsonData: #{sp:basicJSONDataConverted(
+                   certificationSchedule.editedCertificationSchedule.includedApplicationIds,
+                   'ApplicationListConverter')},
+                inputFieldName: 'certifyIncludedAppSuggest',
+                disabled:readOnly,
+                contextPath: CONTEXT_PATH
+                });
+             });
+    </script>
+
+    <tr>
+      <td class="titleColumn certScheduleTitleCol" valign="top" align="left">
+        <h:outputText value="#{msgs.label_included_applications}" />
+      </td>
+      <td class="certScheduleHelpCol" valign="top"><h:graphicImage id="imgHlpIncludedApplications" width="12px"
+        height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_included_applications}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+          <!--
+            Note that we allow editing these for continuous certs that have launched.  This may not
+            trigger changes to the certifications immediately, but will be picked up during the next
+            aggregation or full certification refresh.
+           -->
+          <div id="certifyIncludedAppMultiSuggest"></div>
+          <t:inputHidden id="certifyIncludedAppSuggest"
+                         value="#{certificationSchedule.editedCertificationSchedule.includedApplicationIds}" forceId="true">
+              <sp:convertList />
+          </t:inputHidden>
+      </td>
+    </tr>
+  </ui:fragment>
+
+
+  <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showEntitlementOptions}">
+  <tr>
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.sched_cert_label_included_access}" />
+      </td>
+      <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpAccountsOnly" width="12px"
+        height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_included_access}"/>
+      </td>
+      <td class="certScheduleOptionCol" style="padding-top:0" colspan="6" align="left">
+
+            <h:selectOneRadio onclick="SailPoint.CertificationScheduleForm.toggleIncludeAccessOptions(this)" styleClass="" layout="lineDirection" id="certifyAccounts" value="#{certificationSchedule.editedCertificationSchedule.certifyAccounts}" disabled="#{certificationSchedule.continuousHasLaunched}"
+                    readonly="#{certificationSchedule.existingCertGroup}" >
+                <f:selectItem id="allEntitlements" itemLabel="#{msgs.sched_cert_certify_all_entitlements}" itemValue="#{false}" itemDisabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"/>
+                <f:selectItem id="accountsOnly" itemLabel="#{msgs.sched_cert_certify_accounts}" itemValue="#{true}" itemDisabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"/>
+            </h:selectOneRadio>
+
+            <div id="includeAccessOptions" style="display:#{certificationSchedule.editedCertificationSchedule.certifyAccounts ? 'none' : ''}">
+                <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showIncludeAdditionalEntitlements}">
+
+                    <div style="padding:5px">
+                        <h:selectBooleanCheckbox
+                          id="certifyIncludeAddtEnts"
+                          value="#{certificationSchedule.editedCertificationSchedule.includeAdditionalEntitlements}"
+                          disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                          readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+
+                        <span style="margin-left:5px"><h:outputText value="#{msgs.label_include_addt_ents}" /> </span>
+
+                        <h:graphicImage id="imgHlpIncludeEntitlements" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_include_addt_ents}"/>
+                    </div>
+
+                </ui:fragment>
+
+                <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showIncludeRoles}">
+                    <div style="padding:5px">
+                        <h:selectBooleanCheckbox
+                            id="certifyIncludeRoles"
+                            value="#{certificationSchedule.editedCertificationSchedule.includeRoles}"
+                            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                        <span style="margin-left:5px"><h:outputText value="#{msgs.label_include_roles}" /></span>
+                        <h:graphicImage id="imgHlpIncludeRoles" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_include_roles}"/>
+                    </div>
+                </ui:fragment>
+                <div style="padding:5px">
+
+                        <h:selectBooleanCheckbox
+                            id="certifyEmptyAccounts"
+                            value="#{certificationSchedule.editedCertificationSchedule.certifyEmptyAccounts}"
+                            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                        <span style="margin-left:5px"><h:outputText value="#{msgs.cert_sched_certify_empty_accounts}" /></span>
+                        <h:graphicImage id="imgHlpCertifyEmptyAccounts" width="12px"
+                            height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_certify_empty_accounts}"/>
+                    </div>
+            </div>
+
+      </td>
+    </tr>
+  </ui:fragment>
+  <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showIncludePolicyViolations}">
+      <tr>
+        <td class="titleColumn certScheduleTitleCol">
+          <h:outputText value="#{msgs.label_include_policy_violations}" />
+        </td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpIncludePolicyViolations" width="12px"
+          height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_include_policy_violations}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="6" align="left">
+          <h:selectBooleanCheckbox
+            id="certifyIncludePolicyViolations"
+            value="#{certificationSchedule.editedCertificationSchedule.includePolicyViolations}"
+            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+        </td>
+      </tr>
+  </ui:fragment>
+  
+  <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.dataOwnerCertification}">
+    <script type="text/javascript">
+      Ext.onReady(function() {
+              var unownedAppOwnerSuggest = new SailPoint.IdentitySuggest({
+                  id: 'certificationUnownedAppOwnerSuggestCmp',
+                  renderTo: 'certificationUnownedAppOwnerSuggest',
+                  binding: 'certificationUnownedAppOwnerSuggestInput',
+                  width: '200',
+                  required: false,
+                  disabled: true,
+                  baseParams: {'context': 'Owner'}
+              });
+              
+              var iVal = '#{sp:escapeJavascript(certificationSchedule.editedCertificationSchedule.unownedDataOwner.displayName)}'; 
+              if(iVal != ''){
+            	  unownedAppOwnerSuggest.setRawValue(iVal);
+                  SailPoint.Suggest.IconSupport.setIconDiv(unownedAppOwnerSuggest, 'userIcon');
+              }
+           });
+
+      function includeUnownedDataClicked() {
+        var isChecked = $('certificationScheduleForm:includeUnownedData').checked; 
+        if (isChecked) {
+          $('certificationScheduleForm:unownedAppOwner').disabled = false;
+          unownedAppOwnerClicked();
+        } else {
+          $('certificationScheduleForm:unownedAppOwner').disabled = true;
+          Ext.getCmp('certificationUnownedAppOwnerSuggestCmp').disable();
+        }
+      }
+      
+      function unownedAppOwnerClicked() {
+        var isChecked = $('certificationScheduleForm:unownedAppOwner').checked;
+        if (isChecked) {
+          Ext.getCmp('certificationUnownedAppOwnerSuggestCmp').disable();
+        } else {
+          Ext.getCmp('certificationUnownedAppOwnerSuggestCmp').enable();
+        }
+      }
+    </script>
+      <tr>
+        <td class="titleColumn certScheduleTitleCol">
+          <h:outputText value="#{msgs.data_owner_include_unowned_data}" />
+        </td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpIncludeUnownedData" width="12px"
+          height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_include_unowned_data}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="6" align="left">
+          <h:selectBooleanCheckbox
+            id="includeUnownedData"
+            value="#{certificationSchedule.editedCertificationSchedule.includeUnownedData}"
+            onclick='includeUnownedDataClicked();'
+            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+        </td>
+      </tr>
+      <tr>
+        <td class="titleColumn certScheduleTitleCol">
+          <h:outputText value="#{msgs.data_owner_unowned_data_owner}" />
+        </td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpUnownedDataOwner" width="12px"
+          height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_unowned_data_owner}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="6" align="left">
+          <h:selectBooleanCheckbox
+            id="unownedAppOwner"
+            value="#{certificationSchedule.editedCertificationSchedule.appOwnerIsUnownedOwner}"
+            onclick='unownedAppOwnerClicked();'
+            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" /> <h:outputText value=" #{msgs.app_owner}" />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">&nbsp;</td>
+        <td ><table><tr><td><h:outputText value="#{msgs.data_owner_choose_owner}" /></td><td><div id="certificationUnownedAppOwnerSuggest"></div></td></tr></table>
+                    <t:inputHidden id="certificationUnownedAppOwnerSuggestInput"
+                               value="#{certificationSchedule.editedCertificationSchedule.unownedDataOwner}" forceId="true">
+                      <sp:convertIdentitySuggestItem />
+                    </t:inputHidden>
+                      <a4j:outputPanel ajaxRendered="true">
+                        <br/>
+                        <h:message for="certificationUnownedAppOwnerSuggestInput" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                    </a4j:outputPanel>
+        </td>                    
+      </tr>
+      <tr>
+        <td class="titleColumn certScheduleTitleCol">
+          <h:outputText value="#{msgs.data_owner_include_entitlements_granted_by_roles}" />
+        </td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpIncludeEntitlementsGrantedByRoles" width="12px"
+          height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_include_entitlements_granted_by_roles}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="6" align="left">
+          <h:selectBooleanCheckbox
+            id="includeEntitlementsGrantedByRoles"
+            value="#{certificationSchedule.editedCertificationSchedule.includeEntitlementsGrantedByRoles}"
+            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+        </td>
+      </tr>
+  </ui:fragment>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+    <table class="width100" cellspacing="0" cellpadding="0">
+      <tr>
+        <td> 
+          
+          <table class="width100">        
+            
+            <tr class="odd">
+              <td colspan="3" width="50%">
+                <table class="searchInputPairTable">
+                  <tr>
+                    <td>
+                      <h:outputText styleClass="textBold" value="#{msgs.activity_search_label_type_time_span}"/>
+                    </td>
+                    <td>
+                      <h:selectOneMenu id="dateOrTimePeriodSelection" value="#{searchBean.dateMode}"
+                                       styleClass="textBold" onchange="$('activitySearchForm:updateDateMode').click();">
+                        <f:selectItem itemValue="timePeriod" itemLabel="#{msgs.activity_search_option_time_periods}"/>
+                        <f:selectItem itemValue="activityDate" itemLabel="#{msgs.activity_search_option_date_of_activity}"/>
+                      </h:selectOneMenu>                      
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              
+              <td  colspan="3" width="50%">
+                <h:outputText styleClass="textBold" 
+                  value="#{msgs.activity_search_section_actions}"/>
+              </td>              
+            </tr>
+
+            <tr valign="top">
+              <td colspan="3">
+                <h:panelGroup id="timePeriodsAndDates">
+                  <table cellspacing="0" cellpadding="0">
+                    
+                    <tr style="display:#{searchBean.dateMode == 'activityDate' ? '' : 'none'}">
+                      <td width="10%">
+                        <div id="startDateLabelDiv" >
+                          <sp:outputText styleClass="textBold"
+                            value="#{searchBean.inputs['activityStartDate'].description}"/>
+                        </div>
+                      </td>
+                      <td align="left" width="5%">
+                        <div id="startDateSelectDiv">
+                          <input type="checkbox" id="startDateSelect" name="startDateSelect" style="margin:5px;vertical-align:middle"
+                            onclick="SailPoint.Analyze.updateStartType(this, $('activitySearchForm:startDateType'), $('startDateDiv'));"/>
+                          <h:inputHidden id="startDateType" value="#{searchBean.inputs['activityStartDate'].inputTypeValue}"/>
+                        </div>
+                      </td>
+                      <td align="left">
+                        <div id="startDateDiv" style="display:none">
+                          <sp:inputDate type="date" id="startDate" popupCalendar="true"  ampm="true" timeZone="#{searchBean.userTimeZoneId}" addResources="false"
+                            value='#{searchBean.inputs["activityStartDate"].objectDateValue}' imageLocation="/scripts/myfacescalendar" 
+                            javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+                        </div>
+                      </td>
+                    </tr>   
+                    <tr style="display:#{searchBean.dateMode == 'activityDate' ? '' : 'none'}">                  
+                      <td width="10%">
+                        <div id="endDateLabelDiv" >
+                          <sp:outputText styleClass="textBold"
+                            value="#{searchBean.inputs['activityEndDate'].description}"/>
+                        </div>
+                      </td>
+                      <td align="left" width="5%">
+                        <div id="endDateSelectDiv" >
+                          <input type="checkbox" id="endDateSelect" name="endDateSelect" style="margin:5px;vertical-align:middle"
+                            onclick="SailPoint.Analyze.updateEndType(this, $('activitySearchForm:endDateType'), $('endDateDiv'));"/>
+                            <h:inputHidden id="endDateType" value="#{searchBean.inputs['activityEndDate'].inputTypeValue}"/>
+                        </div>
+                      </td>
+                      <td align="left">
+                        <div style="display:none" id="endDateDiv">
+                          <sp:inputDate type="date" id="endDate" popupCalendar="true"  ampm="true" timeZone="#{searchBean.userTimeZoneId}" addResources="false"
+                           value='#{searchBean.inputs["activityEndDate"].objectDateValue}' imageLocation="/scripts/myfacescalendar" 
+                           javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" styleClass="tomahawkInputDate"/>
+                        </div>
+                      </td>
+                    </tr>                   
+                    
+                    <tr style="display:#{searchBean.dateMode == 'timePeriod' ? '' : 'none'}">
+                      <td colspan="3">
+                        <div id="timePeriodSelectionDiv" >
+                          <table class="width100" cellpadding="0" cellspacing="0">
+                            <t:dataList id="targetSelections" value="#{searchBean.timePeriods}" var="timePeriod">
+                              <tr>
+                                <td><h:selectBooleanCheckbox value="#{searchBean.timePeriodSelections[timePeriod]}"/></td>
+                                <td><h:outputText value="#{ sp:localizeKey( timePeriod.name ) }"/></td>
+                              </tr>
+                            </t:dataList>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                </h:panelGroup>              
+              </td>
+              
+              <td colspan="2" valign="top">
+                <sp:outputText styleClass="textBold"
+                  value="#{searchBean.inputs['action'].description}"/><br/>
+                <h:selectOneMenu id="activityActionType"
+                  value="#{searchBean.inputs['action'].inputTypeValue}">
+                  <f:selectItems value="#{searchBean.equalInputTypeChoices}"/>
+                </h:selectOneMenu>
+              </td>
+              <td valign="top">
+                <h:selectManyListbox id="activityActionOption" size="15"
+                  value="#{searchBean.inputs['action'].objectListValue}">
+                  <f:selectItems value="#{taskDefinition.applicationActivityActions}" />
+                </h:selectManyListbox>
+              </td>            
+            </tr>
+            
+            
+            <tr>
+              <td colspan="6" style="border-bottom:1px #ccc solid">
+                <h:outputText value=" "/>
+              </td>
+            </tr>
+            
+            
+            <tr class="odd">            
+              <td colspan="3">
+                <h:outputText styleClass="textBold" rendered="#{appDisplay != 'none'}"
+                    value="#{msgs.activity_search_section_apps}"/>
+              </td>
+              <td>
+                <h:outputText styleClass="textBold" 
+                  value="#{msgs.activity_search_label_target_type}"/>
+              </td>
+              <td colspan="2">
+                <h:selectOneMenu id="catOrTargetSelection" value="#{searchBean.targetMode}"
+                  styleClass="textBold" onchange="$('activitySearchForm:updateTargetMode').click();">
+                  <f:selectItem itemValue="Category" itemLabel="#{msgs.activity_search_option_target_mode_category}"/>
+                  <f:selectItem itemValue="Target" itemLabel="#{msgs.activity_search_option_target_mode_specific}"/>
+                </h:selectOneMenu>
+              </td>          
+            </tr>
+            
+            <tr valign="top">
+            
+              <ui:fragment rendered="#{appDisplay != 'none'}">
+                <td colspan="3">
+                <table class="width100">
+                  <tr valign="top">
+                    <td>
+                      <sp:outputText styleClass="textBold"
+                        value="#{searchBean.inputs['sourceApplication'].description}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div id="activityAppNameMultiSuggest"></div>
+                      <t:inputHidden id="activityAppNameSuggest"
+                            value="#{searchBean.inputs['sourceApplication'].objectListValue}" forceId="true">
+                          <sp:convertList />
+                      </t:inputHidden>
+                
+                      <div id="activityAppNameMultiSuggestData" style="display:none">
+                        #{sp:basicJSONDataConverted(
+                          searchBean.inputs['sourceApplication'].objectListValue,
+                          'ApplicationListConverter')}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              </ui:fragment>  
+              
+              <td colspan="3">
+                <h:panelGroup id="categoriesAndTargets">
+                  <table cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td colspan="1">
+                        <div id="categoriesLabelDiv" style="display:#{searchBean.targetMode == 'Category' ? '' : 'none'}">
+                          <sp:outputText styleClass="textBold" value="#{searchBean.inputs['category'].description}"/>
+                        </div>
+                        <div id="targetLabelDiv" style="display:#{searchBean.targetMode == 'Target' ? '' : 'none'}">
+                          <sp:outputText styleClass="textBold" value="#{searchBean.inputs['target'].description}"/>
+                        </div>
+                      </td>
+                      <td colspan="2">
+                        <div id="categoriesSelectionDiv" style="display:#{searchBean.targetMode == 'Category' ? '' : 'none'}">
+                          <h:selectOneMenu id="selectCategory" value="#{searchBean.inputs['category'].value}">
+                            <f:selectItems id="categorySelections" value="#{categoriesSuggest.categories}"/>
+                            <a4j:ajax event="change" listener="#{searchBean.updateTargetList}" render="categoriesAndTargets"/>
+                          </h:selectOneMenu>
+                        </div>
+                        <div id="targetSelectionDiv" style="display:#{searchBean.targetMode == 'Target' ? '' : 'none'}">
+                          <h:inputText id="targetSelectionOption" styleClass="inputWidth" value="#{searchBean.inputs['target'].value}"/>
+                        </div>
+                      </td>
+                      
+                    </tr>
+                    <tr>
+                      <td colspan="1">
+                        <div id="targetsLabelDiv" style="display:#{searchBean.targetMode == 'Category' ? '' : 'none'}">
+                          <h:outputText styleClass="textBold" value="#{msgs.activity_search_label_targets}"/>
+                        </div>
+                      </td>
+                      <td colspan="2">
+                        <div id="targetsDisplayDiv" style="display:#{searchBean.targetMode == 'Category' ? '' : 'none'}">
+                          <h:selectManyListbox size="6" readonly="true" disabled="true">
+                            <f:selectItems value="#{searchBean.currentTargets}" />
+                          </h:selectManyListbox>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </h:panelGroup>
+              </td>
+            </tr>
+            
+            <tr>
+              <td colspan="6" style="border-bottom:1px #ccc solid">
+                <h:outputText value=" "/>
+              </td>
+            </tr>
+            
+            <tr class="odd">
+              <td colspan="3">
+                <ui:fragment rendered="#{identityDisplay != 'none'}">
+                  
+                  <ui:fragment rendered="#{searchBean.ipopOptions==null}">
+                    <h:outputText styleClass="textBold" value="#{msgs.activity_search_section_identities}"/>
+                  </ui:fragment>
+                  
+                  <ui:fragment rendered="#{searchBean.ipopOptions!=null}">
+                  
+                    <table>
+                      <tr>
+                        <td>
+                          <h:outputText styleClass="textBold"
+                            value="#{msgs.activity_search_label_ids_or_pops}"/>
+                        </td>
+                        <td>
+                          <h:selectOneMenu id="ipopOrIdentitySelection" value="#{searchBean.identityMode}"
+                            styleClass="textBold" onchange="$('activitySearchForm:updateIdentityMode').click();">
+                            <f:selectItem itemValue="identity" itemLabel="#{msgs.activity_search_option_identities}"/>
+                            <f:selectItem itemValue="ipop" itemLabel="#{msgs.activity_search_option_ipops}"/>
+                          </h:selectOneMenu>
+                        </td>
+                      </tr>
+                    </table>
+                  
+                  </ui:fragment>
+                </ui:fragment>  
+              </td>
+              
+              
+
+              <td  colspan="3" width="50%">
+                <h:outputText styleClass="textBold" 
+                  value="#{msgs.activity_search_label_result}"/>
+              </td>
+            </tr>
+            
+            <tr>
+              <td colspan="3">
+              <h:panelGroup id="ipopsAndIdentities">
+                <ui:fragment rendered="#{identityDisplay != 'none'}">      
+                  <table id="identityRow" class="width100"
+                    style="display:#{searchBean.identityMode == 'identity' ? '' : 'none'}">
+                    <tr valign="top">
+                      <td>
+                        <sp:outputText styleClass="textBold"
+                          value="#{searchBean.inputs['identity'].description}"/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                        <div id="activityOwnersMultiSuggest"></div>
+                        <t:inputHidden id="activityOwners"
+                              value="#{searchBean.inputs['identity'].objectListValue}" forceId="true">
+                            <sp:convertList />
+                        </t:inputHidden>
+                    
+                        <div id="activityOwnersMultiSuggestData" style="display:none">
+                          #{sp:basicJSONDataConverted(
+                            searchBean.inputs['identity'].objectListValue,
+                            'IdentityListConverter')}
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <ui:fragment rendered="#{searchBean.ipopOptions!=null}">
+                    <table id="ipopRow"
+                      style="display:#{searchBean.identityMode == 'ipop' ? '' : 'none'}">
+                      <tr>
+                        <td>
+                          <sp:outputText styleClass="textBold"
+                            value="#{searchBean.inputs['ipop'].description}"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <h:selectOneMenu id="ipopName"
+                            value="#{searchBean.inputs['ipop'].value}">
+                            <f:selectItems value="#{groupDefinitionList.myIpopSelectItems}"/>
+                          </h:selectOneMenu>
+                        </td>
+                      </tr>
+                    </table>
+                  </ui:fragment>
+                </ui:fragment>   
+              </h:panelGroup>
+              </td>
+              <td colspan="3" valign="top">
+                <sp:outputText styleClass="textBold"
+                  value="#{searchBean.inputs['result'].description}"/><br/>
+                <h:selectManyListbox id="activityResult" size="2"
+                  value="#{searchBean.inputs['result'].objectListValue}">
+                  <f:selectItems value="#{taskDefinition.applicationActivityResults}" />
+                </h:selectManyListbox>
+              </td>              
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/assignmentRuleSelector.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/ApplicationSchemaSelector.js?#{debug.revision}</src>
+  </sp:script>
+  
+  <script type="text/javascript"><!--//--><![CDATA[//><!--
+
+    var readOnly = #{certificationSchedule.existingCertGroup or not certificationSchedule.editable};
+    var continuousReadOnly = readOnly || #{certificationSchedule.continuousHasLaunched};
+
+    Ext.onReady(function () {
+        if(initNameTextInserters) {
+            initNameTextInserters();
+        }
+            // manager recipient suggest - the baseParams makes the suggest
+            // return only managers
+            if (#{certificationSchedule.editedCertificationSchedule.managerCertification}) {
+            	
+	            var certifyRecipientSuggest = new SailPoint.IdentitySuggest({
+	                id: 'crsComponent',
+	                renderTo: 'certifyRecipientSuggest', 
+	                binding: 'certifyRecipient',
+	                initialData: [#{sp:buildJSONFromIdentity(certificationSchedule.editedCertificationSchedule.certifier.id)}],
+	                disabled: continuousReadOnly,
+	                extraParams: {type: 'manager', context: 'Manager'},
+	                width: 300
+	            });
+	                
+	            // disable the recipient if global is checked
+	            SailPoint.CertificationScheduleForm.toggleRecipient('crsComponent', 
+                    $('certificationScheduleForm:globalMgrCheckbox').checked, continuousReadOnly);
+            }
+
+            var certOwnerSuggest = new SailPoint.IdentitySuggest({
+                id: 'certificationOwnerSuggestCmp',
+                renderTo: 'certificationOwnerSuggest',
+                binding: 'certificationOwnerSuggestInput',
+                initialData: [#{sp:buildJSONFromIdentity(certificationSchedule.editedCertificationSchedule.certificationOwner.id)}],
+                disabled: continuousReadOnly, 
+                extraParams: {context: 'Owner'}
+            });
+
+            // identity recipient suggest
+            if (#{certificationSchedule.editedCertificationSchedule.identityCertification}) {            	
+                var defaultCertifierSuggest = new SailPoint.IdentitySuggest({
+                    id: 'defaultCertifierSuggestComp',
+                    renderTo: 'defaultCertifierSuggest', 
+                    binding: 'defaultCertifierInput',
+                    initialData: [#{sp:buildJSONFromIdentity(certificationSchedule.editedCertificationSchedule.certifier.id)}],
+                    disabled: continuousReadOnly,
+                    emptyText: '#{sp:escapeJavascript(msgs.cert_sched_select_default_certifier)}',
+                    extraParams: {context: 'Owner'}
+                });
+
+                var multiCertifiersSuggest = new SailPoint.CompactMultiSuggest({
+                    id: 'certifiersMultiSuggestComp',
+                    renderTo: 'certifiersMultiSuggest',
+                    suggestType: 'identity',
+                    jsonData: #{sp:basicJSONDataConverted(certificationSchedule.editedCertificationSchedule.ownerIds,'IdentityListConverter')},
+                    inputFieldName: 'certifiersMultiInput',
+                    disabled: continuousReadOnly,
+                    contextPath: CONTEXT_PATH,
+                    extraParams: {context: 'Owner'}
+                });
+                SailPoint.CertificationScheduleForm.certifierTypeSelected($('certificationScheduleForm:hiddenCertifierSelectionType').value);
+            }
+                                
+            if (#{certificationSchedule.editedCertificationSchedule.showApplicationSelection}) {
+	            var certifyAppNameMultiSuggest = new SailPoint.MultiSuggest({
+	                id: 'certifyAppNameMultiSuggest',
+	                renderTo: 'certifyAppNameMultiSuggest',
+	                suggestType: 'application',
+	                jsonData: #{sp:basicJSONDataConverted(
+	                   certificationSchedule.editedCertificationSchedule.applicationIds,
+	                   'ApplicationListConverter')},
+	                inputFieldName: 'certifyAppNameSelect',
+                  contextPath: CONTEXT_PATH,
+	                disabled: continuousReadOnly
+	            });
+	            
+              if (#{certificationSchedule.editedCertificationSchedule.accountGroupCertification}) {
+    	            Ext.create('sailpoint.component.ApplicationSchemaSelector', {
+    	                applicationsSuggest: certifyAppNameMultiSuggest,
+    	                schemaSuggestId: 'schemaSuggestId',
+    	                hiddenSchemasId: 'certificationScheduleForm:selectedSchemasHiddenId',
+    	                selectGroupsCheckboxId: 'certificationScheduleForm:selectGroupsCheckboxId',
+    	                width: 300,
+    	                disabled: #{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}
+    	            });
+              }
+	            // disable the multisuggest if global is checked
+	            SailPoint.CertificationScheduleForm.toggleMultiSuggest('certifyAppNameMultiSuggest', 
+	                $('certificationScheduleForm:globalAppCheckbox').checked,
+	                '#{sp:escapeJavascript(msgs.all_applications)}',
+	                continuousReadOnly);
+            }           
+                
+            if (#{certificationSchedule.editedCertificationSchedule.businessRoleCertification}) {
+	            var certifyRoleMultiSuggest = new SailPoint.MultiSuggest({
+	                id: 'certifyRoleMultiSuggest',
+	                renderTo: 'certifyRoleMultiSuggest',
+	                suggestType: 'role',
+                    contextPath: CONTEXT_PATH,
+	                jsonData: #{sp:basicJSONDataConverted(
+	                    certificationSchedule.editedCertificationSchedule.businessRoleIds,
+	                    'BundleListConverter')},
+	                inputFieldName: 'certifyBusinessRoleSelect',
+	                disabled: continuousReadOnly
+	                });
+	                
+	            // disable the multisuggest if global is checked
+                SailPoint.CertificationScheduleForm.toggleMultiSuggest('certifyRoleMultiSuggest', 
+                    $('certificationScheduleForm:globalRoleCheckbox').checked, 
+                    '#{sp:escapeJavascript(msgs.select_item_all_biz_roles)}',
+                    continuousReadOnly);
+	        }
+
+            var tagsSuggest = new SailPoint.CompactMultiSuggest({
+                id: 'tagsSuggestComp',
+                renderTo: 'tagsSuggest',
+                inputFieldName: 'tagsInput',
+                forceSelection: false,
+                suggestType: 'tag',
+                jsonData: #{sp:basicJSONDataConverted(certificationSchedule.editedCertificationSchedule.tagIdsOrNames, 'TagListConverter')},
+                disabled: #{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)},
+                contextPath: CONTEXT_PATH
+            });
+
+            // init the role selection widget. Based on the schedule, a given radio will be clicked which
+            // will enable or disable the correct inputs
+            var globalRoleSelect = #{certificationSchedule.editedCertificationSchedule.globalCertification};
+            var roleTypesSelected = #{sp:size(certificationSchedule.editedCertificationSchedule.roleTypes)};
+            if (globalRoleSelect && $('globalRoleSelection')){
+                if (continuousReadOnly) {
+                    $('globalRoleSelection').checked = true;
+                } else {
+                    $('globalRoleSelection').click();
+                }
+            } else if (roleTypesSelected > 0){
+                if (continuousReadOnly) {
+                    $('roleTypeSelection').checked = true;
+                } else {
+                    $('roleTypeSelection').click();
+                }              
+            } else if (null != $('manualRoleSelection')) {
+                if (continuousReadOnly) {
+                    $('manualRoleSelection').checked = true;
+                } else {
+                    $('manualRoleSelection').click();
+                }
+            }
+
+
+            SailPoint.AssignmentRule.initializeSelectors(#{certificationSchedule.existingCertGroup or not certificationSchedule.editable});
+            
+            SailPoint.CertificationScheduleForm.createGroupSuggests(#{certificationSchedule.readOnly || certificationSchedule.continuousHasLaunched});
+            
+            // Initialize any components that were added and deferred because of
+            // AJAX weirdness.
+            SailPoint.CertificationScheduleForm.initializeAjaxComponents();
+    });
+  //--><!]]></script>
+
+    <h:inputHidden id="certificationType" value="#{certificationSchedule.editedCertificationSchedule.type}"/>
+
+    <table class="customWidth paddedTbl" cellpadding="5" cellspacing="0" style="background-color:#ffffff">
+      <tfoot>
+        <tr>
+          <td colspan="2"/>
+          <td colspan="6">
+            <ui:fragment rendered="#{certificationSchedule.identityTrigger}">
+              <h:outputText styleClass="requiredText" value="*"/>
+              <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+            </ui:fragment>
+          </td>
+        </tr>
+      </tfoot>
+      <tbody>
+     
+     
+        <ui:fragment rendered="#{certificationSchedule.identityTrigger}">
+          <t:saveState value="#{certificationSchedule.trigger}" />
+
+          <tr><td class="spContentTitle" colspan="8">#{msgs.cert_event_event_options_header}</td></tr>
+
+          <ui:include src="/define/trigger/triggerInclude.xhtml">
+            <ui:param name="trigger" value="#{certificationSchedule.trigger}" />
+            <ui:param name="formName" value="certificationScheduleForm" />
+            <ui:param name="readOnly" value="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+          </ui:include>
+        </ui:fragment>
+
+
+            <!--
+                Certification Properties
+            -->
+
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_cert_properties}</td></tr>
+
+    
+            <tr>
+                <td class="titleColumn certScheduleTitleCol">
+                    <h:outputText value="#{msgs.cert_sched_cert_name}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpScheduleCertName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                    alt="#{certificationSchedule.editedCertificationSchedule.advancedCertification ? help.help_sched_cert_adv_name : help.help_sched_cert_mgr_name}"/>
+                </td>
+                <td class="certScheduleOptionCol" colspan="5">
+                    <h:inputText id="certificationTemplateName" size="40" value="#{certificationSchedule.editedCertificationSchedule.certificationNameTemplate}"
+                           disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                           readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+
+                    <script type="text/javascript" defer="defer">
+
+                        function initNameTextInserters() {
+                            new SailPoint.TextInserter('certificationScheduleForm:certificationTemplateName', 'certificationScheduleForm:certNameTextInserter');
+                        }
+
+                    </script>
+
+                    <h:selectOneListbox id="certNameTextInserter" size="1"
+                                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+                        <f:selectItems value="#{certificationSchedule.certificationNameParameters}" />
+                    </h:selectOneListbox>
+
+                    <a4j:outputPanel ajaxRendered="true">
+                        <br/>
+                        <h:message for="certificationTemplateName" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                    </a4j:outputPanel>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td class="titleColumn certScheduleTitleCol">
+                    <h:outputText value="#{msgs.cert_sched_cert_owner}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                 <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpScheduleCertOwner" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                    alt="#{help.help_sched_cert_owner}"/>
+                </td>
+                <td class="certScheduleOptionCol" colspan="5">
+                    <div id="certificationOwnerSuggest"></div>
+                    <t:inputHidden id="certificationOwnerSuggestInput"
+                               value="#{certificationSchedule.editedCertificationSchedule.certificationOwner}" forceId="true">
+                      <sp:convertIdentity />
+                    </t:inputHidden>
+
+                      <a4j:outputPanel ajaxRendered="true">
+                        <br/>
+                        <h:message for="certificationOwnerSuggestInput" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                    </a4j:outputPanel>
+
+                </td>
+            </tr>
+
+
+            <!--
+                END Certification Properties
+            -->
+
+
+        <ui:fragment rendered="#{!certificationSchedule.identityTrigger}">
+          <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_who_and_what_header}<h:outputText rendered="#{certificationSchedule.editedCertificationSchedule.advancedCertification}" styleClass="requiredText" value="*"/></td></tr>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.managerCertification}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.recipient}"/>
+            <h:outputText styleClass="requiredText" value="*"/></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpRecipient" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help.help_sched_cert_mgr_recipient}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6">
+              <div id="certifyRecipientSuggest"></div>
+              <t:inputHidden id="certifyRecipient"
+                           value="#{certificationSchedule.editedCertificationSchedule.certifier}" forceId="true">
+                  <sp:convertIdentity />
+              </t:inputHidden>
+              <div style="margin-top: 4px">
+                <label>
+                  <h:selectBooleanCheckbox id="globalMgrCheckbox" value="#{certificationSchedule.editedCertificationSchedule.globalCertification}"
+                                           onclick="SailPoint.CertificationScheduleForm.globalClicked(this.checked, #{certificationSchedule.continuousHasLaunched})"
+                                           disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                           readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                  #{msgs.all_managers}
+                </label>
+              </div>
+
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message for="certifyRecipient" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.identityCertification}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol">
+              <h:outputText value="#{msgs.cert_sched_certifiers}" />
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol" style="vertical-align: top">
+              <h:graphicImage id="imgHlpSchedCertifiers" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_certifiers}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <h:inputHidden id="hiddenCertifierSelectionType"
+                             value="#{certificationSchedule.editedCertificationSchedule.certifierSelectionType}"
+                             converter="sailpoint.object.Enum"/>
+              <table border="0" cellpadding="0" cellspacing="0" style="margin:0;padding:0">
+                <tr>
+                  <td>
+                    <!-- This is the only way to render radio inputs with & w/out the disabled attribute. -->
+                    <ui:fragment rendered="#{('Manager' == certificationSchedule.editedCertificationSchedule.certifierSelectionType) and (certificationSchedule.existingCertGroup or (not certificationSchedule.editable))}">
+                        <input type="radio" name="certifierButton" onclick="SailPoint.CertificationScheduleForm.certifierTypeSelected('Manager')" checked="checked" disabled="disabled"/>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{('Manager' == certificationSchedule.editedCertificationSchedule.certifierSelectionType) and ((not certificationSchedule.existingCertGroup) or certificationSchedule.editable)}">
+                        <input type="radio" name="certifierButton" onclick="SailPoint.CertificationScheduleForm.certifierTypeSelected('Manager')" checked="checked"/>
+                    </ui:fragment>
+                    
+                    <ui:fragment rendered="#{('Manager' != certificationSchedule.editedCertificationSchedule.certifierSelectionType) and (certificationSchedule.existingCertGroup or (not certificationSchedule.editable))}">
+                        <input type="radio" name="certifierButton" onclick="SailPoint.CertificationScheduleForm.certifierTypeSelected('Manager')" disabled="disabled" />
+                    </ui:fragment>
+                    <ui:fragment rendered="#{('Manager' != certificationSchedule.editedCertificationSchedule.certifierSelectionType) and ((not certificationSchedule.existingCertGroup) or certificationSchedule.editable)}">
+                        <input type="radio" name="certifierButton" onclick="SailPoint.CertificationScheduleForm.certifierTypeSelected('Manager')" />
+                    </ui:fragment>
+                    
+                  </td>
+                  <td style="font-weight:bold">&nbsp;#{msgs.cert_sched_assign_mgr}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>
+                    <div id="defaultCertifierSuggest"></div>
+                    <t:inputHidden id="defaultCertifierInput"
+                                 value="#{certificationSchedule.editedCertificationSchedule.certifier}" forceId="true">
+                        <sp:convertIdentity />
+                    </t:inputHidden>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <!-- This is the only way to render radio inputs with & w/out the disabled attribute. -->
+                    <ui:fragment rendered="#{('Manual' == certificationSchedule.editedCertificationSchedule.certifierSelectionType) and (certificationSchedule.existingCertGroup or (not certificationSchedule.editable))}">
+                        <input type="radio" name="certifierButton" onclick="SailPoint.CertificationScheduleForm.certifierTypeSelected('Manual')" checked="checked" disabled="disabled"/>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{('Manual' == certificationSchedule.editedCertificationSchedule.certifierSelectionType) and ((not certificationSchedule.existingCertGroup) or certificationSchedule.editable)}">
+                        <input type="radio" name="certifierButton" onclick="SailPoint.CertificationScheduleForm.certifierTypeSelected('Manual')" checked="checked"/>
+                    </ui:fragment>
+                    
+                    <ui:fragment rendered="#{('Manual' != certificationSchedule.editedCertificationSchedule.certifierSelectionType) and (certificationSchedule.existingCertGroup or (not certificationSchedule.editable))}">
+                        <input type="radio" name="certifierButton" onclick="SailPoint.CertificationScheduleForm.certifierTypeSelected('Manual')" disabled="disabled"/>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{('Manual' != certificationSchedule.editedCertificationSchedule.certifierSelectionType) and ((not certificationSchedule.existingCertGroup) or certificationSchedule.editable)}">
+                        <input type="radio" name="certifierButton" onclick="SailPoint.CertificationScheduleForm.certifierTypeSelected('Manual')"/>
+                    </ui:fragment>
+                    
+                  </td>
+                  <td style="font-weight:bold">&nbsp;#{msgs.cert_sched_select_certifier_manually}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>
+                    <div id="certifiersMultiSuggest"></div>
+                    <t:inputHidden id="certifiersMultiInput"
+                                   value="#{certificationSchedule.editedCertificationSchedule.ownerIds}" forceId="true">
+                        <sp:convertList />
+                    </t:inputHidden>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.identityCertification and !certificationSchedule.identityTrigger}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.identities}"/></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpIdentities" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help.help_sched_cert_bulk_identities}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6">
+              <ui:include src="editBulkCertification.xhtml" />
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showApplicationSelection}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol" valign="top"><h:outputText value="#{msgs.label_apps}"/><h:outputText styleClass="requiredText" value="*"/></td>
+            <td class="certScheduleHelpCol" valign="top"><h:graphicImage id="imgHlpRecipients" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help.help_sched_cert_app_recipient}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="2">
+              <!-- Note that the applications list is editable for continuous certs that have been launched. -->
+              <div id="certifyAppNameMultiSuggest"/>
+              <t:inputHidden id="certifyAppNameSelect"
+                             value="#{certificationSchedule.editedCertificationSchedule.applicationIds}" forceId="true">
+                <f:attribute name="autocomplete" value="off" />
+                <sp:convertList />
+              </t:inputHidden>
+
+              <div style="margin-top: 4px">
+                <label>
+                  <h:selectBooleanCheckbox id="globalAppCheckbox" value="#{certificationSchedule.editedCertificationSchedule.globalCertification}"
+                                           onclick="SailPoint.CertificationScheduleForm.globalClicked(this.checked, #{certificationSchedule.continuousHasLaunched})"
+                                           disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                           readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                  #{msgs.all_applications}
+                </label>
+              </div>
+
+              <a4j:outputPanel id="certifyAppNameErrors" ajaxRendered="true">
+                <h:message for="certifyAppNameSelect" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.accountGroupCertification}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol">#{msgs.cert_sched_basic_select_object_types}</td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpSelectObjType" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help.help_sched_cert_act_grp_object_type}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="2">
+              <h:selectBooleanCheckbox
+                id="selectGroupsCheckboxId"
+                onclick="Ext.getCmp('schemaSuggestId-AppSchemaSelector').toggleSelectGroups();"
+                style="margin-bottom: 4px"
+                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+              <table id="groupSchemaTableId" class="nonPaddedTbl" style="display:none;">
+                <tr><td><div id="schemaSuggestId"/></td></tr>
+                <tr>
+                  <td>
+                    <h:inputHidden id="selectedSchemasHiddenId" value="#{certificationSchedule.editedCertificationSchedule.applicationGroupsJson}"/>
+                    <div id="selectedSchemasId"/>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.businessRoleCertification}">
+
+          <tr>
+              <td class="titleColumn certScheduleTitleCol" valign="top">#{msgs.cert_sched_basic_select_roles}<h:outputText styleClass="requiredText" value="*"/></td>
+              <td class="certScheduleHelpCol" valign="top"><h:graphicImage id="imgHlpBizRoles" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help.help_sched_cert_biz_role_recipient}"/>
+              </td>
+              <td class="certScheduleOptionCol" colspan="2">
+                  <table border="0">
+                      <tr>
+                          <td>
+                            <input type="radio" id="manualRoleSelection" name="selectionMethod" class="#{((not certificationSchedule.editable) or certificationSchedule.existingCertGroup) ? 'disabledRadio' : ''}" checked="checked" onclick="SailPoint.CertificationScheduleForm.roleTypeFilterChanged('Manual')"/>
+                            <span style="margin-left:7px;font-weight:bold">#{msgs.cert_sched_basic_select_roles_manuall}</span>
+                            <div style="margin:5px 0 0 15px">
+                                <div id="certifyRoleMultiSuggest"></div>
+                                <t:inputHidden id="certifyBusinessRoleSelect"
+                                         value="#{certificationSchedule.editedCertificationSchedule.businessRoleIds}" forceId="true">
+                                <f:attribute name="autocomplete" value="off" />
+                                <sp:convertList />
+                                </t:inputHidden>
+                            </div>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                            <input type="radio" id="roleTypeSelection" name="selectionMethod" class="#{((not certificationSchedule.editable) or certificationSchedule.existingCertGroup) ? 'disabledRadio' : ''}" onclick="SailPoint.CertificationScheduleForm.roleTypeFilterChanged('Type')"/>
+                            <span style="margin-left:7px;font-weight:bold">#{msgs.cert_sched_basic_select_roles_by_type}</span>
+                             <div style="margin: 5px 0 5px 15px">
+                                <h:selectManyListbox id="roleTypeSelect" 
+                                                     value="#{certificationSchedule.editedCertificationSchedule.roleTypes}" 
+                                                     disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                                     readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" >
+                                    <f:selectItems value="#{certificationSchedule.roleTypeItems}"/>
+                                </h:selectManyListbox>
+                              </div>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                            <input type="radio" id="globalRoleSelection" name="selectionMethod" class="#{((not certificationSchedule.editable) or certificationSchedule.existingCertGroup) ? 'disabledRadio' : ''}" onclick="SailPoint.CertificationScheduleForm.roleTypeFilterChanged('Global')"/>
+                            <span style="margin-left:7px;font-weight:bold">#{msgs.select_item_all_biz_roles}</span>
+                            <h:selectBooleanCheckbox id="globalRoleCheckbox" value="#{certificationSchedule.editedCertificationSchedule.globalCertification}"
+                                           onclick="SailPoint.CertificationScheduleForm.globalClicked(this.checked, #{certificationSchedule.continuousHasLaunched})"
+                                           style="display:none"
+                                           disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                           readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+                 
+
+                          </td>
+                      </tr>
+                  </table>
+
+                  <a4j:outputPanel ajaxRendered="true">
+                  <h:message for="certifyBusinessRoleSelect" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                  </a4j:outputPanel>
+
+              </td>
+          </tr>
+
+       
+
+          <tr style="display:#{certificationSchedule.editedCertificationSchedule.showBusinessRoleHierarchy ? '' : 'none'}">
+             <td class="titleColumn certScheduleTitleCol" valign="top"><h:outputText value="#{msgs.label_include_role_hierarchy}"/></td>
+             <td class="certScheduleHelpCol" valign="top"><h:graphicImage id="imgHlpIncludeRoleHierarchy" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                    alt="#{help.help_sched_biz_role_include_hierarchy}"/>
+             </td>
+             <td class="certScheduleOptionCol">
+                <h:selectBooleanCheckbox id="includeRoleHierarchy"
+                                         value="#{certificationSchedule.editedCertificationSchedule.includeRoleHierarchy}"
+                                         disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                         readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+             </td>
+          </tr>
+
+        </ui:fragment>
+
+         <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.advancedCertification}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.label_pops_to_certify}"/></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpIpops" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help.help_sched_cert_adv_ipops}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="5">
+              <script type="text/javascript"><!--//--><![CDATA[//><!--
+                // This function keeps the table looking nice after ajax re-renders
+                function reRoundTheIpopsTable() { }
+              
+              //--><!]]></script>
+              <t:saveState value="#{certificationSchedule.editedCertificationSchedule.groups}" />
+              <a4j:outputPanel id="ipopsTablePanel">
+                
+                <h:inputHidden id="selectedGroupId" value="#{certificationSchedule.selectedGroupId}" />
+
+                <div id="ipopsHeader" class="spHeader"/>
+                <div id="spGrayBackground" class="spGrayBackground">
+                  <div id="ipopsContent" class="spContent">
+                      <t:dataTable styleClass="spTable width100"
+                                   headerClass="spTable dataTableCheckboxColumn"
+                                   columnClasses="dataTableCheckboxColumn, leftOfThreeColumns, centerOfThreeColumns"
+                                   footerClass="dataTableCheckboxColumn spTableFooter"
+                                   rowClasses="even, odd"
+                                   id="ipopsTable"
+                                   value="#{certificationSchedule.editedCertificationSchedule.groups}"
+                                   var="group"
+                                   forceIdIndexFormula="#{group.groupDefinition.id}">
+                        <h:column>
+                          <f:facet name="header">
+                            <h:panelGroup style="text-align:center">
+                              <h:selectBooleanCheckbox id="selectAllToggle" value="false"
+                                         onclick="SailPoint.CertificationScheduleForm.toggleGroupSelections(this.checked);"
+                                         disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                         readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}" />
+                            </h:panelGroup>
+                          </f:facet>
+
+                          <h:selectBooleanCheckbox class="deleteGroupFlag" value="#{group.checked}"
+                                         disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                         readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}" />
+
+                          <f:facet name="footer">
+                              <a4j:commandButton id="removeGroupButton" value="#{msgs.cert_sched_basic_button_remove_population}"
+                                                 styleClass="secondaryBtn"
+                                                 render="ipopsTablePanel, ipopsTableErrors"
+                                                 action="#{certificationSchedule.removeGroups}"
+                                                 oncomplete="SailPoint.CertificationScheduleForm.initializeAjaxComponents(); SailPoint.CertificationScheduleForm.postSubmit(); reRoundTheIpopsTable();"
+                                                 disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                                 readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}" />
+                          </f:facet>
+                        </h:column>
+
+                        <h:column>
+                          <f:facet name="header">
+                            <h:outputText value="#{msgs.population}"/>
+                          </f:facet>
+
+                          <h:outputText value="#{group.groupDefinition.name}"/>
+
+                          <f:facet name="footer">
+                            <h:panelGroup styleClass="spBlueTableFooter" style="white-space: nowrap">
+                              <h:selectOneMenu id="groupToAddId" value="#{certificationSchedule.groupToAddId}"
+                                               disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                               readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}">
+                                <f:selectItems id="groupSelections" value="#{certificationSchedule.availableIPOPs}"/>
+                              </h:selectOneMenu>
+                              <a4j:commandButton id="addGroupButton" value="#{msgs.button_add}"
+                                                 styleClass="primaryBtn"
+                                                 render="ipopsTablePanel, ipopsTableErrors"
+                                                 action="#{certificationSchedule.addGroup}"
+                                                 oncomplete="SailPoint.CertificationScheduleForm.createGroupSuggests(#{certificationSchedule.readOnly || certificationSchedule.continuousHasLaunched}); SailPoint.CertificationScheduleForm.initializeAjaxComponents(); SailPoint.CertificationScheduleForm.postSubmit(); reRoundTheIpopsTable();"
+                                                 disabled="#{(not certificationSchedule.editable) || certificationSchedule.existingCertGroup}"
+                                                 readonly="#{(not certificationSchedule.editable) || certificationSchedule.existingCertGroup}" />
+                            </h:panelGroup>
+                          </f:facet>
+                        </h:column>
+
+                        <h:column>
+                          <f:facet name="header">
+                            <h:outputText value="#{msgs.label_certifiers}"/>
+                          </f:facet>
+                          <div id="groupCertifiersSuggest_#{group.groupDefinition.id}"></div>
+                          <t:inputHidden id="groupCertifiersInput" value="#{group.certifiers}">
+                            <sp:convertIdentityList />
+                          </t:inputHidden>
+                          
+                          <input type="hidden" name="groupDefinitionId_#{group.groupDefinition.id}" class="groupDefinitionId" value="#{group.groupDefinition.id}" />
+                          <input type="hidden" id="groupDefinitionCertifiers_#{group.groupDefinition.id}" name="groupDefinitionCertifiers_#{group.groupDefinition.id}" value="#{sp:basicJSONData(group.certifiers)}" />
+
+                          <f:facet name="footer">
+                            <pre>  </pre>
+                          </f:facet>
+                        </h:column>
+                      </t:dataTable>
+                  </div>
+                </div>
+                <div class="spFooter"/>
+              </a4j:outputPanel>
+              <a4j:outputPanel id="ipopsTableErrors" ajaxRendered="true">
+                <h:message for="ipopsTable" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.advancedCertification}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.label_group_factories_to_certify}"/></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpFactories" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help.help_sched_cert_adv_factories}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="5">
+              <script type="text/javascript"><!--//--><![CDATA[//><!--
+                // This function keeps the table looking nice after ajax re-renders
+                function reRoundTheFactoriesTable() { }
+              //--><!]]></script>
+              <t:saveState value="#{certificationSchedule.editedCertificationSchedule.factories}" />
+              <a4j:outputPanel id="factoriesTablePanel">
+                <div id="factoriesHeader" class="spHeader"/>
+                <div id="factoriesGrayBackground" class="spGrayBackground">
+                  <div id="factoriesContent" class="spContent">
+                      <t:dataTable styleClass="spTable width100"
+                                   headerClass="spTable dataTableCheckboxColumn"
+                                   columnClasses="dataTableCheckboxColumn, leftOfThreeColumns, centerOfThreeColumns"
+                                   footerClass="dataTableCheckboxColumn spTableFooter"
+                                   rowClasses="even, odd"
+                                   id="factoriesTable"
+                                   value="#{certificationSchedule.editedCertificationSchedule.factories}"
+                                   var="factory"
+                                   forceIdIndexFormula="#{factory.id}">
+                        <h:column>
+                          <f:facet name="header">
+                            <h:panelGroup style="text-align:center">
+                              <h:selectBooleanCheckbox id="selectAllFactoriesToggle" value="false" onclick="SailPoint.CertificationScheduleForm.toggleFactorySelections(this.checked);"
+                                                 disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                                 readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"/>
+                            </h:panelGroup>
+                          </f:facet>
+
+                          <h:selectBooleanCheckbox class="deleteFactoryFlag" value="#{factory.checked}" 
+                                                 disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                                 readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"/>
+
+                          <f:facet name="footer">
+                              <a4j:commandButton id="removeFactoryButton" value="#{msgs.button_remove}"
+                                                 styleClass="secondaryBtn"
+                                                 render="factoriesTablePanel, factoriesTableErrors"
+                                                 action="#{certificationSchedule.removeFactories}"
+                                                 oncomplete="SailPoint.CertificationScheduleForm.postSubmit(); reRoundTheFactoriesTable();"
+                                                 disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                                 readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}" />
+                          </f:facet>
+                        </h:column>
+
+                        <h:column>
+                          <f:facet name="header">
+                            <h:outputText value="#{msgs.label_group_factory}"/>
+                          </f:facet>
+
+                          <h:outputText value="#{factory.name}"/>
+
+                          <f:facet name="footer">
+                            <h:panelGroup styleClass="spBlueTableFooter" style="white-space: nowrap">
+                              <h:selectOneMenu id="factoryToAddId"
+                                               value="#{certificationSchedule.factoryToAddId}"
+                                               disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                               readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}">
+                                <f:selectItems id="factorySelections" value="#{certificationSchedule.availableFactories}"/>
+                              </h:selectOneMenu>
+                              <a4j:commandButton id="addFactoryButton" value="#{msgs.button_add}"
+                                                 styleClass="primaryBtn"
+                                                 render="factoriesTablePanel, factoriesTableErrors"
+                                                 action="#{certificationSchedule.addFactory}"
+                                                 oncomplete="SailPoint.CertificationScheduleForm.postSubmit(); reRoundTheFactoriesTable();"
+                                                 disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+                                                 readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}" />
+                            </h:panelGroup>
+                          </f:facet>
+                        </h:column>
+
+                        <h:column>
+                          <f:facet name="header">
+                            <h:outputText value="#{msgs.label_certifier_rule}"/>
+                          </f:facet>
+                          <h:panelGroup>                       
+	                          <h:selectOneMenu id="certifierRule" value="#{factory.certifierRuleId}"
+	                                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}"
+	                                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}">
+	                            <f:selectItems value="#{certificationSchedule.certifierRules}"/>
+	                          </h:selectOneMenu>
+
+				              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+				              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+				                     onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:factoriesTabl#{factory.id}:certifierRule').value, 
+				                                                         'Certifier',
+				                                                         $('certificationScheduleForm:refreshCertifierRulesButton'))" />                                                     
+				              </ui:fragment>
+                          </h:panelGroup>
+                        </h:column>
+                      </t:dataTable>
+                  </div>
+                </div>
+                <div class="spFooter"/>
+              </a4j:outputPanel>
+              <a4j:outputPanel id="factoriesTableErrors" ajaxRendered="true">
+                <h:message for="factoriesTable" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <tr><td colspan="2">
+          <ui:include src="scheduleCertificationsFrequencyInclude.xhtml" />
+        </td></tr>
+
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_contents_header}</td></tr>
+
+        <!-- Certification Contents Include -->
+        <ui:include src="certificationContentsInclude.xhtml">
+            <ui:param name="readOnly" value="#{readOnly}"/>
+        </ui:include>
+
+        <tr>
+          <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.sched_cert_tags}"/></td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpTags" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+              alt="#{help.help_sched_cert_tags}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6">
+            <div id="tagsSuggest"></div>
+            <t:inputHidden id="tagsInput" value="#{certificationSchedule.editedCertificationSchedule.tagIdsOrNames}" forceId="true">
+                <sp:convertList />
+            </t:inputHidden>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <a4j:commandButton id="refreshCertifierRulesButton"
+                       style="display:none"
+                       immediate="true"
+                       render="factoriesTablePanel"/> 
+</ui:composition>
+
+</body>
+</html>

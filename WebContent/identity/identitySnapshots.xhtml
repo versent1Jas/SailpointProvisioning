@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+
+  <ui:fragment rendered="#{!(empty identity.snapshotsHelper.snapshots)}">
+
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_identity_snapshots}"/>
+
+    <div class="spTabledAjaxContent">
+    
+      <a4j:outputPanel id='snapshotsPanel'>
+    
+      <table id="snapshotTbl" class="spTable" cellspacing="0">
+        <tr>
+          <th></th>
+          <th>#{msgs.snapshot_date}</th>
+          <th>#{msgs.businessRoles}</th>
+        </tr>
+        <ui:repeat value="#{identity.snapshotsHelper.snapshots}" var="snap">
+          <tr>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'DeleteIdentitySnapshot')}">
+              <td width="50" align="center"><h:selectBooleanCheckbox
+                value="#{identity.snapshotsHelper.snapshotSelections[snap.id]}" /></td>
+            </ui:fragment>
+            <ui:fragment rendered="#{!sp:hasRight(facesContext, 'DeleteIdentitySnapshot')}">
+              <td/>
+            </ui:fragment>
+            <td width="300">
+              <a href="javascript:viewSnapshot('#{snap.id}')">
+                <h:outputText value="#{snap.created}">
+                  <f:convertDateTime type="both" dateStyle="medium" timeZone="#{identity.userTimeZone}"/>
+                </h:outputText>
+              </a>
+              <ui:fragment rendered="#{snap.pendingDelete}">
+                <h:graphicImage width="16px"
+                                alt="#{msgs.identity_acct_pending_delete}"
+                                title="#{msgs.identity_acct_pending_delete}"
+                                height="16px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                url="/images/icons/pending_delete_16.png"/>
+              </ui:fragment>
+            </td>
+            <td><h:outputText value="#{snap.summary}" /></td>
+          </tr>
+        </ui:repeat>
+
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'DeleteIdentitySnapshot')}">
+          <tr>
+            <td colspan="3">
+              <a4j:commandButton  id="snapDeleteButton" 
+                                  value="#{msgs.button_delete}"
+                                  styleClass="secondaryBtn"
+                                  action="#{identity.snapshotsHelper.deleteSnapshots}" 
+                                  render="snapshotsPanel"/>
+            </td>
+          </tr>
+        </ui:fragment>
+      </table>
+      
+      </a4j:outputPanel>
+      
+      <div id="identitySnapshotsContainer" style="width: 100%"></div>
+
+      <script>
+          makeTableMulticolored($('snapshotTbl'), true, true, 'even', 'odd');
+      </script>
+    </div>
+  </ui:fragment>
+  
+  <ui:fragment rendered="#{empty identity.snapshotsHelper.snapshots}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_no_identity_snapshots}"/>
+    <br/><br/>
+  </ui:fragment> 
+</ui:composition>
+
+</body>
+</html>
+  

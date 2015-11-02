@@ -1,0 +1,108 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+
+<ui:composition template="/external/noauthPage.xhtml">
+
+  <ui:define name="body">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/">
+      <src>login.css</src>
+    </sp:style>
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/">
+      <src>base.css</src>
+      <src>buttons.css</src>
+    </sp:style>
+
+    <f:view>
+
+      <h:form id="sessionTimeoutForm">
+        <ui:remove><!--
+          Hidden field into which the ID of the current object being
+          viewed gets copied (if available) when an auto-logout happens.
+          -->
+        </ui:remove>
+        <h:inputHidden id="id"/>
+
+        <ui:remove>
+          <!-- Hidden button used to logout when the session times out. -->
+        </ui:remove>
+        <h:commandButton id="checkSessionBtn"
+            action="#{login.checkSession}" 
+            style="display: none"
+            immediate="true" />
+
+      </h:form>
+
+      <c:choose>
+        <c:when test="#{registration.hasErrors}">
+          <h:form id="registrationErrorForm">
+
+            <h:outputText value="#{msgs.registration_failed}" styleClass="formError" />
+            <br />
+
+            <!--Displays only Error Messages-->
+            <h:messages styleClass="formError" layout="list" id="msg1"
+              infoStyle="display:none" warnStyle="display:none" />
+          </h:form>
+        </c:when>
+
+        <c:otherwise>
+          <h:form styleClass="form" id="registrationSuccessForm">
+
+            <div class="spContent">
+
+              <div class="pageInfo" style="height: 225px">
+
+                <table style="height: 175px; width: 95%">
+                  <tr>
+                    <td align='center'>
+                      <div class="instructions">
+                        <h:outputText value="#{msgs.registration_success}" styleClass="loginFormText" />
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" valign='bottom'>
+                    <c:choose>
+                      <c:when test="#{(registration.selfServiceRedirectPath != null)}">
+                        <div class="buttonwrapper">
+                            <h:outputLink styleClass="primaryBtn" value="#{registration.selfServiceRedirectPath}">
+                              <h:outputText value="#{msgs.lcm_lifecycle_self_service_redirect_button}"/>
+                            </h:outputLink>
+                        </div>
+                      </c:when>
+                      <c:when test="#{(registration.selfServiceRedirectPath == null)}">
+                        <div class="loginbuttonwrapper">
+                            <h:commandButton styleClass="primaryBtn"
+                                             action="#{registration.login}"
+                                             value="#{msgs.lcm_lifecycle_self_service_redirect_button}" />
+                        </div>
+                      </c:when>
+                    </c:choose>
+                    </td>
+                  </tr>
+                </table>
+
+              </div>
+
+            </div>
+
+          </h:form>
+        </c:otherwise>
+      </c:choose>
+
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

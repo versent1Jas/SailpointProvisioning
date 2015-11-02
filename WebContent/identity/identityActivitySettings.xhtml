@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <h:outputText styleClass="spContentTitle" value="#{msgs.header_activity_settings}"/>
+  <br/><br/>
+  
+  <table>
+    <tr>
+      <td>
+        <h:graphicImage rendered="#{identity.activityHelper.activityEnabled}" 
+                        style="padding-right: 7px"
+                        value="/images/icons/dialogue_success_16.png"/>
+        <h:graphicImage rendered="#{!identity.activityHelper.activityEnabled}" 
+                        style="padding-right: 7px"
+                        value="/images/icons/dialogue_error_16.png"/>
+      </td>
+      <td align="left">
+        <h:outputText value="#{msgs.label_activity_monitoring}"/>
+        <h:outputText value=" "/>        
+        <h:outputText rendered="#{identity.activityHelper.activityEnabled}" 
+          value="Enabled"/>
+        <h:outputText rendered="#{!identity.activityHelper.activityEnabled}" 
+          value="Disabled"/>
+      </td> 
+    </tr>
+  </table>
+  
+  <ui:fragment rendered="#{!(empty identity.activityHelper.activityEnabledLinks)}">
+    <div class="paddedContainer">
+      <table id="activityStngsTbl" class="spTable" cellspacing="0">
+        <tr>
+          <th align='center'>#{msgs.label_enable_disable_monitoring}</th>
+          <th>#{msgs.application}</th>
+          <th>#{msgs.header_activity_enabled_by_role}</th>
+        </tr>
+        <ui:repeat value="#{identity.activityHelper.activityEnabledLinks}" var="activityLink">
+          <tr>
+            <td align='center'>
+              <h:selectBooleanCheckbox value="#{identity.activityHelper.activitySelections[activityLink.application.id]}" 
+                rendered="#{null == identity.activityHelper.businessRoleSummary[activityLink.application.name]}"
+                disabled="#{!sp:hasRight(facesContext, 'MonitorIdentityActivity')}"/>
+              <input type="checkbox" name="checkbox-#{activityLink.application.name}" disabled="disabled" checked="checked" style="#{null == identity.activityHelper.businessRoleSummary[activityLink.application.name] ? 'display: none' : ''}"/>
+            </td> 
+            <td>
+              <h:outputText value="#{activityLink.application.name}" />
+            </td>
+            <td>
+              <h:outputText value="#{identity.activityHelper.businessRoleSummary[activityLink.application.name]}"/>
+            </td>
+          </tr>
+        </ui:repeat>
+      </table>
+      <script>
+        makeTableMulticolored($('activityStngsTbl'), true, false, 'even', 'odd');
+      </script>
+    </div>
+    <h:outputText value="#{msgs.info_only_apps_config_for_activity}"/>
+    <br/><br/>
+  </ui:fragment>
+  
+  <ui:fragment rendered="#{empty identity.activityHelper.activityEnabledLinks}">
+    <h:outputText value="#{msgs.info_no_apps_config_for_activity}"/>
+    <br/><br/>
+  </ui:fragment>
+</ui:composition>
+
+</body>
+</html>
+  

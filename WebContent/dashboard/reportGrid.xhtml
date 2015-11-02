@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/PolicyViolationStatusGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/chart/ReportChartBuilder.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/GridReportLayout.js?#{debug.revision}</src>
+</sp:script>
+
+
+<script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+
+
+    var displayMode = "#{reference.content.arguments['displayMode']}";
+
+    var conf = #{reportDefinition.dashboardConfiguration[reference.content.sourceTaskId]};
+    var taskResultId = conf.taskResultId;
+    var gridColConf = conf.gridMetaData;
+    var summaryTableJson = conf.summary;
+    var chartDefinition = conf.chart;
+
+    Ext.onReady(function() {
+        if (!taskResultId || (displayMode == 'summary' && !summaryTableJson && !chartDefinition) || (!gridColConf)){
+            new Ext.Panel({
+                renderTo:'gridPanel',
+                html:"<div style='padding-top:15px;width:100%;height:50px;text-align:center'>#{msgs.dash_report_no_results}</div>"
+            });
+        } else if (displayMode == 'summary') {
+            var summaryItems = [];
+            var summaryTable = SailPoint.GridReportLayout.buildSummaryTable(summaryTableJson);
+            if (summaryTable != null) {
+                summaryItems.push(summaryTable);
+            }
+
+            var chart = null;
+            if (chartDefinition != null) {
+                chart = SailPoint.chart.ReportChartBuilder.createChart(chartDefinition);
+                summaryItems.push(chart);
+            }
+
+            if (summaryItems.length > 0) {
+                var summaryPanel = Ext.create('widget.panel', {
+                    height: 450,
+                    renderTo: 'gridPanel',
+                    layout: {
+                        type: 'hbox'
+                    },
+                    border:false, bodyBorder:false,
+                    items: summaryItems
+                });
+            }
+
+            new Ext.Button({
+                renderTo:'viewButton',
+                text:"#{msgs.dash_reports_view_button}",
+                margin:5,
+                icon:SailPoint.getRelativeUrl('/images/icons/table.png'),
+                handler:function(){
+                    $('dashboardForm:taskResultId').value = taskResultId;
+                    $('dashboardForm:viewResultBtn').click();
+                }
+            });
+
+        } else {
+            var grid = SailPoint.GridReportLayout.buildGrid('reportGrid-#{reference.id}', gridColConf, "", SailPoint.getRelativeUrl('/rest/report/' + taskResultId + '/results'));
+            grid.getStore().load();
+
+            grid.on('itemclick', function(){
+                $('dashboardForm:taskResultId').value = taskResultId;
+                $('dashboardForm:viewResultBtn').click();
+            });
+        }
+
+
+    });
+    //--><!]]>
+</script>
+
+
+<div id="gridPanel"></div>
+<span id="viewButton"></span>
+
+</body>
+</html>
+
+
+
+
+

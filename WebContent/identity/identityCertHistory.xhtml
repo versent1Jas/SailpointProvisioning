@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+
+  <script type="text/javascript" defer="defer">
+      /*The following script builds tooltips for pages that include the "?" help image
+      on their page.  Script looks for images with "imgHlp" in their id and
+      takes their alt text to build a tooltip.*/
+    Ext.onReady(function() {
+      buildTooltips();    
+    });
+  </script>
+
+<h:outputText styleClass="spContentTitle" value="#{msgs.header_identity_cert_history}"/>
+    
+    
+    <div id="identityCertHistoryContainer" style="width: 97%; margin:10px;padding:10px 0">
+    <ui:include src="/manage/certification/certificationLegend.xhtml">
+        <ui:param name="showRevokeAccount" value="true"/>
+        <ui:param name="showMitigate" value="true"/>
+        <ui:param name="showComments" value="true"/>
+        <ui:param name="showClear" value="true"/>
+    </ui:include>    
+    
+    </div>
+    
+    <h:inputHidden id="filterParamsJSON" value="#{identityHistoryExport.filterParamsJSON}" />
+    
+    <a4j:commandButton id="terminateExportButton"
+                       style="display:none" 
+                       action="#{identityHistoryExport.terminateExport}" />  
+    
+    <h:commandButton id="exportHistoryAsPDF"
+                     style="display: none"
+                     action="#{identityHistoryExport.exportHistoryAsPDF}" />
+
+    <h:commandButton id="exportHistoryAsCSV"
+                     style="display: none"
+                     action="#{identityHistoryExport.exportHistoryAsCSV}" />
+    
+</ui:composition>
+
+</body>
+</html>
+  

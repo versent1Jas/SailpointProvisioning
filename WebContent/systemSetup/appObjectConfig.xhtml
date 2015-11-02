@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  
+  <ui:define name="title">#{msgs.oconfig_title_application}</ui:define>
+    
+  <ui:define name="body">
+    <script type="text/javascript" defer="defer">
+      helpKey = 'ATTRIBUTE_CONFIG';
+    </script>
+  
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <ui:fragment rendered="#{applicationObjectConfig.configWarnings != null}">
+        <div class="formError">
+        <table>
+          <ui:repeat value="#{applicationObjectConfig.configWarnings}" var="warning">
+            <tr>
+              <td>
+                <h:outputText value="#{warning}"/>
+              </td>
+            </tr>
+          </ui:repeat>
+        </table>
+        </div>
+        <br/>
+      </ui:fragment>
+
+      <h:form styleClass="form" id="mainform">
+
+        <h:inputHidden id="id" value="#{applicationObjectConfig.object.id}"/>
+
+        <ui:include src="objectConfigCommon.xhtml">
+          <ui:param name="config" value="#{applicationObjectConfig}"/>
+        </ui:include>
+
+        <div class="spFooter"></div>
+
+        <div class="buttonRow">
+          <h:commandButton id="backButton" styleClass="secondaryBtn" action="backToSystemSetup" value="#{msgs.button_return_to_system_setup}" />
+        </div>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+    
+</ui:composition>
+</body>
+</html>

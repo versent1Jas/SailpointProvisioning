@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2011 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/ApplicationSchemaSelector.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+        Ext.onReady(function () {
+            var appSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'applicationsMultiSuggest',
+                suggestType: 'application',
+                jsonData: #{sp:basicJSONDataConverted(taskDefinition.argMap['applications'].objectListValue, 'ApplicationListConverter')},
+                contextPath: CONTEXT_PATH,
+                inputFieldName: 'editForm:applicationsSuggest',
+                valueField:'displayName',
+                sortable:true,
+                sortOnAdd:false
+            });
+            
+            Ext.create('sailpoint.component.ApplicationSchemaSelector', {
+                applicationsSuggest: appSuggest,
+                schemaSuggestId: 'schemaSuggestId',
+                hiddenSchemasId: 'editForm:selectedSchemasHiddenId'
+            });
+        });
+    </script>
+  
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <div class="spContent">
+        <table id="acctGroupOptsTab" class="argumentTbl argumentTblWithHelp customWidth paddedTbl" cellspacing="0">
+          <tr>
+            <th colspan="2" ><h:outputText styleClass="spContentTitle" value="#{msgs.account_group_aggregation_options}"/></th>
+          </tr>    
+          <tr>
+            <td>
+                <sp:outputText value="#{taskDefinition.argMap['applications'].argument.prompt}"/>
+                <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['applications'].argument.name}" 
+                rendered="#{taskDefinition.argMap['applications'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['applications'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <div id="applicationsMultiSuggest"></div>
+              <t:inputHidden id="applicationsSuggest"
+                             value="#{taskDefinition.argMap['applications'].objectListValue}"
+                             required="true">
+                  <sp:convertList />
+              </t:inputHidden>
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message styleClass="formError" for="applicationsSuggest" />
+            </a4j:outputPanel>
+            </td>
+          </tr>
+          <tr>
+            <td>#{msgs.task_in_account_group_aggregation_groups_to_scan}</td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['groupSchema'].argument.name}" 
+                rendered="#{taskDefinition.argMap['groupSchema'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['groupSchema'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <input
+                id="selectGroupsCheckboxId"
+                type="checkbox"
+                onclick="Ext.getCmp('schemaSuggestId-AppSchemaSelector').toggleSelectGroups();"/>
+              <table id="groupSchemaTableId" style="display:none;">
+                <tr><td><div id="schemaSuggestId" style="width: 350px;"/></td></tr>
+                <tr style="border: none;"><td>
+                  <h:inputHidden id="selectedSchemasHiddenId" value="#{taskDefinition.argMap['groupSchema'].objectCustomSerializer}"/>
+                  <div id="selectedSchemasId" class="floatleft spTabledContent" style="padding:0px; margin:0px;width: 350px;">
+                  </div>
+                </td></tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['deltaAggregation'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['deltaAggregation'].argument.name}" 
+                rendered="#{taskDefinition.argMap['deltaAggregation'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['deltaAggregation'].argument.helpKey]}"/>
+            </td>                
+            
+            <td>
+              <h:selectBooleanCheckbox id="deltaAggregation" value="#{taskDefinition.argMap['deltaAggregation'].booleanValue}"/>
+            </td>
+          </tr>  
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['checkDeleted'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['checkDeleted'].argument.name}" 
+                rendered="#{taskDefinition.argMap['checkDeleted'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['checkDeleted'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="checkDeleted" value="#{taskDefinition.argMap['checkDeleted'].booleanValue}"/>
+            </td>
+          </tr>  
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['descriptionLocale'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['descriptionLocale'].argument.name}" 
+                rendered="#{taskDefinition.argMap['descriptionLocale'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['descriptionLocale'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectOneMenu id="descriptionLocale"
+                               value="#{taskDefinition.argMap['descriptionLocale'].value}">
+                <f:selectItem itemLabel="#{msgs.select_locale}" itemValue="" />
+                <f:selectItems value="#{systemConfig.supportedLanguagesItems}"/>
+              </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['descriptionAttribute'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['descriptionAttribute'].argument.name}" 
+                rendered="#{taskDefinition.argMap['descriptionAttribute'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['descriptionAttribute'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:inputText size="40" id="descriptionAttribute" value="#{taskDefinition.argMap['descriptionAttribute'].value}" />
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText value="#{taskDefinition.argMap['accountGroupRefreshRule'].argument.prompt}" /></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['accountGroupRefreshRule'].argument.name}"
+                                rendered="#{taskDefinition.argMap['accountGroupRefreshRule'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{help[taskDefinition.argMap['accountGroupRefreshRule'].argument.helpKey]}"/>
+            </td>
+            <td>
+              <a4j:outputPanel id="accountGroupRefreshRulePanel">
+                <h:selectOneMenu id="accountGroupRefreshRule"
+                                 value="#{taskDefinition.argMap['accountGroupRefreshRule'].value}">
+                  <f:selectItem itemLabel="#{msgs.select_rule}"
+                                itemValue="" />
+                  <f:selectItems value="#{taskDefinition.argMap['accountGroupRefreshRule'].objectNames}"/>
+                </h:selectOneMenu>
+              </a4j:outputPanel>
+
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('editForm:accountGroupRefreshRule').value, 
+                                                       'GroupAggregationRefresh',
+                                                       $('editForm:accountGroupAggregationRefreshRulesButton'))" />
+                <a4j:commandButton id="accountGroupAggregationRefreshRulesButton"
+                                   style="display:none"
+                                   immediate="true"
+                                   render="accountGroupRefreshRulePanel"/>
+              </ui:fragment>
+            </td>
+          </tr>
+        </table>
+      </div>
+    
+      <script defer="defer">
+             makeTableMulticolored($('acctGroupOptsTab'),true,false, "even", "odd" );
+      </script>
+    </ui:fragment>
+</ui:composition>
+
+</body>
+</html>

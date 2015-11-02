@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+<ui:composition>
+
+    <f:view>
+
+        <table class="width100 spTable" style="border:0;" cellspacing="0" cellpadding="0">
+            <tr>
+                <td>
+                    <h:outputText class="sectionHeader" value="#{msgs.standard_attrs}"/>
+                    <table class="width100">
+                        <tr>
+                            <td>
+                                <h:outputText styleClass="font10" style="font-weight:bold"
+                                              value="#{sp:localizeKey(searchBean.inputs['entitlementCatalog.application'].description)}"/>
+                            </td>
+                            <td colspan="2">
+                                <div id="accountGroupApplicationSuggest"></div>
+                                <t:inputHidden id="accountGroupApplication" value="#{searchBean.inputs['entitlementCatalog.application'].value}" forceId="true">
+                                </t:inputHidden>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h:outputText styleClass="font10" style="font-weight:bold"
+                                              value="#{sp:localizeKey('attribute')}"/>
+                            </td>
+                            <td colspan="2">
+                                <ui:include src="../../analyze/suggestAttribute.xhtml">
+                                    <ui:param name="key" value="entitlementCatalog.name"/>
+                                    <ui:param name="field" value="acctGroupAttribute"/>
+                                </ui:include>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h:outputText styleClass="font10" style="font-weight:bold"
+                                              value="#{sp:localizeKey(searchBean.inputs['entitlementCatalog.nativeIdentity'].description)}"/>
+                            </td>
+                            <td colspan="2">
+                                <ui:include src="../../analyze/suggestAttribute.xhtml">
+                                    <ui:param name="key" value="entitlementCatalog.nativeIdentity"/>
+                                    <ui:param name="field" value="nativeIdentity"/>
+                                </ui:include>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h:outputText styleClass="font10" style="font-weight:bold"
+                                              value="#{sp:localizeKey(searchBean.inputs['entitlementCatalog.owner'].description)}"/>
+                            </td>
+                            <td colspan="2">
+                                <div id="accountGroupOwnerSuggestDiv"></div>
+                                <t:inputHidden id="accountGroupOwner" value="#{searchBean.inputs['entitlementCatalog.owner'].value}" forceId="true">
+                                </t:inputHidden>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <table class="width100">
+                        <tr>
+                            <td>
+                                <h:outputText styleClass="font10" style="font-weight:bold" value="#{sp:localizeKey(searchBean.inputs['entitlementCatalog.typeFilter'].description)}"/>
+                            </td>
+                            <td colspan="2">
+                                <div id="accountGroupTypeComboBox"/>
+                                <t:inputHidden id="accountGroupTypeFilter" value="#{searchBean.inputs['entitlementCatalog.typeFilter'].value}" forceId="true">
+                                </t:inputHidden>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <div class="groupPermissionsSearchFields" style="padding-top: 10px;"><h:outputText styleClass="font10"
+                                                                                        style="font-weight:bold"
+                                                                                        value="#{msgs.account_group_permissions}"/>
+                                </div>
+                                <div class="groupPermissionsSearchFields" style="padding:8px;">
+                                    <table class="width100">
+                                        <tr>
+                                            <td>
+                                                <h:outputText styleClass="font10" style="font-weight:bold"
+                                                              value="#{sp:localizeKey(searchBean.inputs['entitlementCatalog.target'].description)}"/>
+                                            </td>
+                                            <td colspan="2">
+                                                <h:inputText id="accountGroupTarget" styleClass="searchInputText inputWidth" size="45"
+                                                             value="#{searchBean.inputs['entitlementCatalog.target'].value}"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <h:outputText styleClass="font10" style="font-weight:bold"
+                                                              value="#{sp:localizeKey(searchBean.inputs['entitlementCatalog.rights'].description)}"/>
+                                            </td>
+                                            <td colspan="2">
+                                                <h:inputText id="accountGroupRights" styleClass="searchInputText inputWidth" size="45"
+                                                             value="#{searchBean.inputs['entitlementCatalog.rights'].value}"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <h:outputText styleClass="font10" style="font-weight:bold"
+                                                              value="#{sp:localizeKey(searchBean.inputs['entitlementCatalog.annotation'].description)}"/>
+                                            </td>
+                                            <td colspan="2">
+                                                <h:inputText id="accountGroupAnnotation" styleClass="searchInputText inputWidth" size="45"
+                                                             value="#{searchBean.inputs['entitlementCatalog.annotation'].value}"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <ui:fragment rendered="#{null != searchBean.extendedAttributeKeys}">
+                <tr><td>&nbsp;</td></tr>
+                <tr>
+                    <td valign="top">
+                        <h:outputText class="sectionHeader" value="#{msgs.searchable_attrs}"/>
+                        <table id="extendedAttributesTbl" cellpadding="5" cellspacing="0" class="width100">
+                            <ui:repeat id="extendedAttributes" value="#{searchBean.extendedAttributeKeys}" var="key">
+                                <tr>
+                                    <td valign="top">
+                                        <h:outputText styleClass="font10" style="font-weight:bold" value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+                                    </td>
+
+                                    <ui:fragment rendered="#{searchBean.extendedAttributes[key].type eq 'boolean'}">
+                                        <!--  Boolean -->
+                                        <td>
+                                            <h:selectOneMenu id="managedAttribute#{sp:buildValidComponentIdIgnoringNulls(key, true)}Boolean" value="#{searchBean.inputs[key].value}">
+                                                <f:selectItem itemLabel="" itemValue="" />
+                                                <f:selectItem itemLabel="#{msgs.txt_true}" itemValue="true" />
+                                                <f:selectItem itemLabel="#{msgs.txt_false}" itemValue="false" />
+                                            </h:selectOneMenu>
+                                            <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Nbr" style="display:none">#{searchBean.extendedAttributes[key].name}</div>
+                                        </td>
+                                    </ui:fragment>
+
+                                    <ui:fragment rendered="#{searchBean.extendedAttributes[key].type eq 'date'}">
+                                        <!--  Date -->
+                                        <td>
+                                            <div class="managedAttributeDateField" id="dateAttribute#{sp:escapeHTMLElementId(key)}Date"></div>
+                                            <h:inputHidden id="dateAttribute#{sp:buildValidComponentIdIgnoringNulls(key, true)}" value="#{searchBean.inputs[key].value}"></h:inputHidden>
+                                            <div id="dateAttribute#{sp:escapeHTMLElementId(key)}Val" style="display:none">#{searchBean.inputs[key].value}</div>
+                                        </td>
+                                    </ui:fragment>
+
+                                    <ui:fragment rendered="#{!(searchBean.extendedAttributes[key].type eq 'boolean')
+                                    and !(searchBean.extendedAttributes[key].type eq 'date')}">
+                                        <!--  String/Long/Int...values -->
+                                        <td>
+                                            <ui:fragment rendered="#{!(searchBean.inputs[key].suggestType eq 'none')}">
+                                                <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Suggest"></div>
+                                                <h:inputHidden id="managedAttribute#{sp:buildValidComponentIdIgnoringNulls(key, true)}" value="#{searchBean.inputs[key].value}">
+                                                    <f:attribute name="forceId" value="true"/>
+                                                </h:inputHidden>
+                                                <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Val" style="display:none" class="managedAttribute">#{searchBean.inputs[key].value}</div>
+                                                <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Nbr" style="display:none">#{searchBean.extendedAttributes[key].name}</div>
+                                                <div id="managedAttribute#{sp:escapeHTMLElementId(key)}Type" style="display:none">#{searchBean.extendedAttributes[key].type}</div>
+                                            </ui:fragment>
+
+                                            <ui:fragment rendered="#{searchBean.inputs[key].suggestType eq 'none'}">
+                                                <h:inputText id="extendedAttribute#{sp:buildValidComponentIdIgnoringNulls(key,true)}" styleClass="searchInputText inputWidth font10" size="30"
+                                                             value="#{searchBean.inputs[key].value}"/>
+                                            </ui:fragment>
+                                        </td>
+                                    </ui:fragment>
+
+
+                                </tr>
+                            </ui:repeat>
+                        </table>
+                    </td>
+                </tr>
+            </ui:fragment>
+        </table>
+
+
+    </f:view>
+</ui:composition>
+</body>
+</html>

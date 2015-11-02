@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+    <ui:composition>
+
+        <script type="text/javascript">
+    
+    // there's an odd little issue that comes up because the tab containing
+    // this page starts off as hidden.  Since this page (and therefore the 
+    // element containing the slider) is hidden, the call to getWidth() on the
+    // containing element returns zero.  The result is a slider whose initial
+    // value doesn't get properly set.  To get around that, I've extended the
+    // ExtJS Slider component and overriden the offending method.  Everything
+    // else about the slider is the same.
+    Ext.define('spSlider', {
+        extend : 'Ext.Slider',
+        initComponent : function(){
+            this.callParent(arguments);
+        },
+        
+        getRatio : function(){
+            var w = this.innerEl.getWidth();
+            if (w == 0) {
+                w = this.width - 14; // the slider "knob" is 14 px
+            }
+
+            var v = this.maxValue - this.minValue;
+            return w/v;
+        }
+    });
+    
+    Ext.onReady(function(){
+        var slider = new spSlider({
+            renderTo: 'slider',
+            width: 200,
+            // the slider values are offset by two to give us a number of bands 
+            // ranging from two to six while still visually representing min and max
+            minValue: 0,
+            maxValue: 4,
+            value: (#{bandConfig.numBands} - 2),
+            increment: 1,
+            useTips: false,
+            style: 'margin-left: 20px',
+            listeners: {
+               change: sliderChange
+            }
+        }); 
+        
+        //pass the JSON in order to set the Risk Band Label to it's current value
+        initBandTable(true,#{bandConfig.bandJson});
+    });  
+
+    function sliderChange(slider, sliderValue) {  
+        $('editForm:numBands').value = sliderValue + 2;
+        updateBands(null);
+    }
+
+    </script>
+
+
+        <!--  Any page that includes this page must also include the bandConfig.js file! -->
+<div class="paddedContainer">
+        <span id="maxScore">#{bandConfig.maxScore}</span>
+
+        <table style="margin: 5px">
+        <thead>
+        <tr class="padBottom"> 
+                <th colspan="2" height="30px" valign="top"><h:outputText
+                        styleClass="spContentTitle"
+                        value="#{msgs.sys_config_identity_risk}" /></th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td width="15px"><h:graphicImage
+                            id="imgHlpRiskBands"
+                            alt="#{help.help_system_config_risk_bands}"
+                            style="cursor:pointer;padding: 0px 7px 0px 7px"
+                            url="/images/icons/dashboard_help_16.png" /></td>
+                    <td class="titleColumn"><h:outputText
+                            value="#{msgs.label_risk_conf_num_bands}" />
+                        <h:inputHidden id="numBands"
+                            value="#{bandConfig.numBands}" /></td>
+                    <td>
+                        <div id="slider"></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br />
+
+         <div class="spTabledContent" style="width: 420px"> 
+            <t:dataTable id="bandConfigTable" styleClass="spTable"
+                style="width: 400px" value="#{bandConfig.bands}"
+                var="band" forceIdIndexFormula="#{band.index}">
+                <t:column>
+                    <f:facet name="header">
+                        <h:outputText value="#{msgs.risk_band_label}" />
+                    </f:facet>
+                    <h:inputText id="bandLabel" validator="sailpoint.web.validators.AttributeNameValidator" value="#{band.label}" />
+                    <a4j:outputPanel ajaxRendered="true">
+                         <br />
+                         <h:message styleClass="formError" for="bandLabel" />
+                    </a4j:outputPanel>
+                </t:column>
+                <t:column headerstyle="text-align: center"
+                    styleClass="rightAlignedColumn"
+                    style="padding-right: 20px">
+                    <f:facet name="header">
+                        <h:outputText value="#{msgs.risk_band_range}" />
+                    </f:facet>
+
+                    <h:outputText id="bandlower"
+                        value="#{band.lowerBound}" />
+                    <h:outputText value=" - " />
+                    <h:inputText id="bandupper"
+                        value="#{band.upperBound}"
+                        onchange="adjustNextBand(#{band.index});"
+                        onkeyup="adjustNextBand(#{band.index}, event);"
+                        size="3" />
+                </t:column>
+                <t:column headerstyle="text-align: center"
+                    styleClass="centeredColumn">
+                    <f:facet name="header">
+                        <h:outputText
+                            value="#{msgs.risk_band_indicator}" />
+                    </f:facet>
+                    <h:inputHidden id="bandTextColor" value="#{band.textColor}" />
+                    <h:inputHidden id="bandColor" value="#{band.color}" />
+                    <h:graphicImage id="bandIndicator"
+                        url="/images/blank.gif" />
+                </t:column>
+            </t:dataTable>
+
+          </div> 
+        <br />
+            <table style="width: 80%; margin: 5px">
+                <tr valign="top">
+
+                    <td>
+                        <table class="paddedTbl" style="margin: 5px">
+                            <tr class="padBottom padTopHi">
+                                <td colspan="2"><h:outputText
+                                        styleClass="spContentTitle"
+                                        value="#{msgs.sys_config_identity_attrs}" /></td>
+                            </tr>
+
+                            <tr>
+                                <td><h:outputText
+                                        value="#{msgs.label_searchable_identity_attributes}  " /></td>
+                                <td align="left"><t:inputText
+                                        id="identityMaxExtendedAttributes"
+                                        size="3"
+                                        value="#{systemConfig.identityMaxExtendedAttributes}"
+                                        onchange="makePageDirty();">
+                                        <f:validateLongRange minimum="0"
+                                            maximum="20" />
+                                    </t:inputText></td>
+                            </tr>
+                        </table>
+                        <table class="paddedTbl" style="margin: 5px">
+                            <tr class="padBottom padTopHi">
+                                <td colspan="2"><h:outputText
+                                        styleClass="spContentTitle"
+                                        value="#{msgs.sys_config_identity_snapshots}" /></td>
+                            </tr>
+
+                            <tr>
+                                <td><h:outputText
+                                        value="#{msgs.label_snapshot_frequency} " />
+                                </td>
+                                <td align="left"><t:inputText
+                                        id="identitySnapshotInterval"
+                                        size="3"
+                                        value="#{systemConfig.identitySnapshotInterval}"
+                                        onchange="makePageDirty();">
+                                        <f:validateLongRange minimum="0"
+                                            maximum="999" />
+                                    </t:inputText></td>
+                            </tr>
+                        </table>
+                        <table class="paddedTbl" style="margin: 5px">
+                        <tr class="padBottom padTopHi">
+                                <td colspan="2"><h:outputText
+                                        styleClass="spContentTitle"
+                                        value="#{msgs.menu_label_workflows}" /></td>
+                            </tr>
+                            <tr>
+                                <td align="left"><h:outputText
+                                        value="#{msgs.sys_config_workflow_identity_update}" /></td>
+                                <td width="15px"><h:graphicImage
+                                        id="imgHlpUpdate" width="12px"
+                                        height="12px"
+                                        alt="#{help.help_sys_config_workflow_identity_update}"
+                                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                        url="/images/icons/dashboard_help_16.png" /></td>
+                                <td><h:selectOneMenu
+                                        value='#{systemConfig.object.attributes["workflowIdentityUpdate"]}'
+                                        onchange="makePageDirty();">
+                                        <f:selectItems
+                                            value="#{systemConfig.identityWorkflows}" />
+                                    </h:selectOneMenu></td>
+                            </tr>
+
+                            <tr>
+                                <td align="left"><h:outputText
+                                        value="#{msgs.sys_config_workflow_identity_refresh}" /></td>
+                                <td width="15px"><h:graphicImage
+                                        id="imgHlpRefresh" width="12px"
+                                        height="12px"
+                                        alt="#{help.help_sys_config_workflow_identity_refresh}"
+                                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                        url="/images/icons/dashboard_help_16.png" /></td>
+                                <td><h:selectOneMenu
+                                        value='#{systemConfig.object.attributes["workflowIdentityRefresh"]}'
+                                        onchange="makePageDirty();">
+                                        <f:selectItems
+                                            value="#{systemConfig.refreshWorkflows}" />
+                                    </h:selectOneMenu></td>
+                            </tr>
+
+                            <tr>
+                                <td align="left"><h:outputText
+                                        value="#{msgs.sys_config_workflow_identity_correlation}" /></td>
+                                <td width="15px"><h:graphicImage
+                                        id="imgHlpCorrelation"
+                                        width="12px" height="12px"
+                                        alt="#{help.help_sys_config_workflow_identity_correlation}"
+                                        style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                        url="/images/icons/dashboard_help_16.png" /></td>
+                                <td><h:selectOneMenu
+                                        value='#{systemConfig.object.attributes["workflowIdentityCorrelation"]}'
+                                        onchange="makePageDirty();">
+                                        <f:selectItems
+                                            value="#{systemConfig.manualCorrelationWorkflows}" />
+                                    </h:selectOneMenu></td>
+                            </tr>
+                        </table>
+
+
+
+                    </td>
+                    <td>
+                        <table class="paddedTbl" style="margin: 5px">
+                            <tr class="padBottom padTopHi">
+                                <td colspan="2"><h:outputText
+                                        styleClass="spContentTitle"
+                                        value="#{msgs.sys_config_index_hist_granularity}" /></td>
+                            </tr>
+                            <tr>
+                                <td><h:outputText
+                                        value="#{msgs.sys_config_identity_history}" /></td>
+                                <td align="left"><h:selectOneMenu
+                                        id="identityGranule"
+                                        value='#{systemConfig.object.attributes["identityIndexGranule"]}'
+                                        onchange="makePageDirty();">
+                                        <f:selectItems
+                                            value="#{systemConfig.granules}" />
+                                    </h:selectOneMenu></td>
+                            </tr>
+                            <tr>
+                                <td><h:outputText
+                                        value="#{msgs.sys_config_group_history}" /></td>
+                                <td align="left"><h:selectOneMenu
+                                        id="groupGranule"
+                                        value='#{systemConfig.object.attributes["groupIndexGranule"]}'
+                                        onchange="makePageDirty();">
+                                        <f:selectItems
+                                            value="#{systemConfig.granules}" />
+                                    </h:selectOneMenu></td>
+                            </tr>
+                        </table>
+
+                        <table class="paddedTbl" style="margin: 5px">
+                            <tr class="padBottom padTopHi">
+                                <td colspan="2"><h:outputText
+                                        styleClass="spContentTitle"
+                                        value="#{msgs.sys_config_account_attrs}" /></td>
+                            </tr>
+
+                            <tr>
+                                <td><h:outputText
+                                        value="#{msgs.label_searchable_account_attributes}  " /></td>
+                                <td align="left"><t:inputText
+                                        id="accountMaxExtendedAttributes"
+                                        size="3"
+                                        value="#{systemConfig.accountMaxExtendedAttributes}"
+                                        onchange="makePageDirty();">
+                                        <f:validateLongRange minimum="0"
+                                            maximum="20" />
+                                    </t:inputText></td>
+                            </tr>
+                        </table>
+
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+
+
+
+
+
+
+
+    </ui:composition>
+
+</body>
+</html>

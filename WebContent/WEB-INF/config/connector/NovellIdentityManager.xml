@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.nidm.NIDMConnector" featuresString="PROVISIONING, ENABLE, AUTHENTICATE, SEARCH" name="Novell Identity Manager Template" type="Novell Identity Manager">
+    <Attributes>
+      <Map>
+        <entry key="3.0">
+          <value>
+            <Map>
+              <entry key="Description" value="Description"/>
+              <entry key="LastName" value="LastName"/>
+              <entry key="cN" value="cN"/>
+              <entry key="dirXML-Associations" value="dirXML-Associations"/>
+              <entry key="dirXML-Driver" value="dirXML-Driver"/>
+              <entry key="dirXML-EntitlementRef" value="dirXML-EntitlementRef"/>
+              <entry key="gUID" value="gUID"/>
+              <entry key="loginDisabled" value="loginDisabled"/>
+              <entry key="objectClass" value="objectClass"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="4.0">
+          <value>
+            <Map>
+              <entry key="Description" value="Description"/>
+              <entry key="LastName" value="LastName"/>
+              <entry key="cN" value="CN"/>
+              <entry key="dirXML-Associations" value="DirXML-Associations"/>
+              <entry key="dirXML-Driver" value="DirXML-Driver"/>
+              <entry key="dirXML-EntitlementRef" value="DirXML-EntitlementRef"/>
+              <entry key="gUID" value="GUID"/>
+              <entry key="loginDisabled" value="LoginDisabled"/>
+              <entry key="objectClass" value="ObjectClass"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="formPath" value="NIDMAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="cN" identityAttribute="dn" nativeObjectType="inetOrgPerson" objectType="account">
+        <AttributeDefinition name="cN" type="string"/>
+        <AttributeDefinition name="Department" type="string"/>
+        <AttributeDefinition multi="true" name="directReports" type="string"/>
+        <AttributeDefinition multi="true" name="dirXML-Accounts" type="string"/>
+        <AttributeDefinition multi="true" name="dirXML-Associations" type="string"/>
+        <AttributeDefinition multi="true" name="dirXML-EntitlementRef" type="string"/>
+        <AttributeDefinition name="Email" type="string"/>
+        <AttributeDefinition name="FirstName" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="group" schemaObjectType="group" type="string"/>
+        <AttributeDefinition name="srvprvHideAttributes" type="string"/>
+        <AttributeDefinition name="LastName" type="string"/>
+        <AttributeDefinition name="loginDisabled" type="boolean"/>
+        <AttributeDefinition name="manager" type="string"/>
+        <AttributeDefinition name="NotificationPrefs" type="string"/>
+        <AttributeDefinition name="srvprvQueryList" type="string"/>
+        <AttributeDefinition name="Location" type="string"/>
+        <AttributeDefinition name="TelephoneNumber" type="string"/>
+        <AttributeDefinition name="Title" type="string"/>
+      </Schema>
+      <Schema displayAttribute="cN" identityAttribute="dn" nativeObjectType="groupOfNames" objectType="group">
+        <AttributeDefinition name="cN" type="string"/>
+        <AttributeDefinition name="Description" type="string"/>
+        <AttributeDefinition multi="true" name="dirXML-Associations" type="string"/>
+        <AttributeDefinition multi="true" name="dirXML-EntitlementRef" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="CreateUser" schemaObjectType="account" usage="Create">
+        <Field displayName="nidm_novell_username" helpKey="In the Distinguished Name format. E.g. cn=TestUser,ou=Users,ou=sa,o=system" name="dn" required="true" type="string"/>
+        <Field displayName="nidm_novell_first_name" name="FirstName" required="true" type="string"/>
+        <Field displayName="nidm_novell_last_name" name="LastName" required="true" type="string"/>
+        <Field displayName="nidm_novell_title" name="Title" type="string"/>
+        <Field displayName="nidm_novell_location" name="Location" type="string"/>
+        <Field displayName="nidm_novell_department" name="Department" type="string"/>
+        <Field displayName="nidm_novell_email" name="Email" type="string"/>
+        <Field displayName="nidm_novell_login_disabled" name="loginDisabled" type="boolean" value="false"/>
+        <Field displayName="nidm_novell_manager" name="manager" type="string"/>
+        <Field displayName="nidm_novell_group" name="group" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

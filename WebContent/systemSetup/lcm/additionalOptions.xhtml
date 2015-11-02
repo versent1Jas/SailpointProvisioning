@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <div id="additionalOptions" class="spBackground">
+    <div id="additionalOptionsBody">
+      <div class="paddedContainer">
+          <p class="padDown"><h:outputText styleClass='spContentTitle' value="#{msgs.sys_config_lifecycle_general_options}"/></p>
+          <table class="paddedTbl"> 
+            <tr>
+              <td>
+                <h:outputText value="#{msgs.sys_config_lifecycle_max_bulk_request_size_description}"/>
+                <f:verbatim>&amp;nbsp;</f:verbatim>
+                <h:inputText id="lcmMaxSynchronousBulkSize" size="3" value="#{lcmConfig.lcmMaxSynchronousBulkSize}">
+                  <f:validateLongRange minimum="1" maximum="9999" />
+                </h:inputText>
+                <h:message for="lcmMaxSynchronousBulkSize" styleClass="formError"/>
+              </td>
+            </tr>                      
+            <tr>
+              <td>
+                <h:outputText value="#{msgs.sys_config_lifecycle_search_options}"/>
+                <f:verbatim>&amp;nbsp;</f:verbatim>
+                <!-- Bug #23635: this needs to be disabled... -->
+                <h:selectOneMenu id="searchType" value="#{lcmConfig.searchType}" disabled="#{lcmConfig.enableFulltext}">
+                  <f:selectItem id="item1" itemLabel="#{msgs.lcm_config_search_startswith}" itemValue="startsWith" />
+                  <f:selectItem id="item2" itemLabel="#{msgs.lcm_config_search_contains}" itemValue="contains" />
+                </h:selectOneMenu>
+              </td>
+            </tr>
+          </table>
+
+          <table class="paddedTbl"> 
+            <tr>
+              <td><h:selectBooleanCheckbox id="allowPriorityEditingCheckbox" value="#{lcmConfig.allowPriorityEditing}"/></td>
+              <td><h:outputText value="#{msgs.sys_config_lifecycle_allow_priority_editing}"/></td>
+            </tr>
+            <tr>
+              <td><h:selectBooleanCheckbox id="lcmManageAccountsAllowGroupManagement" value="#{lcmConfig.lcmManageAccountsAllowGroupManagement}"/></td>
+              <td><h:outputText value="#{msgs.sys_config_lifecycle_manage_accounts_group_management}"/></td>
+            </tr>
+            <tr>
+	      <!-- Bug #23635 ...when this is enabled -->
+              <td><h:selectBooleanCheckbox id="lcmEnableFulltext" value="#{lcmConfig.enableFulltext}"
+                                           onclick="window.lcmConfigForm[&quot;lcmConfigForm:searchType&quot;].disabled = window.lcmConfigForm[&quot;lcmConfigForm:lcmEnableFulltext&quot;].checked"              
+                                           onchange="SailPoint.systemSetup.lcm.toggleEnableFullText(this);"/></td>
+              <td><h:outputText value="#{msgs.sys_config_lcm_enable_fulltext}"/></td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <table>
+                  <tr>
+                    <td><h:outputText value="#{msgs.sys_config_full_text_path}" styleClass="fulltext" /></td>
+                    <td>
+                      <h:graphicImage id="imgHlpFullTextIndexPath" width="12px"
+                                      alt="#{help.help_sys_config_full_text_path}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td colspan="4">
+                      <h:inputText id="lcmFullTextIndexPath"
+                                   size="50" value="#{lcmConfig.fullTextIndexPath}" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><h:outputText value="#{msgs.sys_config_full_text_auto_index}" styleClass="fulltext" /></td>
+                    <td>
+                      <h:graphicImage id="imgHlpFullTextExecutionMode" width="12px"
+                                      alt="#{help.help_sys_config_full_text_auto_index}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td>
+                      <h:selectBooleanCheckbox id="lcmFullTextExecutionMode" 
+                                               value="#{lcmConfig.enableAutoExecutionMode}"
+                                               onchange="SailPoint.systemSetup.lcm.toggleExecutionMode(this);" />
+                    </td>
+                    <td><h:outputText value="#{msgs.sys_config_full_text_interval}" styleClass="fulltext-interval" /></td>
+                    <td>
+                      <h:graphicImage id="imgHlpFullTextInterval" width="12px"
+                                      alt="#{help.help_sys_config_full_text_interval}"
+                                      height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png" />
+                    </td>
+                    <td>
+                      <h:inputText id="lcmFullTextInterval"
+                                   value="#{lcmConfig.executionModeInterval}" size="5">
+                        <f:convertNumber integerOnly="true" />
+                      </h:inputText>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td><h:selectBooleanCheckbox id="lcmAllowPopulationSearch" value="#{lcmConfig.allowPopulationSearch}" /></td>
+              <td><h:outputText value="#{msgs.sys_config_lcm_allow_population_search}" /></td>
+            </tr>
+            <tr>
+              <td><h:selectBooleanCheckbox id="lcmAllowIdentitySearch" value="#{lcmConfig.allowIdentitySearch}" /></td>
+              <td><h:outputText value="#{msgs.sys_config_lcm_allow_identity_search}" /></td>
+            </tr>
+            <tr>
+              <td><h:selectBooleanCheckbox id="lcmOptinResultsDetails" value="#{lcmConfig.allowOptinResultsDetails}" /></td>
+              <td><h:outputText value="#{msgs.sys_config_lcm_optin_results_details}" /></td>
+            </tr>
+            <tr>
+              <td><h:selectBooleanCheckbox id="lcmExternalTicketId" value="#{lcmConfig.showExternalTicketId}" /></td>
+              <td><h:outputText value="#{msgs.sys_config_lcm_show_external_ticket_id}"/></td>
+            </tr>
+          </table>
+
+          <table class="paddedTbl">
+            <tr>
+              <td>
+                <h:outputText value="#{msgs.sys_config_lcm_search_max_results}"/>
+                <f:verbatim>&amp;nbsp;</f:verbatim>
+                <h:inputText id="lcmSearchMaxResults" size="4" value="#{lcmConfig.searchMaxResults}">
+                  <f:validateLongRange minimum="1" maximum="99999" />
+                </h:inputText>
+                <h:message for="lcmSearchMaxResults" styleClass="formError"/>
+              </td>
+            </tr> 
+          </table>
+
+          <table class="paddedTbl">
+              <tr>
+                  <td>
+                      <h:outputText value="#{msgs.sys_config_lcm_mobile_max_selectable_users}"/>
+                      <f:verbatim>&amp;nbsp;</f:verbatim>
+                      <h:inputText id="lcmMobileMaxSelectableUsers" size="4" value="#{lcmConfig.lcmMobileMaxSelectableUsers}">
+                          <f:validateLongRange minimum="1" maximum="500" />
+                      </h:inputText>
+                      <h:message for="lcmMobileMaxSelectableUsers" styleClass="formError"/>
+                  </td>
+              </tr>
+          </table>
+
+          <table class="paddedTbl">
+              <tr>
+                  <td colspan="2">
+                      <div style="margin-bottom: 5px">
+                          <h:outputText value="#{msgs.sys_config_lifecycle_additional_account_apps}"/>
+                      </div>
+
+                      <div id="additionalAccountAppsDiv"></div>
+                      <t:inputHidden id="additionalAccountAppsInput" value="#{lcmConfig.additionalAccountApplicationIds}" forceId="true">
+                          <f:attribute name="autocomplete" value="off" />
+                          <sp:convertList />
+                      </t:inputHidden>
+
+                      <div style="margin-top: 4px">
+                          <label>
+                              <h:selectBooleanCheckbox id="additionalAccountAppsCheckbox"
+                                                       value="#{lcmConfig.additionalAccountAllApplications}"
+                                                       onclick="SailPoint.systemSetup.lcm.toggleAdditionalAccountApplicationsSelectAll(this.checked)" />
+                              #{msgs.all_applications}
+                          </label>
+                      </div>
+                  </td>
+              </tr>
+          </table>
+
+      </div>
+      
+      <div class="paddedContainer">              
+          <p class="padDown"><h:outputText styleClass='spContentTitle' value="#{msgs.sys_config_lifecycle_request_access_options}"/></p>
+          
+                      
+          <p class="padDown"><h:outputText value="#{msgs.sys_config_lifecycle_request_access_actions_description}"/></p>
+                      
+          <table class="spTable" style="width:600px">
+            <tr>
+              <th><h:outputText value="#{msgs.sys_config_lifecycle_role_type}"/></th>
+              <th><h:outputText value="#{msgs.sys_config_lifecycle_my_actions}"/></th>
+              <th><h:outputText value="#{msgs.sys_config_lifecycle_others}"/></th>
+            </tr> 
+            <tr>
+              <td>#{msgs.sys_config_lifecycle_assignable_role}</td>
+              <td><h:selectBooleanCheckbox value="#{lcmConfig.requestRolesActions['requestRolesAssignableSelfEnabled'].selected}" /></td>
+              <td><h:selectBooleanCheckbox value="#{lcmConfig.requestRolesActions['requestRolesAssignableSubordinateEnabled'].selected}" /></td>
+            </tr>
+            <tr>
+              <td>#{msgs.sys_config_lifecycle_permitted_role}</td>
+              <td><h:selectBooleanCheckbox value="#{lcmConfig.requestRolesActions['requestRolesPermittedSelfEnabled'].selected}" /></td>
+              <td><h:selectBooleanCheckbox value="#{lcmConfig.requestRolesActions['requestRolesPermittedSubordinateEnabled'].selected}" /></td>
+            </tr>
+          </table>                     
+          
+          <table class="paddedTbl">
+            <tr>
+              <td><h:selectBooleanCheckbox id="lcmAllowPercentLimitRoles" value="#{lcmConfig.requestRolesOptions['lcmAllowPercentLimitRoles']}"/></td>
+              <td><h:outputText value="#{msgs.sys_config_lifecycle_role_percent_limit}"/></td>
+              <td style="white-space:nowrap">
+                <h:inputText id="lcmAllowPercentLimitRolesPercent" size="2" value="#{lcmConfig.requestRolesOptions['lcmAllowPercentLimitRolesPercent']}"/>%
+              </td>
+            </tr>
+          </table>
+      </div>
+    </div>
+
+    <div class="paddedContainer">              
+        <p class="padDown"><h:outputText styleClass='spContentTitle' value="#{msgs.sys_config_lifecycle_request_entitlements_options}"/></p>
+
+        <table class="paddedTbl">
+          <tr>
+            <td><h:selectBooleanCheckbox id="lcmAllowPercentLimitEntitlements" value="#{lcmConfig.requestEntitlementsOptions['lcmAllowPercentLimitEntitlements']}"/></td>
+            <td><h:outputText value="#{msgs.sys_config_lifecycle_entitlement_percent_limit}"/></td>
+            <td style="white-space:nowrap">
+              <h:inputText id="lcmAllowPercentLimitEntitlementsPercent" size="2" value="#{lcmConfig.requestEntitlementsOptions['lcmAllowPercentLimitEntitlementsPercent']}"/>%
+            </td>
+          </tr>
+        </table>
+
+        <table class="paddedTbl">
+          <tr>
+            <td>
+              <h:outputText value="#{msgs.sys_config_lifecycle_request_entitlements_pop_search_max_attributes}"/>
+              <f:verbatim>&amp;nbsp;</f:verbatim>
+              <h:inputText size="4" value="#{lcmConfig.requestEntitlementsOptions['managedAttributeStatsMaxAttributes']}"/>
+            </td>
+          </tr>
+        </table>
+
+    </div>
+
+    <div class="paddedContainer">
+        <p class="padDown"><h:outputText styleClass='spContentTitle' value="#{msgs.sys_config_lifecycle_create_identity_options}"/></p>
+      
+        <table class="paddedTbl"> 
+          <tr>
+            <td>
+              <h:selectBooleanCheckbox id="lcmRequirePassword" value="#{lcmConfig.requirePasswordIdentityCreate}"/>
+            </td>
+            <td><h:outputText value="#{msgs.sys_config_lifecycle_create_identity_require_password}"/></td>
+          </tr>
+          <tr>
+              <td>
+                  <h:selectBooleanCheckbox id="lcmSelfServiceRegistration" value="#{lcmConfig.enableSelfServiceRegistration}"/>
+              </td>
+              <td><h:outputText value="#{msgs.sys_config_lifecycle_create_identity_self_service_registration}"/></td>
+          </tr>
+        </table>
+        <table class="paddedTbl">
+          <tr>
+            <td><h:outputText value="#{msgs.sys_config_lifecycle_create_identity_self_service_redirect_path}"/>
+              <h:graphicImage id="imgHlpSelfServiceRegistrationRedirectPath"
+                              width="12px" height="12px" alt="#{help.help_system_config_self_service_redirect_url}"
+                              style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td>
+              <h:inputText id="lcmSelfServiceRegistrationRedirectPath" size="50" value="#{lcmConfig.selfServiceRegistrationRedirectPath}"/>
+            </td>
+          </tr>
+        </table>
+        <table class="paddedTbl"> 
+          <tr>
+            <td>
+                <h:outputText value="#{msgs.sys_config_lifecycle_create_identity_use_by}"/>
+                <f:verbatim>&amp;nbsp;</f:verbatim>
+                <h:inputText id="lcmUseByDays" size="4" value="#{lcmConfig.useByDays}">
+                  <f:validateLongRange minimum="0" maximum="99999" />
+                </h:inputText>
+                <h:message for="lcmUseByDays" styleClass="formError"/>
+            </td>
+          </tr>
+        </table>
+    </div>
+                
+    <div class="paddedContainer">
+        <p class="padDown"><h:outputText styleClass="spContentTitle" value="#{msgs.sys_config_lifecycle_manage_accounts_options}"/></p>
+        
+        <table class="paddedTbl marDown"> 
+          <tr>            
+            <td>
+              <h:selectBooleanCheckbox id="lcmManageAccountsShowAllButtons" value="#{lcmConfig.lcmManageAccountsShowAllButtons}"/>
+            </td>
+            <td><h:outputText value="#{msgs.sys_config_lifecycle_manage_accounts_btns}"/></td>
+          </tr>
+        </table>
+        
+        <p class="padDown"><h:outputText value="#{msgs.sys_config_lifecycle_manage_accounts_actions_description}"/></p>
+      
+        <table class="spTable" style="width:600px">
+          <tr>
+            <th><h:outputText value="#{msgs.sys_config_lifecycle_action}"/></th>
+            <th><h:outputText value="#{msgs.sys_config_lifecycle_my_actions}"/></th>
+            <th><h:outputText value="#{msgs.sys_config_lifecycle_subordinate}"/></th>
+          </tr> 
+          <ui:repeat value="#{lcmConfig.manageAccountActions}" var="action">
+            <tr>
+              <td><h:outputText value="#{action.displayName}"/></td>
+              <td><h:selectBooleanCheckbox value="#{action.self}" /></td>
+              <td><h:selectBooleanCheckbox value="#{action.others}" /></td>
+            </tr>      
+          </ui:repeat>                      
+        </table>
+
+        <table class="paddedTbl"> 
+          <tr>
+            <td>
+              <div style="margin-top: 15px; margin-bottom: 5px">
+                <label>
+                  <h:selectBooleanCheckbox id="disableAutoRefreshAccountStatusCheckbox"
+                                           value="#{lcmConfig.disableAutoRefreshAccountStatus}"
+                                           onclick="SailPoint.systemSetup.lcm.toggleAutoRefreshAccStatusOnlyApplicationsSelectAll(this.checked)" />
+                  #{msgs.sys_config_lifecycle_disable_auto_refresh_status}
+                </label>
+              </div>
+                            
+              <div style="margin-top: 4px">
+                <h:outputText value="#{msgs.sys_config_lifecycle_disable_auto_refresh_status_apps}"/>
+              </div>
+                            
+              <div id="disableAutoRefreshAccountStatusAppsDiv"></div>
+              <t:inputHidden id="disableAutoRefreshAccountStatusAppsInput" value="#{lcmConfig.disableAutoRefAccountStatusAppsIds}" forceId="true">
+                <f:attribute name="autocomplete" value="off" />
+                <sp:convertList />
+              </t:inputHidden>              
+            </td>
+          </tr>
+        </table>
+
+        <table class="paddedTbl"> 
+          <tr>
+            <td>
+              <div style="margin-top: 15px; margin-bottom: 5px">
+                <h:outputText value="#{msgs.sys_config_lifecycle_account_only_apps}"/>
+              </div>
+
+              <div id="accountOnlyAppsDiv"></div>
+              <t:inputHidden id="accountOnlyAppsInput" value="#{lcmConfig.accountOnlyApplicationIds}" forceId="true">
+                <f:attribute name="autocomplete" value="off" />
+                <sp:convertList />
+              </t:inputHidden>
+
+              <div style="margin-top: 4px">
+                <label>
+                  <h:selectBooleanCheckbox id="accountOnlyAppsCheckbox"
+                                           value="#{lcmConfig.accountOnlyAllApplications}"
+                                           onclick="SailPoint.systemSetup.lcm.toggleAccountOnlyApplicationsSelectAll(this.checked)" />
+                  #{msgs.all_applications}
+                </label>
+              </div>
+            </td>
+          </tr>
+        </table>
+    </div>
+
+    <div class="paddedContainer">
+        <p class="padDown"><h:outputText styleClass='spContentTitle' value="#{msgs.sys_config_lifecycle_manage_passwords_options}"/></p>
+        <table class="paddedTbl"> 
+          <tr>
+            <td>
+                <h:selectBooleanCheckbox id="lcmGeneratePassword" value="#{lcmConfig.generatePasswordDelegated}"/>
+            </td>
+            <td><h:outputText value="#{msgs.sys_config_lifecycle_manage_passwords_generate_option_description}"/></td>
+          </tr>
+        </table>
+    </div>
+
+    <div class="paddedContainer">
+        <p class="padDown"><h:outputText styleClass='spContentTitle' value="#{msgs.sys_config_lifecycle_password_validation_rule}"/></p>
+        <table class="paddedTbl"> 
+          <tr>
+            <td align="right"><h:outputText value="#{msgs.rule_password_validation}" /></td>
+            <td width="15px">
+              <h:graphicImage id="imgHlpPasswordValidationRule"
+                width="12px" height="12px" alt="#{help.help_system_config_password_validation_rule}"
+                style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png"/>
+            </td>
+            <td>
+              <a4j:outputPanel id="passwordValidationRulePanel">
+              <h:selectOneMenu id="passwordValidationRule"
+                value='#{lcmConfig.passwordValidationRule}' >
+                <f:selectItems value="#{lcmConfig.passwordValidationRules}" />
+              </h:selectOneMenu>
+              </a4j:outputPanel>
+
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                  <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                         onclick="SailPoint.Rule.Editor.edit($('lcmConfigForm:passwordValidationRule').value, 
+                                                             'FieldValue',
+                                                             $('lcmRuleEditorForm:refreshPasswordValidationRulesButton'))" />
+              </ui:fragment>
+            </td>
+          </tr>
+        </table>
+    </div>
+
+    <div class="paddedContainer">
+        <p class="padDown">
+          <h:outputText styleClass='spContentTitle' value="#{msgs.batch_request_approver}"/>
+          <h:graphicImage id="imgHlpBatchRequestApproval" alt="#{help.help_system_config_batch_request_approver}"
+                        styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"/>
+        </p>
+        <table class="paddedTbl"> 
+          <tr>
+            <td>
+              <label>
+              <h:selectBooleanCheckbox id="requireBatchRequestApproval"
+                                       value="#{lcmConfig.requireBatchRequestApproval}"
+                                       onclick="Ext.get('batchApproverInput').toggle();" />
+              #{msgs.sys_config_lifecycle_require_batch_request_approval}
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div id="batchApproverInput" style="display:none">
+                <h:outputText value="#{msgs.sys_config_lifecycle_batch_request_approver_option_description}"/>:
+                <div id="batchApproverSuggest"></div>
+                <t:inputHidden id="batchApproverInputVal" value="#{lcmConfig.batchRequestApprover}" forceId="true"/>
+              </div>
+            </td>
+          </tr>
+        </table>
+    </div>
+
+  </div>
+
+</ui:composition>
+
+</body>
+</html>

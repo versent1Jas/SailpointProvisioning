@@ -1,0 +1,4861 @@
+<?xml version="1.0"?>
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved.
+-->
+
+<faces-config
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_1.xsd"
+    metadata-complete="true"
+    version="2.1">
+  <!--  ***************************************************** -->
+  <!--  Base Bean for Accessing Faces/Servlet Properties      -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <managed-bean-name>base</managed-bean-name>
+    <managed-bean-class>sailpoint.web.BaseBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  State Bean for tracking ui state                      -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <managed-bean-name>state</managed-bean-name>
+    <managed-bean-class>sailpoint.web.StateBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <!--  ***************************************************** -->
+  <!--  Simple State Bean for tracking transient tab states   -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <managed-bean-name>tabState</managed-bean-name>
+    <managed-bean-class>sailpoint.web.TabStateBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>extjsSessionState</managed-bean-name>
+    <managed-bean-class>sailpoint.web.extjs.SessionStateBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Bean for Handling Navigation History                  -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <managed-bean-name>navigationHistory</managed-bean-name>
+    <managed-bean-class>sailpoint.web.NavigationHistoryBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+
+  <!--  ***************************************************** -->
+  <!--  Common Utilities                                      -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <managed-bean-name>util</managed-bean-name>
+    <managed-bean-class>sailpoint.web.UtilBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Menus                                                 -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <managed-bean-name>menu</managed-bean-name>
+    <managed-bean-class>sailpoint.web.MenuBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Localization                                          -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <managed-bean-name>extjsinternationalizer</managed-bean-name>
+    <managed-bean-class>sailpoint.web.extjs.ExtjsInternationalizer</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Regstration                                           -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+      <managed-bean-name>registration</managed-bean-name>
+      <managed-bean-class>sailpoint.web.RegistrationBean</managed-bean-class>
+      <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+
+  <!--  ***************************************************** -->
+  <!--  Global Navigation                                     -->
+  <!--  ***************************************************** -->
+
+  <navigation-rule>
+    <description>Global Navigation Rules</description>
+    <navigation-case>
+      <from-outcome>editPreferences</from-outcome>
+      <to-view-id>/dashboard/editPreferences.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>logoutSuccess</from-outcome>
+      <to-view-id>/login.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    
+    <!--Exception Handling -->
+    <navigation-case>
+      <from-outcome>mobileLogoutSuccess</from-outcome>
+      <to-view-id>/ui/login.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>exceptionNavigation</from-outcome>
+      <to-view-id>/exception.xhtml</to-view-id>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>mobileExceptionNavigation</from-outcome>
+      <to-view-id>/ui/500.xhtml</to-view-id>
+    </navigation-case>
+    
+    <navigation-case>
+      <from-outcome>viewDashboard</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewModeler</from-outcome>
+      <to-view-id>/define/roles/roleTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewCertifications</from-outcome>
+      <to-view-id>/manage/certification/certifications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewWorksheet</from-outcome>
+      <to-view-id>/manage/certification/worksheet.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewEntityList</from-outcome>
+      <to-view-id>/manage/certification/entityList.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewCertDetail</from-outcome>
+      <to-view-id>/manage/certification/detail.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+     <navigation-case>
+      <from-outcome>viewCertificationGroup</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/certificationGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewCertificationGroupList</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/viewAndEditCertifications.jsf?resetTab=true</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewWorkItem</from-outcome>
+      <to-view-id>/workitem/workItem.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewWorkItemArchive</from-outcome>
+      <to-view-id>/workitem/workItemArchive.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewWorkItems</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewChallengeItem</from-outcome>
+      <to-view-id>/workitem/challenge.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>showScores</from-outcome>
+      <to-view-id>/manage/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>applicationList</from-outcome>
+      <to-view-id>/define/applications/applications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editApplication</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>manualCorrelation</from-outcome>
+      <to-view-id>/manage/correlation/manualCorrelation.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>scheduleBulkCertification</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/editCertificationSchedule.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>listViolations</from-outcome>
+      <to-view-id>/manage/policyViolations/policyViolations.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>policyViolationDetail</from-outcome>
+      <to-view-id>/manage/policyViolations/policyViolationDetail.xhtml</to-view-id>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>identityRequestSearchResults</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>certificationSearchResults</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>roleSearchResults</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>accountGroupSearchResults</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>accessDenied</from-outcome>
+      <to-view-id>/accessDenied.xhtml</to-view-id>
+    </navigation-case>
+
+    <!-- used when transitioning from anywyere to a workflow form session -->
+    <navigation-case>
+      <from-outcome>workflowSession</from-outcome>
+      <to-view-id>/workitem/workItem.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+
+    <!-- used when transitioning from a workflow session back to the identity list -->
+    <navigation-case>
+      <from-outcome>identityList</from-outcome>
+      <to-view-id>/define/identity/identities.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    
+    <!--  LCM Global Navigation -->
+    <navigation-case>
+      <from-outcome>requestPopulation</from-outcome>
+      <to-view-id>/lcm/chooseIdentities.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>manageAccounts</from-outcome>
+      <to-view-id>/lcm/manageAccounts.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>managePasswords</from-outcome>
+      <to-view-id>/lcm/managePasswords.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>requestAccess</from-outcome>
+      <to-view-id>/lcm/requestAccess.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>requestRoles</from-outcome>
+      <to-view-id>/lcm/requestRoles.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>requestEntitlements</from-outcome>
+      <to-view-id>/lcm/requestEntitlements.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>requestEntitlementsAccounts</from-outcome>
+      <to-view-id>/lcm/requestEntitlementsAccounts.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>manageAttributes</from-outcome>
+      <to-view-id>/lcm/manageAttributes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>createIdentity</from-outcome>
+      <to-view-id>/lcm/manageAttributes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewIdentity</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>summaryOfRequests</from-outcome>
+      <to-view-id>/lcm/summary.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>recyclebinAction</from-outcome>
+      <to-view-id>/lcm/manageDeletedObjects.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+
+    <navigation-case>
+      <from-outcome>viewAccessRequests</from-outcome>
+      <to-view-id>/manage/accessRequest/myAccessRequests.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+
+    <navigation-case>
+      <from-outcome>viewAccessRequestDetail</from-outcome>
+      <to-view-id>/manage/accessRequest/accessRequestCompleteDetails.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    
+    <navigation-case>
+      <from-outcome>manageWorkItems</from-outcome>
+      <to-view-id>/manage/workItems/workItems.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewReport</from-outcome>
+      <to-view-id>/analyze/reports/viewResult.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewGridReportResult</from-outcome>
+      <to-view-id>/analyze/reports/viewResult.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>registration</from-outcome>
+      <to-view-id>/external/registration.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>registrationSuccess</from-outcome>
+      <to-view-id>/external/registrationSuccess.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>registrationError</from-outcome>
+      <to-view-id>/external/registrationError.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+   <!--  ***************************************************** -->
+   <!--  My Access Requests Details                            -->
+   <!--  ***************************************************** -->
+   <managed-bean>
+     <description>Access requests details bean</description>
+     <managed-bean-name>requestDetails</managed-bean-name>
+     <managed-bean-class>sailpoint.web.IdentityRequestBean</managed-bean-class>
+     <managed-bean-scope>request</managed-bean-scope>
+     <managed-property>
+       <property-name>requestId</property-name>
+       <value>#{param.requestId}</value>
+     </managed-property>
+   </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Login                                                 -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Login page bean</description>
+    <managed-bean-name>login</managed-bean-name>
+    <managed-bean-class>sailpoint.web.LoginBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Login page success</description>
+    <from-view-id>/login.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>expiredPassword</from-outcome>
+      <to-view-id>/expiredPassword.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>authAnswers</from-outcome>
+      <to-view-id>/authAnswers.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!-- Currently don't handle answering required auth questions -->
+  <!-- in the responsive UI, so just redirect to the index. -->
+  <navigation-rule>
+    <description>UI login page auth answers</description>
+    <from-view-id>/ui/login.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>authAnswers</from-outcome>
+      <to-view-id>/ui/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Expired password success</description>
+    <from-view-id>/expiredPassword.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>authAnswers</from-outcome>
+      <to-view-id>/authAnswers.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/login.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Mobile Login page success</description>
+    <from-view-id>/ui/login.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/ui/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Email                                                 -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Email bean</description>
+    <managed-bean-name>email</managed-bean-name>
+    <managed-bean-class>sailpoint.web.EmailBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Dashboard                                             -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Dashboard bean</description>
+    <managed-bean-name>dashboard</managed-bean-name>
+    <managed-bean-class>sailpoint.web.DashboardBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Dashboard Layout</description>
+    <from-view-id>/dashboard/editDashboard.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>saveLayout</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!-- managed-bean>
+    <description>Chart Creator bean</description>
+    <managed-bean-name>chartCreator</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ChartCreatorBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean -->
+
+  <navigation-rule>
+    <description>Dashboard Transitions</description>
+    <from-view-id>/dashboard.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>viewLargeChart</from-outcome>
+      <to-view-id>/dashboard/chart/chart.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewReportResult</from-outcome>
+      <to-view-id>/analyze/reports/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewGridReportResult</from-outcome>
+      <to-view-id>/analyze/reports/viewResult.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewTaskResult</from-outcome>
+      <to-view-id>/monitor/tasks/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>applyFilter</from-outcome>
+      <to-view-id>/manage/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <description>Responsive UI Dashboard bean</description>
+    <managed-bean-name>uiDashboard</managed-bean-name>
+    <managed-bean-class>sailpoint.web.ui.DashboardBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Chart bean</description>
+    <managed-bean-name>chart</managed-bean-name>
+    <managed-bean-class>sailpoint.web.ChartBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Manager Tree view for certification completion status</description>
+    <managed-bean-name>managerTree</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.ManagerTreeBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Preferences                                           -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Preferences</description>
+    <managed-bean-name>preferences</managed-bean-name>
+    <managed-bean-class>sailpoint.web.PreferencesBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Authentication Answers                                -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Authentication Answers</description>
+    <managed-bean-name>authAnswers</managed-bean-name>
+    <managed-bean-class>sailpoint.web.AuthenticationAnswersBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Authentication answers</description>
+    <from-view-id>/authAnswers.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+
+  <!--  ***************************************************** -->
+  <!--  Work Items                                            -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Work Item Inbox List Bean</description>
+    <managed-bean-name>workItemList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.WorkItemListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>inbox</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Work Item Outbox List Bean</description>
+    <managed-bean-name>workItemOutboxList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.WorkItemListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>outbox</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Signoff List Bean</description>
+    <managed-bean-name>signoffList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.WorkItemListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>signoff</value>
+    </managed-property>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Work Item Manage List Bean</description>
+    <managed-bean-name>workItemManageList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.WorkItemListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>manage</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Determine Work Item Rendering Style</description>
+    <managed-bean-name>workItemDispatch</managed-bean-name>
+    <managed-bean-class>sailpoint.web.WorkItemDispatchBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>View a work item</description>
+    <managed-bean-name>workItem</managed-bean-name>
+    <managed-bean-class>sailpoint.web.WorkItemBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>View an archived work item</description>
+    <managed-bean-name>workItemArchive</managed-bean-name>
+    <managed-bean-class>sailpoint.web.WorkItemArchiveBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>View a work item form</description>
+    <managed-bean-name>workItemForm</managed-bean-name>
+    <managed-bean-class>sailpoint.web.WorkItemFormBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Work Item View</description>
+    <from-view-id>/workitem/workItem.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>self</from-outcome>
+      <to-view-id>/workitem/workItem.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewAccessRequest</from-outcome>
+      <to-view-id>/manage/accessRequest/accessRequestCompleteDetails.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>taskResult</from-outcome>
+      <to-view-id>/monitor/tasks/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>roleEditor</from-outcome>
+      <to-view-id>/define/roles/modeler/roleEditor.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Worksheet View</description>
+    <from-view-id>/manage/certification/worksheet.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <description>Access Review Details View</description>
+    <from-view-id>/manage/certification/detail.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <managed-bean>
+    <description>View a challenge work item</description>
+    <managed-bean-name>challengeItem</managed-bean-name>
+    <managed-bean-class>sailpoint.web.ChallengeItemBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Navigation from the challenge item page.</description>
+    <from-view-id>/user/challenge.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/user/challengeSuccess.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Navigation from the challenge item page.</description>
+    <from-view-id>/workitem/challenge.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <description>Remediation item list</description>
+    <managed-bean-name>remediationItemList</managed-bean-name>
+    <managed-bean-class>sailpoint.web.RemediationItemListBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Remediation item</description>
+    <managed-bean-name>remediationItem</managed-bean-name>
+    <managed-bean-class>sailpoint.web.RemediationItemBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Add a comment or completion comment to a remediation item</description>
+    <from-view-id>/workitem/remediationItemCommentPanel.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>completeSuccess</from-outcome>
+      <to-view-id>/workitem/workItem.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>addCommentSuccess</from-outcome>
+      <to-view-id>/workitem/workItem.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <description>Bulk remediation item</description>
+    <managed-bean-name>bulkRemediationItem</managed-bean-name>
+    <managed-bean-class>sailpoint.web.RemediationItemBulkActionBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Complete multiple remediation items</description>
+    <from-view-id>/workitem/bulkRemediationItemCommentPanel.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>completeSuccess</from-outcome>
+      <to-view-id>/workitem/workItem.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Suggest                                               -->
+  <!--  ***************************************************** -->
+
+
+  <managed-bean>
+    <managed-bean-name>baseSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.BaseObjectSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>categoriesSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.CategoriesSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>identitiesSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.IdentitiesSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>identityAttributeSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.IdentityAttributesSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>accountAttributeSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.application.AccountAttributeSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>rolesSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.RolesSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Scopes Suggest Bean</description>
+    <managed-bean-name>scopesSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.scope.ScopesSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Groups Suggest Bean</description>
+    <managed-bean-name>groupsSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.GroupDefinitionSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Applications Suggest Bean</description>
+    <managed-bean-name>applicationsSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ApplicationsSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>linkAttributeValuesSuggest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.LinkAttributeValuesSuggestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+
+  <!--  ***************************************************** -->
+  <!--  Applications                                          -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Application List Bean</description>
+    <managed-bean-name>applicationList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ApplicationListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>application Object Bean</description>
+    <managed-bean-name>applicationObject</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ApplicationObjectBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>application details data source Bean</description>
+    <managed-bean-name>applicationDetails</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.application.ApplicationDetailsDataSourceBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Application Scorecard Bean</description>
+    <managed-bean-name>applicationScorecard</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ApplicationScorecardBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Application Scorecard List Bean</description>
+    <managed-bean-name>applicationScorecardList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ApplicationScorecardListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Application Risk Bean</description>
+    <managed-bean-name>applicationScores</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ApplicationRiskBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Application Create/Edit</description>
+    <from-view-id>/define/applications/application.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/applications/applications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editDataSource</from-outcome>
+      <to-view-id>/define/applications/editActivityDataSource.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>createDataSource</from-outcome>
+      <to-view-id>/define/applications/editActivityDataSource.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/applications/applications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>showApplicationScores</from-outcome>
+      <to-view-id>/manage/riskScores/appRiskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>createPasswordPolicy</from-outcome>
+      <to-view-id>/define/applications/passwordPolicyConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>selectPasswordPolicy</from-outcome>
+      <to-view-id>/define/applications/passwordPolicySelect.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewPasswordPolicy</from-outcome>
+      <to-view-id>/define/applications/passwordPolicyConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editPasswordPolicy</from-outcome>
+      <to-view-id>/define/applications/passwordPolicyConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <description>Activity Data Source Edit</description>
+    <from-view-id>/define/applications/editActivityDataSource.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>saveDataSource</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancelDataSource</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Application Create/Edit</description>
+    <from-view-id>/define/applications/application.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/applications/applications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editTargetSource</from-outcome>
+      <to-view-id>/define/applications/editTargetSource.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>createTargetSource</from-outcome>
+      <to-view-id>/define/applications/editTargetSource.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/applications/applications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <description>Target Source Edit</description>
+    <from-view-id>/define/applications/editTargetSource.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>saveTargetSource</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancelTargetSource</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Application List</description>
+    <from-view-id>/define/applications/applications.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>new</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Application Risk</description>
+    <from-view-id>/manage/riskScores/appRiskScores.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Password Policy Edit</description>
+    <from-view-id>/define/applications/passwordPolicyConfig.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>savePasswordPolicy</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancelPasswordPolicy</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Password Policy Select</description>
+    <from-view-id>/define/applications/passwordPolicySelect.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>savePasswordPolicy</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancelPasswordPolicy</from-outcome>
+      <to-view-id>/define/applications/application.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Roles                                         -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Role Editor</description>
+    <managed-bean-name>roleEditor</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.modeler.RoleEditorBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Role Viewer</description>
+    <managed-bean-name>roleViewer</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.modeler.RoleViewerBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>RoleTypeDefinition Query</description>
+    <managed-bean-name>roleTypeDefinitionQuery</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.modeler.RoleTypeDefinitionQueryBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Role Versioning</description>
+    <managed-bean-name>roleVersion</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.roles.VersionBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>IT Role Mining Scheduling</description>
+    <managed-bean-name>itRoleMiningScheduleBean</managed-bean-name>
+    <managed-bean-class>sailpoint.web.mining.ITRoleMiningScheduleBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>IT Role Mining Role Creation</description>
+    <managed-bean-name>itRoleMiningCreateRoleBean</managed-bean-name>
+    <managed-bean-class>sailpoint.web.mining.ITRoleMiningCreateRoleBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Role Metrics Certification Scheduler</description>
+    <managed-bean-name>roleMetricsScheduleCertification</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.roles.RoleMetricsScheduleCertificationBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+
+  <!--  ***************************************************** -->
+  <!--  Directed Role Mining                                  -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description> Directed Role Mining Bean </description>
+    <managed-bean-name>directedMining</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.roles.DirectedMiningBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description> Automated Business Functional Role Mining Bean </description>
+    <managed-bean-name>bfrMining</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.roles.BusinessFunctionalRoleMiningBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description> Automated Business Functional Role Mining Bean </description>
+    <managed-bean-name>automatedMining</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.roles.AutomatedDirectedMiningBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Activity Data Sources                                 -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Activity Data Source List Bean</description>
+    <managed-bean-name>activityDataSourceList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ActivityDataSourceListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description> Activity Data Source Data Source </description>
+    <managed-bean-name>activityDataSourceDataSource</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.application.ActivityDataSourceDataSourceBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Explanations                                          -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Explanation Bean</description>
+    <managed-bean-name>explanation</managed-bean-name>
+    <managed-bean-class>sailpoint.web.ExplanationBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Managed Attribute Export Bean</description>
+    <managed-bean-name>managedAttributeExport</managed-bean-name>
+    <managed-bean-class>sailpoint.web.group.ManagedAttributeExportBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Managed Attribute Import Bean</description>
+    <managed-bean-name>managedAttributeImport</managed-bean-name>
+    <managed-bean-class>sailpoint.web.group.ManagedAttributeImportBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Applicaiton Password Policy -->
+  <!--  ***************************************************** -->
+
+  <!-- managed-bean>
+    <description>Application Password Policy Bean</description>
+    <managed-bean-name>passwordPolicyConfig</managed-bean-name>
+    <managed-bean-class>sailpoint.web.application.PasswordPolicyConfigBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean -->
+  
+  <!--  ***************************************************** -->
+  <!--  Rules                                                 -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Rule Editor Bean</description>
+    <managed-bean-name>ruleEditorBean</managed-bean-name>
+    <managed-bean-class>sailpoint.web.RuleEditorBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Login Configuration                                   -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Login configuration bean</description>
+    <managed-bean-name>loginConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.LoginConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  <navigation-rule>
+    <description>Login Configuration</description>
+    <from-view-id>/systemSetup/login.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Password Reset Base Bean                              -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Password Reset configuration bean</description>
+    <managed-bean-name>userResetConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.system.UserResetConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+  </managed-bean>
+  
+  <!--  ***************************************************** -->
+  <!--  Auth Question Configuration                           -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Auth question configuration bean</description>
+    <managed-bean-name>authQuestionConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.system.AuthQuestionConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  SMS Reset Configuration                               -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>SMS Reset configuration bean</description>
+    <managed-bean-name>smsResetConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.system.SMSResetConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  SAML Configuration                               -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>SAML configuration bean</description>
+    <managed-bean-name>samlConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.system.SAMLConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Time Period Configuration                             -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Time Period Configuration List Bean</description>
+    <managed-bean-name>timePeriodList</managed-bean-name>
+    <managed-bean-class>sailpoint.web.timePeriod.TimePeriodList</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Time Period Configuration Actions Bean</description>
+    <managed-bean-name>timePeriodActions</managed-bean-name>
+    <managed-bean-class>sailpoint.web.timePeriod.TimePeriodActions</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Time Period Configuration State Bean</description>
+    <managed-bean-name>timePeriodState</managed-bean-name>
+    <managed-bean-class>sailpoint.web.timePeriod.TimePeriodState</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Edit a Time Period</description>
+    <from-view-id>/systemSetup/timePeriods/timePeriods.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>editTimePeriod</from-outcome>
+      <to-view-id>/systemSetup/timePeriods/editTimePeriod.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Finish Editing a Time Period</description>
+    <from-view-id>/systemSetup/timePeriods/editTimePeriod.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/timePeriods/timePeriods.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/timePeriods/timePeriods.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>deleteDates</from-outcome>
+      <to-view-id>/systemSetup/timePeriods/editTimePeriod.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>addDate</from-outcome>
+      <to-view-id>/systemSetup/timePeriods/editTimePeriod.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>goBack</from-outcome>
+      <to-view-id>/systemSetup/timePeriods/timePeriods.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Audit Configuration                                   -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Audit Configuration Bean</description>
+    <managed-bean-name>auditConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.AuditConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  <navigation-rule>
+    <description>Audit Configuration</description>
+    <from-view-id>/systemSetup/audit.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>success</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Host Configuration                                    -->
+  <!--  ***************************************************** -->
+  <navigation-rule>
+    <description>Host List Configuration</description>
+    <from-view-id>/systemSetup/hostConfig.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Search                                                -->
+  <!--  ***************************************************** -->
+  <managed-bean>
+    <description>Search Controller</description>
+    <managed-bean-name>analyzeController</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.analyze.AnalyzeControllerBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identiy Search Bean</description>
+    <managed-bean-name>identitySearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.IdentitySearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Advanced Identiy Search Bean</description>
+    <managed-bean-name>advancedIdentitySearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.AdvancedIdentitySearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Search Bean</description>
+    <managed-bean-name>certificationSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.CertificationSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Role Search Bean</description>
+    <managed-bean-name>roleSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.RoleSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Account Group Search Bean</description>
+    <managed-bean-name>accountGroupSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.AccountGroupSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Entitlement Catalog Search Bean</description>
+    <managed-bean-name>entitlementCatalogSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.EntitlementCatalogSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Activity Search Bean</description>
+    <managed-bean-name>activitySearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.ActivitySearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Audit Search Bean</description>
+    <managed-bean-name>auditSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.AuditSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Request Search Bean</description>
+    <managed-bean-name>identityRequestSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.IdentityRequestSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Syslog Search Bean</description>
+    <managed-bean-name>syslogSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.SyslogSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Link Search Bean</description>
+    <managed-bean-name>linkSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.search.LinkSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>SyslogEvent Bean</description>
+    <managed-bean-name>syslogEvent</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.SyslogEventBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Request List Bean</description>
+    <managed-bean-name>identityRequestList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.IdentityRequestListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Audit Event Bean</description>
+    <managed-bean-name>auditEvent</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.AuditEventBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Process Instrumentation Search Bean</description>
+    <managed-bean-name>processInstrumentationSearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.analyze.ProcessInstrumentationSearchBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Process Instrumentation Search Bean</description>
+    <managed-bean-name>processMetricsEdit</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.analyze.ProcessMetricsEditBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Edit an identity from search results</description>
+    <from-view-id>/analyze/analyzeTabs.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>editIdentity</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editAccountGroup</from-outcome>
+      <to-view-id>/define/groups/editAccountGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/roles/roleTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>    
+    <navigation-case>
+      <from-outcome>editProcess</from-outcome>
+      <to-view-id>/define/workflow/workflow.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>    
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Edit a role search item</description>
+    <from-view-id>/define/roles/search/roleSearchContentPanel.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/roles/roleTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>    
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Links                                            -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Link List Bean</description>
+    <managed-bean-name>linkList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.LinkListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Generic info about a link. May be an actual link or a link snapshot</description>
+    <managed-bean-name>linkDetails</managed-bean-name>
+    <managed-bean-class>
+        sailpoint.web.LinkDetailsBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+
+
+  <!--  ***************************************************** -->
+  <!--  Identities                                            -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Identity List Bean</description>
+    <managed-bean-name>identityList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.IdentityListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Edit Bean</description>
+    <managed-bean-name>identity</managed-bean-name>
+    <managed-bean-class>sailpoint.web.identity.IdentityDTO</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Config Bean</description>
+    <managed-bean-name>identityConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.IdentityConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Config Edit Bean</description>
+    <managed-bean-name>identityConfigEdit</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.IdentityConfigEditBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Attribute Bean</description>
+    <managed-bean-name>identityAttribute</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.IdentityAttributeBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity History Bean</description>
+    <managed-bean-name>identityHistoryDTO</managed-bean-name>
+    <managed-bean-class>sailpoint.web.identity.IdentityHistoryDTO</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity History Export Bean</description>
+    <managed-bean-name>identityHistoryExport</managed-bean-name>
+    <managed-bean-class>sailpoint.web.identity.IdentityHistoryExportBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Activity Details Bean</description>
+    <managed-bean-name>activity</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.activity.ActivityBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Entitlements table                                    -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Identity Entitlement List Bean</description>
+    <managed-bean-name>identityEntitlementList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.IdentityEntitlementListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Entitlement Role List Bean</description>
+    <managed-bean-name>identityEntitlementRoleList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.IdentityEntitlementRoleListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Entitlement Details</description>
+    <managed-bean-name>entitlementDetails</managed-bean-name>
+    <managed-bean-class>sailpoint.web.identity.IdentityEntitlementBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>entitlementId</property-name>
+      <value>#{param.entitlementId}</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Bean to return account IDs for identities on an application</description>
+    <managed-bean-name>accountId</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.AccountIdBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Account Config Bean</description>
+    <managed-bean-name>linkConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.LinkConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Account Config Edit Bean</description>
+    <managed-bean-name>linkConfigEdit</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.identity.LinkConfigEditBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Identity List</description>
+    <from-view-id>/define/identity/identities.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <redirect>
+      	<view-param>
+      	  <name>id</name>
+      	  <value>#{identityList.selectedId}</value>	
+      	</view-param>
+      </redirect>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Identity Edit</description>
+    <from-view-id>/define/identity/identity.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>identities</from-outcome>
+      <to-view-id>/define/identity/identities.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>page</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/identity/identities.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/identity/identities.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>history</from-outcome>
+      <to-view-id>/define/identity/history.xhtml</to-view-id>
+      <redirect />
+      <!-- note that we do not use redirect here so the historyId
+        posted by identity.xhtml will carry over to the history page
+      -->
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>identitySearchResults</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>advancedSearchResults</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editGroupDefinition</from-outcome>
+      <to-view-id>/define/groups/editPopulation.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editSubGroup</from-outcome>
+      <to-view-id>/define/groups/editSubGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>requestPopulation</from-outcome>
+      <to-view-id>/dashboard.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Identity history finished</description>
+    <from-view-id>/define/identity/history.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>identity</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <!-- Tried not using redirect here but it causes odd
+           problems. Until this is resolved have to
+           store the original Identity id on the session.
+      -->
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Edit Identity Attribute</description>
+    <from-view-id>/systemSetup/identities/identitySourceMappings.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/systemSetup/identities/editIdentityAttribute.xhtml</to-view-id>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>add</from-outcome>
+      <to-view-id>/systemSetup/identities/editIdentityAttribute.xhtml</to-view-id>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>delete</from-outcome>
+      <to-view-id>/systemSetup/identities/identitySourceMappings.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Finish Editing Identity Attribute</description>
+    <from-view-id>/systemSetup/identities/editIdentityAttribute.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/identities/identitySourceMappings.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/identities/identitySourceMappings.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/systemSetup/identities/editIdentityAttribute.xhtml</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Add Source Mapping</description>
+    <from-view-id>/systemSetup/identities/addIdentitySource.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>addedSource</from-outcome>
+      <to-view-id>/systemSetup/identities/editIdentityAttribute.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Edit Account Attributes</description>
+    <from-view-id>/systemSetup/accounts/accountSourceMapping.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/systemSetup/accounts/editIdentityAttribute.xhtml</to-view-id>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>add</from-outcome>
+      <to-view-id>/systemSetup/accounts/editIdentityAttribute.xhtml</to-view-id>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>delete</from-outcome>
+      <to-view-id>/systemSetup/accounts/accountSourceMapping.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Finish Editing Identity Attribute</description>
+    <from-view-id>/systemSetup/accounts/editIdentityAttribute.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/accounts/accountSourceMapping.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/accounts/accountSourceMapping.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/systemSetup/accounts/editIdentityAttribute.xhtml</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Add Account Source Mapping</description>
+    <from-view-id>/systemSetup/accounts/addSource.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>addedSource</from-outcome>
+      <to-view-id>/systemSetup/accounts/editIdentityAttribute.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+
+
+
+  <!--  ***************************************************** -->
+  <!--  Bundles                                               -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Bundle List Bean</description>
+    <managed-bean-name>bundleList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.BundleListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+    
+  <managed-bean>
+    <description>Role DTO</description>
+    <managed-bean-name>roleBean</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.BundleDTO
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Role Details Bean</description>
+    <managed-bean-name>roleDetails</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.RoleDetailsBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Profiles                                               -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Profile List Bean</description>
+    <managed-bean-name>profileList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ProfileListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Access Certification                                  -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Certification Entities List Bean</description>
+    <managed-bean-name>certificationEntityList</managed-bean-name>
+    <managed-bean-class>
+        sailpoint.web.certification.CertificationEntityListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Identity Entities List Bean</description>
+    <managed-bean-name>certificationIdentityList</managed-bean-name>
+    <managed-bean-class>
+        sailpoint.web.certification.CertificationEntityListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>identity</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Identity Items List Bean</description>
+    <managed-bean-name>certificationIdentityItemsList</managed-bean-name>
+    <managed-bean-class>
+        sailpoint.web.certification.CertificationItemsListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Access Certification List Bean</description>
+    <managed-bean-name>certificationList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Access Certification Schedule List Bean</description>
+    <managed-bean-name>certificationScheduleList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationScheduleListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Event List Bean</description>
+    <managed-bean-name>certificationEventsList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationEventsListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Bean</description>
+    <managed-bean-name>certification</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Preferences Bean</description>
+    <managed-bean-name>certificationPrefs</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationPreferencesBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification View Bean</description>
+    <managed-bean-name>worksheetView</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.WorksheetViewBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Entity List View Bean</description>
+    <managed-bean-name>certEntityListView</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationEntityListViewBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Entity View Bean</description>
+    <managed-bean-name>certEntityView</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationEntityViewBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Item View Bean</description>
+    <managed-bean-name>certItemView</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationItemViewBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+
+  <managed-bean>
+    <description>Certification Bulk Action Bean</description>
+    <managed-bean-name>certificationBulkAction</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationBulkActionBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Entity Bulk Action Bean</description>
+    <managed-bean-name>certificationEntityBulkAction</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationEntityBulkActionBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Second Pass Bean</description>
+    <managed-bean-name>certificationItemSecondPass</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationItemSecondPassBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Group  List Bean</description>
+    <managed-bean-name>certGroupList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationGroupListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Group Bean</description>
+    <managed-bean-name>certificationGroup</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationGroupBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Challenge Bean</description>
+    <managed-bean-name>certificationChallenge</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.ChallengeBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Certification Role Create/Edit Bean</description>
+    <managed-bean-name>roleFromCertification</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.RoleFromCertificationBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Certification Schedule Bean</description>
+    <managed-bean-name>certificationSchedule</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.certification.CertificationScheduleBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Percentage Bean</description>
+    <managed-bean-name>certificationPercent</managed-bean-name>
+    <managed-bean-class>sailpoint.web.certification.CertificationPercentBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Percentage List Bean</description>
+    <managed-bean-name>certificationPercentList</managed-bean-name>
+    <managed-bean-class>sailpoint.web.certification.CertificationPercentListBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+
+  <!--  ***************************************************** -->
+  <!--  System Configuration                                  -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>System Configuration Bean</description>
+    <managed-bean-name>systemConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.SystemConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>LCM Configuration Bean</description>
+    <managed-bean-name>lcmConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.LCMConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Changes to the identityiq configuration were saved or cancelled</description>
+    <from-view-id>/systemSetup/system.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/systemSetup/system.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Electronic Signature configuration</description>
+    <from-view-id>/systemSetup/electronicSignatures.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <description>Changes to the compliance manager configuration were saved or cancelled</description>
+    <from-view-id>/systemSetup/systemCompliance.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/systemSetup/systemCompliance.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <description>Changes to the lifecycle manager configuration were saved or cancelled</description>
+    <from-view-id>/systemSetup/lcm/lcmConfig.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/systemSetup/lcm/lcmConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <managed-bean>
+    <description>Identity Provisioning Policy Bean</description>
+    <managed-bean-name>identityPolicy</managed-bean-name>
+    <managed-bean-class>sailpoint.web.identity.IdentityPolicyBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  
+  <navigation-rule>
+    <description>Changes to the identity provisioning policy configuration were saved or cancelled</description>
+    <from-view-id>/systemSetup/lcm/identityPolicy.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/systemSetup/lcm/identityPolicy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <managed-bean>
+    <description>Import from File Bean</description>
+    <managed-bean-name>importBean</managed-bean-name>
+    <managed-bean-class>sailpoint.web.system.ImportBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <navigation-rule>
+    <description>File Import Page</description>
+    <from-view-id>/systemSetup/import.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>results</from-outcome>
+      <to-view-id>/systemSetup/importResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <description>File Import Results Page</description>
+    <from-view-id>/systemSetup/importResults.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>importAnother</from-outcome>
+      <to-view-id>/systemSetup/import.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Application Configuration                             -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Generic ObjectConfig</description>
+    <managed-bean-name>objectConfig</managed-bean-name>
+    <managed-bean-class>sailpoint.web.system.ObjectConfigBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Application ObjectConfig</description>
+    <managed-bean-name>applicationObjectConfig</managed-bean-name>
+    <managed-bean-class>sailpoint.web.system.ApplicationObjectConfigBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Application Configuration</description>
+    <from-view-id>/systemSetup/appObjectConfig.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/systemSetup/appObjectAttribute.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Application Attribute</description>
+    <from-view-id>/systemSetup/appObjectAttribute.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/appObjectConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/appObjectConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Forms configuration</description>
+    <from-view-id>/systemSetup/forms.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Role Configuration                                    -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Role ObjectConfig</description>
+    <managed-bean-name>roleObjectConfig</managed-bean-name>
+    <managed-bean-class>sailpoint.web.system.RoleObjectConfigBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Role Configuration</description>
+    <from-view-id>/systemSetup/roleObjectConfig.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/systemSetup/roleObjectAttribute.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editType</from-outcome>
+      <to-view-id>/systemSetup/roleType.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Role Attribute</description>
+    <from-view-id>/systemSetup/roleObjectAttribute.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/roleObjectConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/roleObjectConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Role Type</description>
+    <from-view-id>/systemSetup/roleType.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/roleObjectConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/roleObjectConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Managed Attribute Configuration                       -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>MangedAttribute ObjectConfig</description>
+    <managed-bean-name>managedAttributeConfig</managed-bean-name>
+    <managed-bean-class>sailpoint.web.system.ManagedAttributeConfigBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Managed Attribute Configuration</description>
+    <from-view-id>/systemSetup/managedAttributeConfig.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/systemSetup/managedAttributeAttribute.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Managed Attribute Attribute</description>
+    <from-view-id>/systemSetup/managedAttributeAttribute.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/systemSetup/managedAttributeConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/managedAttributeConfig.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Activity Targets                                      -->
+  <!--  ***************************************************** -->
+
+   <managed-bean>
+    <description>Activity Category List</description>
+    <managed-bean-name>activityCategoryList</managed-bean-name>
+    <managed-bean-class>sailpoint.web.activity.ActivityCategoryList</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Activity Category Configuration</description>
+    <managed-bean-name>activityCategoryConfig</managed-bean-name>
+    <managed-bean-class>sailpoint.web.activity.ActivityCategoryConfig</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Activity Category Configuration</description>
+    <managed-bean-name>editedCategory</managed-bean-name>
+    <managed-bean-class>sailpoint.web.EditedCategoryBean</managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Activity Category Editing</description>
+    <from-view-id>/define/categories/activityCategories.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>delete</from-outcome>
+      <to-view-id>/define/categories/activityCategories.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/categories/activityCategoryTargetMapping.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>More Activity Category Editing</description>
+    <from-view-id>/define/categories/activityCategoryTargetMapping.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>done</from-outcome>
+      <to-view-id>/define/categories/activityCategories.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+
+  <!--  ***************************************************** -->
+  <!--  Policies                                              -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Policy List Bean</description>
+    <managed-bean-name>policies</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.policy.PolicyListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--
+    This is used both to do the initial selection of config page
+    and by the generic policy editing pages.
+  -->
+  <managed-bean>
+    <description>Policy Bean</description>
+    <managed-bean-name>policy</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.policy.PolicyBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Policy Violation List Bean</description>
+    <managed-bean-name>policyViolations</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.policy.PolicyViolationListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Policy Violation Action Bean</description>
+    <managed-bean-name>policyViolationAction</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.policy.PolicyViolationActionBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Policy Violation Chart Bean</description>
+    <managed-bean-name>policyViolationChart</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.PolicyViolationChartBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Add/Edit Policies</description>
+    <from-view-id>/define/policy/policies.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>editPolicy</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>newPolicy</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Policy Editing</description>
+    <from-view-id>/define/policy/policy.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/policy/policies.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/policy/policies.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>policyList</from-outcome>
+      <to-view-id>/define/policy/policies.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>sodConstraint</from-outcome>
+      <to-view-id>/define/policy/sodConstraint.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>activityConstraint</from-outcome>
+      <to-view-id>/define/policy/activityConstraint.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>entitlementConstraint</from-outcome>
+      <to-view-id>/define/policy/entitlementConstraint.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>advancedConstraint</from-outcome>
+      <to-view-id>/define/policy/advancedConstraint.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>SOD Constraint Editing</description>
+    <from-view-id>/define/policy/sodConstraint.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>return</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Activity Constraint Editing</description>
+    <from-view-id>/define/policy/activityConstraint.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>return</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Entitlement Constraint Editing</description>
+    <from-view-id>/define/policy/entitlementConstraint.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>return</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Advanced Constraint Editing</description>
+    <from-view-id>/define/policy/advancedConstraint.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>return</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/policy/policy.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <description>Violation View Bean</description>
+    <managed-bean-name>violationView</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.policy.ViolationViewBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Groups/IPOPs/AccountGroups                            -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Group Navigation Bean</description>
+    <managed-bean-name>groupNavigation</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.GroupNavigationBean
+    </managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Entitlement Mining Bean</description>
+    <managed-bean-name>entitlementMining</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.EntitlementMiningBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Group Factory List Bean</description>
+    <managed-bean-name>groupFactoryList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.GroupFactoryListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Group Factory Bean</description>
+    <managed-bean-name>groupFactory</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.GroupFactoryBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Group Definition Bean</description>
+    <managed-bean-name>groupDefinition</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.GroupDefinitionBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Subgroup Definition Bean</description>
+    <managed-bean-name>subgroupDefinition</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.SubGroupDefinitionBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Navigation from group list pages</description>
+    <from-view-id>/define/groups/accountGroups.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>editAccountGroup</from-outcome>
+      <to-view-id>/define/groups/editAccountGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+      
+  <navigation-rule>
+    <description>Navigation from group list pages</description>
+    <from-view-id>/define/groups/groups.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>editGroupFactory</from-outcome>
+      <to-view-id>/define/groups/editGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>newGroupFactory</from-outcome>
+      <to-view-id>/define/groups/editGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editGroupDefinition</from-outcome>
+      <to-view-id>/define/groups/editPopulation.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editAccountGroup</from-outcome>
+      <to-view-id>/define/groups/editAccountGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editWorkgroup</from-outcome>
+      <to-view-id>/define/groups/editWorkgroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>newWorkgroup</from-outcome>
+      <to-view-id>/define/groups/editWorkgroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Group Editing</description>
+    <from-view-id>/define/groups/editGroup.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/groups/groups.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/groups/groups.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editSubGroup</from-outcome>
+      <to-view-id>/define/groups/editSubGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Subgroup Editing</description>
+    <from-view-id>/define/groups/editSubGroup.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/groups/editGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/groups/editGroup.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Population Editing</description>
+    <from-view-id>/define/groups/editPopulation.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/groups/groups.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/groups/groups.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <description>Group Definition List Bean</description>
+    <managed-bean-name>groupDefinitionList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.GroupDefinitionListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Group Index List Bean</description>
+    <managed-bean-name>groupIndexList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.GroupIndexListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>AccountGroup List Bean</description>
+    <managed-bean-name>accountGroupList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.AccountGroupListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>AccountGroup List Bean</description>
+    <managed-bean-name>entitlementCatalogList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.EntitlementCatalogListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>AccountGroup Details Bean</description>
+    <managed-bean-name>accountGroup</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.AccountGroupBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>AccountGroup Edit Bean</description>
+    <managed-bean-name>accountGroupEdit</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.AccountGroupEditBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>AccountGroup Hierarchy Bean</description>
+    <managed-bean-name>accountGroupHierarchy</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.AccountGroupHierarchyBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>AccountGroup Editing</description>
+    <from-view-id>/define/groups/editAccountGroup.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/groups/accountGroups.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/groups/accountGroups.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <description>Workgroup List Bean</description>
+    <managed-bean-name>workgroupList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.WorkgroupListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Workgroup Edit Bean</description>
+    <managed-bean-name>workgroup</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.group.WorkgroupBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Workgroup Editing</description>
+    <from-view-id>/define/groups/editWorkgroup.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/groups/groups.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/groups/groups.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Risk Score Configuration                              -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Risk Score Configuration Bean</description>
+    <managed-bean-name>riskScoreConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.RiskScoreConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Application Risk Score Configuration Bean</description>
+    <managed-bean-name>applicationRisk</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ApplicationRiskConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Risk Score Chart Bean</description>
+    <managed-bean-name>riskScoreChart</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.RiskScoreChartBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>objectScope</property-name>
+      <value>identity</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Application Risk Score Chart Bean</description>
+    <managed-bean-name>applicationRiskScoreChart</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.RiskScoreChartBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>objectScope</property-name>
+      <value>application</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Certification Completion Chart Bean</description>
+    <managed-bean-name>certificationCompletionChart</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.CertificationCompletionChartBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+   <managed-bean>
+    <description>Certification Decisions Chart Bean</description>
+    <managed-bean-name>certificationDecisionsChart</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.CertificationDecisionsChartBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Activity Monitoring Score Configuration Bean</description>
+    <managed-bean-name>activityMonitoringScoreConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.activity.ActivityMonitoringScoreConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Band Configuration Bean</description>
+    <managed-bean-name>bandConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.BandConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Business Role Baseline Access Risk Configuration Bean</description>
+    <managed-bean-name>businessRoleBarConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.risk.BusinessRoleBarConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>SoD Policy Baseline Access Risk Configuration Bean</description>
+    <managed-bean-name>policyViolationBarConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.policy.PolicyViolationBarConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Entitlements Access Risk Configuration Bean</description>
+    <managed-bean-name>entitlementsBarConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.EntitlementsBarConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Application whose entitlements are currently being edited</description>
+    <managed-bean-name>editedEntitlementApp</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.EditedEntitlementAppBean
+    </managed-bean-class>
+    <managed-bean-scope>session</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Attributes Risk Configuration Bean</description>
+    <managed-bean-name>attributesRiskConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.AttributesRiskConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Permissions Risk Configuration Bean</description>
+    <managed-bean-name>permissionsRiskConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.PermissionsRiskConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Score Category Bean</description>
+    <managed-bean-name>scoreCategory</managed-bean-name>
+    <managed-bean-class>sailpoint.web.ScoreCategoryBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Score Category List Bean</description>
+    <managed-bean-name>scoreCategoryList</managed-bean-name>
+    <managed-bean-class>sailpoint.web.ScoreCategoryListBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Chosing an identity from the riskScores.xhtml page</description>
+    <from-view-id>/manage/riskScores/riskScores.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  <navigation-rule>
+    <description>Clicking on a dashboard scores chart directs you to the risk scores page</description>
+    <from-view-id>/dashboard/*</from-view-id>
+    <navigation-case>
+      <from-outcome>applyFilter</from-outcome>
+      <to-view-id>/manage/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Risk Score Config Editing</description>
+    <from-view-id>/define/riskScores/riskScores.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>gotoBusinessRoleBarPage</from-outcome>
+      <to-view-id>/define/riskScores/businessRoleBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>gotoEntitlementsBarPage</from-outcome>
+      <to-view-id>/define/riskScores/entitlementBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>gotoSoDBarPage</from-outcome>
+      <to-view-id>/define/riskScores/policyViolationsBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>gotoBusinessRoleCompPage</from-outcome>
+      <to-view-id>/define/riskScores/businessRoleScoringInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>gotoEntitlementsCompPage</from-outcome>
+      <to-view-id>/define/riskScores/entitlementScoringInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>gotoSoDCompPage</from-outcome>
+      <to-view-id>/define/riskScores/policyViolationsInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>gotoCertificationCompPage</from-outcome>
+      <to-view-id>/define/riskScores/certificationsInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>gotoCustomScorePage</from-outcome>
+      <to-view-id>/define/riskScores/customScoreInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Application Risk Config Editing</description>
+    <from-view-id>/define/riskScores/appScores.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Business Role BAR Config Editing</description>
+    <from-view-id>/define/riskScores/businessRoleBARInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>SoD Policy BAR Config Editing</description>
+    <from-view-id>/define/riskScores/policyViolationsBARInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Entitlements BAR Config Editing</description>
+    <from-view-id>/define/riskScores/entitlementBARInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>configurePermission</from-outcome>
+      <to-view-id>/define/riskScores/entitlementPermissionsInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>configureAttribute</from-outcome>
+      <to-view-id>/define/riskScores/entitlementAttributesInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>add</from-outcome>
+      <to-view-id>/define/riskScores/entitlementBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>remove</from-outcome>
+      <to-view-id>/define/riskScores/entitlementBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Entitlements BAR Config Attribute Editing</description>
+    <from-view-id>/define/riskScores/entitlementAttributesInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>delete</from-outcome>
+      <to-view-id>/define/riskScores/entitlementAttributesInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/entitlementBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/entitlementBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Entitlements BAR Config Permission Editing</description>
+    <from-view-id>/define/riskScores/entitlementPermissionsInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/entitlementBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/entitlementBARInclude.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Entitlements Compensating Controls Editing</description>
+    <from-view-id>/define/riskScores/entitlementScoringInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Business Roles Compensating Controls Editing</description>
+    <from-view-id>/define/riskScores/businessRoleScoringInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>SoD Policy Compensating Controls Editing</description>
+    <from-view-id>/define/riskScores/policyViolationsInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Certifications Compensating Controls Editing</description>
+    <from-view-id>/define/riskScores/certificationsInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Custom Score Editing</description>
+    <from-view-id>/define/riskScores/customScoreInclude.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Identity Triggers                                     -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Identity Triggers List Bean</description>
+    <managed-bean-name>identityTriggersList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.trigger.IdentityTriggersListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Identity Trigger Bean</description>
+    <managed-bean-name>identityTrigger</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.trigger.IdentityTriggerBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Navigation from identity triggers list</description>
+    <from-view-id>/define/trigger/triggers.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>new</from-outcome>
+      <to-view-id>/define/trigger/trigger.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/trigger/trigger.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Navigation from identity triggers create/edit page</description>
+    <from-view-id>/define/trigger/trigger.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/trigger/triggers.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/trigger/triggers.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>triggers</from-outcome>
+      <to-view-id>/define/trigger/triggers.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+
+  <!--  ***************************************************** -->
+  <!--  Tasks                                                 -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <managed-bean-name>taskDefinition</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskDefinitionBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>reportDefinition</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.reports.ReportDefinitionBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>taskDefinitions</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskDefinitionListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>task</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>reportDefinitions</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskDefinitionListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>report</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>roleMiningTaskDefinitions</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.RoleMiningTaskDefinitionListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>task</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>taskSchedules</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskScheduleListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>task</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>reportSchedules</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskScheduleListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>report</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>taskSchedule</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskScheduleBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>taskResult</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskResultBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>taskResults</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskResultListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>task</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>reportResult</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.reports.ReportResultBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>roleMiningResults</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.RoleMiningTaskResultListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>task</value>
+    </managed-property>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>itRoleMiningResultsList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.mining.ITRoleMiningResultListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>itRoleMiningPopulationList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.mining.ITRoleMiningPopulationBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>certificationResults</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskResultListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>certification</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>reportResults</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.task.TaskResultListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+    <managed-property>
+      <property-name>listType</property-name>
+      <value>report</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>jasperBean</managed-bean-name>
+    <managed-bean-class>sailpoint.web.JasperBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Create/Edit a Task Schedule</description>
+    <from-view-id>/monitor/tasks/schedulePanel.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>savedTask</from-outcome>
+      <to-view-id>/monitor/tasks/viewTasks.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>savedReport</from-outcome>
+      <to-view-id>/analyze/reports/viewReports.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>View Tasks</description>
+    <from-view-id>/monitor/tasks/viewTasks.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>runNow</from-outcome>
+      <to-view-id>/monitor/tasks/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>run</from-outcome>
+      <to-view-id>/monitor/tasks/viewTasks.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/monitor/tasks/editDefinition.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>new</from-outcome>
+      <to-view-id>/monitor/tasks/newTask.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>view</from-outcome>
+      <to-view-id>/monitor/tasks/renderResults.xhtml</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Edit a Task Definition</description>
+    <from-view-id>/monitor/tasks/editDefinition.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>runNow</from-outcome>
+      <to-view-id>/monitor/tasks/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>run</from-outcome>
+      <to-view-id>/monitor/tasks/viewTasks.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>ok</from-outcome>
+      <to-view-id>/monitor/tasks/viewTasks.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>New Task Definition</description>
+    <from-view-id>/monitor/tasks/newTask.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>ok</from-outcome>
+      <to-view-id>/monitor/tasks/viewTasks.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>runNow</from-outcome>
+      <to-view-id>/monitor/tasks/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>New Certification Schedule</description>
+    <from-view-id>/monitor/scheduleCertifications/viewAndEditCertifications.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>createCertification</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/editCertificationSchedule.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editCertification</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/editCertificationSchedule.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewTaskResult</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/renderResults.xhtml</to-view-id>
+    </navigation-case>
+
+    <navigation-case>
+      <from-outcome>createEvent</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/editCertificationSchedule.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editEvent</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/editCertificationSchedule.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Save Certification Schedule</description>
+    <from-view-id>/monitor/scheduleCertifications/editCertificationSchedule.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>scheduleCertificationSuccess</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/viewAndEditCertifications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToCertSchedules</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/viewAndEditCertifications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToCertEvents</from-outcome>
+      <to-view-id>/monitor/scheduleCertifications/viewAndEditCertifications.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>identitySearchResults</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>advancedSearchResults</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>showScores</from-outcome>
+      <to-view-id>/manage/riskScores/riskScores.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Return to Work Item from Task Result</description>
+    <from-view-id>/monitor/tasks/renderResults.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>workItem</from-outcome>
+      <to-view-id>/workitem/workItem.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+
+  <navigation-rule>
+    <description>Role Management</description>
+    <from-view-id>/define/roles/roleTabs.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>gotoRoleEditor</from-outcome>
+      <to-view-id>/define/roles/modeler/roleEditor.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Role Viewer </description>
+    <from-view-id>/define/roles/modeler/roleViewer.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>gotoRoleEditor</from-outcome>
+      <to-view-id>/define/roles/modeler/roleEditor.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <description>Role Management</description>
+    <from-view-id>/define/roles/modeler/roleEditor.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>save</from-outcome>
+      <to-view-id>/define/roles/roleTabs.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/define/roles/roleTabs.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToWorkItem</from-outcome>
+      <to-view-id>/workitem/workItem.xhtml</to-view-id>
+      <redirect/>
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <managed-bean-name>dataExportSchema</managed-bean-name>
+    <managed-bean-class>
+        sailpoint.web.DataExportSchemaBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>cefDataExportSchema</managed-bean-name>
+    <managed-bean-class>
+        sailpoint.web.CefDataExportSchemaBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>arcsightDataExportSchema</managed-bean-name>
+    <managed-bean-class>
+        sailpoint.web.arcsightDataExportSchemaBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Template Editor bean</description>
+    <managed-bean-name>templateEditor</managed-bean-name>
+    <managed-bean-class>sailpoint.web.TemplateEditBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Debug                                                 -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Debug Pages Bean</description>
+    <managed-bean-name>debug</managed-bean-name>
+    <managed-bean-class>sailpoint.web.DebugBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Object Debug</description>
+    <from-view-id>/debug/*</from-view-id>
+    <navigation-case>
+      <from-outcome>view</from-outcome>
+      <to-view-id>/debug/view.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/debug/edit.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>list</from-outcome>
+      <to-view-id>/debug/list.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>result</from-outcome>
+      <to-view-id>/debug/result.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>main</from-outcome>
+      <to-view-id>/debug/debug.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  reports -->
+  <!--  ***************************************************** -->
+
+  <navigation-rule>
+    <description>New Definition</description>
+    <from-view-id>/analyze/reports/newReport.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>ok</from-outcome>
+      <to-view-id>/analyze/reports/viewReports.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>runNow</from-outcome>
+      <to-view-id>/analyze/reports/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>View Report</description>
+    <from-view-id>/analyze/reports/viewReports.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>new</from-outcome>
+      <to-view-id>/analyze/reports/newReport.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>run</from-outcome>
+      <to-view-id>/analyze/reports/viewReports.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>runNow</from-outcome>
+      <to-view-id>/analyze/reports/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editIdentitySearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editAdvancedIdentitySearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editActivitySearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+     <navigation-case>
+      <from-outcome>editAuditSearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editAccountGroupSearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editCertificationSearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editRoleSearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editIdentityRequestSearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editLinkSearchItem</from-outcome>
+      <to-view-id>/analyze/analyzeTabs.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/analyze/reports/editDefinition.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+     <navigation-case>
+      <from-outcome>editform</from-outcome>
+      <to-view-id>/analyze/reports/editDefinitionForm.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>view</from-outcome>
+      <to-view-id>/analyze/reports/renderResults.xhtml</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Edit Definition</description>
+    <from-view-id>/analyze/reports/editDefinition.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>runNow</from-outcome>
+      <to-view-id>/analyze/reports/renderResults.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>ok</from-outcome>
+      <to-view-id>/analyze/reports/viewReports.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+   <navigation-rule>
+    <description>Edit Report Definition with Form</description>
+    <from-view-id>/analyze/reports/editDefinitionForm.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>error</from-outcome>
+      <to-view-id>/analyze/reports/editDefinitionForm.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/analyze/reports/viewReports.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>ok</from-outcome>
+      <to-view-id>/analyze/reports/viewReports.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>result</from-outcome>
+      <to-view-id>/analyze/reports/viewResult.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+     <navigation-case>
+      <from-outcome>previewReport</from-outcome>
+      <to-view-id>/analyze/reports/viewReportPreview.xhtml</to-view-id>
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Preview Report Definition</description>
+    <from-view-id>/analyze/reports/viewReportPreview.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/analyze/reports/viewReports.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>refine</from-outcome>
+      <to-view-id>/analyze/reports/editDefinitionForm.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>result</from-outcome>
+      <to-view-id>/analyze/reports/viewResult.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Requests                                              -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Request List Bean</description>
+    <managed-bean-name>requestList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.RequestListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Request Object Bean</description>
+    <managed-bean-name>requestObject</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.RequestObjectBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <navigation-rule>
+    <description>View Request</description>
+    <from-view-id>/monitor/requests/requests.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/monitor/requests/request.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Cancel View Request</description>
+    <from-view-id>/monitor/requests/request.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/monitor/requests/requests.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Correlation                                           -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Manual Correlation Bean</description>
+    <managed-bean-name>manualCorrelation</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ManualCorrelationBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Manual Correlation Links Search Bean</description>
+    <managed-bean-name>manualCorrelationLinkSearch</managed-bean-name>
+    <managed-bean-class>
+        sailpoint.web.ManualCorrelationLinkBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Manual Correlation Identity Search Bean</description>
+    <managed-bean-name>manualCorrelationIdentitySearch</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ManualCorrelationIdentityBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Chosing an identity from the manualCorrelation.xhtml page. tqm: this is not used it seems.</description>
+    <from-view-id>/manage/correlation/manualCorrelation.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/define/identity/identity.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Scopes                                                -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Scope Tree Bean</description>
+    <managed-bean-name>scopeTree</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.scope.ScopeTreeBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Creating, editing, and deleting scopes from scope tree</description>
+    <from-view-id>/systemSetup/scopes/scopes.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>newScope</from-outcome>
+      <to-view-id>/systemSetup/scopes/scope.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editScope</from-outcome>
+      <to-view-id>/systemSetup/scopes/scope.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>deleteScope</from-outcome>
+      <to-view-id>/systemSetup/scopes/deleteScope.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>configureScopes</from-outcome>
+      <to-view-id>/systemSetup/scopes/configureScopes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>backToSystemSetup</from-outcome>
+      <to-view-id>/systemSetup/index.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <description>Scope Bean</description>
+    <managed-bean-name>scope</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.scope.ScopeBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Scope Delete Bean</description>
+    <managed-bean-name>scopeDelete</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.scope.DeleteScopeBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Navigation after creating, editing a scope.</description>
+    <from-view-id>/systemSetup/scopes/scope.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>scopeCreated</from-outcome>
+      <to-view-id>/systemSetup/scopes/scopes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>scopeEdited</from-outcome>
+      <to-view-id>/systemSetup/scopes/scopes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/scopes/scopes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Navigation after deleting a scope.</description>
+    <from-view-id>/systemSetup/scopes/deleteScope.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>scopeDeleted</from-outcome>
+      <to-view-id>/systemSetup/scopes/scopes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/scopes/scopes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <managed-bean>
+    <description>Scope Config Bean</description>
+    <managed-bean-name>scopeConfig</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.scope.ScopeConfigBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <navigation-rule>
+    <description>Navigation after saving scope configuration.</description>
+    <from-view-id>/systemSetup/scopes/configureScopes.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>configSaved</from-outcome>
+      <to-view-id>/systemSetup/scopes/scopes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/systemSetup/scopes/scopes.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  Workflow                                              -->
+  <!--  ***************************************************** -->
+  
+  <managed-bean>
+    <description>Workflow Bean</description>
+    <managed-bean-name>workflow</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.workflow.WorkflowBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Workflow List Bean</description>
+    <managed-bean-name>workflowList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.workflow.WorkflowListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+<!--  ***************************************************** -->
+  <!--  Domain management                                    -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Domain Management</description>
+    <managed-bean-name>manageDomain</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.ManageDomainBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Domain Data</description>
+    <managed-bean-name>domainData</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.object.DomainData
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Account Scope Management</description>
+    <managed-bean-name>accountSearchScope</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.AccountSearchScopeBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Account Scope Data</description>
+    <managed-bean-name>accountScope</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.object.AccountScopeData
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Group Scope Management</description>
+    <managed-bean-name>groupSearchScope</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.GroupSearchScopeBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Group Scope Data</description>
+    <managed-bean-name>groupScope</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.object.GroupScopeData
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Unstructured Targets                                  -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Target Source Edit Bean</description>
+    <managed-bean-name>targetSource</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.TargetSourceBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description> Target Source Data Source </description>
+    <managed-bean-name>targetSourcesDataSource</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.TargetSourcesDataSourceBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Target Source List Bean</description>
+    <managed-bean-name>targetSourceList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.TargetSourceListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <!--  ***************************************************** -->
+  <!--  Unstructured Targets                                  -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Helps with the Novell Connected Systems Application Generator</description>
+    <managed-bean-name>novellAppGenerator</managed-bean-name>
+    <managed-bean-class>sailpoint.connector.nidm.NIDMApplicationFetcher</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <!--  ***************************************************** -->
+  <!--  Batch requests beans                                  -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <description>Create and schedule batch requests</description>
+    <managed-bean-name>batchSchedule</managed-bean-name>
+    <managed-bean-class>sailpoint.web.BatchRequestScheduleBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Batch Request List Bean</description>
+    <managed-bean-name>batchRequestList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.BatchRequestListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <description>Batch Request Object Bean</description>
+    <managed-bean-name>batchRequest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.BatchRequestObjectBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <description>Batch Request Item List Bean</description>
+    <managed-bean-name>batchRequestItemList</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.BatchRequestItemListBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <navigation-rule>
+    <description>Batch request list</description>
+    <from-view-id>/manage/batchRequest/batchRequests.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>createNew</from-outcome>
+      <to-view-id>/manage/batchRequest/createBatchRequest.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>edit</from-outcome>
+      <to-view-id>/manage/batchRequest/batchRequestDetails.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Batch request details</description>
+    <from-view-id>/manage/batchRequest/batchRequestDetails.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>batchRequestList</from-outcome>
+      <to-view-id>/manage/batchRequest/batchRequests.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <description>Create Batch request</description>
+    <from-view-id>/manage/batchRequest/createBatchRequest.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>batchRequestList</from-outcome>
+      <to-view-id>/manage/batchRequest/batchRequests.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>cancel</from-outcome>
+      <to-view-id>/manage/batchRequest/batchRequests.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <!--  ***************************************************** -->
+  <!--  LCM                                                 -->
+  <!--  ***************************************************** -->
+  
+  <managed-bean>
+    <managed-bean-name>requestPopulation</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.RequestPopulationBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>accountsRequest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.AccountsRequestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>passwordsRequest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.PasswordsRequestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>rolesRequest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.RolesRequestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>accessRequest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.AccessRequestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>attributesRequest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.AttributesRequestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>entitlementsRequest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.EntitlementsRequestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <navigation-rule>
+    <description>Choosing to add a new role from the requestAccess Page.</description>
+    <from-view-id>/lcm/requestRoles.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>addRole</from-outcome>
+      <to-view-id>/lcm/requestRole.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <managed-bean>
+    <managed-bean-name>submitRequest</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.SubmitRequestBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>manageDeletedObjects</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.lcm.ManageDeletedObjectsBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+
+  <!--  ***************************************************** -->
+  <!--  Form                                                  -->
+  <!--  ***************************************************** -->
+
+  <managed-bean>
+    <managed-bean-name>gridConfigBean</managed-bean-name>
+    <managed-bean-class>sailpoint.web.GridConfigBean</managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <managed-bean>
+    <managed-bean-name>dynamicField</managed-bean-name>
+    <managed-bean-class>
+      sailpoint.web.DynamicFieldBean
+    </managed-bean-class>
+    <managed-bean-scope>request</managed-bean-scope>
+  </managed-bean>
+  
+  <!--  ***************************************************** -->
+  <!--  Global Configuration                                  -->
+  <!--  ***************************************************** -->
+
+  <component>
+    <component-type>sailpoint.ui.helpers.ClientIdWriterComponent</component-type>
+    <component-class>sailpoint.ui.helpers.ClientIdWriterComponent</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.Chart</component-type>
+    <component-class>sailpoint.web.tags.ChartTag</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.OutputText</component-type>
+    <component-class>sailpoint.web.tags.LocalizedHtmlOutputTextTag</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.Secret</component-type>
+    <component-class>sailpoint.web.tags.HtmlInputSecret</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.InputText</component-type>
+    <component-class>sailpoint.web.tags.InputText</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.CommandLink</component-type>
+    <component-class>sailpoint.web.tags.CommandLink</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.OutputXmlText</component-type>
+    <component-class>sailpoint.web.tags.HtmlOutputXmlText</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.ImageRadioButton</component-type>
+    <component-class>sailpoint.web.tags.UIImageRadioButton</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.ProgressBar</component-type>
+    <component-class>sailpoint.web.tags.UIProgressBar</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.scriptInclude</component-type>
+    <component-class>sailpoint.web.tags.resourceInclude.ScriptTag</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.styleInclude</component-type>
+    <component-class>sailpoint.web.tags.resourceInclude.StyleTag</component-class>
+  </component>
+  
+  <component>
+    <component-type>sailpoint.messages</component-type>
+    <component-class>sailpoint.web.tags.MessagesTag</component-class>
+  </component>
+
+  <component>
+    <component-type>sailpoint.web.tags.SailPointForm</component-type>
+    <component-class>sailpoint.web.tags.SailPointForm</component-class>
+  </component>
+
+  <component>
+    <component-type>org.apache.myfaces.SPHtmlInputDate</component-type>
+    <component-class>sailpoint.web.tags.SPInputDate</component-class>
+  </component>
+  <!-- Note: use <sp:convertIdentity /> rather supplying a converter   -->
+  <!-- attribute to the component of using <f:converter/>.  The        -->
+  <!-- convertIdentity tag accepts required parameters for conversion. -->
+  <converter>
+    <converter-id>sailpoint.object.Identity</converter-id>
+    <converter-class>sailpoint.web.util.IdentityConverter</converter-class>
+  </converter>
+
+  <converter>
+    <converter-id>sailpoint.web.identity.IdentitySuggestItem</converter-id>
+    <converter-class>sailpoint.web.util.IdentitySuggestItemConverter</converter-class>
+  </converter>
+
+  <converter>
+    <converter-id>sailpoint.object.IdentityList</converter-id>
+    <converter-class>sailpoint.web.util.IdentityListConverter</converter-class>
+  </converter>
+  
+   <converter>
+    <converter-id>sailpoint.object.BundleList</converter-id>
+    <converter-class>sailpoint.web.util.BundleListConverter</converter-class>
+  </converter>
+
+  <converter>
+    <converter-id>sailpoint.object.Application</converter-id>
+    <converter-class>sailpoint.web.util.ApplicationConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>sailpoint.object.ApplicationList</converter-id>
+    <converter-class>sailpoint.web.util.ApplicationListConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>sailpoint.object.ScopeList</converter-id>
+    <converter-class>sailpoint.web.util.ScopeListConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>sailpoint.object.Scope</converter-id>
+    <converter-class>sailpoint.web.util.ScopeConverter</converter-class>
+  </converter>
+
+  <converter>
+    <converter-id>sailpoint.object.TagList</converter-id>
+    <converter-class>sailpoint.web.util.TagListConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>sailpoint.object.Enum</converter-id>
+    <converter-class>sailpoint.web.util.EnumConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>sailpoint.object.Date</converter-id>
+    <converter-class>sailpoint.web.util.DateConverter</converter-class>
+  </converter>
+
+  <converter>
+    <converter-id>sailpoint.object.SailPointObject</converter-id>
+    <converter-class>sailpoint.web.util.SailPointObjectConverter</converter-class>
+  </converter>
+
+  <converter>
+    <converter-id>java.util.List</converter-id>
+    <converter-class>sailpoint.web.util.ListConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>java.util.Map</converter-id>
+    <converter-class>sailpoint.web.util.MapConverter</converter-class>
+  </converter>
+  
+  <converter>
+    <converter-id>NewLineList</converter-id>
+    <converter-class>sailpoint.web.util.NewLineListConverter</converter-class>
+  </converter>
+
+  <validator>
+    <validator-id>sailpoint.web.validators.DateValidator</validator-id>
+    <validator-class>sailpoint.web.validators.DateValidator</validator-class>
+  </validator>
+  
+  <validator>
+    <validator-id>sailpoint.web.validators.ObjectNameValidator</validator-id>
+    <validator-class>sailpoint.web.validators.ObjectNameValidator</validator-class>
+  </validator>
+
+  <validator>
+    <validator-id>sailpoint.web.validators.AlphaNumericValidator</validator-id>
+    <validator-class>sailpoint.web.validators.AlphaNumericValidator</validator-class>
+  </validator>
+
+    <validator>
+        <validator-id>sailpoint.web.validators.AttributeNameValidator</validator-id>
+        <validator-class>sailpoint.web.validators.AttributeNameValidator</validator-class>
+    </validator>
+
+  <lifecycle>
+    <phase-listener>sailpoint.web.util.PhaseTracker</phase-listener>
+  </lifecycle>
+
+  <render-kit>
+    <renderer>
+      <component-family>javax.faces.Form</component-family>
+      <renderer-type>sailpoint.web.tags.Form</renderer-type>
+      <renderer-class>sailpoint.web.tags.FormRenderer</renderer-class>
+    </renderer>
+    <renderer>
+      <component-family>javax.faces.Input</component-family>
+      <renderer-type>sailpoint.web.tags.Secret</renderer-type>
+      <renderer-class>sailpoint.web.tags.SecretRenderer</renderer-class>
+    </renderer>
+    <renderer>
+      <component-family>javax.faces.Input</component-family>
+      <renderer-type>sailpoint.web.tags.InputText</renderer-type>
+      <renderer-class>sailpoint.web.tags.InputTextRenderer</renderer-class>
+    </renderer>
+    <renderer>
+      <component-family>javax.faces.Command</component-family>
+      <renderer-type>sailpoint.web.tags.CommandLink</renderer-type>
+      <renderer-class>sailpoint.web.tags.SpCommandLinkRenderer</renderer-class>
+    </renderer>
+    <renderer>
+      <component-family>javax.faces.Output</component-family>
+      <renderer-type>sailpoint.web.tags.OutputXmlText</renderer-type>
+      <renderer-class>sailpoint.web.tags.XmlTextRenderer</renderer-class>
+    </renderer>
+    <renderer>
+      <component-family>javax.faces.Messages</component-family>
+      <renderer-type>javax.faces.Messages</renderer-type>
+      <renderer-class>sailpoint.web.tags.MessagesRenderer</renderer-class>
+    </renderer>
+  </render-kit>
+
+  <application>
+    <message-bundle>sailpoint.web.messages.iiqMessages</message-bundle>
+    <action-listener>sailpoint.web.util.SailPointActionListener</action-listener>
+    <resource-handler>sailpoint.web.SailPointResourceHandler</resource-handler>
+    <navigation-handler>sailpoint.web.SailPointNavigationHandler</navigation-handler>
+    <locale-config>
+      <default-locale>en</default-locale>
+      <supported-locale>en_GB</supported-locale>
+      <supported-locale>en_CA</supported-locale>
+      <supported-locale>en_AU</supported-locale>
+      <supported-locale>en_US</supported-locale>
+      <supported-locale>fr</supported-locale>
+      <supported-locale>de</supported-locale>
+      <supported-locale>nl</supported-locale>
+      <supported-locale>es</supported-locale>
+      <supported-locale>pt_BR</supported-locale>
+      <supported-locale>it</supported-locale>
+      <supported-locale>zh</supported-locale>
+      <supported-locale>ja</supported-locale>
+    </locale-config>
+  </application>
+
+</faces-config>

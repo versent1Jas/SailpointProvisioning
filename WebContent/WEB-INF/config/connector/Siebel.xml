@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, ENABLE, SEARCH, PASSWORD" icon="enterpriseIcon" name="Siebel" type="Siebel">
+    <Attributes>
+      <Map>
+        <entry key="connectorClass" value="openconnector.connector.SiebelConnector"/>
+        <entry key="formPath" value="SiebelAttributesForm.xhtml"/>
+        <entry key="retryableErrors">
+          <value>
+            <List>
+              <String>Cannot connect to Siebel Server</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="setDelay" value="1"/>
+        <entry key="encrypted" value="passwd"/>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+                            import java.util.*;
+                            import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                            import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                            import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                            import sailpoint.object.ProvisioningPlan.AccountRequest;
+                            import sailpoint.object.ProvisioningPlan.GenericRequest;
+                        
+                                 List accountRequests = plan.getAccountRequests();
+
+                                 if (accountRequests != null)
+                                 {
+                                     for (AccountRequest acctReq : accountRequests)
+                                     {
+                                         AccountRequest.Operation op = acctReq.getOperation();
+                                         if (op == AccountRequest.Operation.Create)
+                                         {
+                                                 String userId = acctReq.getNativeIdentity();
+                                                 if (userId != null)
+                                                 {
+                                                        acctReq.setNativeIdentity(userId.toUpperCase());
+                                                 }
+                                         }
+                                      }
+                                  }
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="Login Name" identityAttribute="Login Name" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="Login Name" remediationModificationType="None" required="true" type="string">
+          <Description>Login Name of Employee</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="First Name" remediationModificationType="None" type="string">
+          <Description>First Name of Employee</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Last Name" remediationModificationType="None" type="string">
+            <Description>Last Name of Employee</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Employment Status" remediationModificationType="None" type="string">
+          <Description>Employment Status</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Street Address" remediationModificationType="None" required="true" type="string">
+          <Description>Street Address</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Phone Number" remediationModificationType="None" required="true" type="string">
+          <Description>Phone Number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Fax Number" remediationModificationType="None" required="true" type="string">
+          <Description>Fax Number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Hire Date" remediationModificationType="None" required="true" type="string">
+          <Description>Hire Date</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Alias" remediationModificationType="None" required="true" type="string">
+          <Description>Alias</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="State" remediationModificationType="None" required="true" type="string">
+          <Description>State</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Availability Status" remediationModificationType="None" required="true" type="string">
+          <Description>Availability status of Employee</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ManagerLogin" remediationModificationType="None" required="true" type="string">
+          <Description>Login of Employee's manager</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Job Title" remediationModificationType="None" required="true" type="string">
+          <Description>Job Title</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Division" remediationModificationType="None" required="true" type="string">
+          <Description>Division</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Primary Responsibility Id" remediationModificationType="None" type="string">
+          <Description>Primary responsibility Id of Employee</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="Responsibility" remediationModificationType="None" type="string">
+          <Description>It contains a list of responsibilties of Employee</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Primary Position Id" remediationModificationType="None" type="string">
+          <Description>Primary Position Id of Employee</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="Position" remediationModificationType="None" schemaObjectType="group" type="string">
+          <Description>It contains a list of positions assigned to Employee</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="Name" featuresString="PROVISIONING" identityAttribute="Id" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="Id" remediationModificationType="None" required="true" type="string">
+          <Description>Unique Identifier for Position</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Name" remediationModificationType="None" required="true" type="string">
+          <Description>Name of Position</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="Last Name" remediationModificationType="None" required="true" type="string">
+          <Description>Last Name of Employee that has this position</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Division" remediationModificationType="None" required="true" type="string">
+          <Description>Division of Position</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Role" remediationModificationType="None" required="true" type="string">
+          <Description>Role</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Start Date" remediationModificationType="None" required="true" type="string">
+          <Description>The date when the position was assigned to Employee</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Position Type" remediationModificationType="None" required="true" type="string">
+          <Description>Position Type</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Parent Position Id" remediationModificationType="None" required="true" type="string">
+          <Description>Parent Position Id</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_form_siebel_loginname" helpKey="help_con_form_siebel_loginname" name="Login Name" required="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_firstname" helpKey="help_con_form_siebel_firstname" name="First Name" required="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_lastname" helpKey="help_con_form_siebel_lastname" name="Last Name" required="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_position" helpKey="help_con_form_siebel_postition" multi="true" name="Position" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_postid" helpKey="help_con_form_siebel_postid" name="Primary Position Id" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_resp" helpKey="help_con_form_siebel_resp" multi="true" name="Responsibility" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_password" helpKey="help_con_form_siebel_pass" name="Password" reviewRequired="true" section="" type="secret"/>
+        <Field displayName="con_form_siebel_repass" helpKey="help_con_form_siebel_repass" name="Verify Password" reviewRequired="true" section="" type="secret"/>
+        <Field displayName="con_form_siebel_jobtitle" helpKey="help_con_form_siebel_jobtitle" name="Job Title" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_emptype" helpKey="help_con_form_siebel_emptype" name="Employee Type Code" reviewRequired="true" section="" type="string">
+          <AllowedValues>
+            <String>Contractor</String>
+            <String>Employee</String>
+            <String>Intern</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_form_siebel_position" helpKey="help_con_form_siebel_post" name="Name" required="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_division" helpKey="help_con_form_siebel_div" name="Division" required="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_posttype" helpKey="help_con_form_siebel_posttype" name="Position Type" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_parid" helpKey="help_con_form_siebel_parid" name="Parent Position Id" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_form_siebel_posttype" helpKey="help_con_form_siebel_posttype" name="Position Type" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_form_siebel_parid" helpKey="help_con_form_siebel_parid" name="Parent Position Id" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

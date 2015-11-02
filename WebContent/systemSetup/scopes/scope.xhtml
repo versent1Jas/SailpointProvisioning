@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputText rendered="#{null == scope.objectId}" value="#{msgs.title_create_scope}"/>
+    <h:outputFormat rendered="#{null != scope.objectId}" value="#{msgs.title_edit_scope}">
+      <f:param value="#{scope.object.displayableName}"/>
+    </h:outputFormat>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/scopes/scope.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+        helpKey = 'SCOPE';
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+        <div class="spContent">
+          <div style="margin: 5px">
+            <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+  
+            <h:form styleClass="form" id="editForm">
+              <h:inputHidden id="id" value="#{scope.objectId}" />
+              <h:inputHidden id="newScopeParentId" value="#{scope.newScopeParentId}" />
+              
+  		      <h:panelGroup>
+  		          <h:outputText styleClass="requiredText" value="*"/>
+  		          <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+  		      </h:panelGroup>
+              
+              <h:panelGrid columns="2">
+                <h:outputText rendered="#{null != scope.object.id}" styleClass="sectionHeader" value="#{msgs.name}"/>
+                <h:outputText rendered="#{null != scope.object.id}" value="#{scope.object.name}" />
+              
+                <h:panelGroup>
+                  <h:outputText styleClass="sectionHeader" value="#{msgs.display_name}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </h:panelGroup>
+                <h:inputText id="displayName"
+                             value="#{scope.object.displayName}" size="43"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageScope')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageScope')}" />
+      
+                <h:panelGroup styleClass="buttonRow">
+                  <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageScope')}">
+                    <h:commandButton style="display: none" id="createBtn" value="#{msgs.create}" action="#{scope.create}" />
+                    <a4j:commandButton id="testCreateBtn" styleClass="primaryBtn" rendered="#{null == scope.objectId}" value="#{msgs.create}" onclick="testNewScope();return;"/>
+                    
+                    <h:commandButton id="editBtn" styleClass="primaryBtn" rendered="#{null != scope.objectId}" value="#{msgs.nav_save}" action="#{scope.edit}" />
+                  </ui:fragment>
+                  <h:commandButton styleClass="secondaryBtn" value="#{msgs.nav_cancel}" action="#{scope.cancelAction}" />
+                </h:panelGroup>
+              </h:panelGrid>
+  
+              <script type="text/javascript" defer="defer">
+                  var btnId = "editForm:createBtn";
+                  if (null == $(btnId)) {
+                      btnId = "editForm:editBtn";
+                  }
+                  var submitter = new SailPoint.SubmitOnEnter(btnId);
+                  submitter.registerTextField("editForm:displayName");
+              </script>
+            </h:form>
+          </div>
+        </div>
+    </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

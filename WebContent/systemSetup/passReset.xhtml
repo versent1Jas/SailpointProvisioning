@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:sp="http://sailpoint.com/ui"
+    xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+    <ui:composition>
+
+        <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+      Ext.onReady(function() {
+          toggleDisplay($('resetTypeContainer'), !(#{userResetConfig.enableForgotPassword} || #{userResetConfig.enableAccountUnlock}));
+      });
+      //--><!]]>
+  </script>
+
+        <div class="paddedContainer">
+            <ui:fragment rendered="#{base.lcmEnabled}">
+                <h:panelGrid styleClass="paddedTbl" columns="3"
+                    columnClasses="titleColumn, helpColumn, leftAlignedColumn">
+                    <h:outputText
+                        value="#{msgs.user_reset_enable_forgot_password}" />
+                    <h:graphicImage id="imgHlpEnableForgotPassword" 
+                        styleClass="helpIcon"
+                        alt="#{help.help_enable_forgot_password}"
+                        url="/images/icons/dashboard_help_16.png" />
+                    <h:selectBooleanCheckbox
+                        id="enableForgotPassCheckbox"
+                        value="#{userResetConfig.enableForgotPassword}"
+                        onclick="toggleDisplay($('resetTypeContainer'), !(this.checked || $('configForm:enableUnlockCheckbox').checked)); SailPoint.SystemSetup.Login.updateLoginPanel();"
+                        onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+                        <a4j:ajax />
+                    </h:selectBooleanCheckbox>
+                    <h:outputText
+                        value="#{msgs.user_reset_enable_account_unlock}" />
+                    <h:graphicImage id="imgHlpEnableAccountUnlock"
+                        styleClass="helpIcon"
+                        alt="#{help.help_enable_account_unlock}"
+                        url="/images/icons/dashboard_help_16.png" />
+                    <h:selectBooleanCheckbox id="enableUnlockCheckbox"
+                        value="#{userResetConfig.enableAccountUnlock}"
+                        onclick="toggleDisplay($('resetTypeContainer'), !(this.checked || $('configForm:enableForgotPassCheckbox').checked)); SailPoint.SystemSetup.Login.updateLoginPanel();"
+                        onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+                        <a4j:ajax />
+                    </h:selectBooleanCheckbox>
+                </h:panelGrid>
+            </ui:fragment>
+        </div>
+        <div id="resetTypeContainer">
+            <ui:include src="/systemSetup/authQuestions.xhtml" />
+            <ui:include src="/systemSetup/smsReset.xhtml" />
+        </div>
+
+
+    </ui:composition>
+
+</body>
+</html>

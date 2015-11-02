@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+  <ui:composition>
+    <f:view>
+      <t:dataTable id="permissionsTable" cellspacing="0" styleClass="width100 spTable" border="1" cellpadding="3" 
+        style="border:solid 1px #ccc" headerClass="spDataTableHeader padded" value="#{permissions}" var="currentPerm">
+        <h:column>
+          <f:facet name="header">
+            <h:outputText value="#{msgs.target}"/>
+          </f:facet>
+          
+          <div style="padding:3px"><h:outputText value="#{currentPerm.target}"/></div>                        
+          <ui:fragment rendered="#{currentPerm.annotation != null}">
+            <div class="spacerDiv"/>
+            <h:outputText styleClass="sectionHeader" value="#{msgs.label_annotation}"/>
+            <div>
+              <h:outputText value="#{currentPerm.annotation}"/>
+            </div>
+          </ui:fragment>
+        </h:column>
+        <h:column>
+          <f:facet name="header">
+            <h:outputText value="#{msgs.rights}"/>
+          </f:facet>
+          <ui:repeat value="#{currentPerm.rightsList}" var="currentRight">
+            <div>
+              <h:outputText value="#{currentRight}"/>
+              <ui:fragment rendered="#{flagNewEntitlements and (null != newPermissionMap[permission.target]) and newPermissionMap[permission.target][currentRight]}">
+                <span class="newEntitlementTxt">#{msgs.bracket_new}</span>
+              </ui:fragment>
+            </div>
+          </ui:repeat>
+        </h:column>
+      </t:dataTable>
+    </f:view>
+  </ui:composition>
+</html>

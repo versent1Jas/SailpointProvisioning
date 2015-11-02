@@ -1,0 +1,1338 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+    <ImportAction name='include' value='WEB-INF/config/tasksCommon.xml'/>
+
+    <!--***********************************************************
+
+    TaskDefinition - Templates
+
+    *************************************************************-->
+
+    <!--
+      Base task definition for activity aggregation.
+    -->
+
+    <TaskDefinition name="Activity Aggregation" executor="sailpoint.task.ActivityDataSourceScan"
+                    progressInterval="5000" progressMode="String" template="true" type="ActivityAggregation">
+        <Description>
+            Template for activity scanning. This task will iterate over
+            an application's activity datasource, correlate the activity
+            back to an Identity and then store the correlated activities.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="datasource" required="true" type="ActivityDataSource">
+                    <Prompt>task_in_activity_aggregation_datasource</Prompt>
+                </Argument>
+                <Argument name="trackLastPosition" type="boolean">
+                    <Prompt>task_in_activity_aggregation_track_last_position</Prompt>
+                </Argument>
+                <Argument name="keepUncorrelatedActivities" type="boolean">
+                    <Prompt>task_in_activity_aggregation_keep_uncorrelated_activities</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_activity_aggregation_total</Prompt>
+                </Argument>
+                <Argument name="correlated" type="int">
+                    <Description>
+                        The total number of activities correlated to identities.
+                    </Description>
+                    <Prompt>task_out_activity_aggregation_correlated</Prompt>
+                </Argument>
+                <Argument name="uncorrrelated" type="int">
+                    <Description>
+                        The total number of activities not correlated to identities.
+                    </Description>
+                    <Prompt>task_out_activity_aggregation_uncorrrelated</Prompt>
+                </Argument>
+                <Argument name="filtered" type="int">
+                    <Description>
+                        The total number of activities ignored.
+                    </Description>
+                    <Prompt>task_out_activity_aggregation_filtered</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Propagate Role Changes" executor="sailpoint.task.RoleChangePropagator" template="true"
+                    progressInterval="5000"
+                    progressMode="String" type="Identity">
+        <Description>
+            Template for role propagation.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="duration" type="int" helpKey="help_task_in_num_of_minutes">
+                    <Prompt>task_in_num_of_mins</Prompt>
+                </Argument>
+                <Argument name="checkPolicies" type="boolean" helpKey="help_task_apply_active_policies">
+                    <Prompt>task_in_account_aggregation_check_policies</Prompt>
+                </Argument>
+                <Argument name="keepInactiveViolations" type="boolean"
+                        helpKey="help_task_keep_inactive_violations">
+                    <Prompt>task_in_identity_refresh_keep_inactive_violations</Prompt>
+                </Argument>
+                <Argument name="policies" type="string" helpKey="help_task_policy_list">
+                    <Prompt>task_in_policy_scan_policies</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_num_identity_updates</Prompt>
+                </Argument>
+                <Argument name="eventsProcessed" type="int">
+                    <Prompt>task_out_num_event_processed</Prompt>
+                </Argument>
+                <Argument name="eventsPending" type="int">
+                    <Prompt>task_out_num_event_pending</Prompt>
+                </Argument>
+                <Argument name="policies" type="string">
+                    <Prompt>task_out_identity_refresh_policies</Prompt>
+                </Argument>
+                <Argument name="policyViolations" type="int">
+                    <Prompt>task_out_identity_refresh_policy_violations</Prompt>
+                </Argument>
+                <Argument name="policyNotifications" type="int">
+                    <Prompt>task_out_identity_refresh_policy_notifications</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Policy Scan" executor="sailpoint.task.IdentityRefreshExecutor" template="true"
+                    type="Identity">
+        <Attributes>
+            <Map>
+                <entry key="correlateEntitlements" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>
+            Template for policy scanning.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="filter" type="string">
+                    <Prompt>task_in_policy_scan_filter</Prompt>
+                </Argument>
+                <Argument name="filterGroups" type="string">
+                    <Prompt>task_in_identity_refresh_filter_groups</Prompt>
+                </Argument>
+                <Argument name="checkPolicies" type="boolean">
+                    <Prompt>task_in_policy_scan_check_policies</Prompt>
+                </Argument>
+                <Argument name="policies" type="string">
+                    <Prompt>task_in_policy_scan_policies</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_policy_scan_total</Prompt>
+                </Argument>
+                <Argument name="policies" type="string">
+                    <Prompt>task_out_policy_scan_policies</Prompt>
+                </Argument>
+                <Argument name="policyViolations" type="int">
+                    <Prompt>task_out_policy_scan_policy_violations</Prompt>
+                </Argument>
+                <Argument name="policyNotifications" type="int">
+                    <Prompt>task_out_policy_scan_policy_notifications</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name="Cancel Certification Group" executor="sailpoint.task.CancelCertificationGroupTask"
+                    hidden="true" progressMode="String" template="true" type="Certification" concurrent="true">
+        <Description>
+            Template task for canceling a certification group.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="certificationGroupId" required="true" type="String">
+                    <Description>
+                        The id of the certification group to cancel.
+                    </Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Activate Certification Group" executor="sailpoint.task.ActivateCertificationGroupTask"
+                    hidden="true" progressMode="String" template="true" type="Certification">
+        <Description>
+            Template task for activating a staged certification group.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="certificationGroupId" required="true" type="String">
+                    <Description>
+                        The id of the certification group to activate.
+                    </Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name="Apply Certification Definition Changes" executor="sailpoint.task.ApplyCertificationDefinitionChangesTask"
+                    hidden="true" progressMode="String" template="true" type="Certification">
+        <Description>
+            Task for applying changes made to a CertificationDefinition to the related Certifications and WorkItems.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="certificationGroupId" required="true" type="String">
+                    <Description>
+                        The id of the certification group to update.
+                    </Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      Base task for certifications.
+      There is a custom UI for this task, so we don't need Prompts
+      in the Signature.  Note the use of the hidden attribute to prevent
+      it from appearing in the generic task pages.
+    -->
+
+    <TaskDefinition name="Certification Manager" executor="sailpoint.task.CertificationExecutor"
+                    hidden="true" progressMode="String" template="true" type="Certification">
+        <Description>
+            Template Task for scheduling access certifications.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="certifier" required="true" type="string">
+                    <Description>
+                        Username that will be assigned as the certifier for this
+                        Manager access certification.
+                    </Description>
+                </Argument>
+                <Argument name="identities" type="string">
+                    <Description>
+                        List of identity ids for use with creating an individual
+                        certification
+                    </Description>
+                </Argument>
+                <Argument name="identityManagers" type="string">
+                    <Description>
+                        String representation of a mapping of identities to managers for
+                        individually assigned certifications
+                    </Description>
+                </Argument>
+                <Argument name="application" required="true" type="string">
+                    <Description>
+                        Application that will be assigned as the application for
+                        this App access certification.
+                    </Description>
+                </Argument>
+                <Argument name="certifiedApplicationIds" required="true" type="string">
+                    <Description>
+                        A comma-separated string of application IDs to certify for an
+                        application owner certification.
+                    </Description>
+                </Argument>
+                <Argument name="certificationType" required="true" type="string">
+                    <Description>Type of Access Certification to Run.</Description>
+                </Argument>
+                <Argument name="duration" required="true" type="string">
+                    <Description>
+                        Date that the access certification will expire
+                    </Description>
+                </Argument>
+                <Argument name="creator" required="true" type="string">
+                    <Description>
+                        Username of the person who created this access certification.
+                    </Description>
+                </Argument>
+                <Argument name="sendReminders" required="true" type="string">
+                    <Description>
+                        "true" or "false" flag on whether to send reminders when the
+                        certification expires.
+                    </Description>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="type" type="String">
+                    <Prompt>task_out_certification_manager_type</Prompt>
+                </Argument>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_certification_manager_total</Prompt>
+                </Argument>
+                <Argument name="individual" type="String">
+                    <Prompt>task_out_certification_manager_individual</Prompt>
+                </Argument>
+                <Argument name="application" type="String">
+                    <Prompt>task_out_certification_manager_application</Prompt>
+                </Argument>
+                <Argument name="manager" type="String">
+                    <Prompt>task_out_certification_manager_manager</Prompt>
+                </Argument>
+                <Argument name="iPOPs" type="String">
+                    <Prompt>task_out_certification_manager_ipo_ps</Prompt>
+                </Argument>
+                <Argument name="activePeriodDurationAmount" type="String">
+                    <Prompt>task_out_active_period_duration</Prompt>
+                </Argument>  
+                <Argument name="activePeriodDurationScale" type="String">
+                    <Prompt>task_out_active_period_scale</Prompt>
+                </Argument>
+                <Argument name="challengePeriodDurationAmount" type="String">
+                    <Prompt>task_out_challenge_period_duration</Prompt>
+                </Argument>
+                <Argument name="challengePeriodDurationScale" type="String">
+                    <Prompt>task_out_challenge_period_scale</Prompt>
+                </Argument>
+                <Argument name="remediationPeriodDurationAmount" type="String">
+                    <Prompt>task_out_remediation_period_duration</Prompt>
+                </Argument> 
+                <Argument name="remediationPeriodDurationScale" type="String">
+                    <Prompt>task_out_remediation_period_scale</Prompt>
+                </Argument>            
+                <Argument name="emailsSuppressed" type="String">
+                    <Prompt>task_out_emails_suppressed</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      Task definition for target aggregation. It includes two inputs, the
+      application along with the target source that should be aggregated.
+    -->
+    <TaskDefinition name="Target Aggregation" 
+                    executor="sailpoint.task.UnstructuredTargetScan" 
+                    progressInterval="5000"
+                    progressMode="String" 
+                    template="true" 
+                    type="TargetAggregation">
+        <Description>
+            Template Task for running target aggregations.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="application" required="true" type="Application">
+                    <Prompt>task_in_target_aggregation_application</Prompt>
+                </Argument>
+                                                    
+                <Argument name="targetSource" required="true" type="TargetSource">
+                    <Prompt>task_in_target_aggregation_target_source</Prompt>
+                </Argument>                
+                
+            </Inputs>
+            <Returns>
+                <Argument name="total" type="int">
+                    <Description>
+                        The total number of targets processed.
+                    </Description>
+                    <Prompt>task_out_target_aggregation_total</Prompt>
+                </Argument>
+                <Argument name="correlated" type="int">
+                    <Description>
+                        The total number of targets that correlated to one or more objects.
+                    </Description>
+                    <Prompt>task_out_target_aggregation_correlated</Prompt>
+                </Argument>
+                <Argument name="uncorrelated" type="int">
+                    <Description>
+                        The total number of targets that did not correlate to any objects.
+                    </Description>
+                    <Prompt>task_out_target_aggregation_uncorrelated</Prompt>
+                </Argument>
+                <Argument name="mappingsProcessed" type="int">
+                    <Description>
+                        The total number of Access Mappings processed
+                    </Description>
+                    <Prompt>task_out_target_aggregation_mappings_processed</Prompt>
+                </Argument>
+                <Argument name="targetsDeleted" type="int">
+                    <Description>
+                        The total number of Targets Deleted
+                    </Description>
+                    <Prompt>task_out_target_aggregation_targets_deleted</Prompt>
+                </Argument>
+                <Argument name="deleteTime" type="string">
+                    <Description>
+                        Time spent deleting old targets
+                    </Description>
+                    <Prompt>task_out_target_aggregation_delete_time</Prompt>
+                </Argument>
+                <Argument name="processTime" type="string">
+                    <Description>
+                        Time spent processing targets
+                    </Description>
+                    <Prompt>task_out_target_aggregation_process_time</Prompt>
+                </Argument>
+                <Argument name="adornmentTime" type="string">
+                    <Description>
+                        Time spent adorning targets to cubes and account groups
+                    </Description>
+                    <Prompt>task_out_target_aggregation_adornment_time</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      Account Group Aggregation task template.
+    -->
+    <TaskDefinition executor="sailpoint.task.ResourceIdentityScan" name="Account Group Aggregation"
+                    progressInterval="5000" progressMode="String" template="true" type="AccountGroupAggregation"
+                    formPath="/monitor/tasks/accountGroupAggregationTask.xhtml" resultRenderer="accountGroupAggregationResult.xhtml">
+        <Attributes>
+            <Map>
+                <entry key="aggregationType" value="group"/>
+            </Map>
+        </Attributes>
+        <Description>
+            Task template for application group scanning.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" required="true" type="Application" helpKey="help_task_select_apps">
+                    <Prompt>task_in_account_group_aggregation_applications</Prompt>
+                </Argument>
+                <Argument name="groupSchema" type="sailpoint.web.task.GroupSchemaCustomSerializer" required="false" helpKey="help_task_group_select_schema">
+                  <Prompt>task_in_account_group_aggregation_groups_to_scan</Prompt>
+                </Argument>
+                <Argument name='deltaAggregation' type='boolean' required='false' helpKey="help_task_group_delta_aggregation">
+                    <Prompt>task_in_account_aggregation_delta</Prompt>
+                </Argument>
+                <Argument name="checkDeleted" type="boolean" helpKey="help_task_group_detect_deleted">
+                    <Prompt>task_in_account_aggregation_check_deleted_acct_groups</Prompt>
+                </Argument>
+                <Argument name="descriptionLocale" type="string" helpKey="help_task_group_description_locale">
+                    <Prompt>task_in_account_aggregation_description_locale</Prompt>
+                </Argument>
+                <Argument name="descriptionAttribute" type="string" helpKey="help_task_group_description_attribute">
+                    <Prompt>task_in_account_aggregation_description_attribute</Prompt>
+                </Argument>
+                <Argument name="accountGroupRefreshRule" type="Rule" filterString="type == Rule.Type.GroupAggregationRefresh" helpKey="help_task_group_refresh_rule">
+                    <Prompt>task_in_account_group_aggregation_refresh_rule</Prompt>
+                </Argument>
+                <!-- bug #5799 keep commented for now, remove later if no complaints  -->
+<!--                <Argument name="groupMemberAttribute" type="string">-->
+<!--                    <Description>-->
+<!--                        Optional name of the extended link attribute where the members of the -->
+<!--                        group are stored.-->
+<!--                    </Description>-->
+<!--                    <Prompt>task_in_account_group_aggregation_member_attribute</Prompt>-->
+<!--                </Argument>-->
+            </Inputs>
+            <Returns>
+                <Argument name="applications" type="int">
+                    <Prompt>task_out_account_group_aggregation_applications</Prompt>
+                </Argument>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_account_group_aggregation_total</Prompt>
+                </Argument>
+                <Argument name="groupsCreated" type="int">
+                    <Prompt>task_out_account_group_aggregation_created</Prompt>
+                </Argument>
+                <Argument name="groupsUpdated" type="int">
+                    <Prompt>task_out_account_group_aggregation_updated</Prompt>
+                </Argument>
+                <Argument name="groupsDeleted" type="int">
+                    <Prompt>task_out_account_group_aggregation_deleted</Prompt>
+                </Argument>
+                <Argument name="groupDetails" type="complex"/>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+
+    <!--
+      Task that can identify which entitlements don't have descriptions.
+    -->
+    <TaskDefinition executor="sailpoint.task.MissingManagedEntitlementsTask"
+                    name="Missing Managed Entitlements Scan" progressInterval="5000" progressMode="String"
+                    template="true" type="System">
+        <Description>
+            Creates missing managed entitlement objects for the applications specified. 
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" required="true" type="Application">
+                    <Prompt>task_in_missing_managed_entitlements_scan_applications</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="applications" type="string">
+                    <Prompt>task_out_missing_managed_entitlements_scan_applications</Prompt>
+                </Argument>
+                <Argument name="managedAttributesCreated" type="int">
+                    <Prompt>task_out_missing_managed_entitlements_totalMissing</Prompt>
+                </Argument>
+                <Argument name="managedAttributesCreatedByApplication" type="string">
+                    <Prompt>task_out_missing_managed_entitlements_appSummary</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      Task that will refresh all reactive certifications to bring them up-to-date
+      with respect to the current state of the identities in the system.
+    -->
+    <TaskDefinition executor="sailpoint.task.CertificationRefreshExecutor"
+                    name="Continuous Certification Refresh" progressInterval="5000" progressMode="Percentage"
+                    template="true" type="CertificationRefresh">
+        <Description>
+            Refreshes all continuous certifications to bring them up-to-date with the current state of the identities in the system.
+        </Description>
+        <Signature>
+            <Returns>
+                <Argument name="certificationsCreated" type="int">
+                    <Prompt>task_out_cert_refresh_certs_created</Prompt>
+                </Argument>
+                <Argument name="certificationsDeleted" type="int">
+                    <Prompt>task_out_cert_refresh_certs_deleted</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      Task that can identify which entitlements don't have descriptions.
+    -->
+    <TaskDefinition executor="sailpoint.task.ITIMApplicationGenerator"
+                    name="ITIM Application Creator"
+                    template="true" type="System">
+        <Description>
+            Automatically creates ITIM account applications using connection
+            information from an authoritative ITIM application.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="itimAppIds" required="true" type="Application">
+                    <Prompt>task_in_itim_app_generator_applications</Prompt>
+                </Argument>
+                <Argument name="appNamePrefix" type="string">
+                    <Prompt>task_in_itim_app_generator_app_name_prefix</Prompt>
+                </Argument>
+                <Argument name="appNameSuffix" type="string">
+                    <Prompt>task_in_itim_app_generator_app_name_suffix</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="appsCreated" type="int">
+                    <Prompt>task_out_itim_app_generator_apps_created</Prompt>
+                </Argument>
+                <Argument name="appsIgnored" type="int">
+                    <Prompt>task_out_itim_app_generator_apps_ignored</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition executor="sailpoint.connector.nidm.NIDMApplicationGenerator"
+                    formPath="/monitor/tasks/novellApplicationGeneratorTask.xhtml"
+                    name="Novell Application Creator"
+                    template="true" type="System">
+        <Description>
+            Automatically creates Novell IDM account applications using connection
+            information from an authoritative ITIM application.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="novellAppName" required="true" type="string">
+                    <Prompt>nidm_novell_idm_application_prompt</Prompt>
+                </Argument>
+                <Argument name="toGenerateList" required="true" type="string">
+                  <Prompt>nidm_novell_connected_apps_list</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="appsCreated" type="int">
+                    <Prompt>nidm_apps_created</Prompt>
+                </Argument>
+                <Argument name="appsIgnored" type="int">
+                    <Prompt>nidm_apps_ignored</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    
+    <!--
+      Task will analyze roles and build statistical role indexes on them.
+    -->
+    <TaskDefinition executor="sailpoint.task.RoleIndexRefreshExecutor"
+                    name="Role Index Refresh"
+                    progressInterval="5000" progressMode="String"
+                    template="true" type="Generic">
+        <Description>
+            Analyzes each role in the system and collects statistics about them into a role index.
+        </Description>
+        <Signature>
+            <Inputs>
+                
+            </Inputs>
+            <Returns>
+                <Argument name="totalRoles" type="int">
+                    <Prompt>task_out_refresh_role_indexes_totalRoles</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>    
+
+    <TaskDefinition executor="sailpoint.task.EntitlementRoleGenerator"
+                    name="Entitlement Role Generator"
+                    template="true" type="Generic">
+      <Description>
+        Automatically creates an Entitlement Role for every entitlement found in the specified application(s)
+      </Description>
+      <Signature>
+        <Inputs>
+          <Argument multi="true" name="applications" required="true" type="Application" />
+          <Argument name="roleType" required="false" type="string">
+            <Prompt>entitlement_role_generator_role_type</Prompt>
+          </Argument>
+          <Argument name="locale" required="false" type="string">
+            <Prompt>task_in_missing_managed_entitlements_scan_locale</Prompt>
+          </Argument>
+          <Argument name="attributeFilter" required="false" type="string">
+            <Prompt>entitlement_role_generator_role_attribute_filter</Prompt>
+          </Argument>
+          <Argument name="permissionsFilter" required="false" type="string">
+            <Prompt>entitlement_role_generator_role_permissions_filter</Prompt>
+          </Argument>
+          <Argument name="roleNamingTemplate" required="false" type="string">
+            <Prompt>entitlement_role_generator_role_naming_template</Prompt>
+          </Argument>
+        </Inputs>
+        <Returns>
+          <Argument name="numRolesGenerated" type="string">
+            <Prompt>entitlement_role_generator_num_roles_generated</Prompt>
+          </Argument>
+          <Argument name="numEntitlementsFound" type="string">
+            <Prompt>entitlement_role_generator_num_entitlements_detected</Prompt>
+          </Argument>
+        </Returns>
+      </Signature>
+    </TaskDefinition>
+    
+
+
+    <!--***********************************************************
+
+    TaskDefinition - Hidden
+
+    *************************************************************-->
+
+    <!--
+      Task that can identify which entitlements don't have descriptions.
+      Launched from the Descriptions tab under Define -> Applications -> <App>.
+    -->
+    <TaskDefinition executor="sailpoint.task.MissingManagedEntitlementsTask"
+                    name="Hidden Missing Managed Entitlements Scan" template="false" 
+                    progressInterval="5000" progressMode="String" type="System" 
+                    hidden="true" resultAction="Delete">
+        <Description>
+            Creates missing managed entitlement objects for the applications specified. 
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" required="true" type="Application" />
+            </Inputs>
+            <Returns>
+                <Argument name="applications" type="string">
+                    <Prompt>task_out_missing_managed_entitlements_scan_application</Prompt>
+                </Argument>
+                <Argument name="managedAttributesCreated" type="int">
+                    <Prompt>task_out_missing_managed_entitlements_totalMissing</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+
+    <!--
+      Internal task used to perform an impact analysis on one
+      or more proposed modifications.  Currently this can only be
+      launched from the work item page.
+    -->
+    <TaskDefinition name="Impact Analysis" executor="sailpoint.task.WhatIfExecutor" hidden="true"
+        resultAction='RenameNew'
+        resultRenderer="impactAnalysis.xhtml" type="System">
+        <Description>
+            System task for performing impact analysis of role or profile changes.
+        </Description>
+        <Signature>
+            <Returns>
+                <Argument name="roles" type="string">
+                    <Prompt>task_out_impact_analysis_roles</Prompt>
+                </Argument>
+                <Argument name="profiles" type="string">
+                    <Prompt>task_out_impact_analysis_profiles</Prompt>
+                </Argument>
+                <Argument name="totalIdentities" type="int">
+                    <Prompt>task_out_impact_analysis_total_identities</Prompt>
+                </Argument>
+                <Argument name="totalLosses" type="int">
+                    <Prompt>task_out_impact_analysis_total_losses</Prompt>
+                </Argument>
+                <Argument name="totalGains" type="int">
+                    <Prompt>task_out_impact_analysis_total_gains</Prompt>
+                </Argument>
+                <Argument name="totalConflicts" type="int">
+                    <Prompt>task_out_impact_analysis_total_conflicts</Prompt>
+                </Argument>
+                <Argument name="analysis" type="complex"/>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    
+    <!--
+      Internal task used to perform an simulation for policy or rules in the policy.
+    -->
+    <TaskDefinition name="Policy Impact Analysis" executor="sailpoint.task.PolicyWhatIfExecutor" hidden="true"
+        resultAction='RenameNew' progressInterval="5000" progressMode="String"
+        resultRenderer="policyImpactAnalysis.xhtml" type="System">
+        <Description>
+            System task for performing impact analysis of policy changes.
+        </Description>
+        <Signature>
+            <Returns>
+                <Argument name="noActiveRule" type="boolean">
+                    <Prompt>task_out_policy_impact_analysis_noActiveRules</Prompt>
+                </Argument>                
+                <Argument name="errorMessage" type="String">
+                    <Prompt>task_out_policy_impact_analysis_errorMessage</Prompt>
+                </Argument>
+                <Argument name="analysis" type="complex"/>
+                <Argument name="ruleName" type="String">
+                    <Prompt>task_out_policy_impact_analysis_ruleName</Prompt>
+                </Argument>
+                <Argument name="vcount" type="int">
+                    <Prompt>task_out_policy_impact_analysis_vcount</Prompt>
+                </Argument>
+                <Argument name="icount" type="int">
+                    <Prompt>task_out_policy_impact_analysis_icount</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      This is a funny template we're using temporarily so we can
+      show WorkflowCase results through the TaskResult UI.  TaskResults
+      need a TaskDefinition so we always point here.  Note that this
+      does not have an executor, but it does provide the resultRenderer.
+
+      We're outfitting this with a signature as if it could be launched
+      but you can't right now.  Code launching workflows has to
+      call Workflower.start.
+
+      NOTE: The description is shown when looking at the task result
+      for a workflow, prior to 5.0 we had "System task for launching workflow cases"
+      which looked weird.  Use a phrase that makes sense to viewers
+      or workflow case reults.
+    -->
+
+    <TaskDefinition name="Workflow Launcher" executor="sailpoint.task.WorkflowExecutor" hidden="true"
+                    resultRenderer="workflow.xhtml" type="Workflow">
+        <Description>Workflow Case</Description>
+        <Signature>
+            <Inputs>
+                <Argument name="workflow" required="true" type="string">
+                    <Prompt>task_in_workflow_launcher_workflow</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="case" type="complex"/>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name='Business Role Mining' type='RoleMining' executor='sailpoint.task.BusinessFunctionalRoleGenerator' resultAction="Rename" hidden="true">
+      <Description>
+        Mine Business Roles based on organizational and functional identity attributes
+      </Description>
+      <Signature> 
+        <Inputs>
+          <Argument name='tieredIdentityMiningAttrs' type='string' required='true'>
+            <Prompt>Comma-separated list of identity mining attributes (required).</Prompt>
+          </Argument>
+          <Argument name='owner' type='string' required='true'>
+            <Prompt>Default owner of mined roles (required).</Prompt>
+          </Argument>
+          <Argument name='genContainerRole' type='boolean'>
+            <Prompt>Place mined business roles into auto-generated organizational roles using top-tier attribute.</Prompt>
+          </Argument>
+          <Argument name='containerRole' type='Bundle' multi='false' required='true'>
+            <Prompt>Place mined roles into single, pre-existing Container Role.</Prompt>
+          </Argument>
+          <Argument name='bfrPrefix' type='string' required='false'>
+            <Prompt>Optional prefix to apply to all mined role names.</Prompt>
+          </Argument>
+          <Argument name='minimumRoleSize' type='int' required='false'>
+            <Prompt>Minimum number of users in each mined role.</Prompt>
+          </Argument>
+          <Argument name='createSubRoles' type='boolean' required='false'>
+            <Prompt>Use sub-roles in the mining process (optional).</Prompt>
+          </Argument>      
+          <Argument name='computeCoverage' type='boolean' required='false'>
+            <Prompt>Compute population statistics (optional).</Prompt>
+          </Argument>      
+          <Argument name='uidNaming' type='boolean' required='false'>
+            <Prompt>Use generic uid naming for mined roles (default: filter-based naming).</Prompt>
+          </Argument>
+          <Argument name='simulate' type='boolean' required='false'>
+            <Prompt>Perform What-If mining analysis (no roles are created).</Prompt>
+          </Argument>
+          <Argument name='mineITRoles' type='boolean' required='false'>
+            <Prompt>Mine for IT entitlements on each generated Business Functional Role (optional).</Prompt>
+          </Argument>
+          <Argument name='applications' type='Application'>
+            <Prompt>If mining for IT Roles, the Application(s) whose entitlements will be mined.</Prompt>
+          </Argument>
+          <Argument name='threshold' type='int' required='true'>
+            <Prompt>If mining for IT Roles, the percentage threshold for inclusion of an entitlement.</Prompt>
+          </Argument>
+          <Argument name='itRoleAssociation' type='boolean' required='false'>
+            <Prompt>Associate the mined IT Role to the BFR using "required" policy (default is "permits").</Prompt>
+          </Argument>
+          <Argument name='attachITProfiles' type='boolean' required='false'>
+            <Prompt>Attach mined IT profiles to BFR instead of creating an IT role.</Prompt>
+          </Argument>
+        </Inputs>
+        <Returns>
+          <Argument name='simulation' type='string'>
+            <Prompt>Simulation:</Prompt>
+          </Argument>
+          <Argument name='miningInput' type='string'>
+            <Prompt>Identity Mining Attributes:</Prompt>
+          </Argument>
+          <Argument name='rolesCreated' type='string'>
+            <Prompt>Roles mined:</Prompt>
+          </Argument>
+          <Argument name='rolesUpdated' type='string'>
+            <Prompt>Roles updated:</Prompt>
+          </Argument>
+          <Argument name='rolesDiscarded' type='string'>
+            <Prompt>Roles discarded:</Prompt>
+          </Argument>
+          <Argument name='roleCoverage' type='string'>
+            <Prompt>Coverage of mined roles:</Prompt>
+          </Argument>
+          <Argument name='entMiningStats' type='string'>
+            <Prompt>Entitlement mining stats:</Prompt>
+          </Argument>
+        </Returns>
+      </Signature>
+    </TaskDefinition>
+
+  <TaskDefinition name='IT Role Mining' type='RoleMining' executor='sailpoint.task.DirectMiningTask' hidden='true'>
+    <Description>
+      IT Role Mining based on a Group Definition, List of applications and threshold.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='roleName' type='Bundle' multi='false' required='false'>
+          <Prompt>Business Role to Mine.  Select if you want an existing Business Role to be mined</Prompt>
+        </Argument>
+        <Argument name='newRoleName' type='string' required='false'>
+          <Prompt>New Business Role Name.  Enter if you want to create a new Business Role</Prompt>
+        </Argument>
+        <Argument name='defaultOwner' type='string' required='false'>
+          <Prompt>Default Business Role Owner.  If creating new Business Role, enter default owner</Prompt>
+        </Argument>
+        <Argument name='containerRole' type='Bundle' multi='false' required='false'>
+          <Prompt>Place mined role into pre-existing Container Role.</Prompt>
+        </Argument>
+        <Argument name='groupName' type='GroupDefinition' multi='false' required='false'>
+          <Prompt>Optional User Population to Mine</Prompt>
+        </Argument>
+        <Argument name='filter' type='string' required='false'>
+          <Prompt>Optional Filter to select Identities.  Example: department == "Finance"</Prompt>
+        </Argument>
+        <Argument name='applications' type='Application' multi='true' required='true'>
+          <Prompt>Applications to Mine Entitlements From</Prompt>
+        </Argument>
+        <Argument name='threshold' type='int' required='true'>
+          <Prompt>Entitlement Threshold Percentage (%)</Prompt>
+        </Argument>
+        <Argument name='simulate' type='boolean'>
+          <Prompt>Simulate Mining Activity.  No Business Roles/Profiles will be created</Prompt>
+        </Argument>
+      </Inputs>
+      <Returns>
+        <Argument name='filterUsed' type='String'>
+          <Prompt>Filter Used to Mine:</Prompt>
+        </Argument>
+        <Argument name='numIdentitiesMined' type='String'>
+          <Prompt>Total Identities Mined:</Prompt>
+        </Argument>
+        <Argument name='numCandidateEntitlements' type='String'>
+          <Prompt>Candidate Entitlements:</Prompt>
+        </Argument>
+        <Argument name='numUsedEntitlements' type='String'>
+          <Prompt>Used Entitlements:</Prompt>
+        </Argument>
+        <Argument name='threshold' type='String'>
+          <Prompt>Threshold Percentage (%)</Prompt>
+        </Argument>
+        <Argument name='simulate' type='String'>
+          <Prompt>Simulate Mining Activity:</Prompt>
+        </Argument>
+        <Argument name='taskResults' type='String'>
+          <Prompt>Detailed Results:</Prompt>
+        </Argument>
+      </Returns>
+    </Signature>
+  </TaskDefinition>
+  
+  <TaskDefinition name='New IT Role Mining' type='ITRoleMining' executor='sailpoint.task.ITRoleMiningTask' resultAction='Rename' hidden='true'>
+    <Description>
+      IT Role Mining based on a population, List of applications/entitlements and thresholds.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='identityFilter' type='Filter' multi='true' required='false'>
+          <Prompt>Filter that restricts the population of identities to mine roles from.</Prompt>
+        </Argument>
+        <Argument name='applications' type='String' multi='true' required='true'>
+          <Prompt>IDs for Applications that contain the users and entitlements from which roles are mined</Prompt>
+        </Argument>
+        <Argument name='includedEntitlements' type='IdentityItem' multi='true' required='false'>
+          <Prompt>Entitlements from which to mine roles</Prompt>
+        </Argument>
+        <Argument name='minIdentities' type='int' required='false'>
+          <Prompt>Minimum number of identities that must contain a given entitlement set to generate a candidate role</Prompt>
+        </Argument>
+        <Argument name='minEntitlements' type='int' required='false'>
+          <Prompt>Mininmum number of entitlements that must be in an entitlement set to generate a candidate role</Prompt>
+        </Argument>
+        <Argument name='maxCandidateRoles' type='int' required='false'>
+          <Prompt>Maximum number of candidate roles that will be generated before the task starts discarding data</Prompt>
+        </Argument>
+      </Inputs>
+      <Returns>
+        <Argument name='itRoleMiningResult' type='Complex'/>
+      </Returns>
+    </Signature>
+  </TaskDefinition>
+
+   <TaskDefinition name="Data Export" executor="sailpoint.task.DataExportExecutor"
+                    progressInterval="5000"  formPath="/monitor/tasks/dataExportInclude.xhtml"
+                    progressMode="String" type="Generic" template="true">
+        <Description>
+            Template for creating a data export task.
+        </Description>
+        <Signature>
+          <Inputs>
+
+            <Argument name="database" type="string">
+                <Prompt>task_in_data_export_database</Prompt>
+            </Argument>
+            <Argument name="username" type="string">
+                <Prompt>task_in_data_export_database_uname</Prompt>
+            </Argument>
+            <Argument name="password" type="secret">
+                <Prompt>task_in_data_export_database_password</Prompt>
+            </Argument>
+            <Argument name="driverClass" type="string">
+                <Prompt>task_in_data_export_database_driverClass</Prompt>
+            </Argument>
+            <Argument name="dbUrl" type="string">
+                <Prompt>task_in_data_export_database_url</Prompt>
+            </Argument>
+
+            <Argument name="exportIdentities" type="boolean">
+                <Prompt>task_in_data_export_identities</Prompt>
+            </Argument>
+            <Argument name="exportIdentitiesRiskScores" type="boolean">
+                <Prompt>task_in_data_export_identities_risk_scores</Prompt>
+            </Argument>
+
+            <Argument name="exportAccounts" type="boolean">
+                <Prompt>task_in_data_export_accounts</Prompt>
+            </Argument>
+
+            <Argument name="exportCertifications" type="boolean">
+                <Prompt>task_in_data_export_certs</Prompt>
+            </Argument>
+
+            <Argument name="identitiesExportMode" type="string">
+                <Prompt>task_in_data_export_identities_mode</Prompt>
+            </Argument>
+
+            <Argument name="accountsExportMode" type="string">
+                <Prompt>task_in_data_export_accounts_mode</Prompt>
+            </Argument>
+
+            <Argument name="certificationsExportMode" type="string">
+                <Prompt>task_in_data_export_certs_mode</Prompt>
+            </Argument>
+
+            <Argument name="identitiesExportFilter" type="string">
+                <Prompt>task_in_data_export_identities_filter</Prompt>
+            </Argument>
+
+            <Argument name="accountsExportFilter" type="string">
+                <Prompt>task_in_data_export_accounts_filter</Prompt>
+            </Argument>
+
+            <Argument name="certificationsExportFilter" type="string">
+                <Prompt>task_in_data_export_certs_filter</Prompt>
+            </Argument>
+            <Argument name="promoteManagedAttributes" type="boolean">
+                <Prompt>task_in_identity_refresh_promote_managed_attributes</Prompt>
+            </Argument>
+          </Inputs>
+
+          <Returns>
+                <Argument name="identitiesExported" type="int">
+                    <Prompt>task_out_data_export_identities</Prompt>
+                </Argument>
+                <Argument name="accountsExported" type="int">
+                    <Prompt>task_out_data_export_accounts</Prompt>
+                </Argument>
+                <Argument name="certificationsExported" type="int">
+                    <Prompt>task_out_data_export_certs</Prompt>
+                </Argument>
+                <Argument name="identitiesPruned" type="int">
+                    <Prompt>task_out_data_export_pruned_identities</Prompt>
+                </Argument>
+                <Argument name="accountsPruned" type="int">
+                    <Prompt>task_out_data_export_pruned_accounts</Prompt>
+                </Argument>
+                <Argument name="certificationsPruned" type="int">
+                    <Prompt>task_out_data_export_pruned_certs</Prompt>
+                </Argument>
+          </Returns>
+
+        </Signature>
+    </TaskDefinition>
+
+	<TaskDefinition executor="sailpoint.task.BMCESSApplicationGenerator"
+                        progressInterval="5000" progressMode="String"
+                        formPath="/monitor/tasks/BMCESSApplicationGeneratorTask.xhtml" 
+                        name="BMC ESS Application Creator" 
+                        deprecated="true" type="System">
+        <Description>
+            Automatically discover and create BMC ESS Managed System Applications.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="essAppIds" required="true" type="Application">
+                    <Prompt>task_in_ess_app_generator_applications</Prompt>
+                </Argument>                
+                <Argument name="addNewAttribute" type="boolean">
+                	<Prompt>task_in_update_schema_with_missing_managed_system_attributes</Prompt>
+            	</Argument>
+          </Inputs>
+            <Returns>
+                <Argument name="appsCreated" type="int">
+                    <Prompt>task_out_ess_app_generator_apps_created</Prompt>
+                </Argument>
+                <Argument name="appsIgnored" type="int">
+                    <Prompt>task_out_ess_app_generator_apps_ignored</Prompt>
+                </Argument>
+                <Argument name="appsUpdated" type="int">
+                    <Prompt>task_out_ess_app_generator_apps_updated</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition executor="sailpoint.task.MicrosoftFIMApplicationGenerator"
+                    name="FIM Application Creator"
+                    progressInterval="5000" progressMode="String"
+                    template="true" type="System">
+        <Description>
+            Automatically discover and create FIM Management Agent Applications.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="fimAppIds" required="true" type="Application">
+                    <Prompt>task_in_fim_app_generator_applications</Prompt>
+                </Argument>           
+                <Argument name="accountObjectTypes" multi='true' required='false' type="string">
+                    <Prompt>task_in_fim_native_account_object_types</Prompt>
+                </Argument>
+                <Argument name="groupObjectTypes" multi='true' required='false' type="string">
+                    <Prompt>task_in_fim_native_group_object_types</Prompt>
+                </Argument>     
+            </Inputs>
+            <Returns>
+                <Argument name="appsCreated" type="int">
+                    <Prompt>task_out_fim_app_generator_apps_created</Prompt>
+                </Argument>
+                <Argument name="appsIgnored" type="int">
+                    <Prompt>task_out_fim_app_generator_apps_ignored</Prompt>
+                </Argument>
+                <Argument name="appsUpdated" type="int">
+                    <Prompt>task_out_fim_app_generator_apps_updated</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition executor="sailpoint.task.OIMApplicationGenerator"
+                    name="OIM Application Creator"
+                    template="true" type="System">
+        <Description>
+            Automatically discover and create OIM Resource Applications.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="oimAppIds" required="true" type="Application">
+                    <Prompt>task_in_oim_generator_applications</Prompt>
+                </Argument>                
+            </Inputs>
+            <Returns>
+                <Argument name="appsCreated" type="int">
+                    <Prompt>task_out_oim_generator_apps_created</Prompt>
+                </Argument>
+                <Argument name="appsIgnored" type="int">
+                    <Prompt>task_out_oim_generator_apps_ignored</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition executor="sailpoint.task.CompleteOrphanIdentityRequestsTask" name="Complete Orphan Identity Requests" type="System">
+       <Description>Remove identity requests for older completed requests</Description>
+       <Signature>
+         <Returns>
+           <Argument name="numRequestsCompleted" type="int">
+             <Prompt>task_out_complete_orphan_identity_requests_completed</Prompt>
+           </Argument>
+         </Returns>
+       </Signature>
+    </TaskDefinition>
+    
+	
+	<!--  ********************************************* Cloud Gateway Synchronization Task *************************************** -->
+	<TaskDefinition executor="sailpoint.task.CIBSyncTask"
+	    name="Identity IQ Cloud Gateway Synchronization Task"
+	    template="true" type="System">
+		<Description>
+                Synchronize the specified objects to the Cloud Gateway.
+        </Description>
+		<Signature>
+			<Inputs>
+			  <Argument name="cloudApp" required="true" type="Application">
+				<Prompt>task_in_cloud_bridge_cloud_app</Prompt>
+			  </Argument>
+			  <Argument multi="true" name="hostedApps" required="true" type="Application">
+				<Prompt>task_in_cloud_bridge_apps_to_sync</Prompt>
+			  </Argument>
+			  <Argument multi="true" name="ruleNames" type="Rule">
+				<Prompt>task_in_cloud_bridge_rules_to_sync</Prompt>
+			  </Argument>
+			</Inputs>
+			<Returns>
+			  <Argument name="appsSyncSuccessful" type="int">
+				<Prompt>task_out_cloud_bridge_apps_sync_success</Prompt>
+			  </Argument>
+			  <Argument name="appsSyncFailed" type="int">
+				<Prompt>task_out_cloud_bridge_apps_sync_failed</Prompt>
+			  </Argument>
+			  <Argument name="rulesSyncSuccessful" type="int">
+				<Prompt>task_out_cloud_bridge_rules_sync_success</Prompt>
+			  </Argument>
+			  <Argument name="rulesSyncFailed" type="int">
+				<Prompt>task_out_cloud_bridge_rules_sync_failed</Prompt>
+			  </Argument>
+			  <Argument name="systemConfigSyncSuccessful" type="int">
+				<Prompt>task_out_cloud_bridge_system_config__sync_success</Prompt>
+			  </Argument>
+			</Returns>
+		</Signature>
+	</TaskDefinition>
+
+  <TaskDefinition
+      executor="sailpoint.task.RuleExecutor"
+      name="Run Rule"
+      type="Generic"
+      template="true">
+    <Description>A task that can be used to run an arbitrary rule.</Description>
+    <Signature>
+      <Inputs>
+        <Argument name="ruleName" type="Rule" helpKey="help_task_run_rule_rule">
+          <Prompt>label_rule</Prompt>
+        </Argument>
+        <Argument name="ruleConfig" type="string" helpKey="help_task_run_rule_ruleconfig">
+          <Prompt>label_rule_config</Prompt>
+        </Argument>
+      </Inputs>
+    </Signature>
+  </TaskDefinition>
+  
+  <!--  ********************************************* CEF Data Export Task *************************************** -->
+  <TaskDefinition name="CEF Data Export" executor="sailpoint.task.CEFDataExportExecutor"
+                    progressInterval="5000"  formPath="/monitor/tasks/cefDataExportInclude.xhtml"
+                    progressMode="String" type="Generic" template="true" deprecated="true">
+        <Description>
+            Template for creating a CEF data export task.
+        </Description>
+        <Signature>
+          <Inputs>
+
+            <Argument name="database" type="string" helpKey="help_task_cef_database">
+                <Prompt>task_in_cef_data_export_database</Prompt>
+            </Argument>
+            <Argument name="username" type="string" helpKey="help_task_cef_username">
+                <Prompt>task_in_cef_data_export_database_uname</Prompt>
+            </Argument>
+            <Argument name="password" type="secret" helpKey="help_task_cef_password">
+                <Prompt>task_in_cef_data_export_database_password</Prompt>
+            </Argument>
+            <Argument name="driverClass" type="string" helpKey="help_task_cef_driverclass">
+                <Prompt>task_in_cef_data_export_database_driverClass</Prompt>
+            </Argument>
+            <Argument name="dbUrl" type="string" helpKey="help_task_cef_dburl">
+                <Prompt>task_in_cef_data_export_database_url</Prompt>
+            </Argument>
+
+            <Argument name="exportIdentities" type="boolean">
+                <Prompt>task_in_cef_data_export_identities</Prompt>
+            </Argument>
+            <Argument name="exportIdentitiesRiskScores" type="boolean">
+                <Prompt>task_in_cef_data_export_identities_risk_scores</Prompt>
+            </Argument>
+
+            <Argument name="exportAccounts" type="boolean">
+                <Prompt>task_in_cef_data_export_accounts</Prompt>
+            </Argument>
+			
+			<Argument name="exportAudits" type="boolean">
+                <Prompt>task_in_cef_data_export_audits</Prompt>
+            </Argument>
+			
+			<Argument name="exportSysLogs" type="boolean">
+                <Prompt>task_in_cef_data_export_syslogs</Prompt>
+            </Argument>
+
+            <Argument name="identitiesExportMode" type="string">
+                <Prompt>task_in_cef_data_export_identities_mode</Prompt>
+            </Argument>
+
+            <Argument name="accountsExportMode" type="string">
+                <Prompt>task_in_cef_data_export_accounts_mode</Prompt>
+            </Argument>
+			
+			<Argument name="auditsExportMode" type="string">
+                <Prompt>task_in_cef_data_export_audits_mode</Prompt>
+            </Argument>
+			
+			<Argument name="syslogsExportMode" type="string">
+                <Prompt>task_in_cef_data_export_syslogs_mode</Prompt>
+            </Argument>
+
+            <Argument name="identitiesExportFilter" type="string">
+                <Prompt>task_in_cef_data_export_identities_filter</Prompt>
+            </Argument>
+
+            <Argument name="accountsExportFilter" type="string">
+                <Prompt>task_in_cef_data_export_accounts_filter</Prompt>
+            </Argument>
+			
+			<Argument name="auditsExportFilter" type="string">
+                <Prompt>task_in_cef_data_export_audits_filter</Prompt>
+            </Argument>
+			
+			<Argument name="syslogsExportFilter" type="string">
+                <Prompt>task_in_cef_data_export_syslogs_filter</Prompt>
+            </Argument>
+			
+            <Argument name="promoteManagedAttributes" type="boolean">
+                <Prompt>task_in_identity_refresh_promote_managed_attributes</Prompt>
+            </Argument>
+          </Inputs>
+
+          <Returns>
+                <Argument name="identitiesExported" type="int">
+                    <Prompt>task_out_cef_data_export_identities</Prompt>
+                </Argument>
+                <Argument name="accountsExported" type="int">
+                    <Prompt>task_out_cef_data_export_accounts</Prompt>
+                </Argument>
+				<Argument name="auditsExported" type="int">
+                    <Prompt>task_out_cef_data_export_audits</Prompt>
+                </Argument>
+                <Argument name="syslogsExported" type="int">
+                    <Prompt>task_out_cef_data_export_syslogs</Prompt>
+                </Argument>
+                <Argument name="identitiesPruned" type="int">
+                    <Prompt>task_out_cef_data_export_pruned_identities</Prompt>
+                </Argument>
+                <Argument name="accountsPruned" type="int">
+                    <Prompt>task_out_cef_data_export_pruned_accounts</Prompt>
+                </Argument>
+				<Argument name="auditsPruned" type="int">
+                    <Prompt>task_out_cef_data_export_pruned_audits</Prompt>
+                </Argument>
+                <Argument name="syslogsPruned" type="int">
+                    <Prompt>task_out_cef_data_export_pruned_syslogs</Prompt>
+                </Argument>
+          </Returns>
+
+        </Signature>
+    </TaskDefinition>
+  <!-- ********************************************* ArcSight Data Export Task *************************************** -->
+  <TaskDefinition name="ArcSight Data Export"
+    executor="sailpoint.task.arcsightDataExportExecutor"
+    progressInterval="5000" formPath="/monitor/tasks/arcsightDataExportInclude.xhtml"
+    progressMode="String" type="Generic" template="true">
+    <Description>
+      Template for creating a ArcSight data export task.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name="database" type="string" helpKey="help_task_arcsight_database">
+          <Prompt>task_in_arcsight_data_export_database</Prompt>
+        </Argument>
+        <Argument name="username" type="string" helpKey="help_task_arcsight_username">
+          <Prompt>task_in_arcsight_data_export_database_uname</Prompt>
+        </Argument>
+        <Argument name="password" type="secret" helpKey="help_task_arcsight_password">
+          <Prompt>task_in_arcsight_data_export_database_password</Prompt>
+        </Argument>
+        <Argument name="driverClass" type="string" helpKey="help_task_arcsight_driverclass">
+          <Prompt>task_in_arcsight_data_export_database_driverClass</Prompt>
+        </Argument>
+        <Argument name="dbUrl" type="string" helpKey="help_task_arcsight_dburl">
+          <Prompt>task_in_arcsight_data_export_database_url</Prompt>
+        </Argument>
+        <Argument name="exportIdentities" type="boolean">
+          <Prompt>task_in_arcsight_data_export_identities</Prompt>
+        </Argument>
+        <Argument name="identitiesExportMode" type="string">
+          <Prompt>task_in_arcsight_data_export_identities_mode</Prompt>
+        </Argument>
+        <Argument name="exportAudits" type="boolean">
+          <Prompt>task_in_arcsight_data_export_audits</Prompt>
+        </Argument>
+        <Argument name="auditsExportMode" type="string">
+          <Prompt>task_in_arcsight_data_export_audits_mode</Prompt>
+        </Argument>
+        <Argument name="promoteManagedAttributes" type="boolean">
+          <Prompt>task_in_identity_refresh_promote_managed_attributes</Prompt>
+        </Argument>
+      </Inputs>
+      <Returns>
+        <Argument name="identitiesExported" type="int">
+          <Prompt>task_out_arcsight_data_export_identities</Prompt>
+        </Argument>
+        <Argument name="identitiesPruned" type="int">
+          <Prompt>task_out_arcsight_data_export_pruned_identities</Prompt>
+        </Argument>
+        <Argument name="auditsExported" type="int">
+          <Prompt>task_out_arcsight_data_export_audits</Prompt>
+        </Argument>
+      </Returns>
+    </Signature>
+  </TaskDefinition>
+</sailpoint>

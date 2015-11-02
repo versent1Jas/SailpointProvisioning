@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<!--
+ Include to render the expando with details about an application for an exception
+ certification item.  Expected params:
+ 
+  - exceptionItem: The CertificationItemBean.ExceptionBean.
+ -->
+
+<ui:composition>
+
+  <div id="applicationDetails_#{exceptionItem.id}" style="display: none;">
+    <div class="detailsPanel">
+      <div class="detailsPanelTitleBar">
+        <h:graphicImage alt="#{msgs.button_click_to_close}"
+                        title="#{msgs.button_click_to_close}"
+                        value="/images/icons/CloseDelete.png"
+                        onclick="showHideWithLock($('applicationDetails_#{exceptionItem.id}'));"
+                        styleClass="detailsPanelClose"/>
+        <h:outputFormat value="#{msgs.title_application_details}">
+          <f:param value="#{exceptionItem.application}" />
+        </h:outputFormat>
+      </div>
+      <div class="detailsPanelContent">
+        <b><h:outputText value="#{msgs.text_app_description}" /></b>
+        <f:verbatim>&amp;nbsp;</f:verbatim>
+        <h:outputText escape="false" value="#{exceptionItem.applicationDescription}" /><br/>
+
+        <b><h:outputText value="#{msgs.text_app_type}" /></b>
+        <f:verbatim>&amp;nbsp;</f:verbatim>
+        <h:outputText value="#{exceptionItem.applicationMap[exceptionItem.application].type}" /><br/>
+
+        <b><h:outputText value="#{msgs.text_app_owner}" /></b>
+        <f:verbatim>&amp;nbsp;</f:verbatim>
+        <h:outputText value="#{exceptionItem.applicationMap[exceptionItem.application].owner.displayableName}" />
+        <br/>
+
+        <b><h:outputText value="#{msgs.text_app_remediators}" /></b>
+        <f:verbatim>&amp;nbsp;</f:verbatim>
+        <ui:repeat value="#{exceptionItem.applicationMap[exceptionItem.application].remediators}" var="remediator">
+          <h:outputText value="#{(not sp:isFirstElement(remediator, exceptionItem.applicationMap[exceptionItem.application].remediators)) ? ', ' : ''}" />
+          <h:outputText value="#{remediator.displayableName}" />
+        </ui:repeat>
+      </div>
+    </div>
+  </div>
+
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+  <ui:define name="title">This page is used for test only
+  </ui:define>
+  <ui:define name="headerItems">
+
+  <script type="text/javascript" src="#{base.requestContextPath}/scripts/sailpoint/component/RuleCombo.js"/>
+  <script type="text/javascript" src="#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateFieldEditor.js"/>
+  <script type="text/javascript" src="#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateBooleanValue.js"/>
+  
+  <script>
+
+var value;
+Ext.onReady(function(){
+
+value = Ext.create('sailpoint.template.TemplateBooleanValue', {id : 'id1', fieldLabel : 'Zee Label'});
+var panel = Ext.create('Ext.form.Panel', {
+    title: 'Simple Form',
+
+    defaultType: 'textfield',
+    
+    items: [{
+        fieldLabel: 'First Name',
+        name: 'first',
+        allowBlank: false
+    },{
+        fieldLabel: 'Last Name',
+        name: 'last',
+        allowBlank: false
+    }, value],
+
+    renderTo: 'container'// Ext.getBody()
+});
+
+  
+});
+
+  </script>
+  </ui:define>
+  <ui:define name="body">
+    <f:view>
+        <div id='container'/>
+        <div id='container1'/>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

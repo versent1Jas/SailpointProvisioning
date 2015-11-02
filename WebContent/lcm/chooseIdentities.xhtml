@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <ui:define name="title">#{msgs.quicklink_request_access} - #{msgs.lcm_breadcrumb_select_identity}</ui:define>
+  <ui:define name="breadCrumbs">
+    <ul>
+      <li class="present">#{msgs.lcm_breadcrumb_select_identity}</li>
+      <li class="future">#{msgs.lcm_breadcrumb_select_access}</li>
+      <li class="future last">#{msgs.lcm_breadcrumb_review}</li>
+    </ul>
+  </ui:define>
+
+  <ui:define name="headerItems">
+  
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+    <src>lcm.css</src>
+    <src>request-access.css</src>
+  </sp:style>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/TextField.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/ChosenIdentitiesGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/chooseIdentities.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/AvailableIdentitiesGrid.js?#{debug.revision}</src>
+  </sp:script>
+  
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'CHOOSE_IDENTIES';
+      //--><!]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+      <h:form id="editForm">
+        
+        <a4j:outputPanel ajaxRendered="true">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+        </a4j:outputPanel>
+        
+        
+        <div class="pageInfo">
+          <h3>#{msgs.lcm_choose_identities_info_title}</h3>
+          <h:outputText value="#{msgs.lcm_choose_identities_info}" rendered="#{requestPopulation.allowBulk}"/>
+          <h:outputText value="#{msgs.lcm_choose_identity_info}" rendered="#{!(requestPopulation.allowBulk)}"/>             
+        </div>
+          <table class="width100">
+            
+            <tr>
+            
+              <ui:fragment rendered="#{requestPopulation.allowBulk}">
+                <td class="lcmIdPicker" valign="top">
+
+                  <div class="spContent">
+                    <div style="margin:10px 10px 66px 10px">
+                      <h:outputText styleClass="sectionHeader" value="#{msgs.lcm_choose_identities_availabe}"/>
+
+                      <div class="spacerDiv"></div>
+
+                      <div id="populationContainer"></div>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="lcmSelectedIds" valign="top">
+                
+                  <div class="spContent">
+                    <div style="margin:10px">
+                      
+                      <h:outputText styleClass="sectionHeader" value="#{msgs.lcm_choose_identities_chosen}"/>                    
+                      
+                      <div class="spacerDiv"></div>
+                      
+                      <div id="chosenIdentitiesContainer"></div>                      
+                      
+                      <div class="spacerDiv"></div>
+                      
+                      <h:inputText style="display:none" id="chosenIdentitiesMultiSelect" styleClass="multiSelect" 
+                        value="#{requestPopulation.identityIds}" converter="java.util.List"/>
+                        
+                      <div style="text-align:right">
+                        <input type="button" value="#{msgs.button_submit}" onclick="SailPoint.LCM.ChooseIdentities.submit()" 
+                        style="margin:0 3px;#{(requestPopulation.allowBulk) ? '' : 'display:none'}" class="primaryBtn"/>
+                        
+                        <h:commandButton action="#{requestPopulation.back}" value="#{msgs.button_cancel}" style="margin:0 3px" class="secondaryBtn"/>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </ui:fragment>
+              
+              <ui:fragment rendered="#{!(requestPopulation.allowBulk)}">
+                <td colspan="2" valign="top">
+                  
+                  <div class="spContent">
+                    <div style="margin:10px">
+                      <h:outputText styleClass="sectionHeader" value="#{msgs.lcm_choose_identities_availabe}"/>   
+                      <div style="margin:5px 0 10px 0">
+                        <h:outputText value="#{msgs.lcm_choose_identity_available_info}"/>
+                      </div>          
+                                            
+                      <div id="populationContainer"></div>
+                      
+                    </div>
+                  </div>
+                </td>
+              </ui:fragment>
+              
+            </tr>
+          </table>
+        
+        <div class="spacerDiv"></div>
+        
+        <h:commandButton rendered="#{!(requestPopulation.allowBulk)}" action="#{requestPopulation.back}" 
+          value="#{msgs.button_cancel}" style="margin:0 3px" styleClass="secondaryBtn"/>
+        
+        <input type="button" style="display:none" id="searchFormBtn" onclick="Ext.getCmp('populationGrid-advSeachForm').doSearch()"/>
+                
+        <h:commandButton action="#{requestPopulation.submit}"  id="submitBtn" style="display:none"/>
+                        
+        <a4j:commandButton action="#{requestPopulation.addIdentity}" id="addBtn" style="display:none"
+          oncomplete="Ext.getCmp('chosenIdentityGrid').getStore().load()"/>
+          
+        <a4j:commandButton action="#{requestPopulation.removeIdentity}" id="removeBtn" style="display:none" 
+          oncomplete="Ext.getCmp('chosenIdentityGrid').loadAfterDelete()"/>
+        
+        <a4j:commandButton action="#{requestPopulation.selectAllIdentities}" id="selectAllBtn" style="display:none"
+          oncomplete="Ext.getCmp('chosenIdentityGrid').getStore().load()"/>
+          
+        <a4j:commandButton action="#{requestPopulation.deselectAllIdentities}" id="deselectAllBtn" style="display:none"
+          oncomplete="Ext.getCmp('chosenIdentityGrid').loadAfterDelete()"/>
+        
+        <a4j:commandButton action="#{requestPopulation.calculateFilter}" id="calculateFilterBtn" style="display:none"
+          oncomplete="Ext.getCmp('populationGrid').getStore().load()"/>
+        
+        <!-- Set on single identity requests -->
+        <h:inputHidden value="#{requestPopulation.identityId}" id="identityId"/>
+        
+        <!-- Set on bulk identity requests -->
+        <h:inputHidden value="#{requestPopulation.identityIds}" id="identityIds" converter="java.util.List"/>
+        
+        <h:inputHidden value="#{requestPopulation.filterString}" id="filterString"/>
+        
+      </h:form>
+      <script type="text/javascript">
+      Ext.onReady(function(){
+        var gridMetaData = #{requestPopulation.columnJSON};
+        var identityAttributes = #{requestPopulation.identityAttributes};
+        var filterValues = #{requestPopulation.filterValues};
+        SailPoint.LCM.ChooseIdentities.initializePopulationGrid(gridMetaData, "#{sp:escapeJavascript(base.loggedInUser.id)}", #{requestPopulation.allowBulk}, identityAttributes, filterValues);
+
+        if(#{requestPopulation.allowBulk}) {
+            SailPoint.LCM.ChooseIdentities.initializeSelectedGrid();
+        }
+      });
+      </script>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+</body>
+</html>

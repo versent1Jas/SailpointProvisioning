@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputText value="Unstructured Target Configuration"/>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION_EDIT_DATASOURCE';
+
+        function reapplyStyles() {}
+
+        function initializeSelectedConfigPage() {
+            var collectorType = $('editForm:collectorType').value;
+	    if ( collectorType == 'Windows FileShare Collector') {
+                displayAppropriatePane('fileShareInfos', 'button0');
+            } else if ( collectorType == 'SharePoint Collector') {
+                displayAppropriatePane('siteCollectionConfig', 'button0');
+            } else if ( collectorType == 'SharePoint Online Collector') {
+                displayAppropriatePane('siteCollectionConfig', 'button0');
+            }
+            else if ( collectorType == 'Lieberman Collector') {
+                displayAppropriatePane('siteCollectionConfig', 'button0');
+            }
+            else if ( collectorType == 'PE2 RACFCollector') {
+                displayAppropriatePane('siteCollectionConfig', 'button0');
+            }
+            else if ( collectorType == 'PE2 ACF2Collector') {
+                displayAppropriatePane('siteCollectionConfig', 'button0');
+            }
+            else if ( collectorType == 'PE2 TSSCOLLECTOR') {
+                displayAppropriatePane('siteCollectionConfig', 'button0');
+            }
+        }
+        var saveClicked = false;
+        function saveClickAction(btn) {
+            if(!saveClicked) {
+                saveClicked = true;
+                return Page.fireEvent('beforeSave', Page.isCompositeApp);
+            }
+            else {
+                btn.disabled = 'disabled';
+                return false;
+            }
+        };
+
+        function isSaveOk( btn ) {
+            return Page.fireEvent('beforeSave', Page.isCompositeApp) && saveClickAction( btn );
+        };
+       //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:form id="editForm">
+        <h:inputHidden id="id" value="#{applicationObject.objectId}"/>
+        <h:inputHidden id="type" value="#{applicationObject.object.type}"/>
+        <h:inputHidden id="selectedTargetsForApp" value="#{applicationObject.selectedTargetSourceId}"/>
+        <ui:param name="targetSource" value="#{applicationObject.selectedTargetSourceBean}"/>
+
+        <h:panelGroup>
+            <h:outputText styleClass="requiredText" value="*"/>
+            <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+        </h:panelGroup>
+
+        <a4j:outputPanel id="targetSourceRulesPanel">
+        <h:panelGrid columns="2" columnClasses="padded" rowClasses="padded">
+          <h:panelGroup>
+            <h:outputText escape="false" value="#{msgs.name}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+          <h:inputText id="dsName" value="#{targetSource.object.name}"
+                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+          <h:outputText value="#{msgs.description}"/>
+          <h:inputTextarea id="dsDescription" value="#{targetSource.object.description}" cols="40" rows="2"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+
+          <h:outputText value="#{msgs.creation_rule}"/>
+	  
+          <h:panelGroup>
+              <h:selectOneMenu id="dsCreationRule" value="#{targetSource.selectedCreationRule}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{targetSource.creationRules}"/>
+              </h:selectOneMenu>
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                  <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                         onclick="SailPoint.Rule.Editor.edit($('editForm:dsCreationRule').value,
+                                 'TargetCreation',
+                                 $('editForm:refreshTargetSourceRulesButton'))" />
+              </ui:fragment>
+          </h:panelGroup>
+	
+          <h:outputText value="#{msgs.correlation_rule}"/>
+          <h:panelGroup>
+              <h:selectOneMenu id="dsCorrelationRule" value="#{targetSource.selectedCorrelationRule}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{targetSource.correlationRules}"/>
+              </h:selectOneMenu>
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                  <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                         onclick="SailPoint.Rule.Editor.edit($('editForm:dsCorrelationRule').value,
+                                 'TargetCorrelation',
+                                 $('editForm:refreshTargetSourceRulesButton'))" />
+              </ui:fragment>
+          </h:panelGroup>
+
+          <h:outputText value="#{msgs.target_source_types}"/>
+          <h:panelGroup>
+            <a4j:outputPanel id="collectorSettings">
+              <h:selectOneMenu id="collectorType"
+                               value="#{targetSource.object.type}"
+                               rendered="#{empty targetSource.object.id}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               onchange="$('editForm:selectTypeButton').click();">
+                <f:selectItem itemValue="" itemLabel="#{msgs.select_collector_type}"/>
+                <f:selectItems value="#{targetSource.collectorTypes}"/>
+              </h:selectOneMenu>
+	                    <h:selectOneMenu id="fixedCollectorType" value="#{empty targetSource.object.type ? 'None' : targetSource.object.type}"
+                               rendered="#{not empty targetSource.object.id}"
+                               disabled="true"
+                               readonly="true">
+                <f:selectItem itemValue="#{empty targetSource.object.type ? 'None' : targetSource.object.type}"
+                              itemLabel="#{empty targetSource.object.type ? msgs.none : targetSource.object.type}"/>
+              </h:selectOneMenu>
+            </a4j:outputPanel>
+          </h:panelGroup>
+
+          <h:panelGroup id = "overrideProvisioningTextPanel">
+              <h:outputText value="#{msgs.override_default_provisioning}"
+                            rendered="#{not empty targetSource.object.type and !targetSource.overrideProvisioningToggle}"/>
+          </h:panelGroup>
+          <h:panelGroup id = "overrideProvisioningPanel">
+              <h:selectBooleanCheckbox id="provisioningOverridden" 
+                                   value="#{targetSource.object.provisioningOverridden}"
+                                   rendered="#{not empty targetSource.object.type and !targetSource.overrideProvisioningToggle}"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication') or not empty targetSource.object.id}"
+                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication') or not empty targetSource.object.id}">
+                                   <a4j:ajax event="click" render="targetCollectors targetCollectorsTextPanel"/>
+              </h:selectBooleanCheckbox>
+          </h:panelGroup>
+
+          <h:panelGroup id="targetCollectorsTextPanel">
+              <h:outputText value="#{msgs.provisioning_action}"
+                            rendered="#{targetSource.object.provisioningOverridden}"/>
+          </h:panelGroup>
+          <h:panelGroup>
+            <a4j:outputPanel id="targetCollectors">
+              <h:selectOneMenu id="collector"
+                               value="#{targetSource.object.targetCollector}"
+                               rendered="#{targetSource.object.provisioningOverridden and empty targetSource.object.id}"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                <f:selectItems value="#{targetSource.targetCollectors}"/>
+              </h:selectOneMenu>
+              <h:selectOneMenu id="fixedCollector"
+                               value="#{targetSource.object.targetCollector}"
+                               rendered="#{targetSource.object.provisioningOverridden and not empty targetSource.object.id}"
+                               disabled="true"
+                               readonly="true">
+                <f:selectItem itemValue="#{empty targetSource.object.targetCollector ? 'None' : targetSource.object.targetCollector}"
+                              itemLabel="#{empty targetSource.object.targetCollector ? msgs.none : targetSource.object.targetCollector}"/>
+              </h:selectOneMenu>
+            </a4j:outputPanel>
+          </h:panelGroup>
+        </h:panelGrid>
+        </a4j:outputPanel>
+
+        <a4j:outputPanel id="configSettings">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+          <h:panelGroup  rendered="#{not empty targetSource.object.collector}">
+            <ui:include src="#{targetSource.configPage}"/>
+          </h:panelGroup>
+        </a4j:outputPanel>
+
+        <div class="buttonRow">
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+            <h:commandButton id="targetSourceSave" action="#{targetSource.saveAction}" value="#{msgs.button_save}" styleClass="primaryBtn" 
+                             onclick="return isSaveOk(this);"/>
+          </ui:fragment>
+          <h:commandButton id="targetSourceCancel" action="#{targetSource.cancelAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+        </div>
+
+        <a4j:commandButton id="refreshTargetSourceRulesButton"
+                           style="display:none"
+                           immediate="true"
+                           render="targetSourceRulesPanel"/>
+
+        <a4j:commandButton id="selectTypeButton" action="#{targetSource.selectType}" style="display:none"
+                           render="configSettings collectorSettings
+                           overrideProvisioningTextPanel overrideProvisioningPanel
+                           targetCollectorsTextPanel targetCollectors"
+                           oncomplete="initializeSelectedConfigPage();"/>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

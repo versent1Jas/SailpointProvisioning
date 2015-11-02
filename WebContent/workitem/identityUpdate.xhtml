@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+<!--
+  WorkItem details renderer for identity update approvals.
+  NOTE: !! we need to templatize this with workflow.xhtml  
+  because the outer stuff will always be the same, only the
+  details changes.
+-->
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.witem_identity_title}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    </sp:script>
+ <!-- PageName: identityUpdate.xhtml -->
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+
+          <ui:include src="summaryFieldset.xhtml"/>
+          <ui:include src="commentsFieldset.xhtml"/>
+
+          <!-- TODO: the header should be pushed into workflowDetails.xhtml -->
+          <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.details}"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <!-- shows the identity old roles and new roles
+                       not much in here, might as well inline it -->
+                  <ui:include src="identityUpdateDetails.xhtml"/>
+                </td>
+              </tr>
+
+              <!-- attribute diffs -->
+              <tr><td>
+                <ui:fragment rendered='#{workItem.object.attributes["approvalSet"] != null}'>
+                  <table class="width100">
+                    <tr><td><div class="spTabledContent">
+                      <table class="spTable" cellspacing="0" id="attributeTbl">
+                        <tr>
+                          <th>#{msgs.label_application}</th>
+                          <th>#{msgs.attribute}</th>
+                          <th>#{msgs.label_operation}</th>
+                          <th>#{msgs.label_value}</th>
+                        </tr>              
+                        <ui:repeat value='#{workItem.object.attributes["approvalSet"].items}' var="item">
+                          <tr>
+                            <td><h:outputText value="#{item.applicationName}"/></td>
+                            <td><h:outputText value="#{item.name}"/></td>
+                            <td><h:outputText value="#{item.operation}"/></td>
+                            <td><h:outputText value="#{item.value}"/></td>
+                          </tr>
+                        </ui:repeat>
+                      </table>
+                    </div></td></tr>
+                  </table>
+                </ui:fragment>
+              </td></tr>
+
+              <!-- violations are in their own table -->
+              <tr>
+                <td>
+                  <ui:fragment rendered="#{workItem.attributes['policyViolations'] != null}">
+                    <br/>
+                    <h:outputFormat styleClass="spContentTitle" value="Policy Violations"/>
+                    
+                    <div class="spTabledContent">
+                      <table class="spTable" cellspacing="0" cellpadding="0" id="roleTbl">
+                        <tr>
+                          <th><h:outputText value="#{msgs.impact_column_policy}"/></th>
+                          <th><h:outputText value="#{msgs.impact_column_constraint}"/></th>
+                          <th><h:outputText value="#{msgs.impact_column_description}"/></th>
+                        </tr>
+                
+                        <ui:repeat value="#{workItem.attributes['policyViolations']}" var="con">
+                          <tr>
+                            <td><h:outputText value="#{con.policyName}"/></td>
+                            <td><h:outputText value="#{con.ruleName}"/></td>
+                            <td><h:outputText value="#{con.description}" escape="false"/></td>
+                          </tr>
+                        </ui:repeat>
+                      </table>
+                    </div>
+                  </ui:fragment>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <br/>
+        <div class="buttonRow">
+          <h:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" />
+          <h:commandButton style="display: none" id="rejectBtn" action="#{workItem.reject}" />
+          <h:commandButton style="display: none" id="returnBtn" action="#{workItem.returnAction}" />
+
+          <ui:fragment rendered="#{workItem.editable}">
+
+            <h:commandButton onclick="addComment('editForm:completeBtn', '#{sp:escapeJavascript(msgs.button_approve)}', '#{sp:escapeJavascript(msgs.dialog_title_approval_comments)}'); return false;"
+                             value="#{msgs.button_approve}" 
+                             title="#{msgs.button_title_click_to_approve}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton onclick="addComment('editForm:rejectBtn', '#{sp:escapeJavascript(msgs.button_reject)}', '#{sp:escapeJavascript(msgs.dialog_title_rejection_comments)}'); return false;"
+                             value="#{msgs.button_reject}" 
+                             title="#{msgs.button_title_click_to_reject_request}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false, SailPoint.getWorkItemPriority()); return false;"
+                             value="#{msgs.button_forward}" 
+                             title="#{msgs.button_title_click_to_forward}" 
+                             styleClass="primaryBtn"/>
+
+          </ui:fragment>
+
+          <h:commandButton action="#{workItem.save}"
+                           value="#{msgs.button_save}"
+                           title="#{msgs.button_title_click_to_save_work_item}"
+                           styleClass="primaryBtn"/>
+
+          <h:commandButton action="#{workItem.cancel}" 
+                           immediate="true" 
+                           value="#{msgs.button_cancel}" 
+                           styleClass="secondaryBtn"/>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

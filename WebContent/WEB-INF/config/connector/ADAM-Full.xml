@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="AUTHENTICATE, PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, MANAGER_LOOKUP, SEARCH, UNSTRUCTURED_TARGETS, ENABLE, PASSWORD" icon="directory2Icon" name="LDAP - ADAM Template" type="ADAM - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="LDAPADAM"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMADAttributesForm.xhtml"/>
+        <entry key="splContainerAttributes">
+          <value>
+            <Map>
+              <entry key="OE_ID" value="false"/>
+              <entry key="OE_PR " value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <ClusterScript>
+        <Source>
+                                String cluster = null;
+                                 Object host = application.getAttributeValue("host");
+                                 Object port = application.getAttributeValue("port");
+                                 if (host != null) {
+                                    cluster = host.toString();
+                                    if (port != null)
+                                        cluster += ":" + port.toString();
+                                 }
+                                 return cluster;
+                      </Source>
+      </ClusterScript>
+      <PlanInitializerScript>
+        <Source>
+                        
+                                import java.util.*;
+                                import sailpoint.object.*;
+                                import sailpoint.object.ProvisioningPlan.AccountRequest;
+                                import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                                import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                                import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                                import sailpoint.object.ProvisioningPlan;
+
+                                List accountRequests = plan.getAccountRequests();
+                                
+                                if(accountRequests != null)
+                                {
+                                    for (AccountRequest acctReq : accountRequests)
+                                    {
+                                        AccountRequest.Operation op = acctReq.getOperation();
+                                        
+                                        if (op == AccountRequest.Operation.Create)
+                                        {
+                                            AttributeRequest userTypeAttr = acctReq.getAttributeRequest("LDAPADAM_USER_TYPE");
+
+                                            if (userTypeAttr != null)
+                                            {
+                                                String userType = userTypeAttr.getValue();
+                                                if (userType != null)
+                                                {
+                                                    if(userType.equalsIgnoreCase("User"))
+                                                    {
+                                                        if(userType.equalsIgnoreCase("User"))  
+                                                        userTypeAttr.setValue("U0");
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                AttributeRequest att = new AttributeRequest("LDAPADAM_USER_TYPE", "U0");
+                                                acctReq.add(att);
+                                            }
+                                            
+                                            AttributeRequest userOE_PR_Attr = acctReq.getAttributeRequest("USER_OE_PR");
+                                            if(userOE_PR_Attr == null)
+                                            {
+                                                AttributeRequest userID = acctReq.getAttributeRequest("USER_ID");
+                                                if (userID != null)
+                                                {
+                                                    String user_ID = userID.getValue();
+                                                    String attname = "USER_OE_PR";
+                                                    int nCommaIndex = user_ID.indexOf(",");
+                                                    if(nCommaIndex > 0)
+                                                    {
+                                                        if(user_ID.charAt(nCommaIndex-1)=='/')
+                                                        {
+                                                             nCommaIndex = user_ID.indexOf(",",nCommaIndex+1);
+                                                        }
+                                                        String value = user_ID.substring(nCommaIndex+1);
+                                                        AttributeRequest att = new AttributeRequest(attname, value);
+                                                        acctReq.add(att);
+                                                    }
+                                                }
+                                            }
+                                            
+                                        }                              
+                                    }
+                                }
+                                 
+                                List groups = plan.getObjectRequests();
+                                if (groups != null) 
+                                {
+                                    for (ObjectRequest req : groups) 
+                                    {
+                                        ObjectOperation op = req.getOp();
+                                        if (op == ObjectOperation.Create)
+                                        {
+                                            AttributeRequest groupTypeAttr = req.getAttributeRequest("LDAPADAM_GROUP_TYPE");
+                                            
+                                            if (groupTypeAttr != null)
+                                            {
+                                                String groupType =   groupTypeAttr.getValue();
+                                                if (groupType != null &amp;&amp; groupType.equalsIgnoreCase("Group"))
+                                                {
+                                                    groupTypeAttr.setValue("G0"); 
+                                                }
+                                            }
+                                            else
+                                            {
+                                                AttributeRequest att = new AttributeRequest("LDAPADAM_GROUP_TYPE", "G0");
+                                                req.add(att);
+                                            }
+                                            
+                                            AttributeRequest groupOE_PR_Attr = req.getAttributeRequest("GROUP_OE_PR");
+                                            if(groupOE_PR_Attr == null)
+                                            {
+                                                AttributeRequest groupID = req.getAttributeRequest("GROUP_ID");
+                                                if (groupID != null)
+                                                {
+                                                    String group_ID = groupID.getValue();
+                                                    String attname = "GROUP_OE_PR";
+                                                    int nCommaIndex = group_ID.indexOf(",");
+                                                    if(nCommaIndex > 0)
+                                                    {
+                                                        if(group_ID.charAt(nCommaIndex-1)=='/')
+                                                        {
+                                                             nCommaIndex = group_ID.indexOf(",",nCommaIndex+1);
+                                                        }
+                                                        String value = group_ID.substring(nCommaIndex+1);
+                                                        AttributeRequest att = new AttributeRequest(attname, value);
+                                                        req.add(att);
+                                                    }
+                                                }
+                                            }
+                                        }                                   
+                                    }                                   
+                                  } 
+                            
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="USER_ID" groupAttribute="groups" identityAttribute="USER_ID" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Locked" name="RU_Locked" required="true" type="string"/>
+        <AttributeDefinition displayName="Suspened" name="RU_SUSPENDED" required="true" type="string"/>
+        <AttributeDefinition displayName="when modified" name="LDAPADAM_MODIFY_TIME_STAMP" required="true" type="string"/>
+        <AttributeDefinition displayName="cn" name="LDAPADAM_CN" required="true" type="string"/>
+        <AttributeDefinition displayName="bad password time" name="LDAPADAM_BAD_PASSWORD_TIME" required="true" type="string"/>
+        <AttributeDefinition displayName="when created" name="LDAPADAM_CREATE_TIME_STAMP" required="true" type="string"/>
+        <AttributeDefinition displayName="bad password count" name="LDAPADAM_BAD_PWD_COUNT" required="true" type="string"/>
+        <AttributeDefinition displayName="user type" name="LDAPADAM_USER_TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="object class" multi="true" name="LDAPADAM_ObJeCt_ClAsS" required="true" type="string"/>
+        <AttributeDefinition displayName="distinguished name" name="LDAPADAM_FuLl_Dn" required="true" type="string"/>
+        <AttributeDefinition displayName="groups" entitlement="true" managed="true" multi="true" name="groups" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="when changed" name="LDAPADAM_WHEN_CHANGED" required="true" type="string"/>
+        <AttributeDefinition displayName="when modified" name="LDAPADAM_MODIFY_TIME_STAMP" required="true" type="string"/>
+        <AttributeDefinition displayName="cn" multi="true" name="LDAPADAM_CN" required="true" type="string"/>
+        <AttributeDefinition displayName="canonical Name" name="LDAPADAM_CANONICAL_NAME" required="true" type="string"/>
+        <AttributeDefinition displayName="description" name="LDAPADAM_DESCRIPTION" required="true" type="string"/>
+        <AttributeDefinition displayName="group Type" name="LDAPADAM_GROUP_TYPE_ADAM" required="true" type="string"/>
+        <AttributeDefinition displayName="when created" name="LDAPADAM_CREATE_TIME_STAMP" required="true" type="string"/>
+        <AttributeDefinition displayName="group type" name="LDAPADAM_GROUP_TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="object class" multi="true" name="LDAPADAM_ObJeCt_ClAsS" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" helpKey="Enter distinguished name of user. For instance, &apos;cn=user1,cn=users,dc=sailpoint,dc=com&apos;" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" helpKey="Enter user password" name="USER_PWD" required="true" section="" type="secret"/>
+      </Template>
+      <Template name="group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group ID" helpKey="Enter distinguished name of group. For instance, &apos;cn=group1,cn=groups,dc=sailpoint,dc=com&apos;" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Description" helpKey="Enter description of group.For instance, &apos;group one&apos;" name="LDAPADAM_DESCRIPTION" type="string"/>
+      </Template>
+      <Template name="group" schemaObjectType="group" usage="Update">
+        <Field displayName="Description" helpKey="Enter description of group.For instance, &apos;group one&apos;" name="LDAPADAM_DESCRIPTION" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

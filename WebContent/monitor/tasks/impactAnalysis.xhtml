@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+<ui:composition>  
+
+  <ui:param name='analysis' value="#{taskResult.impactAnalysis}"/>
+
+  <!-- make it resemble the expanding details panel -->
+  <div class="baseWindow expandPanel">
+    <div class="baseWindowHeader expandPanelHeader">
+      <h:graphicImage
+        class="dashContentExpandBtn"
+        url="/images/icons/minus.png"
+        id="analysisExpandPanelExpandBtn" />
+      <h:outputText value="#{msgs.title_impact_analysis_summary}"/>
+    </div>
+    <div id="expandPanelContent" class="baseWindowBody expandPanelBody" >
+      <table class="paddedTbl width100 lightBorder" style="background:#FFF">
+        <tr>
+          <td width="15%" class="spLightGray textBold rBorder">
+            <h:outputText value="#{msgs.impact_label_roles_analyzed}"/>
+          </td>
+          <td><h:outputText value="#{taskResult.object.attributes['roles']}"/></td>
+        </tr>
+        <tr>
+          <td class="spLightGray textBold rBorder"><h:outputText value="#{msgs.impact_label_total_gains}"/></td>
+          <td><h:outputText value="#{analysis.totalRoleGains}"/></td>
+        </tr>
+        <tr>
+          <td class="spLightGray textBold rBorder"><h:outputText value="#{msgs.impact_label_total_losses}"/></td>
+          <td><h:outputText value="#{analysis.totalRoleLosses}"/></td>
+        </tr>
+        <tr>
+          <td class="spLightGray textBold rBorder"><h:outputText value="#{msgs.impact_label_total_conflicts}"/></td>
+          <td><h:outputText value="#{analysis.totalPolicyConflicts}"/></td>
+        </tr>
+      </table>
+    </div>
+    <div class="baseWindowFooter expandPanelFooter"><img src="#{base.requestContextPath}/images/blank.gif" style="display:none"/></div>
+  </div>
+
+  <br/>
+
+  <ui:fragment rendered="#{analysis.roleAssignmentCount == 0}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.impact_title_no_roles_impacted}"/>
+  </ui:fragment>
+
+  <ui:fragment rendered="#{analysis.roleAssignmentCount > 0}">
+	<h:outputFormat styleClass="spContentTitle" value="#{msgs.impact_title_roles_impacted}">
+		<f:param value="#{analysis.roleAssignmentCount}"/>
+	</h:outputFormat>
+    
+    
+    <div class="spTabledContent">
+      <table class="spTable" cellspacing="0" cellpadding="0" id="roleTbl">
+        <tr>
+          <th><h:outputText value="#{msgs.impact_column_role}"/></th>
+          <th><h:outputText value="#{msgs.impact_column_gains}"/></th>
+          <th><h:outputText value="#{msgs.impact_column_losses}"/></th>
+        </tr>
+
+        <ui:repeat value="#{analysis.roleAssignments}" var="role">
+
+          <tr>
+            <td><h:outputText value="#{role.name}"/></td>
+            <td>
+              <a href="javascript:toggleIdentitiesDisplay('#{role.uid}Gains');" class="disclosure">
+                <h:outputText  value="#{role.gains}"/>
+              </a>
+            </td>
+            <td>
+              <a href="javascript:toggleIdentitiesDisplay('#{role.uid}Losses');" class="disclosure">
+                <h:outputText  value="#{role.losses}"/>
+              </a>
+            </td>
+          </tr>
+
+          <tr id="#{role.uid}GainsRow" style="display:none">
+            <td align="left" width="50%" valign="top">
+              <div id="#{role.uid}GainsDiv" style="display: none; margin-left: 15px">
+                <div class="spAjaxBlueTabledContent">
+  
+                  <t:dataTable id="#{role.uid}gains_tbl"
+                               styleClass="spLightBlueTable"
+                               cellspacing="0"
+                               rows="50"
+                               value="#{role.gainedIdentities}"
+                               var="ident">
+  
+                    <h:column>
+                      <f:facet name="header">
+                        <h:outputText styleClass="font10" value="#{msgs.impact_label_gained_identities}"/>
+                      </f:facet>
+                      <h:outputText styleClass="font10" value="#{ident}"/>
+                    </h:column>
+                  </t:dataTable>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr id="#{role.uid}LossesRow" style="display:none">
+            <td align="left" width="50%" valign="top">
+              <div id="#{role.uid}LossesDiv" style="display: none; margin-left: 15px">
+                <div class="spAjaxBlueTabledContent">
+  
+                  <t:dataTable id="#{role.uid}losses_tbl"
+                               styleClass="spLightBlueTable"
+                               cellspacing="0"
+                               rows="50"
+                               value="#{role.lostIdentities}"
+                               var="ident">
+  
+                    <h:column>
+                      <f:facet name="header">
+                        <h:outputText styleClass="font10" value="#{msgs.impact_label_lost_identities}"/>
+                      </f:facet>
+                      <h:outputText styleClass="font10" value="#{ident}"/>
+                    </h:column>
+                  </t:dataTable>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+        </ui:repeat>
+      </table>
+    </div>
+  </ui:fragment>
+
+  <br/>
+
+  <ui:fragment rendered="#{analysis.totalPolicyConflicts > 0}">
+    <br/>
+    <h:outputFormat styleClass="spContentTitle" value="#{msgs.impact_title_policy_conflicts}">
+      <f:param value="#{analysis.totalPolicyConflicts}"/>
+    </h:outputFormat>
+    
+    <div class="spTabledContent">
+      <table class="spTable" cellspacing="0" cellpadding="0" id="roleTbl">
+        <tr>
+          <th><h:outputText value="#{msgs.impact_column_policy}"/></th>
+          <th><h:outputText value="#{msgs.impact_column_constraint}"/></th>
+          <th><h:outputText value="#{msgs.impact_column_description}"/></th>
+        </tr>
+
+        <ui:repeat value="#{analysis.policyConflicts}" var="con">
+
+          <tr>
+            <td><h:outputText value="#{con.policyName}"/></td>
+            <td><h:outputText value="#{con.constraintName}"/></td>
+            <td><h:outputText value="#{con.description}" escape="false"/></td>
+          </tr>
+
+        </ui:repeat>
+      </table>
+    </div>
+  </ui:fragment>
+
+  <!-- 
+     taskResultDetailsInclude puts one of these in the first
+     section but I like having one at the bottom as well.
+     JSF loses the action if you have a command button inside a ui:fragment
+     You have to use a raw <input> and click a hidden button.  
+     taskResultsDetailsInclude has the goBackToWorkItem() function. Unbelievable.
+  <ui:fragment rendered="#{taskResult.workItemId != null}">
+    <input type="button" value="#{msgs.button_return_to_workitem}" 
+      onclick="goBackToWorkItem()" style="margin:5px"/>
+  </ui:fragment>
+  -->
+
+  <script defer="defer">
+    <!--//--><![CDATA[//><!--
+
+    function toggleIdentitiesDisplay(id) {
+      if(!$(id+'Row').visible()) {
+          $(id+'Row').style.display='';
+      }
+      showHideWithLock([$(id + 'Div')]);
+    }
+    //--><!]]>
+  </script>
+
+
+   <!-- 
+     Overlap Analysis
+   -->
+
+  <ui:param name='overlap' value="#{taskResult.object.attributes['overlapAnalysis']}"/>
+  <ui:fragment rendered="#{overlap != null}">
+    <ui:include src="overlapAnalysis.xhtml">
+      <ui:param name="result" value="#{overlap}"/>
+    </ui:include>
+  </ui:fragment>
+
+</ui:composition>
+
+</body>
+</html>

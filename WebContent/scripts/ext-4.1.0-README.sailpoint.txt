@@ -1,0 +1,20 @@
+***NOTICE*** WE DID EDIT THE EXT SOURCE FILES!!  If you need to patch something (you already tried using 
+an override in the ext-patches.js file) in the EXT SOURCE FILES themselves, document your sins here.
+Please include a bug number and description of what/where/why/when for tracking.
+
+[Chris Annino - 2/28/13]
+bug # 15114 - Several issues with strings not being localized as well as other UI issues uncovered during translation
+I downloaded ext-4.2.0beta and copied 2 loading text overrides from 4.2 into the ext-4.1.0/locale/ext-lang-de.js, ext-lang-nl.js, 
+and ext-lang-fr.js files.  When upgrading to 4.2 we can delete this README file and rely on the ext i18n framework to correctly 
+display 'Loading' in language specific locales. So, no need to port this hack over to 4.2.  Changes are: 
+
+    Ext.define("Ext.locale.de.LoadMask", {
+        override: "Ext.LoadMask",
+        msg: "Lade Daten..."
+    });
+
+    // changing the msg text below will affect the LoadMask
+    Ext.define("Ext.locale.de.view.AbstractView", {
+        override: "Ext.view.AbstractView",
+        loadingText: "Lade Daten..."
+    });

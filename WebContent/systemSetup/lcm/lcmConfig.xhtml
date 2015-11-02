@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+  <ui:define name="title"><h:outputText value="#{msgs.menu_label_lifecycle_manager_config}"/></ui:define>
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      helpKey = 'LCM_CONFIG';
+    </script>
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style> 
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/systemSetup">
+      <src>system-setup.css</src>
+    </sp:style> 
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/json2.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/lcm/attributeFilterBuilder.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/lcm/lifecycleActions.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/lcm/businessProcesses.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/lcm/additionalOptions.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/lcm/lcmConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script>
+      Ext.onReady(function () {
+          var addtAcctApps = #{sp:basicJSONDataConverted(lcmConfig.additionalAccountApplicationIds, 'ApplicationListConverter')};
+          var acctOnlyApps = #{sp:basicJSONDataConverted(lcmConfig.accountOnlyApplicationIds, 'ApplicationListConverter')};
+          var disableAutoRefAcctApps = #{sp:basicJSONDataConverted(lcmConfig.disableAutoRefAccountStatusAppsIds, 'ApplicationListConverter')};
+          SailPoint.systemSetup.lcm.initTabPanel(addtAcctApps, acctOnlyApps, disableAutoRefAcctApps);
+
+          var iVal = #{empty sp:buildJSONFromIdentity(lcmConfig.batchRequestApprover) ? "''" : sp:buildJSONFromIdentity(lcmConfig.batchRequestApprover)};
+          var batchApproverSuggest = new SailPoint.IdentitySuggest({
+              id: 'batchApproverSuggestCmp',
+              renderTo: 'batchApproverSuggest',
+              initialData: [iVal],
+              extraParams: {context: 'Owner'},
+              binding: 'batchApproverInputVal'
+          });
+          
+          
+          if(iVal &amp;&amp; iVal.displayableName){
+        	  batchApproverSuggest.setRawValue(iVal.displayableName); 
+              SailPoint.Suggest.IconSupport.setIconDiv(batchApproverSuggest, 'userIcon'); 
+          }
+
+          if (#{lcmConfig.requireBatchRequestApproval}) {
+            Ext.get('batchApproverInput').toggle();
+          }
+
+      });
+    </script>
+
+  </ui:define>
+  <ui:define name="body">
+    <h:form id="lcmConfigForm">  
+      <div id="hiddenContents" style="display:none">
+        <div id="actionsPanelContents">
+          <ui:include src="lifecycleActions.xhtml"/>
+        </div>
+        
+        <div id="businessProcessesContents">
+          <ui:include src="businessProcesses.xhtml"/>
+        </div>
+
+        <div id="additionalOptionsContents">
+          <ui:include src="additionalOptions.xhtml"/>
+        </div>
+        
+        <h:commandButton id="saveButton" action="#{lcmConfig.saveChangesAction}"/>
+        <h:commandButton id="cancelButton" action="#{lcmConfig.cancelAction}"/>
+      </div>
+    </h:form>
+    
+    <h:form id="lcmRuleEditorForm">
+      <input type="button" style="display:none" id="lcmRuleEditorForm:refreshRulesButton" 
+             onclick="Ext.getCmp('lifecycleActionsPanel').updateRuleSelectors();"/>
+             
+         <a4j:commandButton id="refreshPasswordValidationRulesButton"
+            style="display:none"
+            immediate="true"
+            render="passwordValidationRulePanel"/>
+    </h:form>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

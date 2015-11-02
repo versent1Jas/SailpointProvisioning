@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+  <div id="dashboardControls">
+  
+    <ui:fragment rendered="#{dashboard.showDashboardSelector}">
+      <div id="dashboardTypeSelector">
+        
+        <select id="dashTypes" onchange="$('dashboardForm:dashType').value = this.value; $('dashboardForm:changeDashTypeBtn').click();">   
+        <ui:repeat value="#{dashboard.dashboardTypes}" var="dashType">
+          
+          <ui:fragment rendered="#{dashboard.dashboardType == dashType.value}">            
+            <option selected="selected" value="#{dashType.value}">#{dashType.label}</option>
+          </ui:fragment>
+          
+          <ui:fragment rendered="#{!(dashboard.dashboardType == dashType.value)}">            
+            <option value="#{dashType.value}">#{dashType.label}</option>
+          </ui:fragment>
+          
+        </ui:repeat>        
+        </select>            
+      </div>
+    </ui:fragment>
+    
+    <ui:fragment rendered="#{!base.mobile}">
+      <div id="dashboardEditLink">
+        <h:outputLink value="dashboard/editDashboard.jsf">
+          <h:outputText value="#{msgs.edit_dashboard}"/>
+        </h:outputLink>
+      </div>
+    </ui:fragment>    
+  </div>
+  
+</body>
+</html>

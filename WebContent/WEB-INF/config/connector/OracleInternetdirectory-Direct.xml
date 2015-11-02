@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.LDAPConnector" featuresString="AUTHENTICATE, PROVISIONING, SYNC_PROVISIONING, ENABLE, UNLOCK, PASSWORD, MANAGER_LOOKUP, SEARCH" icon="directory2Icon" name="Oracle Internet Directory - Direct Template" type="Oracle Internet Directory - Direct">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="ldapAttributesForm.xhtml"/>
+        <entry key="groupEntitlementAttr" value="groups"/>
+        <entry key="keystore"/>
+        <entry key="lockAttr" value="pwdaccountlockedtime"/>
+        <entry key="passwordAttr" value="userPassword"/>
+        <entry key="restoreAttr" value="orclIsEnabled"/>
+        <entry key="restoreVal" value="DISABLED"/>
+        <entry key="revokeAttr" value="orclIsEnabled"/>
+        <entry key="revokeVal" value="DISABLED"/>
+        <entry key="unlockAction" value="add"/>
+        <entry key="unlockAttr" value="orclpwdaccountunlock"/>
+        <entry key="unlockVal" value="1"/>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+         import sailpoint.object.*;
+         import sailpoint.object.ProvisioningPlan.AccountRequest;
+         import sailpoint.object.ProvisioningPlan.AttributeRequest;
+         import sailpoint.object.ProvisioningPlan.Operation;
+         import java.util.ArrayList;
+         import java.util.List;
+         List accountRequests = plan.getAccountRequests();
+         if(accountRequests != null)
+         {
+              for (AccountRequest acctReq : accountRequests)
+              {
+                AccountRequest.Operation op = acctReq.getOperation();
+                if(op == AccountRequest.Operation.Create)
+                  {
+                       List attrRequests =acctReq.getAttributeRequests();
+                       AccountRequest.Operation op = acctReq.getOperation();
+                       if(op == AccountRequest.Operation.Create)
+                         {
+                            if(attrRequests != null)
+                            {
+                                if(!attrRequests.contains("objectclass"))
+                                {
+                                    List objectClasses = new ArrayList();
+                                    objectClasses.add("inetorgperson");
+                                    objectClasses.add("orclUser");
+                                    objectClasses.add("orclUserV2");
+                                    attrRequests.add(new AttributeRequest("objectclass",objectClasses));
+                                }
+                            }
+                         }
+                  }
+              }
+          }
+        </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="cn" identityAttribute="dn" nativeObjectType="inetOrgPerson" objectType="account">
+        <AttributeDefinition name="businessCategory" type="string">
+          <Description>business category</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="carLicense" type="string">
+          <Description>vehicle license or registration plate</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="cn" type="string">
+          <Description>common name(s) for which the entity is known by</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="dn" type="string">
+          <Description>distinguished name for which the entity is known by</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="departmentNumber" type="string">
+          <Description>identifies a department within an organization</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="description" type="string">
+          <Description>descriptive information</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="destinationIndicator" type="string">
+          <Description>destination indicator</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="displayName" type="string">
+          <Description>preferred name to be used when displaying entries</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="employeeNumber" type="string">
+          <Description>numerically identifies an employee within an organization</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="employeeType" type="string">
+          <Description>type of employment for a person</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="facsimileTelephoneNumber" type="string">
+          <Description>Facsimile (Fax) Telephone Number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="givenName" type="string">
+          <Description>first name(s) for which the entity is known by</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" schemaObjectType="group" type="string">
+          <Description>List of groups a user is a member</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="homePhone" type="string">
+          <Description>home telephone number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="homePostalAddress" type="string">
+          <Description>home postal address</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="initials" type="string">
+          <Description>initials of some or all of names, but not the surname(s).</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="internationaliSDNNumber" type="string">
+          <Description>international ISDN number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="l" type="string">
+          <Description>city</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="mail" type="string">
+          <Description>RFC822 Mailbox</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="manager" type="string">
+          <Description>DN of manager</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="mobile" type="string">
+          <Description>mobile telephone number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="o" type="string">
+          <Description>organization this object belongs to</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ou" type="string">
+          <Description>organizational unit this object belongs to</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="pager" type="string">
+          <Description>pager telephone number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="physicalDeliveryOfficeName" type="string">
+          <Description>Physical Delivery Office Name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="postOfficeBox" type="string">
+          <Description>Post Office Box</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="postalAddress" type="string">
+          <Description>postal address</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="postalCode" type="string">
+          <Description>postal code</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="preferredDeliveryMethod" type="string">
+          <Description>preferred delivery method</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="preferredLanguage" type="string">
+          <Description>preferred written or spoken language for a person</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="registeredAddress" type="string">
+          <Description>registered postal address</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="roomNumber" type="string">
+          <Description>room number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="secretary" type="string">
+          <Description>DN of secretary</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="seeAlso" type="string">
+          <Description>DN of related object</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="sn" type="string">
+          <Description>last (family) name(s) for which the entity is known by</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="st" type="string">
+          <Description>state or province which this object resides in</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="street" type="string">
+          <Description>street address of this object</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="telephoneNumber" type="string">
+          <Description>Telephone Number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="teletexTerminalIdentifier" type="string">
+          <Description>Teletex Terminal Identifier</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="telexNumber" type="string">
+          <Description>Telex Number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="title" type="string">
+          <Description>title associated with the entity</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="uid" type="string">
+          <Description>user identifier</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="objectClass" type="string">
+          <Description>object classes of the entity</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="cn" featuresString="PROVISIONING" identityAttribute="dn" nativeObjectType="groupOfUniqueNames" objectType="group">
+        <Attributes>
+          <Map>
+            <entry key="groupMemberAttribute" value="uniqueMember"/>
+          </Map>
+        </Attributes>
+        <AttributeDefinition name="cn" type="string">
+          <Description>common name(s) for which the entity is known by</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="dn" type="string">
+          <Description>Directory Path</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="o" type="string">
+          <Description>organization this object belongs to</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ou" type="string">
+          <Description>organizational unit this object belongs to</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="owner" type="string">
+          <Description>owner (of the object)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="description" type="string">
+          <Description>descriptive information</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_ldap_user_DN" helpKey="help_con_prov_policy_ldap_user_DN" name="dn" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_ldap_password" helpKey="help_con_prov_policy_ldap_password" name="password" required="true" section="" type="secret"/>
+        <Field displayName="con_prov_policy_ldap_full_name" helpKey="help_con_prov_policy_ldap_full_name" name="CN" required="true" section="" type="string"/>		
+        <Field displayName="con_prov_policy_ldap_first_name" helpKey="help_con_prov_policy_ldap_first_name" name="givenName" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_ldap_last_name" helpKey="help_con_prov_policy_ldap_last_name" name="SN" required="true" section="" type="string"/>
+      </Template>
+      <Template name="group create" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_ldap_group_DN" helpKey="help_con_prov_policy_ldap_group_DN" name="dn" required="true" reviewRequired="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_ldap_description" helpKey="help_con_prov_policy_ldap_description" name="description" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="edit group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_ldap_description" name="description" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

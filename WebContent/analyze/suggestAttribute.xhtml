@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+<ui:composition>
+    <ui:fragment rendered="#{!(searchBean.inputs[key].searchType eq 'None')}">
+        <div id="#{sp:escapeHTMLElementId(field)}Suggest"></div>
+        <t:inputHidden id="#{sp:escapeHTMLElementId(field)}" value="#{searchBean.inputs[key].value}" forceId="true">
+        </t:inputHidden>
+
+        <div id="#{sp:escapeHTMLElementId(field)}Val" style="display:none">#{searchBean.inputs[key].value}</div>
+        <div id="#{sp:escapeHTMLElementId(field)}Type" style="display:none">#{searchBean.inputs[key].value}</div>
+    </ui:fragment>
+
+    <ui:fragment rendered="#{searchBean.inputs[key].searchType eq 'None'}">
+        <h:inputText id="#{sp:escapeHTMLElementId(field)}" styleClass="searchInputText inputWidth"
+                     value="#{searchBean.inputs[key].value}"/>
+    </ui:fragment>
+
+</ui:composition>
+</body>
+</html>

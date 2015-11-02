@@ -1,0 +1,20 @@
+Bug 22579 Do not reset focus when selecting a date in the picker because it causes
+the virtual keyboard to be displayed on mobile devices
+
+Index: web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js	(date 1414508613000)
++++ web/ui/js/lib/ui-bootstrap/ui-bootstrap-tpls-0.11.0.js	(revision )
+@@ -1500,7 +1500,9 @@
+
+         if ( closeOnDateSelection ) {
+           scope.isOpen = false;
+-          element[0].focus();
++          /* JW: Setting the focus back to the input causes the
++           * keyboard to pop up on mobile.  So do not do that */
++//          element[0].focus();
+         }
+       };

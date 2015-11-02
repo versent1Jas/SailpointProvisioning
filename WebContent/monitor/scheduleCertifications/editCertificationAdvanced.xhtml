@@ -1,0 +1,629 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:c="http://java.sun.com/jstl/core"      
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+
+       <!--//--><![CDATA[//><!--
+
+        var readOnly = #{readOnly};
+
+        var certifyAppOwnersMultiSuggest;
+        Ext.onReady(function () {
+            if(initTextInserters) {
+                initTextInserters();
+            }
+	        if (#{certificationSchedule.editedCertificationSchedule.showMultiCertifiers}) {
+	            certifyAppOwnersMultiSuggest = new SailPoint.MultiSuggest({
+	                id: 'certifyAppOwnersMultiSuggest',
+	                renderTo: 'certifyAppOwnersMultiSuggest',
+	                suggestType: 'identity',
+	                jsonData: #{sp:basicJSONDataConverted(
+	                   certificationSchedule.editedCertificationSchedule.ownerIds,
+	                   'IdentityListConverter')},
+	                inputFieldName: 'certifyAppOwners',
+                    contextPath: CONTEXT_PATH,
+                    baseParams: {context: 'Owner'},
+	                disabled: readOnly || #{certificationSchedule.existingCertGroup ||
+	                           (certificationSchedule.editedCertificationSchedule.certifierSelectionType != 'Manual')}
+	            });
+	        }
+
+            if (#{certificationSchedule.showAssignedScopeControl}) {
+                var scopeSuggest = new SailPoint.ScopeSuggest({
+                    id: 'ssComponent',
+                    renderTo: 'assignedScopeSuggest', 
+                    binding: 'assignedScope', 
+                    disabled: readOnly || #{certificationSchedule.existingCertGroup},
+                    width: 200,
+                    matchFieldWidth: false,
+                    listConfig: {width : 300}
+                });
+                scopeSuggest.setRawValue('#{certificationSchedule.editedCertificationSchedule.assignedScope.displayName}');
+            }
+
+            var escalationSelectCheckboxes = Ext.query('input[class*=escalationSelect]');
+            if (escalationSelectCheckboxes){
+                for(var i=0;i<escalationSelectCheckboxes.length;i++){
+                    var checkbox = escalationSelectCheckboxes[i];
+                    // get the type prefix from the checkbox id so we can lookup the table which contains it.
+                    var elementPrefix = checkbox.id.substring(checkbox.id.indexOf(':') + 1, checkbox.id.indexOf('EscalationSelect'));
+                    SailPoint.CertificationScheduleForm.toggleEscalationEvent(elementPrefix, checkbox.checked, #{certificationSchedule.continuousHasLaunched});
+                }
+            }
+            SailPoint.CertificationScheduleForm.onApproverRuleSelectionChange();
+            SailPoint.CertificationScheduleForm.onPreDelegationRuleSelectionChange();
+        });
+
+
+
+        function updateCertifierInput(disabled){
+            if (disabled)
+                certifyAppOwnersMultiSuggest.disable();
+            else
+                certifyAppOwnersMultiSuggest.enable();
+       }
+
+       
+
+
+    //--><!]]>
+    </script>
+
+    <table class="customWidth paddedTbl" border="0" cellpadding="5" cellspacing="0" style="background-color:#ffffff">
+      <tbody>
+
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_adv_cert_properties}</td></tr>
+
+        <!-- Name templates -->
+        <tr>
+          <td class="titleColumnWithWrap certScheduleTitleCol">
+            <h:outputText value="#{msgs.cert_sched_adv_label_name_template}"/>
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpNameTemplate" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_name_template}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+            <h:inputText id="nameTemplate" size="40"
+                         value="#{certificationSchedule.editedCertificationSchedule.nameTemplate}"
+                         disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                         readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+            <h:selectOneListbox id="nameTextInserter" size="1"
+                                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+              <f:selectItems value="#{certificationSchedule.accessReviewNameParameters}" />
+            </h:selectOneListbox>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="titleColumnWithWrap certScheduleTitleCol">
+            <h:outputText value="#{msgs.cert_sched_adv_label_short_name_template}"/>
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpShortNameTemplate" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_short_name_template}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+            <h:inputText id="shortNameTemplate" size="40"
+                         value="#{certificationSchedule.editedCertificationSchedule.shortNameTemplate}"
+                         disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                         readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+            <h:selectOneListbox id="shortNameTextInserter" size="1"
+                                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+              <f:selectItems value="#{certificationSchedule.accessReviewNameParameters}" />
+            </h:selectOneListbox>
+            <script type="text/javascript" defer="defer">
+              function initTextInserters() {
+                  new SailPoint.TextInserter('certificationScheduleForm:nameTemplate', 'certificationScheduleForm:nameTextInserter');
+                  new SailPoint.TextInserter('certificationScheduleForm:shortNameTemplate', 'certificationScheduleForm:shortNameTextInserter');
+              }
+            </script>
+          </td>
+        </tr>
+
+        <ui:fragment rendered="#{certificationSchedule.showAssignedScopeControl}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.label_scope}"/></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpScope" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help.help_sched_cert_scope}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="5">
+              <div id="assignedScopeSuggest"></div>
+              <t:inputHidden id="assignedScope"
+                             value="#{certificationSchedule.editedCertificationSchedule.assignedScope}" forceId="true">
+                <sp:convertScope />
+              </t:inputHidden>
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message for="assignedScope" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <!-- ======================================== -->
+        <!-- Certifiers Selection                     -->
+        <!-- ======================================== -->
+  
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showMultiCertifiers}">
+          <tr>
+            <td colspan="8" class="spContentTitle">#{msgs.cert_sched_adv_section_cert_assign}</td>
+          </tr>
+          <tr>
+           
+            <td class="titleColumn certScheduleTitleCol" valign="top" >#{msgs.cert_sched_adv_label_certifiers}</td>
+            <td valign="top" class="certScheduleHelpCol"><h:graphicImage
+              id="imgHlpAppCertifiers" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png"
+              alt="#{certificationSchedule.editedCertificationSchedule.accountGroupCertification ? help.help_sched_cert_act_grp_owners : help.help_sched_cert_app_owners}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="2" style="padding:0">
+                <h:inputHidden id="certifierSelectionType" value="#{certificationSchedule.editedCertificationSchedule.certifierSelectionType}" converter="sailpoint.object.Enum"/>
+                <table border="0" cellpadding="0" cellspacing="0" style="margin:0;padding:0">
+                    <tr style="display:#{certificationSchedule.editedCertificationSchedule.businessRoleMembershipCertification ? '' : 'none'}">
+                        <td>
+                            <ui:fragment rendered="#{!certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType == 'Manager'}">
+                                <input name="certifierButton" type="radio" checked="checked" onclick="updateCertifierInput(true);$('certificationScheduleForm:certifierSelectionType').value='Manager'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{!certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType != 'Manager'}">
+                                <input name="certifierButton" type="radio" onclick="updateCertifierInput(true);$('certificationScheduleForm:certifierSelectionType').value='Manager'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType == 'Manager'}">
+                                <input name="certifierButton" type="radio" disabled="disabled" checked="checked" onclick="updateCertifierInput(true);$('certificationScheduleForm:certifierSelectionType').value='Manager'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType != 'Manager'}">
+                                <input name="certifierButton" type="radio" disabled="disabled" onclick="updateCertifierInput(true);$('certificationScheduleForm:certifierSelectionType').value='Manager'"/>
+                            </ui:fragment>
+                        </td>
+                        <td style="font-weight:bold">&nbsp;#{msgs.cert_sched_adv_label_assign_mgr}</td>
+                    </tr>
+                    <tr style="display:#{certificationSchedule.editedCertificationSchedule.businessRoleCertification ? '' : 'none'}">
+                        <td>
+                            <ui:fragment rendered="#{!certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType == 'Owner'}">
+                                <input name="certifierButton" type="radio" checked="checked" onclick="updateCertifierInput(true);$('certificationScheduleForm:certifierSelectionType').value='Owner'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{!certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType != 'Owner'}">
+                                <input name="certifierButton" type="radio" onclick="updateCertifierInput(true);$('certificationScheduleForm:certifierSelectionType').value='Owner'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType == 'Owner'}">
+                                <input name="certifierButton" type="radio" disabled="disabled" checked="checked" onclick="updateCertifierInput(true);$('certificationScheduleForm:certifierSelectionType').value='Owner'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType != 'Owner'}">
+                                <input name="certifierButton" type="radio" disabled="disabled" onclick="updateCertifierInput(true);$('certificationScheduleForm:certifierSelectionType').value='Owner'"/>
+                            </ui:fragment>
+                        </td>
+                        <td style="font-weight:bold">&nbsp;#{msgs.cert_sched_adv_label_assign_owner}</td>
+                    </tr>
+                    <tr>
+                        <td valign="top" style="display:#{certificationSchedule.editedCertificationSchedule.businessRoleCertification ? '' : 'none'}">                          
+                            <ui:fragment rendered="#{!certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType == 'Manual'}">
+                                <input name="certifierButton" type="radio" checked="checked" onclick="updateCertifierInput(false);$('certificationScheduleForm:certifierSelectionType').value='Manual'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{!certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType != 'Manual'}">
+                                <input name="certifierButton" type="radio" onclick="updateCertifierInput(false);$('certificationScheduleForm:certifierSelectionType').value='Manual'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType == 'Manual'}">
+                                <input name="certifierButton" type="radio"  disabled="disabled" checked="checked" onclick="updateCertifierInput(false);$('certificationScheduleForm:certifierSelectionType').value='Manual'"/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{certificationSchedule.existingCertGroup and certificationSchedule.editedCertificationSchedule.certifierSelectionType != 'Manual'}">
+                                <input name="certifierButton" type="radio"  disabled="disabled" onclick="updateCertifierInput(false);$('certificationScheduleForm:certifierSelectionType').value='Manual'"/>
+                            </ui:fragment>
+                        </td>
+                        <td>     
+                            <div style="font-weight:bold;display:#{certificationSchedule.editedCertificationSchedule.businessRoleCertification ? '' : 'none'}">&nbsp;#{msgs.cert_sched_adv_label_assign_manually}</div>
+					          <div id="certifyAppOwnersMultiSuggest"></div>
+					          <t:inputHidden id="certifyAppOwners"
+					                         value="#{certificationSchedule.editedCertificationSchedule.ownerIds}"
+                                             forceId="true">
+					              <sp:convertList />
+					          </t:inputHidden>
+                        </td>
+                    </tr>
+                </table>
+
+                <a4j:outputPanel ajaxRendered="true">
+                  <h:message for="certifyAppOwners" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                </a4j:outputPanel>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <!-- ======================================== -->
+        <!-- Certification Creation Options           -->
+        <!-- ======================================== -->
+ 
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_adv_cert_contents}</td></tr>
+ 
+        <!--  Subordinate Include -->
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showSubordinateCompletion}">
+            <ui:include src="scheduleCertificationsSubordinateInclude.xhtml">
+              <ui:param name="formName" value="certificationScheduleForm"/>
+              <ui:param name="isRendered" value="#{certificationSchedule.editedCertificationSchedule.managerCertification}"/>
+              <ui:param name="optionsBean" value="#{certificationSchedule.editedCertificationSchedule}"/>
+            </ui:include>
+         </ui:fragment>
+
+        <!-- Exclusion Options -->
+
+        <script type="text/javascript">
+        <!--//--><![CDATA[//><!--
+
+            SailPoint.exclusionSelected = function(selectBox){
+
+                var excludeInactiveInput = $('certificationScheduleForm:excludeInactive');
+
+                var excludeInactive = excludeInactiveInput && excludeInactiveInput.checked;
+
+                // If they select an exclusion rule, default saveExclusions to true.
+                // If they have selected nothing, disable the checkbox if the Exclude Inactive
+                // checkbox is not also checked.
+                if (selectBox.selectedIndex > 0){
+                    $('certificationScheduleForm:saveExclusions').checked = true;
+                } else if (!excludeInactive) {
+                    $('certificationScheduleForm:saveExclusions').checked = false;
+                }
+            }
+
+            SailPoint.excludeInactiveSelected  = function(checkbox){ 
+                if (checkbox.checked){
+                    $('certificationScheduleForm:saveExclusions').checked = true;
+                } else if ($('certificationScheduleForm:exclusionRules').selectedIndex == 0){
+                    $('certificationScheduleForm:saveExclusions').checked = false;                 
+                }
+            }
+            //--><!]]>
+        </script>
+
+      <tr>
+        <td class="titleColumnWithWrap certScheduleTitleCol">
+          <h:outputText value="#{msgs.cert_sched_adv_label_exclusion_rule}"/>
+        </td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpExclusionRuleName" styleClass="helpIcon"
+            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_exclusion_rule}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="6" align="left">
+          <a4j:outputPanel id="exclusionRulesPanel">            
+          <h:selectOneMenu id="exclusionRules" onchange="SailPoint.exclusionSelected(this)"
+                           value="#{certificationSchedule.editedCertificationSchedule.exclusionRuleName}"
+                           rendered="#{!(empty certificationSchedule.exclusionRules)}"
+                           disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                           readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+            <f:selectItems value="${certificationSchedule.exclusionRules}"/>
+          </h:selectOneMenu>
+          
+          <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+          <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                           style="display: #{(certificationSchedule.existingCertGroup or (not certificationSchedule.editable)) ? 'none' : ''}"
+                 onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:exclusionRules').value, 
+                                                     'CertificationExclusion',
+                                                     $('certificationScheduleForm:refreshExclusionRulesButton'))" />                                                     
+          </ui:fragment>                        
+          </a4j:outputPanel>
+          <h:outputText value="#{msgs.cert_sched_adv_no_exclusion_rules_defined}" rendered="#{(empty certificationSchedule.exclusionRules)}"/>
+        </td>
+      </tr>
+      <tr>
+        <td class="titleColumnWithWrap certScheduleTitleCol">
+          <h:outputText value="#{msgs.cert_sched_adv_label_save_exclusions}"/>
+        </td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpSaveExclusions" styleClass="helpIcon"
+            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_save_exclusions}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="6" align="left">
+          <h:selectBooleanCheckbox id="saveExclusions" value="#{certificationSchedule.editedCertificationSchedule.saveExclusions}"
+                                   disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                   readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+        </td>
+      </tr>
+
+
+        <!-- Exclude Inactive -->
+        <ui:fragment rendered="#{certificationSchedule.supportsExcludeInactive}">
+          <tr id="excludeInactive">
+            <td class="titleColumnWithWrap certScheduleTitleCol">
+              <h:outputText value="#{msgs.cert_sched_adv_label_exclude_inactive}"/>
+            </td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpExcludeInactive" styleClass="helpIcon"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_exclude_inactive}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <h:selectBooleanCheckbox id="excludeInactive" onclick="SailPoint.excludeInactiveSelected(this)" value="#{certificationSchedule.editedCertificationSchedule.excludeInactive}"
+                                       disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                       readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        <!-- Update Identity Entitlements with this certification detail -->
+       <ui:fragment rendered="#{certificationSchedule.showIdentityEntitlementUpdateCheckbox}">
+         <tr>
+           <td class="titleColumnWithWrap certScheduleTitleCol">
+             <h:outputText value="#{msgs.cert_sched_update_identity_entitlements}"/>
+           </td>
+           <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpUpdateIdentityEntitlement" styleClass="helpIcon"
+               url="/images/icons/dashboard_help_16.png" alt="#{help.help_cert_sched_update_identity_entitlements}"/>
+           </td>
+           <td class="certScheduleOptionCol" colspan="6" align="left">
+             <h:selectBooleanCheckbox value="#{certificationSchedule.editedCertificationSchedule.updateIdentityEntitlements}"
+                                      disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                      readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+           </td>
+         </tr>
+       </ui:fragment>
+
+        <!-- Exclude base application accounts -->
+       <ui:fragment rendered="#{certificationSchedule.supportsExcludeBaseAppAccountsCheckbox}">
+         <tr id="excludeBaseAppAccounts">
+           <td class="titleColumnWithWrap certScheduleTitleCol">
+             <h:outputText value="#{msgs.cert_sched_exclude_base_app_accts}"/>
+           </td>
+           <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpExcludeBaseAppAccts" styleClass="helpIcon"
+               url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_exclude_base_app_accts}"/>
+           </td>
+           <td class="certScheduleOptionCol" colspan="6" align="left">
+             <h:selectBooleanCheckbox value="#{certificationSchedule.editedCertificationSchedule.excludeBaseAppAccounts}"
+                                      disabled="#{certificationSchedule.existingCertGroup}"
+                                      readonly="#{certificationSchedule.existingCertGroup}"/>
+           </td>
+         </tr>
+       </ui:fragment>
+
+        <!-- Logical application entitlement filtering -->
+       <ui:fragment rendered="#{certificationSchedule.supportsExcludeBaseAppAccountsCheckbox}">
+         <tr id="logicalEntitlementFiltering">
+           <td class="titleColumnWithWrap certScheduleTitleCol">
+             <h:outputText value="#{msgs.cert_sched_filter_logical_entitlements}"/>
+           </td>
+           <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpLogicalEntitlmentFiltering" styleClass="helpIcon"
+               url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_filter_logical_entitlements}"/>
+           </td>
+           <td class="certScheduleOptionCol" colspan="6" align="left">
+             <h:selectBooleanCheckbox value="#{certificationSchedule.editedCertificationSchedule.attributes['filterLogicalEntitlements']}"
+                                      disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                      readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+           </td>
+         </tr>
+       </ui:fragment>
+
+
+       <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showIncludeIIQEntitlements}">
+         <tr>
+           <td class="titleColumn certScheduleTitleCol">
+             <h:outputText value="#{msgs.sched_cert_label_include_iiq_capabilities}" />
+           </td>
+           <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpIncludeCapabilities" width="12px"
+                height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_include_iiq_capabilities}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <h:selectBooleanCheckbox
+                id="certifyIncludeCapabilities"
+                value="#{certificationSchedule.editedCertificationSchedule.includeCapabilities}"
+                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+            </td>
+          </tr>
+        </ui:fragment>
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showIncludeIIQScopes}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol">
+              <h:outputText value="#{msgs.sched_cert_label_include_iiq_scopes}" />
+            </td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpIncludeScopes" width="12px"
+                height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_include_iiq_scopes}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <h:selectBooleanCheckbox
+                id="certifyIncludeScopes"
+                value="#{certificationSchedule.editedCertificationSchedule.includeScopes}"
+                disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+            </td>
+          </tr>
+        </ui:fragment>
+ 
+        <!-- Entitlement Granularity -->
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showEntitlementGranularity}">
+            <tr id="certificationGranularityRow" style="display:#{certificationSchedule.editedCertificationSchedule.entitlementGranularityEditable ? '' : 'none'}">
+              <td class="titleColumnWithWrap certScheduleTitleCol">
+                <h:outputText value="#{msgs.cert_sched_adv_label_ent_granularity}" />
+              </td>
+              <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEntGranularity" styleClass="helpIcon"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_ent_granularity}"/>
+              </td>
+              <td class="certScheduleOptionCol" colspan="6" align="left">
+                <h:selectOneMenu value="#{certificationSchedule.editedCertificationSchedule.entitlementGranularity}"
+                                 converter="sailpoint.object.Enum"
+                                 id="entitlementGranularity"
+                                 disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                 readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+                  <f:selectItems value="#{certificationSchedule.entitlementGranularities}" />
+                </h:selectOneMenu>
+              </td>
+            </tr>
+        </ui:fragment>        
+        
+       <!-- Store/Remove IdentityIQ assignments when decisions are made. -->
+       <ui:fragment rendered="#{certificationSchedule.showEntitlementAssignmentCheckbox}">
+         <tr>
+           <td class="titleColumnWithWrap certScheduleTitleCol">
+             <h:outputText value="#{msgs.cert_sched_update_assignment_model}"/>
+           </td>
+           <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpUpdateAttributeAssignments" styleClass="helpIcon"
+               url="/images/icons/dashboard_help_16.png" alt="#{help.help_cert_sched_update_attribute_assignments}"/>
+           </td>
+           <td class="certScheduleOptionCol" colspan="6" align="left">
+             <h:selectBooleanCheckbox value="#{certificationSchedule.editedCertificationSchedule.updateAttributeAssignments}"
+                                      disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                      readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+           </td>
+         </tr>
+       </ui:fragment>
+  
+        <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_adv_cert_rules}</td></tr>
+
+        <!-- Pre-delegation Options -->
+        <tr>
+          <td class="titleColumnWithWrap certScheduleTitleCol">
+            <h:outputText value="#{msgs.cert_sched_adv_label_predelegation_rule}"/>
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpPreDelegationRuleName" styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_predelegation_rule}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+            <a4j:outputPanel id="preDelegationRulesPanel">                      
+            <h:selectOneMenu id="preDelegationRules"
+                             value="#{certificationSchedule.editedCertificationSchedule.preDelegationRuleName}"
+                             disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                             onchange="SailPoint.CertificationScheduleForm.onPreDelegationRuleSelectionChange();"
+                             readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+              <f:selectItems value="${certificationSchedule.preDelegationRules}"/>
+            </h:selectOneMenu>
+            
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                           style="display: #{(certificationSchedule.existingCertGroup or (not certificationSchedule.editable)) ? 'none' : ''}"
+                   onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:preDelegationRules').value, 
+                                                       'CertificationPreDelegation',
+                                                       $('certificationScheduleForm:refreshPreDelegationRulesButton'))" />                                                     
+            </ui:fragment>              
+            </a4j:outputPanel>
+          </td>
+        </tr>
+
+      <tr id='preDelegationEmailTr' style="display:none;">
+        <td class="titleColumnWithWrap certScheduleTitleCol"><h:outputText value="#{msgs.cert_sched_adv_label_email_owner_on_pre_delegation_completion}" /></td>
+        <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpPreDelegationEmail" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_predelegation_emails}" /></td>
+        <td class="certScheduleOptionCol" colspan="6" align="left"><h:selectBooleanCheckbox id="cbPreDelegationEmail" value="#{certificationSchedule.editedCertificationSchedule.sendPreDelegationCompletionEmails}" /></td>
+      </tr>
+
+      <ui:fragment rendered="#{certificationSchedule.supportsSignOffApprover and not certificationSchedule.editedCertificationSchedule.continuous}">
+          <tr id="signOffApproverRule">
+            <td class="titleColumnWithWrap certScheduleTitleCol">
+              <h:outputText value="#{msgs.cert_sched_adv_sign_off_approver_rule}"/>
+            </td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpSignOffApprRule" styleClass="helpIcon"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_sign_off_approver_rule}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <a4j:outputPanel id="approverRulesPanel">                      
+              <h:selectOneMenu id="approverRules"
+                               value="#{certificationSchedule.editedCertificationSchedule.approverRuleName}"
+                               disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                               onchange="SailPoint.CertificationScheduleForm.onApproverRuleSelectionChange();"
+                               readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+                <f:selectItems value="${certificationSchedule.approverRules}"/>
+              </h:selectOneMenu>
+            
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                           style="display: #{(certificationSchedule.existingCertGroup or (not certificationSchedule.editable)) ? 'none' : ''}"
+                     onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:approverRules').value, 
+                                                         'CertificationSignOffApprover',
+                                                         $('certificationScheduleForm:refreshApproverRulesButton'))" />                                                     
+              </ui:fragment>              
+              </a4j:outputPanel>
+            </td>
+          </tr>
+          <tr>
+             <td colspan="2"></td>
+             <td colspan="4">
+              <div id="approvalEmailTemplateConfig" style="display:none">
+                <table >
+                 <thead>
+                   <tr><th colspan="5" class="dashContentHeader">
+                       <h:outputText value="#{msgs.cert_sched_adv_label_signoff_email_template_config}" />
+                   </th></tr>
+                 </thead>
+                 <tbody>
+                 <tr class="titleColumnWithWrap certScheduleTitleCol">
+                   <td >
+                     <h:outputText
+                       value="#{msgs.email_template_cert_sign_off_approval}" />
+                   </td>
+                   <td width="15px">
+                     <h:graphicImage id="imgHlpSignOffApprEmail"
+                       width="12px" height="12px" alt="#{help.help_system_config_cert_sign_off_approval_email}"
+                       style="cursor:pointer;padding: 0px 7px 0px 7px"
+                       url="/images/icons/dashboard_help_16.png"/>
+                   </td>
+                   <td align="left">
+                     <h:selectOneMenu
+                       value='#{certificationSchedule.editedCertificationSchedule.certificationSignOffApprovalEmailTemplate}'
+                       onchange=""
+                       disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                       readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+                       <f:selectItems value="#{systemConfig.emailTemplates}" />
+                     </h:selectOneMenu>  
+                   </td>
+                 </tr>
+                 </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </ui:fragment>
+        
+        <!-- ======================================== -->
+        <!--  Partitioning Options -->
+        <!-- ======================================== -->
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.managerCertification}">
+            <tr id="partitionSectionTitle">
+              <td class="spContentTitle" colspan="8">#{msgs.cert_sched_adv_cert_partition}</td></tr>
+            <tr id="partitionSectionEnable">
+              <td class="titleColumnWithWrap certScheduleTitleCol">
+              <h:outputText value="#{msgs.cert_sched_adv_label_enable_partitioning}"/>
+            </td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEnablePartitioning" styleClass="helpIcon"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_enable_partitioning}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <h:selectBooleanCheckbox id="enablePartitioning" value="#{certificationSchedule.editedCertificationSchedule.enablePartitioning}"
+                                       disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                       readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"/>
+            </td>
+          </tr>
+        </ui:fragment>
+      </tbody>
+    </table>
+    
+    <!-- called to refresh the rule lists -->
+    <a4j:commandButton id="refreshExclusionRulesButton"
+                       style="display:none"
+                       immediate="true"
+                       render="exclusionRulesPanel"/>                
+    
+    <a4j:commandButton id="refreshPreDelegationRulesButton"
+                       style="display:none"
+                       immediate="true"
+                       render="preDelegationRulesPanel"/>                
+    
+    <a4j:commandButton id="refreshApproverRulesButton"
+                       style="display:none"
+                       immediate="true"
+                       render="approverRulesPanel"/>                
+    
+</ui:composition>
+
+</body>
+</html>

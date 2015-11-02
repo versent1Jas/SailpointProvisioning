@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+
+  <body>
+    <ui:composition template="/appPage.xhtml">
+      <ui:define name="title">#{msgs.title_edit_account_attribute}</ui:define>
+      <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>           
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/systemSetup">
+      <src>system-setup.css</src>
+    </sp:style>     
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/identityConfig.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/systemSetup/sequenceTracker.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+          <!--//--><![CDATA[//><!--
+          helpKey = 'ACCOUNT_MAPPING';
+          //--><!]]>
+        </script>
+      </ui:define>
+      <ui:define name="body">
+        <f:view>
+          <h:form styleClass="form" id="configForm">
+          
+            <a4j:outputPanel ajaxRendered="true">
+              <h:messages showDetail="true" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+            </a4j:outputPanel>
+
+            <!-- This hidden input keeps track of order changes in the source mappings -->
+            <h:inputHidden id="newSourceOrder"/>
+
+            <div class="pageInfo">
+              <h:outputText value="#{msgs.page_description_account}"/>
+            </div>
+
+              <div class="spContent">
+                <div class="spTabledContent">
+                  <table id="identityAttributeSettingsTbl" class="width100 spTable">
+                    <thead><tr><th colspan="2"><h:outputText value="#{msgs.section_account_attribute}"/></th></tr></thead>
+                    <tbody>
+                      <tr class="padTop">
+                        <td width="25%"><h:outputText value="#{msgs.label_attribute_name}"/></td>
+                        <td><h:inputText id="attribute" 
+                                         validator="sailpoint.web.validators.AttributeNameValidator"
+                                          value="#{linkConfigEdit.editedAttribute.name}"/></td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.label_display_name}"/></td>
+                        <td><h:inputText id="displayName" value="#{linkConfigEdit.editedAttribute.displayName}"/></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="spTabledContent">
+                  <table class="width100 spTable">
+                    <thead><tr><th colspan="2"><h:outputText value="#{msgs.section_advanced_options}"/></th></tr></thead>
+                    <tbody>
+                      <tr class="padTop">
+                        <td><h:outputText value="#{msgs.oconfig_label_edit_mode}"/></td>
+                        <td>
+                          <h:selectOneMenu id="editableMode" value="#{linkConfigEdit.editedAttribute.editMode}">
+                            <f:selectItem itemValue="ReadOnly" itemLabel="#{msgs.objconfig_edit_mode_readonly}"/>
+                            <f:selectItem itemValue="Permanent" itemLabel="#{msgs.objconfig_edit_mode_permanent}"/>
+                            <f:selectItem itemValue="UntilFeedValueChanges" itemLabel="#{msgs.objconfig_edit_mode_temporary}"/>
+                          </h:selectOneMenu>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.label_attribute_type}"/></td>
+                        <td>
+                           <h:selectOneMenu id="types"
+                                            value="#{linkConfigEdit.editedAttribute.type}">
+                             <f:selectItem itemValue=""
+                                           itemLabel="#{msgs.select_type}"/>
+                             <f:selectItems value="#{linkConfigEdit.editedAttribute.types}"/>
+                          </h:selectOneMenu>
+
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><h:outputText value="#{msgs.ident_attribute_searchable}"/></td>
+                        <td><h:selectBooleanCheckbox disabled="true" readonly="true" id="extended" value="true"/></td>
+                      </tr>
+                      <tr>
+                        <td><h:outputText value="#{msgs.oconfig_attr_multi}"/></td>
+                        <td><h:selectBooleanCheckbox id="multiValued" value="#{linkConfigEdit.editedAttribute.multi}"/> </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <a4j:outputPanel id="sourceMappings">
+                  <div class="spTabledContent">
+                    <table id="mappedSourceTable" class="width100 spTable">
+                      <thead><tr><th colspan="2"><h:outputText value="#{msgs.section_source_mappings}"/></th></tr></thead>
+                      <tbody>
+                        <tr class="padTop">
+                          <td width="25%">
+                            <table id="sources" class="#{linkConfigEdit.editedAttribute.numSources gt 1 ? 'selectionBox' : 'borderlessSelectionBox'} width100" cellspacing="0">
+                              <tbody>
+                                <ui:repeat value="#{linkConfigEdit.editedAttribute.mappedSources}" var="source">
+                                  <tr id="#{sp:buildValidComponentIdIgnoringNulls(source.text, true)}"
+                                      onclick="selectMe('#{sp:buildValidComponentIdIgnoringNulls(source.text, true)}');"
+                                      style="cursor:pointer;">
+                                    <td width="20px">
+                                      <h:outputText value="#{linkConfigEdit.editedAttribute.numSources gt 1 ? source.currentOrder : ''}"/>
+                                      <h:outputText value="#{linkConfigEdit.editedAttribute.numSources gt 1 ? '.' : ''}"/>
+                                    </td>
+                                    <td>                                  
+                                      <h:inputHidden id="#{sp:buildValidComponentIdIgnoringNulls(source.text, true)}Index" value="#{source.index}"/>
+                                      <h:outputText value="#{source.text}"/>
+                                    </td>
+                                  </tr>
+
+                                  <script type="text/javascript">
+                                    SequenceTracker.appendValueToSequence('sources', #{source.index});
+                                  </script>
+
+                                </ui:repeat>
+                              </tbody>
+                            </table>
+                          </td>
+                          <td>
+                            <div id="selectionArrows" style="display:#{linkConfigEdit.editedAttribute.numSources gt 1 ? '' : 'none'}">
+                              <table class="width100">
+                                <tbody>
+                                  <tr><td><h:graphicImage
+                                    id="imgMoveUp"
+                                    url="/images/icons/TealArrowUpWhtSdw.png"
+                                    onclick="moveMeUp();"/>
+                                  </td></tr>
+                                  <tr><td>
+                                    <h:graphicImage
+                                      id="imgMoveDown"
+                                      url="/images/icons/TealArrowDownWhtSdw.png"
+                                      onclick="moveMeDown();"/>
+                                  </td></tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </a4j:outputPanel>
+
+                <div style="margin: 10px 0 10px 12px">
+                  <a4j:commandButton styleClass="secondaryBtn" id="AddSource" action="#{linkConfigEdit.prepareToAddSource}" 
+                                     oncomplete="showAddSourcePopup('#{sp:escapeJavascript(linkConfigEdit.editedAttribute.name)}');" value="#{msgs.button_add_source_mapping}"/>
+                  <input type="button" id="DeleteSources" class="secondaryBtn" onclick="showDeleteSourcesPopup('#{sp:escapeJavascript(linkConfigEdit.editedAttribute.name)}');" value="#{msgs.button_delete_source_mappings}"/>
+                </div>
+
+                <div class="buttonRow">
+                    <h:commandButton id="saveButton" styleClass="primaryBtn" value="#{msgs.button_save}" action="#{linkConfigEdit.save}"/>
+                    <h:commandButton id="cancelButton" styleClass="secondaryBtn" value="#{msgs.button_cancel}" action="#{linkConfigEdit.cancel}" immediate="true"/>
+                </div>
+              </div>
+            
+            <div id="addSourceDialog">
+              <ui:include src="addSource.xhtml"/>
+            </div>
+            
+            <div id="deleteSourceDialog">
+              <ui:include src="deleteSource.xhtml"/>
+            </div>
+          </h:form>
+        </f:view>
+      </ui:define>
+    </ui:composition>
+  </body>
+</html>

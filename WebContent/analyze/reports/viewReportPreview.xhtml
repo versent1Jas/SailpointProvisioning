@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+    <ui:define name="title">#{msgs.rept_preview_title}</ui:define>
+
+    <ui:define name="headerItems">
+        <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/analyze/reports">
+          <src>reports.css</src>
+        </sp:style>
+        <sp:script>
+            <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+            <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+            <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+            <src>#{base.requestContextPath}/scripts/sailpoint/chart/ReportChartBuilder.js?#{debug.revision}</src>
+            <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/GridReportLayout.js?#{debug.revision}</src>
+            <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/reports/reportPreview.js?#{debug.revision}</src>
+        </sp:script>
+
+        <script type="text/javascript">
+            <!--//--><![CDATA[//><!--
+
+            helpKey = 'REPORT_PREVIEW';
+
+            var gridColConf = #{reportDefinition.gridConfigJson};
+            var hasSummary = #{reportDefinition.includesSummary};
+            var hasChart = #{reportDefinition.includesChart};
+            var gridTitle = '#{msgs.rept_preview_grid_title}';
+            var summaryTableTitle = "#{msgs.rept_preview_panel_summary}";
+
+            var definitionId = "#{reportDefinition.taskDefinitionId}";
+
+            Ext.onReady(function() {
+                SailPoint.reportPreviewInit(gridColConf, gridTitle, definitionId, hasSummary, hasChart);
+            });
+
+            //--><!]]>
+        </script>
+
+    </ui:define>
+
+    <ui:define name="body">
+        <f:view>
+            <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+            <h:form styleClass="form" id="editForm">
+
+                <h:inputHidden value="#{reportDefinition.taskDefinitionId}"/>
+
+                <div id="pageContentContainer">
+                    <div id="controls" style="display:none">
+                        <h:inputText styleClass="reviewAction" value="#{reportDefinition.reviewAction}"/>
+                        <h:commandButton styleClass="reviewActionButton secondaryBtn" action="#{reportDefinition.submitReviewAction}"/>
+                    </div>
+
+                    <div id="toolbar" style="width:100%;height:40px"></div>
+
+                    <div class="reportTitle">#{reportDefinition.reportTitle}</div>
+
+                    <div id="schedule-success-msg" style="margin-top:15px;display:none" class="formInfo">#{msgs.rept_preview_schedule_success}</div>
+
+                    <div id="unsaved-changes-msg" style="margin-top:15px;display:none" class="unsaved-changes">#{msgs.rept_preview_warning_unsaved_changes} <span id="changeSaveButton"></span> <span id="changeCancelButton"></span></div>
+
+                    <div id="summaryPanel" style="margin:20px 0;"></div>
+
+                    <div id="gridPanel" style="margin-top:20px;"></div>
+
+                    <c:if test="#{reportDefinition.gridPreviewDisabled}">
+                        <div style="margin-top:20px;">#{reportDefinition.previewDisabledMessage}</div>
+                    </c:if>
+
+                </div>
+
+            </h:form>
+        </f:view>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<!-- djs: work in progress. -->
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.lcm_workitem_renderer_title}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>image-radio.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/lcmWorkItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/lcmWorkItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ImageRadio.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ElectronicSignaturePopup.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+
+        SailPoint.web.workitem.SIGNATURE_MEANING = "#{sp:escapeJavascript(workItem.signatureMeaning)}";
+        SailPoint.web.workitem.ORIGINAL_AUTH_ID = "#{sp:escapeJavascript(workItem.originalAuthId)}";
+        SailPoint.web.workitem.NATIVE_AUTH_ID = "#{sp:escapeJavascript(workItem.nativeAuthId)}";
+
+        Ext.onReady(function () {
+            makeTableMulticolored($('approvalItemsTable'), true, true, 'odd', 'even');
+        });
+
+        //------------------------------------------------------
+        // ** EVENTS **
+        //------------------------------------------------------
+
+        Page.addEvents(
+          /**
+           * @event beforeSave
+           * Fires when the save or complete button is clicked.
+           */
+          'beforeSave'
+        );
+
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <sp:sailpointForm styleClass="form" id="editForm" forceEncodedURL="true">
+
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+          <h:inputHidden id="signatureAuthId" value="#{workItem.signatureAuthId}"/>
+          <h:inputHidden id="signaturePass" value="#{workItem.signaturePass}"/>
+          <h:inputHidden id="decisions" value="#{workItem.decisions}" />
+          <h:inputHidden id="bulkDecision" value="#{workItem.bulkDecision}" />
+
+          <ui:include src="summaryFieldset.xhtml"/>
+          <ui:include src="commentsFieldset.xhtml"/>
+
+          <div id="unsavedChangesDiv" class="certificationIdentityChanged" style="width:100%;display:none">
+              <h:graphicImage alt="" url="/images/icons/dialogue_error_16.png"
+                style="vertical-align:middle; padding:0px 3px 2px 0px;"/>
+              #{msgs.workitem_unsaved_item}
+          </div>
+          <div id="finishAllItemsDiv" class="certificationIdentityChanged" style="width:100%;display:none">
+              <h:graphicImage alt="" url="/images/icons/dialogue_error_16.png"
+                style="vertical-align:middle; padding:0px 3px 2px 0px;"/>
+              #{msgs.arm_finish_all_items_before_complete}
+          </div>
+
+          <ui:fragment rendered="#{workItem.attributes['policyViolations'] != null}">
+            <ui:include src="lcmApprovalViolations.xhtml">
+              <ui:param name="workitemId" value="#{workItem.objectId}" />
+            </ui:include>
+          </ui:fragment>
+
+          <ui:fragment rendered='#{workItem.formBean != null and workItem.editable}'>
+          <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{workItem.attributes['lcmViolationReview'] == 'true' ? msgs.policy_violations_detected : msgs.changes}"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <ui:include src='../include/formRenderer.xhtml'>
+                    <ui:param name='form' value='#{workItem.formBean}'/>
+                    <ui:param name='formStyle' value='width:90%;'/>
+                    <ui:param name='persistEvent' value='beforeSave'/>
+                    <ui:param name='showPreviousValue' value='true'/>
+                    <ui:param name='submitButton' value='editForm:submitBtn'/>
+                  </ui:include>
+                </td>
+              </tr>
+            </table>
+          </div>
+          </ui:fragment>
+          
+          <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="Decisions"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <ui:include src="approvalItemsBulkDecisionInclude.xhtml">
+                    <ui:param name='disableSummary' value='true'/>
+                    <ui:param name="violationReview" value="#{workItem.attributes['lcmViolationReview']}" />
+                  </ui:include>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <br/>
+        <div class="buttonRow">
+          <h:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" onclick="SailPoint.workitem.ApprovalItemGrid.persistDecisions( '#{workItem.object.id}', SailPoint.DecisionTracker, SailPoint.BulkDecision.decision ); return true;"/>
+                    
+          <a4j:commandButton id="submitBtn" style="display: none" action="#{workItem.refresh}"
+                           onclick="Page.fireEvent('beforeSave'); SailPoint.workitem.ApprovalItemGrid.persistDecisions( '#{workItem.object.id}', SailPoint.DecisionTracker, SailPoint.BulkDecision.decision ); return true;"
+                           render="formRenderer-" oncomplete="SailPoint.form.Util.updateFormPanel({formId:'#{workItem.formBean.id}',meaning: '#{sp:escapeJavascript(workItem.signatureMeaning)}', oAuthId: '#{sp:escapeJavascript(workItem.originalAuthId)}', nAuthId: '#{sp:escapeJavascript(workItem.nativeAuthId)}'});"/>
+          
+          <ui:fragment rendered="#{workItem.editable}">
+
+            <h:commandButton onclick="Page.fireEvent('beforeSave');checkDisableClick('editForm:completeBtn',true); return false;"
+                             value="#{msgs.button_complete}"
+                             title="#{msgs.button_title_click_when_finished}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton  onclick="var ret = Page.fireEvent('beforeSave'); if( ret ) { SailPoint.workitem.ApprovalItemGrid.persistDecisions( '#{workItem.object.id}', SailPoint.DecisionTracker, SailPoint.BulkDecision.decision ); } return ret;"
+                              action="#{workItem.save}"
+                              value="#{msgs.button_save}"
+                              title="#{msgs.button_title_click_to_save_work_item}"
+                              styleClass="primaryBtn"/>
+
+
+            <h:commandButton onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false, SailPoint.getWorkItemPriority()); return false;"
+                             value="#{msgs.button_forward}"
+                             title="#{msgs.button_title_click_to_forward}"
+                             styleClass="primaryBtn"/>
+
+          </ui:fragment>
+          <ui:fragment rendered="#{!workItem.editable}">
+            <h:commandButton action="#{workItem.save}"
+                             value="#{msgs.button_save}"
+                             title="#{msgs.button_title_click_to_save_work_item}"
+                             styleClass="primaryBtn"/>
+          </ui:fragment>
+          <h:commandButton action="#{workItem.cancel}"
+                           immediate="true"
+                           value="#{msgs.button_cancel}"
+                           styleClass="secondaryBtn"/>
+        </div>
+      </sp:sailpointForm>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

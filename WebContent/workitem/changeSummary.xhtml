@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+<!--
+  Common including for rendering a stilpoint.object.ChangeSummary object.
+  Required parameters:
+
+    summary - a sailpoint.object.ChangeSummary object
+    createTitle - a catalog key for the details title when creating
+    updateTitle - a catalog key for the details title when updating
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <br/>
+  <h:panelGroup>
+        
+    <ui:fragment rendered="#{summary.create}">
+      <h:outputText styleClass="spContentTitle" value="#{sp:localizeKey(createTitle)}"/>
+      <br/><br/>
+
+      <table class="width100">
+        <tr><td><div class="spTabledContent">
+          <table class="spTable" cellspacing="0" id="createTbl">
+            <tr>
+              <th>#{msgs.attribute}</th>
+              <th>#{msgs.attr_new_value}</th>
+            </tr>              
+            <ui:repeat value="#{summary.differences}" var="diff">
+              <tr>
+                <td><h:outputText value="#{sp:localizeKey(diff.attribute)}"/></td>
+                <td><h:outputText value="#{diff.newValue}" escape="false"/></td>
+              </tr>
+            </ui:repeat>
+          </table>
+        </div></td></tr>
+      </table>
+    </ui:fragment>
+
+    <ui:fragment rendered="#{summary.delete}"> 
+      <h:outputText styleClass="spContentTitle" value="#{sp:localizeKey(updateTitle)}"/> 
+      <br/><br/> 
+	 
+      <!-- optional, contains information about the object being deleted --> 
+      <ui:fragment rendered="#{summary.differences != null}"> 
+        <table class="width100"> 
+          <tr><td><div class="spTabledContent"> 
+            <table class="spTable" cellspacing="0" id="createTbl"> 
+              <tr> 
+                <th>#{msgs.attribute}</th> 
+                <th>#{msgs.label_value}</th> 
+              </tr>               
+              <ui:repeat value="#{summary.differences}" var="diff"> 
+                <tr> 
+                  <td><h:outputText value="#{sp:localizeKey(diff.attribute)}"/></td> 
+                  <td><h:outputText value="#{diff.newValue}" escape="false"/></td> 
+                </tr> 
+              </ui:repeat> 
+            </table> 
+          </div></td></tr> 
+        </table> 
+      </ui:fragment> 
+    </ui:fragment> 
+	 
+    <ui:fragment rendered="#{!summary.create and !summary.delete}"> 
+      <h:outputText styleClass="spContentTitle" value="#{sp:localizeKey(updateTitle)}"/>
+      <br/><br/>
+
+      <table class="width100">
+        <tr><td><div class="spTabledContent">
+          <table class="spTable" cellspacing="0" id="updateTb">
+            <tr>
+              <th>#{msgs.attribute}</th>
+              <th>#{msgs.attr_old_value}</th>
+              <th>#{msgs.attr_new_value}</th>
+            </tr>              
+            <ui:repeat value="#{summary.differences}" var="diff">
+              <tr>
+                <td><h:outputText value="#{sp:localizeKey(diff.attribute)}"/></td>
+                <td><h:outputText value="#{diff.oldValue}" escape="false"/></td>
+                <td><h:outputText value="#{diff.newValue}" escape="false"/></td>
+              </tr>
+            </ui:repeat>
+          </table>
+        </div></td></tr>
+      </table>
+    </ui:fragment>
+
+  </h:panelGroup>
+</ui:composition>
+</body>
+</html>

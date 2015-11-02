@@ -1,0 +1,437 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+<!--***********************************************************
+
+    Workflow Registry
+
+    *************************************************************-->
+
+<WorkflowRegistry name='Workflow Registry'>
+
+  <WorkflowTypes>
+    <WorkflowType name="BatchProvisioning" lcm="true" displayNameKey="workflow_type_batch_provisioning" helpKey="help_workflow_type_batch_provisioning"/>
+    <WorkflowType name="ScheduledAssignment" displayNameKey="workflow_type_scheduled_assignment" helpKey="help_workflow_type_scheduled_assignment"/>
+    <WorkflowType name="ScheduledRoleActivation" displayNameKey="workflow_type_scheduled_role_activation" helpKey="help_workflow_type_scheduled_role_activation"/>
+    <WorkflowType name="ManagedAttribute" displayNameKey="workflow_type_managed_attribute" helpKey="help_workflow_type_managed_attribute"/>
+    <WorkflowType name="IdentityCorrelation" displayNameKey="workflow_type_identity_correlation" helpKey="help_workflow_type_identity_correlation"/>
+    <WorkflowType name="IdentityEvent" displayNameKey="workflow_type_identity_event" helpKey="help_workflow_type_identity_event"/>
+    <WorkflowType name="IdentityLifecycle" displayNameKey="workflow_type_identity_lifecycle" helpKey="help_workflow_type_identity_lifecycle" stepLibraries="IdentityProvisioningStepLibrary"/>
+    <WorkflowType name="IdentityUpdate" displayNameKey="workflow_type_identity_update" helpKey="help_workflow_type_identity_update"/>
+    <WorkflowType name="IdentityRefresh" displayNameKey="workflow_type_identity_refresh" helpKey="help_workflow_type_identity_refresh"/>
+    <WorkflowType name="LCMIdentity" lcm="true" displayNameKey="workflow_type_lcm_identity" helpKey="help_workflow_type_lcm_identity"/>
+    <WorkflowType name="LCMProvisioning" lcm="true" displayNameKey="workflow_type_lcm_provisioning" helpKey="help_workflow_type_lcm_provisioning" stepLibraries="IdentityProvisioningStepLibrary"/>
+    <WorkflowType name="LCMRegistration" lcm="true" displayNameKey="workflow_type_lcm_registration" helpKey="help_workflow_type_lcm_registration"/>
+    <WorkflowType name="PolicyViolation" displayNameKey="workflow_type_policy_violation" helpKey="help_workflow_type_policy_violation"/>
+    <WorkflowType name="RoleModeler" displayNameKey="workflow_type_role_modeler" helpKey="help_workflow_type_role_modeler"/>
+    <WorkflowType name="Subprocess" displayNameKey="workflow_type_subprocess" helpKey="help_workflow_type_subprocess"/>
+    <WorkflowType name="PasswordIntercept" displayNameKey="workflow_type_password_intercept" helpKey="help_workflow_type_password_intercept"/>
+  </WorkflowTypes>
+
+  <Attributes>
+      <Map>
+        <entry key="approvalModes" value="serial,serialPoll,parallel,parallelPoll,any"/>
+        <entry key="icons">
+          <value>
+            <List>
+              <WorkflowStepIcon name="Analysis" text="Analysis" styleClass="analysis"/> 
+              <WorkflowStepIcon name="Approval" text="Approval" styleClass="approval"/> 
+              <WorkflowStepIcon name="Audit" text="Audit" styleClass="audit"/> 
+              <WorkflowStepIcon name="Catches" text="Catches" styleClass="catches"/> 
+              <WorkflowStepIcon name="Default" text="Generic Step" styleClass="" defaultIcon="true"/> 
+              <WorkflowStepIcon name="Email" text="Send Email" styleClass="email"/> 
+              <WorkflowStepIcon name="Message" text="Add Message" styleClass="message"/> 
+              <WorkflowStepIcon name="Provision" text="Provision" styleClass="provision"/> 
+              <WorkflowStepIcon name="Start" text="Start" styleClass="start" defaultIcon="true"/> 
+              <WorkflowStepIcon name="Stop" text="Stop" styleClass="stop" defaultIcon="true"/> 
+              <WorkflowStepIcon name="Task" text="Task" styleClass="task"/> 
+              <WorkflowStepIcon name="Undo" text="Undo" styleClass="undo"/> 
+            </List>
+          </value>
+        </entry>
+      </Map>
+  </Attributes>
+
+  <WorkflowCallables>
+  
+    <!--  Initialization - Workflow Methods that do initialize something to awesome -->
+    
+    <!-- IDENTITY LIBRARY -->
+    <WorkflowCallable name="getManager" type="Initialization" library="Identity" descriptionKey="workflow_registry_identity_getmanager">
+      <RequiredArguments>
+        <Argument name="identityName">
+          <Description>the name of the identity for whom to return the manager's name</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    
+    <!-- ROLE LIBRARY -->
+    <WorkflowCallable name="getRoleDifferences" type="Initialization" library="Role" descriptionKey="workflow_registry_role_getroledifferences">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="isSignificantChange" type="Initialization" library="Role" descriptionKey="workflow_registry_role_issignificantchange">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="getDisplayableRoleName" type="Initialization" library="Role" descriptionKey="workflow_registry_role_getdisplayablerolename">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+
+    <!--  APPROVAL LIBRARY -->
+    <WorkflowCallable name="getCurrentObject" type="Initialization" library="Approval" descriptionKey="workflow_registry_approval_getcurrentobject">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="getObject" type="Initialization" library="Approval" descriptionKey="workflow_registry_approval_getobject">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+
+    <WorkflowCallable name="getObjectName" type="Initialization" library="Approval" descriptionKey="workflow_registry_approval_getobjectname">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="getObjectClass" type="Initialization" library="Approval" descriptionKey="workflow_registry_approval_getobjectclass">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+
+    <WorkflowCallable name="getObjectOwner" type="Initialization" library="Approval" descriptionKey="workflow_registry_approval_getobjectowner">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+
+    <WorkflowCallable name="getObjectOwnerName" type="Initialization" library="Approval" descriptionKey="workflow_registry_approval_getobjectownername">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="isSelfApproval" type="Initialization" library="Approval" descriptionKey="workflow_registry_approval_isselfapproval">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    
+    <!--  STANDARD WORKFLOW HANDLER -->
+  
+    <!--  Actions - Workflow Methods that do something awesome -->
+    
+    <!--  STANDARD WORKFLOW HANDLER -->
+    <WorkflowCallable name="audit" type="Action" descriptionKey="workflow_registry_general_audit">
+      <RequiredArguments>
+        <Argument name="source"/>
+        <Argument name="action"/>
+        <Argument name="target"/>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="addMessage" type="Action" descriptionKey="workflow_registry_general_addmessage">
+      <RequiredArguments>
+        <Argument name="message">
+          <Description>a string or message object to stored on the workflow</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="launchTask" type="Action" descriptionKey="workflow_registry_general_launchtask">
+      <RequiredArguments>
+        <Argument name="taskDefinition">
+          <Description>required name of the TaskDefinition to launch</Description>
+        </Argument>
+        <Argument name="taskResult">
+          <Description>optional name of the TaskResult</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="print" type="Action" descriptionKey="workflow_registry_general_print">
+      <RequiredArguments>
+        <Argument name="message">
+          <Description>a string or message object to printed to the console</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="sendEmail" type="Action" descriptionKey="workflow_registry_general_sendemail">
+      <RequiredArguments>
+        <Argument name="to"/>   
+        <Argument name="bcc"/>   
+        <Argument name="cc"/>   
+        <Argument name="from"/> 
+        <Argument name="subject"/> 
+        <Argument name="body"/> 
+        <Argument name="template"/> 
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <!-- ROLE LIBRARY -->
+    <WorkflowCallable name="auditRoleDifferences" type="Action" library="Role" descriptionKey="workflow_registry_role_auditroledifferences">
+      <RequiredArguments>
+        <Argument name="source"/>
+        <Argument name="action"/>
+        <Argument name="target"/>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="buildApplicationApprovals" type="Action" library="Role" descriptionKey="workflow_registry_role_buildapplicationapprovals">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="buildOwnerApproval" type="Action" library="Role" descriptionKey="workflow_registry_role_buildownerapproval">
+      <RequiredArguments>
+        <Argument name="approver">
+          <Description>the name of the suggested approver</Description>
+        </Argument>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="disableRole" type="Action" library="Role" descriptionKey="workflow_registry_role_disablerole">
+      <RequiredArguments>
+        <Argument name="role">
+          <Description>The ID of the role to be disabled.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="enableRole" type="Action" library="Role" descriptionKey="workflow_registry_role_enablerole">
+      <RequiredArguments>
+        <Argument name="role">
+          <Description>The ID of the role to be enabled.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="getApprovalAuditAction" type="Action" library="Role" descriptionKey="workflow_registry_role_getapprovalauditaction">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+  
+  
+    <!-- IDENTITY LIBRARY -->
+    <WorkflowCallable name="activateRoleAssignment" type="Action" library="Identity" descriptionKey="workflow_registry_identity_activateroleassignment">
+      <RequiredArguments>
+        <Argument name="identity">
+          <Description>The ID of the identity to be acted on.</Description>
+        </Argument>
+        <Argument name="role">
+          <Description>The ID of the role to be assigned.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="assembleRetryProject" type="Action" library="Identity" descriptionKey="workflow_registry_identity_assembleretryproject">
+      <RequiredArguments>
+        <Argument name="project">
+          <Description>Provisioning project containing assigned roles and side effects, compiled from the input plan.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="assimilatePlanApprovalForm" type="Action" library="Identity" descriptionKey="workflow_registry_identity_assimilateplanapprovalform">
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="buildPlanApprovalForm" type="Action" library="Identity" descriptionKey="workflow_registry_identity_buildplanapprovalform">
+      <RequiredArguments>
+        <Argument name="template">
+          <Description>Argument used by buildProvisioningForm to pass in the name of the form template.  If not specified the default 'Identity Refresh' form is used..</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="assimilateProvisioningForm" type="Action" library="Identity" descriptionKey="workflow_registry_identity_assimilateprovisioningform">
+      <RequiredArguments>
+        <Argument name="project">
+          <Description>Provisioning project containing assigned roles and side effects, compiled from the input plan.</Description>
+        </Argument>
+        <Argument name="form">
+          <Description>Argument used by assimilateProvisioningForm to pass in the Form object that has been interactted with.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="buildPlanApprovalForm" type="Action" library="Identity" descriptionKey="workflow_registry_identity_buildplanapprovalform">
+      <RequiredArguments>
+        <Argument name="template">
+          <Description>Argument used by buildProvisioningForm to pass in the name of the form template.  If not specified the default 'Identity Refresh' form is used.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="checkPolicyViolations" type="Action" library="Identity" descriptionKey="workflow_registry_identity_checkpolicyviolations">
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="buildProvisioningForm" type="Action" library="Identity" descriptionKey="workflow_registry_identity_buildprovisioningform">
+      <RequiredArguments>
+        <Argument name="preferredOwner">
+          <Description>Optional name of the Identity we'd like to process first.</Description>
+        </Argument>
+        <Argument name="requiredOwner">
+          <Description>Optional name of the Identity we must process first then stop.</Description>
+        </Argument>
+        <Argument name="template">
+          <Description>Argument used by buildProvisioningForm to pass in the name of the form template.  If not specified the default 'Identity Refresh' form is used.</Description>
+        </Argument>
+        <Argument name="project">
+          <Description>Provisioning project containing assigned roles and side effects, compiled from the input plan.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="deleteAllAccounts" type="Action" library="Identity" descriptionKey="workflow_registry_identity_deleteallaccounts">
+    </WorkflowCallable>
+    <WorkflowCallable name="disableAllAccounts" type="Action" library="Identity" descriptionKey="workflow_registry_identity_disableallaccounts">
+    </WorkflowCallable>
+    <WorkflowCallable name="enableAllAccounts" type="Action" library="Identity" descriptionKey="workflow_registry_identity_enableallaccounts">
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="deactivateRoleAssignment" type="Action" library="Identity" descriptionKey="workflow_registry_identity_deactivateroleassignment">
+      <RequiredArguments>
+        <Argument name="identity">
+          <Description>The ID of the identity to be acted on.</Description>
+        </Argument>
+        <Argument name="role">
+          <Description>The ID of the role to be assigned.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="processApprovalDecisions" type="Action" library="Identity" descriptionKey="workflow_registry_identity_processapprovaldecisions">
+      <RequiredArguments>
+        <Argument name="project">
+          <Description>Provisioning project containing assigned roles and side effects, compiled from the input plan.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="provisionProject" type="Action" library="Identity" descriptionKey="workflow_registry_identity_provisionproject">
+      <RequiredArguments>
+        <Argument name="project">
+          <Description>Provisioning project containing assigned roles and side effects, compiled from the input plan.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="refreshIdentity" type="Action" library="Identity" descriptionKey="workflow_registry_identity_refreshidentity">
+      <RequiredArguments>
+        <Argument name="identity">
+          <Description>The ID of the identity to be refreshed.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="refreshIdentities" type="Action" library="Identity" descriptionKey="workflow_registry_identity_refreshidentities">
+      <RequiredArguments>
+        <Argument name="identityNames">
+          <Description>The names of the identities to be refreshed.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="retryProvisioningProject" type="Action" library="Identity" descriptionKey="workflow_registry_identity_retryprovisioningproject">
+      <RequiredArguments>
+        <Argument name="project">
+          <Description>Provisioning project containing assigned roles and side effects, compiled from the input plan.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    
+    <!-- GROUP LIBRARY -->
+    <WorkflowCallable name="provisionGroupProject" type="Action" library="Identity" descriptionKey="workflow_registry_group_provisiongroupproject">
+      <RequiredArguments>
+        <Argument name="project">
+          <Description>Provisioning project containing assigned roles and side effects, compiled from the input plan.</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <!-- VIOLATION LIBRARY -->
+    <WorkflowCallable name="delete" type="Action" library="PolicyViolation" descriptionKey="workflow_registry_policy_violation_delete">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="ignore" type="Action" library="PolicyViolation" descriptionKey="workflow_registry_policy_violation_ignore">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="mitigateViolation" type="Action" library="PolicyViolation" descriptionKey="workflow_registry_policy_violation_mitigateviolation">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+    <WorkflowCallable name="remediateViolation" type="Action" library="PolicyViolation" descriptionKey="workflow_registry_policy_violation_remediateviolation">
+      <RequiredArguments>
+        <Argument name="approvalObject">
+          <Description>the object being approved</Description>
+        </Argument>
+      </RequiredArguments>
+    </WorkflowCallable>
+    
+  </WorkflowCallables>
+
+</WorkflowRegistry>
+
+</sailpoint>

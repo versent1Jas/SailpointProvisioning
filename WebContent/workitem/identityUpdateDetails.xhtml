@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <br/>
+  <h:panelGroup>
+        
+    <table cellspacing="10">
+      <tr>
+        <td><h:outputText value="#{msgs.witem_identity_name}" styleClass="titleColumn"/> </td>
+        <td align='left'><h:outputText value="#{workItem.attributes['identityName']}"/> </td>
+      </tr>
+      <ui:fragment rendered="#{sp:size(workItem.attributes['oldRoles']) != 0 or sp:size(workItem.attributes['newRoles']) != 0}">
+      <tr>
+        <td><h:outputText value="#{msgs.witem_identity_old_roles}" styleClass="titleColumn"/></td>
+        <td><h:outputText value="#{workItem.attributes['oldRoles']}"/></td>
+      </tr>
+      <tr>
+        <td><h:outputText value="#{msgs.witem_identity_new_roles}" styleClass="titleColumn"/></td>
+        <td><h:outputText value="#{workItem.attributes['newRoles']}"/></td>
+      </tr>
+      </ui:fragment>
+      <ui:fragment rendered="#{sp:size(workItem.attributes['linksToMove']) gt 0}">
+      <tr>
+        <td><h:outputText value="#{msgs.witem_identity_links_to_move}" styleClass="titleColumn"/></td>
+        <td><ui:repeat value="#{workItem.attributes['linksToMove']}" var="link"><h:outputText value="#{link}"/><br/></ui:repeat></td>
+      </tr>
+      </ui:fragment>
+      <ui:fragment rendered="#{sp:size(workItem.attributes['linksToRemove']) gt 0}">
+      <tr>
+        <td><h:outputText value="#{msgs.witem_identity_links_to_remove}" styleClass="titleColumn"/></td>
+        <td><ui:repeat value="#{workItem.attributes['linksToRemove']}" var="link"><h:outputText value="#{link}"/><br/></ui:repeat></td>
+      </tr>
+      </ui:fragment>
+      <ui:fragment rendered="#{sp:size(workItem.attributes['linksToAdd']) gt 0}">
+      <tr>
+        <td><h:outputText value="#{msgs.witem_identity_links_to_add}" styleClass="titleColumn"/></td>
+        <td><ui:repeat value="#{workItem.attributes['linksToAdd']}" var="link"><h:outputText value="#{link}"/><br/></ui:repeat></td>
+      </tr>
+      </ui:fragment>
+    </table>
+
+  </h:panelGroup>
+</ui:composition>
+</body>
+</html>

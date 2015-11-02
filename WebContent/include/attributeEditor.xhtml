@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+
+<ui:remove><!--
+   Editable field-value pairs for attributes that are defined in an ObjectConfig
+   Required arguments:
+       attributeEditor - AttributeEditBean instance that was constructed with the
+                         ObjectConfig/Attributes pair that is being edited
+
+   Other items to note:
+   This file assumes that the edited attributes are being embedded in an existing table
+
+   Any files that are including this one should also include the following:
+     sailpoint/Date.js provides date utilities
+     sailpoint/DateTimeInput.js supports date fields
+     sailpoint/Suggest.js supports identity fields
+     sailpoint/attributeEditor.js generates the date and identity components
+
+   The class for the AttributeEditBean instance referred to above is in the sailpoint.web package
+--></ui:remove>
+
+<body>
+<ui:composition>
+
+<table id="#{tableId}">
+    <ui:fragment rendered="#{!empty attributeEditor.attributeDefinitionsWithNoCategory}">
+        <ui:include src="attributesEditorByCategory.xhtml">
+            <ui:param name="formName" value="#{formName}" />
+            <ui:param name="attributeEditor" value="#{attributeEditor}" />
+            <ui:param name="attributeDefinitions" value="#{attributeEditor.attributeDefinitionsWithNoCategory}" />
+            <ui:param name="leftColumnClass" value="#{leftColumnClass}" />
+            <ui:param name="rightColumnClass" value="#{rightColumnClass}" />
+            <ui:param name="categoryName" value=""/>
+            <ui:param name="tableId" value="#{tableId}"/>
+        </ui:include>
+    </ui:fragment>
+  
+    <ui:repeat value="#{sp:mapKeys(attributeEditor.attributeDefinitionsByCategory)}" var="key">
+        <ui:fragment rendered="#{key ne 'noCategory'}">
+            <ui:include src="attributesEditorByCategory.xhtml">
+                <ui:param name="formName" value="#{formName}" />
+                <ui:param name="attributeEditor" value="#{attributeEditor}" />
+                <ui:param name="attributeDefinitions" value="#{attributeEditor.attributeDefinitionsByCategory[key]}" />
+                <ui:param name="leftColumnClass" value="#{leftColumnClass}" />
+                <ui:param name="rightColumnClass" value="#{rightColumnClass}" />
+                <ui:param name="categoryName" value="#{key}"/>
+                <ui:param name="tableId" value="#{tableId}"/>
+            </ui:include>
+        </ui:fragment>
+    </ui:repeat>
+  
+  <ui:fragment rendered="#{!empty attributeEditor.permissions and attributeDefinition.editable}">
+    <tr><td colspan="2">
+      <h:outputText styleClass="sectionHeader" value="#{msgs.permissions}"/>
+  
+      <t:dataTable value="#{attributeEditor.permissions}" var="permission" rowIndexVar="rowIndex" cellspacing="0"
+        styleClass="spTable width100" rowClasses="even,odd"
+        style="border-bottom: solid 1px #ccc">
+        <t:column>
+          <h:outputText value="#{permission.name}"/>
+        </t:column>
+        <t:column>
+          <f:facet name="header">
+            <h:outputText value="Rights"/>
+          </f:facet>
+          <h:selectManyListbox value="#{permission.selectedRights}">
+            <f:selectItems value="#{attributeEditor.availableRights}"/>
+          </h:selectManyListbox>
+        </t:column>
+        <t:column>
+          <f:facet name="header">
+            <h:outputText value="Target"/>
+          </f:facet>
+          <h:inputText id="target" value="#{permission.target}"/>
+        </t:column>
+      </t:dataTable>
+    </td></tr>
+  </ui:fragment>
+  <ui:fragment rendered="#{!empty attributeEditor.permissions and !attributeDefinition.editable}">
+    <tr><td colspan="2">
+      <h:outputText styleClass="sectionHeader" value="#{msgs.permissions}"/>
+  
+      <t:dataTable value="#{attributeEditor.permissions}" var="permission" rowIndexVar="rowIndex" cellspacing="0"
+        styleClass="spTable width100" rowClasses="even,odd"
+        style="border-bottom: solid 1px #ccc">
+        <t:column>
+          <h:outputText value="#{permission.name}"/>
+        </t:column>
+        <t:column>
+          <f:facet name="header">
+            <h:outputText value="Rights"/>
+          </f:facet>
+          <h:selectManyListbox disabled="true" value="#{permission.selectedRights}">
+            <f:selectItems value="#{attributeEditor.availableRights}"/>
+          </h:selectManyListbox>
+        </t:column>
+        <t:column>
+          <f:facet name="header">
+            <h:outputText value="Target"/>
+          </f:facet>
+          <h:outputText id="target" value="#{permission.target}"/>
+        </t:column>
+      </t:dataTable>
+    </td></tr>
+  </ui:fragment>
+</table> 
+ 
+</ui:composition>
+
+</body>
+</html>

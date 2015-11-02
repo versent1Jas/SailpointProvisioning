@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <br/>
+  <c:choose>
+    <!--
+      This section is used when creating or modifying a role.
+      The new version is stored inside the work item.
+    -->
+    <c:when test="#{workItem.object.approvalType == 'Role'}">
+      <h:panelGroup>
+ 
+        <br/>
+        <h:outputFormat styleClass="spContentTitle" value="#{msgs.label_named_role}">
+            <f:param value="#{workItem.newVersion.name}"/>
+        </h:outputFormat>
+
+
+        <table class="width100"><tr><td><div class="spTabledContent">
+          <table class="spTable" cellspacing="0" id="attributeTbl">
+            <tr>
+              <th>#{msgs.attribute}</th>
+              <th>#{msgs.old_value}</th>
+              <th>#{msgs.new_value}</th>
+            </tr>              
+            <ui:repeat value="#{workItem.roleDifferences.attributeDifferences}" var="diff">
+              <tr>
+                <td><h:outputText value="#{diff.attribute}"/></td>
+                <td><h:outputText value="#{diff.oldValue}"/></td>
+                <td><h:outputText value="#{diff.newValue}"/></td>
+              </tr>
+            </ui:repeat>
+          </table>
+        </div></td></tr></table>
+
+      </h:panelGroup>
+    </c:when>
+
+    <!--
+      This section is used when creating or modifying a profile.  
+      The new version is inside the work item.
+    -->
+    <c:when test="#{workItem.object.approvalType == 'Profile'}">
+      <h:panelGroup>
+ 
+        <br/>
+        <h:outputFormat styleClass="spContentTitle" value="label_named_profile">
+            <f:param value="#{workItem.newVersion.name}"/>
+        </h:outputFormat>
+
+          <br/><br/>
+
+        <ui:fragment rendered="#{workItem.roleDifferences.attributeDifferences != null}">
+          <table class="width100"><tr><td><div class="spTabledContent">
+            <table class="spTable" cellspacing="0" id="attributeTbl">
+              <tr>
+                <th>#{msgs.attribute}</th>
+                <th>#{msgs.old_value}</th>
+                <th>#{msgs.new_value}</th>
+              </tr>              
+              <ui:repeat value="#{workItem.roleDifferences.attributeDifferences}" var="diff">
+                <tr>
+                  <td><h:outputText value="#{diff.attribute}"/></td>
+                  <td><h:outputText value="#{diff.oldValue}"/></td>
+                  <td><h:outputText value="#{diff.newValue}"/></td>
+                </tr>
+              </ui:repeat>
+            </table>
+          </div></td></tr></table>
+        </ui:fragment>
+  
+        <ui:fragment rendered="#{workItem.roleDifferences.filterDifference != null}">
+          <br/>
+          <!-- this looks busy
+          <h:outputText styleClass="spContentTitle" value="Filter Changes"/><br/><br/>
+          -->
+          <h:panelGrid columns="2" columnClasses="titleColumn,leftAlignedColumn">
+    
+            <h:outputText value="#{msgs.old_filter}"/>
+            <h:inputTextarea value="#{workItem.roleDifferences.filterDifference.oldValue}" 
+              rows='5' cols='60' disabled='true'/>
+
+            <h:outputText value="#{msgs.new_filter}"/>
+            <h:inputTextarea value="#{workItem.roleDifferences.filterDifference.newValue}" 
+              rows='5' cols='60' disabled='true'/>
+
+          </h:panelGrid>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{workItem.roleDifferences.permissionDifferences != null}">
+          <br/>
+          <h:outputText styleClass="spContentTitle" value="#{msgs.permission_changes}"/><br/><br/>
+          <table class="width100"><tr><td><div class="spTabledContent">
+            <table class="spTable" cellspacing="0" id="attributeTbl">
+              <tr>
+                <th>#{msgs.target}</th>
+                <th>#{msgs.old_rights}</th>
+                <th>#{msgs.new_rights}</th>
+              </tr>              
+              <ui:repeat value="#{workItem.roleDifferences.permissionDifferences}" var="diff">
+                <tr>
+                  <td><h:outputText value="#{diff.attribute}"/></td>
+                  <td><h:outputText value="#{diff.oldValue}"/></td>
+                  <td><h:outputText value="#{diff.newValue}"/></td>
+                </tr>
+              </ui:repeat>
+            </table>
+          </div></td></tr></table>
+        </ui:fragment>
+
+      </h:panelGroup>
+    </c:when>
+
+    <c:otherwise>
+      <h:panelGroup>
+        <h:outputFormat styleClass="spContentTitle" value="#{msgs.label_unknown_analysis_type}">
+            <f:param value="#{workItem.object.attributes['approvalType']}"/>
+        </h:outputFormat>
+          <br/><br/>
+      </h:panelGroup>
+    </c:otherwise>
+
+  </c:choose>
+
+  <br/>
+
+  <!-- 
+    This is a convention recognized by viewResult
+   -->
+  <h:inputHidden id="TaskResultId" value="#{workItem.object.attributes['taskResult']}"/>
+
+  <c:choose>
+    <c:when test="#{workItem.object.attributes['taskResult'] == null}">
+      <h:outputText styleClass="spContentTitle" value="#{msgs.no_impact_analysis_result_found}"/>
+    </c:when>
+    <c:otherwise>
+      <h:commandLink id="goToResult" styleClass="spContentTitle" 
+        value="#{msgs.click_to_view_analysis_task_result}"
+        action="#{workItem.viewTaskResultAction}"/>
+    </c:otherwise>
+  </c:choose>
+
+</ui:composition>
+
+</body>
+</html>

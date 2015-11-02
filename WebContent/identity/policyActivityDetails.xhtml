@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<!--
+   You're in a h:panelGrid with label/value columns.
+
+    parameters:
+        violationView - ViolationViewBean
+-->
+
+<ui:composition>
+
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <ui:fragment rendered="#{!(null eq violationView.activity)}">
+    <tr>
+      <td class="titleColumn"><h:outputText value="#{msgs.label_activity}"/></td>
+
+      <td><table width="90%" style="margin:5px;border:1px #999 solid">
+        <tr>
+          <td class="spLightGray font10 textBold">#{msgs.date}</td>
+          <td class="spLightGray font10 textBold">#{msgs.label_user}</td>
+          <td class="spLightGray font10 textBold">#{msgs.label_activity}</td>
+          <td class="spLightGray font10 textBold">#{msgs.label_application}</td>
+          <td class="spLightGray font10 textBold">#{msgs.label_target}</td>
+        </tr>
+        <tr>
+          <td>
+            <h:outputText styleClass="font10" value="#{violationView.activity.timeStamp}">
+              <f:convertDateTime type="both" dateStyle="short" timeStyle="long" 
+                                 timeZone="#{base.userTimeZone}"/>
+            </h:outputText>
+          </td>
+          <td><h:outputText styleClass="font10" value="#{violationView.activity.user}"/></td>
+          <td><h:outputText styleClass="font10" value="#{violationView.activity.action}"/></td>
+          <td><h:outputText styleClass="font10" value="#{violationView.activity.sourceApplication}"/></td>
+          <td><h:outputText styleClass="font10" value="#{violationView.activity.target}"/></td>
+        </tr>
+      </table></td>
+    </tr>
+  </ui:fragment>
+
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<!-- 
+  Parameters (not a complete list):
+    - manageRight: The optional name of the SPRight required to edit the filters.
+ -->
+
+<ui:composition>
+  <table class="dashWidth100 paddedTbl" cellpadding="5">
+    <tr>
+      <td colspan="2">
+        <div class="pageInfo" style="#{(hideHelp eq 'true') ? 'display:none' : ''}">
+          <div class="instructions">
+            <h:outputFormat value="#{backingBean.instructions}">
+            </h:outputFormat>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><h:outputFormat styleClass="spContentTitle" value="#{msgs.count_of_filters}">
+          <f:param value="#{backingBean.filterCount}"/>
+          </h:outputFormat>
+      </td>
+      <td align="right">
+      <ui:fragment rendered="#{!backingBean.showFilterSource}">
+        <span onclick="$('#{formName}:#{prefix}filterSourceShowBtn').click()">
+          <h:outputText styleClass="smallFakeLink" value="[#{msgs.view_filter_source}]" rendered="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"/>
+          <h:outputText styleClass="smallFakeLink" value="[#{msgs.view_edit_filter_source}]" rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}"/>
+        </span>
+      </ui:fragment>
+      </td>
+    </tr>
+  </table>
+
+
+  <ui:fragment rendered="#{!backingBean.showFilterSource}">
+    <div id="#{prefix}filterListTbl">
+      <table class="dashWidth100 paddedTbl" cellpadding="5">
+        <tr>
+          <td colspan="2">
+            <div class="#{prefix}spTabledAjaxContent" id="#{prefix}filterBeanListDiv">
+              
+              <a4j:commandButton id="#{prefix}updateOp" action="#{backingBean.updateGlobalOp}" 
+                      render="#{prefix}filterSrcArea" style="display:none"/>
+            
+              <table class="spTable width100" id="#{prefix}filterBeanListTbl">
+                <tr>
+                  <th width="10%">
+                    <h:outputText styleClass="font10" value="#{msgs.filter_operation}"/>
+                  </th>
+                  <ui:fragment rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}">
+                    <th width="5%"></th>
+                  </ui:fragment>
+                  <th><h:outputText styleClass="font10" value="#{msgs.field}"/></th>
+                  <th><h:outputText styleClass="font10" value="#{msgs.search_type}"/></th>
+                  <th><h:outputText styleClass="font10" value="#{msgs.value}"/></th>
+                </tr>
+                <t:dataList id="${prefix}filterBeans" value="#{backingBean.filterBeans}" var="filterBean">
+                
+                  <ui:fragment rendered="#{filterBean.displayable}">
+                  <tr>   
+                    <ui:fragment rendered="#{filterBean.firstElement}">
+                      <td rowspan="#{backingBean.filterCount}" 
+                        style="border-right:1px #ccc solid; text-align:center">
+                        
+                        <h:selectOneMenu styleClass="font10" 
+                          rendered="#{(backingBean.filterCount > 1)}"
+                          value="#{backingBean.globalBooleanOp}"
+                          onchange="$('#{formName}:#{prefix}changeOperator').click()"
+                          disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                          readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}">
+                          <f:selectItem itemLabel="#{msgs.filter_and}" itemValue="AND"/>
+                          <f:selectItem itemLabel="#{msgs.filter_or}" itemValue="OR"/>
+                        </h:selectOneMenu> 
+                        
+                      </td>
+                    </ui:fragment>
+                    
+                    <ui:fragment rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}">
+                      <td>
+                        <h:selectBooleanCheckbox id="#{prefix}selectFilter" value="#{filterBean.selected}"/>
+                      </td>
+                    </ui:fragment>
+                    
+                    <ui:fragment rendered="#{!filterBean.composite}">
+                      <ui:include src="leafFilterInclude.xhtml">
+                        <ui:param name="filter" value="#{filterBean}"/>
+                        <ui:param name="prefix" value="#{prefix}"/>
+                      </ui:include>
+                    </ui:fragment>
+                    
+                    <ui:fragment rendered="#{filterBean.composite}">
+                      <ui:include src="compositeFilterInclude.xhtml">
+                        <ui:param name="filter" value="#{filterBean}"/>
+                        <ui:param name="prefix" value="#{prefix}"/>
+                      </ui:include>
+                    </ui:fragment>
+                    
+                  </tr>
+                  </ui:fragment>
+                </t:dataList>
+              </table>
+            </div>
+          </td>
+        </tr>
+        <ui:fragment rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}">
+          <tr>
+            <td style="padding-bottom:15px">
+              <div class="buttonRow">
+                <input type="button" value="#{msgs.group_selected}" class="secondaryBtn" onclick="window.#{prefix}FiltersPage.validateGroup($('#{formName}:#{prefix}groupBtn'), $('#{errorDivId}'))" style="margin-right:10px"/>
+                <input type="button" value="#{msgs.ungroup_selected}" class="secondaryBtn" onclick="$('#{formName}:#{prefix}ungroupBtn').click()" style="margin-right:10px"/>
+              </div>
+            </td>
+            <td align="right" style="padding-bottom:15px">
+              <a4j:commandButton action="#{backingBean.removeFilters}" 
+                value="#{msgs.button_remove_selected}" styleClass="secondaryBtn" render="#{prefix}filterPnl"
+                oncomplete="window.#{prefix}FiltersPage.reRoundTable('#{prefix}filterBeanListDiv'); window.#{prefix}FiltersPage.onChangeFilter();"/>
+            </td>
+          </tr>
+        </ui:fragment>
+      </table>
+    </div>
+  </ui:fragment>  
+  
+  <ui:fragment rendered="#{backingBean.showFilterSource}">
+    <a4j:outputPanel id="#{prefix}filterSrcPnl">
+      <div id="#{prefix}FilterSrc}" style="padding:10px;">
+        <h:outputText styleClass="sectionHeader" value="#{msgs.label_filter_source}"/><br/>
+        
+        <h:inputTextarea value="#{backingBean.filterString}" cols="85" rows="10" id="#{prefix}filterSourceArea"
+                         disabled="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"
+                         readonly="#{(null != manageRight) and !sp:hasRight(facesContext, manageRight)}"/>
+          
+        <br/>
+        <div id="#{prefix}compilationErrorMessage" class="formError" style="display:none;margin:5px">
+          <h:outputText value="#{msgs.search_filter_compile_failure}"/>
+        </div>      
+        
+        <div class="buttonRow">
+          <ui:fragment rendered="#{(null == manageRight) or sp:hasRight(facesContext, manageRight)}">
+            <input type="button" value="#{msgs.button_save}" class="primaryBtn" onclick="$('#{formName}:#{prefix}filterSourceInput').value = $('#{formName}:#{prefix}filterSourceArea').value;$('#{formName}:#{prefix}filterSourceCompileBtn').click()"/>
+          </ui:fragment>
+          <input type="button" value="#{msgs.button_cancel}" class="secondaryBtn" onclick="$('#{formName}:#{prefix}hideSourceBtn').click()"/>
+        </div>
+      </div>  
+      
+    </a4j:outputPanel>
+  </ui:fragment>  
+  
+  <h:inputText value="#{backingBean.compilationError}" id="#{prefix}compilationError" style="display:none"/>
+  <h:inputHidden value="#{backingBean.filterString}" id="#{prefix}filterSourceInput"/>
+        
+  <a4j:commandButton id="#{prefix}filterSourceCompileBtn" action="#{backingBean.convertStringToFilters}" 
+      render="#(prefix}filterSrcPnl,#{prefix}compilationError" oncomplete="window.#{prefix}FiltersPage.checkFilterCompilation()" style="display:none"/>
+  
+  <a4j:commandButton id="#{prefix}hideSourceBtn" action="#{backingBean.hideSource}" 
+      render="#{prefix}filterPnl" oncomplete="window.#{prefix}FiltersPage.cancelSource()" style="display:none"/>
+
+  <a4j:commandButton id="#{prefix}filterSourceHideBtn"
+    render="#{prefix}filterPnl"
+    oncomplete="window.#{prefix}FiltersPage.reRoundTable('#{prefix}filterBeanListDiv'); window.#{prefix}FiltersPage.onChangeFilter();"
+    style="display:none"/>
+            
+  <a4j:commandButton id="#{prefix}filterSourceShowBtn" action="#{backingBean.showSource}" 
+    render="#{prefix}filterPnl" style="display:none"/>
+    
+  <a4j:commandButton action="#{backingBean.groupFilters}" style="display:none"
+          value="Group Selected" render="#{prefix}filterPnl" id="#{prefix}groupBtn"
+          oncomplete="window.#{prefix}FiltersPage.reRoundTable('#{prefix}filterBeanListDiv'); window.#{prefix}FiltersPage.onChangeFilter();"/>
+          
+  <a4j:commandButton action="#{backingBean.ungroupFilters}" style="display:none"
+          value="Ungroup Selected" render="#{prefix}filterPnl" id="#{prefix}ungroupBtn"
+          oncomplete="window.#{prefix}FiltersPage.reRoundTable('#{prefix}filterBeanListDiv'); window.#{prefix}FiltersPage.onChangeFilter();"/>
+          
+  <a4j:commandButton id="#{prefix}changeOperator"
+                       style="display:none"
+                       action="#{backingBean.refreshOperationsAction}"
+                       oncomplete="window.#{prefix}FiltersPage.onChangeFilter();"/>            
+</ui:composition>
+
+</body>
+</html>

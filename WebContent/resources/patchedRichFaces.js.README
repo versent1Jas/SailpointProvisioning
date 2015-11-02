@@ -1,0 +1,124 @@
+10/18/2013 pjeong
+
+Patched the richfaces.js file because there was a mish mash of references to jQuery and '$'.
+
+The jQuery var gets passed in as the '$' var and so within that function $ should be used instead ofjQuery.
+
+The anonymous functions first param should be $.
+
+Here is the diff:
+
+13c13
+< (function(jQuery, richfaces) {
+---
+> (function($, richfaces) {
+130c130
+<         var e = (typeof source == "string") ? document.getElementById(source) : jQuery('body').get(0);
+---
+>         var e = (typeof source == "string") ? document.getElementById(source) : $('body').get(0);
+132c132
+<             e = jQuery('body').get(0);
+---
+>             e = $('body').get(0);
+140c140
+<                 jQuery.each(elements, function(index) {
+---
+>                 $.each(elements, function(index) {
+143c143
+<                 jQuery.cleanData(elements);
+---
+>                 $.cleanData(elements);
+146c146
+<             jQuery.cleanData([e]);
+---
+>             $.cleanData([e]);
+155c155
+<             form = jQuery(form)
+---
+>             form = $(form)
+167c167
+<                     var input = jQuery("input[name='" + parameterName + "']", form);
+---
+>                     var input = $("input[name='" + parameterName + "']", form);
+169c169
+<                         var newInput = jQuery("<input />").attr({type: 'hidden', name: parameterName, value: parameterValue});
+---
+>                         var newInput = $("<input />").attr({type: 'hidden', name: parameterName, value: parameterValue});
+193c193
+<             jQuery(parameterInputs).remove();
+---
+>             $(parameterInputs).remove();
+200c200
+<     jQuery.fn.toXML = function () {
+---
+>     $.fn.toXML = function () {
+322c322
+<             var propertyNamesArray = jQuery.trim(macro).split(DOT_SEPARATOR);
+---
+>             var propertyNamesArray = $.trim(macro).split(DOT_SEPARATOR);
+379c379
+<         return jQuery("partial-response extension#org\\.richfaces\\.extension", responseXML);
+---
+>         return $("partial-response extension#org\\.richfaces\\.extension", responseXML);
+388c388
+<                     return jQuery.parseJSON(dataString);
+---
+>                     return $.parseJSON(dataString);
+390c390
+<                     var parsedData = jQuery.parseJSON("{\"root\": " + dataString + "}");
+---
+>                     var parsedData = $.parseJSON("{\"root\": " + dataString + "}");
+402c402
+<         var dataString = jQuery.trim(extensionElement.children(elementName).text());
+---
+>         var dataString = $.trim(extensionElement.children(elementName).text());
+442c442
+<                         jQuery.extend(event, eventData);
+---
+>                         $.extend(event, eventData);
+558c558
+<             jQuery.extend(parameters, options.clientParameters);
+---
+>             $.extend(parameters, options.clientParameters);
+630,632c630,632
+<                 eventHandlers.begin = chain(function() { jQuery(form).trigger('ajaxbegin'); }, eventHandlers.begin);
+<                 eventHandlers.beforedomupdate = chain(function() { jQuery(form).trigger('ajaxbeforedomupdate'); }, eventHandlers.beforedomupdate);
+<                 eventHandlers.complete = chain(function() { jQuery(form).trigger('ajaxcomplete'); }, eventHandlers.complete);
+---
+>                 eventHandlers.begin = chain(function() { $(form).trigger('ajaxbegin'); }, eventHandlers.begin);
+>                 eventHandlers.beforedomupdate = chain(function() { $(form).trigger('ajaxbeforedomupdate'); }, eventHandlers.beforedomupdate);
+>                 eventHandlers.complete = chain(function() { $(form).trigger('ajaxcomplete'); }, eventHandlers.complete);
+643c643
+<                 jQuery(form).trigger('ajaxsubmit');
+---
+>                 $(form).trigger('ajaxsubmit');
+667c667
+<             jQuery(sourceElement).parents().each(function() {
+---
+>             $(sourceElement).parents().each(function() {
+714c714
+<             var partialResponse = jQuery(responseXML).children("partial-response");
+---
+>             var partialResponse = $(responseXML).children("partial-response");
+717,718c717,718
+<                 jQuery.each(elements, function () {
+<                     richfaces.cleanDom(jQuery(this).attr('id'));
+---
+>                 $.each(elements, function () {
+>                     richfaces.cleanDom($(this).attr('id'));
+725,726c725,726
+<         jQuery(function() {
+<             jQuery(document).trigger("javascriptServiceComplete");
+---
+>         $(function() {
+>             $(document).trigger("javascriptServiceComplete");
+742c742
+<         jQuery(document).ready(attachAjaxDOMCleaner);
+---
+>         $(document).ready(attachAjaxDOMCleaner);
+750c750
+< }(jQuery, RichFaces));
+\ No newline at end of file
+---
+> }(jQuery, RichFaces));
+

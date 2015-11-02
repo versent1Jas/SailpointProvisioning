@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, ENABLE, PASSWORD" icon="enterpriseIcon" name="AS400 Template" type="AS400 - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="AS400"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+                            import java.util.*;
+                            import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                            import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                            import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                            import sailpoint.object.ProvisioningPlan.AccountRequest;
+                            import sailpoint.object.ProvisioningPlan.GenericRequest;
+                        
+                                 List accountRequests = plan.getAccountRequests();
+                                 if (accountRequests != null)
+                                 {
+                                   for (AccountRequest acctReq : accountRequests)
+                                   {
+                                     AccountRequest.Operation op = acctReq.getOperation();
+                                     if (op == AccountRequest.Operation.Create)
+                                     {
+                                         String userId = acctReq.getNativeIdentity();
+                                         if (userId != null)
+                                         {
+                                            acctReq.setNativeIdentity(userId.toUpperCase());
+                                         }
+                                                
+                                         AttributeRequest UG_DEF = acctReq.getAttributeRequest("UG_DEF");
+                                         if (UG_DEF != null)
+                                         {
+                                            String strUG_DEF = UG_DEF.getValue();
+                                            UG_DEF.setValue(strUG_DEF.toUpperCase());
+                                         }
+                                      }
+                                    }
+                                  }
+                                  List groups = plan.getObjectRequests();
+                                  if (groups != null)
+                                  {
+                                        for (ObjectRequest req : groups)
+                                        {
+                                           String groupId = req.getNativeIdentity();
+                                           if (groupId != null)
+                                           {
+                                               req.setNativeIdentity(groupId.toUpperCase());
+                                           }
+                                           List attrRequests=req.getAttributeRequests() ;
+                                           if(attrRequests != null)
+                                           {
+                                              for (AttributeRequest attrreq : attrRequests)
+                                              {
+                                                 if(attrreq.getValue() instanceof java.lang.String)
+                                                 {
+                                                    attrreq.setValue(attrreq.getValue().toUpperCase());
+                                                 }
+                                              }
+                                            }
+                                         }
+                                     }
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User Name" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" type="string"/>
+        <AttributeDefinition displayName="groups" entitlement="true" managed="true" multi="true" name="groups" required="true" type="string"/>
+        <AttributeDefinition displayName="User Status" name="USER_STA" type="string"/>
+        <AttributeDefinition displayName="Profile Type" name="PROFILE_TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="User Class" name="USRCLS" type="string"/>
+        <AttributeDefinition displayName="Special Authority" multi="true" name="SPCAUT" type="string"/>
+        <AttributeDefinition displayName="Owner Type" name="OWNER_TYPE" type="string"/>
+        <AttributeDefinition displayName="Group Authority" multi="true" name="GRPAUT" type="string"/>
+        <AttributeDefinition displayName="Group Authority Type" name="GRPAUTTYP" type="string"/>
+        <AttributeDefinition displayName="Password Expiration Interval" name="PWDEXPITV" type="string"/>
+        <AttributeDefinition displayName="Password is Expired" name="PWDEXP" type="string"/>
+        <AttributeDefinition displayName="Block Password change" name="PWDCHGBLK" type="string"/>
+        <AttributeDefinition displayName="Assistance Level" name="ASTLVL" type="string"/>
+        <AttributeDefinition displayName="Current Library" name="CURLIB" type="string"/>
+        <AttributeDefinition displayName="Inital Program to call" name="INLPGM" type="string"/>
+        <AttributeDefinition displayName="Inital Program Library" name="INLPGM_LIB" type="string"/>
+        <AttributeDefinition displayName="Inital Menu" name="INLMNU" type="string"/>
+        <AttributeDefinition displayName="Inital Menu Library" name="INLMNU_LIB" type="string"/>
+        <AttributeDefinition displayName="Limit Capabilities" name="LMTCPB" type="string"/>
+        <AttributeDefinition displayName="Home Directory" name="HOMEDIR" type="string"/>
+        <AttributeDefinition displayName="Description" name="TEXT" type="string"/>
+        <AttributeDefinition displayName="Display sign-on information" name="DSPSGNINF" type="string"/>
+        <AttributeDefinition displayName="Limit Device sessions" name="LMTDEVSSN" type="string"/>
+        <AttributeDefinition displayName="Keyboard buffering" name="KBDBUF" type="string"/>
+        <AttributeDefinition displayName="Maximum Storage Allowed" name="MAXSTG" type="string"/>
+        <AttributeDefinition displayName="Storage Used" name="STR_USED" type="string"/>
+        <AttributeDefinition displayName="Highest scheduling priority" name="PTYLMT" type="string"/>
+        <AttributeDefinition displayName="Job Description" name="JOBD" type="string"/>
+        <AttributeDefinition displayName="Job Description Library" name="JOBD_LIB" type="string"/>
+        <AttributeDefinition displayName="Accounting Code" name="ACGCDE" type="string"/>
+        <AttributeDefinition displayName="Message Queue" name="MSGQ" type="string"/>
+        <AttributeDefinition displayName="Message Queue Library" name="MSGQ_LIB" type="string"/>
+        <AttributeDefinition displayName="Delievery" name="DLVRY" type="string"/>
+        <AttributeDefinition displayName="Sev" name="SEV" type="string"/>
+        <AttributeDefinition displayName="Output Queue" name="OUTQ" type="string"/>
+        <AttributeDefinition displayName="Output Queue Library" name="OUTQ_LIB" type="string"/>
+        <AttributeDefinition displayName="Printer Device" name="PRTDEV" type="string"/>
+        <AttributeDefinition displayName="Special Environment" name="SPCENV" type="string"/>
+        <AttributeDefinition displayName="Attention Program" name="ATNPGM" type="string"/>
+        <AttributeDefinition displayName="Attention Program Library" name="ATNPGM_LIB" type="string"/>
+        <AttributeDefinition displayName="Sort Sequence" name="SRTSEQ" type="string"/>
+        <AttributeDefinition displayName="Sort Sequence Library" name="SRTSEQ_LIB" type="string"/>
+        <AttributeDefinition displayName="Language ID" name="LANGID" type="string"/>
+        <AttributeDefinition displayName="Country ID" name="CNTRYID" type="string"/>
+        <AttributeDefinition displayName="Coded character set ID" name="CCSID" type="string"/>
+        <AttributeDefinition displayName="User Option" multi="true" name="USROPT" type="string"/>
+        <AttributeDefinition displayName="Audit Level" multi="true" name="AUDLVL" type="string"/>
+        <AttributeDefinition displayName="Object Auditing value" multi="true" name="OBJAUD" type="string"/>
+        <AttributeDefinition displayName="User action auditing" multi="true" name="AUDLVL1" type="string"/>
+        <AttributeDefinition displayName="Authority" name="AUT" type="string"/>
+        <AttributeDefinition displayName="UID" name="UID" type="string"/>
+        <AttributeDefinition displayName="Previous Sign-on" name="PREV_SIGN" type="string"/>
+        <AttributeDefinition displayName="Invalid Sign-on attempts" name="INV_SIGN_ON" type="string"/>
+        <AttributeDefinition displayName="Pwd Last Chg" name="PWD_LAST_CHG" type="string"/>
+        <AttributeDefinition displayName="Password Expiration Date" name="PWD_EXP_DATE" type="string"/>
+        <AttributeDefinition displayName="Password Expiration Days" name="PWD_EXP_DAY" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group Name" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="User ID" name="UID" required="true" type="string"/>
+        <AttributeDefinition displayName="Group ID" name="GID" required="true" type="string"/>
+        <AttributeDefinition displayName="User Class" name="USRCLS" type="string"/>
+        <AttributeDefinition displayName="Storage Used" name="STR_USED" type="string"/>
+        <AttributeDefinition displayName="Maximum Storage Allowed" name="MAXSTG" type="string"/>
+        <AttributeDefinition displayName="Printer Device" name="PRTDEV" type="string"/>
+        <AttributeDefinition displayName="Accounting Code" name="ACGCDE" type="string"/>
+        <AttributeDefinition displayName="Limit Capabilities" name="LMTCPB" type="string"/>
+        <AttributeDefinition displayName="Owner Type" name="OWNER_TYPE" type="string"/>
+        <AttributeDefinition displayName="Authority" name="AUT" type="string"/>
+        <AttributeDefinition displayName="Assistance Level" name="ASTLVL" type="string"/>
+        <AttributeDefinition displayName="Limit Device sessions" name="LMTDEVSSN" type="string"/>
+        <AttributeDefinition displayName="Description" name="TEXT" type="string"/>
+        <AttributeDefinition displayName="Job Description" name="JOBD" type="string"/>
+        <AttributeDefinition displayName="Home Directory" name="HOMEDIR" type="string"/>
+        <AttributeDefinition displayName="Special Authority" multi="true" name="SPCAUT" type="string"/>
+        <AttributeDefinition displayName="Previous Sign-on" name="PREV_SIGN" type="string"/>
+        <AttributeDefinition displayName="Invalid Sign-on attempts" name="INV_SIGN_ON" type="string"/>
+        <AttributeDefinition displayName="Sort Sequence" name="SRTSEQ" type="string"/>
+        <AttributeDefinition displayName="Sort Sequence Library" name="SRTSEQ_LIB" type="string"/>
+        <AttributeDefinition displayName="Object Auditing value" multi="true" name="OBJAUD" type="string"/>
+        <AttributeDefinition displayName="Language ID" name="LANGID" type="string"/>
+        <AttributeDefinition displayName="Coded character set ID" name="CCSID" type="string"/>
+        <AttributeDefinition displayName="Current Library" name="CURLIB" type="string"/>
+        <AttributeDefinition displayName="Inital Program to call" name="INLPGM" type="string"/>
+        <AttributeDefinition displayName="Inital Program Library" name="INLPGM_LIB" type="string"/>
+        <AttributeDefinition displayName="Inital Menu" name="INLMNU" type="string"/>
+        <AttributeDefinition displayName="Inital Menu Library" name="INLMNU_LIB" type="string"/>
+        <AttributeDefinition displayName="Display sign-on information" name="DSPSGNINF" type="string"/>
+        <AttributeDefinition displayName="Keyboard buffering" name="KBDBUF" type="string"/>
+        <AttributeDefinition displayName="Highest scheduling priority" name="PTYLMT" type="string"/>
+        <AttributeDefinition displayName="Job Description Library" name="JOBD_LIB" type="string"/>
+        <AttributeDefinition displayName="Message Queue" name="MSGQ" type="string"/>
+        <AttributeDefinition displayName="Message Queue Library" name="MSGQ_LIB" type="string"/>
+        <AttributeDefinition displayName="Delievery" name="DLVRY" type="string"/>
+        <AttributeDefinition displayName="Sev" name="SEV" type="string"/>
+        <AttributeDefinition displayName="Output Queue" name="OUTQ" type="string"/>
+        <AttributeDefinition displayName="Output Queue Library" name="OUTQ_LIB" type="string"/>
+        <AttributeDefinition displayName="Special Environment" name="SPCENV" type="string"/>
+        <AttributeDefinition displayName="Attention Program" name="ATNPGM" type="string"/>
+        <AttributeDefinition displayName="Attention Program Library" name="ATNPGM_LIB" type="string"/>
+        <AttributeDefinition displayName="User Option" multi="true" name="USROPT" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Default Group" name="UG_DEF" required="true" section="" type="string"/>
+        <Field displayName="UID" name="UID" section="" type="string"/>
+        <Field displayName="Special Authority" name="SPCAUT" section="" type="string"/>
+        <Field displayName="Password is Expired" name="PWDEXP" section="" type="string" value="N"/>
+        <Field displayName="Home Directory" name="HOMEDIR" section="" type="string" value="*USRPRF"/>
+        <Field displayName="User Class" name="USRCLS" section="" type="string" value="*USER"/>
+        <Field displayName="Owner Type" name="OWNER_TYPE" section="" type="string" value="*USRPRF"/>
+        <Field displayName="Group Authority Type" name="GRPAUTTYPE" section="" type="string" value="*PRIVATE"/>
+        <Field displayName="ASTLVL" name="ASTLVL" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="CURLIB" name="CURLIB" section="" type="string" value="*CRTDFT"/>
+        <Field displayName="INLPGM" name="INLPGM" section="" type="string" value="*NONE"/>
+        <Field displayName="INLPGM_LIB" name="INLPGM_LIB" section="" type="string" value="*LIBL"/>
+        <Field displayName="INLMNU" name="INLMNU" section="" type="string" value="MAIN"/>
+        <Field displayName="INLMNU_LIB" name="INLMNU_LIB" section="" type="string" value="*LIBL"/>
+        <Field displayName="LMTCPB" name="LMTCPB" section="" type="string" value="*NO"/>
+        <Field displayName="DSPSGNINF" name="DSPSGNINF" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="LMTDEVSSN" name="LMTDEVSSN" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="KBDBUF" name="KBDBUF" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="MAXSTG" name="MAXSTG" section="" type="string" value="*NOMAX"/>
+        <Field displayName="PTYLMT" name="PTYLMT" section="" type="string" value="3"/>
+        <Field displayName="JOBD" name="JOBD" section="" type="string" value="QDFTJOBD"/>
+        <Field displayName="JOBD_LIB" name="JOBD_LIB" section="" type="string" value="*LIBL"/>
+        <Field displayName="ACGCDE" name="ACGCDE" section="" type="string" value="*BLANK"/>
+        <Field displayName="MSGQ" name="MSGQ" section="" type="string" value="*USRPRF"/>
+        <Field displayName="MSGQ_LIB" name="MSGQ_LIB" section="" type="string" value="*LIBL"/>
+        <Field displayName="DLVRY" name="DLVRY" section="" type="string" value="*NOTIFY"/>
+        <Field displayName="SEV" name="SEV" section="" type="string" value="0"/>
+        <Field displayName="OUTQ" name="OUTQ" section="" type="string" value="*WRKSTN"/>
+        <Field displayName="OUTQ_LIB" name="OUTQ_LIB" section="" type="string" value="*LIBL"/>
+        <Field displayName="PRTDEV" name="PRTDEV" section="" type="string" value="*WRKSTN"/>
+        <Field displayName="SPCENV" name="SPCENV" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="ATNPGM" name="ATNPGM" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="ATNPGM_LIB" name="ATNPGM_LIB" section="" type="string" value="*LIBL"/>
+        <Field displayName="SRTSEQ" name="SRTSEQ" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="SRTSEQ_LIB" name="SRTSEQ_LIB" section="" type="string" value="*LIBL"/>
+        <Field displayName="LANGID" name="LANGID" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="CNTRYID" name="CNTRYID" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="CCSID" name="CCSID" section="" type="string" value="*SYSVAL"/>
+        <Field displayName="OBJAUD" name="OBJAUD" section="" type="string" value="*NONE"/>
+        <Field displayName="AUT" name="AUT" section="" type="string" value="*EXCLUDE"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group Name" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="GID" helpKey="Group Identifier" name="GID" required="true" section="" type="string"/>
+        <Field displayName="Object Auditing Value" name="AUDIT" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>*ALL</String>
+            <String>*CHANGE</String>
+            <String>*USRPRF</String>
+            <String>*NONE</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="OWNER" name="OWNER" section="" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="GID" helpKey="Group Identifier" name="GID" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

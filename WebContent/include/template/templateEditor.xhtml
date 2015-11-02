@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <style>
+    .x-form-radio-group .x-form-radio-wrap {
+        white-space: nowrap;
+    }
+  </style>
+      
+  <div style="margin:5px" class="width100">
+    
+
+    <c:if test="#{showUsageList}">
+      <ui:include src="/include/template/templateEditorUsageListInclude.xhtml"/>
+    </c:if>
+    
+    <c:if test="#{showUsageListByObjectType}">
+      <ui:include src="/include/template/templateEditorUsageListByObjectTypeInclude.xhtml"/>
+    </c:if>
+    
+    <c:if test="#{showList}">
+      <ui:include src="/include/template/templateEditorListInclude.xhtml"/>
+    </c:if>
+    
+    <c:if test="#{!showList and !showUsageList and !showUsageListByObjectType}">
+      <ui:include src="/include/template/templateEditorPanelInclude.xhtml"/>
+    </c:if>
+
+    <ui:include src="/include/template/templateEditorInclude.xhtml"/>
+
+    <a4j:commandButton action="#{templateEditor.saveTemplate}"
+                       id="templateSaveBtn"
+                       render="templatesList,templatesJSON,templateFieldsString"
+                       oncomplete="$('editForm:templateFieldsString').value='';Page.fireEvent('onTemplateEditorContentChanged');"
+                       style="display:none"/>
+                       
+  </div>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">System Caches</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_CACHES';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      
+      <h:form>
+        <h:panelGrid columns="1">
+
+          <a4j:commandButton value="Reset Miscellaneous Caches"
+                             action="#{debug.resetCacheAction}" styleClass="primaryBtn" />
+            <br/>
+          <a4j:commandButton value="Reset Managed Attribute Cache"
+                             action="#{debug.resetManagedAttributeCache}" styleClass="primaryBtn" />
+            <br/>
+          <a4j:commandButton value="Load Managed Attribute Cache"
+                             action="#{debug.loadManagedAttributeCache}" styleClass="primaryBtn" />
+            <br/>
+          <a4j:commandButton value="Dump Managed Attribute Cache"
+                             action="#{debug.dumpManagedAttributeCache}" styleClass="primaryBtn" />
+
+        </h:panelGrid>
+      </h:form>
+      
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+    <tr id="#{idName}EscalationHeader" style="display: #{(hide) ? 'none' : ''}">
+      <td class="titleColumnWithWrap certScheduleTitleCol">
+        <h:outputText value="#{enabledText}" />
+      </td>
+      <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEscalate#{idName}" width="12px"
+        height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+        url="/images/icons/dashboard_help_16.png" alt="#{enabledHelp}"/></td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+
+        <h:selectBooleanCheckbox
+          id="#{idName}EscalationSelect"
+          styleClass="escalationSelect"
+          value="#{notifBean.enabled}"
+          onclick="showHideWithLock($('#{idName}Escalation'), this);SailPoint.CertificationScheduleForm.toggleEscalationEvent('#{idName}', this.checked, #{certificationSchedule.continuousHasLaunched})"
+          disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+          readonly="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}" />
+      </td>
+    </tr>
+
+    <tr id="#{idName}EscalationOptions" style="display: #{(hide) ? 'none' : ''}">
+      <td colspan="2"></td>
+      <td colspan="6">
+      <div id="#{idName}Escalation" style="display:none">
+      <table class="width100" cellpadding="5" cellspacing="0">
+        <thead>
+          <tr><th colspan="5" class="dashContentHeader">
+            <h:outputText value="#{msgs.label_escalation_policy}" />
+          </th></tr>
+        </thead>
+        <tbody>
+          <tr id="#{idName}EscalationStartDaysBeforeEnd" style="display: #{(sendReminders || hideTrigger) ? 'none' : ''}">
+            <td class="titleColumn certScheduleTitleCol"><h:outputText
+              value="#{msgs.label_escalation_trigger}" /></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEscalateTrigger#{idName}"
+              width="12px" height="12px"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png" alt="#{triggerHelp}"/>
+            </td>
+            <td class="certScheduleOptionCol">
+              <div id="escalate">
+                <h:outputText value="#{msgs.label_escalate_days_before}" />
+                <h:inputText id="#{idName}EscalateDaysBeforeEnd" size="3" value="#{notifBean.startHowManyDays}"
+                             disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+                             readonly="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}">
+                  <f:validateLongRange minimum="1" maximum="999" disabled="#{not notifBean.enabled}"/>
+                </h:inputText>
+              </div>
+
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message for="#{idName}EscalateDaysBeforeEnd" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+          <tr id="#{idName}EscalationMaxReminders" style="display: #{(not sendReminders) ? 'none' : ''}">
+            <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.label_escalation_trigger}" /></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEscalateTrigger2#{idName}"
+              width="12px" height="12px"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png" alt="#{triggerHelp}"/>
+            </td>
+            <td class="certScheduleOptionCol">
+              <div id="escalate">
+                <h:outputText value="#{msgs.label_escalate_max_reminders}" />
+                <h:inputText id="#{idName}EscalateMaxReminders" size="3" value="#{notifBean.maxReminders}"
+                             disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+                             readonly="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}">
+                  <f:validateLongRange minimum="0" maximum="999" />
+                </h:inputText>
+              </div>
+
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message for="#{idName}EscalateMaxReminders" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+          <tr>
+            <td class="titleColumn certScheduleTitleCol"><h:outputText
+              value="#{msgs.label_escalation_rule}" /></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEscalateRule#{idName}"
+              width="12px" height="12px"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png" alt="#{ruleHelp}"/>
+            </td>
+            <td class="certScheduleOptionCol">
+              <a4j:outputPanel id="#{idName}EscalationRulesPanel">            
+              <h:selectOneMenu id="#{idName}EscalationRules"
+                         value="#{notifBean.escalationRuleId}" 
+                         disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+                         readonly="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}">
+                <f:selectItems value="${util.escalationRules}" />
+              </h:selectOneMenu>
+                
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+              <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                     onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:#{idName}EscalationRules').value, 
+                                                         'Escalation',
+                                                         $('certificationScheduleForm:refreshCertEscalationRulesButton'))" />                                                     
+              </ui:fragment>              
+              </a4j:outputPanel>
+
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message for="#{idName}EscalationRules" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="titleColumnWithWrap certScheduleTitleCol"><h:outputText
+              value="#{msgs.label_escalation_email_template}" /></td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEscEmlTemplate#{idName}"
+             styleClass="helpIcon"
+              url="/images/icons/dashboard_help_16.png" alt="#{templateHelp}"/>
+            </td>
+            <td class="certScheduleOptionCol">
+              <h:selectOneMenu id="#{idName}EscalationEmailTemplates"
+                     value="#{notifBean.emailTemplateId}"
+                     disabled="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}"
+                     readonly="#{certificationSchedule.continuousHasLaunched or (not certificationSchedule.editable)}">
+                <f:selectItems value="${util.emailTemplates}" />
+              </h:selectOneMenu>
+
+              <a4j:outputPanel ajaxRendered="true">
+                <h:message for="#{idName}EscalationEmailTemplates" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+              </a4j:outputPanel>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      </td>
+    </tr>
+    
+    <tr style="display: none"><td>
+      <script defer="defer">
+        if($('certificationScheduleForm:#{idName}EscalationSelect')!=null) {
+          if($('certificationScheduleForm:#{idName}EscalationSelect').checked)
+            $('#{idName}Escalation').style.display = '';
+        }
+      </script>
+    </td></tr>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<head/>
+
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+        <!--//--><![CDATA[//><!--
+
+        Ext.addBehaviors({
+
+            'li.primary-submenuitems@mouseleave' : function(e, elem) {
+                var menuId = "menu-" + this.id;
+                var subMenu = Ext.menu.Manager.get(menuId);
+                if (subMenu && subMenu.el) {
+                    if (!SailPoint.isEventWithinElement(e, subMenu.el)){
+                        subMenu.hide();
+                    }
+                }
+            },
+
+            'li.primary-submenuitems@mouseover' : function(e, elem) {
+                SailPoint.mainMenuId = "menu-" + this.id;
+                var subMenu = Ext.menu.Manager.get(SailPoint.mainMenuId);
+                var i, links, link, extElem, menuItems = [], showMenu = false;
+                
+                if (!subMenu) {
+                    links = Ext.query(".primary-submenu li a", this);
+                    for(i = 0; i < links.length; i++){
+                        link = links[i];
+                        menuItems.push(
+                            {
+                                xtype : 'menuitem',
+                                text: link.innerHTML, 
+                                href: link.href, 
+                                cls: 'x-menu-list-item',
+                                overCls: 'x-menu-item-active'
+                            }
+                        );
+                    }
+                    subMenu = new Ext.menu.Menu({
+                        id : SailPoint.mainMenuId,
+                        plain : true,
+                        items : menuItems,
+                        cls : 'main-submenu'
+                    });
+
+                    showMenu = true;
+                }
+                else if (!subMenu.isVisible()) {
+                    showMenu = true;
+                }
+
+                if (showMenu) {
+                    extElem = Ext.get(this);
+                    subMenu.showAt([extElem.getX(), extElem.getY() + 34]); // plus 29px (the height of menuitem in css)
+                }
+            }
+        });
+
+        /**
+         * Determines if the given event occurred within the bounds
+         * of the given element.
+         */
+        SailPoint.isEventWithinElement = function(e, elem){
+            if (!elem) { return false; }
+            elem = Ext.get(elem);
+            var box = elem.getBox();
+            return (e.getX() > box.x) && (e.getX() < box.right) && (e.getY() > (box.y - 5)) && (e.getY() < box.bottom);
+        }
+
+         //--><!]]>
+    </script>
+
+
+    <div class="menu" style="display: #{(hideMenu) ? 'none' : ''}">
+        <ul id="menuItems">
+            <ui:repeat value="#{menu.root.decoratedSubMenu}" var="menuitem">
+                <li class="primary-menuitem #{menuitem.isCurrentPage ? 'menuitemselected' : 'menuitemunselected'} #{menuitem.hasSubItems ? 'primary-submenuitems' : ''}">
+                    <h:outputLink value="#{menuitem.fullPath}">
+                        <h:outputText value="#{sp:localizeKey(menuitem.label)}"/>
+                    </h:outputLink>
+
+                    <ui:fragment rendered="#{menuitem.hasSubItems and menuitem.displaySubMenu}">
+                        <ul class="primary-submenu">
+                            <ui:repeat value="#{menuitem.decoratedSubMenu}" var="submenuitem">
+                                <li>
+                                    <h:outputLink value="#{submenuitem.fullPath}">#{sp:localizeKey(submenuitem.label)}</h:outputLink>
+                                </li>
+                            </ui:repeat>
+                        </ul>
+                    </ui:fragment>
+                </li>
+            </ui:repeat>
+        </ul>
+    </div>
+
+</ui:composition>
+
+</body>
+</html>

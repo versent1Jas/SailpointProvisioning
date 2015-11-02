@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <div id="profileEditorDiv" style="display:none; margin: 10px;">
+    <div>
+      <ui:param name="profileBean" value="#{roleEditor.profileEditor}" style="margin-right: 10px;"/>
+      <ui:param name="profile" value="#{roleEditor.profileEditor.object}"/>
+        <ui:param name="filterspath" value="#{(roleEditor.editMode == 'SimpleEntitlement') ? '/analyze/advanced/addSimpleFilters.xhtml' : '/analyze/advanced/addFilters.xhtml'}"/>
+        <ui:param name="saveOnClick" value="#{(roleEditor.editMode == 'SimpleEntitlement') ? 'SailPoint.modeler.RoleEditor.simpleCommit();' : ''}"/>
+
+      <h:panelGrid columns="2" style="padding-right:3px">
+        <h:outputText rendered="#{roleEditor.editMode != 'SimpleEntitlement'}" class="sectionHeader" value="#{msgs.description}"/>
+        <h:inputTextarea rendered="#{roleEditor.editMode != 'SimpleEntitlement'}" value="#{profile.description}" style="width: 300px; height: 70px;" onkeyup="if (profileEditor) { profileEditor.setPageDirty(true); }"/>
+  
+        <h:outputText class="sectionHeader" value="#{msgs.application}" style="margin-right: 10px; margin-top: 10px;"/>
+        <h:panelGroup>
+          <div id="applicationSuggestCmp" style="margin-top: 10px;"></div>
+          <input style="position:static" id="applicationSuggest" name="applicationSuggest" type="hidden" value="#{profile.application.name}"/>
+          <h:inputHidden id="profileApplication" value="#{profileBean.applicationId}"/>
+        </h:panelGroup>
+
+      </h:panelGrid>
+
+      <h:panelGrid columns="1">
+        <a4j:outputPanel id="entitlementsEditorPanel">
+          <h:panelGroup id="entitlementsPanel" style="#{(profile.application == null) ? 'display:none' : 'display:block'}">
+            <br/>
+            <h:panelGrid columns="1" styleClass="width100">
+              <h:outputText rendered="#{roleEditor.editMode != 'SimpleEntitlement'}" class="sectionHeader" id="entitlementsLabel" value="#{msgs.label_attr_rules}"/>
+            </h:panelGrid>
+              <table class="width100" style="margin:5px" cellpadding="5">
+                <tr><td>
+                  <h:panelGroup id="filtersPanel">
+                      <ui:include src="#{filterspath}">
+                          <ui:param name="formName" value="editForm"/>
+                          <ui:param name="prefix" value="profile"/>
+                          <ui:param name="backingBean" value="#{profileBean.profileConstraints}"/>
+                          <ui:param name="errorDivId" value="selectedCount"/>
+                          <ui:param name="isRendered" value="#{not (empty profileBean.appAttributeDefinitions)}"/>
+                          <ui:param name="notRenderedBecause" value="The #{profile.application.name} application does not have any attributes."/>
+                      </ui:include>
+                    
+                    <div style="display:none;" class="spContent" id="selectedCount"/>
+                    
+                    <a4j:commandButton id="changeApplication"
+                                       style="display:none"
+                                       action="#{profileBean.changeApplicationAction}"
+                                       render="entitlementsEditorPanel"
+                                       oncomplete="$('editForm:entitlementsPanel').style.display = $('editForm:profileApplication').value == '' ? 'none' : ''; 
+                                                   $('editForm:entitlementPermissionsValue').style.display = $('editForm:profileApplication').value == '' ? 'none' : '';
+                                                   if (profileEditor) { profileEditor.setPageDirty(true);  }"/>
+                    <a4j:commandButton id="refreshEntitlements"
+                                       style="display:none"
+                                       action="#{profileBean.refreshEntitlementsAction}"
+                                       render="entitlementsEditorPanel"/>
+                  </h:panelGroup>
+      
+                </td></tr>
+              </table>
+          </h:panelGroup>
+
+          <a4j:outputPanel ajaxRendered="true">
+            <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+          </a4j:outputPanel>
+
+            <!--<h:panelGroup id="entitlementPermissionsValue" style="#{(profile.application == null) || (roleEditor.editMode == 'SimpleEntitlement') ? 'display:none' : 'display:block'}">-->
+            <h:panelGroup id="entitlementPermissionsValue" style="#{(profile.application == null) || (roleEditor.editMode != 'Profile') ? 'display:none' : 'display:block'}">
+            <br/>
+            <h:panelGrid columns="1" styleClass="width100">
+              <h:outputText rendered="#{roleEditor.editMode != 'SimpleEntitlement'}" class="sectionHeader" id="entitlementPermissionsLabel" value="#{msgs.permissions}"/>
+            </h:panelGrid>
+              <div class="spContent" >
+                <table class="width100" style="margin:5px" cellpadding="5">
+                  <tr><td>
+                    <a4j:outputPanel rendered="#{roleEditor.editMode != 'SimpleEntitlement'}" id="permissionsData">
+                      <div class="spAjaxTabledContent">
+                        <t:dataTable value="#{profileBean.profilePermissions}" var="permission" rowIndexVar="rowIndex" cellspacing="0"
+                          styleClass="spTable width100" rowClasses="even,odd"
+                          style="border-bottom: solid 1px #ccc; #{(empty profileBean.profilePermissions) ? 'visibility:hidden' : 'visibility:visible'}">
+                          <t:column>
+                            <h:selectBooleanCheckbox value="#{profileBean.selectedPermission[rowIndex]}"/>
+                          </t:column>
+                          <t:column>
+                            <f:facet name="header">
+                              <h:outputText value="#{msgs.rights}"/>
+                            </f:facet>
+                            <h:selectManyListbox value="#{permission.selectedRights}" onchange="if (profileEditor) { profileEditor.setPageDirty(true); }">
+                              <f:selectItems value="#{profileBean.availableRights}"/>
+                            </h:selectManyListbox>
+                          </t:column>
+                          <t:column>
+                            <f:facet name="header">
+                              <h:outputText value="#{msgs.target}"/>
+                            </f:facet>
+                            <h:inputText id="target" value="#{permission.target}" onkeyup="if (profileEditor) { profileEditor.setPageDirty(true); }"/>
+                          </t:column>
+                        </t:dataTable>
+                      </div>
+                    </a4j:outputPanel>
+        
+                    <div class="buttonRow">
+                      <a4j:commandButton rendered="#{roleEditor.editMode != 'SimpleEntitlement'}" value="#{msgs.btn_new_permission}"
+                                         styleClass="primaryBtn"
+                                         action="#{profileBean.newEntitlementPermissionAction}"
+                                         render="permissionsData"
+                                         onclick="if (profileEditor) { profileEditor.setPageDirty(true); }"/>
+                      <a4j:commandButton rendered="#{roleEditor.editMode != 'SimpleEntitlement'}" value="#{msgs.btn_delete_permissions}"
+                                         styleClass="secondaryBtn"
+                                         action="#{profileBean.deleteEntitlementPermissionsAction}"
+                                         render="permissionsData"
+                                         onclick="if (profileEditor) { profileEditor.setPageDirty(true); }"/>
+                    </div>
+                  </td></tr>
+                </table>
+              </div>
+          </h:panelGroup>
+        </a4j:outputPanel>
+      </h:panelGrid>
+    </div>
+      <a4j:commandButton style="display:none" id="profileSave" value="Save"
+                         onclick="${saveOnClick}"
+                         render="#{profile}filterErrorPnl"
+                         action="#{roleEditor.saveProfile}" oncomplete="if (#{roleEditor.hasError}) {return;}
+                         destroyProfileEditor();
+                         Ext.StoreMgr.lookup('entitlementDataStore').load({params: {'editForm:id': $('editForm:roleToEdit').value}, callback: refreshEntitlements});
+                         reloadSimpleEntitlements();
+                         SailPoint.modeler.RoleEditor.toggleSwitchToSimpleButton();
+                         $('editForm:refreshTargetAccountRules').click(); "/>
+      <a4j:commandButton style="display:none" id="profileCancel" value="Cancel"
+                         action="#{roleEditor.cancelProfileEditAction}" render="entitlementsEditorPanel"
+                         oncomplete="destroyProfileEditor(); Ext.StoreMgr.lookup('entitlementDataStore').load({params: {'editForm:id': $('editForm:roleToEdit').value}, callback: refreshEntitlements});"/>
+  </div>
+  
+</ui:composition>
+
+</body>
+</html>

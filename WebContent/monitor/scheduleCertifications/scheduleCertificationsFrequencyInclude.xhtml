@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+    </sp:script>
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css"
+          rel="stylesheet"
+          type="text/css" />
+
+
+    <ui:fragment rendered="#{!certificationSchedule.identityTrigger}">
+
+      <tr><td class="spContentTitle" colspan="8">#{msgs.cert_sched_when_header}</td></tr>
+
+      <tr>
+        <td class="titleColumn certScheduleTitleCol">
+          <h:outputText value="#{msgs.label_execution_frequency}" />
+        </td>
+        <td class="certScheduleHelpCol">
+          <h:graphicImage id="imgHlpFreq" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_freq}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="6" align="left">
+          <h:selectOneListbox
+            id="freqSelect"
+            value="#{certificationSchedule.editedCertificationSchedule.frequency}"
+            size="1"
+            disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+            readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+            onchange="SailPoint.CertificationScheduleForm.certificationFrequencyChanged(this, #{certificationSchedule.existingCertGroup});">
+            <f:selectItems value="#{certificationSchedule.frequencies}" />
+          </h:selectOneListbox>
+        </td>
+      </tr>
+      <tr>
+        <td class="titleColumn certScheduleTitleCol">
+          <h:outputText value="#{msgs.label_run_now}" />
+        </td>
+        <td class="certScheduleHelpCol">
+          <h:graphicImage id="imgHlpRunNow" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_run_now}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="6" align="left">
+          <h:selectBooleanCheckbox id="runNowCheckbox" value="#{certificationSchedule.runNow}"
+                                   disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                   readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                                   onclick="SailPoint.CertificationScheduleForm.runNowClicked(this, 'certificationScheduleForm:certifyExecution');">
+                                   
+              <a4j:ajax event="change"
+                         oncomplete="SailPoint.CertificationScheduleForm.postSubmit();"
+                         render="activeDates, challengeDates, remediationDates, certification_notificationDates, certification_notificationDatesWarning" />
+          </h:selectBooleanCheckbox>
+        </td>
+      </tr>
+      <tr>
+        <td class="titleColumn certScheduleTitleCol">
+          <h:outputText value="#{msgs.start}" />
+        </td>
+        <td class="certScheduleHelpCol">
+          <h:graphicImage id="imgHlpExec" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_freq_exec}"/>
+        </td>
+        <td class="certScheduleOptionCol" colspan="2" align="left">
+          <sp:inputDate id="certifyExecution"
+                       popupCalendar="true"
+                       addResources="false"
+                       imageLocation="/scripts/myfacescalendar"
+                       javascriptLocation="/scripts/myfacescalendar"
+                       styleLocation="/scripts/myfacescalendar"
+                       value="#{certificationSchedule.editedCertificationSchedule.firstExecution}" type="both"
+                       ampm="true" timeZone="#{base.userTimeZoneId}"
+                       disabled="#{certificationSchedule.runNow or certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                       styleClass="tomahawkInputDate">
+            <a4j:ajax event="change"
+                         oncomplete="SailPoint.CertificationScheduleForm.postSubmit();"
+                         render="activeDates, challengeDates, remediationDates, certification_notificationDates" />
+          </sp:inputDate>
+
+          <script type="text/javascript" defer="defer">
+          <!--//--><![CDATA[//><!--
+            /**
+             * Either hide or show the included apps multi-suggest component
+             * using 'visibility' hiding rather than 'display' hiding.  This
+             * will cause the layout of the surrounding elements to not shift
+             * when the component is hidden/shown.  We need this to fix some
+             * layout issues in IE7.
+             *
+             * @param {Boolean} isShow  True to show the component.
+             */
+            function hideOrShowIncludedApps(isShow) {
+                var cmp = Ext.getCmp('certifyIncludedAppMultiSuggestCmp');
+                if (null != cmp) {
+                    var prevHideMode = cmp.hideMode;
+                    cmp.hideMode = 'visibility';
+                    cmp.setVisible(isShow);
+                    cmp.hideMode = prevHideMode;
+                }
+            }
+
+            // If we are in IE7, add show/hide listeners to the calendar to
+            // hide/show the Included Applications multi suggest.  In IE7, the
+            // multi suggest always covers the popup calendar.  It is acting
+            // like a z-index or iframe problem, but I don't think that is the
+            // cause.  Pulling out the big guns and just hiding the problem.
+            // Make sure that the calendar variable is defined - this won't be
+            // defined if the calendar is disabled.
+            if (Ext.isIE7 && (typeof certificationScheduleForm_3AcertifyExecutionCalendarVar != 'undefined')) {
+                certificationScheduleForm_3AcertifyExecutionCalendarVar.onShow(Ext.pass(hideOrShowIncludedApps, [false]));
+                certificationScheduleForm_3AcertifyExecutionCalendarVar.onHide(Ext.pass(hideOrShowIncludedApps, [true]));
+            }
+            
+            Ext.onReady(function() {
+            	SailPoint.CertificationScheduleForm.certificationFrequencyChanged($('certificationScheduleForm:freqSelect'), #{certificationSchedule.existingCertGroup});
+            });
+            
+          //--><!]]>
+          </script>
+
+          <!-- Choosing a date from the popup doesn't fire the onchange, so we'll set up a timed observer. -->
+          <a4j:commandButton id="dateChangedBtn"
+                             style="display: none"
+                             oncomplete="SailPoint.CertificationScheduleForm.updateNotifications();SailPoint.CertificationScheduleForm.postSubmit();"
+                             render="activeDates, challengeDates, remediationDates, certification_notificationDates" />
+          <script type="text/javascript">
+              SailPoint.CertificationScheduleForm.observeDateChange('certificationScheduleForm:certifyExecution', 'certificationScheduleForm:dateChangedBtn');
+          </script>
+
+          <a4j:outputPanel ajaxRendered="true" style="width:100%">
+            <h:message styleClass="formErrorNoWrap" for="certifyExecution" />
+          </a4j:outputPanel>
+        </td>
+      </tr>
+    </ui:fragment>
+</ui:composition>
+
+</body>
+</html>

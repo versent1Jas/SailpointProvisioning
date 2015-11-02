@@ -1,0 +1,484 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, AUTHENTICATE, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD" icon="enterpriseIcon" name="ITSM Template" type="BMC ITSM - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="ITSM"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+                               import sailpoint.object.ProvisioningPlan.AccountRequest;
+                               import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                               import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                               import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                               import sailpoint.api.*;
+                               import sailpoint.object.*;
+                               import sailpoint.tools.Util;
+                               import sailpoint.object.ProvisioningPlan;
+                                import java.util.*;
+                               import java.util.ArrayList;
+
+                          
+
+                                List accounts = plan.getAccountRequests();
+                            if (accounts != null) {
+                                for (AccountRequest req : accounts) {
+                                  AccountRequest.Operation op = req.getOperation();
+                                 
+                                 if (op == AccountRequest.Operation.Modify)
+                                 {
+                                         
+                                              // find the Link for this account
+                                      Application app = context.getObject(Application.class, req.getApplication());
+                                      if (app == null) {
+                                         // should never happen, the plan has an error
+                                        // print("Invalid application!");
+                                      }
+                                       else {
+                                          Link link = identity.getLink(app, req.getNativeIdentity());
+                                          if (link == null) {
+                                             // should never happen, on an Operation.Delete
+                                            // print("Missing link!");
+                                          }
+                                          else {
+                                              String attname = "ITSM_PERSON_ID";
+                                              Object value = link.getAttribute(attname);
+                                              AttributeRequest att = new AttributeRequest(attname, value);
+                                              req.add(att);
+
+                                               String attname1 = "ITSM_COMPANY";
+                                                Object value1 = link.getAttribute(attname1);
+
+                                                AttributeRequest att1 = new AttributeRequest(attname1, value1);
+                                                req.add(att1);
+
+                                                String attname2 = "XSA_PASSWORD_LIFE";
+                                                AttributeRequest att2 = new AttributeRequest(attname2, "PERMANENT");
+                                                req.add(att2);
+                                          }
+                                      }
+                                 }
+
+                                  if (op == AccountRequest.Operation.Delete || op == AccountRequest.Operation.Disable  || op == AccountRequest.Operation.Enable)
+                                 {
+                                         // print("delete...");
+                                              // find the Link for this account
+                                      Application app = context.getObject(Application.class, req.getApplication());
+                                      if (app == null) {
+                                         // should never happen, the plan has an error
+                                         //print("Invalid application!");
+                                      }
+                                       else {
+                                          Link link = identity.getLink(app, req.getNativeIdentity());
+                                          if (link == null) {
+                                             // should never happen, on an Operation.Delete
+                                            // print("Missing link!");
+                                          }
+                                          else {
+                                              String attname = "ITSM_PERSON_ID";
+                                              Object value = link.getAttribute(attname);
+                                              AttributeRequest att = new AttributeRequest(attname, value);
+                                              req.add(att);
+
+
+                                          }
+                                      }
+                                 }
+
+
+
+                                    //support for add
+                                       if (op == AccountRequest.Operation.Create)
+                                      {
+
+                                                
+                                              AttributeRequest clientSens = req.getAttributeRequest("ITSM_CLIENT_SENSITIVITY");
+                                              if (clientSens != null)
+                                              {
+                                                       String privString =clientSens.getValue();
+                                                       
+                                                       String newString = null;
+                                                       if(privString.equals("Sensitive"))
+                                                              newString = "0";
+                                                       else
+                                                              newString ="1";
+                                                       clientSens.setValue(newString);
+                                                        
+                                              }
+
+
+
+                                                AttributeRequest clientType = req.getAttributeRequest("ITSM_CLIENT_TYPE");
+                                              if (clientType != null)
+                                              {
+                                                       String privString =clientType.getValue();
+                                                       
+                                                       String newString = null;
+                                                       if(privString.equals("Office-Based Employee"))
+                                                              newString = "2000";
+                                                       else if(privString.equals("Field-Based Employee"))
+                                                              newString ="3000";
+                                                       else if(privString.equals("Home-Based Employee"))
+                                                              newString ="4000";
+                                                       else if(privString.equals("Contractor"))
+                                                           newString ="5000";
+                                                       else if(privString.equals("Customer"))
+                                                           newString ="7000";
+                                                       else if(privString.equals("Prospect"))
+                                                           newString ="8000";
+                                                       else if(privString.equals("Vendor"))
+                                                           newString ="10000";
+                                                       else
+                                                       {
+                                                         
+                                                       }
+                                                       clientType.setValue(newString);
+                                                        
+                                              }
+
+
+
+                                            AttributeRequest profStat = req.getAttributeRequest("ITSM_PROFILE_STATUS");
+                                              if (profStat != null)
+                                              {
+                                                     String privString =profStat.getValue();
+                                                      
+                                                       String newString = null;
+                                                         if(privString.equals("Proposed"))
+                                                              newString = "0";
+                                                       else if(privString.equals("Enabled"))
+                                                              newString ="1";
+                                                       else if(privString.equals("Offline"))
+                                                              newString ="2";
+                                                       else if(privString.equals("Obsolete"))
+                                                           newString ="3";
+                                                       else if(privString.equals("Archive"))
+                                                           newString ="4";
+                                                      else if(privString.equals("Delete"))
+                                                            newString ="5";
+                                                     else
+                                                     {
+                                                        
+                                                     }
+
+                                                     profStat.setValue(newString);
+
+                                              }
+                                       }
+                            }
+                            }
+                            
+                        
+                            
+                             List groups = plan.getObjectRequests();
+                              if (groups != null) {
+                              
+                                for (ObjectRequest req : groups) {
+                                  ObjectOperation op = req.getOp();
+                                  
+                                  
+                                     
+                                                                
+                                if (op == ObjectOperation.Create)
+                                      {
+                                     
+                                      String groupId = req.getNativeIdentity();
+                                      
+                                        if (groupId != null) {
+                                            req.setNativeIdentity(groupId);
+                                        }
+                                     
+                                      AttributeRequest itsmGroupType = req.getAttributeRequest("ITSM_GROUP_TYPE");
+                                      if (itsmGroupType != null)
+                                      {
+                                
+                                               String privString =itsmGroupType.getValue();
+                                               
+                                               String newString = null;
+                                               if(privString.equals("None"))
+                                                      newString = "0";
+                                            else
+                                                if(privString.equals("View"))
+                                                      newString ="1";
+                                            else
+                                                if(privString.equals("Change"))
+                                                      newString ="2";
+                                            
+                                               itsmGroupType.setValue(newString);
+                                                
+                                      }
+                                                                  
+                                      AttributeRequest groupCat = req.getAttributeRequest("ITSM_GROUP_CATEGORY");
+                                       if (groupCat != null)
+                                              {
+                                                
+                                                       String privString =groupCat.getValue();
+                                                       
+                                                       String newString = null;
+                                                       if(privString.equals("Regular"))
+                                                              newString = "0";
+                                                       else if(privString.equals("Dynamic"))
+                                                              newString ="1";
+                                                       else if(privString.equals("Computed"))
+                                                              newString ="2";
+                                                        
+                                                     
+                                                       groupCat.setValue(newString);
+                                                        
+                                              }
+                                       
+                                      AttributeRequest groupType = req.getAttributeRequest("ITSM_TYPE");
+                                       if (groupType != null)
+                                              {
+                                        
+                                                       String privString =groupType.getValue();
+                                                       
+                                                       String newString = null;
+                                                       if(privString.equals("Support_Group"))
+                                                              newString = "SUPPORT_GROUP";
+                                                       else if(privString.equals("Permission_Group"))
+                                                              newString ="PERMISSION_GROUP";
+                                                                                             
+                                                     
+                                                       groupType.setValue(newString);
+                                                        
+                                              }
+                                              
+                                         AttributeRequest groupPGPStatus = req.getAttributeRequest("ITSM_GROUP_STATUS");
+                                                 if (groupPGPStatus != null)
+                                              {
+                                               String privString =groupPGPStatus.getValue();
+                                                      
+                                                       String newString = null;
+                                                       if(privString.equals("Current"))
+                                                       newString = "0";
+                                                      
+                                                          groupPGPStatus.setValue(newString);
+                                              }
+                                              
+                                              
+                                              
+                                           AttributeRequest grpStatus = req.getAttributeRequest("ITSM_SUPPORT_GROUP_STATUS");
+                                       if (grpStatus != null)
+                                              {
+                                               
+                                                       String privString =grpStatus.getValue();
+                                                       
+                                                       String newString = null;
+                                                       if(privString.equals("Proposed"))
+                                                              newString = "0";
+                                                       else if(privString.equals("Enabled"))
+                                                              newString ="1";
+                                                      else if(privString.equals("Offline"))
+                                                              newString ="2";
+                                                      else if(privString.equals("Obsolete"))
+                                                              newString ="3";
+                                                      else if(privString.equals("Obsolete"))
+                                                              newString ="4";
+                                                      else if(privString.equals("Delete"))
+                                                              newString ="5";
+                                                                              
+                                                   
+                                                       grpStatus.setValue(newString);
+                                                        
+                                              }
+
+                                       }
+                                       
+                                       
+                                   if (op == ObjectOperation.Modify)
+                                      {
+                                       String groupId = req.getNativeIdentity();
+                                        if (groupId != null) {
+                                             req.setNativeIdentity(groupId);
+                                             Application app = context.getObject(Application.class,req.getApplication());
+                                             ManagedAttribute ma= ManagedAttributer.get(context,app,"Groups",groupId);
+                                             Object sgpGroupId = ma.getAttribute("ITSM_SUPPORT_GROUP_ID");
+                                             Object pgpRequestId = ma.getAttribute("ITSM_GROUP_REQUEST_ID");
+                                             if(sgpGroupId !=null){
+                                             AttributeRequest att1 = new AttributeRequest("ITSM_SUPPORT_GROUP_ID", sgpGroupId);
+                                             att1.setOperation(ProvisioningPlan.Operation.Set);
+                                             req.add(att1);
+                                             }
+                                              if(pgpRequestId !=null){
+                                             AttributeRequest att1 = new AttributeRequest("ITSM_GROUP_REQUEST_ID", pgpRequestId);
+                                             att1.setOperation(ProvisioningPlan.Operation.Set);
+                                             req.add(att1);
+                                             }
+                                             
+                                                                         
+
+                                         
+                                        }
+                                   }
+                                     if (op == ObjectOperation.Delete)
+                                      {
+                                       String groupId = req.getNativeIdentity();
+                                        if (groupId != null) {
+                                             req.setNativeIdentity(groupId);
+                                             Application app = context.getObject(Application.class,req.getApplication());
+                                             ManagedAttribute ma= ManagedAttributer.get(context,app,"Groups",groupId);
+                                             Object sgpGroupId = ma.getAttribute("ITSM_SUPPORT_GROUP_ID");
+                                             Object pgpRequestId = ma.getAttribute("ITSM_GROUP_REQUEST_ID");
+                                             if(sgpGroupId !=null){
+                                             AttributeRequest att1 = new AttributeRequest("ITSM_SUPPORT_GROUP_ID", sgpGroupId);
+                                             att1.setOperation(ProvisioningPlan.Operation.Set);
+                                             req.add(att1);
+                                             }
+                                              if(pgpRequestId !=null){
+                                             AttributeRequest att1 = new AttributeRequest("ITSM_GROUP_REQUEST_ID", pgpRequestId);
+                                             att1.setOperation(ProvisioningPlan.Operation.Set);
+                                             req.add(att1);
+                                             }
+                                         
+                                        }
+                                   }
+                    
+                                    
+                                    
+                                 }
+}
+                                 
+
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" objectType="account">
+        <AttributeDefinition minable="true" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="RU_SUSPENDED" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_FIRST_NAME" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_LAST_NAME" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_CLIENT_TYPE" required="true" type="int"/>
+        <AttributeDefinition minable="true" name="ITSM_PROFILE_STATUS" required="true" type="int"/>
+        <AttributeDefinition minable="true" name="ITSM_CLIENT_SENSITIVITY" required="true" type="int"/>
+        <AttributeDefinition minable="true" name="ITSM_COMPANY" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_PHONE_NUMBER_BUSINESS" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_INTERNET_EMAIL" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_SITE" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_PERSON_ID" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" objectType="group">
+        <AttributeDefinition minable="true" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_TYPE" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_SUPPORT_COMPANY" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_SUPPORT_GROUP_ROLE" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_SUPPORT_ORGANIZATION" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_SUPPORT_GROUP_STATUS" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_GROUP_TYPE" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_LONG_GROUP_NAME" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_GROUP_CATEGORY" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_SUPPORT_GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_GROUP_REQUEST_ID" required="true" type="string"/>
+        <AttributeDefinition minable="true" name="ITSM_GROUP_STATUS" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="USER ID" helpKey="Mandatory field : User name/ID for ITSM account" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" helpKey="Mandatory field : Password for username" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="ITSM Type" helpKey="Mandatory field : ITSM Type should be filled e.g.:- People" name="ITSM_TYPE" required="true" section="" type="string" value="PEOPLE"/>
+        <Field displayName="First Name" helpKey="Mandatory field : First name of the user" name="ITSM_FIRST_NAME" required="true" type="string"/>
+        <Field displayName="Last Name" helpKey="Mandatory field : Last name of the user" name="ITSM_LAST_NAME" required="true" type="string"/>
+        <Field displayName="ITSM Client Type" helpKey="Mandatory field : Client type of as ITSM user" name="ITSM_CLIENT_TYPE" required="true" type="string">
+          <AllowedValues>
+            <String>Office-Based Employee</String>
+            <String>Field-Based Employee</String>
+            <String>Home-Based Employee</String>
+            <String>Contractor</String>
+            <String>Customer</String>
+            <String>Prospect</String>
+            <String>Vendor</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="ITSM Profile Status" helpKey="Mandatory field : Profile status of an account,e.g.Enabled" name="ITSM_PROFILE_STATUS" required="true" type="string">
+          <AllowedValues>
+            <String>Proposed</String>
+            <String>Enabled</String>
+            <String>Offline</String>
+            <String>Obsolete</String>
+            <String>Archive</String>
+            <String>Delete</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="ITSM Client Sensitivity" helpKey="Mandatory field : ITSM Client Sensitivity" name="ITSM_CLIENT_SENSITIVITY" required="true" type="string">
+          <AllowedValues>
+            <String>Sensitive</String>
+            <String>Standard</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="ITSM company" helpKey="Mandatory field : ITSM Company name" name="ITSM_COMPANY" required="true" type="string"/>
+        <Field displayName="ITSM Ph no" helpKey="Mandatory field : Ph no of an ITSM user/account" name="ITSM_PHONE_NUMBER_BUSINESS" required="true" type="string"/>
+        <Field displayName="ITSM Internet Mail" helpKey="Mandatory field : Email address of an ITSM user/account" name="ITSM_INTERNET_EMAIL" required="true" type="string"/>
+        <Field displayName="ITSM Site" helpKey="Mandatory field : Site of an ITSM user/account" name="ITSM_SITE" required="true" type="string"/>
+      </Template>
+      <Template name="Group Create" schemaObjectType="group" usage="Create">
+        <Field displayName="Group Name" helpKey="Mandatory field : Group name should be filled up with prefix PGP or SGP for example:- PGP:GroupName or SGP:GroupName" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Group ID" helpKey="Manditory field for PGP group for example :-123456" name="ITSM_GROUP_ID" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Group Type" helpKey="This type will decide the prefix of Group name,Example if you select the Permission Group then group name should be PGP:GroupName" name="ITSM_TYPE" reviewRequired="true" section="" type="string" value="Support_Group">
+          <AllowedValues>
+            <String>Permission_Group</String>
+            <String>Support_Group</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Long Group Name" helpKey="Manditory field for PGP group" name="ITSM_LONG_GROUP_NAME" reviewRequired="true" type="string"/>
+        <Field displayName="Group Category" helpKey="Manditory field for PGP group" name="ITSM_GROUP_CATEGORY" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>Regular</String>
+            <String>Dynamic</String>
+            <String>Computed</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="ITSM Group Type" helpKey="Manditory field for PGP group" name="ITSM_GROUP_TYPE" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>None</String>
+            <String>View</String>
+            <String>Change</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Status" helpKey="Manditory field for PGP group" name="ITSM_GROUP_STATUS" reviewRequired="true" type="string" value="Current">
+          <AllowedValues>
+            <String>Current</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Support Company" helpKey="Manditory field for SGP group" name="ITSM_SUPPORT_COMPANY" reviewRequired="true" type="string"/>
+        <Field displayName="Support Organization" helpKey="Manditory field for SGP group" name="ITSM_SUPPORT_ORGANIZATION" reviewRequired="true" type="string"/>
+        <Field displayName="Support Group Role" helpKey="Manditory field for SGP group" name="ITSM_SUPPORT_GROUP_ROLE" reviewRequired="true" type="string"/>
+        <Field displayName="Support Group Status" helpKey="Manditory field for SGP group" name="ITSM_SUPPORT_GROUP_STATUS" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>Proposed</String>
+            <String>Enabled</String>
+            <String>Offline</String>
+            <String>Obsolete</String>
+            <String>Archive</String>
+            <String>Delete</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Modify" schemaObjectType="group" usage="Update">
+        <Field displayName="Group Type" helpKey="Field for PGP/SGP group" name="ITSM_TYPE" readOnly="true" section="" type="string"/>
+        <Field displayName="Long Group Name" helpKey="Field for PGP group" name="ITSM_LONG_GROUP_NAME" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Group Category" helpKey="Field for PGP group" name="ITSM_GROUP_CATEGORY" readOnly="true" section="" type="string"/>
+        <Field displayName="ITSM Group Type" helpKey="Field for PGP group,0- None,1- View,2- Change" name="ITSM_GROUP_TYPE" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Status" helpKey="Field for PGP group" name="ITSM_GROUP_STATUS" readOnly="true" section="" type="string"/>
+        <Field displayName="Support Company" helpKey="Field for SGP group" name="ITSM_SUPPORT_COMPANY" readOnly="true" section="" type="string"/>
+        <Field displayName="Support Organization" helpKey="Field for SGP group" name="ITSM_SUPPORT_ORGANIZATION" readOnly="true" section="" type="string"/>
+        <Field displayName="Support Group Role" helpKey="Field for SGP group" name="ITSM_SUPPORT_GROUP_ROLE" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Support Group Status" helpKey="Field for SGP group,0- Proposed ,1- Enabled ,2- Offline ,3- Obsolete ,4- Obsolete ,5- Delete" name="ITSM_SUPPORT_GROUP_STATUS" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Support Group ID" helpKey="Field for SGP group" name="ITSM_SUPPORT_GROUP_ID" readOnly="true" section="" type="string"/>
+        <Field displayName="Group Request ID" helpKey="field for PGP group" name="ITSM_GROUP_REQUEST_ID" readOnly="true" section="" type="string"/>
+        <Field displayName="Group ID" helpKey="Field for PGP group for example :-123456" name="ITSM_GROUP_ID" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

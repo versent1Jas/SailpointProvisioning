@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+
+  <td colspan='5'>
+  <div class="spAjaxLightBlueTabledContent">
+  <table class="spLightBlueTable width100"
+    style="border-right: 1px #999 solid; border-left: 1px #999 solid">
+    <tr>
+      <th align="center">#{msgs.filter_operation}</th>
+      <th align="center">#{msgs.type}</th>
+      <th align="center">#{msgs.application}</th>
+      <th align="center">#{msgs.name}</th>
+      <th align="center">#{msgs.value}</th>
+      <th align="center">#{msgs.selector_type_is_null}</th>
+    </tr>
+
+    <t:dataList value="#{matchTerm.children}" var="groupChild">
+      <tr>
+        <ui:fragment rendered="#{groupChild.first}">
+          <td rowspan='#{sp:size(matchTerm.children)}'><h:selectOneMenu id="#{prefix}SelectorName"
+            value="#{matchTerm.operation}" disabled="#{readOnly == true}" >
+                  <f:selectItem itemLabel="#{msgs.filter_and}" itemValue="and"/>
+                  <f:selectItem itemLabel="#{msgs.filter_or}" itemValue="or"/>
+          </h:selectOneMenu></td>
+        </ui:fragment>
+        <ui:fragment rendered="#{!groupChild.container}">
+        <ui:include src="selectorGroupTerm.xhtml">
+          <ui:param name="groupTerm" value="#{groupChild}"/>
+          <ui:param name="enableValueSelect" value="#{enableValueSelect}"/>
+          <ui:param name="readOnly" value="#{readOnly == true}"/>
+        </ui:include>
+        </ui:fragment>
+        <ui:fragment rendered="#{groupChild.container}">
+        <ui:include src="selectorGroupGroup.xhtml">
+          <ui:param name="groupGroup" value="#{groupChild}"/>
+          <ui:param name="enableValueSelect" value="#{enableValueSelect}"/>
+          <ui:param name="readOnly" value="#{readOnly == true}"/>
+        </ui:include>
+        </ui:fragment>
+      </tr>
+    </t:dataList>
+  </table>
+  </div>
+  </td>
+
+</ui:composition>
+
+</body>
+</html>

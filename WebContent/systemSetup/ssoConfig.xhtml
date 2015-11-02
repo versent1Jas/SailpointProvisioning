@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC
+    "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+    <script type="text/javascript">
+        <!--//--><![CDATA[//><!--
+        Ext.onReady(function() {
+            toggleDisplay($('ssoRuleBasedContainer'), #{!samlConfig.ruleBasedSSOEnabled});
+            toggleDisplay($('ssoSamlConfigContainer'), #{!samlConfig.samlEnabled});
+        });
+        //--><!]]>
+    </script>
+  <div class="paddedContainer">
+
+      <h:outputText value="#{msgs.sso_enable_rule_based}" />
+      <h:graphicImage id="imgHlpRuleBasedSSOEnabled" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_rule_based_enabled}"/>
+      <h:selectBooleanCheckbox id="ruleBasedSSOEnabled" value="#{samlConfig.ruleBasedSSOEnabled}" onclick="showHideWithLock($('ssoRuleBasedContainer'), this, 100);
+          SailPoint.SystemSetup.Login.updateLoginPanel(); SailPoint.SystemSetup.Login.handleRuleBasedToggle(this.checked);" onchange="SailPoint.SystemSetup.Login.makePageDirty();"/>
+
+
+      <table id="ssoRuleBasedContainer" class="spTable">
+        <tr>
+            <th><span class="spContentTitle">#{msgs.sso_rule_based}</span></th>
+        </tr>
+        <tr>
+          <td>
+            <table class="spContent">
+              <tr>
+                <td>
+
+                  <div style="margin: 7px">
+                    <h:panelGrid styleClass="paddedTbl" columns="3" columnClasses="titleColumn, helpColumn, leftAlignedColumn">
+
+                      <h:outputText value="#{msgs.sso_rule}"/>
+                      <h:graphicImage id="imgHlpSSORule" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_setup_login_sso_rule}"/>
+                      <h:panelGroup>
+                        <a4j:outputPanel id="ssoRulePanel">
+                          <h:selectOneMenu id="ssoRule" value="#{loginConfig.ssoRule}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" style="width:270px">
+                            <f:selectItems value="#{loginConfig.SSORules}"/>
+                          </h:selectOneMenu>
+                        </a4j:outputPanel>
+
+                        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}">
+                          <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                                 onclick="SailPoint.Rule.Editor.edit($('configForm:ssoRule').value, 'SSOAuthentication', $('configForm:refreshSSORulesButton'))"/>
+                        </ui:fragment>
+                      </h:panelGroup>
+
+                      <h:outputText value="#{msgs.sso_validation_rule}"/>
+                      <h:graphicImage id="imgHlpSSOValidationRule" width="12px"
+                                      alt="#{help.help_setup_login_sso_validation_rule}" height="12px"
+                                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                      url="/images/icons/dashboard_help_16.png"/>
+                      <h:panelGroup>
+                        <a4j:outputPanel id="ssoValidationRulePanel">
+                          <h:selectOneMenu id="ssoValidationRule" value="#{loginConfig.ssoValidationRule}"
+                                           onchange="SailPoint.SystemSetup.Login.makePageDirty();"
+                                           style="width:270px">
+                            <f:selectItems value="#{loginConfig.SSOValidationRules}"/>
+                          </h:selectOneMenu>
+                        </a4j:outputPanel>
+
+                        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}">
+                          <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                                 onclick="SailPoint.Rule.Editor.edit($('configForm:ssoValidationRule').value,
+                                                                   'SSOValidation',
+                                                                   $('configForm:refreshSSOValidationRulesButton'))"/>
+                        </ui:fragment>
+                      </h:panelGroup>
+
+                    </h:panelGrid>
+
+                    <a4j:commandButton id="refreshSSORulesButton" style="display:none" render="ssoRulePanel"/>
+                    <a4j:commandButton id="refreshSSOValidationRulesButton" style="display:none" render="ssoValidationRulePanel"/>
+                  </div>
+
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+
+    <br/><br/>
+
+
+    <h:outputText value="#{msgs.sso_enable_saml_based}" />
+    <h:graphicImage id="imgHlpSamlBasedSSOEnabled" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_saml_based_enabled}"/>
+    <h:selectBooleanCheckbox id="samlBasedSSOEnabled" value="#{samlConfig.samlEnabled}" onclick="showHideWithLock($('ssoSamlConfigContainer'), this, 100);
+        SailPoint.SystemSetup.Login.updateLoginPanel();" onchange="SailPoint.SystemSetup.Login.makePageDirty();"/>
+
+    <table id="ssoSamlConfigContainer" class="spTable">
+      <tr>
+          <th><span class="spContentTitle">#{msgs.sso_saml_based}</span></th>
+      </tr>
+      <tr>
+        <td>
+          <table class="spContent">
+            <tr>
+              <td>
+
+                <table class="spContent">
+                  <tr>
+                    <td class="firstColumn">
+                      #{msgs.sso_entity_id}
+                    </td>
+                    <td class="middleColumn">
+                      <h:graphicImage id="imgHlpSsoIdpEntityId" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_entity_id}"/>
+                    </td>
+                    <td class="leftAlignedColumn">
+                      <h:inputText id="entityId" value="#{samlConfig.entityId}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" styleClass="inputWidth"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="firstColumn">
+                      #{msgs.sso_idp_service_url}
+                    </td>
+                    <td class="middleColumn">
+                      <h:graphicImage id="imgHlpSsoIdpServiceUrl" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_idp_service_url}"/>
+                    </td>
+                    <td class="leftAlignedColumn">
+                      <h:inputText id="idpServiceUrl" value="#{samlConfig.idpServiceUrl}" onchange="SailPoint.SystemSetup.Login.makePageDirty();"  styleClass="inputWidth"/>
+                    </td>
+                  </tr>
+                  <tr>
+                      <td class="firstColumn">
+                          #{msgs.sso_saml_acs}
+                      </td>
+                      <td class="middleColumn">
+                          <h:graphicImage id="imgHlpSsoAcs" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_saml_acs}"/>
+                      </td>
+                      <td class="leftAlignedColumn">
+                          <h:inputText id="assertionConsumerService" value="#{samlConfig.assertionConsumerService}" onchange="SailPoint.SystemSetup.Login.makePageDirty();"  styleClass="inputWidth"/>
+                      </td>
+                  </tr>
+                  <tr>
+                    <td class="firstColumn">
+                      #{msgs.sso_binding_method}
+                    </td>
+                    <td class="middleColumn">
+                      <h:graphicImage id="imgHlpSsoBindingMethod" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_binding_method}"/>
+                    </td>
+                    <td class="leftAlignedColumn">
+                      <h:selectOneRadio id="bindingMethod" value="#{samlConfig.bindingMethod}" onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+                        <f:selectItems value="#{samlConfig.bindingMethodList}"/>
+                      </h:selectOneRadio>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="firstColumn">
+                      #{msgs.sso_nameid_format}
+                    </td>
+                    <td class="middleColumn">
+                      <h:graphicImage id="imgHlpSsoNameIdFormat" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_nameid_format}"/>
+                    </td>
+                    <td class="leftAlignedColumn">
+                      <h:selectOneMenu id="nameIdFormat" value="#{samlConfig.nameIdFormat}" onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+                        <f:selectItem itemLabel="" itemValue="" />
+                        <f:selectItems value="#{samlConfig.nameIdFormatList}"/>
+                      </h:selectOneMenu>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="firstColumn">
+                      #{msgs.sso_public_x509_cert}
+                    </td>
+                    <td class="middleColumn">
+                      <h:graphicImage id="imgHlpSsoPulicCert" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_public_x509_cert}"/>
+                    </td>
+                    <td class="leftAlignedColumn">
+                      <h:inputTextarea id="idpPublicKey" value="#{samlConfig.idpPublicKey}" onchange="SailPoint.SystemSetup.Login.makePageDirty();"
+                                       rows="4" style="width:270px" onfocus="SailPoint.SystemSetup.Login.resizeTextArea(true);" onblur="SailPoint.SystemSetup.Login.resizeTextArea(false);"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="firstColumn">
+                      <h:outputText value="#{msgs.sso_saml_correlation_rule}"/>
+                    </td>
+                    <td class="middleCOlumn">
+                      <h:graphicImage id="imgHlpSamlCorrRule" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sso_saml_correlation_rule}"/>
+                    </td>
+                    <td class="leftAlignedColumn">
+                      <h:panelGroup>
+                        <a4j:outputPanel id="samlCorrRulePanel">
+                          <h:selectOneMenu id="samlCorrRule" value="#{samlConfig.samlCorrelationRule}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" style="width:270px">
+                            <f:selectItems value="#{samlConfig.samlRules}"/>
+                          </h:selectOneMenu>
+                        </a4j:outputPanel>
+
+                        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}">
+                          <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                               onclick="SailPoint.Rule.Editor.edit($('configForm:samlCorrRule').value, 'SAMLCorrelation', $('configForm:refreshSamlCorrelationRulesButton'))"/>
+                        </ui:fragment>
+                      </h:panelGroup>
+                      <a4j:commandButton id="refreshSamlCorrelationRulesButton" style="display:none" render="samlCorrRulePanel"/>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+  </div>
+</ui:composition>
+
+</body>
+</html>

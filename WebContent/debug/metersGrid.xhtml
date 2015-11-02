@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Call Timings</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_BEANS';
+      //--><!]]>
+    </script>
+    
+    <script type="text/javascript">
+
+    Ext.onReady(function(){
+
+        // data store
+        var store = SailPoint.Store.createStore({
+            fields: ['name', 'hits', 'errors', 'min', 'max', 'total', 'average'],
+            autoLoad: false,
+            url: CONTEXT_PATH + '/rest/debug/meters',
+            root : 'objects'
+        });
+
+        // display models     
+        var cols = [{
+            header: 'Name', 
+            dataIndex: 'name', 
+            flex : 2,
+            sortable: true
+        },{
+            header: 'Hits', 
+            dataIndex: 'hits', 
+            flex : 0.5,
+            sortable: true
+        },{
+            header: 'Errors', 
+            dataIndex: 'errors',
+            flex : 0.5,
+            sortable: true
+        },{
+            header: 'Min (ms)', 
+            dataIndex: 'min',
+            flex : 0.5,
+            sortable: true
+        },{
+            header: 'Max (ms)', 
+            dataIndex: 'max',
+            flex : 0.5,
+            sortable: true
+        },{
+            header: 'Total (ms)', 
+            dataIndex: 'total',
+            flex : 0.5,
+            sortable: true
+        },{
+            header: 'Average (ms)', 
+            dataIndex: 'average',
+            flex : 0.5,
+            sortable: true
+        }];
+        
+        // grid
+        var grid = new Ext.grid.Panel({
+            id: 'metersGrid',
+            renderTo: 'meters-grid',
+            store: store,
+            columns: cols,
+            viewConfig: {
+                stripeRows: true
+            }
+        });
+        
+        store.load();
+    }); // Ext.onReady
+    
+    </script>
+    </ui:define>
+
+  <ui:define name="body">
+  
+    <div id="meters-grid" style="width:100%"></div>
+
+    <h:form>
+      <h:commandButton action="#{debug.resetMetersAction}" value="Reset Meters" styleClass="primaryBtn" />
+    </h:form>
+
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

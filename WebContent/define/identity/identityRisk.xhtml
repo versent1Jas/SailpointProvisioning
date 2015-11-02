@@ -1,0 +1,26 @@
+<!-- Used to have "position: relative" here, but this messed up the suggest component. -->
+<html xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+  <f:view>
+
+    <ui:fragment rendered="#{!(identity.activeTab eq 5)}">
+      <div class="spContent">
+        <h:graphicImage url="/images/progress.gif"
+          style="padding:5px;vertical-align:middle"/>
+      </div>
+    </ui:fragment>
+
+    <ui:fragment rendered="#{identity.activeTab eq 5}">
+      <div class="spAjaxContent"  id="scoreContentContainer">
+        <ui:include src="/include/scorecard.xhtml">
+          <ui:param name="scorecard" value="#{identity.scorecardHelper.scorecard}"/>
+        </ui:include>
+      </div>
+    </ui:fragment>
+    
+  </f:view>
+</html>

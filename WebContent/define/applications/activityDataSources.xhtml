@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+    <f:view>
+      <div class="width100">
+        <input id="activityDSCanEdit" name="activityDSCanEdit" value="#{sp:hasRight(facesContext, 'ManageApplication')}" style="display:none"/>
+        <table id="activitiesTbl" class="paddedTbl width100">
+          <tbody>
+            <tr><td><h:outputText styleClass="spContentTitle" value="#{msgs.title_activity_data_sources}"/></td></tr>
+            <tr><td style="width:98%; padding-top:10px; padding-bottom:10px">
+              <div id="activityDataSources-display" class="width100"/>
+            </td></tr>
+            <tr><td>
+              <h:commandButton style="display:none" action="#{applicationObject.editDataSource}" id="editButton"/>
+              <h:commandButton style="display:none" action="#{applicationObject.deleteDataSource}" id="deleteButton"/>
+              <h:commandButton id="createDataSourceButton"
+                               action="#{applicationObject.createDataSource}"
+                               value="#{msgs.button_new_activity_data_src}"
+                               styleClass="secondaryBtn"
+                               rendered="#{sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

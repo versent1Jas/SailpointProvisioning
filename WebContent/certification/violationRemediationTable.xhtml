@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core">
+
+<body>
+  <t:dataTable styleClass="spTable" style="border-bottom:1px #cccccc solid"
+                 rowClasses="even,odd"
+                 value="#{businessRoles}"
+                 var="businessRole"
+                 forceIdIndexFormula="#{businessRole.businessRole.id}">
+    <h:column>
+      <h:selectBooleanCheckbox value="#{businessRole.selected}" readonly="#{readOnly}" disabled="#{readOnly}" />
+    </h:column>
+
+    <h:column>
+      <f:facet name="header">
+        <h:outputText value="#{msgs.business_role}"/>
+      </f:facet>
+      
+      <h:outputText value="#{businessRole.businessRole.name}"/>
+    </h:column>
+
+    <h:column>
+      <f:facet name="header">
+        <h:outputText value="#{msgs.description}"/>
+      </f:facet>
+      
+      <h:outputText escape="false" value="#{businessRole.businessRole.description}"/>
+    </h:column>
+
+  </t:dataTable>
+</body>
+</html>

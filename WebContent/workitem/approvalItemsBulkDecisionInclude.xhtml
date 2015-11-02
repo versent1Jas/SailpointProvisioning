@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/roles">
+    <src>roles.css</src>
+  </sp:style>
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+    <src>lcm.css</src>
+  </sp:style>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/PercentRangeInput.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/certification/BaseCertificationGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/certification/WorksheetGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/Workitem.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/BatchDetailPopup.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/batchRequests/BatchRequestsGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/certification/BaseDecisionDialog.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/certification/BulkSelectionCountConfirmationDialog.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/certification/Decider.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleAssignmentWindow.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/VTypes.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/approvalItemsBulkDecision.js?#{debug.revision}</src>
+  </sp:script>
+  <script type="text/javascript">
+  
+  var sp = new SailPoint.state.StateProvider({
+      stateIds: ['#{workItem.gridState.name}'],
+      states:   ['#{workItem.gridState.state}']
+    });
+    Ext.state.Manager.setProvider(sp);
+
+      // Global objects - I moved these from global vars to
+      // SailPoint-namespaced global objects for clarity. jfb
+      // NOTE : many of these are referenced randomly in other
+      // files so be careful
+      SailPoint.WorkItemState = {
+        id : "#{workItem.object.id}",
+        editable : #{workItem.editable},
+        violationReview : #{violationReview == 'true'},
+        gridFields : Ext.JSON.decode('#{workItem.storeFieldsJson}').fields,
+        gridColumns : [],
+        disableDecisionColumn : #{disableDecisionColumn == 'true'},
+        isArchive : #{isArchive == 'true'}
+      };
+
+      // todo : it would be much better to do this in the bean - jfb
+      <c:forEach items="#{workItem.approvalSet.items}" var="item">
+              SailPoint.RemoteDecisions[ '#{item.object.id}' ] = '#{item.object.state}';
+      </c:forEach>
+
+      // todo : Use UIConfig object to build column config instead of doing this in the ApprovalItemGridHelper
+      var appMemberColumnMeta = #{workItem.approvalMemberColumnJSON};
+
+      Ext.onReady(function() {
+          SailPoint.workitem.ApprovalItemGrid.initBulkDecision(SailPoint.WorkItemState.gridFields,
+                  appMemberColumnMeta.columns,
+                  SailPoint.WorkItemState.disableDecisionColumn,
+                  SailPoint.WorkItemState.editable,
+                  SailPoint.WorkItemState.isArchive,
+                  '#{workItem.gridState.name}');
+      });
+        
+  </script>
+  <h:panelGroup>
+    <table cellspacing="5" >
+      <ui:fragment rendered="#{workItem.targetIdentityBean.object.id != null}">
+        <tr>
+          <td>
+            <table>
+              <tr>
+                <td align='left'>
+                  <p class="viewIdentityDetails">
+                    <a href="#" onclick="SailPoint.IdentityDetailPopup.showForWorkItem('#{workItem.targetIdentityBean.object.id}', '#{sp:escapeJavascript(workItem.targetIdentityBean.object.name)}', '#{workItem.objectId}'); return false;">
+                      <h:outputFormat value="#{msgs.lcm_view_identity_details_for}">
+                         <f:param value="#{workItem.attributes['identityDisplayName']}"/>
+                      </h:outputFormat>
+                    </a>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </ui:fragment>
+      <tr>
+        <ui:fragment rendered="#{title == null}">
+          <td>
+            <h:outputFormat rendered="#{violationReview != 'true'}" value="#{msgs.approvalitem_items_title}" styleClass="titleColumn">
+                <f:param value="#{workItem.attributes['identityDisplayName']}"/>
+            </h:outputFormat>
+
+            <ui:fragment rendered="#{violationReview =='true'}">
+                <div style="padding:5px;margin:5px">
+                <h:outputText  value="#{msgs.approvalitem_violation_review_title }"/>
+                </div>
+            </ui:fragment>
+
+
+          </td>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{title != null}">
+          <td>
+            <h:outputText value='#{title}' styleClass="titleColumn"/> 
+          </td>
+        </ui:fragment>
+
+      </tr>
+    </table>
+    <h:inputHidden id="approvalComment"/>
+    <h:inputHidden id="approvalId"/>
+    <a4j:commandButton id="addApprovalItemComment" style="display:none" render="approvalItems-grid" action="#{workItem.addApprovalItemComment}" oncomplete="Ext.getCmp('approvalcheckboxgrid').getStore().load();">
+    </a4j:commandButton>
+    
+    <h:inputHidden id="approvalSunrise" />
+    <h:inputHidden id="approvalSunset" />
+    <a4j:commandButton id="updateActivationDates" style="display:none" action="#{workItem.updateActivationDates}" oncomplete="Ext.getCmp('approvalcheckboxgrid').getStore().load();">
+    </a4j:commandButton> 
+    
+    <ui:fragment rendered="#{not disableDecisionColumn or violationReview}">
+      <ui:include src="approvalDecisionsLegend.xhtml"/>
+    </ui:fragment>
+    <div id="approvalItems-grid" class="width100"></div>
+    <table id="bulkDecisionTable" class="dashTable width100" style="margin-top: 5px">
+        <tr>
+            <td style="white-space: nowrap" width="20%">
+
+                <div id="bulkDecisionContainer" style="margin:5px"></div>
+
+            </td>
+            <td>
+                <div style="display:none;margin:3px" class="formWarn" id="selectedCount"/>
+            </td>
+        </tr>
+    </table>
+    <c:forEach items="#{workItem.approvalSet.items}" var="item">
+       <h:inputHidden id="itemComment_#{item.object.id}" value='#{item.completionComments}'/>
+    </c:forEach>
+
+  </h:panelGroup>
+<script type="text/javascript" defer="defer">
+Ext.onReady(function() {
+    Ext.QuickTips.init();
+    //There may be more than one help icon
+    Ext.select(".descriptionHelp").each(function(helpIcon) {
+        Ext.QuickTips.register({
+            target: helpIcon,
+            text: helpIcon.dom.alt
+        });
+    });
+});
+</script>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui">
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+<h:body>
+  <section class="container-fluid m-b b-b bg-light lt">
+
+    <div class="row bg-light lt">
+      <div class="col-xs-12">
+        <div class="input-group m-b m-t">
+          <label for="removeAccessSearchText" class="sr-only">{{'ui_access_search_current_access' | spTranslate}}</label>
+          <input id="removeAccessSearchText" type="text" ng-model="itemsCtrl.searchScratchPad.searchTerm" ng-keypress="itemsCtrl.search($event)" class="form-control" placeholder="{{'ui_access_search_current_access' | spTranslate}}" tabindex="50" sp-focus-changer="#accessSearchBtn"></input>
+          <span class="input-group-btn">
+            <button id="currentAccessSearchBtn" ng-click="itemsCtrl.search()" role="button" type="button" class="btn btn-info" tabindex="50">
+              <i class="fa fa-search text-white" role="presentation"></i>
+              <span class="sr-only">{{'ui_access_search_button_sr' | spTranslate}}</span>
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+    <!-- /SEARCH BAR ROW -->
+  </section>
+  <!-- /OPTIONS CONTAINER-FLUID -->
+
+  <section class="container-fluid bg-light">
+    <div class="row m-b-sm" ng-controller="AccessRequestFlowCtrl as flowCtrl">
+      <div class="col-xs-6" ng-class="{ 'col-sm-4' : itemsCtrl.showCurrentPageInfo() }"
+           ng-controller="AccessRequestSelectedIdentitiesCtrl as identitiesCtrl" ng-if="!flowCtrl.isSelfService()">
+        <sp-selected-identities-button sp-id="selectedIdentitiesTopBtn"
+                                       sp-identities="identitiesCtrl.getIdentities()"
+                                       sp-on-click="identitiesCtrl.showSelectedIdentities()"/>
+      </div>
+
+      <div class="col-xs-6" ng-class="{ 'col-sm-4' : itemsCtrl.showCurrentPageInfo() }" ng-if="flowCtrl.isSelfService()">
+          <span ng-if="flowCtrl.getRemovedItemsCount()" class="label label-badge label-danger" id="removeBadge_top">
+                    {{ 'ui_access_removed_badge' | spTranslate }} {{ flowCtrl.getRemovedItemsCount() }}
+          </span>
+      </div>
+
+      <sp-current-page-info class="hidden-xs col-sm-4" ng-if="itemsCtrl.showCurrentPageInfo()" ng-model="itemsCtrl.pageState.pagingData"/>
+
+      <div class="col-xs-6 text-right" ng-class="{ 'col-sm-4' : itemsCtrl.showCurrentPageInfo() }">
+        <button id="itemsFilterBtn" class="btn btn-sm" role="button" type="button" tabindex="50"
+           ng-click="itemsCtrl.toggleFiltersDisplayed()"
+           ng-class="{ 'btn-success': itemsCtrl.hasAppliedFilters(), 'btn-white': !itemsCtrl.hasAppliedFilters() }">
+          <span aria-hidden="true" class="hidden-xs">{{'ui_access_filters' | spTranslate}}</span>
+          <i class="fa fa-chevron-down hidden-xs" role="presentation"
+             ng-class="{'rotate': itemsCtrl.filtersDisplayed, 'unrotate': !itemsCtrl.filtersDisplayed}"></i>
+          <span class="sr-only">
+            {{ itemsCtrl.hasAppliedFilters() ?
+                   ( itemsCtrl.filtersDisplayed ? 'ui_access_filters_applied_and_displayed' : 'ui_access_filters_applied_and_not_displayed' ) :
+                   ( itemsCtrl.filtersDisplayed ? 'ui_access_filters_not_applied_and_displayed' : 'ui_access_filters_not_applied_and_not_displayed' )
+                 | spTranslate }}
+          </span>
+          <span class="visible-xs">
+            <i class="fa fa-filter" role="presentation"></i>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <sp-filter-panel id="itemsFilterPanel"
+                         sp-title="'ui_access_current_access_filter_panel_title' | spTranslate"
+                         sp-search-data="itemsCtrl.searchScratchPad"
+                         sp-filters="itemsCtrl.filters"
+                         sp-displayed="itemsCtrl.filtersDisplayed"
+                         sp-apply-func="itemsCtrl.search()"/>
+      </div>
+    </div>
+    <!-- /FILTER PANEL ROW -->
+
+    <!-- CARDS-->
+    <div class="list-result-container" tabindex="50" sp-loading-mask="itemsCtrl.isPageReady()" sp-focus-snatcher="itemsCtrl.focusResults">
+      <div ng-if="itemsCtrl.pageState.pagingData.getTotal() === 0" class="row">
+        <div class="col-xs-12 text-center">
+          <h3 class="text-muted">{{'ui_no_search_results' | spTranslate}} <i class="fa fa-search" role="presentation"></i></h3>
+        </div>
+        <!-- /COL-XS-12 -->
+      </div>
+
+      <div ng-if="itemsCtrl.pageState.pagingData.getTotal()"
+           class="row"
+           ng-swipe-right="itemsCtrl.previousPage()"
+           ng-swipe-left="itemsCtrl.nextPage()">
+        <div class="col-xs-12">
+          <div class="panel" ng-repeat="item in itemsCtrl.items">
+            <div class="panel-heading bg-light lter">
+              <div class="header-cell">
+                <sp-access-request-select-button
+                   sp-selected="{{itemsCtrl.isItemSelected(item)}}"
+                   sp-on-select="itemsCtrl.selectItem(item)"
+                   sp-on-deselect="itemsCtrl.deselectItem(item)"
+                   sp-label="{{'ui_access_remove' | spTranslate}} {{item.getDisplayableName()}}"
+                   sp-disabled="item.isRequested()"
+                   sp-button-style="Remove"
+                   ng-show="item.isRemovable()" />
+              </div>
+              <div class="v-middle h5 header-cell-text">
+                <b>{{ item.getDisplayableName() || item.getName() }}</b>
+              </div>
+              <div class="header-cell-button">
+                <button class="btn btn-white btn-sm" ng-click="itemsCtrl.showItemDetails(item)" role="button" type="button">
+                  <span aria-hidden="true">{{'ui_access_request_current_access_details_btn' | spTranslate }}</span>
+                  <span class="sr-only">
+                    {{'ui_access_request_current_access_details_btn_sr' | spTranslate : (item.getDisplayableName() || item.getName()) }}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <sp-configurable-details ng-model="item" sp-col-configs="itemsCtrl.getColumnConfig(item)">
+              <p class="text-muted">
+                <span ng-if="item.isRequested() || item.isRole()">
+                  <b>{{ 'ui_access_request_current_access_status' | spTranslate }}</b>
+                  <small ng-if="item.isRequested()" class="label m-l-xs label-success">{{ item.getStatusLabel() }}</small>
+                  <small ng-if="!item.isRequested() &amp;&amp; item.isRole()" class="m-l-xs">{{ itemsCtrl.getRoleStatus(item) | spTranslate }}</small>
+                  <span ng-if="item.getSunrise() || item.getSunset()">
+                    &#160;|&#160; 
+                  </span>
+                </span>
+                
+                <!-- Sunrise/sunset -->
+                <span ng-if="item.getSunrise() &amp;&amp; !item.getSunset()">
+                  {{ 'ui_access_request_active_on' | spTranslate : (item.getSunrise() | date:'shortDate') }}
+                </span>
+                <span ng-if="!item.getSunrise() &amp;&amp; item.getSunset()">
+                  {{ 'ui_access_request_inactive_on' | spTranslate : (item.getSunset() | date:'shortDate') }}
+                </span>
+                <span ng-if="item.getSunrise() &amp;&amp; item.getSunset()">
+                  {{ 'ui_access_request_active_from' | spTranslate : (item.getSunrise() | date:'shortDate') : (item.getSunset() | date:'shortDate') }}
+                </span>
+              </p>
+            </sp-configurable-details>
+          </div>
+          <!-- /CARD -->
+        </div>
+        <!-- /COL-XS-12 -->
+      </div>
+    </div>
+    <!-- /RESULTS ROW -->
+
+    <div class="row m-b" ng-controller="AccessRequestFlowCtrl as flowCtrl">
+      <div class="hidden-xs col-sm-4" ng-controller="AccessRequestSelectedIdentitiesCtrl as identitiesCtrl"
+           ng-if="!flowCtrl.isSelfService()">
+        <sp-selected-identities-button sp-id="selectedIdentitiesBottomBtn"
+                                       sp-identities="identitiesCtrl.getIdentities()"
+                                       sp-on-click="identitiesCtrl.showSelectedIdentities()"/>
+      </div>
+      <div class="col-xs-6" ng-class="{ 'col-sm-4' : itemsCtrl.showCurrentPageInfo() }" ng-if="flowCtrl.isSelfService()">
+          <span ng-if="flowCtrl.getRemovedItemsCount()" class="label label-badge label-danger" id="removeBadge_bottom">
+                    {{ 'ui_access_removed_badge' | spTranslate }} {{ flowCtrl.getRemovedItemsCount() }}
+          </span>
+      </div>
+      <sp-current-page-info class="col-sm-4 col-xs-12" ng-model="itemsCtrl.pageState.pagingData" ng-if="itemsCtrl.showCurrentPageInfo()" />
+    </div>
+    <div class="row m-b">
+      <div class="text-center col-xs-12" ng-if="itemsCtrl.getPageState().pagingData.hasMultiplePages()">
+        <pagination total-items="itemsCtrl.pageState.pagingData.getTotal()"
+                    items-per-page="12"
+                    ng-model="itemsCtrl.pageState.pagingData.currentPage"
+                    ng-change="itemsCtrl.fetchItems()"
+                    max-size="4"
+                    rotate="true">
+        </pagination>
+      </div>
+    </div>
+    <!-- /PAGINATION -->
+  </section>
+</h:body>
+</html>

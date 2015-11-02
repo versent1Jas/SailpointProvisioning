@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Manual Changes Requested</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/workitem/lcmWorkItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+        Ext.onReady(function () {
+            makeTableMulticolored($('approvalItemsTable'), true, true, 'odd', 'even');
+        });
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+
+          <ui:include src="summaryFieldset.xhtml"/>
+          <ui:include src="commentsFieldset.xhtml"/>
+
+          <!-- TODO: the header should be pushed into workflowDetails.xhtml -->
+          <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.details}"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <ui:include src="approvalItemsBulkDecisionInclude.xhtml">
+                    <ui:param name="disableDecisionColumn" value="true"/>
+                    <ui:param name="title" value="Please make the following account changes listed below and click complete when the changes have been made."/>
+                  </ui:include>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <br/>
+        <div class="buttonRow">
+          <h:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" />
+
+          <ui:fragment rendered="#{workItem.editable}">
+
+          <h:commandButton onclick="checkDisableClick('editForm:completeBtn', true); return false;"
+                             value="#{msgs.button_complete}"
+                             title="#{msgs.button_title_click_when_finished}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton action="#{workItem.save}"
+                             value="#{msgs.button_save}"
+                             title="#{msgs.button_title_click_to_save_work_item}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false, SailPoint.getWorkItemPriority()); return false;"
+                             value="#{msgs.button_forward}"
+                             title="#{msgs.button_title_click_to_forward}"
+                             styleClass="primaryBtn"/>
+
+          </ui:fragment>
+          <ui:fragment rendered="#{!workItem.editable}">
+            <h:commandButton action="#{workItem.save}"
+                             value="#{msgs.button_save}"
+                             title="#{msgs.button_title_click_to_save_work_item}"
+                             styleClass="primaryBtn"/>
+          </ui:fragment>
+
+          <h:commandButton action="#{workItem.cancel}"
+                           immediate="true"
+                           value="#{msgs.button_cancel}"
+                           styleClass="secondaryBtn"/>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

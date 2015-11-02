@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+<!--
+  Default WorkItem renderer for policy violation approvals.
+  This was added for the example policy violation workflows.
+  Though it is similar and uses the same core include to render
+  violation details, it is not the same as violation items
+  opened from the policy management pages.  Rethink this, there
+  should be things in common...
+
+  NOTE: We display different buttons than most work item pages
+  so we can provide options for Allow, Remediate etc. without
+  having a two stage process where you select an action then 
+  "approve".
+-->
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.witem_violation_title}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/DateTimeInput.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+    </sp:script>
+ <!-- PageName: policyViolation.xhtml -->
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+
+        // have to do this here instead of in Ext.onready due to 
+        // odditidies rendering the combo date/time picker if it
+        // is initially in a hidden div
+        var datePickerInitialized = false;
+
+        function changeAction(menu) {
+            $('mitigationRow').style.display = 'none';
+            $('remediationRow').style.display = 'none';
+            if (menu.value == 'Mitigated') {
+                $('mitigationRow').style.display = '';
+                if (!datePickerInitialized) {
+                    SailPoint.WorkItemEditor.initEditableDates();
+                    datePickerInitialized = true;
+                }
+            }
+            else if (menu.value == 'Remediated') {
+                $('remediationRow').style.display = '';
+            }
+        }
+
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+
+          <ui:include src="summaryFieldset.xhtml"/>
+          <ui:include src="commentsFieldset.xhtml"/>
+
+          <!-- TODO: the header should be pushed into workflowDetails.xhtml -->
+          <div class="spTabledContent" style="margin:5px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.details}"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <table cellspacing="5" class="spPaddedTable">
+                    <tr>
+                      <td class='titleColumn'><h:outputText value="#{msgs.witem_identity_name}"/> </td>
+                      <td align='left'><h:outputText value="#{workItem.attributes['approvalObject'].identity.name}"/> </td>
+                    </tr>
+
+                    <ui:include src="/identity/policyGenericDetails.xhtml">
+                      <ui:param name="violationView" value="#{workItem.violationViewBean}"/>
+                      <ui:param name="showViolationLink" value="true"/>
+                    </ui:include>
+
+                    <ui:fragment rendered="#{workItem.attributes['approvalObject'].leftBundles != null}">
+                      <tr>
+                        <td class='titleColumn'><h:outputText value="These roles"/></td>
+                        <td align='left'><h:outputText value="#{workItem.attributes['approvalObject'].leftBundles}"/> </td>
+                      </tr>
+                      <tr>
+                        <td class='titleColumn'><h:outputText value="Conflict with these roles"/></td>
+                        <td align='left'><h:outputText value="#{workItem.attributes['approvalObject'].rightBundles}"/> </td>
+                      </tr>
+                    </ui:fragment>
+
+                    <tr>
+                      <td class='titleColumn'><h:outputText value="Select an action"/> </td>
+                      <td align='left'>
+                        <!-- Possible values are Acknowledged, Mitigated, and Remediated
+                             (from CertificationItem.Status) as well as Deleted and Ignored.
+                             Ignored is effectively the same as Acknowledged.
+                             If you chose to use defaultPolicyViolationActions you will get
+                             back a combination Acknowledged, Mitigated, and Remediated as
+                             defined in the Policy.  If you want more control over the actions,
+                             take out defaultPolicyViolationActions and code individual 
+                             selectItem's for the ones you want (or new ones added to the
+                             workflow).
+                        -->
+                        <h:selectOneMenu id="workItemAction" value="#{workItem.attributes['action']}"
+                          onchange="changeAction(this);">
+                          <f:selectItem itemLabel='--Select--' itemValue='none'/>
+                          <f:selectItems value="#{workItem.defaultPolicyViolationActions}"/>
+                          <f:selectItem itemLabel='Delete' itemValue='Deleted'/>
+                        </h:selectOneMenu>
+                      </td>
+                    </tr>
+                    <tr id='remediationRow' style="#{workItem.attributes['action'] == 'Remediated' ? '' : 'display: none'}">
+                      <td class='titleColumn'><h:outputText value="Roles to revoke"/> </td>
+                      <td align='left'>
+                        <h:selectManyListbox id="remediationSelections" style="height:100;"
+                          value="#{workItem.listAttributes['remediations']}">
+                          <f:selectItems value="#{sp:getSelectItems(workItem.attributes['remediatables'],false)}"/>
+                        </h:selectManyListbox>
+                      </td>
+                    </tr>
+                    <tr id='mitigationRow' style="#{workItem.attributes['action'] == 'Mitigated' ? '' : 'display: none'}">
+                      <td class='titleColumn'><h:outputText value="Allow expiration date"/> </td>
+                      <td align='left'>
+                        <!-- Ext.form.DateFields will be applied to these by the javascript in attributeEditor.js -->
+                        <div id="workItemDateDiv" class="dateField">
+                          <h:inputHidden value="#{workItem.attributes['expiration']}"/>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <br/>
+        <div class="buttonRow">
+          <h:commandButton style="display: none" id="completeBtn" action="#{workItem.complete}" />
+          <h:commandButton style="display: none" id="rejectBtn" action="#{workItem.reject}" />
+
+          <h:commandButton onclick="addComment('editForm:completeBtn', '#{sp:escapeJavascript(msgs.button_complete)}', '#{sp:escapeJavascript(msgs.dialog_title_completion_comments)}'); return false;"
+                           value="#{msgs.button_complete}" 
+                           title="#{msgs.button_title_click_to_complete_work_item}"
+                           styleClass="primaryBtn"/>
+
+          <h:commandButton onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false, SailPoint.getWorkItemPriority()); return false;"
+                           value="#{msgs.button_forward}" 
+                           title="#{msgs.button_title_click_to_forward}" 
+                           styleClass="primaryBtn"/>
+
+          <h:commandButton action="#{workItem.cancel}" 
+                           immediate="true" 
+                           value="#{msgs.button_cancel}" 
+                           styleClass="secondaryBtn"/>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

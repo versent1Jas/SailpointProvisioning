@@ -1,0 +1,379 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:c="http://java.sun.com/jstl/core">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>paging-tree.css</src>
+    </sp:style>    
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+      <src>html-editor-counter-plugin.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/groups">
+      <src>account-groups.css</src>
+    </sp:style>        
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/PagingTreeStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Store.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditorCounterPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiLanguageHtmlEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/DateTimeInput.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/attributeEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/accountGroupSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/entitlementCatalog/editEntitlement.js?#{debug.revision}</src>
+    </sp:script>
+    
+    <script type="text/javascript">
+        Ext.onReady(function() {
+            var viewport;
+            Ext.suspendLayouts();
+            viewport = SailPoint.getViewport({
+                bodyContent: SailPoint.EntitlementsEditor.getEntitlementsEditor(),
+                title: 'Edit',
+                minWidth: 500
+            });
+            Ext.resumeLayouts(true);
+            viewport.doLayout();
+        });
+    </script>
+    
+  </ui:define>
+  
+  <ui:define name="title">#{accountGroupEdit.title}</ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <a4j:outputPanel id="editAccountGroupPanel" ajaxRendered="true">
+          <script type="text/javascript">
+              helpKey = 'EDIT_ACCOUNT_GROUP';
+          </script>
+
+
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        
+        <div id="jsonSafeOwnerInfo" style="display:none">#{sp:buildJSONFromIdentity(accountGroupEdit.owner)}</div>
+        <div id="jsonSafeOwnerInit" style="display:none">#{accountGroupEdit.groupOwnerInit}</div>
+        <div id="jsonSafeScope" style="display:none">#{accountGroupEdit.scope}</div>
+        <div id="jsonSafeScopeInit" style="display:none">#{accountGroupEdit.scopeInit}</div>
+        <div id="groupOptionsEnabled" style="display:none">#{accountGroupEdit.groupOptionsEnabled}</div>
+        <div id="provisioningEnabled" style="display:none">#{accountGroupEdit.provisioningEnabled}</div>
+        <div id="showRequestableOption" style="display:none">#{accountGroupEdit.showRequestableOption}</div>
+        <div id="supportedTypes" style="display:none">#{accountGroupEdit.supportedTypes}</div>
+        <div id="isGroup" style="display:none">#{accountGroupEdit.accountGroup.group}</div>
+        <div id="showGroupTab" style="display:none">#{accountGroupEdit.showGroupTab}</div>
+        <div id="showMembersTab" style="display:none;">#{accountGroupEdit.showMembersTab}</div>
+        <div id="scopeControlEnabled" style="display:none">#{accountGroupEdit.showAssignedScopeControl}</div>
+        <div id="isNewGroup" style="display:none">#{accountGroupEdit.newGroup}</div>
+        <div id="isSupportsHierarchy" style="display:none">#{accountGroupEdit.supportsHierarchy}</div>
+        <div id="permissionColumn" style="display:none">#{accountGroup.permissionColumnJson}</div>
+                
+        <sp:sailpointForm styleClass="form" id="editForm" style="display:none" forceEncodedURL="true">
+          <div id="propertyPanel"><div class="spBackground"><div class="spContent">
+            <span id="allowManagedAttributeLocalization" style="display:none">#{sp:getSystemConfigurationValue('enableLocalizeManagedAttributeDescriptions', false)}</span>
+                        
+            <ui:fragment rendered="#{accountGroupEdit.newGroup}">
+              <h:panelGroup>
+                <h:outputText styleClass="requiredText" value="*"/>
+                <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+              </h:panelGroup>
+            </ui:fragment>
+            <div id="overriddenTypeWarning" class="formWarn" style="display:#{(accountGroupEdit.typeChanged) ? '' : 'none'}">#{accountGroupEdit.reasonForTypeChange}</div>
+            
+            <h:panelGrid columns="2" styleClass="paddedTbl" cellspacing="0" cellpadding="5">  
+              <h:panelGroup>
+                <h:outputText styleClass="titleColumn" value="#{msgs.application}"/>
+                <ui:fragment rendered="#{accountGroupEdit.newGroup}">
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </ui:fragment>
+              </h:panelGroup>
+              <ui:fragment rendered="#{accountGroupEdit.newGroup}">
+                <div id="applicationInit" style="display:none">#{accountGroupEdit.applicationInit}</div>
+                <div id="applicationName"/>
+              </ui:fragment>
+              <ui:fragment rendered="#{!accountGroupEdit.newGroup}">
+                <h:outputText value="#{accountGroupEdit.accountGroup.applicationName}"/>
+              </ui:fragment>
+                            
+              <h:panelGroup>
+                <h:outputText styleClass="titleColumn" value="#{msgs.type}"/>
+                <ui:fragment rendered="#{accountGroupEdit.newGroup}">
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </ui:fragment>
+              </h:panelGroup>
+              <h:panelGroup>
+                <ui:fragment rendered="#{accountGroupEdit.newGroup}">
+                  <div id="typeCombo"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{!accountGroupEdit.newGroup}">
+                  <h:outputText value="#{accountGroupEdit.readOnlyType}"/>
+                </ui:fragment>
+              </h:panelGroup>
+                
+              <h:panelGroup>
+                <ui:fragment rendered="#{accountGroupEdit.type == 'permission'}">
+                  <h:outputText styleClass="titleColumn" value="#{msgs.target}"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{accountGroupEdit.attributeVisible}">
+                  <h:outputText styleClass="titleColumn" value="#{msgs.attribute}"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{accountGroupEdit.newGroup and accountGroupEdit.attributeVisible}">
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </ui:fragment>
+              </h:panelGroup>
+              
+              <ui:fragment rendered="#{accountGroupEdit.newGroup and accountGroupEdit.type != 'permission'}">
+                <div id="referenceAttributeInit" style="display:none">#{accountGroupEdit.referenceAttributeInit}</div>
+                <div id="referenceAttribute">
+                  <h:outputText value="#{accountGroupEdit.requiredAppInfoMessage}"/>
+                </div>
+              </ui:fragment>
+              <ui:fragment rendered="#{accountGroupEdit.newGroup and accountGroupEdit.type == 'permission'}">
+                <h:inputText id="unboundPermissionTarget" style="width:275px"/>
+              </ui:fragment>
+              
+              <ui:fragment rendered="#{!accountGroupEdit.newGroup}">
+                <h:outputText value="#{accountGroupEdit.accountGroup.referenceAttribute}"/>
+              </ui:fragment>
+  
+              <ui:fragment rendered="#{accountGroupEdit.type != 'permission' and !empty accountGroupEdit.type}">
+                <h:panelGroup>
+                  <h:outputText styleClass="titleColumn" value="#{msgs.native_identity}"/>
+                  <ui:fragment rendered="#{accountGroupEdit.newGroup}">
+                    <h:outputText styleClass="requiredText" value="*"/>
+                  </ui:fragment>
+                </h:panelGroup>
+              </ui:fragment>
+              <ui:fragment rendered="#{accountGroupEdit.newGroup and accountGroupEdit.supportsDirectValueEdit}">
+                <!-- The unboundGroupNativeIdentity copies its value to the groupNativeIdentity input in the form inputs section -->
+                <h:inputText id="unboundGroupNativeIdentity" name="unboundGroupNativeIdentity" style="width:275px" value="#{accountGroupEdit.accountGroup.nativeIdentity}"/>
+              </ui:fragment>
+              <ui:fragment rendered="#{accountGroupEdit.newGroup and accountGroupEdit.type != 'permission' and !accountGroupEdit.supportsDirectValueEdit and !empty accountGroupEdit.type}">
+                <h:outputText id="groupReadOnlyValueInstructions" value="#{accountGroupEdit.readOnlyValueInstructions}"/>
+              </ui:fragment>
+              <ui:fragment rendered="#{!accountGroupEdit.newGroup and accountGroupEdit.type != 'permission'}">
+                <h:outputText id="groupNativeIdentityReadOnly" value="#{accountGroupEdit.accountGroup.nativeIdentity}"/>
+              </ui:fragment>
+  
+              <ui:fragment rendered="#{accountGroupEdit.type != 'permission'}">
+                <h:outputText styleClass="titleColumn" value="#{msgs.label_display_value}"/>
+              </ui:fragment>
+              <ui:fragment rendered="#{accountGroupEdit.type != 'permission'}">
+                <h:panelGroup>
+                  <!-- The unboundGroupName copies its value to the groupNativeIdentity input in the form inputs section -->
+                  <h:inputText id="unboundGroupName" style="width:275px" value="#{accountGroupEdit.accountGroup.displayValue}"/>
+                </h:panelGroup>
+              </ui:fragment>
+              
+              <ui:fragment rendered="#{accountGroupEdit.showRequestableOption}">
+                <h:outputText styleClass="titleColumn" value="#{msgs.explanation_col_requestable}"/>
+              </ui:fragment>
+              <ui:fragment rendered="#{accountGroupEdit.showRequestableOption}">
+                <h:panelGroup>
+                  <!-- The unboundRequestableOption copies its vlaue to the groupNativeIdentity input in the form inputs section -->
+                  <h:selectBooleanCheckbox id="unboundRequestableOption" value="#{accountGroupEdit.accountGroup.requestable}"/>
+                </h:panelGroup>
+              </ui:fragment>
+  
+              <h:outputText styleClass="titleColumn" value="#{msgs.description}"/>
+              <div id="managedAttributeDescriptionHTML"/>
+              <div style="display:none" id="managedAttributeDescriptionsJSON">#{accountGroupEdit.descriptionsJSON}</div>        
+              <div id="manAttrdescrDefaulLocale" style="display:none">#{accountGroupEdit.locale}</div>
+              <h:panelGroup>
+                <h:outputText styleClass="titleColumn" value="#{msgs.owner}"/>
+              </h:panelGroup>
+              <h:panelGroup>
+                <div id="groupOwnerInit" style="display:none">#{accountGroupEdit.groupOwnerInit}</div>
+                <div id="groupOwnerSuggest"></div>
+                <h:message styleClass="formError" for="groupOwner" />
+              </h:panelGroup>
+  
+              <h:outputText rendered="#{accountGroupEdit.showAssignedScopeControl}" styleClass="titleColumn" value="#{msgs.label_scope}"/>
+              <h:panelGroup rendered="#{accountGroupEdit.showAssignedScopeControl}">
+                <div id="assignedScopeSuggest"></div>
+              </h:panelGroup>
+            </h:panelGrid>
+            <ui:fragment rendered="#{accountGroupEdit.accountGroup.containsExtendedAttributes}">
+              <table id="extendedAttributesTable" class="paddedTbl width100" cellspacing="0" cellpadding="5"><tbody><tr><td>
+                <ui:include src='../../include/formRenderer.xhtml'>
+                  <ui:param name='form' value='#{accountGroupEdit.accountGroup.extendedAttributeFormBean}'/>
+                  <ui:param name='panelGroupIndex' value='1'/>
+                  <ui:param name="formsPerPage" value="2"/>
+                  <ui:param name="formStyle" value="width:490px"/>
+                  <ui:param name='persistEvent' value='collectFormData'/>
+                  <ui:param name="afterLayoutEvent" 
+                            value="{ fn: SailPoint.EntitlementsEditor.fixPropertiesPanelContents, single: true}"/>
+                  <ui:param name="clearListenersOnInit" value="#{false}"/>
+                  <ui:param name="submitButton" value="editForm:refreshFormsBtn"/>
+                  <ui:param name='hideMessages' value='true'/>
+                </ui:include>
+              </td></tr></tbody></table>
+            </ui:fragment>
+          </div></div></div>
+          
+          <div id="groupOptionsPanel"><div class="spBackground"><div class="spContent">
+            <table id="groupOptionsTable" class="paddedTbl width100" cellspacing="0" cellpadding="5"><tbody>
+              <tr><td>
+                <h:outputText styleClass="titleColumn" value="#{msgs.object_attributes}"/><div/>
+              </td></tr>
+              <tr><td>
+                <ui:fragment rendered="#{accountGroupEdit.accountGroup.containsGroupAttributes}">
+                  <ui:include src='../../include/formRenderer.xhtml'>
+                    <ui:param name='form' value='#{accountGroupEdit.accountGroup.groupAttributeFormBean}'/>
+                    <ui:param name='panelGroupIndex' value='2'/>
+                    <ui:param name="formsPerPage" value="2"/>
+                    <ui:param name="formStyle" value="width:600px"/>
+                    <ui:param name='persistEvent' value='collectFormData'/>
+                    <ui:param name="afterLayoutEvent" 
+                            value="{ fn: SailPoint.EntitlementsEditor.fixGroupPanelContents, single: true}"/>
+                    <ui:param name="clearListenersOnInit" value="#{false}"/>
+                    <ui:param name="submitButton" value="editForm:refreshFormsBtn"/>
+                    <ui:param name='hideMessages' value='true'/>
+                  </ui:include>
+                </ui:fragment>
+              </td></tr>
+              <ui:fragment rendered="#{accountGroupEdit.supportsHierarchy}">
+                <style type="text/css">
+                  .multisuggest table tr.x-grid-header-row { display:table-row; }
+                </style>
+              
+                <tr><td>
+                  <h:outputText styleClass="titleColumn" value="#{msgs.group_hierarchy}"/>
+                </td></tr>
+                <tr><td>
+                  <input id="numInherited" type="hidden" value="#{accountGroupEdit.inheritedGroupsCount}"/> 
+                  <div id="inheritedGroupsInit" style="display:none">#{accountGroupEdit.inheritedGroupsInit}</div>
+                  <table class="paddedTbl width100" cellspacing="0" cellpadding="5"><tbody>
+                    <tr><td>
+                      <h:outputText styleClass="titleColumn" value="#{msgs.inherited_groups}"/>
+                    </td></tr>
+                    <tr><td>
+                      <div id="inheritingTbl"/>
+                    </td></tr>
+                    <tr><td>&nbsp;</td></tr>
+                    <ui:fragment rendered="#{accountGroupEdit.inheritingGroupsCount > 0}">
+                      <tr><td><h:outputText styleClass="titleColumn" value="#{msgs.inheriting_groups}"/></td></tr>
+                      <tr><td>
+                        <input id="numInheriting" type="hidden" value="#{accountGroupEdit.inheritingGroupsCount}"/> 
+                        <div id="inheritingGroupsGridDiv"/>
+                      </td></tr>
+                    </ui:fragment>
+                  </tbody></table>
+                </td></tr>
+              </ui:fragment>
+            </tbody></table>
+           
+            <ui:fragment rendered="#{accountGroupEdit.entitlementsVisible}">
+              <h:outputText styleClass="titleColumn" value="#{msgs.entitlements}"/>
+              <div class="spTabledContent" style="padding:0px">
+                <table class="spTable">
+                  <thead><tr>
+                    <th><h:outputText value="#{msgs.display_name}"/></th>
+                    <th><h:outputText value="#{msgs.attribute}"/></th>
+                    <th><h:outputText value="#{msgs.value}"/></th>
+                  </tr></thead>
+                  <tbody>
+                    <ui:repeat value="#{accountGroupEdit.entitlementMaps}" var="entitlementMap">
+                      <tr>
+                        <td><h:outputText value="#{entitlementMap['displayName']}"/></td>
+                        <td><h:outputText value="#{entitlementMap['attribute']}"/></td>
+                        <td><h:outputText value="#{entitlementMap['value']}"/></td>
+                      </tr>
+                    </ui:repeat>
+                  </tbody>
+                </table>
+              </div>
+            </ui:fragment>
+            
+            <ui:fragment rendered='#{accountGroupEdit.permissionsCount > 0}'>
+              <br/>
+              <h:outputText styleClass="titleColumn" value="#{msgs.permissions}"/>
+              <div id="permissions-display" style="width: 600px"></div>
+              <div style="width:600px">
+                <div style="float: right;display:inline;" class="font10">
+                   <span class="entitlementDescriptions"  style="display:#{accountGroupEdit.displayEntitlementDescriptions ? '' : 'none'}">
+                       <h:graphicImage url="/images/icons/info.png"  style="vertical-align:middle"/>
+                       <a href="javascript:switchEntitlementDescriptionStyle(false)">
+                        <h:outputText value="#{msgs.cert_show_entitlement_value}"/>
+                       </a>
+                   </span>
+                   <span class="entitlementValues" style="display:#{accountGroupEdit.displayEntitlementDescriptions ? 'none' : ''}">
+                      <h:graphicImage url="/images/icons/info.png" style="vertical-align:middle"/>
+                       <a href="javascript:switchEntitlementDescriptionStyle(true)">
+                        <h:outputText value="#{msgs.cert_show_entitlement_desc}"/>
+                       </a>
+                   </span>
+                </div>
+              </div>
+            </ui:fragment>
+          </div></div></div>
+          
+
+          <!-- Form parameters are here so that they don't get yanked out of the form and into the tab panel.
+             - In some cases the SailPoint.EntitlementsEditor.copyFormParams method will copy any inputs that
+             - couldn't be moved here.  
+           -->
+          <h:inputHidden id="id" name="id" value="#{accountGroupEdit.objectId}"/>
+          <t:inputHidden id="applicationNameInput" name="applicationNameInput" value="#{accountGroupEdit.application}" forceId="true">
+          </t:inputHidden>
+          <t:inputHidden id="typeInput" name="typeInput" value="#{accountGroupEdit.type}" forceId="true">
+          </t:inputHidden>
+          <t:inputHidden id="referenceAttributeInput" name="referenceAttributeInput" value="#{accountGroupEdit.accountGroup.referenceAttribute}" forceId="true">
+          </t:inputHidden>
+          <h:inputHidden id="groupNativeIdentity" name="groupNativeIdentity" value="#{accountGroupEdit.accountGroup.nativeIdentity}"/>
+          <h:inputHidden id="groupName" name="groupName" style="width:275px" value="#{accountGroupEdit.accountGroup.displayValue}"/>
+          <h:selectBooleanCheckbox id="requestableOption" name="requestableOption" style="display:none" value="#{accountGroupEdit.accountGroup.requestable}"/>
+          <h:inputHidden value="#{accountGroupEdit.accountGroup.description}" id="managedAttributeDescription" name="managedAttributeDescription" escape="false"/>
+          <t:inputHidden id="groupOwner" name="groupOwner" value="#{accountGroupEdit.owner}" forceId="true">
+          </t:inputHidden>
+          <h:inputHidden id="inheritedAccountGroupIds" name="inheritedAccountGroupIds" value="#{accountGroupEdit.accountGroup.inheritedAccountGroups}" converter="java.util.List"/>
+          <t:inputHidden id="assignedScope" name="assignedScope"
+                         value="#{accountGroupEdit.scope}"
+                         rendered="#{accountGroupEdit.showAssignedScopeControl}"
+                         forceId="true">
+          </t:inputHidden>
+          <h:inputHidden id="currentTab" name="currentTab" value="#{accountGroupEdit.currentTab}"/>
+          
+          <h:commandButton id="entitlementEditSave" style="display:none" action="#{accountGroupEdit.save}"
+                           onclick="if(SailPoint.EntitlementsEditor.isValidForms('#{accountGroupEdit.accountGroup.extendedAttributeFormBean.id}', '#{accountGroupEdit.accountGroup.groupAttributeFormBean.id}')) {Page.fireEvent('collectFormData'); SailPoint.EntitlementsEditor.copyFormParams();} else {return false;}"
+                           value="#{msgs.button_save}" disabled="#{accountGroupEdit.saveDisabled}" readonly="#{accountGroupEdit.saveDisabled}"/>
+          <h:commandButton id="entitlementEditCancel" style="display:none" action="#{accountGroupEdit.cancel}" value="#{msgs.button_cancel}" immediate="true"/>
+          <h:commandButton id="refreshAttributesBtn" style="display:none"
+                           onclick="Page.fireEvent('collectFormData'); SailPoint.EntitlementsEditor.copyFormParams();"
+                           action="#{accountGroupEdit.refreshGroupAttributes}"/>
+          <h:commandButton id="refreshFormsBtn" style="display:none"
+                           onclick="SailPoint.EntitlementsEditor.copyFormParams();"
+                           action="#{accountGroupEdit.refreshForms}"/>
+        </sp:sailpointForm>
+
+      </a4j:outputPanel>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+
+</html>

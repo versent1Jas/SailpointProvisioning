@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+  <!--
+    Task for sychronizing descriptions.  This tasks should not theoretically ever be needed and is therefore commented out.  
+    It should only be uncommented and imported in cases where an application failure caused LocalizedAttributes to fall out 
+    of sync with their target objects.
+  -->
+  <TaskDefinition name="Synchronize Descriptions" 
+    executor="sailpoint.task.LocalizedAttributeSyncExecutor" 
+    formPath="/monitor/tasks/syncDescriptionsTask.xhtml"
+    progressInterval="5000"
+    progressMode="String" 
+    template="true" 
+    type="System">
+    <Description>
+      Template for synchronizing descriptions.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name="syncClass" type="string" helpKey="help_task_description_sync_class">
+          <Prompt>task_description_sync_class</Prompt>
+        </Argument>
+        <Argument name="syncObjects" type="string" helpKey="help_task_description_sync_objects" multi="true">
+          <Prompt>task_description_sync_objects</Prompt>
+        </Argument>
+        <Argument name="syncSource" type="string" helpKey="help_task_description_sync_objects">
+          <Prompt>task_description_sync_source</Prompt>
+        </Argument>
+      </Inputs>
+      <Returns>
+        <Argument name="total" type="int">
+          <Prompt>task_out_description_sync_total</Prompt>
+        </Argument>
+      </Returns>
+    </Signature>
+  </TaskDefinition>
+</sailpoint>

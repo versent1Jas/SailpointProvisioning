@@ -1,0 +1,75 @@
+use identityiq;
+
+create table sptr_cef_export (
+    task_def_id varchar(128) not null,
+    class_name varchar(256) not null,
+    start_dt bigint not null,
+    end_dt bigint not null
+);
+
+create index sptr_idx_export_task on sptr_cef_export (task_def_id);
+create index sptr_idx_export_class on sptr_cef_export (class_name);
+
+create table identityiq.sptr_cef_identity (
+    created_dt timestamp,
+    hostname varchar(128) not null,
+    cef_version varchar(128) not null,
+    device_vendor varchar(128) not null,
+    device_product varchar(128) not null,
+    device_version varchar(128) not null,
+    signature_id varchar(128) not null,
+    name varchar(128) not null,
+    severity varchar(128) not null,
+    extension longtext,
+    primary key (signature_id)
+);
+
+create index sptr_idx_cef_identity on sptr_cef_identity (signature_id);
+
+create table identityiq.sptr_cef_link (
+    created_dt timestamp,
+    hostname varchar(128) not null,
+    cef_version varchar(128) not null,
+    device_vendor varchar(128) not null,
+    device_product varchar(128) not null,
+    device_version varchar(128) not null,
+    signature_id varchar(128) not null,
+    name varchar(128) not null,
+    severity varchar(128) not null,
+    extension longtext,
+    primary key (signature_id)
+);
+
+create index sptr_idx_cef_link on sptr_cef_link (signature_id);
+
+create table identityiq.sptr_cef_audit_event (
+    created_dt timestamp,
+    hostname varchar(128) not null,
+    cef_version varchar(128) not null,
+    device_vendor varchar(128) not null,
+    device_product varchar(128) not null,
+    device_version varchar(128) not null,
+    signature_id varchar(128) not null,
+    name varchar(128) not null,
+    severity varchar(128) not null,
+    extension longtext,
+    primary key (signature_id)
+);
+
+create index sptr_idx_audit_event on sptr_cef_audit_event (signature_id);
+
+create table identityiq.sptr_cef_syslog_event (
+    created_dt timestamp,
+    hostname varchar(128) not null,
+    cef_version varchar(128) not null,
+    device_vendor varchar(128) not null,
+    device_product varchar(128) not null,
+    device_version varchar(128) not null,
+    signature_id varchar(128) not null,
+    name varchar(128) not null,
+    severity varchar(128) not null,
+    extension longtext,
+    primary key (signature_id)
+);
+
+create index sptr_idx_syslog_event on sptr_cef_syslog_event (signature_id);

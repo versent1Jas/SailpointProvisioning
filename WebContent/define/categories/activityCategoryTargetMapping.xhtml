@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      // <![CDATA[
+      var currentRepeatId = 0;
+      helpKey = 'CATEGORY_ADD_TARGET';
+      
+      // This function prevents JSF from flipping out when the application gets changed out
+      // from under it, rendering the activity selection invalid.  
+      function resetActivitySelection() {
+          var activitySelectionElement = $('editForm:targetActivitySelection');
+          
+          if (activitySelectionElement) {
+              activitySelectionElement.value = '';
+          }
+      }
+      
+      // This function prevents JSF from flipping out when the activity gets changed out
+      // from under it, rendering the target selection(s) invalid.  
+      function resetTargetSelection() {
+          var selectionElement = $('editForm:targetSelection');
+          
+          if (selectionElement) {
+              var selectedValues = selectionElement.options;
+              var i;
+              
+              for (i = 0; i < selectedValues.length; ++i) {
+                  selectedValues[i].selected = false;
+              }
+          }
+      }
+
+
+
+      // ]]>
+    </script>
+
+  </ui:define>
+  <ui:define name="title">#{msgs.title_add_targets_to_activity_category}</ui:define>
+
+  <ui:define name="body">
+    <f:view>
+
+      <h:form id="editForm">
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        
+        <a4j:commandButton id="removeTargetFromCategory" style="display:none" action="#{editedCategory.removeTargetAction}" oncomplete="attachEventsToTargets();" render="editForm:categoryTargetListing"/>
+        
+        <div id='instructionPanel' class="pageInfo">
+          <p>
+            <h:outputText escape="false"  value="#{msgs.instr_activity_targets_left_panel}"/>
+          </p>
+                               
+          <p>
+            <h:outputText escape="false" value="#{msgs.instr_activity_targets_right_panel}"/>
+          </p>
+
+          <p>
+            <h:outputText escape="false" value="#{msgs.instr_activity_target_modifications}"/>
+          </p>
+        </div>
+          <div class="spContent">
+            <table id="activityTargetCategoryConfig" class="width100">
+              <tbody>
+                <tr>
+                  <td class="titleColumn"><h:outputText value="#{msgs.label_category_name}"/></td>
+                  <td>
+                    <h:inputText id="name" validator="sailpoint.web.validators.ObjectNameValidator" value="#{editedCategory.object.name}">
+                      <a4j:ajax event="change" execute="@this" render="categoryLabel"/>
+                    </h:inputText>
+                    <a4j:outputPanel ajaxRendered="true">
+                         <br />
+                         <h:message styleClass="formError" for="name" />
+                    </a4j:outputPanel>
+
+                  </td>
+                  <td/>
+                </tr>
+                <tr>
+                  <td colspan="2" width="40%" style="vertical-align:top">
+                    <div id="activityTargetCategories">
+                      <table id="categoryTargets" class="width100" style="border:1px solid gray">
+                        <thead><tr><th>
+                          <a4j:outputPanel id="categoryLabel">
+                            <h:outputFormat value="#{msgs.targets_for_category}">
+                                <f:param value="#{editedCategory.object.name}"/>
+                            </h:outputFormat>
+                          </a4j:outputPanel>
+                        </th></tr></thead>
+                        <tbody>
+                          <tr><td>
+                            <t:dataTable
+                              styleClass="width100"
+                              columnClasses="centeredColumn"
+                              rowClasses="ricoLG_evenRow, ricoLG_oddRow"
+                              id="categoryTargetListing"
+                              value="#{editedCategory.object.targets}" 
+                              var="target"
+                              forceIdIndexFormula="#{target}">
+                              
+                              <h:column>
+                                <h:selectBooleanCheckbox id="deleteTarget" value="#{editedCategory.selectedTargets[target]}"/> 
+                              </h:column>
+                              
+                              <h:column>
+                                  <h:outputText id="mappedTarget" value="#{target}"/>
+                              </h:column>
+                              
+                            </t:dataTable>
+                          </td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                  <td class="centeredColumn">
+                    <div>
+                      <h:commandButton style="width:175px" id="addTargets" value="&lt;&lt; #{msgs.button_add_targets}" styleClass="secondaryBtn" action="#{editedCategory.addTargetsAction}"/>
+                    </div>
+                    <div><h:commandButton style="width:175px" id="deleteTargets" value="#{msgs.button_remove_targets} &gt;&gt;" styleClass="secondaryBtn" action="#{editedCategory.removeTargetsAction}"/></div>
+                  </td>
+                  <td width="40%" style="vertical-align:top">
+                    <table class="width100" style="border:1px solid gray">
+                      <thead><tr><th colspan="2"><h:outputText value="#{msgs.select_target}"/></th></tr></thead>
+                      <tbody>
+                        <tr>
+                          <td class="titleColumn"><h:outputText value="#{msgs.label_application}"/></td>
+                          <td>
+                            <h:selectOneMenu id="targetAppSelection" value="#{activityCategoryConfig.selectedApplicationId}" onchange="resetActivitySelection(); $('editForm:selectAppButton').click();">
+                              <f:selectItem itemLabel="#{msgs.select_application}" itemValue=""/>
+                              <f:selectItems value="#{activityCategoryConfig.applications}"/>
+                            </h:selectOneMenu>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="titleColumn"><h:outputText value="#{msgs.label_activity_data_source}" rendered="#{activityCategoryConfig.renderActivitySelection}"/></td>
+                          <td>
+                            <h:selectOneMenu id="targetActivitySelection" rendered="#{activityCategoryConfig.renderActivitySelection}" value="#{activityCategoryConfig.selectedActivityDataSourceId}" onchange="resetTargetSelection(); $('editForm:selectActivityButton').click();">
+                              <f:selectItem itemLabel="#{msgs.select_activity_data_source}" itemValue=""/>
+                              <f:selectItems value="#{activityCategoryConfig.dataSources}"/>
+                            </h:selectOneMenu>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="titleColumn"><h:outputText value="#{msgs.label_targets}" rendered="#{activityCategoryConfig.renderTargetSelection}"/></td>
+                          <td>
+                            <h:selectManyListbox id="targetSelection" size="10" rendered="#{activityCategoryConfig.renderTargetSelection}" value="#{activityCategoryConfig.selectedTargets}">
+                              <f:selectItems value="#{activityCategoryConfig.targets}"/>
+                            </h:selectManyListbox>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="buttonRow">
+            <h:commandButton value="#{msgs.button_save}" styleClass="primaryBtn" action="#{editedCategory.finishMappingAction}"/>
+            <h:commandButton value="#{msgs.button_cancel}" styleClass="secondaryBtn" action="#{editedCategory.finishMappingActionWithoutRenaming}"/>
+          </div>
+
+        <h:commandButton id="selectAppButton" style="display:none" action="#{activityCategoryConfig.updateTargetAppSelection}"/>
+        <h:commandButton id="selectActivityButton" style="display:none" action="#{activityCategoryConfig.updateTargetActivitySelection}"/>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

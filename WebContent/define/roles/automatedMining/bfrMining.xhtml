@@ -1,0 +1,403 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+  
+  <div style="padding:10px" id="automatedBFRMiningContentDiv" class="width100">
+    <h:form id="bfrMiningForm">
+      <div id="bfrInstructions" class="spContent" style="width:97%">
+        <div class="spBorderlessContentBody">
+          <ui:fragment rendered="#{!(bfrMining.templateName eq null)}">
+            <div class="formWarn">
+              <h:outputFormat class="" value="#{msgs.role_mining_template_info}">
+                <f:param value="#{bfrMining.templateName}"/>
+              </h:outputFormat>
+            </div>
+          </ui:fragment>
+        
+          <div class="pageInfo">
+            <div class="instructions">
+              <h:outputText value="#{msgs.instructions_bfr_mining}" escape="false" />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <a4j:outputPanel id="bfrMiningPanel">
+      
+        <div id="bfrMining" class="spContent" style="width:97%">
+          <div class="spBorderlessContentBody">
+            <h:outputText styleClass="requiredText" value="*"/>
+            <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+          </div>
+          <div id="bfrGeneralSettings" class="spTabledContent" style="padding:0px">
+            <table id="bfrMiningGeneralTable" class="spTable">
+              <thead><tr><th style="width:45%"><h:outputText value="#{msgs.title_general_settings}"/></th><th style="width:5%"/><th style="width:50%"/></tr></thead>
+              <tbody>
+                <tr>
+                    <td>
+                        <h:outputText class="titleColumn"  value="#{msgs.label_name}" />
+                        <h:outputText styleClass="requiredText" value="*"/>
+                    </td>
+                    <td colspan="2">
+                        <h:inputText id="bfrRoleMiningTemplateName" size="50" value="#{bfrMining.templateName}" />
+                    </td>
+                </tr>
+                <tr id="bfrMiningTemplateNameError" style="display:none">
+                  <td colspan="3"><div class="formError">
+                    <h:outputText value="#{msgs.bfr_requires_name}"/>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_compute_population_statistics}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpComputeStats" width="12px" 
+                                    alt="#{help.help_bfr_mining_compute_statstics}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td><h:selectBooleanCheckbox id="bfrComputePopStats" value="#{bfrMining.computePopulationStatistics}"/></td>
+                </tr>
+                <tr>
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_bfr_analyze_only}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpPerformAnalysis" width="12px" 
+                                    alt="#{help.help_bfr_mining_perform_analysis}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td><h:selectBooleanCheckbox id="bfrAnalyzeOnly" value="#{bfrMining.analyzeOnly}" onclick="Ext.getCmp('bfrMiningPanel').toggleRoleCreationOptions();"/></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="bfrOrganizational" class="spTabledContent" style="padding:0px">
+            <table id="bfrMiningOrganizationalTable" class="spTable">
+              <thead><tr><th style="width:45%"><h:outputText value="#{msgs.title_organizational_settings}"/></th><th style="width:5%"/><th style="width:50%"/></tr></thead>
+              <tbody>
+                <tr>
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_auto_generate_org_roles}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpGenerateRoot" width="12px" 
+                                    alt="#{help.help_bfr_mining_generate_root}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox id="generateOrgRoles" value="#{bfrMining.generateOrgRoles}" 
+                      onclick="Ext.getCmp('bfrMiningPanel').updateContainerOption();"/>
+                  </td>
+                </tr>
+                <tr id="existingRootContainer">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_add_to_existing_container}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpSelectExistingContainer" width="12px" 
+                                    alt="#{help.help_bfr_mining_select_existing_container}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <div id="bfrContainerRoleSuggest"></div>
+                    <input id="bfrContainerRoleSuggestValue" name="bfrContainerRoleSuggestValue" type="hidden" value="#{bfrMining.containerRoleName}"/>            
+                    <h:inputHidden id="bfrContainerRole" value="#{bfrMining.containerRole}"/>
+                  </td>
+                </tr>
+                <tr id="orgRoleTypeOption" style="display:none">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_select_org_role_type}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpRootType" width="12px" 
+                                    alt="#{help.help_bfr_mining_root_type}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <h:selectOneMenu id="createdOrgRoleType" value="#{bfrMining.createdOrganizationalRoleType}">
+                      <f:selectItems value="#{bfrMining.organizationalRoleTypes}"/>
+                    </h:selectOneMenu>
+                  </td>
+                </tr>
+                <tr>
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_use_inherited_roles}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpGenerateHierarchy" width="12px" 
+                                    alt="#{help.help_bfr_mining_generate_hierarchy}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td><h:selectBooleanCheckbox id="bfrUseInherited" value="#{bfrMining.useInheritedRoles}"/></td>
+                </tr>
+                <tr>
+                  <td>
+                    <h:outputText class="titleColumn" value="#{msgs.ordered_scoping_attributes}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                  </td>
+                  <td>
+                    <h:graphicImage id="imgHlpScopingAttributes" width="12px" 
+                                    alt="#{help.help_bfr_mining_scoping_attributes}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <div id="bfrMiningScopingAttributesMultiSuggest"/>
+                    <t:inputHidden id="bfrMiningScopingAttributesSuggest" value="#{bfrMining.scopingAttributes}" forceId="true">
+                      <sp:convertList />
+                    </t:inputHidden>
+      
+                    <div id="bfrMiningScopingAttributesMultiSuggestData" style="display:none">
+                      #{bfrMining.scopingAttributesJSON}
+                    </div>
+                  </td>
+                </tr>
+                <tr id="scopingAttributesValidationError" style="display:none">
+                  <td colspan="3"><div class="formError">
+                    <h:outputText class="titleColumn" value="#{msgs.bfr_requires_scoping_attributes}"/>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="bfrBusiness" class="spTabledContent" style="padding:0px">
+            <table id="bfrMiningBusinessTable" class="spTable">
+              <thead><tr><th style="width:45%"><h:outputText value="#{msgs.title_business_settings}"/></th><th style="width:5%"/><th style="width:50%"/></tr></thead>
+              <tbody>
+                <tr class="roleCreationOption">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_select_business_role_type}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpSelectBusinessRoleType" width="12px" 
+                                    alt="#{help.help_bfr_mining_type}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <h:selectOneMenu id="createdRoleBusinessType" value="#{bfrMining.createdBusinessRoleType}">
+                      <f:selectItems value="#{bfrMining.businessRoleTypes}"/>
+                    </h:selectOneMenu>
+                  </td>
+                </tr>
+                <tr class="roleCreationOption">
+                  <td>
+                    <h:outputText class="titleColumn" value="#{msgs.owner}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                  </td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRoleOwner" width="12px" 
+                                    alt="#{help.help_bfr_mining_owner}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <div id="bfrMiningOwnerSuggest"></div>
+                    <input id="bfrMiningOwnerSuggestValue" name="bfrMiningOwnerSuggestValue" type="hidden" value="#{bfrMining.ownerName}"/>
+                    <h:inputHidden id="bfrMiningOwner" value="#{bfrMining.owner}"/>
+                  </td>
+                </tr>
+                <tr id="bfrMiningOwnerValidationError" style="display:none">
+                  <td colspan="3"><div class="formError">
+                    <h:outputText value="#{msgs.bfr_requires_owner}"/>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_min_num_users_per_role}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRoleMinUsers" width="12px" 
+                                    alt="#{help.help_bfr_mining_min_users}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td><h:inputText id="bfrMinNumUsers" size="4" value="#{bfrMining.minNumUsersPerRole}"/></td>
+                </tr>
+                <tr id="bfrMiningMinNumUsersValidationError" style="display:none">
+                  <td colspan="3"><div class="formError">
+                    <h:outputText value="#{msgs.err_invalid_number_entered}"/>
+                  </div></td>
+                </tr>
+                <tr class="roleCreationOption">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_naming_algorithm}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpNamingAlgorithm" width="12px" 
+                                    alt="#{help.help_bfr_mining_naming_algorithm}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <h:selectOneRadio id="bfrNamingAlgorithm" layout="lineDirection" value="#{bfrMining.namingAlgorithm}">
+                      <f:selectItems value="#{bfrMining.namingOptions}"/>
+                    </h:selectOneRadio>
+                  </td>
+                </tr>
+                <tr class="roleCreationOption">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_role_name_prefix}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRolePrefix" width="12px" 
+                                    alt="#{help.help_bfr_mining_prefix}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td><h:inputText id="bfrRoleNamePrefix" value="#{bfrMining.roleNamePrefix}"/></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="bfrIt" class="spTabledContent" style="padding:0px">
+            <table id="bfrMiningItTable" class="spTable">
+              <thead><tr><th style="width:45%"><h:outputText value="#{msgs.title_it_settings}"/></th><th style="width:5%"/><th style="width:50%"/></tr></thead>
+              <tbody>
+                <tr>
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_mine_for_entitlements}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRoleMineEntitlements" width="12px" 
+                                    alt="#{help.help_bfr_mining_mine_entitlements}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox id="bfrMineForEntitlements" value="#{bfrMining.mineForEntitlements}"
+                      onclick="SailPoint.roles.setEntitlementOptionsDisabled(!$('bfrMiningForm:bfrMineForEntitlements').checked);"/>
+                  </td>
+                </tr>
+                <tr class="entitlementMiningOption" style="display:none">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_attach_profiles_to_bfr}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRoleAttachDirectly" width="12px" 
+                                    alt="#{help.help_bfr_mining_attach_directly}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox id="bfrAttachProfilesToBfr" value="#{bfrMining.attachProfilesToBfr}"
+                      onclick="SailPoint.roles.setITRoleOptionsDisabled($('bfrMiningForm:bfrAttachProfilesToBfr').checked);"/>
+                  </td>
+                </tr>
+                <tr class="ITRoleOption entitlementMiningOption roleCreationOption" style="display:none">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_select_it_role_type}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRoleItType" width="12px" 
+                                    alt="#{help.help_bfr_mining_it_type}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <h:selectOneMenu id="createdItRoleType" value="#{bfrMining.createdITRoleType}">
+                      <f:selectItems value="#{bfrMining.itRoleTypes}"/>
+                    </h:selectOneMenu>
+                  </td>
+                </tr>
+                <tr class="ITRoleOption entitlementMiningOption" style="display:none">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_relationship_to_it}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRoleRelationshipToIt" width="12px" 
+                                    alt="#{help.help_bfr_mining_relationship_to_mined}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <h:selectOneRadio id="bfrRelationshipToIt" layout="lineDirection" value="#{bfrMining.relationshipToIt}">
+                      <f:selectItems value="#{bfrMining.relationshipOptions}"/>
+                    </h:selectOneRadio>
+                  </td>
+                </tr>
+                <tr id="bfrMiningAppMultiSuggestRow" class="entitlementMiningOption" style="visibility:hidden">
+                  <td>
+                    <h:outputText class="titleColumn" value="#{msgs.label_applications_to_mine}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                  </td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRoleEntitlementSources" width="12px" 
+                                    alt="#{help.help_bfr_mining_entitlement_sources}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td>
+                    <div id="bfrMiningApplicationMultiSuggest"/>
+                    <t:inputHidden id="bfrMiningApplicationSuggest" value="#{bfrMining.applications}" forceId="true">
+                      <sp:convertList />
+                    </t:inputHidden>
+              
+                    <div id="bfrMiningApplicationMultiSuggestData" style="display:none">
+                      #{bfrMining.applicationsJSON}
+                    </div>
+                  </td>
+                </tr>
+                <tr id="bfrMiningEntitlementApplicationValidationError" class="entitlementMiningError" style="display:none">
+                  <td colspan="3"><div class="formError">
+                    <h:outputText value="#{msgs.bfr_requires_applications}"/>
+                  </div></td>
+                </tr>
+                <tr class="entitlementMiningOption" style="display:none">
+                  <td><h:outputText class="titleColumn" value="#{msgs.label_threshold_for_entitlement}"/></td>
+                  <td>
+                    <h:graphicImage id="imgHlpBusinessRolePercentageThreshold" width="12px" 
+                                    alt="#{help.help_bfr_mining_percentage_threshold}"
+                                    height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                    url="/images/icons/dashboard_help_16.png" />
+                  </td>
+                  <td><h:inputText id="bfrThreshold" value="#{bfrMining.threshold}" size="4"/></td>
+                </tr>
+                <tr id="bfrMiningThresholdValidationError" class="entitlementMiningError" style="display:none">
+                  <td colspan="3"><div class="formError">
+                    <h:outputText value="#{msgs.err_invalid_number_entered}"/>
+                  </div></td>
+                </tr>          
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </a4j:outputPanel> 
+      
+      <a4j:outputPanel id="businessRoleSaveResult">
+        <div id="businessRoleSaveResultContents" style="display:none">
+          <h:outputText value="#{bfrMining.saveResult}"/>
+        </div>
+      </a4j:outputPanel>    
+      
+      <a4j:commandButton id="launchBFRMining" style="display:none" action="#{bfrMining.launchMining}"
+                         render="businessRoleLaunchResult"
+                         oncomplete="Ext.getCmp('bfrMiningPanel').displayLaunchStatus();"/>
+                         
+      <a4j:commandButton id="bfrSaveTemplateBtn" style="display:none" action="#{bfrMining.saveTemplate}"
+                         render="businessRoleSaveResult,bfrRoleMiningTemplateName,bfrRoleMiningTemplateId"
+                         oncomplete="Ext.getCmp('bfrMiningPanel').displaySaveStatus();"/>
+
+      <a4j:commandButton id="bfrSaveAndExecTemplateBtn" style="display:none" action="#{bfrMining.saveTemplate}"
+                         render="businessRoleSaveResult,bfrRoleMiningTemplateName,bfrRoleMiningTemplateId"
+                         oncomplete="var saveResults = $('businessRoleSaveResultContents').innerHTML;
+                                     var bfrMiningPanel = Ext.getCmp('bfrMiningPanel');
+                                     if (bfrMiningPanel.isResultSuccessful(saveResults)) {
+                                         $('templateId').value = $('bfrMiningForm:bfrRoleMiningTemplateId').value;
+                                         $('businessRoleMiningLaunchFromGridForm:launchBFRMining').click();
+                                     } else {
+                                         bfrMiningPanel.displaySaveStatus();
+                                     }"/>
+      
+      <input id="bfrRoleMiningResultName" name="bfrRoleMiningResultName" value="#{bfrMining.miningResultName}" style="display:none"/>
+      <input id="bfrRoleMiningResultId" name="bfrRoleMiningResultId" value="#{bfrMining.miningResultId}" style="display:none"/>
+
+      <h:inputHidden value="#{bfrMining.templateId}" id="bfrRoleMiningTemplateId"/>
+      <h:inputHidden value="#{bfrMining.originalTemplateName}" id="bfrRoleMiningOriginalTemplateName"/>
+      
+      <a4j:commandButton id="bfrViewLastTaskResult" style="display:none" 
+                         onclick="Ext.MessageBox.wait('#{sp:escapeJavascript(msgs.loading_data)}');"
+                         action="#{bfrMining.viewLastTaskResult}"
+                         oncomplete="SailPoint.Role.Mining.getTaskResultWindow().showTaskResults($('bfrRoleMiningResultId').value);"/>
+      
+    </h:form>
+  </div>
+</ui:composition>
+
+</body>
+</html>

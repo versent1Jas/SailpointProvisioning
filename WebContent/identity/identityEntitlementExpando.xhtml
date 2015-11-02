@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  
+  <div class="spLightBlueTabledContent">
+    <table class="spLightBlueTable">
+      <tr>        
+        <th>
+          <h:outputFormat rendered="#{(entitlementDetails.nativeIdentity eq null)}" 
+                          value="#{msgs.identity_entitlements_role_details}">
+              <f:param value="#{entitlementDetails.value}"/>
+          </h:outputFormat>          
+
+          <h:outputFormat rendered="#{entitlementDetails.nativeIdentity != null and entitlementDetails.instance == null}" 
+                           value="#{msgs.identity_entitlements_details}">
+              <f:param value="#{entitlementDetails.name}"/>
+              <f:param value="#{entitlementDetails.displayValue}"/>
+              <f:param value="#{entitlementDetails.accountName}"/>
+          </h:outputFormat>
+
+          <h:outputFormat rendered="#{entitlementDetails.appName != null and entitlementDetails.instance != null}" 
+                          value="#{msgs.identity_entitlements_details_instance}">
+            <f:param value="#{entitlementDetails.name}"/>
+            <f:param value="#{entitlementDetails.displayValue}"/>
+            <f:param value="#{entitlementDetails.accountName}"/>
+            <f:param value="#{entitlementDetails.instance}"/>
+          </h:outputFormat>
+
+        </th>
+      </tr>
+    </table>      
+  </div>
+    
+  <div style="margin: 5px 5px 5px 10px;">
+    <table>
+        
+      <!--  Role specific data -->      
+      
+      <ui:fragment rendered='#{entitlementDetails.iiqEntitlement}'> 
+             
+        <ui:fragment rendered='#{entitlementDetails.startDate != null}'>
+          <tr>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+              #{msgs.lcm_summary_role_activation}
+            </td>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+              #{entitlementDetails.startDate}
+            </td>
+          </tr>    
+        </ui:fragment>
+        
+        <ui:fragment rendered='#{entitlementDetails.endDate != null}'>                    
+          <tr>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+              #{msgs.lcm_summary_role_deactivation}
+            </td>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+              #{entitlementDetails.endDate}
+            </td>
+          </tr>
+        </ui:fragment>
+        
+        <ui:fragment rendered='#{entitlementDetails.detectedRole}'>
+          <tr>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+              #{msgs.identity_entitlements_role_allowed}
+            </td>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+              #{sp:localizeKey(entitlementDetails.allowed)}
+            </td>
+          </tr>
+        </ui:fragment>      
+        
+      </ui:fragment>
+      
+      <ui:fragment rendered='#{not entitlementDetails.iiqEntitlement}'>
+
+        <tr>
+          <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+           #{msgs.identity_entitlements_aggregation_type}              
+          </td>
+          <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+           #{entitlementDetails.localizedType}
+          </td>
+        </tr>
+        
+        <ui:fragment rendered='#{entitlementDetails.annotation != null}'>
+          <tr>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+              #{msgs.identity_entitlements_permission_annotation}               
+            </td>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+             #{entitlementDetails.annotation}
+            </td>
+          </tr>
+        </ui:fragment>       
+       
+        <tr>
+          <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+              #{msgs.identity_entitlements_assigned}
+          </td>
+          <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+              #{sp:localizeKey(entitlementDetails.assigned)}
+          </td>
+        </tr>   
+        
+        <tr>
+          <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+             #{msgs.identity_entitlements_granted_by_role}
+          </td>
+          <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+              #{sp:localizeKey(entitlementDetails.grantedByRole)}
+          </td>
+        </tr>                     
+
+        <ui:fragment rendered='#{entitlementDetails.grantedByRole}'>
+          <tr>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+              #{msgs.identity_entitlements_source_assigned}
+            </td>
+            <ui:fragment rendered='#{entitlementDetails.sourceAssignableRolesString != null}'>
+              <td style="padding: 2px; padding-right: 5px; width: 600px; padding-top:3px;" valign="top">           
+               #{entitlementDetails.sourceAssignableRolesString}
+              </td>
+            </ui:fragment>  
+            <ui:fragment rendered='#{entitlementDetails.sourceAssignableRolesString == null}'>   
+              <td style="padding: 2px; padding-right: 5px; width: 600px; padding-top:3px;" valign="top">           
+                #{msgs.none}
+               </td>
+            </ui:fragment>
+          </tr>   
+
+          <tr>
+            <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+              #{msgs.identity_entitlements_source_detected}
+            </td>
+            <ui:fragment rendered='#{entitlementDetails.sourceDetectableRolesString != null}'>            
+              <td style="padding: 2px; padding-right: 5px; width: 600px; padding-top:3px;" valign="top">           
+               #{entitlementDetails.sourceDetectableRolesString}
+              </td>
+            </ui:fragment>
+            <ui:fragment rendered='#{entitlementDetails.sourceDetectableRolesString == null}'>   
+              <td style="padding: 2px; padding-right: 5px; width: 600px; padding-top:3px;" valign="top">           
+                #{msgs.none}
+               </td>
+            </ui:fragment>
+          </tr>   
+        </ui:fragment>     
+        
+        <tr>
+          <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold;width:150px;" valign="top;">
+            #{msgs.identity_entitlements_aggregation_state_display}
+          </td>
+          <td style="padding: 2px; padding-right: 5px; padding-top:3px;" valign="top">           
+            #{sp:localizeKey(entitlementDetails.foundOnAccount)}
+          </td>
+        </tr>            
+        
+      </ui:fragment>
+
+      <ui:fragment rendered='#{entitlementDetails.assigner != null}'>           
+      <tr>
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+          #{msgs.identity_entitlements_assigner}
+        </td>        
+        <td style="padding: 2px; padding-right: 5px; width: 600px; padding-top:3px;" valign="top">           
+          #{entitlementDetails.assignerDisplayName}
+        </td>                  
+      </tr>
+      </ui:fragment>
+            
+      <ui:fragment rendered='#{not entitlementDetails.detectedRole}'>             
+      <tr>
+        <td style="padding: 2px; padding-right: 5px; padding-top:3px; font-weight:bold" valign="top">
+         #{msgs.identity_entitlements_source}
+        </td>
+        <td style="padding: 2px; padding-right: 5px; width: 600px; padding-top:3px;" valign="top">           
+         #{entitlementDetails.source}
+        </td>
+      </tr>   
+      </ui:fragment>
+       
+    </table> 
+  </div> <!--  end of general details  -->              
+   
+  <ui:fragment rendered='#{entitlementDetails.lastCertBean != null || entitlementDetails.pendingCertBean != null}'>           
+    <div style="margin: 5px 5px 5px 10px;">  
+      <table>
+        <tr>
+          <th valign="top">
+            <a onclick="showHideWithLock($('entitlementDetails_#{entitlementDetails.objectId}_certInfo'), null, null,
+               {fn1:SailPoint.identity.updateGridLayouts, fn2:SailPoint.Utils.toggleDisclosureDiv, args:{link:this, div:'entitlementDetails_#{entitlementDetails.objectId}_certInfo'}});"
+               class="disclosure">
+                <h:outputText value="#{msgs.certification}" />
+            </a>
+          </th>         
+        </tr>
+      </table>     
+      <div id="entitlementDetails_#{entitlementDetails.objectId}_certInfo" style="display: none;">     
+      <ui:include src='identityEntitlementExpandoCertTable.xhtml'>
+        <ui:param name='title' value='#{msgs.identity_entitlements_cert_info}'/>
+        <ui:param name='notFoundMsg' value='#{msgs.identity_entitlements_cert_not_found}'/>                 
+        <ui:param name='certSummaryBean' value='#{entitlementDetails.lastCertBean}'/>
+      </ui:include>    
+        
+      <ui:include src='identityEntitlementExpandoCertTable.xhtml'>
+        <ui:param name='title' value='#{msgs.identity_entitlements_pending_cert_info}'/> 
+        <ui:param name='notFoundMsg' value='#{msgs.identity_entitlements_cert_pending_not_found}'/>
+        <ui:param name='certSummaryBean' value='#{entitlementDetails.pendingCertBean}'/>
+      </ui:include>                                  
+      </div>                             
+    </div> <!--  End of the cert details div -->
+   
+  </ui:fragment>             
+             
+  <ui:fragment rendered='#{entitlementDetails.lastRequestBean != null || entitlementDetails.pendingRequestBean != null}'>           
+   <div style="margin: 5px 5px 5px 10px;">
+      <table>
+        <tr>
+          <th style="font-weight:normal" valign="top">
+            <a onclick="showHideWithLock($('entitlementDetails_#{entitlementDetails.objectId}_requestInfo'), null, null,
+               {fn1:SailPoint.identity.updateGridLayouts, fn2:SailPoint.Utils.toggleDisclosureDiv, args:{link:this, div:'entitlementDetails_#{entitlementDetails.objectId}_requestInfo'}});"
+               class="disclosure">
+                <h:outputText value="#{msgs.identity_entitlements_request_details}" />
+            </a>
+          </th>
+       </tr>
+      </table>
+      
+      <div id="entitlementDetails_#{entitlementDetails.objectId}_requestInfo" style="display: none;">
+        <ui:include src='identityEntitlementExpandoRequestTable.xhtml'>
+          <ui:param name='title' value='#{msgs.identity_entitlements_request_info}'/> 
+        <ui:param name='notFoundMsg' value='#{msgs.identity_entitlements_request_details_not_found}'/>
+        <ui:param name='requestSummaryBean' value='#{entitlementDetails.lastRequestBean}'/>
+        </ui:include>
+      
+        <ui:include src='identityEntitlementExpandoRequestTable.xhtml'>
+          <ui:param name='title' value='#{msgs.identity_entitlements_pending_request_info}'/> 
+        <ui:param name='notFoundMsg' value='#{msgs.identity_entitlements_pending_request_not_found}'/>
+        <ui:param name='requestSummaryBean' value='#{entitlementDetails.pendingRequestBean}'/>
+        </ui:include>
+      </div>                                                
+      
+    </div>  <!--  end of request info -->
+  </ui:fragment>
+     
+</ui:composition>
+</body>
+</html>

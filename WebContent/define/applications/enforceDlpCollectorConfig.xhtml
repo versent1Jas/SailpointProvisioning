@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+  <ui:composition>
+    <script>
+       Ext.onReady( function() {
+    	   var corrAppSugg = SailPoint.SuggestFactory.createSuggest( 'application', 'correlationApplicationSuggestField', null, null, 
+                   {
+               id: 'correlationApplicationSuggestFieldCmp',
+               allowBlank: false,
+               renderTo: 'correlationApplicationSuggestField',
+               binding: 'editForm:correlationApplicationIdField',
+               fields: ['id', 'displayName', 'purview', 'applicationName'],
+               width: 350
+           }
+         );
+         corrAppSugg.store.load( { callback: function() { 
+                                              if( $( 'editForm:correlationApplicationIdField' ).value ) {
+                                                corrAppSugg.setValue( corrAppSugg.store.getById( $( 'editForm:correlationApplicationIdField' ).value ).data.displayName );
+                                              }
+                                          } 
+                              } );
+       } );
+    </script>
+
+    <table class="width100" cellpadding="0" cellspacing="0">
+      <tr>
+        <td>
+          <div id="submenu-main">
+            <div id="submenu-tabs">
+              <ul id="submenu-links">
+                <li id="button0" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('symantecDLPSettingsContent', 'button0')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> Symantec DLP Configuration </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="symantecDLPSettingsContent" class="submenuContentBox" style="border:0px">
+              <div class="spContent">
+                <div class="spTabledContent">
+                  <table class="spTable" cellspacing="0">
+                    <thead>
+                      <tr><th colspan="2"><h:outputText value="Symantec DLP Settings"/></th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td width="25%"><h:outputText value="Report API User"/></td>
+                        <td>
+                          <h:inputText size="50" id="reportApiUser" value="#{activityDataSource.object.configuration['user']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="#{msgs.connection_password}"/></td>
+                        <td>
+                          <sp:inputSecret size="50" id="reportApiPassword" value="#{activityDataSource.object.configuration['password']}" redisplay="true"
+                                          autocomplete="off"
+                                          disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                          readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="Protect Manager URL"/></td>
+                        <td>
+                          <h:inputText size="50" id="protectManagerUrl" value="#{activityDataSource.object.configuration['url']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="Endpoint Report Id"/></td>
+                        <td>
+                          <h:inputText size="50" id="endpointReportId" value="#{activityDataSource.object.configuration['endpointReportId']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                       readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <h:outputText style="color: red;" value="*"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="25%"><h:outputText value="Correlation Application"/></td>
+                        <td>
+                          <div id="correlationApplicationSuggestField"></div>
+                          <h:inputHidden id="correlationApplicationIdField" value="#{activityDataSource.object.configuration['correlationApplication']}"/>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+          </div>  <!-- connectionSettingsContent -->
+        </td>
+      </tr>
+    </table>
+  </ui:composition>
+</body>
+</html>

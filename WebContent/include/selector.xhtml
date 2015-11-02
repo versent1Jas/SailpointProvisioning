@@ -1,0 +1,419 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+
+<ui:remove><!--
+  Include for editing an IdentitySelector object.
+  Expected to be called with these parameters:
+    prefix
+      A prefix to put in front of all component ids in case we need
+      to edit more than one IdentitySelector on a page.
+    listener
+      A bean to receive the actionListener events from the 
+      command buttons in this file.
+    selector
+      An instanceof IdentitySelectorDTO
+    noFilter, noScript, noRule, noPouplation
+      When true suppresses these match types from the radio button.
+    noRadio
+      When true suppresses the style selector radio button.
+      The selector will be displayed in the type determined
+      initially by SelectorBean and cannot be changed.  Currently
+      this is used only for Entitlement SOD policies which we
+      are limiting to just match lists.
+    manageRight
+      Name of the right you must have to edit the selector.
+    ruleType
+      [Optional] Type of rule to display; defaults to "IdentitySelector"
+    enableValueSelect
+      [Optional] If true, selectors will be used instead of text fields for attribute values
+      
+  Also note that to properly use this file you have to include assignmentRuleSelector.js
+  and call the initialization function as needed
+--></ui:remove>
+
+<body>
+<ui:composition>
+  <script type="text/javascript" defer="defer">
+    // <![CDATA[
+    // sigh, think of a way to share the same functions
+    // for multiple selectors
+    function #{prefix}UpdateSelectorType(el) {
+        var type = el.value;
+        //$('#{prefix}HiddenSelectorType).value = type;
+        #{prefix}UpdateSelectorTypeFields(type);
+    }
+    // derived from workItemConfig.xhtml, seems like there
+    // ought to be an easier way...
+    function #{prefix}UpdateSelectorTypeFields(type) {
+      //alert("#{prefix}Type = " + type);
+      if (type == 'match') {
+        $('#{prefix}SelectorMatchFields').style.display='';
+        $('#{prefix}SelectorFilterFields').style.display='none';
+        $('#{prefix}SelectorScriptFields').style.display='none';
+        $('#{prefix}SelectorRuleFields').style.display='none';
+        $('#{prefix}SelectorPopulationFields').style.display='none';
+      }
+      else if (type == 'filter') {
+        $('#{prefix}SelectorMatchFields').style.display='none';
+        $('#{prefix}SelectorFilterFields').style.display='';
+        $('#{prefix}SelectorScriptFields').style.display='none';
+        $('#{prefix}SelectorRuleFields').style.display='none';
+        $('#{prefix}SelectorPopulationFields').style.display='none';
+        resizeTextArea('#{prefix}filterTextArea');
+      }
+      else if (type == 'script') {
+        $('#{prefix}SelectorMatchFields').style.display='none';
+        $('#{prefix}SelectorFilterFields').style.display='none';
+        $('#{prefix}SelectorScriptFields').style.display='';
+        $('#{prefix}SelectorRuleFields').style.display='none';
+        $('#{prefix}SelectorPopulationFields').style.display='none';
+        resizeTextArea('#{prefix}scriptTextArea');
+      }
+      else if (type == 'rule') {
+        $('#{prefix}SelectorMatchFields').style.display='none';
+        $('#{prefix}SelectorFilterFields').style.display='none';
+        $('#{prefix}SelectorScriptFields').style.display='none';
+        $('#{prefix}SelectorRuleFields').style.display='';
+        $('#{prefix}SelectorPopulationFields').style.display='none';
+      }
+      else if (type == 'population') {
+        $('#{prefix}SelectorMatchFields').style.display='none';
+        $('#{prefix}SelectorFilterFields').style.display='none';
+        $('#{prefix}SelectorScriptFields').style.display='none';
+        $('#{prefix}SelectorRuleFields').style.display='none';
+        $('#{prefix}SelectorPopulationFields').style.display='';
+      }
+      else if (type == 'none') {
+        $('#{prefix}SelectorMatchFields').style.display='none';
+        $('#{prefix}SelectorFilterFields').style.display='none';
+        $('#{prefix}SelectorScriptFields').style.display='none';
+        $('#{prefix}SelectorRuleFields').style.display='none';
+        $('#{prefix}SelectorPopulationFields').style.display='none';
+      }
+
+      // if contained in panel redo layout
+      var assignmentRulePanel = Ext.getCmp('assignmentRule');
+
+      if (assignmentRulePanel) {
+        assignmentRulePanel.doLayout();
+      }
+    }
+    
+    function resizeTextArea(id) {
+        var cb = Ext.get('certificationScheduleForm:' + id);
+        var tbl = Ext.get('#{prefix}TTable');
+        if(cb && tbl) {
+            var dw = tbl.getWidth();
+            var cw = Math.floor((dw * 1.1) / 7); // width / multiplier / ave cols width in px
+            cb.set( {cols:cw} );
+        }
+    }
+    
+    function #{prefix}InitSelectorTypeFields() {
+      //doesn't work
+      #{prefix}UpdateSelectorTypeFields($('#{prefix}SelectorType').value);
+    }
+    // travel up the DOM tree looking for the parent form
+    function #{prefix}findFormName(button) {
+        var node = button;
+        while (node.parentNode.nodeName != "FORM") {
+            node = node.parentNode;
+        }
+            
+        return node.parentNode.id;
+    }
+    // If "is null" is selected on a match list, make sure that the associated
+    // value textbox is disabled.
+    function #{prefix}disableAssociatedTextBox(checkbox) {
+        var tableRow = checkbox.parentNode.parentNode;
+        var arrayOfDomNodes = Ext.query('.matchListValue', tableRow);
+        
+        if (arrayOfDomNodes.length > 0) {        
+        	var input = arrayOfDomNodes[0];
+        	input.disabled = checkbox.checked;
+        } else {
+        	var selectorDivs = Ext.query('.#{prefix}attrValueSelect', tableRow);
+        	if (selectorDivs.length > 0) {
+        		#{prefix}updateValueSelect(selectorDivs[0]);
+        	}
+        }
+    }
+    
+    function #{prefix}updateValueSelect(selectorDiv) {
+    	var tableRow = selectorDiv.parentNode.parentNode;
+    	
+    	var attributeSelect = Ext.get(Ext.query('.#{prefix}attrSelect', tableRow)[0]);
+    	var nullCheck = Ext.query('.#{prefix}nullCheck', tableRow)[0];
+    	
+    	var valueSelect = Ext.getCmp(selectorDiv.getAttribute('componentId'));
+    	
+    	if (attributeSelect.getValue() && !nullCheck.checked) {    	 	
+    	 	valueSelect.setDisabled(false);
+    	} else {
+    		valueSelect.clearValue();
+    		valueSelect.setDisabled(true);
+    	}
+    }
+    
+    function #{prefix}createAttributeSelectors() {
+    	var selectorDivs = Ext.query('.#{prefix}attrValueSelect');
+    	if (selectorDivs) {
+    		selectorDivs.each(function(selectorDiv) {
+    			if (selectorDiv.innerHTML) {
+    				return;
+    			}
+    			
+    			var tableRow = selectorDiv.parentNode.parentNode;
+    			
+    			var attributeSelect = Ext.get(Ext.query('.#{prefix}attrSelect', tableRow)[0]);
+    			
+    			var relatedInput = Ext.query('input[type="hidden"]', selectorDiv.parentElement)[0];
+    			
+    			var valueSelect = Ext.create('SailPoint.form.ManagedAttributeValueCombo', {
+    			 	renderTo: selectorDiv,
+    			 	applicationName: selectorDiv.getAttribute('applicationId'),
+    			 	attribute: attributeSelect.getValue(),
+    			 	disabled: #{readOnly == true} || (attributeSelect.getValue() == ''),
+    			 	listeners: { 
+    			 		change: function(combo, newValue, oldValue, eOpts) {
+    			 			relatedInput.value = newValue;
+    			 		} 
+    			    } 
+    			});
+
+                // load the store before setting the value
+                valueSelect.getStore().load(function() {
+                  valueSelect.setValue(relatedInput.value);
+                });
+    			
+
+    		    attributeSelect.on('change', function() {
+    		    	if (attributeSelect.getValue()) {
+    		    		valueSelect.setAttribute(attributeSelect.getValue()); 
+    		    	 	valueSelect.getStore().load(); 
+    		    	}
+    		    	
+    		    	#{prefix}updateValueSelect(selectorDiv);
+    		    });
+
+    		    selectorDiv.setAttribute('componentId', valueSelect.getId());
+    		});
+    	}
+    }
+    
+    Ext.onReady(function() {
+    	if (#{enableValueSelect == true}) {
+    		#{prefix}createAttributeSelectors();
+    	}
+    });
+    
+    Page.on('selectorPanelChanged', function() {
+    	if (#{enableValueSelect == true}) {
+    		#{prefix}createAttributeSelectors();
+    	}
+    });
+    
+    //Behaviour.addLoadEvent(#{prefix}InitSelectorTypeFields);
+    //]]>
+  </script>
+    <c:if test="#{!noRadio}">
+      <h:selectOneRadio id="#{prefix}SelectorType" value="#{selector.type}"
+        onclick="javascript:#{prefix}UpdateSelectorType(this);"
+        disabled="#{(readOnly == true) || ((null != manageRight) and !sp:hasRight(facesContext, manageRight))}"
+        readonly="#{(readOnly == true) || ((null != manageRight) and !sp:hasRight(facesContext, manageRight))}">
+        <c:if test="#{selector.allowTypeNone}">
+          <f:selectItem itemValue="none" itemLabel="#{(null != noneLabel) ? noneLabel : msgs.selector_type_none}"/>
+        </c:if>
+        <f:selectItem itemValue="match" itemLabel="#{msgs.selector_type_match}"/>
+        <c:if test="#{!noFilter}">
+          <f:selectItem itemValue="filter" itemLabel="#{msgs.selector_type_filter}"/>
+        </c:if>
+        <c:if test="#{!noScript}">
+          <f:selectItem itemValue="script" itemLabel="#{msgs.selector_type_script}"/>
+        </c:if>
+        <c:if test="#{!noRule}">
+          <f:selectItem itemValue="rule" itemLabel="#{msgs.selector_type_rule}" />
+        </c:if>
+        <c:if test="#{!noPopulation}">
+          <f:selectItem itemValue="population" itemLabel="#{msgs.selector_type_population}" />
+        </c:if>
+      </h:selectOneRadio>
+    </c:if>
+
+      
+    <!-- have to pull this back to 90% for IE6 else we spill over the spBackground -->
+    <table cellspacing="0" width="90%" id="#{prefix}TTable">
+      <tr id="#{prefix}SelectorMatchFields" style="#{selector.type == 'match' ? '' : 'display: none;'}">
+      <td>
+        <h:panelGroup>
+          <ui:fragment rendered="#{manageRight == null || sp:hasRight(facesContext, manageRight)}">
+            <!-- Add firing of 'selectorPanelChanged' event to all buttons because Chrome does not 
+            want to parse the script returned in the response, perhaps because the response type is text/xml?? -->
+            <ui:fragment rendered="#{!noIdentityAttributes}">
+              <table class="spTable" cellpadding="4" cellspacing="0">
+                <tr><th>#{msgs.identityiq} #{msgs.items}</th></tr>
+                <tr>
+                  <td>
+                    <a4j:commandButton render='#{prefix}selectorPanel' id="#{prefix}_AddIdentityAttributeButton" value="#{msgs.selector_add_identity_attribute}" styleClass="secondaryBtn"
+                        actionListener="#{listener.addSelectorIdentityAttribute}" oncomplete="Page.fireEvent('selectorPanelChanged');" disabled="#{readOnly == true}" />
+                  </td>
+                </tr>
+              </table>
+                <div class="spacerDiv"/>
+            </ui:fragment>
+
+            <table class="spTable" cellpadding="4" cellspacing="0">
+              <tr><th colspan="2">#{msgs.label_application} #{msgs.items}</th></tr>
+              <tr>
+                <ui:fragment rendered="#{!noApplicationSuggest}">
+                    <td style="padding:4px; width: 300px">
+                      <div style="display:none">
+                        <t:inputText id="#{prefix}SelectorApplication" 
+                                     styleClass="selectorApplicationSuggest"
+                                     style="display:none; border:none"
+                                     value="#{selector.application}"
+                                     forceId="true">
+                        </t:inputText>
+                      </div>
+                
+                      <div id="#{prefix}SelectorApplicationSuggest"></div>
+                    </td>
+                </ui:fragment>
+                <td style="padding:4px">
+                  <div class="buttonRow" style="margin-top:0">
+                    <a4j:commandButton render='#{prefix}selectorPanel' id="#{prefix}_AddAttributeButton" value="#{msgs.selector_add_attribute}" styleClass="secondaryBtn"
+                        actionListener="#{listener.addSelectorAttribute}" oncomplete="Page.fireEvent('selectorPanelChanged');" disabled="#{readOnly == true}" />
+                        <h:message for="#{prefix}_AddAttributeButton"/>
+                    <a4j:commandButton render='#{prefix}selectorPanel' id="#{prefix}_AddPermissionButton" value="#{msgs.selector_add_permission}" styleClass="secondaryBtn"
+                        actionListener="#{listener.addSelectorPermission}" oncomplete="Page.fireEvent('selectorPanelChanged');" disabled="#{readOnly == true}" />
+                  </div>
+                </td>
+              </tr>
+            </table>
+            <div class="spacerDiv"/>
+          </ui:fragment>
+        
+          <a4j:outputPanel id='#{prefix}selectorPanel'>
+          <ui:fragment rendered="#{selector.matchTermCount > 0}">
+            <table class="spTable" cellpadding="4" cellspacing="0">
+              <tr>
+                <th align="center">#{msgs.filter_operation}</th>
+                <th></th>
+                <th align="center">#{msgs.type}</th>
+                <th align="center">#{msgs.application}</th>
+                <th align="center">#{msgs.name}</th>
+                <th align="center">#{msgs.value}</th>
+                <th align="center">#{msgs.selector_type_is_null}</th>
+              </tr>
+              <t:dataList id="#{prefix}matchTermsTbl" value="#{selector.matchTerms}" var="term" >
+                <tr>
+                  <ui:fragment rendered="#{term.first}">
+                  <td rowspan='#{sp:size(selector.matchTerms)}'>
+                    <h:selectOneMenu id="#{prefix}_matchOperator" disabled="#{readOnly == true}" 
+                      value="#{selector.matchOperator}">
+                      <f:selectItems value="#{selector.matchOperators}" />
+                    </h:selectOneMenu>
+                  </td>
+                  </ui:fragment>
+                  <td width="50" align="center"><h:selectBooleanCheckbox value="#{term.selected}" /> </td>
+                  <ui:fragment rendered='#{!term.container}'>
+                    <ui:include src="selectorTerm.xhtml">
+                      <ui:param name="matchTerm" value="#{term}"/>
+                      <ui:param name="prefix" value="#{prefix}"/>
+                      <ui:param name="enableValueSelect" value="#{enableValueSelect}"/>
+                      <ui:param name="readOnly" value="#{readOnly == true}" />
+                    </ui:include>
+                  </ui:fragment>
+                  <ui:fragment rendered='#{term.container}'>
+                    <ui:include src="selectorGroup.xhtml">
+                      <ui:param name="matchTerm" value="#{term}"/>
+                      <ui:param name="prefix" value="#{prefix}"/>
+                      <ui:param name="readOnly" value="#{readOnly == true}"/>
+                    </ui:include>
+                  </ui:fragment>
+                </tr>
+              </t:dataList>
+            </table>
+
+            <div class="buttonRow" style="margin-top:0">
+              <a4j:commandButton render='#{prefix}selectorPanel' id="#{prefix}_GroupButton" value="#{msgs.group_selected}" styleClass="secondaryBtn"
+                                 actionListener="#{listener.groupSelectedTerms}" oncomplete="Page.fireEvent('selectorPanelChanged');" disabled="#{readOnly == true}" />
+              <a4j:commandButton render='#{prefix}selectorPanel' id="#{prefix}_UngroupButton" value="#{msgs.ungroup_selected}" styleClass="secondaryBtn"
+                                 actionListener="#{listener.ungroupSelectedTerms}" oncomplete="Page.fireEvent('selectorPanelChanged');" disabled="#{readOnly == true}" />
+              <a4j:commandButton render='#{prefix}selectorPanel' id="#{prefix}_DeleteButton" value="#{msgs.selector_delete_selected}" styleClass="secondaryBtn"
+                                 actionListener="#{listener.deleteSelectorTerms}" oncomplete="Page.fireEvent('selectorPanelChanged');" disabled="#{readOnly == true}" />
+            </div>
+          </ui:fragment>
+          </a4j:outputPanel>
+          
+        </h:panelGroup>        
+      </td>
+      </tr>
+      <tr id="#{prefix}SelectorFilterFields" style="#{selector.type == 'filter' ? '' : 'display: none;'}">
+      <td>
+        <h:inputTextarea style="width:100%" value="#{selector.filterSource}" rows="20" id="#{prefix}filterTextArea"
+                         disabled="#{(readOnly == true) || (manageRight != null and !sp:hasRight(facesContext, manageRight))}"
+                         readonly="#{(readOnly == true) || (manageRight != null and !sp:hasRight(facesContext, manageRight))}"/>
+      </td>
+      </tr>
+      <tr id="#{prefix}SelectorScriptFields" style="#{selector.type == 'script' ? '' : 'display: none;'}">
+        <td>
+          <h:inputTextarea style="width:100%" value="#{selector.scriptSource}" rows="20" id="#{prefix}scriptTextArea"
+                           disabled="#{(readOnly == true) || (manageRight != null and !sp:hasRight(facesContext, manageRight))}"
+                           readonly="#{(readOnly == true) || (manageRight != null and !sp:hasRight(facesContext, manageRight))}"/>
+        </td>
+      </tr>
+      <tr id="#{prefix}SelectorRuleFields" style="#{selector.type == 'rule' ? '' : 'display: none;'}">
+        <td>
+          <a4j:outputPanel id="#{prefix}selectorRulePanel">
+          <c:if test="#{(ruleType == null) or (ruleType == 'IdentitySelector')}">
+              <h:selectOneMenu id="#{prefix}SelectorRule" value="#{selector.rule}" disabled="#{readOnly == true}">
+                <f:selectItems  value="#{util.identitySelectorRules}"/>
+              </h:selectOneMenu>
+          </c:if>
+
+          <c:if test="#{ruleType == 'Policy'}">
+              <h:selectOneMenu id="#{prefix}SelectorRule" value="#{selector.rule}" disabled="#{readOnly == true}">
+                <f:selectItems  value="#{util.policyRules}"/>
+              </h:selectOneMenu>
+          </c:if>
+          
+          <a4j:commandButton id="#{prefix}refreshSelectorRulesButton"
+                           style="display:none"
+                           immediate="true"
+                           render="#{prefix}selectorRulePanel"/>
+          </a4j:outputPanel>
+        </td>
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >                              
+        <td width="100%">
+            <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                   style="display: #{(readOnly == true) ? 'none' : ''}"
+                   onclick="SailPoint.Rule.Editor.edit($(#{prefix}findFormName(this) + ':#{prefix}SelectorRule').value, 
+                                                       ((#{ruleType != null}) ? '#{ruleType}' : 'IdentitySelector'),
+                                                       $(#{prefix}findFormName(this) + ':#{prefix}refreshSelectorRulesButton'))" />                                                     
+        </td>
+        </ui:fragment>              
+      </tr>
+      <tr id="#{prefix}SelectorPopulationFields" style="#{selector.type == 'population' ? '' : 'display: none;'}">
+        <td>
+          <h:selectOneMenu id="#{prefix}SelectorPopulation" value="#{selector.population}" disabled="#{readOnly == true}">
+            <f:selectItems  value="#{util.populations}"/>
+          </h:selectOneMenu>
+        </td>
+      </tr>
+    </table>
+</ui:composition>
+</body>
+</html>

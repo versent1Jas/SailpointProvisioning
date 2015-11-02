@@ -1,0 +1,488 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var fileName = getFieldValue('editForm:host');
+               Validator.validateNonBlankString(fileName, "#{msgs.err_host_cannot_be_null}");
+
+
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+        function toggleCredentials(authType) {
+        	if (authType == "") {
+        		authType = "Basic";
+        	}
+            if (authType == "Basic") {
+            	$('editForm:uPassword').show();
+            	$('editForm:requiredPwd').show();
+            	$('editForm:userPassword').show();
+            	$('editForm:imgHlpPassword').show();
+                $('editForm:userPassword').disabled = false;                
+                $('editForm:keystorePwdId').style.display = 'none';
+                $('editForm:requiredKeyPwd').style.display = 'none';
+            	$('editForm:imgHlpKeystorePwd').style.display = 'none';
+            	$('editForm:keystorePwd').style.display = 'none';
+            	$('editForm:keystorePwd').value = '';
+            	$('editForm:aliasNameId').style.display = 'none';
+            	$('editForm:requiredAlias').style.display = 'none';
+            	$('editForm:imgHlpKeystoreAliasName').style.display = 'none';
+            	$('editForm:aliasName').style.display = 'none';
+            	$('editForm:aliasName').value = '';
+            	$('editForm:keystorePathId').style.display = 'none';
+            	$('editForm:requiredKeyPath').style.display = 'none';
+            	$('editForm:imgHlpKeyStoreFileForAuthentication').style.display = 'none';
+            	$('editForm:keystrFileLocA').style.display = 'none';
+            	$('editForm:keystrFileLocA').value = '';
+            } if (authType == "Trusted"){ 
+            	$('editForm:uPassword').style.display = 'none'; 
+            	$('editForm:requiredPwd').style.display = 'none';
+            	$('editForm:imgHlpPassword').style.display = 'none';
+            	$('editForm:userPassword').style.display = 'none';
+            	$('editForm:userPassword').value = '';  
+            	$('editForm:keystorePwdId').show();
+            	$('editForm:requiredKeyPwd').show();
+            	$('editForm:imgHlpKeystorePwd').show();
+            	$('editForm:keystorePwd').show();            	
+            	$('editForm:aliasNameId').show();
+            	$('editForm:requiredAlias').show();
+            	$('editForm:imgHlpKeystoreAliasName').show();
+            	$('editForm:aliasName').show();            	
+            	$('editForm:keystorePathId').show();
+            	$('editForm:requiredKeyPath').show();
+            	$('editForm:imgHlpKeyStoreFileForAuthentication').show();
+            	$('editForm:keystrFileLocA').show();            	
+            }
+        }
+        Ext.onReady(function () {
+            Ext.QuickTips.init();
+
+  		toggleCredentials('#{applicationObject.attributes['authType']}');
+            // This is our validation hook
+            Page.on('beforeSave', function() {
+              /*  var domain = getFieldValue('editForm:domain');
+                Validator.validateNonBlankString(domain, "#{msgs.err_domain_cannot_be_null}");
+ 	
+                var email = getFieldValue('editForm:email');
+                Validator.validateNonBlankString(email, "#{msgs.err_admin_email_cannot_be_null}");*/
+                
+                
+                var errors = Validator.getErrors();
+                if (errors && errors.length > 0) {
+                    var errorDivTop = $('formErrorsTop');
+                    var errorDivBottom = $('formErrorsBottom');
+                    Validator.displayErrors(errorDivBottom); 
+                    Validator.displayErrors(errorDivTop); 
+                    return false;
+                }
+                //return false will kill cancel the save
+                return true;
+            });
+
+         });
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.bmc_ess_openservices_settings}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.open_services_host}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpHostName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_host_name}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="host"
+                           value="#{applicationObject.attributes['host']}"
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.open_services_port}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPort" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_port}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes['port']}"
+                           size="20"
+                           id="PortNo"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                           <f:validateLongRange minimum = "1" maximum = "65535"/>
+              </h:inputText>
+              <h:message showSummary="true" showDetail="false"
+        		id="errors1"
+       			for="PortNo"
+       			style="color:red"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.open_services_host_type}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpHostType" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_ejb_container}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes['hostType']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.open_services_profile_name}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpProfileName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_ess_profile}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="profileName"
+                           value="#{applicationObject.attributes['profileName']}"
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.secured_connection}"/>
+            </td>
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpSecure" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_connection_type}"/>
+
+            </td>
+            <td>
+              <h:selectBooleanCheckbox id="secure"
+                                       value="#{applicationObject.attributes['secure']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.keystore_file_location}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpKeyStoreFile" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_keystore_location}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes['keyStorePath']}"
+                           size="100"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.security_provider_class_name}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpProvider" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_security_provider}"/>
+            </td>
+            
+            <td>
+              <h:inputText value="#{applicationObject.attributes['provider']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.open_services_auth_type}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpauthtype" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.open_services_auth_type}"/>
+            </td>
+             <td>
+               <h:selectOneMenu id="authType" 
+                               value="#{applicationObject.attributes['authType']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               onchange="toggleCredentials(this.value)"> 
+                  <f:selectItem itemValue="Basic" itemLabel="#{msgs.basic_authentication}"/>
+                  <f:selectItem itemValue="Trusted" itemLabel="#{msgs.trusted_authentication}"/>
+               </h:selectOneMenu>  
+             </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.username}"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpUser" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_user}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes['user']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.password}" id="uPassword"/>
+              <h:outputText styleClass="requiredText" value="*" id="requiredPwd"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="userPassword"
+               				   size="50" 
+                               value="#{applicationObject.attributes['password']}" redisplay="true"
+                               autocomplete="off"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.keystore_file_location_for_authentication}" id="keystorePathId"/>
+              <h:outputText styleClass="requiredText" value="*" id="requiredKeyPath"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpKeyStoreFileForAuthentication" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_keystore_file_location_for_authentication}"/>
+            </td>
+            <td>
+              <h:inputText id="keystrFileLocA"
+              			   value="#{applicationObject.attributes['keyStorePathForAuth']}"
+                           size="100"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.keystore_alias_name}" id="aliasNameId"/>
+              <h:outputText styleClass="requiredText" value="*" id="requiredAlias"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpKeystoreAliasName" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_keystore_alias_name}"/>
+            </td>
+            <td>
+              <h:inputText id="aliasName"
+              			   value="#{applicationObject.attributes['aliasForAuth']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.keystore_password}" id="keystorePwdId"/>
+              <h:outputText styleClass="requiredText" value="*" id="requiredKeyPwd"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpKeystorePwd" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_keystore_password}"/>
+            </td>
+            <td>
+              <sp:inputSecret id="keystorePwd"
+              			   value="#{applicationObject.attributes['keystorePwd']}" redisplay="true"
+                           size="20"
+                           autocomplete="off"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.open_services_block_size}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPageSize" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_blockSize}"/>
+            </td>
+            <td>
+              <h:inputText value="#{applicationObject.attributes['pageSize']}"
+                           size="20"
+                           id="pageSz"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                           <f:validateLongRange minimum = "1" maximum = "65000"/>
+              </h:inputText>
+              <h:message showSummary="true" showDetail="false"
+        		id="errors2"
+       			for="pageSz"
+       			style="color:red"/>             
+            </td>
+          </tr>
+                              
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.include_accounts}"/>
+            </td>
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpincludeAccounts" 
+                              styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_include_accounts}"/>
+
+            </td>
+            <td>
+              <h:selectBooleanCheckbox id="includeAccounts"
+                                       value="#{applicationObject.attributes['includeAccounts']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}" />
+            </td>
+          </tr>     
+          
+          <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.iterate_search_filter}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpIterateSrchFilter_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ctsa_filter}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'iterateSearchFilter')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+           </tr>
+
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.group_search_filter}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpGroupSrchFilter_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ctsa_group_filter}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'groupSearchFilter')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+           </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.authentication_search_attributes}"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpAuthSrchAtts" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_ctsa_auth_attribute}"/>
+            </td>
+            <td>
+              <h:inputTextarea value="#{applicationObject.attributes['authSearchAttributes']}"
+                               converter="NewLineList"                                         
+                               rows="5" cols="37"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+        </table>
+
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

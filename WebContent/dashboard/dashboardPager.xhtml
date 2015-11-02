@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+<!--
+  Renders a pager for a table.  This is similar to pager.xhtml but does not have
+  a bean that implements the Pager interface.  Instead, all properties are
+  passed in as parameters.
+  
+  - pageSize:   The number of items to display in a page.
+  - totalRows:  The total number of items.
+  - startIdx:   The zero-based start index for the current page.
+  - endIdx:     The end index for the current page.
+  - prevBtn:    The ID of the previous button.
+  - nextBtn     The ID of the next button.
+  - objectType  The name of the type of object.
+  - statusText  The status text with the current page information.
+  -->
+<ui:composition>
+  <ui:fragment rendered="#{pageSize le totalRows}">
+    <table class="spTable dashWidth100 pagerTable">
+      <tr>
+        <th class="pagerPage" style="text-align: center; width: 99%">      
+          <h:outputText style="font-weight:bold" styleClass="font10" 
+            value="#{totalRows} #{objectType} #{statusText}"/>
+        </th>
+
+        <th>
+          <div class="pagerBtn #{(startIdx gt 0) ? '' : 'pagerBtnDisabled '}pagerBtnPrev"
+               onclick="if (!#{startIdx gt 0} || Ext.get(this).hasCls('btnClicked')) return false; Ext.get(this).addCls('btnClicked'); $('#{prevBtn}').click()"/>
+        </th>
+        <th>
+          <div class="pagerBtn #{(endIdx lt totalRows) ? '' : 'pagerBtnDisabled '}pagerBtnNext"
+               onclick="if (!#{endIdx lt totalRows} || Ext.get(this).hasCls('btnClicked')) return false; Ext.get(this).addCls('btnClicked'); $('#{nextBtn}').click()"/>
+        </th>
+      </tr>
+    </table>
+  </ui:fragment>
+</ui:composition>
+
+</body>
+</html>

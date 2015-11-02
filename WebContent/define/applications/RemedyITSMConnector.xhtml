@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var serverName = getFieldValue('editForm:serverName');
+               Validator.validateNonBlankString(serverName, "Remedy Server Host or IP address cannot be null!");	          
+               
+               var admin = getFieldValue('editForm:admin');
+               Validator.validateNonBlankString(admin, "Administrator Name cannot be null!");
+               
+               var password = getFieldValue('editForm:password');
+               Validator.validateNonBlankString(password, "Administrator Password cannot be null!");
+                            
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="Remedy/ITSM Connector Settings"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_RIC_server_name}"/>   
+              <h:outputText styleClass="requiredText" value="*"/>           
+            </td>
+
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpServerName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_RIC_server_name}"/>
+            </td>
+            
+            <td>
+              <h:inputText id="serverName"
+                           value="#{applicationObject.attributes['serverName']}"
+                                                   redisplay="true"                                                
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_RIC_port}"/>
+            </td>
+             <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPort" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_RIC_port}"/>
+
+            </td>
+            <td>
+              <h:inputText id = "port"
+                                   value="#{applicationObject.attributes['port']}"                                   
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                          
+              </h:inputText>
+            </td>
+            </tr>   
+                         
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_RIC_admin_name}"/>   
+              <h:outputText styleClass="requiredText" value="*"/>           
+            </td>
+
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpAdminName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_RIC_admin}"/>
+
+            </td>
+            <td>
+              <h:inputText id="admin"
+                           value="#{applicationObject.attributes['admin']}"
+                                                   redisplay="true"                                               
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+                        <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_RIC_admin_password}"/>   
+              <h:outputText styleClass="requiredText" value="*"/>           
+            </td>
+
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpAdminPassword" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_RIC_admin_password}"/>
+
+            </td>
+            <td>
+              <sp:inputSecret id="password"
+                           value="#{applicationObject.attributes['password']}"
+                                                   redisplay="true"                                              
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+                        <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_page_size}"/>
+            </td>
+             <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPageSize" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{help.help_con_form_RIC_page_size}"/>
+
+            </td>
+            <td>
+              <h:inputText id = "pageSize"
+                                   value="#{applicationObject.attributes['pageSize']}"                                   
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                           <f:validateLongRange minimum="1"/>
+                           </h:inputText>
+            </td>
+            </tr>
+
+        </table>
+
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

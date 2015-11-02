@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+  
+      <div id="hiddenStateDiv" style="display:none">
+        #{roleViewer.roleViewerState.state}
+      </div>
+      
+      <div id="roleMetricsUIConfig" style="display:none">
+        #{gridConfigBean.uiConfigJson['roleMetricsIdentitiesColumns']}
+      </div>
+
+      <ui:include src="roleView.xhtml">
+        <ui:param name="prefix" value=""/>
+      </ui:include>
+      
+      <div id="archiveViewDiv">
+        <ui:include src="roleView.xhtml">
+          <ui:param name="prefix" value="archive"/>
+        </ui:include>
+      </div>
+
+</ui:composition>
+
+</body>
+</html>

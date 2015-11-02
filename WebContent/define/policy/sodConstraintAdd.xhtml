@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <f:view>
+    <h:form id="constraintAddForm">    
+      <h:inputHidden id="editedAttribute" value="#{identityConfig.editedAttribute}"/>
+      <h:inputHidden id="sourcePriorities" value="#{identityConfig.sourcePriorities}"/>
+      
+      <div id="errorMessages" class="hideErrors"/>
+      <div class="spacerDiv">&nbsp;</div>
+      <h:panelGrid styleClass="width100" columns="1" id="addSourcePanel" columnClasses="leftAlignedColumn">
+        <ui:include src="selectIdentitySource.xhtml">
+          <ui:param name="rootPanel" value="addSourcePanel" />
+          <ui:param name="appBean" value="#{identityConfig.newAttribute.selectedSource}"/>
+          <ui:param name="formName" value="addIdentitySourceForm"/>
+	    </ui:include>          
+      </h:panelGrid>
+      <div class="spacerDiv">&nbsp;</div>
+      <h:commandButton id="stealthAddSourceButton" style="display:none" action="#{identityConfig.addSourceToAttributeAction}"/>
+    </h:form>
+  </f:view>
+</ui:composition>
+
+</body>
+</html>

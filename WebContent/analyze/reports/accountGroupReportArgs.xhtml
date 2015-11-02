@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+	</sp:script>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+      Ext.onReady(function () {
+        var appSuggest = Ext.getCmp('groupAppSuggest');
+        if (!appSuggest) {
+          appSuggest = new SailPoint.BaseSuggest({
+            id: 'groupAppSuggest',
+            pageSize: 10,
+            baseParams: {'suggestType': 'application'},
+            renderTo: 'groupAppSuggestDiv',
+            binding: 'application',
+            value: $('application').value,
+            valueField: 'displayName',                        
+            width: 300,
+            emptyText: '#{sp:escapeJavascript(msgs.select_application)}',
+            initialData: '#{taskDefinition.argMap["application"].value}'
+          });
+          appSuggest.on('select', function(suggestField, record, index) {
+             $('application').value = record.data['displayName'];
+          });
+        }
+      });
+      //--><!]]>
+    </script>
+    
+    <table class="width100" cellspacing="0" cellpadding="3">
+      <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <tr>
+	      <td colspan="2">
+          <sp:outputText styleClass="spContentTitle" value="#{msgs.rept_app_account_grp_memb_options}"/>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><h:outputText value="#{msgs.rept_app_account_grp_memb_input_application} "/><h:outputText styleClass="requiredText" value="*"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <sp:outputText style="font-size:11px" 
+                    value='#{taskDefinition.argMap["application"].argument.description}'/>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div id="groupAppSuggestDiv"></div>
+                  <t:inputHidden required="true" id="application" value="#{taskDefinition.argMap['application'].value}" forceId="true">
+                  </t:inputHidden>
+            		  <a4j:outputPanel ajaxRendered="true">
+            		    <br/><br/>
+            		    <h:message styleClass="formError" for="application" />
+            		  </a4j:outputPanel>
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+      	<td valign="top">
+      	  <div class="spTabledContent" style="margin:15px">
+      	    <table class="spTable" cellspacing="0" border="0">
+      	      <tr>
+      		      <th><sp:outputText value="#{msgs.rept_app_account_grp_memb_input_mode} "/><h:outputText styleClass="requiredText" value="*"/></th>
+      	      </tr>
+      	      <tr>
+      		      <td>
+                  <sp:outputText style="font-size:11px" 
+                    value='#{taskDefinition.argMap["executionMode"].argument.description}'/>
+                </td>
+      	      </tr>
+      	      <tr>
+      		      <td>
+      		        <t:selectOneRadio id="executionMode" layout="pageDirection" 
+                                          value='#{taskDefinition.argMap["executionMode"].value}' 
+                                          required="true">
+            		    <f:selectItem itemValue='groupMembership' 
+                                              itemLabel='#{msgs.rept_app_account_grp_memb_input_all_groups}'/>
+            		    <f:selectItem itemValue='noMembers' 
+                                              itemLabel='#{msgs.rept_app_account_grp_memb_input_nomember_groups}'/>
+            		  </t:selectOneRadio>
+            		  <a4j:outputPanel ajaxRendered="true">
+            		    <br/><br/>
+            		    <h:message styleClass="formError" for="executionMode" />
+            		  </a4j:outputPanel>
+      		      </td>
+      	      </tr>
+            </table>
+      	  </div>
+      	</td>	
+      </tr>
+    </ui:fragment>
+  </table>
+  
+</ui:composition>
+</body>
+</html>

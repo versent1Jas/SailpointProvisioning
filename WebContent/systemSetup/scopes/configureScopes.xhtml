@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputText value="#{msgs.title_config_scopes}"/>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+        helpKey = 'CONFIG_SCOPES';
+    </script>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>     
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+    </sp:script>    
+    
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+        <div class="spContent">
+          <h:form styleClass="form" id="editForm">
+          
+            <table cellpadding="4" style="margin:5px">
+              <tbody>
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.enable_scoping}" /></td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpEnableScoping"
+                      width="12px" height="12px" alt="#{help.help_enable_scoping}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox value="#{scopeConfig.scopingEnabled}"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.scope_id_attr}" /></td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpScpIdAttr"
+                      width="12px" height="12px" alt="#{help.help_scope_id_attr}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <h:selectOneMenu value="#{scopeConfig.scopeAttribute}">
+                      <f:selectItems value="#{scopeConfig.identityAttributes}" />
+                    </h:selectOneMenu>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.scope_corr_rule}" /></td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpScpCorrRule"
+                      width="12px" height="12px" alt="#{help.help_scope_corr_rule}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <a4j:outputPanel id="scopeCorrelationRulePanel">
+                    <h:selectOneMenu id="scopeCorrelationRule" value="#{scopeConfig.scopeCorrelationRule}">
+                      <f:selectItems value="#{scopeConfig.correlationRules}" />
+                    </h:selectOneMenu>
+                    </a4j:outputPanel>
+                    
+			        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >  
+			            <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+			                   onclick="SailPoint.Rule.Editor.edit($('editForm:scopeCorrelationRule').value, 
+			                                                       'ScopeCorrelation',
+			                                                       $('editForm:refreshScopeCorrelationRulesButton'))" />  
+			        </ui:fragment>                            
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.scope_sel_rule}" /></td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpScpSelRule"
+                      width="12px" height="12px" alt="#{help.help_scope_sel_rule}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <a4j:outputPanel id="scopeSelectionRulePanel">
+                    <h:selectOneMenu id="scopeSelectionRule" value="#{scopeConfig.scopeSelectionRule}">
+                      <f:selectItems value="#{scopeConfig.selectionRules}" />
+                    </h:selectOneMenu>
+                    </a4j:outputPanel>
+                    
+                    <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >  
+                        <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                               onclick="SailPoint.Rule.Editor.edit($('editForm:scopeSelectionRule').value, 
+                                                                   'ScopeSelection',
+                                                                   $('editForm:refreshScopeSelectionRulesButton'))" />  
+                    </ui:fragment>                            
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.unscoped_globally_accessible}" /></td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpUnscopedGloballyAccessible"
+                      width="12px" height="12px" alt="#{help.help_unscoped_globally_accessible}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox value="#{scopeConfig.unscopedGloballyAccessible}"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right"><h:outputText value="#{msgs.id_ctrls_assigned_scope}" /></td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpIdCtrlsAssignedScope"
+                      width="12px" height="12px" alt="#{help.help_id_ctrls_assigned_scope}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox value="#{scopeConfig.identityControlsAssignedScope}"/>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+
+            <div class="buttonRow">
+              <h:commandButton styleClass="primaryBtn" value="#{msgs.nav_save}" action="#{scopeConfig.save}" />
+              <h:commandButton styleClass="secondaryBtn" value="#{msgs.nav_cancel}" immediate="true" action="#{scopeConfig.cancel}" />
+            </div>
+            
+		  <a4j:commandButton id="refreshScopeCorrelationRulesButton"
+		                     style="display:none"
+		                     render="scopeCorrelationRulePanel"/>
+		
+		  <a4j:commandButton id="refreshScopeSelectionRulesButton"
+		                     style="display:none"
+		                     render="scopeSelectionRulePanel"/>		
+            
+          </h:form>
+        </div>
+    </f:view>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

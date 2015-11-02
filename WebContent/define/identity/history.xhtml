@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">
+    <h:outputFormat value="#{msgs.view_identity_history}">
+        <f:param value="#{identityHistoryDTO.identityName}"/>
+    </h:outputFormat>
+    <h:outputText value=" " escape="false"/>
+    <h:outputText value="#{identityHistoryDTO.created}">
+      <f:convertDateTime type="both" dateStyle="short" timeStyle="short" timeZone="#{identityHistoryDTO.userTimeZone}"/>
+    </h:outputText>
+  </ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/identity">
+      <src>identity.css</src>
+    </sp:style>
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'IDENTITY_HISTORY';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>	     
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="editForm">
+      
+      
+        <div id="historyTabs"></div> 
+        
+        <div id="attributesContent" class="x-hide-display">
+            <div class="spContent"><table class="width100"><tr><td>
+            <div class="spTabledContent">
+              <table class="spTable" cellspacing="0">
+                <tr>
+                  <th>#{msgs.attribute}</th>
+                  <th>#{msgs.value}</th>
+                </tr>
+                <ui:repeat value="#{identityHistoryDTO.attributes}" var="attr" varStatus="status">
+                  <tr class="#{status.even ? 'even' : 'odd'}">
+                    <td class="attributeTitleColumn" style="padding:5px">#{msgs[attr.displayName]}</td>
+                    <td>
+                      <ui:fragment rendered="#{attr.name != 'manager' and !attr.multi}">
+                        <h:outputText style="padding:5px" value="#{identityHistoryDTO.snapshotAttributes[attr.name]}" />
+                      </ui:fragment>
+                      <ui:fragment rendered="#{attr.name != 'manager' and attr.multi}">
+                        <ui:repeat value="#{identityHistoryDTO.snapshotAttributes[attr.name]}" var="multiVal">
+                          <div><h:outputText style="padding:5px" value="#{multiVal}"/></div>
+                        </ui:repeat>
+                      </ui:fragment>
+                    </td>
+                  </tr>
+                </ui:repeat>
+              </table>
+            </div>
+            </td></tr></table></div>
+        </div>
+
+        <div id="businessRoleContent" class="x-hide-display">
+          <div class="spContent"><table class="width100"><tr><td>
+          
+          <ui:fragment rendered="#{!(empty identityHistoryDTO.bundles)}">
+            <div class="spTabledContent">
+              <table id="businessRoleTbl" class="spTable" cellspacing="0">
+                <tr>
+                  <th>#{msgs.business_role}</th>
+                  <th>#{msgs.entitlements}</th>
+                </tr>
+
+                <ui:repeat value="#{identityHistoryDTO.bundles}" var="bundle">
+                  <tr>
+                    <td><h:outputText value="#{bundle.name}" /></td>
+                    <td valign="top">
+                      <ul class="noList">
+                        <ui:repeat value="#{bundle.entitlements}" var="entitlement">
+
+                              <ui:repeat value="#{entitlement.permissions}" var="perm">
+                                <li>
+                                  <h:outputText styleClass="textBold" value="#{msgs.application}: "/>
+                                  <h:outputText value="#{entitlement.application} "/>
+                                  <h:outputText styleClass="textBold" value="#{msgs.label_right_or_rights}: "/>
+                                  <h:outputText value="#{perm.rights} #{msgs.on} #{perm.target} "/>
+                               </li>
+                              </ui:repeat>
+                              <ui:repeat value="#{entitlement.attributeNames}" var="attr">
+                                <li>  
+                                  <h:outputText styleClass="textBold" value="#{msgs.application}: "/>
+                                  <h:outputText value="#{entitlement.application} "/>
+                                  <h:outputText styleClass="textBold" value="#{msgs.label_value_or_values}: "/>
+                                  <h:outputText value="#{sp:getEntitlementSnapshotDisplayableName(attr, entitlement)} #{msgs.on} #{attr} "/>
+                                </li>
+                              </ui:repeat>
+                            </ui:repeat>
+                          </ul>
+                        </td>
+                      </tr>
+                    </ui:repeat>
+                    <ui:fragment rendered="#{!(empty identityHistoryDTO.assignedRoles)}">
+                      <ui:repeat value="#{identityHistoryDTO.assignedRoles}" var="assignedRole">
+                        <tr>
+                          <td><h:outputText value="#{assignedRole.name}" /></td>
+                          <td></td>
+                        </tr>
+                      </ui:repeat>
+                    </ui:fragment>
+                  </table>
+            </div>
+            <script defer="defer" type="text/javascript">
+              makeTableMulticolored($('businessRoleTbl'),true,false, "even", "odd" );
+            </script>
+            </ui:fragment>
+            
+            <ui:fragment rendered="#{empty identityHistoryDTO.bundles and empty identityHistoryDTO.assignedRoles}">
+              <h:outputText value="#{msgs.no_business_roles}"/>
+            </ui:fragment>
+            
+            </td></tr></table></div>
+        </div>
+
+        <div id="entitlementsContent" class="x-hide-display">
+          <div class="spContent"><table class="width100"><tr><td>
+          
+            <ui:fragment rendered="#{!(empty identityHistoryDTO.exceptions)}">
+              <div class="spTabledContent">
+                <table id="entitlementsTbl" class="spTable" cellspacing="0">
+                  <tr>
+                    <th>#{msgs.application}</th>
+                    <ui:fragment rendered="#{identityHistoryDTO.linkInstances}">
+                      <th>#{msgs.app_instance}</th>
+                    </ui:fragment>
+                    <th>#{msgs.entitlements}</th>
+                  </tr>
+
+                  <ui:repeat value="#{identityHistoryDTO.exceptions}" var="item" varStatus="status">
+                    <tr class="#{status.even ? 'even' : 'odd'}">
+                      <td valign="top" width="35%"><h:outputText value="#{item.application}" /> </td>
+                      <ui:fragment rendered="#{identityHistoryDTO.linkInstances}">
+                        <td valign="top"><h:outputText value="#{item.instance}" /> </td>
+                      </ui:fragment>
+                      <td valign="top" width="65%">
+                        <ul class="noList">
+                          <ui:repeat value="#{item.permissions}" var="perm">
+                            <li>
+                              <h:outputText styleClass="textBold" value="#{msgs.label_extra_right_or_rights}: "/>
+                              <h:outputText value="#{perm.rights} #{msgs.on} #{perm.target} "/>
+                           </li>
+                            
+                          </ui:repeat>
+                          <ui:repeat value="#{item.attributeNames}" var="attr">
+                            <li>
+                              <h:outputText styleClass="textBold" value="#{msgs.label_extra_values}: "/>
+                                <h:outputText value="#{sp:getGroupDisplayableNames(item.application, attr, item.attributes[attr])}"/>
+                              <h:outputText value=" #{msgs.on} #{attr} "/>
+                           </li>
+                          </ui:repeat>
+                        </ul>
+                      </td>
+                    </tr>
+                  </ui:repeat>
+                </table>
+              </div>
+            </ui:fragment>
+            
+            <ui:fragment rendered="#{empty identityHistoryDTO.exceptions}">
+              <h:outputText value="#{msgs.no_additional_entitlements}"/>
+            </ui:fragment>
+            
+            </td></tr></table></div>
+        </div>
+
+        <div id="linksContent" class="x-hide-display">
+            <div class="spContent"><table class="width100"><tr><td>
+            
+            <ui:fragment rendered="#{!(empty identityHistoryDTO.links)}">
+              <div class="spTabledContent">
+                <table id="appAcctsTbl" class="spTable" cellspacing="0">
+                  <tr>
+                    <th>#{msgs.application}</th>
+                    <ui:fragment rendered="#{identityHistoryDTO.linkInstances}">
+                      <th>#{msgs.app_instance}</th>
+                    </ui:fragment>
+                    <th>#{msgs.account_name}</th>
+                    <th>#{msgs.full_identity}</th>
+                  </tr>
+
+                  <ui:repeat value="#{identityHistoryDTO.links}" var="link" varStatus="status">
+                    <tr class="#{status.even ? 'even' : 'odd'}">
+                      <td valign="top"><h:outputText value="#{link.application}" /> </td>
+                      <ui:fragment rendered="#{identityHistoryDTO.linkInstances}">
+                        <td valign="top"><h:outputText value="#{link.instance}" /> </td>
+                      </ui:fragment>
+                      <td valign="top"><h:outputText value="#{link.simpleIdentity}"/></td>
+                      <td valign="top"><h:outputText value="#{link.nativeIdentity}"/></td>
+                    </tr>
+                  </ui:repeat>
+                </table>
+              </div>
+            </ui:fragment>
+            
+            <ui:fragment rendered="#{empty identityHistoryDTO.links}">
+              <h:outputText value="#{msgs.no_application_accounts}"/>
+            </ui:fragment>
+            
+            </td></tr></table></div>
+        </div>
+
+        <script>
+		Ext.onReady(function() {
+          var tabContainer = Ext.get('historyTabs');
+          if (tabContainer == null) 
+              return;
+        
+          var tabPanel = new Ext.TabPanel({
+              renderTo:'historyTabs',
+              border:false,
+              activeTab: 0,
+              plain: true,
+              width: $('historyTabs').clientWidth,
+              items: [
+                      {title: '#{msgs.attributes}', contentEl: 'attributesContent'},
+                      {title: '#{msgs.biz_roles}', contentEl: 'businessRoleContent'},
+                      {title: '#{msgs.extra_entitlements}', contentEl: 'entitlementsContent'},
+                      {title: '#{msgs.application_account}', contentEl: 'linksContent'}
+              ]
+          });
+		});
+        </script>
+  
+        <h:panelGroup styleClass="savecancelButtonGroup">
+          <h:commandButton id="okButton" action="#{identityHistoryDTO.okAction}" styleClass="primaryBtn" value="#{msgs.button_ok}" />
+        </h:panelGroup>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

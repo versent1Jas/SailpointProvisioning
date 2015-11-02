@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+
+  <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+      Ext.onReady(function () {
+          Ext.create('SailPoint.MultiSuggest', {
+              renderTo: 'passThroughAppsMultiSuggest',
+              suggestType: 'application',
+              jsonData: #{sp:basicJSONData(loginConfig.passThroughApplications)},
+              inputFieldName: 'passThroughApps',
+              baseParams: { 'showAuthenticating': 'true' }
+              });
+      });
+      
+    //--><!]]>
+  </script>
+
+  <div class="paddedContainer">
+    <table class="width100"><tr><td>
+    <div style="margin: 7px">
+      <h:panelGrid styleClass="paddedTbl" columns="3" columnClasses="titleColumn, helpColumn, leftAlignedColumn">
+
+        <h:outputText value="#{msgs.login_conf_pass_thru_app}" />
+        <h:graphicImage id="imgHlpPassThrough" width="12px" alt="#{help.help_setup_login_pass_through}"
+          height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+          url="/images/icons/dashboard_help_16.png" />
+        <h:panelGroup>
+          <div id="passThroughAppsMultiSuggest"></div>
+          <t:inputHidden id="passThroughApps"
+                         value="#{loginConfig.passThroughApplications}" forceId="true">
+              <sp:convertApplicationList />
+          </t:inputHidden>
+          <h:message styleClass="formError" for="passThroughApps" />
+        </h:panelGroup>
+                
+        <h:outputText value="#{msgs.refresh_after_login}" />
+        <h:graphicImage id="imgHlpRefreshAfterLogin" width="12px" alt="#{help.help_refresh_after_login}" height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px" url="/images/icons/dashboard_help_16.png" />
+        <h:selectBooleanCheckbox value="#{loginConfig.refreshIdentityAfterPassthrough}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" />
+
+        <h:outputText value="#{msgs.auto_create_user_rule}" />
+        <h:graphicImage id="imgHlpAutoCreate" width="12px" alt="#{help.help_setup_login_auto_create}"
+          height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+          url="/images/icons/dashboard_help_16.png" />
+        <h:panelGroup>
+            <a4j:outputPanel id="autoCreateUserRulePanel">
+            <h:selectOneMenu id="autoCreateUserRule" value="#{loginConfig.autoCreateUserRuleId}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" style="width:270px">
+              <f:selectItems value="#{loginConfig.autoCreateUserRules}" />
+            </h:selectOneMenu>
+            </a4j:outputPanel>
+            
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >  
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('configForm:autoCreateUserRule').value, 
+                                                           'IdentityCreation',
+                                                           $('configForm:refreshAutoCreateUserRulesButton'))" />  
+            </ui:fragment>                                                     
+        </h:panelGroup>
+                
+        <h:outputText value="#{msgs.login_err_style}" />
+        <h:graphicImage id="imgHlpLoginError" width="12px" alt="#{help.help_setup_login_error_style}"
+          height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+          url="/images/icons/dashboard_help_16.png" />
+        <h:selectOneMenu value="#{loginConfig.loginErrorStyle}" onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+        <f:selectItem itemValue="#{loginConfig.simpleLoginStyle}"
+                                                        itemLabel="#{msgs.login_err_style_simple}"/>
+        <f:selectItem itemValue="#{loginConfig.detailLoginStyle}"
+                                                      itemLabel="#{msgs.login_err_style_detailed}"/>
+        </h:selectOneMenu>
+
+        <h:outputText value="#{msgs.login_returns_to_dashboard}" />
+        <h:graphicImage id="imgHlpLoginReturn" width="12px" alt="#{help.help_login_returns_to_dashboard}" height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px" url="/images/icons/dashboard_help_16.png" />
+        <h:selectBooleanCheckbox value="#{loginConfig.loginReturnsToDashboard}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" />
+
+        <ui:fragment>
+          <h:outputText value="#{msgs.enable_auth_lockout}" />
+        </ui:fragment>
+        <ui:fragment>
+          <h:graphicImage id="imgHlpEnableAuthLockout" width="12px" alt="#{help.help_enable_auth_lockout}" height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px" url="/images/icons/dashboard_help_16.png" />
+        </ui:fragment>
+        <ui:fragment>
+            <h:selectBooleanCheckbox id="enablelockout" value="#{loginConfig.enableAuthLockout}" onclick="toggleDisplay(document.getElementById('loginLockConfig'),!document.getElementById('configForm:enablelockout').checked); SailPoint.SystemSetup.Login.updateLoginPanel();" />
+        </ui:fragment>
+
+      
+      </h:panelGrid>
+
+      <a4j:commandButton id="refreshAutoCreateUserRulesButton"
+                         style="display:none"
+                         render="autoCreateUserRulePanel"/>
+
+      <div id="loginLockConfig" style="display:none">                  
+        <h:panelGrid columns="3" styleClass="paddedTbl" columnClasses="titleColumn, helpColumn, leftAlignedColumn">
+          <h:outputText value="#{msgs.login_conf_auth_lockout_attempts}" />
+          <h:graphicImage id="imgHlpLockoutAttempts" width="12px" alt="#{help.help_failed_login_attempts}" height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px" url="/images/icons/dashboard_help_16.png" />
+          <h:inputText id="loginAttempts" value="#{loginConfig.loginAttempts}" onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+            <f:validateLongRange minimum="1" />
+          </h:inputText>
+          
+          <h:outputText value="#{msgs.login_conf_auth_lockout_duration}" />
+          <h:graphicImage  id="imgHlpLockoutDuration" width="12px" alt="#{help.help_login_lock_duration}" height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px" url="/images/icons/dashboard_help_16.png" />
+          <h:inputText id="lockoutDuration" value="#{loginConfig.failedLoginLockDurationMinutes}"  onchange="SailPoint.SystemSetup.Login.makePageDirty();">
+              <f:validateLongRange minimum="0" maximum="99999999999999" />
+          </h:inputText>
+          <ui:fragment>
+            <h:outputText value="#{msgs.enable_protected_user_lockout}" />
+          </ui:fragment>
+          <ui:fragment>
+            <h:graphicImage id="imgHlpProtectedUserLockout" width="12px" alt="#{help.help_protected_user_lockout}" height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px" url="/images/icons/dashboard_help_16.png" />
+          </ui:fragment>
+          <ui:fragment>
+            <h:selectBooleanCheckbox id="protectedlockout" value="#{loginConfig.enableProtectedUserLockout}" onchange="SailPoint.SystemSetup.Login.makePageDirty();" />
+          </ui:fragment>
+        
+        </h:panelGrid>
+      </div>
+      
+      <script type="text/javascript">
+        window.onload=function() {
+          var theDiv = document.getElementById("loginLockConfig");
+          var enabled = document.getElementById("configForm:enablelockout");
+          if(enabled.checked) {
+        	  theDiv.style.display='';
+          }
+          else {
+        	  theDiv.style.display='none';
+          }
+        }
+      </script>
+    </div>
+    </td></tr></table>
+  </div>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <div class="baseWindow expandPanel width100" style="#{styleOverride}">
+    <table class="expandPanelTable">
+      <thead><tr><th>
+        <div class="baseWindowHeader expandPanelHeader" >
+          <h:graphicImage
+            class="dashContentExpandBtn"
+            url="#{(startCollapsed) ? '/images/icons/plus.png' : '/images/icons/minus.png'}"
+            id="expandPanelExpandBtn" />
+          <ui:insert name="panelTitle" />
+        </div>
+      </th></tr></thead>
+      <tbody><tr><td>
+        <div id="expandPanelContent" class="baseWindowBody expandPanelBody" style="#{(startCollapsed) ? 'display:none' : ''}">
+          <ui:insert name="panelBody" />
+        </div>
+      </td></tr></tbody>
+      <tfoot><tr><td>
+        <div class="baseWindowFooter expandPanelFooter"><img src="#{base.requestContextPath}/images/blank.gif" style="display:none"/></div>
+      </td></tr></tfoot>
+    </table>
+  </div>
+  <!-- If you use this template make sure that your base file includes expandingPanel.js and calls the 
+       initExpanders(formName) function defined in that file 
+    -->
+</ui:composition>
+</body>
+</html>

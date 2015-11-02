@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <div style="padding:10px" id="automatedMiningContentDiv">
+    <h:form id="automatedDirectedMiningForm">
+      <div id="automatedInstructions" class="spContent" style="width:97%">
+        <div class="spBorderlessContentBody">
+        
+          <ui:fragment rendered="#{!(automatedMining.templateName eq null)}">
+            <div class="formWarn">
+              <h:outputFormat class="sectionHeader" value="#{msgs.role_mining_template_info}">
+                <f:param value="#{automatedMining.templateName}"/>
+              </h:outputFormat>
+            </div>
+          </ui:fragment>
+          
+          <div class="pageInfo">
+            <div class="instructions">
+                #{msgs.instructions_automated_mining}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="automatedDirectedMiningPanel" class="spContent" style="width:97%">
+        <div class="spBorderlessContentBody">
+          <h:outputText styleClass="requiredText" value="*"/>
+          <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+        </div>
+        <ui:fragment rendered="#{sp:size(directedMining.editableItRoleTypes) == 0}">
+            <div style="margin-left:10px;margin-right:20px" class="formWarn">#{msgs.automated_mining_no_editable_role_types}</div>
+        </ui:fragment>
+        <div id="roleCreationSettingsPanel" class="spTabledContent">
+          <table id="creationSettingsTbl" class="spTable">
+            <thead><tr><th width="45%"><h:outputText value="#{msgs.automated_mining_role_creation_settings}"/></th><th width="5%"/><th width="50%"/></tr></thead>
+            <tbody>
+              <tr>
+                <td><h:outputText class="sectionHeader" value="#{msgs.automated_mining_role_creation_options}"/></td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedRoleCreation" width="12px" 
+                                  alt="#{help.help_automated_mining_role_creation}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <h:selectOneRadio id="entitlementCreationOption" value="#{automatedMining.entitlementCreationOption}" layout="horizontal"
+                                    onclick="Ext.getCmp('itRoleMiningPanel').applyEntitlementCreationOptions();">
+                    <f:selectItems value="#{automatedMining.entitlementCreationOptions}"/>
+                  </h:selectOneRadio>
+                </td>
+              </tr>
+              <tr class="existingRoleOption" style="display:none">
+                <td>
+                  <h:outputText class="sectionHeader" value="#{msgs.automated_mining_existing_role_to_mine}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedRoleToMine" width="12px" 
+                                  alt="#{help.help_automated_role_to_mine}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <input id="automatedMiningExistingRoleSuggest" name="automatedMiningExistingRoleSuggest" type="text" value="#{automatedMining.existingRoleName}"/>            
+                  <h:inputHidden id="automatedMiningExistingRole" value="#{automatedMining.existingRole}"/>
+                </td>
+              </tr>
+              <tr id="automatedDirectedMiningExistingRoleValidationError" class="existingRoleOption validationError" style="display:none">
+                <td colspan="3"><div class="formError">
+                  <h:outputText value="#{msgs.automated_mining_requires_existing_role_name}"/>
+                </div></td>
+              </tr>
+              <tr class="newRoleOption">
+                <td>
+                  <h:outputText class="sectionHeader" value="#{msgs.name}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedNewRoleName" width="12px" 
+                                  alt="#{help.help_automated_name}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td><h:inputText id="automatedDirectedMiningNewRoleName" value="#{automatedMining.newRoleName}"/></td>
+              </tr>
+              <tr id="automatedDirectedMiningNewRoleNameValidationError" class="newRoleOption validationError" style="display:none">
+                <td colspan="3"><div class="formError">
+                  <h:outputText value="#{msgs.automated_mining_requires_new_role_name}"/>
+                </div></td>
+              </tr>
+              <tr class="newRoleOption">
+                <td>
+                  <h:outputText class="sectionHeader" value="#{msgs.owner}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedOwner" width="12px" 
+                                  alt="#{help.help_automated_owner}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <input id="automatedDirectedMiningRoleOwnerSuggest" name="automatedDirectedMiningRoleOwnerSuggest" type="text" value="#{automatedMining.newRoleOwnerName}"/>
+                  <h:inputHidden id="automatedDirectedMiningNewRoleOwner" value="#{automatedMining.newRoleOwner}"/>
+                </td>
+              </tr>
+              <tr id="automatedDirectedMiningOwnerValidationError" class="newRoleOption validationError" style="display:none">
+                <td colspan="3"><div class="formError">
+                  <h:outputText value="#{msgs.automated_mining_requires_owner}"/>
+                </div></td>
+              </tr>
+              <tr class="newRoleOption">
+                <td>
+                  <h:outputText class="sectionHeader" value="#{msgs.type}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedItType" width="12px" 
+                                  alt="#{help.help_automated_type}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <h:selectOneMenu id="automatedDirecteMiningNewRoleType" value="#{automatedMining.newRoleType}">
+                    <f:selectItems value="#{directedMining.typesWithEntitlements}"/>
+                  </h:selectOneMenu>
+                </td>
+              </tr>
+              <tr id="automatedDirectedMiningTypeValidationError" class="newRoleOption validationError" style="display:none">
+                <td colspan="3"><div class="formError">
+                  <h:outputText value="#{msgs.automated_mining_requires_type}"/>
+                </div></td>
+              </tr>
+              <tr class="newRoleOption">
+                <td><h:outputText class="sectionHeader" value="#{msgs.automated_mining_target_role}"/></td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedContainer" width="12px" 
+                                  alt="#{help.help_automated_container}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <input id="automatedMiningContainerRoleSuggest" name="automatedMiningContainerRoleSuggest" type="text" value="#{automatedMining.containerRoleName}"/>            
+                  <h:inputHidden id="automatedMiningContainerRole" value="#{automatedMining.containerRole}"/>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="containerRole" class="spTabledContent">
+          <table id="miningSettingsTable" class="spTable">
+            <thead><tr><th width="45%"><h:outputText value="#{msgs.automated_mining_mining_settings}"/></th><th width="5%"/><th width="50%"/></tr></thead>
+            <tbody>
+              <tr>
+                <td>
+                  <h:outputText class="sectionHeader" value="#{msgs.automated_mining_apps_to_mine}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedApps" width="12px" 
+                                  alt="#{help.help_automated_applications}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <div id="automatedDirectedMiningApplicationSelectionPanel">
+                    <div id="automatedDirectedMiningApplicationMultiSuggest"/>
+                    <t:inputHidden id="automatedMiningApplicationSuggest" value="#{automatedMining.applications}" forceId="true">
+                      <sp:convertList />
+                    </t:inputHidden>
+              
+                    <div id="automatedDirectedMiningApplicationMultiSuggestData" style="display:none">
+                      #{automatedMining.applicationsJson}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr id="automatedDirectedMiningApplicationsValidationError" class="validationError" style="display:none">
+                <td colspan="3"><div class="formError">
+                  <h:outputText value="#{msgs.err_automated_mining_need_applications}"/>
+                </div></td>
+              </tr>
+              <tr>
+                <td><h:outputText class="sectionHeader" value="#{msgs.automated_mining_filter_source}"/></td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedFilterSource" width="12px" 
+                                  alt="#{help.help_automated_filter_source}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <h:selectOneRadio id="filterCreationOption" value="#{automatedMining.filterCreationOption}" layout="horizontal"
+                                    onclick="Ext.getCmp('itRoleMiningPanel').applyFilterCreationOptions();">
+                    <f:selectItems value="#{automatedMining.filterCreationOptions}"/>
+                  </h:selectOneRadio>                
+                </td>
+              </tr>
+              <tr class="groupFilterOption">
+                <td>
+                  <h:outputText class="sectionHeader" value="#{msgs.automated_mining_groups_to_mine}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedGroups" width="12px" 
+                                  alt="#{help.help_automated_groups}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <div id="automatedDirectedMiningGroupMultiSuggest"/>
+                  <t:inputHidden id="automatedDirectedMiningGroupSuggest" value="#{automatedMining.groups}" forceId="true">
+                    <sp:convertList />
+                  </t:inputHidden>
+            
+                  <div id="automatedDirectedMiningGroupMultiSuggestData" style="display:none">
+                    #{automatedMining.groupsJson}
+                  </div>
+                </td>
+              </tr>
+              <tr id="automatedDirectedMiningGroupValidationError" class="validationError" style="display:none">
+                <td colspan="3"><div class="formError">
+                  <h:outputText value="#{msgs.err_automated_mining_need_groups}"/>
+                </div></td>
+              </tr>
+              <tr class="identityFilterOption" style="display:none">
+                <td>
+                  <h:outputText class="sectionHeader" value="#{msgs.automated_mining_filter}"/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedFilter" width="12px" 
+                                  alt="#{help.help_automated_filter}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td>
+                  <div class="spBackground width100">
+                    <ui:include src="/analyze/advanced/addFilters.xhtml">
+                      <ui:param name="formName" value="automatedDirectedMiningForm"/>
+                      <ui:param name="prefix" value="automatedMining"/>
+                      <ui:param name="backingBean" value="#{automatedMining.identityConstraints}"/>
+                      <ui:param name="errorDivId" value="selectedCount"/>
+                      <ui:param name="isRendered" value="#{not (empty automatedMining.appAttributeDefinitions)}"/>
+                      <ui:param name="notRenderedBecause" value="None of the applications to mine have any attributes."/>
+                    </ui:include>
+                  </div>
+                </td>
+              </tr>
+              <tr id="automatedDirectedMiningIdentityFilterValidationError" class="validationError" style="display:none">
+                <td colspan="3"><div class="formError">
+                  <h:outputText value="#{msgs.err_automated_mining_need_filters}"/>
+                </div></td>
+              </tr>
+              <tr>
+                <td><h:outputText class="sectionHeader" value="#{msgs.automated_mining_threshold}"/></td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedThreshold" width="12px" 
+                                  alt="#{help.help_automated_threshold}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td><h:inputText id="autoDirectedMiningThresholdPercentage" size="4" value="#{automatedMining.threshold}"/></td>
+              </tr>
+              <tr id="automatedDirectedMiningThresholdValidationError" class="validationError" style="display:none">
+                <td colspan="3"><div class="formError">
+                  <h:outputText value="#{msgs.err_invalid_number_entered}"/>
+                </div></td>
+              </tr>
+              <tr>
+                <td><h:outputText class="sectionHeader" value="#{msgs.automated_mining_simulate_activity}"/></td>
+                <td>
+                  <h:graphicImage id="imgHlpAutomatedSimulate" width="12px" 
+                                  alt="#{help.help_automated_simulate}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+                </td>
+                <td><h:selectBooleanCheckbox id="autoDirectedMiningSimulateActivity" value="#{automatedMining.simulateActivity}"/></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <a4j:outputPanel id="launchResult">
+        <div id="launchResultContents" style="display:none">
+          <h:outputText value="#{automatedMining.launchResult}"/>
+        </div>
+      </a4j:outputPanel>    
+      
+      <a4j:outputPanel id="itRoleSaveResult">
+        <div id="automatedSaveResultContents" >
+          <h:outputText value="#{automatedMining.saveResult}"/>
+        </div>
+      </a4j:outputPanel> 
+      
+      
+      <a4j:commandButton id="launchITRoleMining" style="display:none" action="#{automatedMining.launchMining}"
+                         render="launchResult"
+                         oncomplete="Ext.getCmp('itRoleMiningPanel').displayLaunchStatus();"/>
+                         
+      <a4j:commandButton id="itSaveTemplateBtn" style="display:none" action="#{automatedMining.saveTemplate}"
+                         render="itRoleSaveResult,itRoleMiningTemplateName,itRoleMiningTemplateId"
+                         oncomplete="Ext.getCmp('itRoleMiningPanel').displaySaveStatus();"/>
+      
+      <input id="itRoleMiningResultName" name="itRoleMiningResultName" value="#{automatedMining.miningResultName}" style="display:none"/>
+      <input id="itRoleMiningResultId" name="itRoleMiningResultId" value="#{automatedMining.miningResultId}" style="display:none"/>
+      
+      <h:inputHidden value="#{automatedMining.templateName}" id="itRoleMiningTemplateName"/>
+      <h:inputHidden value="#{automatedMining.templateId}" id="itRoleMiningTemplateId"/>
+      
+      <a4j:commandButton id="automatedMiningViewLastTaskResult" style="display:none" action="#{automatedMining.viewLastTaskResult}"
+                         oncomplete="SailPoint.Role.Mining.getTaskResultWindow().showTaskResults($('itRoleMiningResultId').value);"/>
+      
+    </h:form>
+  </div>
+</ui:composition>
+
+</body>
+</html>

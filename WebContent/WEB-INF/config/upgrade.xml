@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  This is used by 'iiq upgrade' to drive upgrading the schema and data between
+  revisions.
+
+  There are two files that define the upgrade: upgrade.xml and
+  upgradeObjects.xml.  If you have LCM enabled, there are two additional
+  files, upgrade-lcm.xml and upgradeObjects-lcm.xml.
+
+  upgrade.xml (this file) is processed in a special way before Hibernate
+  is started so that changes can be made at the JDBC level.  upgrade.xml should
+  only contain <ImportAction> elements that use the "execute" command to
+  call upgrader classes.  *DO NOT PUT STATIC XML OBJECTS IN UPGRADE.XML*
+
+  upgradeObjects.xml is included by upgrade.xml and will be
+  imported after Hibernate is started.  Any changes to objects that can be
+  respesented as static XML or as ImportActions with the "merge" command
+  must go in upgradeObjects.xml to ensure that they are parsed after
+  Hibernate has been started so that references can be resolved.
+
+  In upgrade.xml (this file), each action should have a revision attribute
+  specified,  which will be checked while upgrading to make sure that
+  upgrades aren't run multiple times.  NOTE: revision should be set to the
+  NEXT revision number, NOT the current one.
+
+  First the upgraders that are marked as pre-Hibernate are run, then Hibernate
+  is started, then the ones marked as post-Hibernate are run.
+
+  After all the upgraders are run and Hibernate is started,
+  the upgradeObjects.xml file is imported.
+
+  In some special cases we have upgraders that run after the
+  upgradeObjects.xml import.
+
+-->
+<sailpoint>
+
+  <ImportAction name="execute" value="sailpoint.server.upgrade.ApplicationGroupSchemaUpgrader"/>
+  <ImportAction name='execute' value='sailpoint.server.upgrade.FullTextIndexPathUpgrader' />
+  <ImportAction name='execute' value='sailpoint.server.upgrade.RenameChecCaseSensitiveKeyNameUpgrader' />
+  <ImportAction name='execute' value='sailpoint.server.upgrade.BMCESSApplicationTypeDeprecator'/>
+  <ImportAction name="execute" value="sailpoint.server.upgrade.ADApplicationAttributesUpgrader"/>
+
+  <!-- DO NOT REMOVE - THIS SHOULD BE IMPORTED FOR EVERY RELEASE. -->
+  <ImportAction name='include' value='WEB-INF/config/upgradeObjects.xml' />
+
+  <ImportAction name='execute'
+                value='sailpoint.server.upgrade.RoleAssignmentModelUpgrader'
+                systemVersion='6.3-26'>
+
+    <TaskDefinition name='RoleAssignmentModelUpgrader -- Entitlement Correlation'
+                    executor="sailpoint.task.IdentityRefreshExecutor">
+      <Attributes>
+        <Map>
+          <entry key="correlateEntitlements" value="true" />
+          <entry key="refreshThreads" value="5" />
+          <entry key="noApplicationTemplates" value="true" />
+        </Map>
+      </Attributes>
+      <Description>TaskDefinition for the upgrader that upgrades the role assignment model.</Description>
+    </TaskDefinition>
+  </ImportAction>
+  <ImportAction name='execute' value='sailpoint.server.upgrade.SharePointTargetFeatureStringUpgrader'/>
+  
+  <ImportAction name='execute' value='sailpoint.server.upgrade.AirwatchProfileSchemaUpgrader'/>
+  
+  <ImportAction name='execute' value='sailpoint.server.upgrade.FormUpgrader' systemVersion="6.4-35"/>
+  
+  <ImportAction name='execute' value='sailpoint.server.upgrade.BadTaskArgumentUpgrader'/>
+
+  <ImportAction name='execute' value='sailpoint.server.upgrade.CustomSchemaUpgrader'/>
+
+</sailpoint>

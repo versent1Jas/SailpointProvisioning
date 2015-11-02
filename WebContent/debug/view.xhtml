@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Debug Pages</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_VIEW';
+
+        // resize the text area based on the size of the browser window
+        Ext.onReady(function() {
+          var winWidth = document.body.clientWidth || innerWidth;
+          var winHeight = document.body.clientHeight || innerHeight;
+          var tacols = winWidth / 8;
+          var tarows = winHeight / 25;
+
+          $('editForm:viewArea').cols = tacols;
+          $('editForm:viewArea').rows = tarows;
+        });
+
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+
+      <h2>View Object: #{debug.object.name}</h2>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="editForm">
+
+          <h:panelGrid columns='1'>
+        
+            <h:inputTextarea id='viewArea' cols='100' rows='30' readonly='true' wrap='off'
+               value='#{debug.xml}'/>
+
+            <h:panelGroup>
+              <h:commandButton action="#{debug.cancelAction}" value="Ok" />
+            </h:panelGroup>
+
+          </h:panelGrid>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

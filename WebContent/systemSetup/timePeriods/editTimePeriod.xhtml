@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">#{msgs.conf_time_period}</ui:define>
+      
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/checkboxSelector.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+    </sp:script>
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css"
+      rel="stylesheet" type="text/css">
+    </link>
+    <script type="text/javascript" defer="defer">
+          <!--//--><![CDATA[//><!--
+          helpKey = 'TIME_PERIOD_CONFIGURATION_EDIT';
+          //--><!]]>
+        </script>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+      <h:form styleClass="form" id="editForm">
+        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        
+          <div class="spContent">
+            <h:panelGrid columns="2" columnClasses="title, leftAlignedColumn">
+              <h:outputText value="#{msgs.label_name}"/>
+              <h:outputText value="#{sp:localizeKey( timePeriodState.editedTimePeriod.name ) }"/>
+            </h:panelGrid>
+                    
+            <h:panelGroup rendered="#{timePeriodState.editedTimePeriod.classifier == 'DateRange'}">
+              <h:panelGrid columns="2" columnClasses="title, leftAlignedColumn">
+                <h:outputText value="#{msgs.label_begins_on}"/>
+                <sp:inputDate id="startDate" 
+                             type="date" 
+                             popupCalendar="true" 
+                             timeZone="#{base.userTimeZoneId}" 
+                             addResources="false" 
+                             value="#{timePeriodState.editedTimePeriod.initParameters['startDate']}" 
+                             imageLocation="/scripts/myfacescalendar" 
+                             javascriptLocation="/scripts/myfacescalendar" 
+                             styleLocation="/scripts/myfacescalendar"
+                             styleClass="tomahawkInputDate"/>
+                <h:outputText value="#{msgs.label_ends_on}"/>
+                <sp:inputDate id="endDate" 
+                             type="date" 
+                             popupCalendar="true" 
+                             timeZone="#{base.userTimeZoneId}" 
+                             addResources="false" 
+                             value="#{timePeriodState.editedTimePeriod.initParameters['endDate']}" 
+                             imageLocation="/scripts/myfacescalendar" 
+                             javascriptLocation="/scripts/myfacescalendar" 
+                             styleLocation="/scripts/myfacescalendar"
+                             styleClass="tomahawkInputDate"/>
+              </h:panelGrid>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{timePeriodState.editedTimePeriod.classifier == 'DateSet'}">
+              <h:dataTable id="dateSetTable" styleClass="width100"
+                headerClass="spDataTableHeader centeredColumn"
+                footerClass="spDataTableHeader centeredColumn"
+                columnClasses="centeredColumn, centeredColumn"
+                rowClasses="ricoLG_evenRow, ricoLG_oddRow"
+                value="#{timePeriodState.dateKeys}" 
+                var="dateKey">
+                
+                <h:column>
+                  <f:facet name="header">
+                    <h:selectBooleanCheckbox id="selectAllToggle" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked);"/>
+                  </f:facet>
+
+                  <h:selectBooleanCheckbox id="checkbox" value="#{timePeriodState.selectedDate[dateKey]}"/>
+
+                  <f:facet name="footer">
+                    <h:commandButton id="removeDates" styleClass="secondaryBtn" value="#{msgs.button_delete}" action="#{timePeriodState.deleteSelectedDates}"/>
+                  </f:facet>
+                </h:column>
+
+                <h:column>
+                  <f:facet name="header">
+                    <h:outputText value="#{msgs.dates}"/>
+                  </f:facet>
+                  
+                  <sp:inputDate id="dateSetDate" 
+                               type="date" 
+                               popupCalendar="true" 
+                               addResources="false" 
+                               timeZone="#{base.userTimeZoneId}" 
+                               value="#{timePeriodState.dates[dateKey]}" 
+                               imageLocation="/scripts/myfacescalendar" 
+                               javascriptLocation="/scripts/myfacescalendar" 
+                               styleLocation="/scripts/myfacescalendar"
+                               styleClass="tomahawkInputDate"/>
+                  
+                  <f:facet name="footer">
+                    <h:panelGroup>
+                      <sp:inputDate id="newDateSetDate" 
+                                   type="date" 
+                                   popupCalendar="true" 
+                                   value="#{timePeriodState.newDate}" 
+                                   addResources="false" 
+                                   timeZone="#{base.userTimeZoneId}" 
+                                   imageLocation="/scripts/myfacescalendar" 
+                                   javascriptLocation="/scripts/myfacescalendar" 
+                                   styleLocation="/scripts/myfacescalendar"
+                                   styleClass="tomahawkInputDate"/>
+                      <h:commandButton id="addDate" styleClass="secondaryBtn" value="#{msgs.button_add}" action="#{timePeriodState.addDate}"/>
+                    </h:panelGroup>
+                  </f:facet>
+                </h:column>
+              </h:dataTable>
+            </h:panelGroup>
+        
+            <h:panelGroup rendered="#{timePeriodState.editedTimePeriod.classifier == 'DaysOfWeek'}">
+              <h:dataTable id="daysOfWeekTable" class="width100" 
+                           headerClass="spDataTableHeader centeredColumn"
+                           columnClasses="centeredColumn, centeredColumn"
+                           rowClasses="ricoLG_evenRow, ricoLG_oddRow"
+                           value="#{timePeriodState.availableDaysOfTheWeek}" 
+                           var="day">
+                <h:column>
+                  <f:facet name="header">
+                    <h:selectBooleanCheckbox id="selectAllToggle" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked);"/>
+                  </f:facet>
+                  
+                  <h:selectBooleanCheckbox id="checkbox" value="#{timePeriodState.selectedDaysOfWeek[day]}"/>            
+                </h:column>
+                
+                <h:column>
+                  <f:facet name="header">
+                    <h:outputText value="#{msgs.days_of_week}"/>
+                  </f:facet>
+                  <h:outputText value="#{day}"/>
+                </h:column>
+              </h:dataTable>
+            </h:panelGroup>
+        
+            <h:panelGroup rendered="#{timePeriodState.editedTimePeriod.classifier == 'TimeOfDayRange'}">
+              <h:panelGrid columns="2" columnClasses="title, leftAlignedColumn">
+                <h:outputText value="#{msgs.label_starting_at}"/>
+                <sp:inputDate id="startTime" 
+                             type="time" 
+                             popupCalendar="false" 
+                             timeZone="#{base.userTimeZoneId}" 
+                             addResources="false" 
+                             value="#{timePeriodState.editedTimePeriod.initParameters['startTime']}" 
+                             ampm="true" 
+                             imageLocation="/scripts/myfacescalendar" 
+                             javascriptLocation="/scripts/myfacescalendar" 
+                             styleLocation="/scripts/myfacescalendar"
+                             styleClass="tomahawkInputDate"/>
+                <h:outputText value="#{msgs.label_ending_at}" timeZone="#{base.userTimeZoneId}" javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar" />
+                <sp:inputDate id="endTime" 
+                             type="time" 
+                             popupCalendar="false" 
+                             timeZone="#{base.userTimeZoneId}" 
+                             addResources="false" 
+                             value="#{timePeriodState.editedTimePeriod.initParameters['endTime']}" 
+                             ampm="true" 
+                             imageLocation="/scripts/myfacescalendar" 
+                             javascriptLocation="/scripts/myfacescalendar" 
+                             styleLocation="/scripts/myfacescalendar"
+                             styleClass="tomahawkInputDate"/>
+              </h:panelGrid>
+            </h:panelGroup>
+          </div>
+        
+        <h:commandButton id="save" styleClass="primaryBtn" value="#{msgs.button_save}" action="#{timePeriodState.saveEdits}"/>
+
+        <h:panelGroup rendered="#{timePeriodState.editedTimePeriod.classifier != 'DateSet'}">
+          <h:commandButton id="cancel" styleClass="secondaryBtn" value="#{msgs.button_cancel}" action="#{timePeriodState.cancelEdits}" immediate="true"/>
+        </h:panelGroup>
+        
+        <h:panelGroup rendered="#{timePeriodState.editedTimePeriod.classifier == 'DateSet'}">
+          <h:commandButton id="back" styleClass="secondaryBtn" value="#{msgs.button_cancel}" action="#{timePeriodState.goBack}" immediate="true"/>
+        </h:panelGroup>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+        <h:outputText rendered='#{schemaType == "group."}' styleClass="sectionHeader" value="#{msgs.con_form_delimited_groupSettings}"/>
+        <h:outputText rendered='#{schemaType != "group."}' styleClass="sectionHeader" value="#{msgs.con_form_delimited_accountSettings}"/>
+
+        <br/><br/>
+
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_search_scope}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpSrchScope_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ldap_search_scope}"/>
+              </td>
+              <td>
+                <h:selectOneMenu value="#{applicationObject.attributes[sp:concat(schemaType, 'searchScope')]}"
+                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                  <f:selectItem itemValue="SUBTREE" itemLabel="#{msgs.con_form_ldap_search_scope_subtree}"/>                                 
+                  <f:selectItem itemValue="OBJECT_SCOPE" itemLabel="#{msgs.con_form_ldap_search_scope_base}"/>                                 
+                  <f:selectItem itemValue="ONELEVEL_SCOPE" itemLabel="#{msgs.con_form_ldap_search_scope_one}"/>                                 
+                </h:selectOneMenu>
+              </td>
+            </tr>
+            
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_search_dn}"/>
+                <ui:fragment rendered='#{nameSpace != "group"}'>
+                <h:outputText styleClass="requiredText" value="*"/>
+                </ui:fragment>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpSrchDn_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ldap_search_dn}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'searchDN')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+
+            <ui:fragment rendered='#{nameSpace == "group"}'>
+            
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_iterate_srch_filter}"/>
+              <ui:fragment rendered='#{nameSpace == "group"}'/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpGroupIterateSrchFilter_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ldap_iterate_grpsrch_filter}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'iterateSearchFilter')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+            </ui:fragment>
+            
+            <ui:fragment rendered='#{nameSpace != "group"}'>
+             <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_iterate_srch_filter}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpIterateSrchFilter_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ldap_iterate_srch_filter}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'iterateSearchFilter')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+
+            <ui:fragment rendered='#{applicationObject.activeDirectoryType}'>
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_primary_grp_srch_dn}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpPrimaryGrpSrchDn_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ldap_primary_grp_srch_dn}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'primaryGroupSearchDN')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+            </ui:fragment>
+            
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_grp_mbr_srch_dn}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpGrpMbrSrchDn_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ldap_grp_mbr_srch_dn}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'groupMemberSearchDN')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_grp_mbr_srch_filter}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpGrpMbrSrchFilter_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ldap_grp_mbr_srch_filter}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'groupMemberFilterString')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+            </ui:fragment>
+            
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_ldap_filter_string}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpFilterStr_#{nameSpace}" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_con_form_ldap_filter_string}"/>
+              </td>
+              <td>
+                <h:inputText value="#{applicationObject.attributes[sp:concat(schemaType, 'filterString')]}"
+                             size="40"
+                             disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                             readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+            
+          </table>
+            
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

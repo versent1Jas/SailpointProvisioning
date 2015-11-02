@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Rule language="beanshell" name="6.1Upgrader Update Role Assignment Rule"
+      type="Refresh">
+  <Description>
+   Update Role Assignment Meta Data with DisplayName
+  </Description>
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="identity">
+        <Description>
+          The sailpoint.object.Identity being refreshed.
+        </Description>
+      </Argument>
+      <Argument name="environment">
+        <Description>
+          The task arguments
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+    <![CDATA[
+    import sailpoint.object.Identity;
+    import sailpoint.object.RoleAssignment;
+
+    import java.util.List;
+
+    if(identity != null) {
+        List roles = identity.getRoleAssignments();
+        if(roles != null) {
+            for(int i=0; i<roles.size(); i++) {
+                    if(roles.get(i).getAssigner() != null) {
+                    Identity assigner = context.getObjectByName(Identity.class, roles.get(i).getAssigner());
+                    if(assigner != null) {
+                        roles.get(i).setAssigner(assigner.getDisplayableName());
+                        System.out.println("Changed " + identity.getDisplayableName() + " assigner for role " 
+                                            + roles.get(i).getName() + " from " + assigner.getName() + " to " 
+                                            + assigner.getDisplayableName());
+                    }
+                }
+            }
+        }
+    }
+    
+    ]]>
+  </Source>
+</Rule>
+
+</sailpoint>

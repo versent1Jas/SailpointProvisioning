@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <ui:fragment rendered="#{!chartBean.renderChart}">
+    <div class="alert_message" id="runningText" style="padding-top:50px">
+      <span> #{msgs.msg_loading_chart}</span>
+    </div> 
+    <div id="modal_dialog_progress" class="alert_progress"></div>
+    
+    <script defer="defer">
+      setTimeout('reRenderChart(\'#{reference.content.id}\', $(\'dashboardForm:#{chartName}_chartBtn_#{reference.content.id}\'),\'#{chartName}\', \'#{parentFormName}\')',250);     
+    </script>
+  </ui:fragment>
+
+  <a4j:outputPanel id="#{chartName}ChartPanel_#{reference.content.id}">
+    <ui:fragment rendered="#{chartBean.renderChart and chartBean.categoryType}">
+
+      <sp:chart id="#{chartName}CategoryChart_#{reference.content.id}" 
+        datasource="#{chartBean.groupHistoryCategoryDatasource}"
+        colors="#{chartColors}" title="#{chartTitle}"
+        type="#{chartBean.chartType}" is3d="#{chartBean.threeD}" 
+        orientation="#{chartOrientation}" alpha="75" startAngle="0" antialias="true" legend="true" 
+        height="#{chartHeight}" storeOnSession="true"
+        width="#{chartWidth}" labels="true" outline="false"
+        usemap="#map_#{chartName}" uselinks="#{javascript}" size="#{chartSize}">
+      </sp:chart>
+        
+    </ui:fragment>
+    
+    <a4j:commandButton style="display:none" id="#{chartName}_refreshBtn_#{reference.content.id}" value="#{msgs.button_refresh}" limitRender="true"
+    action="#{chartBean.refreshChart}" onclick="this.disabled=true" render="#{chartName}ChartPanel_#{chartBean.referenceIndex}"/>
+  </a4j:outputPanel>
+  
+</ui:composition>
+
+</body>
+
+</html>

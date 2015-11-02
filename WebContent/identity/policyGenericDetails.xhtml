@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+
+
+
+<body>
+<!--
+    This is included in manage/policyViolations/policyViolationDetail
+    and identity/policyDetails which in turn is used by both the cert
+    and identity view pages.
+
+    You are in a two column <table>
+
+    parameters:
+        violationView - ViolationViewBean
+        noPolicy - true to disable the policy name
+        noRule - true to disalbe the rule name
+        noSummary - true to disable the custom summary
+        showViolationLink - true render a link to violation
+
+
+   NOTE: You must use ui:fragment to conditionalize fields
+   rather than c:if.  c:if works for the manage violations nad
+   identity pages but not when included within a cert.
+   Typical jstl/facelets bs.
+
+-->
+
+<ui:composition>
+
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+            <ui:fragment rendered="#{violationView.violationMissing}">
+               <div class="formError">
+                 <tr>
+                   <td>
+                     <h:outputText value="${msgs.violation_viewer_no_violation}"/>
+                   </td>
+                </tr>
+              </div>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{!noPolicy}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.violation_viewer_label_policy}"/></td>
+                <td><h:outputText value="#{violationView.policyName}"/></td>
+              </tr>
+            </ui:fragment>
+
+
+            <ui:fragment rendered="#{violationView.constraintPolicy != null}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.violation_details_label_policy_desc}"/></td>
+                <td><h:outputText escape='false' value="#{violationView.constraintPolicy}"/></td>
+              </tr>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{violationView.owner != null}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.policy_violation_owner}"/></td>
+                <td><h:outputText value="#{violationView.owner}"/></td>
+              </tr>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{!noRule}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.violation_viewer_label_rule}"/></td>
+                <td><h:outputText escape='false' value="#{violationView.constraint}"/></td>
+              </tr>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{violationView.constraintDescription != null}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.violation_details_label_rule_desc}"/></td>
+                <td><h:outputText escape='false' value="#{violationView.constraintDescription}"/></td>
+              </tr>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{violationView.constraintWeight > 0}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.violation_details_label_score_weight}"/></td>
+                <td><h:outputText value="#{violationView.constraintWeight}"/></td>
+              </tr>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{!noSummary and violationView.violation.description != null and violationView.violation.description != violationView.constraintDescription}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.violation_viewer_label_summary}"/></td>
+                <td><h:outputText escape="false" value="#{violationView.violation.description}"/></td>
+              </tr>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{violationView.compensatingControl != null}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.violation_details_label_comp_control}"/></td>
+                <td><h:outputText value="#{violationView.compensatingControl}"/></td>
+              </tr>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{violationView.remediationAdvice != null}">
+              <tr>
+                <td class="titleColumn"><h:outputText value="#{msgs.violation_details_label_correction_advice}"/></td>
+                <td><h:outputText value="#{violationView.remediationAdvice}"/></td>
+              </tr>
+            </ui:fragment>
+            <ui:fragment rendered="#{showViolationLink}">
+              <tr>
+                  <td class="titleColumn"></td>    
+                  <td>
+                      <h:commandLink value="#{msgs.violation_details_go_to_violation}"
+                                     action="#{policyViolations.policyViolationDetail}"/>
+                  </td>
+              </tr>
+            </ui:fragment>
+
+</ui:composition>
+</body>
+</html>

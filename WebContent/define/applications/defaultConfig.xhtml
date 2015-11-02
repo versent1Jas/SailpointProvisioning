@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+  <ui:composition>
+    <table class="width100" cellpadding="0" cellspacing="0">
+      <tr>
+        <td>
+          <div id="submenu-main">
+            <div id="submenu-tabs">
+              <ul id="submenu-links">
+                <li id="button0" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('attributesContent', 'button0')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> Attributes </span>
+                </li>
+                <li id="button1" class="sMButton"
+                  onmouseover="subMouseOver(this);"
+                  onmouseout="subMouseOut(this);"
+                  onclick="displayAppropriatePane('targetsContent', 'button1')">
+                  <span class="sMText" onmouseover="subMouseOver(this);"
+                        onmouseout="subMouseOut(this);"> #{msgs.activity_targets} </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="attributesContent" class="submenuContentBox" style="border:0px">
+              <div class="spContent">
+                <div class="spTabledContent">
+                  <table class="spTable" cellspacing="0">
+                    <tr>
+                      <th>#{msgs.name}</th>
+                      <th>#{msgs.value}</th>
+                    </tr>
+                    <ui:repeat value="#{activityDataSource.attributeConfig}" var="attrDef">
+                      <tr>
+                        <td>
+                          <h:outputText value="#{attrDef.name}"/>
+                        </td>
+                        <td>
+                          <h:inputText rendered="#{attrDef.type != 'secret' and
+                                                   attrDef.type != 'boolean' and
+                                                   !attrDef.multiValued}"
+                                  value="#{activityDataSource.object.configuration[attrDef.name]}"
+                                  size="40"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                          <sp:inputSecret rendered="#{attrDef.type == 'secret'}"
+                                  value="#{activityDataSource.object.configuration[attrDef.name]}"
+                                  size="40" redisplay="true"
+                                  autocomplete="off"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                           <h:inputTextarea rendered="#{attrDef.multiValued}"
+                                  converter="NewLineList"
+                                  value="#{activityDataSource.object.configuration[attrDef.name]}"
+                                  rows="5" cols="40"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                           <h:selectBooleanCheckbox rendered="#{attrDef.type == 'boolean'}"
+                                  value="#{activityDataSource.object.configuration[attrDef.name]}"
+                                  disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                  readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                           <h:outputText style="color: red;" value="*" rendered="#{attrDef.required}"/>
+                        </td>
+                      </tr>
+                    </ui:repeat>
+                  </table>
+                </div>
+              </div>
+          </div> <!--  attributesContent -->
+          <div id="targetsContent" class="submenuContentBox" style="display:none; border:0px">
+            <ui:include src="activityTargets.xhtml"/>
+          </div> <!-- targetsContent -->
+        </td>
+      </tr>
+    </table>
+  </ui:composition>
+</body>
+</html>

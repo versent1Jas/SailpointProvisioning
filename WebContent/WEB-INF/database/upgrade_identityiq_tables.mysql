@@ -1,0 +1,84 @@
+--
+-- This script contains DDL statements to upgrade a database schema to
+-- reflect changes to the model.  This file should only be used to
+-- upgrade from the last formal release version to the current code base.
+--
+
+USE identityiq;
+
+-- Add assigned roles to IdentitySnapshot
+alter table identityiq.spt_identity_snapshot add assigned_roles longtext;
+
+-- Add attributes map to Schema
+alter table identityiq.spt_application_schema add config longtext;
+
+-- Add featuresString to Schema
+alter table identityiq.spt_application_schema add features_string varchar(512);
+
+-- Set schemaObjectType on groups
+update identityiq.spt_managed_attribute set type = 'group' where is_group=1;
+
+-- Add aggregated column and transfer data from is_group, is_group will be removed in post upgrade script
+alter table identityiq.spt_managed_attribute add aggregated bit default 0;
+create index spt_managed_attr_aggregated on identityiq.spt_managed_attribute (aggregated);
+update identityiq.spt_managed_attribute set aggregated = is_group where is_group is not null;
+
+-- Add schemaObjectType to schemaAttributes
+alter table identityiq.spt_schema_attributes add schema_object_type varchar(128);
+
+-- Add pendingDelete to Bundle
+alter table identityiq.spt_bundle add pending_delete bit;
+update identityiq.spt_bundle set pending_delete = 0;
+
+-- Create table for persisting role change events
+create table identityiq.spt_role_change_event (
+    id varchar(128) not null,
+    created bigint,
+    bundle_id varchar(128),
+    provisioning_plan longtext,
+    bundle_deleted bit,
+    primary key (id)
+) ENGINE=InnoDB;
+
+create index spt_role_change_event_created on identityiq.spt_role_change_event (created);
+
+-- Remove indexes for constraint_name and increase the size
+alter table identityiq.spt_mitigation_expiration drop index spt_mitigation_const_ci;
+alter table identityiq.spt_mitigation_expiration modify constraint_name varchar(2000);
+
+alter table identityiq.spt_identity_history_item drop index spt_id_hist_item_constr_ci;
+alter table identityiq.spt_identity_history_item modify constraint_name varchar(2000);
+
+-- add schemaObjectType to cert entity
+alter table identityiq.spt_certification_entity add schema_object_type varchar(128);
+alter table identityiq.spt_archived_cert_entity add schema_object_type varchar(128);
+
+-- Add hidden to Form
+alter table identityiq.spt_form add hidden bit;
+update identityiq.spt_form set hidden = 0;
+
+-- Add lock to Workitem
+alter table identityiq.spt_work_item add iiqlock varchar(128);
+
+--
+-- WorkflowTestSuite
+--
+
+    create table identityiq.spt_workflow_test_suite (
+        id varchar(128) not null,
+        created bigint,
+        modified bigint,
+        name varchar(128) not null unique,
+        description varchar(4000),
+        replicated bit,
+        case_name varchar(255),
+        tests longtext,
+        responses longtext,
+        attributes longtext,
+        primary key (id)
+    ) ENGINE=InnoDB;
+
+--
+-- make sure to change the schema version here. LEAVE THIS HERE
+--
+update identityiq.spt_database_version set schema_version = '6.4-15' where name = 'main';

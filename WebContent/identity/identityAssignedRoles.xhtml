@@ -1,0 +1,129 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <a4j:outputPanel id="assigneRolesPanel">
+    <div id="assignedRolesJSON" style="display:none">#{sp:basicJSONData("")}</div>
+    <div id="assignedRoleIds" style="display:none">#{identity.assignedRolesHelper.assignedRoleIdsString}</div>
+    <ui:fragment rendered="#{!(empty identity.assignedRolesHelper.assignedRoleBeans)}">
+      
+      <h:outputText styleClass="spContentTitle" value="#{msgs.header_assigned_roles}"/>
+      <br/><br/>
+      
+      <div class="spTabledAjaxContent">
+        <table class="spTable" cellspacing="0" id="assignedRoleTbl" style='table-layout:fixed'>
+          <tr style="white-space:nowrap">
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityRole')}">
+              <th width="5%"></th>
+            </ui:fragment>
+            <th style="white-space:nowrap;" width="20%">#{msgs.name}</th>
+            <th style="white-space:nowrap" width="35%">#{msgs.description}</th>
+            <th style="white-space:nowrap" width="10%">#{msgs.identity_role_col_assigned_by}</th>
+            <th style="white-space:nowrap" width="25%">#{msgs.identity_role_col_permits}</th>
+          </tr>
+          
+          <!-- if you use ui:repeat here you cannot use it for bundle.entitlements -->
+          <ui:repeat value="#{identity.assignedRolesHelper.assignedRoleBeans}" var="role">
+            <ui:fragment rendered="#{!(role.negative)}">
+            <tr style="vertical-align: top;">
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityRole')}">
+                <td><h:selectBooleanCheckbox value="#{role.selected}"/></td>
+              </ui:fragment>
+              <td align="left" style="word-wrap:break-word;">
+                <div class="#{role != null and role.roleTypeDefinition != null ?  role.roleTypeDefinition.icon : null}" >
+                  <a onclick="SailPoint.RoleDetailPanel.toggle('#{role.roleId}', '#{identity.identityId}', true, 'businessRoleDetails_#{role.roleId}', null, this)" title="#{msgs.info_role_composition}" class="disclosure" style="margin-left:18px">
+                    <h:outputText value="#{role.roleName}" />
+                  </a>
+                </div>
+                
+                <ui:fragment 
+                  rendered="#{!(role.sunriseDate eq null) || !(role.sunsetDate eq null)}">
+                  <div class="activationNotice" style="margin:10px 0" >
+                    
+                    <a class="edit" href="javascript:editRoleAssignment('#{role.roleId}','#{role.sunriseDate}','#{role.sunsetDate}')">
+                      <h:graphicImage url="/images/icons/calendar_edit.png" style="vertical-align:middle; margin:3px" />
+                    </a>
+                    
+                    <ui:fragment rendered="#{!(role.sunriseDate eq null)}">
+                      <div style="float:left">
+                        <h:outputText styleClass="label green" value="#{msgs.activate}: "/>
+                        <h:outputText value="#{role.sunriseDate}">
+                          <f:convertDateTime type="date" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                        </h:outputText>
+                      </div>                      
+                      <div class="vis-clear"></div>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{!(role.sunsetDate eq null)}">
+                      <div style="float:left">
+                        <h:outputText styleClass="label red" value="#{msgs.deactivate}: "/>
+                        <h:outputText value="#{role.sunsetDate}">
+                          <f:convertDateTime type="date" dateStyle="short"  timeZone="#{base.userTimeZone}"/>
+                        </h:outputText>
+                      </div>
+                    </ui:fragment>                      
+                    <div class="vis-clear"></div>
+                    
+                    
+                  </div>
+                </ui:fragment>
+                
+              </td>
+              <td><h:outputText escape="false" value="#{role.description}" /></td>
+              <ui:fragment rendered="#{role.assigner != null}">
+                <td><h:outputText value="#{role.assigner}" /></td>
+              </ui:fragment>
+              <ui:fragment rendered="#{role.assigner == null}">
+                <td><h:outputText value="#{msgs.label_rule}"/></td>
+              </ui:fragment>
+              <td><h:outputText value="#{role.permits}" /></td>
+            </tr>
+            <tr class="skip">
+              <td colspan="#{sp:hasRight(facesContext, 'SetIdentityRole') ? 5 : 4}">
+                <div id="businessRoleDetails_#{role.roleId}" class="customWidth"></div>
+              </td>
+            </tr>  
+            </ui:fragment>
+          </ui:repeat>
+        </table>
+        <script>
+          makeTableMulticolored($('assignedRoleTbl'), true, false, 'even', 'odd', 'skip');
+        </script>
+      </div> 
+    </ui:fragment>
+     
+                 
+    <ui:fragment rendered="#{empty identity.assignedRolesHelper.assignedRoleBeans}">
+      <h:outputText styleClass="spContentTitle" value="#{msgs.header_no_assigned_roles}"/>
+    </ui:fragment>
+    <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityRole')}">
+      <div class="buttonRow">
+        
+        <input type="button" value="#{msgs.button_delete_role}" class="secondaryBtn"
+               onclick="deleteRole(#{sp:getSystemConfigurationValue('enableRoleSunAssign', true)})"
+               style="#{(!empty identity.assignedRolesHelper.assignedRoleBeans) ? '' : 'display:none'}"/>
+        <input type="button" value="#{msgs.button_add_role}" class="primaryBtn"
+               onclick="addNewRole(#{sp:getSystemConfigurationValue('enableRoleSunAssign', true)})"/>
+  
+        <t:inputHidden id="assignedRoles"              
+                       value="#{identity.assignedRolesHelper.assignedRoles}" forceId="true">
+          <sp:convertList/>
+        </t:inputHidden>
+                       
+      </div>
+      <div id="assignedRolesMultiSuggest" class="width100"></div>
+    </ui:fragment>
+  </a4j:outputPanel>
+</ui:composition>
+
+</body>
+
+</html>

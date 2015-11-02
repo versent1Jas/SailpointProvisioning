@@ -1,0 +1,123 @@
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+<ui:define name="title">#{msgs.deleted_objects_grid_title}</ui:define>
+
+<ui:define name="headerItems">
+
+    <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>      
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/ManageDeletedObjects.js?#{debug.revision}</src>
+    </sp:script>
+
+
+    <script type="text/javascript"><!--
+      //<![CDATA[//>
+      helpKey = 'RECYCLE_BIN';
+      
+      //<!]]>
+    --></script>
+  </ui:define>
+
+<ui:define name="body">
+    <f:view>
+    
+        <script type="text/javascript">
+            var sp = new SailPoint.state.StateProvider({
+              stateIds: ['#{manageDeletedObjects.gridState.name}',
+                         '#{manageDeletedObjects.gridState.name}'
+              ],
+              states:   ['#{manageDeletedObjects.gridState.state}',
+                         '#{manageDeletedObjects.gridState.state}'
+              ]
+            });
+            Ext.state.Manager.setProvider(sp);
+            var debug = {};
+            Ext.onReady(function() {
+                Ext.QuickTips.init();
+
+                var accountGridColConf = #{manageDeletedObjects.accountGridColModel};
+                var groupGridColConf = #{manageDeletedObjects.groupGridColModel};
+                SailPoint.LCM.ManageDeletedObjects.DisplayDeletedObjects.suggestADApplication(accountGridColConf, groupGridColConf);
+            });
+        </script>
+        
+        <h:form styleClass="form" id="editForm">
+            
+            <a4j:outputPanel ajaxRendered="true">
+              <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+            </a4j:outputPanel>
+
+            <h:panelGroup id="restoreADApplication" class="paddedContainer" layout="block">
+              <table class="spPaddedTable">
+                <tr>
+                    <td style="vertical-align: middle;" class="titleColumn">#{msgs.deleted_objects_grid_select_ad_application}</td>
+                    <td width= "1%">
+                      <h:graphicImage id="imgHlpADAppType" 
+                                styleClass="helpIcon" 
+                                url="/images/icons/dashboard_help_16.png" 
+                                alt="#{help.help_deleted_objects_grid_select_ad_application}"/>
+                    </td>
+                    <td class="leftAlignedColumn">
+                      <div id="appSuggest"></div>
+                    </td>
+                </tr>
+              </table>
+              
+              <h:panelGroup>
+                <div class="paddedContainer">
+                  <div id="mainPanel" style="width:97%"></div>
+                </div>
+              </h:panelGroup>
+              
+              <h:panelGroup>
+                <div class="buttonRow">
+
+                  <ui:fragment>
+                    <button id="restoreButton" type="button" class="primaryBtn" 
+                            onclick="SailPoint.LCM.ManageDeletedObjects.DisplayDeletedObjects.restoreSelectedObjectsHandler(this,null,null); return false;" >
+                        #{msgs.deleted_objects_grid_button_label_restore_all}
+                    </button>
+                  </ui:fragment>
+
+                  <h:commandButton styleClass="secondaryBtn" id="cancelAppBtn" action="#{applicationObject.cancelAction}" value="#{msgs.deleted_objects_grid_button_label_back}" immediate="true"/>
+  
+                  <a4j:commandButton action="#{manageDeletedObjects.restoreDeletedObjects}" style="display:none" id="restoreCmdBtn" 
+                                     oncomplete="SailPoint.LCM.ManageDeletedObjects.DisplayDeletedObjects.endRestore('#{manageDeletedObjects.accountSelectedIds}', '#{manageDeletedObjects.groupSelectedIds}')"/>
+                  
+                  <h:inputHidden id="accountSelectedIds" value="#{manageDeletedObjects.accountSelectedIds}" converter="java.util.List" />
+                  <h:inputHidden id="groupSelectedIds" value="#{manageDeletedObjects.groupSelectedIds}" converter="java.util.List" />
+                  <h:inputHidden id="selectedApplicationId" value="#{manageDeletedObjects.selectedApplicationId}" />
+                </div>
+              </h:panelGroup>
+          </h:panelGroup>
+      </h:form>
+    </f:view>
+</ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

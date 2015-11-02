@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, ENABLE, PASSWORD" icon="mainframeIcon" name="RACF Full Template" type="RACF - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="RACF"/>
+        <entry key="fieldDelimiter" value="#"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="listDelimiter" value=";"/>
+        <entry key="splAceAttributes">
+          <value>
+            <Map>
+              <entry key="ACCESS" value="false"/>
+              <entry key="INFO.ACC_COUNT" value="false"/>
+              <entry key="WHEN.APPCPORT" value="false"/>
+              <entry key="WHEN.CONSOLE" value="false"/>
+              <entry key="WHEN.JESINPUT" value="false"/>
+              <entry key="WHEN.PROGRAM" value="false"/>
+              <entry key="WHEN.SYSID" value="false"/>
+              <entry key="WHEN.TERMINAL" value="false"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="splResourceAttributes">
+          <value>
+            <Map>
+              <entry key="APPLDATA" value="false"/>
+              <entry key="AUDIT.ALL" value="false"/>
+              <entry key="AUDIT.FAILURES" value="false"/>
+              <entry key="AUDIT.NONE" value="false"/>
+              <entry key="AUDIT.SUCCESS" value="false"/>
+              <entry key="CATEGORY" value="false"/>
+              <entry key="DATA" value="false"/>
+              <entry key="DFP.RESOWNER" value="false"/>
+              <entry key="DLFDATA.JOBNAMES" value="false"/>
+              <entry key="DLFDATA.RETAIN" value="false"/>
+              <entry key="ERASE" value="false"/>
+              <entry key="GENERIC" value="false"/>
+              <entry key="GLOBALAUDIT.ALL" value="false"/>
+              <entry key="GLOBALAUDIT.FAILURES" value="false"/>
+              <entry key="GLOBALAUDIT.NONE" value="false"/>
+              <entry key="GLOBALAUDIT.SUCCESS" value="false"/>
+              <entry key="INFO.ALTER_COUNT" value="false"/>
+              <entry key="INFO.AUTOMATIC" value="false"/>
+              <entry key="INFO.CONTROL_COUNT" value="false"/>
+              <entry key="INFO.CREATE_DATE" value="false"/>
+              <entry key="INFO.CREATGRP" value="false"/>
+              <entry key="INFO.DATASET_TYPE" value="false"/>
+              <entry key="INFO.GROUP_CLASS" value="false"/>
+              <entry key="INFO.LASTCHG_DATE" value="false"/>
+              <entry key="INFO.LASTREF_DATE" value="false"/>
+              <entry key="INFO.MEMBER_CLASS" value="false"/>
+              <entry key="INFO.READ_COUNT" value="false"/>
+              <entry key="INFO.RESOURCE_GROUP" value="false"/>
+              <entry key="INFO.TVTOC" value="false"/>
+              <entry key="INFO.UNKNOWNCAT" value="false"/>
+              <entry key="INFO.UPDATE_COUNT" value="false"/>
+              <entry key="LEVEL" value="false"/>
+              <entry key="MEMBER" value="false"/>
+              <entry key="NODLFDATA" value="false"/>
+              <entry key="NOSESSION" value="false"/>
+              <entry key="NOSTDATA" value="false"/>
+              <entry key="NOSVFMR" value="false"/>
+              <entry key="NOTIFY" value="false"/>
+              <entry key="NOTME" value="false"/>
+              <entry key="OWNER" value="false"/>
+              <entry key="RETPD" value="false"/>
+              <entry key="SECLABEL" value="false"/>
+              <entry key="SECLEVEL" value="false"/>
+              <entry key="SESSION.CONVSEC" value="false"/>
+              <entry key="SESSION.INTERVAL" value="false"/>
+              <entry key="SESSION.LOCK" value="false"/>
+              <entry key="SESSION.SESSKEY" value="false"/>
+              <entry key="SINGLEDSN" value="false"/>
+              <entry key="SSIGNON.KEYENCRYPT" value="false"/>
+              <entry key="STDATA.GROUP" value="false"/>
+              <entry key="STDATA.PRIVILEGED" value="false"/>
+              <entry key="STDATA.TRACE" value="false"/>
+              <entry key="STDATA.TRUSTED" value="false"/>
+              <entry key="STDATA.USER" value="false"/>
+              <entry key="SVFMR.PARMNAME" value="false"/>
+              <entry key="SVFMR.SCRIPTNAME" value="false"/>
+              <entry key="TIMEZONE" value="false"/>
+              <entry key="TME.CHILDREN" value="false"/>
+              <entry key="TME.GROUPS" value="false"/>
+              <entry key="TME.PARENT" value="false"/>
+              <entry key="TME.RESOURCE" value="false"/>
+              <entry key="TME.ROLES" value="false"/>
+              <entry key="TVTOC" value="false"/>
+              <entry key="UACC" value="false"/>
+              <entry key="UNIT" value="false"/>
+              <entry key="VOLUME" value="false"/>
+              <entry key="VOLUME_LIST" value="false"/>
+              <entry key="VOLUME_LIST1" value="false"/>
+              <entry key="WARNING" value="false"/>
+              <entry key="WHEN.DAYS" value="false"/>
+              <entry key="WHEN.TIME" value="false"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="splTargetPermissionsInterestingKwds">
+          <value>
+            <Map>
+              <entry key="ACCESS" value="false"/>
+              <entry key="INFO.ACC_COUNT" value="false"/>
+              <entry key="WHEN.APPCPORT" value="false"/>
+              <entry key="WHEN.CONSOLE" value="false"/>
+              <entry key="WHEN.JESINPUT" value="false"/>
+              <entry key="WHEN.PROGRAM" value="false"/>
+              <entry key="WHEN.SYSID" value="false"/>
+              <entry key="WHEN.TERMINAL" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <PasswordPolicies>
+      <PasswordPolicyHolder name="default">
+        <PolicyRef>
+          <Reference class="sailpoint.object.PasswordPolicy" id="2c908cd73c4e61b8013c4e61db5100a5" name="RACF Default Password Policy"/>
+        </PolicyRef>
+      </PasswordPolicyHolder>
+    </PasswordPolicies>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+                        import java.util.*;
+                        import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                        import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                        import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                        import sailpoint.object.ProvisioningPlan.AccountRequest;
+                              List accounts = plan.getAccountRequests();
+                              if (accounts != null)
+                              {
+                                    for (AccountRequest req : accounts)
+                                    {
+                                      AccountRequest.Operation op = req.getOperation();
+                                      
+                                      if (op == AccountRequest.Operation.Delete)
+                                      {
+                                            req.add(new AttributeRequest("MODE", "DELETE"));
+                                            req.add(new AttributeRequest("DELAY", "N"));
+                                      }
+                                      if (op == AccountRequest.Operation.Create)
+                                      {
+                                          String userId = req.getNativeIdentity();
+                                          if (userId != null)
+                                          {
+                                            req.setNativeIdentity(userId.toUpperCase());
+                                          }
+                                      }
+                            
+                                    }
+                              }
+                       
+                            List groups = plan.getObjectRequests();
+                            if (groups != null)
+                            {
+                                for (ObjectRequest req : groups)
+                                {
+                                    ObjectOperation op = req.getOp();
+                                     if (op == ObjectOperation.Delete)
+                                    {
+                                        req.add(new AttributeRequest("MODE", "DELETE"));
+                                    }
+                                    if (op == ObjectOperation.Create)
+                                    {
+                                        String groupId = req.getNativeIdentity();
+                                        if (groupId != null)
+                                        {
+                                            req.setNativeIdentity(groupId.toUpperCase());
+                                        }
+                                    }
+                                    List attrRequests=req.getAttributeRequests() ;
+                                    if(attrRequests != null){
+                                        for (AttributeRequest attrreq : attrRequests) {
+                                            if(attrreq.getValue() instanceof java.lang.String){
+                                            attrreq.setValue(attrreq.getValue().toUpperCase());
+                                            }                                               }
+                                    }
+                                }
+                                
+                              }
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="USER_ID" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="USER_ID" required="true" type="string">
+        <Description>RACF ID of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UG_DEF" required="true" type="string">
+        <Description>Default group of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" required="true" schemaObjectType="group" type="string">
+        <Description>List of groups this user belongs to</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.CREATE_DATE.1" required="true" type="string">
+        <Description>Certificate creation date</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.OWNER.1" required="true" type="string">
+        <Description>Certificate owner</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.SERIAL_NUMBER.1" required="true" type="string">
+        <Description>Certificate serial number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.ISSUER_NAME.1" required="true" type="string">
+        <Description>Certificate issuer name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.TRUST.1" required="true" type="string">
+        <Description>Certificate TRUST value</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.SUBJECT_NAME.1" required="true" type="string">
+        <Description>Certificate serial number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.VALID_NOT_BEFORE.1" required="true" type="string">
+        <Description>Local date and time from which the certificate is valid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.VALID_NOT_AFTER.1" required="true" type="string">
+        <Description>Local date and time after which the certificate is no longer valid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.SERIAL_NUMBER.2" required="true" type="string">
+        <Description>Certificate serial number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.ISSUER_NAME.2" required="true" type="string">
+        <Description>Certificate issuer name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.TRUST.2" required="true" type="string">
+        <Description>Certificate TRUST value</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.SUBJECT_NAME.2" required="true" type="string">
+        <Description>Certificate serial number</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.VALID_NOT_BEFORE.2" required="true" type="string">
+        <Description>Local date and time from which the certificate is valid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCERT.VALID_NOT_AFTER.2" required="true" type="string">
+        <Description>Local date and time after which the certificate is no longer valid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="RESTRICTED" required="true" type="string">
+        <Description>Global access checking is bypassed</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AUTHORITY" required="true" type="string">
+        <Description>Group authority level for user in the default group (USE / CREATE / CONNECT / JOIN)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ADSP" required="true" type="string">
+        <Description>Permanent tape and DASD data sets created by the user are protected by discrete profiles</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="CATEGORY" required="true" type="string">
+        <Description>User access to resources is additionally protected by the security categories</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="CLAUTH" required="true" type="string">
+        <Description>Classes in which user is allowed to define profiles</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DATA" required="true" type="string">
+        <Description>Installation-defined data</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="GRPACC" required="true" type="string">
+        <Description>Group data sets protected by DATASET profiles defined by this user are automatically accessible to other users in the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INTERVAL" required="true" type="string">
+        <Description>Number of days during which a user's password and password phrase (if set) remain valid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MODEL" required="true" type="string">
+        <Description>Discrete data set profile name that is used as a model when new data set profiles are created that have userid as the high-level qualifier</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NAME" required="true" type="string">
+        <Description>User name associated with the user ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OIDCARD" required="true" type="string">
+        <Description>User must supply an operator identification card when logging onto the system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERATIONS" required="true" type="string">
+        <Description>User has authorization to do maintenance operations on all RACF-protected resources</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OWNER" required="true" type="string">
+        <Description>Owner User or owner group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="RESUME_DATE" required="true" type="string">
+        <Description>Starting date when user will be allowed to access the system again</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="REVOKE_DATE" required="true" type="string">
+        <Description>Starting date when user will be disallowed to access the system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SECLABEL" required="true" type="string">
+        <Description>Default security label</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SECLEVEL" required="true" type="string">
+        <Description>Security level of user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UAUDIT" required="true" type="string">
+        <Description>RACF logs most events and changed done by the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="WHEN.DAYS" required="true" type="string">
+        <Description>Days of the week when the user is allowed to access the system from a terminal</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WHEN.TIME" required="true" type="string">
+        <Description>Hours in the day when the user is allowed to access the system from a terminal</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INFO.INTERVAL" required="true" type="string">
+        <Description>Number of days during which a user's password and password phrase (if set) remain valid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INFO.CREATE_DATE" required="true" type="string">
+        <Description>Date when user was defined to RACF</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INFO.LAST_LOGIN_DATE" required="true" type="string">
+        <Description>Last date user login to system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INFO.LAST_LOGIN_TIME" required="true" type="string">
+        <Description>Last time in INFO.LAST_LOGIN_DATE when user login to system</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INFO.PASSCHG_DATE" required="true" type="string">
+        <Description>Last date user changed his password</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INFO.UNKNOWNCAT" required="true" type="string">
+        <Description>Security level unknown category</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS.OPIDENT" required="true" type="string">
+        <Description>Operator ID for use by BMS - CICS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="CICS.OPCLASS" required="true" type="string">
+        <Description>classes assigned to this operator to which BMS (basic mapping support) messages are to be routed - CICS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS.OPPRTY" required="true" type="string">
+        <Description>Priority of the operator - CICS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS.TIMEOUT" required="true" type="string">
+        <Description>Time, in hours and minutes, that the operator is allowed to be idle before being signed off. - CICS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="CICS.XRFSOFF" required="true" type="string">
+        <Description>FORCE means that the user is signed off by CICS when an XRF takeover occurs - CICS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFP.DATAAPPL" required="true" type="string">
+        <Description>DFP data application identifier - DFP segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFP.DATACLAS" required="true" type="string">
+        <Description>Default data class - DFP segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFP.MGMTCLAS" required="true" type="string">
+        <Description>Default management class - DFP segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFP.STORCLAS" required="true" type="string">
+        <Description>Default storage class - DFP segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LANGUAGE.PRIMARY" required="true" type="string">
+        <Description>Primary language of user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LANGUAGE.SECONDARY" required="true" type="string">
+        <Description>Secondary language of user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.ALTGRP" required="true" type="string">
+        <Description>Alternate console group used in recovery - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.AUTH" required="true" type="string">
+        <Description>authority this console has to issue operator commands (MASTER,ALL,INFO,CONS,IO,SYS) - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.AUTO" required="true" type="string">
+        <Description>Whether the extended console can receive messages that have been automated by the Message Processing Facility (MPF) in the sysplex (YES / NO) - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.CMDSYS" required="true" type="string">
+        <Description>System name to which commands issued from this console are sent - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.DOM" required="true" type="string">
+        <Description>Whether this console receives delete operator message (DOM)requests (NORMAL / ALL / NONE) - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.KEY" required="true" type="string">
+        <Description>Name to display information for all consoles with the specified key by using the MVS command DISPLAY CONSOLES,KEY - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.LEVEL" required="true" type="string">
+        <Description>Messages this console receives (R, I, CE, E, IN, NB or ALL) - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.LOGCMDRESP" required="true" type="string">
+        <Description>Whether command responses are logged (YES / NO) - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.MFORM" required="true" type="string">
+        <Description>Format in which messages are displayed at the console (J, M, S, T, X) - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.MIGID" required="true" type="string">
+        <Description>Migration ID which is assigned to this console - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.MONITOR" required="true" type="string">
+        <Description>Information displayed when jobs, TSO sessions, or data set status are being monitored - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.MSCOPE" required="true" type="string">
+        <Description>Systems from which this console can receive messages that are not directed to a specific console - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="OPERPARM.ROUTCODE" required="true" type="string">
+        <Description>Routing codes of messages this console receives - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.STORAGE" required="true" type="string">
+        <Description>Amount of storage in megabytes in the TSO address space that can be used for message queuing to this console - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OPERPARM.UD" required="true" type="string">
+        <Description>Whether this console is to receive undelivered messages (YES / NO) - OPERPARM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.ACCTNUM" required="true" type="string">
+        <Description>Default TSO account number when logging on - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.COMMAND" required="true" type="string">
+        <Description>Command run during TSO logon - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.DEST" required="true" type="string">
+        <Description>Default destination to which the system routes dynamically-allocated SYSOUT data sets - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.HOLDCLASS" required="true" type="string">
+        <Description>Default hold class - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.JOBCLASS" required="true" type="string">
+        <Description>Default job class - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.MAXSIZE" required="true" type="string">
+        <Description>Maximum region size the user can request at logon - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.MSGCLASS" required="true" type="string">
+        <Description>Default message class - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.PROC" required="true" type="string">
+        <Description>Default logon procedure name when logging on through TSO logon panel - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.SECLABEL" required="true" type="string">
+        <Description>Security label entered or used during TSO LOGON - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.SIZE" required="true" type="string">
+        <Description>Default or requested region size during TSO logon - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.SYSOUTCLASS" required="true" type="string">
+        <Description>Default SYSOUT class - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.UNIT" required="true" type="string">
+        <Description>Default name of a device or group of devices that a procedure uses for allocations - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TSO.USERDATA" required="true" type="string">
+        <Description>Optional installation data defined for the user - TSO segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAACCNT" required="true" type="string">
+        <Description>Account number for APPC processing - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAADDR1" required="true" type="string">
+        <Description>Additional address line #1 for SYSOUT delivery - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAADDR2" required="true" type="string">
+        <Description>Additional address line #2 for SYSOUT delivery - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAADDR3" required="true" type="string">
+        <Description>Additional address line #3 for SYSOUT delivery - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAADDR4" required="true" type="string">
+        <Description>Additional address line #4 for SYSOUT delivery - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WABLDG" required="true" type="string">
+        <Description>Building that SYSOUT information is to be delivered to - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WADEPT" required="true" type="string">
+        <Description>Department that SYSOUT information is to be delivered to - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WANAME" required="true" type="string">
+        <Description>User name that SYSOUT information is to be delivered to - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="WORKATTR.WAROOM" required="true" type="string">
+        <Description>Room that SYSOUT information is to be delivered to. - part of WORKATTR segment.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.ASSIZEMAX" required="true" type="string">
+        <Description>RLIMIT_AS hard limit (maximum) resource value that processes receive when they are dubbed a process - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.CPUTIMEMAX" required="true" type="string">
+        <Description>RLIMIT_CPU hard limit (maximum) resource value that OMVS processes receive when they are dubbed a process - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.FILEPROCMAX" required="true" type="string">
+        <Description>Maximum number of files this user is allowed to have concurrently active or open - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.HOME" required="true" type="string">
+        <Description>OMVS initial directory pathname - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.MMAPAREAMAX" required="true" type="string">
+        <Description>Maximum amount of data space storage, in pages, that can be allocated by the user for memory mappings of OMVS files - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.PROCUSERMAX" required="true" type="string">
+        <Description>Maximum number of processes this user is allowed to have active at the same time, regardless of how the process became OMVS process - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.PROGRAM" required="true" type="string">
+        <Description>First program started when TSO command OMVS is entered or when a batch job is started using the BPXBATCH program - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.THREADSMAX" required="true" type="string">
+        <Description>Maximum number of pthread_create threads, including those running, queued, and exited but not detached, that this user can have concurrently active - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.UID" required="true" type="string">
+        <Description>OMVS User identifier - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LNOTES.SNAME" required="true" type="string">
+        <Description>Lotus Notes for zOS short-name of the user - LNOTES segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NDS.UNAME" required="true" type="string">
+        <Description>Novell Directory Services for zOS user-name of the user - NDS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.CONSNAME" required="true" type="string">
+        <Description>Default MCS console name used for this operator. Relevant when no console name is used on the NetView GETCONID command - NETVIEW segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.CTL" required="true" type="string">
+        <Description>Whether a security check is performed for this NetView operator when trying to use a span or trying to do a cross-domain logon (GENERAL, GLOBAL, SPECIFIC) - NETVIEW segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.DOMAINS" required="true" type="string">
+        <Description>Identifiers of NetView programs in another NetView domain where this operator can start a cross-domain session - NETVIEW segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.IC" required="true" type="string">
+        <Description>Command or command list to be processed by NetView for this operator when this operator logs on to NetView - NETVIEW segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.MSGRECVR" required="true" type="string">
+        <Description>Whether this operator is to receive unsolicited messages that are not routed to a specific NetView operator - NETVIEW segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.NGMFADMN" required="true" type="string">
+        <Description>Whether a NetView operator has administrator authority to the NetView Graphic Monitor Facility (NGMF). - NETVIEW segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="NETVIEW.NGMFVSPN" required="true" type="string">
+        <Description>Reserved for future use by the NetView Graphic Monitor Facility - NETVIEW segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="NETVIEW.OPCLASS" required="true" type="string">
+        <Description>NetView scope classes for which the operator has authority - NETVIEW segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.AUTOLOGIN" required="true" type="string">
+        <Description>Whether OMVS DCE is to log this user into OMVS DCE automatically - DCE segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.DCENAME" required="true" type="string">
+        <Description>DCE principal name defined for this RACF user in the DCE registry - DCE segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.HOMECELL" required="true" type="string">
+        <Description>DCE cell name defined for this RACF user - DCE segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.HOMEUUID" required="true" type="string">
+        <Description>DCE universal unique identifier (UUID) for the cell that this user is defined to - DCE segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DCE.UUID" required="true" type="string">
+        <Description>DCE universal unique identifier (UUID) of the DCE principal defined in DCENAME - DCE segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OVM.FSROOT" required="true" type="string">
+        <Description>Pathname for the file system root - OVM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OVM.HOME" required="true" type="string">
+        <Description>Initial directory pathname - OVM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OVM.PROGRAM" required="true" type="string">
+        <Description>PROGRAM pathname of OMVS shell program) - OVM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OVM.UID" required="true" type="string">
+        <Description>User identifier - OVM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROXY.LDAPHOST" required="true" type="string">
+        <Description>URL of the LDAP server which the zOS LDAP server contacts when acting as a proxy on behalf of a requester - PROXY segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROXY.BINDDN" required="true" type="string">
+        <Description>Distinguished name (DN) which the zOS LDAP server uses when acting as a proxy on behalf of a requester - PROXY segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PROXY.BINDPW" required="true" type="string">
+        <Description>Password which the zOS LDAP server uses when acting as a proxy on behalf of a requester - PROXY segment</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="GROUP_ID" featuresString="PROVISIONING" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="GROUP_ID" remediationModificationType="None" required="true" type="string">
+        <Description>RACF ID of the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OWNER" remediationModificationType="None" required="true" type="string">
+        <Description>RACF defined user or group which is the owner of the group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UNIVERSAL" remediationModificationType="None" required="true" type="string">
+        <Description>Universal group with effectively unlimited number of users who may be connected to it</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MODEL" remediationModificationType="None" required="true" type="string">
+        <Description>A discrete MVS data set profile whcih is the model for new data sets of this group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="INFO.CREATE_DATE" remediationModificationType="None" required="true" type="string">
+        <Description>Date when this group was defined to RACF</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DATA" remediationModificationType="None" required="true" type="string">
+        <Description>Installation-defined data</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="SUBGROUP" remediationModificationType="None" required="true" type="string">
+        <Description>List of all groups which this group is their SUPGROUP</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="TERMUACC" remediationModificationType="None" required="true" type="string">
+        <Description>During terminal authorization checking, RACF allows any user in the group access to a terminal based on the universal access authority for that terminal</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OMVS.GID" remediationModificationType="None" required="true" type="string">
+        <Description>Group identifier - OMVS segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OVM.GID" remediationModificationType="None" required="true" type="string">
+        <Description>OpenExtensions VM group identifier - OVM segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFP.DATAAPPL" remediationModificationType="None" required="true" type="string">
+        <Description>DFP data application identifier - DFP segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFP.DATACLAS" remediationModificationType="None" required="true" type="string">
+        <Description>Default data class - DFP segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFP.MGMTCLAS" remediationModificationType="None" required="true" type="string">
+        <Description>Default management class - DFP segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DFP.STORCLAS" remediationModificationType="None" required="true" type="string">
+        <Description>Default storage class - DFP segment</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="TME.ROLES" remediationModificationType="None" required="true" type="string">
+        <Description>List of roles that reference this group - TME segment</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="User ID" name="USER_ID" required="true" type="string"/>
+        <Field displayName="DCERT.SERIAL.2" name="DCERT.SERIAL.2" section="" type="string" value="N"/>
+        <Field displayName="DCERT.SERIAL.1" name="DCERT.SERIAL.1" section="" type="string" value="N"/>
+        <Field displayName="DCERT.TRUST.1" name="DCERT.TRUST.1" section="" type="string" value="N"/>
+        <Field displayName="NOPASSWORD" name="NOPASSWORD" section="" type="string" value="N"/>
+        <Field displayName="GRPACC" name="GRPACC" section="" type="string" value="N"/>
+        <Field displayName="ADSP " name="ADSP" section="" type="string" value="N"/>
+        <Field displayName="OIDCARD " name="OIDCARD" section="" type="string" value="N"/>
+        <Field displayName="OPERATIONS " name="OPERATIONS" section="" type="string" value="N"/>
+        <Field displayName="Password" name="password" required="true" section="" type="secret"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="GROUP_ID" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="OWNER" name="OWNER" required="true" section="" type="string"/>
+        <Field displayName="UNIVERSAL" name="UNIVERSAL" section="" type="string" value="N">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="GROUP_OE_PR" name="GROUP_OE_PR" section="" type="string"/>
+        <Field displayName="OWNER" name="OWNER" section="" type="string"/>
+        <Field displayName="MODEL" name="MODEL" section="" type="string"/>
+        <Field displayName="DATA" name="DATA" section="" type="string"/>
+        <Field displayName="TERMUACC" name="TERMUACC" section="" type="string" value="Y">
+          <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="OMVS.GID" name="OMVS.GID" section="" type="string"/>
+        <Field displayName="UNIVERSAL" name="UNIVERSAL" readOnly="true" section="" type="string"/>
+        <Field displayName="SUBGROUP" multi="true" name="SUBGROUP" readOnly="true" section="" type="string"/>
+        <Field displayName="OVM.GID" name="OVM.GID" section="" type="string"/>
+        <Field displayName="DFP.DATAAPPL" name="DFP.DATAAPPL" section="" type="string"/>
+        <Field displayName="DFP.DATACLAS" name="DFP.DATACLAS" section="" type="string"/>
+        <Field displayName="DFP.MGMTCLAS" name="DFP.MGMTCLAS" section="" type="string"/>
+        <Field displayName="DFP.STORCLAS" name="DFP.STORCLAS" section="" type="string"/>
+        <Field displayName="TME.ROLES" name="TME.ROLES" section="" type="string"/>
+        <Field displayName="INFO.CREATE_DATE" name="INFO.CREATE_DATE" readOnly="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

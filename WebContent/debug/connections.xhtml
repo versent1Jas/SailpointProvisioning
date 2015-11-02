@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Database Connections</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_CONNECTIONS;
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+
+    <div class="spContent" >
+      <table class="width100">
+        <tr>
+          <td><h:outputText value="Id" styleClass="spContentTitle"/></td>
+          <td><h:outputText value="Source" styleClass="spContentTitle"/></td>
+        </tr>
+        <ui:repeat value="#{debug.connections}" var="con">
+          <tr><td colspan="2"><hr/></td></tr>
+          <tr>
+            <td><h:outputText value="#{con.name}"/></td>
+            <td>
+              <table>
+                <ui:repeat value="#{con.stack}" var="frame">
+                  <tr><td style="padding-left: 20px;"><h:outputText value="#{frame}"/></td></tr>
+                </ui:repeat>
+              </table>
+            </td>
+          </tr>
+        </ui:repeat>
+      </table>
+    </div>
+
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

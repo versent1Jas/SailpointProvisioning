@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+ <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/PolicyViolationStatusGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+  </sp:script>
+
+
+  <script type="text/javascript">
+   var policyViolationsStatusGrid = null;
+   var pvGridConf = #{gridConfigBean.uiConfigJson['policyViolationStatusGridColumns']};
+
+   Ext.onReady(function(){
+
+     policyViolationsStatusGrid = new SailPoint.dashboard.PolicyViolationStatusGrid({
+       id:'policyViolationsStatusGrid',
+       stateId: 'policyViolationsStatusGrid',
+       renderTo: 'policyViolationsStatusGridContainer',
+       stateful: true,
+       columns: pvGridConf.columns,
+       fields: pvGridConf.fields,
+       currentIdentity:SailPoint.CURR_USER_NAME,
+       allowClick: #{(sp:hasRight(facesContext, 'FullAccessPolicyViolation') or base.loggedInUser.managerStatus)}
+     });
+     
+   });
+  </script>
+
+
+  <div id="policyViolationsStatusGridContainer" style="width:100%"></div>
+  <h:inputHidden  id="violationIds"
+                  value="#{policyViolationAction.violationIds}" 
+                  converter="java.util.List"/>
+                      
+  <h:commandButton  id="selectedPolicyViolationButton" 
+                    style="display:none"
+                    action="policyViolationDetail"/>
+
+
+</body>
+</html>
+      
+      
+
+      
+      

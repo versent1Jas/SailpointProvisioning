@@ -1,0 +1,22 @@
+var pairs =
+{
+"mobile":{"approvals":1,"interface":1,"approval":1}
+,"approvals":{"use":1,"assigned":1,"workgroups":1,"page":1}
+,"use":{"identityiq":1}
+,"identityiq":{"mobile":1}
+,"interface":{"decisions":1}
+,"decisions":{"approvals":1}
+,"assigned":{"member":1}
+,"member":{"workgroups":1}
+,"workgroups":{"listings":1,"section":1}
+,"listings":{"include":1}
+,"include":{"approvals":1}
+,"section":{"following":1}
+,"following":{"topics":1}
+,"topics":{"additional":1}
+,"additional":{"information":1}
+,"information":{"mobile":1}
+,"page":{"mobile":1}
+,"approval":{"tasks":1}
+}
+;Search.control.loadWordPairs(pairs);

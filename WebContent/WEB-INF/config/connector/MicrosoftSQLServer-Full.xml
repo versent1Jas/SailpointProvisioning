@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD, SYNC_PROVISIONING" icon="databaseIcon" name="Microsoft SQL Server Full Template" type="Microsoft SQL Server - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="MSSQL"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <ClusterScript>
+        <Source>
+                        
+                          String cluster = null;
+                          Object host = application.getAttributeValue("host");
+                          Object port = application.getAttributeValue("port");
+                          if (host != null) {
+                            cluster = host.toString();
+                            if (port != null)
+                              cluster += ":" + port.toString();
+                            }
+                          return cluster;
+                        
+                      </Source>
+      </ClusterScript>
+      <PlanInitializerScript>
+        <Source>
+                        
+                          import sailpoint.object.*;
+                          import sailpoint.object.ProvisioningPlan.AccountRequest;
+                          import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                          import sailpoint.object.ProvisioningPlan;
+
+                          List accountRequests = plan.getAccountRequests();
+                          if(null!=accountRequests){
+                          for (AccountRequest ar : accountRequests) {
+                            AttributeRequest systemPriv = ar.getAttributeRequest("MSSQL_RU_TYPE");
+                            if (systemPriv != null) {
+                              String privString = systemPriv.getValue();
+                              System.out.println (" Before Converting Value:- " + privString);
+                              String newString;
+                              if (privString.equals("NT LOGIN"))
+                              {
+                                newValue = "1";
+                              }
+                              else if(privString.equals("SQL LOGIN"))
+                              {
+                                newValue = "2";
+                              }
+                              else if(privString.equals("DATABASE USER"))
+                              {
+                                newValue = "3";
+                              }
+                              else if(privString.equals("APPLICATION ROLE"))
+                              {
+                                newValue = "4";
+                              }
+                              else if(privString.equals("REMOTE LOGIN"))
+                              {
+                                newValue = "5";
+                              }
+                              System.out.println(" #########################NewValue:######################" + newValue);
+                              systemPriv.setValue(newValue);
+                            }
+
+                          }
+                        }
+
+                        
+                      </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="USER ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="USER ID" minable="true" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" minable="true" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" type="string"/>
+        <AttributeDefinition displayName="Account Type" minable="true" name="MSSQL_RU_TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="Windows NT login type" minable="true" name="MSSQL_NT_ENTITY" required="true" type="string"/>
+        <AttributeDefinition displayName="Windows NT login domain" minable="true" name="MSSQL_NT_DOMAIN" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Database" minable="true" name="DEFAULT_DATABASE" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Langauge" minable="true" name="DEFAULT_LANGUAGE" required="true" type="string"/>
+        <AttributeDefinition displayName="Login Name for DB User" minable="true" name="MSSQL_LOGIN_NAME" required="true" type="string"/>
+        <AttributeDefinition displayName="System Privileges" minable="true" multi="true" name="MSSQL_SYS_PERMISSIONS8" required="true" type="string"/>
+        <AttributeDefinition displayName="Login Name for Remote User" minable="true" name="SERVER_LOGIN_NAME" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="GROUP ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" minable="true" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" minable="true" name="GROUP_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Type" minable="true" name="MSSQL_UG_TYPE" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" minable="true" name="MSSQL_ROLE_DESC" required="true" type="string"/>
+        <AttributeDefinition displayName="System Privileges" minable="true" multi="true" name="MSSQL_SYS_PERMISSIONS8" required="true" type="string"/>
+        <AttributeDefinition displayName="Role-ID" minable="true" name="MSSQL_DB_ROLE_ID" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="USER ID" helpKey="The name should be like (containerName:userName) ex- Local:login1 for sql login , Databases:master:username for dbuser,Remote Servers:ServerName:loginName for remote login user .The format  for NT loin will be (Local:DomainName\userName). The format for NT authority will be (Databases:msdb:NT AUTHORITY\NETWORK SERVICE)" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Container" helpKey="The container name should be (Databases:container name) For DBUSER and NT authority, (Local) for Login user and NT loin,(Remote Servers:ServerName) for remote login" name="USER_OE_PR" required="true" section="" type="string"/>
+        <Field displayName="Account Type" name="MSSQL_RU_TYPE" required="true" type="string">
+          <AllowedValues>
+            <String>NT LOGIN</String>
+            <String>SQL LOGIN</String>
+            <String>DATABASE USER</String>
+            <String>APPLICATION ROLE</String>
+            <String>REMOTE LOGIN</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Login User Name" helpKey="This login user name is mandatory in case of DATABASE USER and REMOTE LOGIN user. Format should be (Local:loginuserName)for DATABASE USER and [remoteservername] for remote user" name="MSSQL_LOGIN_NAME" reviewRequired="true" type="string"/>
+        <Field displayName="System Privileges" helpKey="Grantee#Command#Action" multi="true" name="MSSQL_SYS_PERMISSIONS8" reviewRequired="true" section="" type="string">
+          <AllowedValues>
+            <String>Backup DB#Grant#</String>
+            <String>Backup DB#Revoke#</String>
+            <String>Backup DB#Deny#</String>
+            <String>Backup Log#Revoke#</String>
+            <String>Backup Log#Deny#</String>
+            <String>Create Default#Grant#</String>
+            <String>Create Default#Deny#</String>
+            <String>Create Default#Revoke#</String>
+            <String>Create Database#Grant#</String>
+            <String>Create Database#Deny#</String>
+            <String>Create Database#Revoke#</String>
+            <String>Create Function#Grant#</String>
+            <String>Create Function#Deny#</String>
+            <String>Create Function#Revoke#</String>
+            <String>Create View#Grant#</String>
+            <String>Create View#Deny#</String>
+            <String>Create View#Revoke#</String>
+            <String>Create SP#Grant#</String>
+            <String>Create SP#Deny#</String>
+            <String>Create SP#Revoke#</String>
+            <String>Create Rule#Grant#</String>
+            <String>Create Rule#Deny#</String>
+            <String>Create Rule#Revoke#</String>
+            <String>Create Table#Grant#</String>
+            <String>Create Table#Deny#</String>
+            <String>Create Table#Revoke#</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="GROUP_ID" helpKey="Format for this field is Databases:database-name:group-name" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Parent Group Name" helpKey="Format for this field is Databases:databaseName(Local:databaseName should never be used)" name="GROUP_OE_PR" required="true" section="" type="string"/>
+        <Field displayName="MSSQL_UG_TYPE" helpKey="This field is used to create only Database standard role" name="MSSQL_UG_TYPE" readOnly="true" section="" type="string" value="Database standard role"/>
+        <OwnerDefinition value=""/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="System Privileges" helpKey="Grantee#Command#Action" multi="true" name="MSSQL_SYS_PERMISSIONS8" reviewRequired="true" section="" type="string">
+          <AllowedValues>
+            <String>Backup DB#Grant#</String>
+            <String>Backup DB#Revoke#</String>
+            <String>Backup DB#Deny#</String>
+            <String>Backup Log#Revoke#</String>
+            <String>Backup Log#Deny#</String>
+            <String>Create Default#Grant#</String>
+            <String>Create Default#Deny#</String>
+            <String>Create Default#Revoke#</String>
+            <String>Create Database#Grant#</String>
+            <String>Create Database#Deny#</String>
+            <String>Create Database#Revoke#</String>
+            <String>Create Function#Grant#</String>
+            <String>Create Function#Deny#</String>
+            <String>Create Function#Revoke#</String>
+            <String>Create View#Grant#</String>
+            <String>Create View#Deny#</String>
+            <String>Create View#Revoke#</String>
+            <String>Create SP#Grant#</String>
+            <String>Create SP#Deny#</String>
+            <String>Create SP#Revoke#</String>
+            <String>Create Rule#Grant#</String>
+            <String>Create Rule#Deny#</String>
+            <String>Create Rule#Revoke#</String>
+            <String>Create Table#Grant#</String>
+            <String>Create Table#Deny#</String>
+            <String>Create Table#Revoke#</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

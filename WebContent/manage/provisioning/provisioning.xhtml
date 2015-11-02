@@ -1,0 +1,162 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.prov_title_role_provisioning}</ui:define>
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'PROVISIONING';
+        
+       //--><!]]>
+     </script>
+
+   </ui:define>
+  <ui:define name="body">
+    <f:view>
+      <h:form styleClass="form" id="editForm">  
+      
+      <a4j:outputPanel ajaxRendered="true">
+        <h:messages tooltip="true" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      </a4j:outputPanel>
+      
+        <div class="spContent">
+          <div style="margin:10px">
+
+
+              <ui:fragment rendered="#{provisioning.baseline == null}">
+                <table width='100%'>
+                  <tr align='center'><td><h:outputText class="sectionHeader" value="#{msgs.prov_msg_need_analysis}"/></td></tr>
+                  <tr align='center'><td><h:commandButton id="analyzeButton" value="#{msgs.prov_button_analyze}" action="#{provisioning.analyzeAction}"/></td></tr>
+                </table>
+              </ui:fragment>
+
+              <ui:fragment rendered="#{provisioning.baseline != null}">
+  
+                <table>
+                  <tr><td>
+                    <table>
+                      <tr>
+                        <td>
+                          <h:outputText class="sectionHeader" value="#{msgs.prov_section_analysis_date}"/>
+                        </td>
+                        <td style='padding-left:10px'>
+                          <div class="sectionHeader">
+                            <sp:outputXmlText value="#{provisioning.baseline.created}">
+                              <f:convertDateTime type="both" dateStyle="short" timeStyle="full" timeZone="#{taskSchedules.userTimeZone}"/>
+                            </sp:outputXmlText>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td></tr>
+
+                  <tr><td style='padding-top:20px'/></tr>
+
+                  <tr><td>
+                    <table>
+                      <tr>
+                        <td class='titleColumn'><h:outputText value="#{msgs.prov_label_last_provisioning_date}"/></td>
+                        <td style='padding-left:10px'>
+                          <sp:outputXmlText value="#{provisioning.baseline.previous}">
+                            <f:convertDateTime type="both" dateStyle="short" timeStyle="full" timeZone="#{taskSchedules.userTimeZone}"/>
+                          </sp:outputXmlText>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class='titleColumn'><h:outputText value="#{msgs.prov_label_roles_analyzed}"/></td>
+                        <td style='padding-left:10px'>
+                          <h:outputText value="#{provisioning.baseline.roleCount}"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class='titleColumn'><h:outputText value="#{msgs.prov_label_roles_modified}"/></td>
+                        <td style='padding-left:10px'>
+                          <h:outputText value="#{provisioning.baseline.modifiedRoleCount}"/>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class='titleColumn'><h:outputText value="#{msgs.prov_label_identities_to_provision}"/></td>
+                        <td style='padding-left:10px'>
+                          <h:outputText value="#{provisioning.baseline.identityCount}"/>
+                        </td>
+                      </tr>
+                    </table>
+                  </td></tr>
+
+                  <tr><td style='padding-top:20px'/></tr>
+
+                  <tr><td>
+                    <h:commandButton value="#{msgs.prov_button_provision}" action="#{provisioning.provisionAction}"/>
+                    <h:commandButton value="#{msgs.prov_button_analyze_again}" action="#{provisioning.analyzeAction}"/>
+                    <h:commandButton value="#{msgs.prov_button_clear}" action="#{provisioning.clearAction}"/>
+                  </td></tr>
+
+                </table>
+              </ui:fragment>
+
+          </div>
+        </div>
+        
+        <br/>
+        
+        <!-- Formerly used a4j:commandButtons and rerendered this panel
+             but since we have to rerender the header panel we might just as well
+             use normal commandButtons and refresh the whole page.
+         -->
+        <a4j:outputPanel id="roleList">
+          <ui:fragment rendered="#{provisioning.analyzeComplete}">
+            <div class="spContent">
+              <div style="margin:10px">
+                <ui:include src="roleAnalysisInclude.xhtml"/>
+              </div>
+            </div>
+          </ui:fragment>
+        </a4j:outputPanel>
+        
+      
+      <script defer="defer">
+        <!--//--><![CDATA[//><!--
+
+        function toggleRoleDisplay(id) {
+
+          var elements = [];
+          elements.push($(id + 'Div'));
+
+          if(!$(id+'DetailsRow').visible())
+            $(id+'DetailsRow').style.display='';
+          else if ($(id+'IdentitiesDiv').visible())
+            elements.push($(id + 'IdentitiesDiv'));
+
+          showHideWithLock(elements);
+        }
+
+        function toggleIdentitiesDisplay(id) {
+          if(!$(id+'IdentitiesRow').visible())
+            $(id+'IdentitiesRow').style.display='';
+
+          var elements = [];
+          elements.push($(id + 'IdentitiesDiv'));
+          showHideWithLock(elements);
+        }
+        //--><!]]>
+      </script>
+      
+      </h:form>
+    </f:view>
+  </ui:define>
+  
+</ui:composition>
+
+</body>
+
+</html>

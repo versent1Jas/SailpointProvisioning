@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+
+  <t:saveState value="#{authAnswersBeanParam.preLoginUrl}" />
+
+  <table id="answersTable" class="width100 paddedTbl #{tableClass}">
+    <tbody>
+      <ui:repeat value="#{authAnswersBeanParam.authAnswers}" var="answer">
+        <tr>
+          <td class="titleColumn">
+            <h:outputFormat value="#{msgs.auth_answers_question}">
+              <f:param value="#{answer.index}"/>
+            </h:outputFormat>:
+          </td>
+          <td>
+            <h:selectOneMenu value="#{answer.questionId}">
+              <f:selectItems value="#{authAnswersBeanParam.questions}" />
+            </h:selectOneMenu>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="titleColumn">
+            <h:outputFormat value="#{msgs.auth_answers_answer}">
+              <f:param value="#{answer.index}"/>
+            </h:outputFormat>:
+          </td>
+          <td>
+            <h:inputText value="#{answer.answer}" size="40"/>
+          </td>
+        </tr>
+      </ui:repeat>
+    </tbody>
+  </table>
+  <script defer="defer">
+    makeTableMulticolored($('answersTable'), true, true, 'odd', 'even', null, 0, 0, 2);
+  </script>
+
+</ui:composition>
+
+</body>
+</html>

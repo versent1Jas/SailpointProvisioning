@@ -1,0 +1,2046 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<sailpoint>
+
+<!-- 
+  -
+  - Configuration Form for Provisioning Workflows
+  -
+  - The same form can drive almost all of our
+  - Provisioning workflows we ship out of the box.
+  -
+  - There are four main sections to the configuration forms:
+  -
+  - 1) Approval
+  - 2) Notification
+  - 3) Policy Checking
+  - 4) Advanced
+  -
+  - The main exception to the "one form fits all"
+  - is the Manage Passwords workflow because it 
+  - does not allow for approvals or policy 
+  - checking during password changes. Because
+  - of this they have different forms.
+  -  
+  -->
+<Form name="Provisioning Workflow Config Form" type="WorkflowConfig" hidden="true">
+  <Section label="wf_config_provisioning_approval_section">
+    
+    <Field name="disableApprovals" displayName="wf_config_provisioning_approval_none" 
+           helpKey="help_wf_provisioning_approval_disable" type="boolean" 
+           postBack="true">
+    
+      <Script>
+        <Source>
+          <![CDATA[       
+              import sailpoint.tools.Util;
+                       
+              if ( disableApprovals == void && approvalScheme != void ) {
+                  List approvalSchemeList = Util.asList(approvalScheme);
+                  if ( Util.nullSafeContains(approvalSchemeList, "none") ) {
+                      return true;
+                  }
+              }  
+              return false;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+    
+    <Field name="approvalSchemeField"
+           displayName="wf_config_provisioning_approval_setting"
+           helpKey="help_wf_provisioning_approval_setting"
+           multi="true" 
+           authoritative="true"
+           postBack="true">
+           
+      <Description>
+        This field is dynamic based on the type of workflow,
+        as the approval scheme values is the only real 
+        difference between what we need for Create and 
+        Update vs. normal provisioning. The type
+        is injected into the rule/script context
+        by the WorkflowBean.
+      </Description>
+      
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value="script: sailpoint.tools.Util.otob(disableApprovals)"/>
+          <entry key="ignoreWidth">
+            <value><Boolean>true</Boolean></value>
+          </entry>
+          <entry key="anchorConfig" value="100%"/>
+        </Map>
+      </Attributes>     
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            <![CDATA[
+              import sailpoint.tools.Util;
+              import sailpoint.object.Workflow;
+              
+              List values = new ArrayList();
+              
+              List manager = new ArrayList();
+              manager.add("manager");
+              manager.add("wf_config_provisioning_approval_manager");
+              values.add(manager);
+                 
+              if ( workflowType != void && Util.nullSafeEq(Workflow.TYPE_LCM_IDENTITY, workflowType) ) {
+                  // newManager scheme only makes sense with IIQ approvals
+                  List neu = new ArrayList();
+                  neu.add("newManager");
+                  neu.add("wf_config_provisioning_approval_newmanager");
+                  values.add(neu);             
+              } else {
+                  List owner = new ArrayList();
+                  owner.add("owner");
+                  owner.add("wf_config_provisioning_approval_owner");
+                  values.add(owner);  
+                                 
+                  // security officer could be in the other list too not sure why it isn't
+                  // an option listed in the workflow. Leave it out for now, but might want
+                  // to revisit this.  
+                  List so = new ArrayList();
+                  so.add("securityOfficer");             
+                  so.add("wf_config_provisioning_approval_so");
+                  values.add(so);
+              }
+              return values;
+            ]]>             
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>      
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            List list = null;
+            if ( approvalSchemeField == void && approvalScheme != void ) {
+                if ( disableApprovals == void || !Util.otob(disableApprovals) ) {
+                    list = Util.csvToList(approvalScheme);
+                }
+            }
+            return list;
+          ]]>
+        </Source>
+       </Script>
+       <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && !disableApprovals ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+       
+    </Field>
+
+    <Field name="approvalScheme" 
+           type="string"  
+           hidden="true"         
+           dynamic="true">
+       <Description>
+        This is the value that gets set on the initalizer
+        based on the approvalSchemeField.  Since we 
+        store a csv we do a csv conversion of the 
+        values in approvalScheme field.
+      </Description>
+      
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+
+            String csv = null;
+            if ( approvalSchemeField != void ) {
+                csv = Util.listToCsv(approvalSchemeField);                
+            }
+            if ( disableApprovals != void && Util.otob(disableApprovals) ) {
+                csv = "none";  
+            }
+            return csv;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+    
+    <Field name="approvalEmailTemplate" displayName="wf_config_provisioning_approval_email_template" 
+           helpKey="help_wf_provisioning_approval_template" type="EmailTemplate">
+           
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value="script: approvalSchemeField == null || sailpoint.tools.Util.otob(disableApprovals)"/>
+        </Map>
+      </Attributes>     
+    </Field>
+
+    <Field name="managerElectronicSignature" displayName="wf_config_provisioning_approval_manager_esig"
+           helpKey="help_wf_provisioning_manager_esig" type="string"
+           dynamic="true">
+           
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source>
+                  <![CDATA[
+                    // Hide this field if we are in the LMCIdentity workflow
+                    import sailpoint.tools.Util;            
+                    import sailpoint.object.Workflow;
+                            
+                    if ( Util.otob(disableApprovals) || !Util.nullSafeContains( approvalSchemeField, "manager") || 
+                       ( workflowType != void && Util.nullSafeEq(Workflow.TYPE_LCM_IDENTITY, workflowType) || Util.nullSafeEq(Workflow.TYPE_LCM_SELF_SERVICE_REGISTRATION, workflowType) ) ) {
+                        return true;
+                    }         
+                    return false;
+                  ]]>
+                </Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>     
+      <AllowedValuesDefinition value="script: return sailpoint.workflow.FormUtil.getElectronicSignatureNames(context);"/>
+    </Field>
+    
+    <Field name="approverElectronicSignature" displayName="wf_config_provisioning_approval_approver_esig"
+           helpKey="help_wf_provisioning_approver_esig" type="string"
+           dynamic="true">
+      <Description>This field is only interesting from LCMIdentity and LCMRegistration workflows, hidden otherwise.</Description>           
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source>
+                  <![CDATA[
+                    import sailpoint.tools.Util;
+                    import sailpoint.object.Workflow;
+                    
+                    if ( workflowType != void && Util.nullSafeEq(Workflow.TYPE_LCM_IDENTITY, workflowType) || Util.nullSafeEq(Workflow.TYPE_LCM_SELF_SERVICE_REGISTRATION, workflowType) ) {
+                        if ( Util.otob(disableApprovals) || approvalSchemeField == null ) {
+                            return true;
+                        } 
+                        return false;
+                    }     
+                    return true;
+                  ]]>
+                </Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>      
+      <AllowedValuesDefinition value="script: return sailpoint.workflow.FormUtil.getElectronicSignatureNames(context);"/>
+    </Field>
+
+    <Field name="securityOfficerName" displayName="wf_config_provisioning_approval_security_officer" 
+           helpKey="help_wf_provisioning_securityofficer_name"  type="identity">
+       <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableApprovals) || !sailpoint.tools.Util.nullSafeContains( approvalSchemeField, "securityOfficer");'/>         
+        </Map>
+      </Attributes>  
+    </Field>
+
+    <Field name="securityOfficerElectronicSignature" displayName="wf_config_provisioning_approval_security_esig" 
+           helpKey="help_wf_provisioning_sofficer_esig"  type="string"
+           dynamic="true">
+       <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableApprovals) || !sailpoint.tools.Util.nullSafeContains( approvalSchemeField, "securityOfficer") || sailpoint.tools.Util.nullSafeEq(sailpoint.object.Workflow.TYPE_LCM_SELF_SERVICE_REGISTRATION, workflowType);'/>         
+        </Map>
+      </Attributes> 
+      <AllowedValuesDefinition value="script: return sailpoint.workflow.FormUtil.getElectronicSignatureNames(context);"/>            
+    </Field>
+
+    <Field name="ownerElectronicSignature" displayName="wf_config_provisioning_approval_owner_esig" 
+           helpKey="help_wf_provisioning_owner_esig" type="string"
+           dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableApprovals) || !sailpoint.tools.Util.nullSafeContains( approvalSchemeField, "owner") || sailpoint.tools.Util.nullSafeEq(sailpoint.object.Workflow.TYPE_LCM_SELF_SERVICE_REGISTRATION, workflowType);'/>         
+        </Map>
+      </Attributes>
+      <AllowedValuesDefinition value="script: return sailpoint.workflow.FormUtil.getElectronicSignatureNames(context);"/>
+    </Field>
+
+    <Field name="fallbackApprover" displayName="wf_config_provisioning_approval_fallback_approver" 
+           helpKey="help_wf_provisioning_fallback_approver" type="identity">
+      <Attributes>
+        <Map>
+          <entry key="hidden" value="script: return approvalSchemeField == null || sailpoint.tools.Util.otob(disableApprovals);"/>
+        </Map>
+      </Attributes>
+    </Field>
+
+  </Section>
+  
+  <!--  Notification Section -->
+  <Section label="wf_config_provisioning_notification_section">
+  
+      <Field name="disableNotifications" displayName="wf_config_provisioning_notification_none" 
+             helpKey="help_wf_provisioning_notification_disable" type="boolean" 
+             postBack="true">
+    
+      <Script>
+        <Source>
+          <![CDATA[                
+              import sailpoint.tools.Util;
+          
+              if ( disableNotifications == void && notificationScheme != void ) {
+                  List notificationSchemeList = Util.asList(notificationScheme);
+                  if ( Util.nullSafeContains(notificationSchemeList, "none") ) {
+                      return true;
+                  }
+              }  
+              return false;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+
+    <Field name="notificationSchemeField" displayName="wf_config_provisioning_notification_scheme"
+           helpKey="help_wf_provisioning_notification_scheme"  
+           type="string" multi="true"
+           postBack="true">
+           
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableNotifications);'/>
+        </Map>
+      </Attributes>
+                      
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            <![CDATA[
+              import sailpoint.tools.Util;
+              import sailpoint.object.Workflow;
+              
+              List values = new ArrayList();
+         
+              List manager = new ArrayList();
+              manager.add("manager");
+              manager.add("wf_config_provisioning_notification_manager");
+              values.add(manager);
+              
+              List user = new ArrayList();
+              user.add("user");
+              user.add("wf_config_provisioning_notification_user");
+              values.add(user);
+              
+              if ( !Util.nullSafeEq(Workflow.TYPE_LCM_SELF_SERVICE_REGISTRATION, workflowType) ) {
+                  List requester = new ArrayList();
+                  requester.add("requester");
+                  requester.add("wf_config_provisioning_notification_requester");
+                  values.add(requester);
+              }
+              return values;
+            ]]>             
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.object.Workflow;
+            
+            List list = null;
+            if ( notificationSchemeField == void ) {
+                if ( notificationScheme != void && (disableNotifications != void || !Util.otob(disableNotifications)) ) {
+                    list = Util.csvToList(notificationScheme); 
+                    if ( Util.nullSafeEq(Workflow.TYPE_LCM_SELF_SERVICE_REGISTRATION, workflowType) ) {
+                    
+                    }
+                }
+            }
+            return list;
+          ]]>
+        </Source>
+      </Script>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && !disableNotifications ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>       
+    </Field>
+    
+    <Field name="notificationScheme" hidden="true" 
+           dynamic="true">
+      <Description>
+        This is the value that gets set on the initalizer
+        based on the notificationSchemeField.  Since we 
+        store a csv we do a csv conversion of the 
+        values in approvalScheme field.
+      </Description>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String csv = null;
+            if ( notificationSchemeField != void ) {
+                csv = Util.listToCsv(notificationSchemeField);                
+            }  
+            if ( disableNotifications != void && Util.otob(disableNotifications) ) {
+                csv = "none";
+            }
+            
+            return csv;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+
+    <Field name="userEmailTemplate" displayName="wf_config_provisioning_notification_user_email" 
+           helpKey="help_wf_provisioning_user_template" type="EmailTemplate">
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableNotifications) || !sailpoint.tools.Util.nullSafeContains( notificationSchemeField, "user");'/>
+        </Map>
+      </Attributes>
+    </Field>
+
+    <Field name="requesterEmailTemplate" displayName="wf_config_provisioning_notification_requester_email" 
+           helpKey="help_wf_provisioning_requester_template" type="EmailTemplate">
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableNotifications) || !sailpoint.tools.Util.nullSafeContains( notificationSchemeField, "requester") || sailpoint.tools.Util.nullSafeEq(sailpoint.object.Workflow.TYPE_LCM_SELF_SERVICE_REGISTRATION, workflowType);'/>
+        </Map>
+      </Attributes>
+    </Field>
+
+    <Field name="managerEmailTemplate" displayName="wf_config_provisioning_notification_manager_email" 
+           helpKey="help_wf_provisioning_manager_template" type="EmailTemplate">
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return  sailpoint.tools.Util.otob(disableNotifications) || !sailpoint.tools.Util.nullSafeContains( notificationSchemeField, "manager");'/>
+        </Map>
+      </Attributes>
+    </Field>
+
+  </Section>
+
+  <!--  Policy Section -->
+  <Section label="wf_config_provisioning_policy_section">
+
+    <Field name="policyScheme" displayName="wf_config_provisioning_policy_scheme" 
+           helpKey="help_wf_provisioning_policy_scheme" 
+           type="string" postBack="true">
+
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            <![CDATA[
+              import sailpoint.tools.Util;
+              import sailpoint.object.Workflow;
+
+              List values = new ArrayList();
+         
+              List none = new ArrayList();
+              none.add("none");
+              none.add("wf_config_provisioning_policy_none");
+              values.add(none);
+              
+              List cont = new ArrayList();
+              cont.add("continue");
+              cont.add("wf_config_provisioning_policy_continue");
+              values.add(cont);
+              
+              // Interactive doesn't make sense during LCM Create and Update
+              // OR during Registration since there won't be any 
+              // roles or entitlements assigned
+              if ( !Util.nullSafeEq(Workflow.TYPE_LCM_SELF_SERVICE_REGISTRATION, workflowType) && !Util.nullSafeEq(Workflow.TYPE_LCM_IDENTITY, workflowType) ) {
+                  List interactive = new ArrayList();
+                  interactive.add("interactive");
+                  interactive.add("wf_config_provisioning_policy_interactive");
+                  values.add(interactive);
+              }
+              
+              List fail = new ArrayList();
+              fail.add("fail");
+              fail.add("wf_config_provisioning_policy_fail");
+              values.add(fail);
+              
+              return values;
+            ]]>             
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>
+            
+    </Field>
+
+    <Field name="policiesToCheckField" displayName="wf_config_provisioning_policy_check" 
+           helpKey="help_wf_provisioning_policy_check" 
+           type="string"
+           postBack="true">
+
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.nullSafeEq( policyScheme, "none");'/>
+        </Map>
+      </Attributes> 
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <List>
+              <String>checkAll</String>
+              <String>wf_config_provisioning_policy_all</String>
+            </List>
+            <List>
+              <String>select</String>
+              <String>wf_config_provisioning_policy_selected</String>           
+            </List>            
+          </List>
+        </Value>
+      </AllowedValuesDefinition>   
+      <Script>
+        <Source>
+          <![CDATA[        
+            String val = value;
+
+            if ( policiesToCheckField == void || value == null ) {
+                if ( policiesToCheck != void && policiesToCheck != null 
+                     && !sailpoint.tools.Util.nullSafeEq( policyScheme, "none")) {
+                    val = "select";
+                } else {
+                    val = "checkAll";
+                }                 
+            }
+            return val;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+    
+    <Field name="policiesToCheck" displayName="wf_config_provisioning_policy_policies" 
+           helpKey="help_wf_provisioning_policies" 
+           multi="true" 
+           type="Policy"
+           dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.nullSafeEq( policiesToCheckField, "checkAll") || sailpoint.tools.Util.nullSafeEq( policyScheme, "none");'/>
+          <entry key="ignoreWidth">
+            <value><Boolean>true</Boolean></value>
+          </entry>
+          <entry key="anchorConfig" value="100%"/>
+        </Map>
+      </Attributes>
+      
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && Util.nullSafeEq(policiesToCheckField, "select") 
+              && !Util.nullSafeEq( policyScheme, "none") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+      <Script>
+        <Source>
+          <![CDATA[ 
+          import sailpoint.tools.Util;
+
+          Object val = value;
+          if ( Util.nullSafeEq( policiesToCheckField, "checkAll" ) || policiesToCheckField == null || Util.nullSafeEq( policyScheme, "none" )) {          
+              val = null;
+          }
+          return val;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+    
+    
+  </Section>
+
+  <!--  Advanced Section -->
+  <Section label="wf_config_provisioning_advanced_section">
+  
+    <Field name="workItemPriority" displayName="wf_config_provisioning_advanced_priority" multi="false" 
+            helpKey="help_wf_provisioning_advanced_priority">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <List>
+              <String>Low</String>
+              <String>wf_config_provisioning_priority_low</String>
+            </List>
+            <List>
+              <String>Normal</String>
+              <String>wf_config_provisioning_priority_normal</String>           
+            </List>
+            <List>
+              <String>High</String>
+              <String>wf_config_provisioning_priority_high</String>
+            </List>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+    </Field>
+    
+    <Field name="doRefresh" displayName="wf_config_provisioning_advanced_refresh" helpKey="help_wf_provisioning_refresh" type="boolean"/>
+    <Field name="foregroundProvisioning" displayName="wf_config_provisioning_advanced_foreground" helpKey="help_wf_provisioning_foreground" type="boolean"/>
+    <Field name="trace" displayName="wf_config_provisioning_advanced_trace" helpKey="help_wf_trace" type="boolean"/>
+  </Section>
+
+</Form>
+
+<!-- 
+  -
+  - Configuration Form for LCM Manage Passwords Workflow
+  -
+  - This form is a subset of the form from above, it doesn't
+  - include the Approval or Policy checking options.
+  -
+  -->
+<Form name="LCM Manage Passwords Config Form" type="WorkflowConfig" hidden="true">
+
+  <!--  Notification Section -->
+  <Section label="wf_config_provisioning_notification_section">
+  
+      <Field name="disableNotifications" displayName="wf_config_provisioning_notification_none" 
+             helpKey="help_wf_provisioning_notification_disable" type="boolean" 
+             postBack="true">
+    
+      <Script>
+        <Source>
+          <![CDATA[                
+              import sailpoint.tools.Util;
+          
+              if ( disableNotifications == void && notificationScheme != void ) {
+                  List notificationSchemeList = Util.asList(notificationScheme);
+                  if ( Util.nullSafeContains(notificationSchemeList, "none") ) {
+                      return true;
+                  }
+              }  
+              return false;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+
+    <Field name="notificationSchemeField" displayName="wf_config_provisioning_notification_scheme"
+           helpKey="help_wf_provisioning_notification_scheme"  
+           type="string" multi="true"
+           postBack="true">
+           
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableNotifications);'/>
+        </Map>
+      </Attributes>
+                      
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            <![CDATA[
+              import sailpoint.tools.Util;
+
+              List values = new ArrayList();
+         
+              List manager = new ArrayList();
+              manager.add("manager");
+              manager.add("wf_config_provisioning_notification_manager");
+              values.add(manager);
+              
+              List manager = new ArrayList();
+              manager.add("user");
+              manager.add("wf_config_provisioning_notification_user");
+              values.add(manager);
+              
+              List manager = new ArrayList();
+              manager.add("requester");
+              manager.add("wf_config_provisioning_notification_requester");
+              values.add(manager);
+
+              return values;
+            ]]>             
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            List list = null;
+            if ( notificationSchemeField == void ) {
+                if ( disableNotifications != void || !Util.otob(disableNotifications) ) {
+                    list = Util.csvToList(notificationScheme); 
+                }
+            }
+            return list;
+          ]]>
+        </Source>
+      </Script>
+       
+    </Field>
+    
+    <Field name="notificationScheme" hidden="true" 
+           dynamic="true">
+      <Description>
+        This is the value that gets set on the initalizer
+        based on the notificationSchemeField.  Since we 
+        store a csv we do a csv conversion of the 
+        values in approvalScheme field.
+      </Description>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String csv = null;
+            if ( notificationSchemeField != void ) {
+                csv = Util.listToCsv(notificationSchemeField);                
+            }  
+            if ( disableNotifications != void && Util.otob(disableNotifications) ) {
+                csv = "none";
+            }
+            
+            return csv;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+
+    <Field name="userEmailTemplate" displayName="wf_config_provisioning_notification_user_email" 
+           helpKey="help_wf_provisioning_user_template" type="EmailTemplate">
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableNotifications) || !sailpoint.tools.Util.nullSafeContains( notificationSchemeField, "user");'/>
+        </Map>
+      </Attributes>
+    </Field>
+
+    <Field name="requesterEmailTemplate" displayName="wf_config_provisioning_notification_requester_email" 
+           helpKey="help_wf_provisioning_requester_template" type="EmailTemplate">
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return sailpoint.tools.Util.otob(disableNotifications) || !sailpoint.tools.Util.nullSafeContains( notificationSchemeField, "requester");'/>
+        </Map>
+      </Attributes>
+    </Field>
+
+    <Field name="managerEmailTemplate" displayName="wf_config_provisioning_notification_manager_email" 
+           helpKey="help_wf_provisioning_manager_template" type="EmailTemplate">
+      <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return  sailpoint.tools.Util.otob(disableNotifications) || !sailpoint.tools.Util.nullSafeContains( notificationSchemeField, "manager");'/>
+        </Map>
+      </Attributes>
+    </Field>
+
+  </Section>
+
+  <!--  Advanced Section -->
+  <Section label="wf_config_provisioning_advanced_section">
+  
+    <Field name="workItemPriority" displayName="wf_config_provisioning_advanced_priority" multi="false" 
+            helpKey="help_wf_provisioning_advanced_priority">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <List>
+              <String>Low</String>
+              <String>wf_config_provisioning_priority_low</String>
+            </List>
+            <List>
+              <String>Normal</String>
+              <String>wf_config_provisioning_priority_normal</String>           
+            </List>
+            <List>
+              <String>High</String>
+              <String>wf_config_provisioning_priority_high</String>
+            </List>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+    </Field>
+    
+    <Field name="foregroundProvisioning" displayName="wf_config_provisioning_advanced_foreground" helpKey="help_wf_provisioning_foreground" type="boolean"/>
+    <Field name="trace" displayName="wf_config_provisioning_advanced_trace" helpKey="help_wf_trace" type="boolean"/>
+  </Section>
+
+  
+</Form>
+
+<!-- 
+  -
+  - Configuration Form for Identity Update Workflow
+  -
+  -->
+<Form name="Identity Update Config Form" type="WorkflowConfig" hidden="true">
+  <Section label="wf_config_provisioning_identity_update_section">
+    <Field name="doManualActions" displayName="wf_config_provisioning_advanced_manual_actions" helpKey="help_wf_provisioning_manual_actions" type="boolean"/>
+    <Field name="doRefresh" displayName="wf_config_provisioning_advanced_refresh" helpKey="help_wf_provisioning_refresh" type="boolean"/>
+    <Field name="foregroundProvisioning" displayName="wf_config_provisioning_advanced_foreground" helpKey="help_wf_provisioning_foreground"  type="boolean"/>
+    <Field name="optimisticProvisioning" displayName="wf_config_provisioning_advanced_optimistic" helpKey="help_wf_provisioning_optimistic"  type="boolean"/>
+    <Field name="requireCreateTemplates" displayName="wf_config_provisioning_require_create_template" helpKey="help_wf_provisioning_require_create_template"  type="boolean"/>
+    <Field name="trace" displayName="wf_config_provisioning_advanced_trace" helpKey="help_wf_trace" type="boolean"/> 
+  </Section>
+</Form>
+
+<!-- 
+  -
+  - Configuration Form Approval Step Library
+  -
+  -->
+<Form name="Provisioning Approval Step Form" type="Workflow">
+
+  <Section label="wf_config_provisioning_approval_setting">
+
+    <Field name="approvalOverride" 
+           displayName="wf_config_provisioning_approval_override" 
+           helpKey="help_wf_provisioning_reference_update"
+           type="boolean"
+           postBack="true">       
+
+      <Attributes>
+        <Map>
+          <entry key="hidden" value='script: return !stepDTO.isArgReference("approvalScheme");'/>
+        </Map>
+      </Attributes>   
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            if ( approvalScheme != void && approvalScheme != null && stepDTO.isArgReference("approvalScheme") &&  sailpoint.workflow.FormUtil.isFieldEqual(approvalScheme, "approvalScheme", stepDTO)) {
+               return false;
+            }
+            return true;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+
+    <Field name="approvalSchemeField"
+           displayName="wf_config_provisioning_approval_approver"
+           helpKey="help_wf_provisioning_approval_setting"
+           postBack="true"           
+           multi="true"> 
+           
+      <Description>
+        This field is dynamic based on the type of workflow,
+        as the approval scheme values is the only real 
+        difference between what we need for Create and 
+        Update vs. normal provisioning. The type
+        is injected into the rule/script context
+        by the WorkflowBean.
+      </Description>
+      
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="script: return !approvalOverride;"/>         
+        </Map>
+      </Attributes>
+    
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            <![CDATA[
+              import sailpoint.tools.Util;
+              
+              List values = new ArrayList();                           
+
+              List manager = new ArrayList();
+              manager.add("manager");
+              manager.add("wf_config_provisioning_approval_manager");
+              values.add(manager);
+
+              List owner = new ArrayList();
+              owner.add("owner");
+              owner.add("wf_config_provisioning_approval_owner");
+              values.add(owner);
+             
+              List identity = new ArrayList();
+              identity.add("identity");
+              identity.add("wf_config_provisioning_approval_identityOrWorkgroup");
+              values.add(identity);
+                                 
+              List so = new ArrayList();
+              so.add("securityOfficer");             
+              so.add("wf_config_provisioning_approval_so");
+              values.add(so);
+
+              return values;
+            ]]>             
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>      
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            List list = null;
+            if ( approvalSchemeField == void && approvalScheme != void ) {
+                if ( approvalSchemeField != null && Util.otob(approvalOverride)) {
+                    list = Util.csvToList(approvalScheme);
+                } 
+            }                
+            return list;
+          ]]>
+        </Source>
+      </Script>
+             
+    </Field>
+        
+    <Field name="approvalScheme" 
+           type="string"  
+           hidden="true"       
+           dynamic="true">
+       <Description>
+        This is the value that gets set on the arg value.
+      </Description>
+      
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+
+            String csv = null;
+
+            if ( approvalSchemeField != void ) {
+                csv = Util.listToCsv(approvalSchemeField);                
+                if ( approvalOverride != void && !Util.otob(approvalOverride) ) {
+                    csv = stepDTO.getArgScript("approvalScheme");
+                    if ( approvalSchemeField != null ) {
+                        approvalSchemeField.clear();
+                    }
+                }
+            }
+            
+            return csv;
+          ]]>
+        </Source>
+      </Script>
+     </Field>
+           
+    <Field name="approvingIdentities" displayName="wf_config_provisioning_approval_identityOrWorkgroup_label" 
+           helpKey="help_wf_provisioning_identities_scheme" 
+           multi="true" 
+           type="identity">
+       <Attributes>
+        <Map>
+          <entry key="hidden" 
+                 value='script: return !sailpoint.tools.Util.nullSafeContains( approvalSchemeField, "identity");'/>         
+        </Map>
+      </Attributes>
+
+    </Field>
+        
+    <Field name="securityOfficerName" 
+           displayName="wf_config_provisioning_approval_security_officer" 
+           helpKey="help_wf_provisioning_securityofficer_name" type="identity"
+           dynamic="true">
+ 
+       <Attributes>
+        <Map>
+          <entry key="hidden" value='script: return !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "securityOfficer");'/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "securityOfficer")  ) {
+                    val = null;
+                } 
+            }
+            return val;
+          ]]>
+        </Source>
+      </Script>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && Util.nullSafeContains(approvalSchemeField, "securityOfficer") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>    
+
+    <Field  name="fallbackApprover"  displayName="wf_config_provisioning_approval_fallback_approver" 
+            dynamic="true" helpKey="help_wf_provisioning_fallback_approver"
+            type="identity">
+      <Attributes>
+        <Map>
+          <entry key="extraRecords" value='script: sailpoint.workflow.FormUtil.buildExtraFields(field, stepDTO, locale);'/>     
+          <entry key="hidden" value='script: return approvalSchemeField == null || sailpoint.tools.Util.nullSafeContains( approvalSchemeField, "none");'/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>
+         <![CDATA[
+           return value;
+          ]]>
+        </Source> 
+      </Script>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && approvalSchemeField != null || Util.nullSafeContains(approvalSchemeField, "none") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>    
+
+  </Section>
+  
+  <Section label="wf_config_provisioning_approval_notification_section">
+    <Attributes>
+      <Map>     
+        <entry key="hidden" value="script: approvalSchemeField == null"/>
+      </Map>
+    </Attributes>  
+   
+    <Field name="managerEmailTemplate" displayName="wf_config_provisioning_approval_manager_email" 
+           helpKey="help_wf_provisioning_manager_approval_emailtemplate" type="EmailTemplate" dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key="hidden" value='script: return ( approvalSchemeField == null || !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "manager") )'/>
+          <entry key="extraRecords" value='script: sailpoint.workflow.FormUtil.buildExtraFields(field, stepDTO, locale);'/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "manager") ) {
+                    val = null;
+                } 
+            }
+            return val;
+          ]]>
+        </Source> 
+      </Script>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && Util.nullSafeContains(approvalSchemeField, "manager") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>
+       
+    <Field name="ownerEmailTemplate" displayName="wf_config_provisioning_approval_owner_email" 
+           helpKey="help_wf_provisioning_owner_approval_emailtemplate" type="EmailTemplate"
+           dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key="hidden" value='script: approvalSchemeField == null || !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "owner")'/>
+          <entry key="extraRecords" value='script: sailpoint.workflow.FormUtil.buildExtraFields(field, stepDTO, locale);'/>                    
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>
+         <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "owner")  ) {
+                    val = null;
+                } 
+            }
+            return val;
+          ]]>
+        </Source> 
+      </Script>  
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && Util.nullSafeContains(approvalSchemeField, "owner") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>     
+    </Field>
+    
+    <Field name="securityOfficerEmailTemplate" displayName="wf_config_provisioning_approval_so_email" 
+           helpKey="help_wf_provisioning_so_approval_emailtemplate" type="EmailTemplate"
+           dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key="hidden" value='script: approvalSchemeField == null || !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "securityOfficer")'/>
+          <entry key="extraRecords" value='script: sailpoint.workflow.FormUtil.buildExtraFields(field, stepDTO, locale);'/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>
+         <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "securityOfficer")  ) {
+                    val = null;
+                } 
+            }
+            return val;
+          ]]>
+        </Source> 
+      </Script>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && Util.nullSafeContains(approvalSchemeField, "securityOfficer") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript> 
+    </Field>
+        
+    <Field name="identityEmailTemplate" displayName="wf_config_provisioning_approval_identity_email" 
+           helpKey="help_wf_provisioning_identity_approval_emailtemplate" type="EmailTemplate"
+           dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key="hidden" value='script: approvalSchemeField == null || !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "identity")'/>
+        </Map>
+      </Attributes>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && Util.nullSafeContains(approvalSchemeField, "identity") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>  
+      <Script>
+        <Source>
+         <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "identity")  ) {
+                    val = null;
+                } 
+            }
+            return val;
+          ]]>
+        </Source> 
+      </Script>  
+    </Field>
+  </Section>
+  
+  <Section label="wf_config_provisioning_approval_electronic_sig_section">
+    <Attributes>
+      <Map>     
+        <entry key="hidden" value="script: approvalSchemeField == null"/>
+      </Map>
+    </Attributes> 
+            
+    <Field name="managerElectronicSignature" displayName="wf_config_provisioning_approval_manager_esig"
+           helpKey="help_wf_provisioning_manager_esig" type="string"
+           dynamic="true">
+
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: return ( approvalSchemeField == null || !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "manager") )'/>
+        </Map>
+      </Attributes>   
+
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            import sailpoint.workflow.FormUtil;
+            return FormUtil.getStepElectronicSignatureNames(context, field, stepDTO, locale);
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "manager") ) {
+                    val = null;
+                } 
+            }
+            return val;
+          ]]>
+        </Source>
+       </Script>
+    </Field>
+
+    <Field name="ownerElectronicSignature" displayName="wf_config_provisioning_approval_owner_esig"
+           helpKey="help_wf_provisioning_owner_esig" type="string"
+           dynamic="true">
+
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: approvalSchemeField == null || !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "owner")'/>
+        </Map>
+      </Attributes>
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            import sailpoint.workflow.FormUtil;
+            return FormUtil.getStepElectronicSignatureNames(context, field, stepDTO, locale);
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "owner")  ) {
+                    val = null;
+                } 
+            }
+            return val;
+          ]]>
+        </Source> 
+      </Script>
+      
+    </Field>
+    
+    <Field name="securityOfficerElectronicSignature" displayName="wf_config_provisioning_approval_security_esig"
+           helpKey="help_wf_provisioning_sofficer_esig" type="string"
+           dynamic="true">
+
+      <Attributes>
+        <Map>     
+          <entry key="displayName" value="wf_config_provisioning_approval_security_esig1"/>
+          <entry key="hidden" value='script: approvalSchemeField == null || !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "securityOfficer")'/>
+        </Map>
+      </Attributes>
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            import sailpoint.workflow.FormUtil;
+            return FormUtil.getStepElectronicSignatureNames(context, field, stepDTO, locale);
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>   
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "securityOfficer")  ) {
+                    val = null;
+                } 
+            }
+            return val;
+          ]]>
+        </Source> 
+      </Script>         
+    </Field>
+    
+    <Field name="identityElectronicSignature" displayName="wf_config_provisioning_approval_identity_esig"
+           helpKey="help_wf_provisioning_identity_esig" type="string"
+           dynamic="true">
+
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: approvalSchemeField == null || !sailpoint.tools.Util.nullSafeContains(approvalSchemeField, "identity")'/>
+        </Map>
+      </Attributes>   
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            import sailpoint.workflow.FormUtil;
+            return FormUtil.getStepElectronicSignatureNames(context, field, stepDTO, locale);
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( value != null && stepDTO.isLiteral(field.getName() ) ) {
+                if ( Util.otob(approvalOverride) && !Util.nullSafeContains(approvalSchemeField, "identity")  ) {
+                    val = null;
+                } 
+            }
+            return val;;
+          ]]>
+        </Source> 
+      </Script>
+    </Field>
+    
+  </Section>
+  
+  <Section label="wf_config_provisioning_approval_reminders_title">
+  
+    <Field name="approvalEscalation" displayName="wf_config_provisioning_approval_reminder_setting" 
+           helpKey="help_wf_provisioning_approval_escalation_setting" 
+           type="string" postBack="true">
+
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <List>
+              <String>none</String>
+              <String>wf_config_provisioning_approval_reminder_setting_none</String>
+            </List>
+            <List>
+              <String>sendReminders</String>
+              <String>wf_config_provisioning_approval_reminder_setting_remind</String>           
+            </List>
+            <List>
+              <String>escalateOnly</String>
+              <String>wf_config_provisioning_approval_reminder_setting_escalate</String>           
+            </List>
+            <List>
+              <String>reminderEsclate</String>
+              <String>wf_config_provisioning_approval_reminder_setting_reminder_escalate</String>           
+            </List>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            // dafault to none
+            String val = "none";
+            boolean reminderTemplateEnabled = false;
+            boolean workItemEscalationRuleEnabled = false;
+            
+            if ( workItemReminderTemplate != void && workItemReminderTemplate != null ) {
+                reminderTemplateEnabled = true;
+            }
+            
+            if ( workItemEscalationRule != void && workItemEscalationRule != null ) {
+                workItemEscalationRuleEnabled = true;
+            }
+            
+            if ( reminderTemplateEnabled ) {
+                val = "sendReminders";
+            } 
+            
+            if ( workItemEscalationRuleEnabled && !reminderTemplateEnabled ) {
+                val = "escalateOnly";
+            }
+            
+            if ( reminderTemplateEnabled && workItemEscalationRuleEnabled ) { 
+                val = "reminderEsclate";
+            }
+            
+            return val;
+          ]]>
+        </Source>
+      </Script>            
+    </Field>
+    
+    <Field name="workItemReminderTemplate" displayName="wf_config_provisioning_approval_reminder_template" 
+           helpKey="help_wf_provisioning_approval_reminder_email" type="EmailTemplate"
+           dynamic="true">
+           
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: return approvalEscalation == null || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "none") || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "escalateOnly")'/>
+        </Map>
+      </Attributes> 
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+
+            String val = value;
+            if ( approvalEscalation == null || Util.nullSafeEq(approvalEscalation, "none") || Util.nullSafeEq(approvalEscalation, "escalateOnly") ) {
+               val = "";
+            } 
+            return val;
+          ]]>
+        </Source>
+      </Script>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && approvalEscalation != null && !Util.nullSafeEq(approvalEscalation, "none") && !Util.nullSafeEq(approvalEscalation, "escalateOnly") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>
+    
+    <Field name="workItemDaysBeforeReminderField" displayName="wf_config_provisioning_approval_reminder_days" 
+           helpKey="help_wf_provisioning_approval_reminder_days"
+           dynamic="true" >
+           
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: return approvalEscalation == null || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "none") || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "escalateOnly")'/>
+        </Map>
+      </Attributes>  
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.workflow.FormUtil;
+
+            String val = value;
+            if ( workItemDaysBeforeReminderField == void && value == null && workItemHoursTillEscalation != void ) {
+                if ( Util.atoi(workItemHoursTillEscalation) > 0 ) {            
+                    val = FormUtil.convertHoursToDays(workItemHoursTillEscalation);
+                } else {
+                    val = workItemHoursTillEscalation;
+                }
+            }             
+            if ( approvalEscalation == null || Util.nullSafeEq(approvalEscalation, "none") || Util.nullSafeEq(approvalEscalation, "escalateOnly") ) {
+               val = "";
+            } 
+            return val;
+          ]]>
+        </Source>
+      </Script> 
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && approvalEscalation != null && !Util.nullSafeEq(approvalEscalation, "none") && !Util.nullSafeEq(approvalEscalation, "escalateOnly") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>  
+    </Field>
+
+    <Field name="workItemDaysBetweenRemindersField" displayName="wf_config_provisioning_approval_reminder_frequency_days" 
+           helpKey="help_wf_provisioning_approval_reminder_frequency_days" 
+           dynamic="true">
+           
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: return approvalEscalation == null || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "none") || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "escalateOnly")'/>
+        </Map>
+      </Attributes>     
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.workflow.FormUtil;
+            import sailpoint.tools.Util;
+
+            String val = value;
+            if ( workItemDaysBetweenRemindersField == void && value == null && workItemHoursBetweenReminders != void ) {
+                if ( Util.atoi(workItemHoursBetweenReminders) > 0 ) {            
+                    val = FormUtil.convertHoursToDays(workItemHoursBetweenReminders);
+                } else {
+                    val = workItemHoursBetweenReminders;
+                }                             
+            } 
+            if ( approvalEscalation == null || Util.nullSafeEq(approvalEscalation, "none") || Util.nullSafeEq(approvalEscalation, "escalateOnly") ) {
+                val = "";
+            }            
+            return val;
+          ]]>
+        </Source>
+      </Script>   
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && approvalEscalation != null && !Util.nullSafeEq(approvalEscalation, "none") && !Util.nullSafeEq(approvalEscalation, "escalateOnly") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>       
+    </Field>
+    
+    <Field name="workItemMaxReminders" displayName="wf_config_provisioning_approval_max_reminders" 
+           helpKey="help_wf_provisioning_approval_max_reminder" 
+           dynamic="true">
+           
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: !sailpoint.tools.Util.nullSafeEq(approvalEscalation, "reminderEsclate");'/>
+        </Map>
+      </Attributes>     
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+
+            Object val = value;
+            if ( !Util.nullSafeEq(approvalEscalation, "reminderEsclate") ) {
+                val = "";
+            }            
+            return val;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+    
+    <Field name='workItemHoursBetweenReminders' 
+           hidden="true" 
+           dynamic="true">
+      <Description>
+         This is the value required by the Workflow engine, using the field above convert the days into hours.
+
+         Workflow.ARG_WORK_ITEM_HOURS_BETWEEN_REMINDERS
+      </Description>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.workflow.FormUtil;
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( workItemDaysBetweenRemindersField != void ) {
+                if ( Util.atoi(workItemDaysBetweenRemindersField) > 0 ) {            
+                    val = FormUtil.convertDaysToHours(workItemDaysBetweenRemindersField);
+                }  else {
+                    val = workItemDaysBetweenRemindersField;
+                }
+            }
+            return val;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+                
+    <Field name="workItemEscalationRule" 
+           filterString='type == "Escalation"'
+           displayName="wf_config_provisioning_approval_escalation_rule"
+           helpKey="help_wf_provisioning_approval_escalation_rule" 
+           dynamic="true"
+           type="rule">
+      
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: return approvalEscalation == null || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "none") || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "sendReminders")'/>
+        </Map>
+      </Attributes>   
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+
+            String val = value;
+            if ( approvalEscalation == null || Util.nullSafeEq(approvalEscalation, "none") || Util.nullSafeEq(approvalEscalation, "sendReminders") ) {
+                val = "";
+            }
+            return val;
+          ]]>
+        </Source>
+      </Script>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && approvalEscalation != null && !Util.nullSafeEq(approvalEscalation, "none") && !Util.nullSafeEq(approvalEscalation, "sendReminders") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>
+    
+    <Field name="workItemEscalationTemplate" displayName="wf_config_provisioning_approval_escalation_template" 
+           helpKey="help_wf_provisioning_approval_escalation_email" type="EmailTemplate"
+           dynamic="true">
+           
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: return approvalEscalation == null || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "none") || sailpoint.tools.Util.nullSafeEq(approvalEscalation, "sendReminders")'/>
+        </Map>
+      </Attributes>     
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+
+            String val = value;
+            if ( approvalEscalation == null || Util.nullSafeEq(approvalEscalation, "none") || Util.nullSafeEq(approvalEscalation, "sendReminders") ) {
+                val = "";
+            }
+            return val;
+          ]]>
+        </Source>
+      </Script>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && approvalEscalation != null && !Util.nullSafeEq(approvalEscalation, "none") && !Util.nullSafeEq(approvalEscalation, "sendReminders") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>
+            
+    <Field name="workItemDaysTillEscalationField" displayName="wf_config_provisioning_approval_max_days_reminders" 
+           helpKey="help_wf_provisioning_approval_max_days_reminder"
+           dynamic="true">           
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value='script: return !sailpoint.tools.Util.nullSafeEq(approvalEscalation, "escalateOnly");'/>
+        </Map>
+      </Attributes>           
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.workflow.FormUtil;
+
+            String val = value;
+            if ( workItemDaysTillEscalationField == void ) {
+                if ( value == null && workItemHoursTillEscalation != void ) {
+                    if ( Util.atoi(workItemHoursTillEscalation) > 0 ) {
+                        val = FormUtil.convertHoursToDays(workItemHoursTillEscalation);
+                    } else {
+                        val = workItemHoursTillEscalation;
+                    }
+                }                              
+            } 
+            
+            if ( approvalEscalation == null || Util.nullSafeEq(approvalEscalation, "none") || Util.nullSafeEq(approvalEscalation, "sendReminders") ) {
+                val = "";
+            }
+            return val;
+          ]]>
+        </Source>
+      </Script>
+       <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && Util.nullSafeEq(approvalEscalation, "escalateOnly") ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>
+           
+    <Field name="workItemHoursTillEscalation"  
+           hidden="true"
+           dynamic="true">
+      <Description>
+         This is required for both escallation AND reminders, don't let the attribute name fool you.
+         
+         The way it works is that the WorkItem has to sit for hoursTillEscalation before the process begins.  
+
+         Then a "clock" starts and on each tick we first send reminders up to maxReminders, then we run the
+         escalation rule to change owners.  After the owner change we send reminders again on each tick 
+         up to maxReminders and then run the escalation rule again.  
+         
+         If the approvalEscalation == sendReminders OR reminderEsclate we use the workItemDaysBeforeReminderField field
+         If the approvalEscalation == escalateOnly we use the workItemDaysTillEscalationField field 
+         
+         We ignore negative number conversion because that represent seconds.
+      </Description>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.workflow.FormUtil;
+            import sailpoint.tools.Util;
+            
+            String val = value;
+            if ( approvalEscalation != void ) {
+                 String toConvert = null;
+                 if ( Util.nullSafeEq(approvalEscalation, "sendReminders") || Util.nullSafeEq(approvalEscalation, "reminderEsclate") ) {
+                     toConvert = workItemDaysBeforeReminderField;
+                 } else
+                 if ( Util.nullSafeEq(approvalEscalation, "escalateOnly") ) {
+                     toConvert = workItemDaysTillEscalationField;
+                 } 
+                 if ( toConvert != null ) {
+                     int i = Util.atoi(toConvert);
+                     // If its negative leave it, can be used to convey seconds
+                     if ( i > 0 ) {
+                         val = FormUtil.convertDaysToHours(toConvert);
+                     } else {
+                         val = toConvert;
+                     }
+                 }
+             }
+             // Clear value if necessary
+             if ( approvalEscalation == null || Util.nullSafeEq(approvalEscalation, "none") ) {
+                 val = null;
+             }
+             return val;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+  </Section>
+  
+  <Section label="wf_config_provisioning_advanced_section">
+  
+    <Field name="approvalMode" displayName="wf_config_provisioning_approval_mode" 
+           helpKey="help_wf_provisioning_approval_mode" 
+           type="string" displayType="radio">
+
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <List>
+              <String>parallelPoll</String>
+              <String>wf_config_provisioning_approval_mode_parallel</String>
+            </List>
+            <List>
+              <String>serialPoll</String>
+              <String>wf_config_provisioning_approval_mode_serial</String>           
+            </List>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>    
+      <Attributes>
+        <Map>     
+          <entry key="hidden" value="script: approvalSchemeField == null"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            
+            String mode = "parallelPoll";
+            if ( current != null ) {
+                mode = current;
+            }             
+            return mode;
+          ]]>
+        </Source>
+      </Script>
+    </Field>
+
+    <Field name="approvalAssignmentRule" 
+           displayName="wf_config_provisioning_approval_assignment_rule"
+           helpKey="help_wf_provisioning_approval_assignment_rule" 
+           type="rule"
+           filterString='type == "ApprovalAssignment"'>
+      <ValidationScript>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+            import sailpoint.tools.Message;
+            import sailpoint.web.messages.MessageKeys;
+            
+            Message error = null;
+            if ( value == null && approvalSchemeField == null && Util.otob(approvalOverride ) ) {
+                Object[] msgParams = { field.getName() };
+                error = new Message(MessageKeys.WF_CONFIG_PROVISIONING_VALIDATE_NULL, msgParams );
+            }  
+            return error;
+          ]]>
+        </Source>
+      </ValidationScript>
+    </Field>
+    
+  </Section>
+  
+</Form>
+
+<!-- 
+  -
+  - Configuration Form for Notifications
+  -
+  -->
+<Form name="Provisioning Notification Step Form" type="Workflow">
+  <Attributes>
+    <Map>
+      <entry key="maxWidth" value="500"/>
+    </Map>
+  </Attributes>
+  <Section label="wf_config_provisioning_notification_section">
+    <Field name="notificationScheme" displayName="wf_config_provisioning_notification_scheme"
+           helpKey="help_wf_provisioning_notification_scheme" 
+           type="string" multi="true"
+           postBack="true">
+      <Attributes>
+        <Map>     
+          <entry key="ignoreWidth">
+            <value><Boolean>true</Boolean></value>
+          </entry>
+          <entry key="anchorConfig" value="100%"/>
+        </Map>
+      </Attributes>     
+      <AllowedValuesDefinition>
+        <Script>
+          <Source>
+            <![CDATA[
+              import sailpoint.tools.Util;
+
+              List values = new ArrayList();
+         
+              val = new ArrayList();
+              val.add("user");
+              val.add("wf_config_provisioning_notification_user");
+              values.add(val);
+
+              val = new ArrayList();
+              val.add("requester");
+              val.add("wf_config_provisioning_notification_requester");
+              values.add(val);
+
+              List val = new ArrayList();
+              val.add("manager");
+              val.add("wf_config_provisioning_notification_manager");
+              values.add(val);
+              
+              val = new ArrayList();
+              val.add("securityOfficer");
+              val.add("wf_config_provisioning_notification_security_officer");
+              values.add(val);
+
+              val = new ArrayList();
+              val.add("otherUsers");
+              val.add("wf_config_provisioning_notification_other_users");
+              values.add(val);
+
+              return values;
+            ]]>             
+          </Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.tools.Util;
+
+            List val = null;
+
+            // References are not supported in this form right now so initialize the value 
+            // to null if we get a reference
+            if ( notificationScheme != void && notificationScheme != null && !notificationScheme.startsWith("ref:")) {
+                val = Util.csvToList(notificationScheme);
+            }
+
+            return val;
+          ]]>
+        </Source>
+      </Script>   
+    </Field>
+
+    <Field name="otherUsersToNotify" displayName="wf_config_provisioning_notification_other_users_names"
+           helpKey="help_wf_provisioning_other_users_names" type="Identity" multi="true" dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key='hidden' value='script: return !sailpoint.tools.Util.nullSafeContains(notificationScheme, "otherUsers")'/>
+          <entry key="ignoreWidth">
+            <value><Boolean>true</Boolean></value>
+          </entry>
+          <entry key="anchorConfig" value="100%"/>
+        </Map>
+      </Attributes>
+    </Field>
+    
+    <Field name="securityOfficerName" displayName="wf_config_provisioning_notification_security_officer_name"
+           helpKey="help_wf_provisioning_securityofficer_name" type="Identity" dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key='hidden' value='script: return !sailpoint.tools.Util.nullSafeContains(notificationScheme, "securityOfficer")'/>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+
+  <Section label="wf_config_email_templates" name="Email Templates">
+    <Attributes>
+      <Map>
+        <entry key='hidden' value='script: return sailpoint.tools.Util.isEmpty(notificationScheme)'/>
+      </Map>
+    </Attributes>
+
+    <Field name="userEmailTemplate" displayName="wf_config_provisioning_notification_user_email"
+           helpKey="help_wf_provisioning_user_template" type="EmailTemplate" dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key='hidden' value='script: return !sailpoint.tools.Util.nullSafeContains(notificationScheme, "user")'/>
+        </Map>
+      </Attributes>
+    </Field>
+    
+    <Field name="requesterEmailTemplate" displayName="wf_config_provisioning_notification_requester_email"
+           helpKey="help_wf_provisioning_requester_template" type="EmailTemplate" dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key='hidden' value='script: return !sailpoint.tools.Util.nullSafeContains(notificationScheme, "requester")'/>
+        </Map>
+      </Attributes>
+    </Field>
+    
+    <Field name="managerEmailTemplate" displayName="wf_config_provisioning_notification_manager_email"
+           helpKey="help_wf_provisioning_manager_template" type="EmailTemplate" dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key='hidden' value='script: return !sailpoint.tools.Util.nullSafeContains(notificationScheme, "manager")'/>
+        </Map>
+      </Attributes>
+    </Field>
+    
+    <Field name="securityOfficerEmailTemplate" displayName="wf_config_provisioning_notification_security_officer_email"
+           helpKey="help_wf_provisioning_securityofficer_template" type="EmailTemplate" dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key='hidden' value='script: return !sailpoint.tools.Util.nullSafeContains(notificationScheme, "securityOfficer")'/>
+        </Map>
+      </Attributes>
+    </Field>
+
+    <Field name="otherUsersToNotifyEmailTemplate" displayName="wf_config_provisioning_notification_other_users_email"
+           helpKey="help_wf_provisioning_other_users_template" type="EmailTemplate" dynamic="true">
+      <Attributes>
+        <Map>
+          <entry key='hidden' value='script: return !sailpoint.tools.Util.nullSafeContains(notificationScheme, "otherUsers")'/>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+</Form>
+
+</sailpoint>

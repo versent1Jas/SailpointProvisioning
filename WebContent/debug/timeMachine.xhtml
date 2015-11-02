@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">Debug Pages - Time Machine</ui:define>
+
+  <ui:define name="headerItems">
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:form id="form1">
+      <ui:fragment rendered="#{debug.timeMachine.enabled}">
+        <div>
+          <h:outputText value="Advance By"/>
+          <a4j:outputPanel id="input">
+            <h:inputText id="inputTextHours" value="#{debug.timeMachine.days}" size="3" style="margin-left:5px;"/><h:outputText value="Days" style="margin-left:5px;"/>
+            <h:inputText id="inputTextMinutes" value="#{debug.timeMachine.hours}" size="3" style="margin-left:5px;"/><h:outputText value="Hours" style="margin-left:5px;"/>
+            <h:inputText id="inputTextSeconds" value="#{debug.timeMachine.minutes}" size="3" style="margin-left:5px;"/><h:outputText value="Minutes" style="margin-left:5px;"/>
+          </a4j:outputPanel>
+          <div style="margin-top: 10px;margin-bottom: 10px;">
+            <a4j:commandButton id="advanceButton" value="Advance Time" action="#{debug.timeMachine.advanceTime}" render="output" style="margin-left:5px;"/>
+            <a4j:commandButton id="resetButton" value="Reset" action="#{debug.timeMachine.resetTime}" render="input,output"/>
+          </div>
+        </div>
+        <div>
+          <a4j:outputPanel id="output">
+            <h:outputText id="outputText" value="#{debug.timeMachine.commandOutput}" escape="false"/>
+          </a4j:outputPanel>
+        </div>
+      </ui:fragment>
+      <ui:fragment rendered="#{!debug.timeMachine.enabled}">
+        <h:outputText value="Time Machine is Disabled. You must be an administrator and the configuration setting 'timeMachineEnabled' must be set to use it."/>
+      </ui:fragment>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, UNLOCK, ENABLE, SEARCH" icon="internetIcon" name="Duo" type="Duo">
+    <Attributes>
+      <Map>
+        <entry key="connectorClass" value="openconnector.connector.Duo.DuoConnector"/>
+        <entry key="formPath" value="DuoAttributesForm.xhtml"/>
+        <entry key="testConnectionUri" value="/admin/v1/integrations"/>
+        <entry key="usersUri" value="/admin/v1/users"/>
+        <entry key="groupUri" value="/admin/v1/groups"/>
+        <entry key="enrollUserUri" value="/admin/v1/users/enroll"/>
+        <entry key="groups" value="group_id"/>
+        <entry key="phones" value="number"/>
+        <entry key="tokens" value="token_id"/>
+      </Map>
+    </Attributes>
+  <Schemas>
+    <Schema displayAttribute="username" identityAttribute="user_id" instanceAttribute="" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="username" type="string">
+        <Description>User Name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="status" remediationModificationType="None" type="string">
+        <Description>User Status</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="email" type="string">
+        <Description>Email ID </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_id" type="string">
+        <Description>User ID </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="realname" type="string">
+        <Description>Real Name </Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="notes" type="string">
+        <Description>Notes </Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" schemaObjectType="group"  type="string">
+        <Description>Name of Groups to which the user is connected to</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="phones" type="string">
+        <Description>Phone numbers of Account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="last_login" type="string">
+        <Description>Last login time of Account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="tokens" type="string">
+        <Description>Token for the account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="desktoptokens" type="string">
+        <Description>Desktop tokens for the account</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="name" identityAttribute="group_id" instanceAttribute="" nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="name" type="string">
+        <Description>Group Name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="desc" type="string">
+        <Description>Group Description</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="status" type="string">
+        <Description>Group Status</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="group_id" type="string">
+        <Description>Group ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="voice_enabled" type="boolean">
+        <Description>Voice Enabled Flag</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="sms_enabled" type="boolean">
+        <Description>SMS Enabled Flag</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="mobile_otp_enabled" type="boolean">
+        <Description>Mobile One Time Password Enabled Flag</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="push_enabled" type="boolean">
+        <Description>Push Enabled Flag</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_duo_user_name" filterString="" helpKey="help_con_prov_policy_duo_user_name" name="username" required="true" type="string"/>
+        <Field displayName="con_prov_policy_duo_email" filterString="" helpKey="help_con_prov_policy_duo_email" name="email" required="true" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_duo_real_name" filterString="" helpKey="help_con_prov_policy_duo_real_name" name="realname" type="string"/>
+     </Template>
+     <Template name="Enable Account" schemaObjectType="account" usage="Enable">
+      <Field filterString="" name="status" required="true" reviewRequired="true" type="string">
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>active</String>
+              <String>bypass</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field filterString="" name="enableStatus" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source>ref:status</Source>
+        </Script>
+      </Field>
+    </Template>
+    <Template name="Unlock Account" schemaObjectType="account" usage="Unlock">
+      <Field filterString="" name="status" required="true" reviewRequired="true" type="string">
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>active</String>
+              <String>bypass</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field filterString="" name="enableStatus" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source>ref:status</Source>
+        </Script>
+      </Field>
+    </Template>
+    </Templates>
+  </Application>
+</ImportAction>

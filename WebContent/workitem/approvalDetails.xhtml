@@ -1,0 +1,321 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+
+   THIS FILE IS OBSOLETE AND SHOULD BE DELETED
+
+->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+<ui:composition>
+
+  <br/>
+
+  <c:choose>
+    <!--
+      This section is used when creating a new role from a CandidateRole stored
+      within the work item.  This is the common case used with undirected mining
+      and when creating roles from certifications.
+    -->
+    <c:when test="#{workItem.object.approvalType == 'CandidateRole'}">
+      <h:panelGroup>
+ 
+        <h:outputText styleClass="spContentTitle" value="Candidate Role"/><br/><br/>
+        <h:panelGrid columns="2" columnClasses="titleColumn,leftAlignedColumn">
+  
+          <h:panelGroup>
+            <h:outputText value="Name"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+          <h:inputText id="jfName" value="#{workItem.candidate.name}" size="40"/>
+  
+          <h:panelGroup>
+            <h:outputText value="#{msgs.owner}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+         <sp:suggest id="jfActionOwner"
+                      value="#{workItem.candidate.owner}"
+                      requestParamPrefix="identity"
+                      suggestSource="#{base.requestContextPath}/identity/identitiesSuggest.xmlds"
+                      onchange="jfEditor.setPageDirty(true);">
+            <sp:convertIdentity convertToIdentity="true" />
+          </sp:suggest>
+
+          <h:outputText value="#{msgs.description}"/>
+          <h:inputTextarea value="#{workItem.candidate.description}"
+            cols="40" rows="4" onchange="jfEditor.setPageDirty(true);"/>
+
+        </h:panelGrid>
+
+        <ui:repeat value="#{workItem.candidate.candidateProfiles}" var="profile">
+
+            <br/>
+            <h:outputText styleClass="spContentTitle" value="Profile for #{profile.application.name}"/>
+            <br/><br/>
+
+            <h:panelGrid columns="3" columnClasses="titleColumn,leftAlignedColumn,leftAlignedColumn">
+
+              <sp:outputText value="filter"/>
+              <h:outputText value=" "/>
+              <h:outputText value="#{profile.ruleExpression}"/>
+
+              <sp:outputText value="permissions"/>
+              <h:outputText value=" "/>
+              <h:panelGroup>
+                <ui:repeat value="#{profile.permissions}" var="perm">
+                  <h:outputText value="#{perm.rights} on #{perm.target}"/>
+                </ui:repeat>
+              </h:panelGroup>
+
+            </h:panelGrid>
+        </ui:repeat>
+      </h:panelGroup>
+    </c:when>
+
+    <!--
+      This section is used when creating a new role and the role has
+      already been saved as a Bundle/Profile pair.  Allow the owner,
+      and description to be changed.  On approval the role will be enabled.  
+      
+      This style of approval can only be created within the modeler.
+      NOTE: We decided to disallow role approvals in 2.0, though there
+      is still some support.  You can approve profiles but not roles.
+    -->
+    <c:when test="#{workItem.object.approvalType == 'Role' and workItem.newVersion == null and workItem.approving != null}">
+      <h:panelGroup>
+ 
+        <h:outputText styleClass="spContentTitle" value="#{msgs.new_role}"/><br/><br/>
+        <h:panelGrid columns="2" columnClasses="titleColumn,leftAlignedColumn">
+  
+          <h:panelGroup>
+            <h:outputText value="#{msgs.name}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+          <h:inputText id="jfName" value="#{workItem.approving.name}" size="40"/>
+  
+          <h:outputText value="#{msgs.business_process}"/>
+          <h:inputText value="#{workItem.approving.process.name}" size="40" disabled="true"/>          
+  
+          <h:panelGroup>
+            <h:outputText value="#{msgs.owner}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+          <sp:suggest id="jfActionOwner"
+                       value="#{workItem.approving.owner}"
+                       requestParamPrefix="identity"
+                       suggestSource="#{base.requestContextPath}/identity/identitiesSuggest.xmlds"
+                       onchange="jfEditor.setPageDirty(true);">
+             <sp:convertIdentity convertToIdentity="true" />
+           </sp:suggest>
+
+          <h:outputText value="#{msgs.description}"/>
+          <h:inputTextarea value="#{workItem.approving.description}"
+            cols="40" rows="2" onchange="jfEditor.setPageDirty(true);"/>
+        </h:panelGrid>
+
+        <ui:repeat value="#{workItem.approving.profiles}" var="profile">
+
+            <br/>
+            <h:outputText styleClass="spContentTitle" value="Profile for #{profile.application.name}"/>
+            <br/><br/>
+
+            <h:panelGrid columns="2" columnClasses="titleColumn,leftAlignedColumn">
+      
+              <h:outputText value="#{msgs.name}"/>
+              <h:inputText value="#{profile.name}" size="60"/>
+
+              <h:outputText value="#{msgs.constraints}"/>
+              <h:panelGroup>
+                <ui:repeat value="#{profile.constraints}" var="con">
+                  <h:outputText value="#{con.expression}"/>
+                </ui:repeat>
+              </h:panelGroup>
+            </h:panelGrid>
+     
+        </ui:repeat>
+
+      </h:panelGroup>
+    </c:when>
+
+    <!--
+      This section is used when modifying an existing role, the new version
+      is stored inside the work item.  We don't allow any modifications here,
+      we just present a table summarizing the changes.
+      This style of approval can only come from the modeler.
+    -->
+    <c:when test="#{workItem.object.approvalType == 'Role' and workItem.newVersion != null and workItem.approving != null}">
+      <h:panelGroup>
+ 
+        <br/>
+        <h:outputText styleClass="spContentTitle" value="Modified Role: #{workItem.approving.name}"/><br/><br/>
+
+        <table class="width100"><tr><td><div class="spTabledContent">
+          <table class="spTable" cellspacing="0" id="attributeTbl">
+            <tr>
+              <th>#{msgs.attribute}</th>
+              <th>#{msgs.attr_old_value}</th>
+              <th>#{msgs.attr_new_value}</th>
+            </tr>              
+            <ui:repeat value="#{workItem.roleDifferences.attributeDifferences}" var="diff">
+              <tr>
+                <td><h:outputText value="#{diff.attribute}"/></td>
+                <td><h:outputText value="#{diff.oldValue}"/></td>
+                <td><h:outputText value="#{diff.newValue}"/></td>
+              </tr>
+            </ui:repeat>
+          </table>
+        </div></td></tr></table>
+
+      </h:panelGroup>
+    </c:when>
+
+    <!--
+      This section is used when creating a new profile and the profile has
+      already been stored and is marked disabled.
+    -->
+    <c:when test="#{workItem.object.approvalType == 'Profile' and workItem.newVersion == null and workItem.approving != null}">
+      <h:panelGroup>
+ 
+        <h:outputText styleClass="spContentTitle" value="#{msgs.new_profile}"/><br/><br/>
+
+        <h:panelGrid columns="2" columnClasses="titleColumn,leftAlignedColumn">
+  
+          <h:panelGroup>
+            <h:outputText value="#{msgs.name}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+          <h:inputText id="jfName" value="#{workItem.approving.name}" size="40"/>
+  
+          <h:panelGroup>
+            <h:outputText value="#{msgs.owner}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+          <sp:suggest id="jfActionOwner"
+                       value="#{workItem.approving.owner}"
+                       requestParamPrefix="identity"
+                       suggestSource="#{base.requestContextPath}/identity/identitiesSuggest.xmlds"
+                       onchange="jfEditor.setPageDirty(true);">
+             <sp:convertIdentity convertToIdentity="true" />
+           </sp:suggest>
+
+          <h:outputText value="#{msgs.description}"/>
+          <h:inputTextarea value="#{workItem.approving.description}"
+            cols="40" rows="2" onchange="jfEditor.setPageDirty(true);"/>
+
+          <h:outputText value="#{msgs.application}"/>
+          <h:inputText value="#{workItem.approving.application.name}" size="40" disabled='true'/>
+
+          <h:outputText value="Filters"/>
+          <h:panelGrid columns="1" columnClasses="leftAlignedColumn">
+            <ui:repeat value="#{workItem.approving.constraints}" var="con">
+              <h:outputText value="#{con.expression}"/>
+            </ui:repeat>
+          </h:panelGrid>
+
+          <h:outputText value="#{msgs.permissions}"/>
+          <h:panelGrid columns="1" columnClasses="leftAlignedColumn">
+            <ui:repeat value="#{workItem.approving.permissions}" var="perm">
+              <h:outputText value="#{perm.rights} on #{perm.target}"/>
+            </ui:repeat>
+          </h:panelGrid>
+
+        </h:panelGrid>
+     
+      </h:panelGroup>
+    </c:when>
+
+    <!--
+      This section is used when editing an existing profile.  The new version
+      is stored inside the work item.  We don't allow any modifications, jus thow
+      a table summarizing the pending changes.
+    -->
+    <c:when test="#{workItem.object.approvalType == 'Profile' and workItem.newVersion != null and workItem.approving != null}">
+      <h:panelGroup>
+ 
+        <br/>
+        <h:outputFormat styleClass="spContentTitle" value="#{msgs.modified_named_profile}">
+            <f:param value="#{workItem.approving.name}"/>
+        </h:outputFormat>
+          <br/><br/>
+
+        <ui:fragment rendered="#{workItem.roleDifferences.attributeDifferences != null}">
+          <table class="width100"><tr><td><div class="spTabledContent">
+            <table class="spTable" cellspacing="0" id="attributeTbl">
+              <tr>
+                <th>#{msgs.attribute}</th>
+                <th>#{msgs.old_value}</th>
+                <th>#{msgs.new_value}</th>
+              </tr>              
+              <ui:repeat value="#{workItem.roleDifferences.attributeDifferences}" var="diff">
+                <tr>
+                  <td><h:outputText value="#{diff.attribute}"/></td>
+                  <td><h:outputText value="#{diff.oldValue}"/></td>
+                  <td><h:outputText value="#{diff.newValue}"/></td>
+                </tr>
+              </ui:repeat>
+            </table>
+          </div></td></tr></table>
+        </ui:fragment>
+  
+        <ui:fragment rendered="#{workItem.roleDifferences.filterDifference != null}">
+          <br/>
+          <h:outputText styleClass="spContentTitle" value="#{msgs.filter_changes}"/><br/><br/>
+          <h:panelGrid columns="2" columnClasses="titleColumn,leftAlignedColumn">
+    
+            <h:outputText value="#{msgs.old_filter}"/>
+            <h:inputText value="#{workItem.roleDifferences.filterDifference.oldValue}" size="60" disabled='true'/>
+
+            <h:outputText value="#{msgs.new_filter}"/>
+            <h:inputText value="#{workItem.roleDifferences.filterDifference.newValue}" size="60" disabled='true'/>
+
+          </h:panelGrid>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{workItem.roleDifferences.permissionDifferences != null}">
+          <br/>
+          <h:outputText styleClass="spContentTitle" value="#{msgs.permission_changes}"/><br/><br/>
+          <table class="width100"><tr><td><div class="spTabledContent">
+            <table class="spTable" cellspacing="0" id="attributeTbl">
+              <tr>
+                <th>#{msgs.target}</th>
+                <th>#{msgs.old_rights}</th>
+                <th>#{msgs.new_rights}</th>
+              </tr>              
+              <ui:repeat value="#{workItem.roleDifferences.permissionDifferences}" var="diff">
+                <tr>
+                  <td><h:outputText value="#{diff.attribute}"/></td>
+                  <td><h:outputText value="#{diff.oldValue}"/></td>
+                  <td><h:outputText value="#{diff.newValue}"/></td>
+                </tr>
+              </ui:repeat>
+            </table>
+          </div></td></tr></table>
+        </ui:fragment>
+
+      </h:panelGroup>
+    </c:when>
+
+    <c:otherwise>
+      <h:panelGroup>
+        <h:outputText styleClass="spContentTitle" value="Unknown approval type: #{workItem.object.attributes['approvalType']}"/><br/><br/>
+        <h:outputText styleClass="spContentTitle" value="Object ID: #{workItem.object.attributes['approvalObjectId']}"/><br/><br/>
+        <h:outputText styleClass="spContentTitle" value="Object Name: #{workItem.object.attributes['approvalObjectName']}"/><br/><br/>
+      </h:panelGroup>
+    </c:otherwise>
+
+  </c:choose>
+</ui:composition>
+
+</body>
+</html>
+

@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">#{msgs.title_manage}</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'MANAGE';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages layout="table" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <div class="pageInfo">
+        <div class="instructions">
+          <h:outputText value="#{msgs.inst_manage_index}"/>
+        </div>
+      </div>
+
+      <c:forEach var="rootSubItem" items="#{menu.root.subMenuItems}">
+        <c:if test="#{rootSubItem.path == 'manage/index.jsf'}">
+          <div class="spContent">
+            <div class="spTabledContent">
+              <h:dataTable id="linkTable" styleClass="spTable" cellspacing="0"
+                value="#{rootSubItem.subMenuItems}" var="subMenuItem" >
+                <h:column>
+                  <f:facet name="header">
+                    <h:outputText value="#{msgs.page}" />
+                  </f:facet>
+                  <h:outputLink value="#{subMenuItem.fullPath}">
+                    <h:outputText value="#{sp:localizeKey(subMenuItem.label)}" />
+                  </h:outputLink>
+                </h:column>
+                <h:column>
+                  <f:facet name="header">
+                    <h:outputText value="#{msgs.description}" />
+                  </f:facet>
+                  <h:outputText value="#{sp:localizeKey(subMenuItem.description)}" />
+                </h:column>
+              </h:dataTable>
+              <script>
+                makeTableMulticolored($('linkTable'), true, false, 'even', 'odd');
+              </script>
+            </div>
+          </div>
+        </c:if>
+      </c:forEach>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

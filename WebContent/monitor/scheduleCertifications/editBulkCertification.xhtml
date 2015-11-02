@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <!-- TODO: copy the selectedSourceMapping class so we don't have to reference this here -->
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/systemSetup">
+    <src>system-setup.css</src>
+  </sp:style>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+    var identitiesStore, identitiesGrid;
+    <!--//--><![CDATA[//><!--
+    Ext.onReady(function(){
+        Ext.QuickTips.init();
+
+        var certGroupId = '#{certificationSchedule.certificationGroupId}';
+
+        var storeUrl = CONTEXT_PATH + '/monitor/scheduleCertifications/identityDataSource.json';
+        if (certGroupId != '')
+            storeUrl += "?certGroup=" + certGroupId;    
+
+        // data store
+        identitiesStore = SailPoint.Store.createStore({
+            autoLoad: false,
+            url: storeUrl,
+            root: 'identities',
+            pageSize: 20,
+            fields: ['id', 'name', 'firstname', 'lastname']
+        });
+
+        // display models
+        // NOTE: Columns are not sortable due to a limitation on the 
+        // CertificationScheduleBean.  See CertificationScheduleBean.getIdentitiesToCertify()
+        // for details.
+        var cm = [
+        {
+            header: '#{sp:escapeJavascript(msgs.name)}',
+            dataIndex: 'name', 
+            flex: 1,
+            sortable: false, 
+            hideable: true
+        },{
+            header: '#{sp:escapeJavascript(msgs.firstName)}',
+            dataIndex: 'firstname', 
+            flex: 0.5,
+            sortable: false, 
+            hideable: true
+        },{
+            header: '#{sp:escapeJavascript(msgs.lastName)}',
+            dataIndex: 'lastname', 
+            flex: 0.5,
+            sortable: false, 
+            hideable: true
+        }];
+        
+        identitiesGrid = Ext.create('SailPoint.grid.PagingCheckboxGrid', {
+            id: 'identitiesGrid',
+            renderTo: 'identities-display',
+            pageSize: 20,
+            store: identitiesStore,
+            columns: cm,
+            selModel: new SailPoint.grid.CheckboxSelectionModel({selectMessageBox: Ext.getDom('selectedCount')}),
+            viewConfig : {stripeRows: true},
+            bbar: {
+                xtype : 'pagingtoolbar',
+                store: identitiesStore,
+                displayInfo: true
+            }
+        });
+        
+        identitiesGrid.initialLoad();       
+
+        // suggest component for adding new identities to this cert
+        var idSuggest = Ext.create('SailPoint.IdentitySuggest', {
+            id: 'addedIdentitySuggestCmp',
+            renderTo: 'addedIdentitySuggest',
+            binding: 'addedIdentity',
+            width: 200,
+            listConfig : {width : 300},
+            baseParams: {context: 'Global'}
+        });    
+    }); // Ext.onReady
+   
+    // eliminates right mouse clicks on the row
+    function doNothing(grid, rowIndex, event) {       
+        event.stopEvent();
+    }
+      
+    function updateSelectedIds() { 
+      Ext.getDom('certificationScheduleForm:selectedIdentityIds').value = arrayToString(identitiesGrid.selModel.getSelectedIds(), true);
+    }
+    
+    function updateStore() {
+        identitiesStore.load({params: {start: 0, limit: 20}});       
+        identitiesGrid.deselectAll();
+    }
+    //--><!]]> 
+  </script>
+
+    
+  <h:inputHidden id="selectedIdentityIds" value="#{certificationSchedule.identitiesToRemove}" converter="java.util.List"/>
+
+
+
+  <table id="identitiesTbl" cellpadding="0" cellspacing="0" class="width100 eraseTdPadding">
+    <tr><td colspan="3" class="width100">
+        <a4j:outputPanel id="identityCertPanel">
+          <h:inputHidden id="identitiesCount" value="#{certificationSchedule.identitiesCount}"/>
+          <ui:fragment rendered="#{certificationSchedule.identitiesCount > 0}">
+              <div id="identities-display" style="width: 100%"></div>
+          </ui:fragment>
+          <ui:fragment rendered="#{certificationSchedule.identitiesCount == 0}">
+            <div class="selectedSourceMapping" style="padding: 5px">
+              <div class="spContent">
+                <table class="width100"><tr><td class="centeredColumn spContentTitle">
+                  <h:outputText value="#{msgs.certification_has_no_identities}"/>
+                </td></tr></table>
+              </div>
+            </div>
+          </ui:fragment>
+        </a4j:outputPanel>
+    </td></tr>
+    </table>    
+    
+    <br/>
+        
+        <table>
+          <tr>
+            <td class="centeredColumn">
+              <a4j:commandButton disabled="#{certificationSchedule.existingCertGroup}" value="#{msgs.button_remove_selected_users}" action="#{certificationSchedule.removeUsersFromBulkCertification}" onclick="SailPoint.CertificationScheduleForm.postSubmit(); updateSelectedIds()" oncomplete="updateStore()" styleClass="secondaryBtn" />
+            </td>
+            <td width="215" class="rightAlignedColumn">
+                <div id="addedIdentitySuggest"></div>
+                <t:inputHidden id="addedIdentity" value="#{certificationSchedule.identityToAdd}" forceId="true">
+                    <sp:convertIdentity />
+                </t:inputHidden>
+            </td>
+            <td class="leftAlignedColumn">
+              <a4j:commandButton disabled="#{certificationSchedule.existingCertGroup}"  id="addUserToBulk" value="#{msgs.button_add_user}" action="#{certificationSchedule.addUserToBulkCertification}" onclick="SailPoint.CertificationScheduleForm.postSubmit(); updateSelectedIds()" oncomplete="updateStore()" styleClass="primaryBtn" />
+              <h:message for="addUserToBulk" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+            </td>
+          </tr>
+        </table>
+        
+        <table class="width100">
+          <tr>
+            <td align="left" colspan="3" class="width100">
+              <div id="selectedCount" class="formWarn" style="display:none;margin:3px" />
+            </td>
+          </tr>
+        </table>
+
+</ui:composition>
+
+</body>
+</html>

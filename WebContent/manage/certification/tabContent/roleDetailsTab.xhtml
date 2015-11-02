@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition>
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    <f:view>
+
+      <div style="padding:10px">
+          <ui:fragment rendered="#{null == certification.roleSnapshot}">
+            <div >
+              <h:outputText value="#{msgs.cert_role_comp_details_missing_role}"/>
+            </div>
+          </ui:fragment>
+
+          <ui:fragment rendered="#{null != certification.roleSnapshot}">
+            <div class="spContent">
+
+                <div class="spTabledContent">
+                <table class="spTable width100">
+                    <tr>
+                        <td class="sectionHeader" width="180">#{msgs.cert_role_comp_details_name}</td>
+                        <td>#{certification.roleSnapshot.objectName}</td>
+                    </tr>
+                    <tr>
+                        <td class="sectionHeader">#{msgs.cert_role_comp_details_type}</td>
+                        <td>#{sp:localizeKey(certification.roleSnapshot.typeDisplayName)}</td>
+                    </tr>
+                    <tr>
+                        <td class="sectionHeader">#{msgs.cert_role_comp_details_owner}</td>
+                        <td>#{certification.roleSnapshot.ownerDisplayName}</td>
+                    </tr>
+                    <tr>
+                        <td class="sectionHeader">#{msgs.cert_role_comp_details_scope}</td>
+                        <td><h:outputText rendered="certification.roleSnapshot.scopeDisplayName}"/> </td>
+                    </tr>
+                    <tr>
+                        <td class="sectionHeader">#{msgs.cert_role_comp_details_desc}</td>
+                        <td><h:outputText escape="false" value="#{certification.roleSnapshot.objectDescription}"/></td>
+                    </tr>
+                </table>
+               </div>
+
+              <ui:fragment rendered="#{certification.roleSnapshot.displayableAttributeKeys != null}">
+               <div class="spTabledContent">
+
+                       <span class="sectionHeader">#{msgs.cert_role_comp_details_attribute_hdr}</span>
+                       <table class="spTable width100">
+
+
+
+                            <ui:repeat var="attr" value="#{certification.roleSnapshot.displayableAttributeKeys}">
+                                <tr>
+                                    <td class="sectionHeader" width="180">#{attr}</td>
+                                    <td>#{certification.roleSnapshot.attributes[attr]}</td>
+                                </tr>
+                            </ui:repeat>
+                        </table>
+
+                </div>
+                </ui:fragment>
+            </div>
+          </ui:fragment>
+      </div>
+    </f:view>
+  </ui:composition>
+</html>

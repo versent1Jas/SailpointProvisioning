@@ -1,0 +1,68 @@
+create table identityiq.sptr_cef_export (
+    task_def_id varchar2(128) not null,
+    class_name varchar2(256) not null,
+    start_dt number(19,0) not null,
+    end_dt number(19,0) not null
+);
+
+
+create index identityiq.sptr_idx_export_task on identityiq.sptr_cef_export (task_def_id);
+create index identityiq.sptr_idx_export_class on identityiq.sptr_cef_export (class_name);
+
+create table identityiq.sptr_cef_identity (
+    created_dt timestamp,
+    hostname varchar2(128) not null,
+    cef_version varchar2(128) not null,
+    device_vendor varchar2(128) not null,
+    device_product varchar2(128) not null,
+    device_version varchar2(128) not null,
+    signature_id varchar2(128) not null,
+    name varchar2(128) not null,
+    severity varchar2(128) not null,
+    extension clob,
+    primary key (signature_id)
+);
+
+create table identityiq.sptr_cef_link (
+    created_dt timestamp,
+    hostname varchar2(128) not null,
+    cef_version varchar2(128) not null,
+    device_vendor varchar2(128) not null,
+    device_product varchar2(128) not null,
+    device_version varchar2(128) not null,
+    signature_id varchar2(128) not null,
+    name varchar2(128) not null,
+    severity varchar2(128) not null,
+    extension clob,
+    primary key (signature_id)
+);
+
+
+create table identityiq.sptr_cef_audit_event (
+    created_dt timestamp,
+    hostname varchar2(128) not null,
+    cef_version varchar2(128) not null,
+    device_vendor varchar2(128) not null,
+    device_product varchar2(128) not null,
+    device_version varchar2(128) not null,
+    signature_id varchar2(128) not null,
+    name varchar2(128) not null,
+    severity varchar2(128) not null,
+    extension clob,
+    primary key (signature_id)
+);
+
+create table identityiq.sptr_cef_syslog_event (
+    created_dt timestamp,
+    hostname varchar2(128) not null,
+    cef_version varchar2(128) not null,
+    device_vendor varchar2(128) not null,
+    device_product varchar2(128) not null,
+    device_version varchar2(128) not null,
+    signature_id varchar2(128) not null,
+    name varchar2(128) not null,
+    severity varchar2(128) not null,
+    extension clob,
+    primary key (signature_id)
+);
+

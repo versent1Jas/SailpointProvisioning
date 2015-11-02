@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_policies}</ui:define>
+  
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>menuButton.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/PoliciesGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/menuButton.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" >
+    helpKey = 'POLICIES';
+
+    var sp = new SailPoint.state.StateProvider({
+      stateIds: ['#{policies.gridState.name}'],
+      states:   ['#{policies.gridState.state}']
+    });
+    Ext.state.Manager.setProvider(sp);  
+    
+    var canEdit = #{sp:hasRight(facesContext, 'ManagePolicy')};
+    var typeStore = [
+                     <c:forEach items="#{policies.policyTypes}" var="type" varStatus="vStatus">
+                     <h:outputText rendered="#{!vStatus.first}" value=","/>
+                     ['#{type.value}', '#{type.label}']
+                     </c:forEach>  
+                   ];
+    var typeStore2 = [
+        <c:forEach items="#{policies.policyTypes}" var="type" varStatus="vStatus">
+          <h:outputText rendered="#{!vStatus.first}" value=","/>
+          {value:'#{type.value}', text:'#{type.label}'}
+        </c:forEach>
+    ];
+
+    var fields = ['id', 'name', 'type', 'description', 'state'];
+    
+    Ext.onReady(function(){
+        
+        Ext.QuickTips.init();
+
+        var grid = SailPoint.Define.Grid.Policy.createGrid(fields, #{policies.columnJSON}, '#{policies.gridState.name}', typeStore);
+
+        var viewport = SailPoint.getViewport({
+          bodyContent: grid,
+          title: "#{msgs.title_policy_violations}"
+        });
+        SailPoint.Component.MenuButton.renderMenuButton('#{msgs.create_new_policy}', typeStore2, SailPoint.Define.Grid.Policy.newPolicy, 'newPolicyButton');
+        viewport.doLayout();
+    }); 
+    </script>
+  </ui:define>
+
+  <ui:define name="subtitle">
+    <div id="subtitle" class="highlight">
+    </div>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form styleClass="form" id="policyForm">
+
+        <h:panelGrid id="policyTbl" rendered="true" styleClass="width100" columns="1" cellpadding="0" cellspacing="0">
+          
+          <br/>
+
+          <h:inputHidden id="currentObjectId"
+                         value="#{policies.selectedId}"/>
+
+          <h:commandButton id="editButton" style="display:none"
+                           action="#{policies.editAction}"/>
+
+          <h:commandButton id="deleteButton" style="display:none" 
+                           action="#{policies.deleteAction}"/>
+
+        </h:panelGrid>
+
+        <h:panelGroup styleClass="certificationSaveBtnRow" rendered="#{sp:hasRight(facesContext, 'ManagePolicy')}">
+          
+          <h:inputHidden id="newPolicyType" value="#{policies.newPolicyType}"/>
+          <h:commandButton id="createPolicyButton" style="display:none"
+            action="#{policies.newAction}"/>
+        </h:panelGroup>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>
+

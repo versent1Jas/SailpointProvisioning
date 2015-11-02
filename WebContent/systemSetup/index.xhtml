@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">#{msgs.system_setup}</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'ADVANCED_SETTINGS';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages layout="table" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <div class="pageInfo">
+        <div class="instructions">
+          <h:outputText value="#{msgs.inst_system_index}"/>
+      	</div>
+      </div>
+      
+      <c:forEach var="rootSubItem" items="#{menu.root.subMenuItems}">
+
+        <c:if test="#{rootSubItem.path == 'systemSetup/index.jsf'}">
+          
+            <ui:repeat value="#{rootSubItem.sections}" var="section">
+              <div class="spContent">
+                <h:outputText styleClass="sectionHeader" value="#{sp:localizeKey(section)}" style="margin:5px"/>
+                <table class="width100"><tr><td>
+                <div class="spTabledContent">
+                
+                  <table class="spTable" id="linkTable#{section}">
+                    <tr>
+                      <th width="30%"><h:outputText value="#{msgs.page}" /></th>
+                      <th width="70%"><h:outputText value="#{msgs.description}" /></th>
+                    </tr>
+                    <ui:repeat value="#{rootSubItem.subMenuItems}" var="subMenuItem">
+                      <ui:fragment rendered="#{subMenuItem.section eq section}">
+                        <tr>
+                          <td>
+                            <h:outputLink value="#{subMenuItem.fullPath}">
+                              <h:outputText value="#{sp:localizeKey(subMenuItem.label)}" />
+                            </h:outputLink>
+                          </td>
+                          <td>
+                            <h:outputText value="#{sp:localizeKey(subMenuItem.description)}" />
+                          </td>
+                        </tr>
+                      </ui:fragment>
+                    </ui:repeat>
+                  </table>
+                  <script>
+                    makeTableMulticolored($('linkTable#{section}'), true, false, 'even', 'odd');
+                  </script>
+                </div>
+                </td></tr></table>
+              </div>
+            </ui:repeat>
+          
+        </c:if>
+        
+      </c:forEach>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

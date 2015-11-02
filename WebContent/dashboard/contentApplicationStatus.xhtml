@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+  <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+  <c:choose>
+    <c:when test="#{applicationScorecardList.count gt 0}">
+  
+    <div id="appStatus-grid" style="width:100%"></div>
+    <script type="text/javascript">
+
+      
+      
+      function updateApplicationStatusPanel() {
+        var detailPanel = Ext.getCmp('detailPanel');
+        var template = new Ext.Template($('applicationStatusAjaxPanel'));
+        template.overwrite(detailPanel.body);
+      }
+
+      function updateDetailsPanel(record, appStatusTpl) {
+          if(record) {
+            var detailPanel = Ext.getCmp('detailPanel');
+            appStatusTpl.overwrite(detailPanel.body, record.data);
+            makeTableMulticolored($('appStatusTplTable'), true, false, 'even', 'odd');
+            setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500);
+            detailPanel.doComponentLayout();
+          }
+      }
+
+      var selectedRecord;
+      
+      Ext.onReady(function(){
+
+        var appGridWidth = $('appStatus-grid').clientWidth;
+        Ext.QuickTips.init();
+        
+        var sm = new Ext.selection.RowModel({
+          listeners: { select : function(sm, r, rowIdx) {
+            selectedRecord = r;
+            updateDetailsPanel(r, appStatusTpl);
+          }}
+        });
+
+        var appStatusTplMarkup = [
+          '<table class="spBlueTable font10" id="appStatusTplTable">',
+          '<tr><th class="font10" width="40%">#{msgs.application}</th>',
+          '<th class="font10">{name}</th></tr>',
+          '<tr><td class="font10">#{msgs.label_statistics_updated}</td><td class="font10">{scorecard-created}</td></tr>',        
+          <c:forEach items="#{applicationScorecardList.attributeColumns}" var="col" varStatus="varStatus">
+          '<tr><td class="font10">#{sp:splitCamelCase(col.dataIndex)}</td><td class="font10">{#{col.dataIndex}}</td></tr>',
+          </c:forEach>
+          '</table>'
+        ];
+
+        var blankTpl = new Ext.Template(['<p>#{msgs.msg_please_select_application_details}</p>']);
+        
+        var appStatusTpl = new Ext.Template(appStatusTplMarkup);
+                     
+        var gridMetaData = #{applicationScorecardList.columnJSON};
+        
+        
+        var applicationStatusGridId = '#{applicationScorecardList.gridState.name}';
+        var appStatusStore;
+        var oldGrid = Ext.getCmp(applicationStatusGridId);
+        
+        if (oldGrid) {
+            // If a previously existing grid got rerendered out of existence
+            // we can re-use its store instead of creating a new one.
+            appStatusStore = oldGrid.getStore();
+            // Destroy the old grid to avoid collisions with the new one that we're about to render
+            oldGrid.destroy();
+        } else {
+            appStatusStore = SailPoint.Store.createStore({
+                url: CONTEXT_PATH + '/dashboard/contentApplicationStatusDatasource.json',
+                root: 'results',
+                fields: gridMetaData.fields,
+                remoteSort: true,
+                pageSize: 10
+              });
+        }
+
+        // Whenever we load the store (e.g. from a search) we need to check if the details
+        // panel should be hidden when the results no longer display the item that is detailed.
+        appStatusStore.on('load', function(el, records) {
+            if (selectedRecord) {
+              var record = appStatusStore.findRecord('id', selectedRecord.getId());
+
+              if (record) {
+                updateDetailsPanel(record, appStatusTpl);
+              }
+              else {
+                blankTpl.overwrite(dPanel.body);
+                dPanel.doComponentLayout();
+              }
+            }
+        });
+        
+        // create the grid
+        applicationStatusGrid = new Ext.grid.Panel({
+          id: '#{applicationScorecardList.gridState.name}',
+          cls: 'smallFontGrid selectableGrid wrappingGrid',
+          stateId: '#{applicationScorecardList.gridState.name}',
+          stateful: true,
+          store: appStatusStore,
+          columns : gridMetaData.columns,
+          selModel:sm,
+          viewConfig: {
+            scrollOffset: 0,
+            stripeRows:true
+          },
+          region:'north',
+          split:true,
+          width:appGridWidth,         
+          bbar: {
+              xtype : 'pagingtoolbar',
+              pageSize: 10,
+              store: appStatusStore,
+              displayInfo: true
+          }
+        });
+        
+        var dPanel = new Ext.Panel({
+          id: 'detailPanel',
+          region: 'center',
+          bodyStyle: {
+            background: '#ffffff',
+            padding: '7px'
+          },
+          html: '#{sp:escapeJavascript(msgs.msg_please_select_application_details)}'
+        });
+        
+        var ct = new Ext.Panel({
+          renderTo:'appStatus-grid',
+          width:appGridWidth,
+          items: [applicationStatusGrid, dPanel],
+          tbar: [
+            {
+              xtype : 'searchfield',
+              store:appStatusStore,
+              paramName:'name',
+              storeLimit:10,
+              emptyText:'<h:outputText value="#{msgs.label_filter_by_application_name}"/>',
+              width:250,
+
+              afterClick: function() {
+                var record;
+                if (selectedRecord) {
+                  record = appStatusStore.findRecord('id', selectedRecord.getId());
+                }
+                if (!record) {
+                  selectedRecord = null;
+                  blankTpl.overwrite(dPanel.body);
+                }
+                dPanel.doComponentLayout();
+              }
+          }]
+        });
+
+        appStatusStore.load({params:{start:0, limit:10}});
+    });
+      
+    </script>
+    </c:when>
+    <c:otherwise>
+      <table class="width100" cellpadding="0" cellspacing="0">
+        <tr>
+          <td class="lightBlueBoxHeading" align="center"><h:outputText value="#{msgs.smsg_no_application_statistics}" />
+          </td>
+        </tr>
+      </table>
+    </c:otherwise>
+  </c:choose>
+</ui:composition>
+
+</body>
+</html>

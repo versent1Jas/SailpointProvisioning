@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+<ui:composition>
+  <span id="allowRoleLocalization" style="display:none">#{sp:getSystemConfigurationValue('enableLocalizeRoleDescriptions', false)}</span>
+  <f:view>
+
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    
+    <!-- Initial value for approver suggest  -->
+    <div id="approverSuggestInitialValue" style="display: none">
+        #{roleFromCertification.approver.displayableName}
+    </div>
+
+    <a4j:outputPanel>
+
+    <h:form id="roleFromCertificationForm">
+      <div style="text-align: left">
+        <h:inputHidden id="id" value="#{roleFromCertification.certificationIdentityId}" />
+        <t:saveState id="entitlements" value="#{roleFromCertification.entitlementsByApp}" />
+
+        <a4j:commandButton id="saveRoleBtn" style="display: none" limitRender="true" render="roleFromCertErrorPanel"
+                           action="#{roleFromCertification.saveRole}" oncomplete="Page.fireEvent('roleCreationComplete');Ext.getCmp('RoleDialogWindow').reSizeWindow();" />
+
+        <a4j:outputPanel id="roleFromCertErrorPanel" ajaxRendered="true">
+          <h:inputHidden id="validationErrorDetected" value="#{roleFromCertification.validationErrorDetected}" />
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </a4j:outputPanel>
+  
+        <h:panelGroup>
+          <h:outputText styleClass="requiredText" value="*"/>
+          <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+        </h:panelGroup>
+
+        <h:panelGrid columns="2">
+          <h:panelGroup>
+            <h:outputText class="sectionHeader" value="#{msgs.label_role_name}"/>
+            <h:outputText styleClass="requiredText" value="*"/>
+          </h:panelGroup>
+          <h:inputText id="roleName" value="#{roleFromCertification.roleName}" size="40" />
+    
+          <h:outputText class="sectionHeader" value="#{msgs.label_approver}"/>
+          <h:panelGroup>
+            <div id="approverSuggest"></div>
+            <t:inputHidden id="approver" value="#{roleFromCertification.approver}">
+                <sp:convertIdentity />
+            </t:inputHidden>
+          </h:panelGroup>
+
+          <h:outputText class="sectionHeader" value="#{msgs.create_role_label_type}"/>
+          <h:selectOneMenu id="createdRoleBusinessType" value="#{roleFromCertification.roleType}">
+            <f:selectItems value="#{roleFromCertification.editableRoleTypes}"/>
+          </h:selectOneMenu>
+
+          <h:outputText class="sectionHeader" value="#{msgs.label_description}"/>
+          <div id="roleDescriptionHTML"/>
+          <h:inputHidden value="#{roleFromCertification.descriptionsJSON}" id="jfDescriptionsJSON" escape="false"/>
+        </h:panelGrid>
+  
+        <div style="overflow-y: auto; overflow-x: hidden">
+          <ui:repeat value="#{roleFromCertification.applicationNames}" var="app">
+            <div style="margin-top: 10px">
+              <h:outputText class="sectionHeader" value="#{app}" />
+            
+              <div class="spTabledContent" id="spTabledContent_#{app}">
+                <table style="width: 460px" class="spTable" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th width="5%"/>
+                      <th width="47%"><h:outputText value="#{msgs.name}"/></th>
+                      <th width="47%"><h:outputText value="#{msgs.value}"/></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <ui:repeat value="#{roleFromCertification.entitlementsByApp[app]}" var="entitlement">
+                      <tr class="#{(roleFromCertification.oddOrEvenBoolean) ? 'odd' : 'even'}"> 
+                        <td>
+                          <h:selectBooleanCheckbox value="#{entitlement.selected}" />
+                        </td>
+                        <td><h:outputText value="#{entitlement.attribute}"/></td>
+                        <td><h:outputText value="#{entitlement.value}"/></td>
+                      </tr>
+                    </ui:repeat>
+                  </tbody>
+                </table> 
+              </div>
+            </div>
+          </ui:repeat>
+        </div>
+      </div>
+    </h:form>
+      </a4j:outputPanel>
+  </f:view>
+</ui:composition>
+</body>
+</html>

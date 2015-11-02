@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved.
+#
+# Run the SailPoint IdentityIQ application launcher.
+#
+# The script will try to find the IdentityIQ installation directory
+# automatically by looking relative to the location of this script.  If
+# the SPHOME environment variable is set, then it's value will be used
+# instead.
+#
+# A supported Java runtime must be in the PATH.
+# The sun.lang.ClassLoader.allowArraySyntax option is necessary 
+# if you want to use JDK 1.6.
+
+JAVA_OPTS="-Xms128m -Xmx256m -Dsun.lang.ClassLoader.allowArraySyntax=true -Djava.awt.headless=true"
+
+
+  #
+  # try to find SPHOME if it is not set
+  #
+if [ -z "$SPHOME" ]; then
+  for dir in "`dirname $0`/../.." . .. "`dirname $0`/../../build"; do
+    if [ -f "$dir/WEB-INF/lib/identityiq.jar" -o \
+         -f "$dir/WEB-INF/classes/sailpoint/launch/Launcher.class" ]; then
+      SPHOME="$dir"
+      break
+    fi
+  done
+fi
+
+if [ -z "$SPHOME" ]; then
+  echo "SPHOME is not set and unable to determine the correct value." >&2
+  exit 1
+fi
+
+  #
+  # parse any command line arguments specific to this script
+  #
+DEBUG=""
+if [ "$1" = "-d" ]; then
+  DEBUG="-d"
+  shift
+fi
+
+  #
+  # Set a bootstrap CLASSPATH.  A special classloader will be used to
+  # add the rest of our CLASSPATH.
+  #
+fileSep=":"
+case "`uname`" in
+  CYGWIN*)
+      fileSep=";"
+      SPHOME=`cygpath -w "$SPHOME"`
+      ;;
+esac
+
+if [ -n "$CLASSPATH" ]; then
+  CLASSPATH="${CLASSPATH}${fileSep}"
+fi
+CLASSPATH="${CLASSPATH}${SPHOME}/WEB-INF/classes"
+CLASSPATH="${CLASSPATH}${fileSep}${SPHOME}/WEB-INF/lib/identityiq.jar"
+export CLASSPATH
+
+COMMAND_LINE="java $JAVA_OPTS sailpoint.launch.Launcher $DEBUG ""$@"
+
+[ -n "$DEBUG" ] && echo $COMMAND_LINE >&2
+$COMMAND_LINE

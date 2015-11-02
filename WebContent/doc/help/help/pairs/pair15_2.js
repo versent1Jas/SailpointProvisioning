@@ -1,0 +1,20 @@
+var pairs =
+{
+"how":{"schedule":1}
+,"schedule":{"application":1,"description":1,"certification":1}
+,"application":{"owner":1}
+,"owner":{"certification":1}
+,"certification":{"procedure":1,"schedule":1,"field":1}
+,"procedure":{"lists":1}
+,"lists":{"basic":1}
+,"basic":{"steps":1}
+,"steps":{"required":1}
+,"required":{"launch":1}
+,"launch":{"certification":1}
+,"description":{"option":1}
+,"option":{"available":1}
+,"available":{"page":1}
+,"page":{"schedule":1}
+,"field":{"descriptions":1}
+}
+;Search.control.loadWordPairs(pairs);

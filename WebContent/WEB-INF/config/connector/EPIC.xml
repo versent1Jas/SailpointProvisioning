@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, PASSWORD, ENABLE, SEARCH, UNLOCK" icon="internetIcon" name="EPIC" type="EPIC">
+    <Attributes>
+      <Map>
+        <entry key="CAConnector" value="true"/>
+        <entry key="connectorClass" value="openconnector.connector.EPICConnector"/>
+        <entry key="formPath" value="EPICAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="Name" identityAttribute="UserID" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="Name" remediationModificationType="None" type="string">
+        <Description>Full Name of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="UserID" remediationModificationType="None" type="string">
+        <Description>User Id of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SystemLoginID" remediationModificationType="None" type="string">
+        <Description>Login Id of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="UserAlias" remediationModificationType="None" type="string">
+        <Description>User Alias</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="StartDate" remediationModificationType="None" type="string">
+        <Description>Start date of the user account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="IsPasswordChangeRequired" remediationModificationType="None" type="boolean">
+        <Description>Password Change Required Flag</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="BlockStatus" remediationModificationType="None" type="boolean">
+        <Description>Block status</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EndDate" remediationModificationType="None" type="string">
+        <Description>End date of the user account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DefaultLoginDepartmentID" remediationModificationType="None" type="string">
+        <Description>Name of default login department</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="AuthenticationConfigurationID" remediationModificationType="None" type="string">
+        <Description>Authentication Configuration </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LinkedProviderID" remediationModificationType="None" type="string">
+        <Description>Linked Provider Id of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="LinkedSubtemplateIDs" remediationModificationType="None" type="string">
+       <Description>List of Linked Subtemplate Ids</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="LinkedTemplateID" schemaObjectType="group" type="string">
+        <Description>Linked template Id of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="UserRoles" type="string">
+        <Description>User Roles</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="LinkedTemplateID" identityAttribute="LinkedTemplateID" nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="LinkedTemplateID" remediationModificationType="None" type="string">
+        <Description>Name of the Linked template</Description>
+      </AttributeDefinition>
+    </Schema>
+    </Schemas>
+    <Templates>
+    <Template name="account" schemaObjectType="account" usage="Create">
+       <Field displayName="con_prov_policy_Name" helpKey="help_con_prov_policy_Name" name="Name" required="true" reviewRequired="true" type="string">
+        <Script>
+          <Source>
+                            return identity.getName();
+                          </Source>
+        </Script>
+      </Field>
+      <Field displayName="con_prov_policy_Password" helpKey="help_con_prov_policy_Password" name="password" required="true" reviewRequired="true" type="secret"/>
+      <Field defaultValue="false" displayName="con_prov_policy_IIQDISABLED" helpKey="help_con_prov_policy_IIQ_DISABLED" name="IIQ_DISABLED" reviewRequired="true" type="boolean"/>
+      <Field displayName="con_prov_policy_DefaultloginDept" helpKey="help_con_prov_policy_DefaultLoginDept" name="DefaultLoginDepartmentID" reviewRequired="true" type="string"/>
+      <Field displayName="con_prov_policy_StartDate" helpKey="help_con_prov_policy_StartDate" name="StartDate" reviewRequired="true" type="date"/>
+      <Field displayName="con_prov_policy_EndDate" helpKey="help_con_prov_policy_EndDate" name="EndDate" reviewRequired="true" type="date"/>
+   </Template>
+   </Templates>
+  </Application>
+</ImportAction>

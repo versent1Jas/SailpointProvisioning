@@ -1,0 +1,274 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <Rule language="beanshell" name="WindowsSidTargetCorrelator"
+        type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+      import sailpoint.api.Correlator;
+      import sailpoint.tools.xml.XMLObjectFactory;
+
+      private String ATTR_OBJECT_SID = "objectSid";
+      Map returnMap = new HashMap();
+      if ( isGroup ) {
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE, ATTR_OBJECT_SID);
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, nativeId);
+      } else {
+          returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE, ATTR_OBJECT_SID);
+          returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE_VALUE, nativeId);
+      }
+//System.out.println("Incomming ["+nativeId+"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+      return returnMap;
+      ]]>
+    </Source>
+  </Rule>
+
+<Rule language="beanshell" name="TAM default target correlation rule"
+        type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+      import sailpoint.api.Correlator;
+      import sailpoint.tools.xml.XMLObjectFactory;
+
+      Map returnMap = new HashMap();
+
+      if ( isGroup ) {
+              returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE,"nativeIdentity");
+              returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, nativeId);
+          } else {
+          returnMap.put(Correlator.RULE_RETURN_LINK_IDENTITY, nativeId);
+        }
+       //System.out.println("Incomming ["+nativeId+"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+      return returnMap;
+      ]]>
+    </Source>
+  </Rule>
+<!--  <Rule language="beanshell" name="SharePoint Default Target Correlation"
+        type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+      import sailpoint.api.Correlator;
+      import sailpoint.tools.xml.XMLObjectFactory;
+      import sailpoint.object.ManagedAttribute;
+      import sailpoint.object.Application;
+      import sailpoint.object.Link;
+      import sailpoint.object.Filter;
+      import sailpoint.object.QueryOptions;
+
+      //  The rule gets these inputs:
+      //
+      //  application
+      //  target
+      //  targetSource
+      //  isGroup
+      //  nativeId
+      //
+      //  SharePoint mappings will contain both Domain Users and Groups
+      //  when isGroup == false.  When isGroup == true that indicates
+      //  we are dealing with a SharePoint group.
+      //
+      Map returnMap = new HashMap();
+
+      if ( isGroup ) {
+          // When the association tells us its comming from a group that means
+          // its always a sharepoint group. Since you cannot look up the
+          // groups by ID in SharePoint we require the Id be an extended
+          // attribute
+          Correlator correlator = new Correlator(context);
+          ManagedAttribute group = correlator.findAccountGroupByAttribute(application, "ID", nativeId);
+          if ( group != null)  {
+              returnMap.put(Correlator.RULE_RETURN_GROUP, group );
+          } else {
+              System.out.println("SharePointCorrelationRule did not find group by Id attribute.");
+          }
+      } else {
+          // This could be a domain user OR a domain group
+          // In sharepoint they are both classified as Users
+          // To help us, do a count up front to try and determine
+          // if we are dealing with a Link or ManagedAttribute
+          // The native Identity should match up with the fully qualiifed
+          // sAMAccount name stored on the SharePoint Link
+
+          QueryOptions ops = new QueryOptions();
+          ops.setIgnoreCase(true);
+          ops.addFilter(Filter.ignoreCase(Filter.eq("value", nativeId)));
+          ops.addFilter(Filter.eq("application", application));
+
+          int num = context.countObjects(ManagedAttribute.class, ops);
+          if ( num == 1 ) {
+              AccountGroup group = context.getUniqueObject(ManagedAttribute.class, Filter.and(ops.getRestrictions()));
+              if ( group != null)  {
+                  returnMap.put(Correlator.RULE_RETURN_GROUP, group );
+              }
+          } else {
+              ops = new QueryOptions();
+              ops.setIgnoreCase(true);
+              ops.addFilter(Filter.ignoreCase(Filter.eq("nativeIdentity", nativeId)));
+              ops.addFilter(Filter.eq("application", application));
+              num = context.countObjects(Link.class, ops);
+              if ( num == 1 ) {
+                  // djs: is the count query really interesting?
+                  returnMap.put(Correlator.RULE_RETURN_LINK_IDENTITY, nativeId);
+              }
+          }
+      }
+//System.out.println("Correlation Rule Incomming ["+nativeId+"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+      return returnMap;
+      ]]>
+    </Source>
+  </Rule>
+-->
+
+ <Rule language="beanshell" name="SharePoint Default Target Correlation"
+        type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+      import sailpoint.api.Correlator;
+      import sailpoint.tools.xml.XMLObjectFactory;
+
+      private String ATTR_USER_OBJECT= "AccountName";
+      private String ATTR_GROUP_OBJECT= "DisplayName";
+      Map returnMap = new HashMap();
+
+      if ( isGroup ) {
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE,ATTR_GROUP_OBJECT);
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, nativeId);
+      } 
+      else {
+        returnMap.put(Correlator.RULE_RETURN_LINK_IDENTITY, nativeId);
+      }
+      //System.out.println("Incomming ["+nativeId+"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+      return returnMap;
+        ]]>
+    </Source>
+  </Rule>
+
+ <!-- This rule is applicable for SharePoint Server Version 2007, 2010 with default authentication type set. -->
+  <Rule language="beanshell" name="SharePoint Target Correlation For Active Directory Application"
+        type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+        import sailpoint.api.Correlator;
+        import sailpoint.tools.xml.XMLObjectFactory;
+
+        private String ATTR_OBJECT= "sAMAccountName";
+        Map returnMap = new HashMap();
+
+        private int nIndex = nativeId.indexOf("\\");
+        private String strsAMAccountName =     nativeId.substring(nIndex+1);
+
+        if ( isGroup ) {
+              returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE,ATTR_OBJECT);
+              returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, strsAMAccountName );
+          } else {
+             returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE,ATTR_OBJECT);
+             returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE_VALUE, strsAMAccountName );
+        }
+        System.out.println("Incomming ["+strsAMAccountName +"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+          return returnMap;
+          ]]>
+    </Source>
+  </Rule>
+  
+   <Rule language="beanshell" name="AD STEALTHbits Correlator for SharePoint"
+        type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+      import sailpoint.api.Correlator;
+      import sailpoint.tools.xml.XMLObjectFactory;
+
+      private String ATTR_MSDS_PRINCIPALNAME= "msDS-PrincipalName";
+      Map returnMap = new HashMap();
+
+      if ( isGroup ) {
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE,ATTR_MSDS_PRINCIPALNAME);
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, nativeId);
+      } else {
+             returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE,ATTR_MSDS_PRINCIPALNAME);
+             returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE_VALUE, nativeId );
+      }
+      System.out.println("Incomming ["+nativeId+"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+      return returnMap;
+        ]]>
+    </Source>
+  </Rule>
+  
+ <!-- This rule is applicable for SharePoint 2013 & SharePoint Windows Claim Based Authentication Configured environment. -->  
+  <Rule language="beanshell" name="SharePoint Windows Claim Based Authentication Configured  Environment Target Correlation For Active Directory Application"
+        type="TargetCorrelation">
+    <Source>
+    <![CDATA[
+      import sailpoint.api.Correlator;
+      import sailpoint.tools.xml.XMLObjectFactory;
+
+      private String ATTR_OBJECT_ACCOUNT= "sAMAccountName";
+      private String ATTR_OBJECT_GROUP= "objectSid";
+
+      Map returnMap = new HashMap();
+      private int nIndex =  nativeId.indexOf("|");
+      private String strsVal =nativeId.substring(nIndex+1);
+
+      if ( isGroup ) {    
+            returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE,ATTR_OBJECT_GROUP);
+            returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, strsVal );
+      } else {
+         nIndex = strsVal.indexOf("\\");
+         strsVal  =     strsVal.substring(nIndex+1);
+         returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE,ATTR_OBJECT_ACCOUNT);
+         returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE_VALUE, strsVal );
+      }
+      System.out.println("Incomming ["+ strsVal +"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+        return returnMap;
+    ]]>
+   </Source>
+  </Rule>
+
+  <Rule language="beanshell" name="UNIX Default Target Correlation"
+        type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+      import sailpoint.api.Correlator;
+      import sailpoint.tools.xml.XMLObjectFactory;
+
+      Map returnMap = new HashMap();
+
+      if ( isGroup ) {
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE, "nativeIdentity");
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, nativeId);
+      }
+      else {
+          returnMap.put(Correlator.RULE_RETURN_LINK_IDENTITY, nativeId);
+      }
+
+      return returnMap;
+      ]]>
+    </Source>
+  </Rule>
+
+  <Rule language="beanshell" name="Lieberman Default Target Correlation For Active Directory Application"
+        type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+      import sailpoint.api.Correlator;
+      import sailpoint.tools.xml.XMLObjectFactory;
+
+      private String ATTR_OBJECT_ID = "msDS-PrincipalName";
+      Map returnMap = new HashMap();
+      if ( isGroup ) {
+        returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE, ATTR_OBJECT_ID);
+        returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, nativeId);
+      } else {
+        returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE, ATTR_OBJECT_ID);
+        returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE_VALUE, nativeId);
+      }
+      //System.out.println("Incomming ["+nativeId+"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+
+      return returnMap;
+      ]]>
+    </Source>
+  </Rule>
+</sailpoint>

@@ -1,0 +1,61 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:ui="http://java.sun.com/jsf/facelets">
+  <h:head>
+
+      <sp:script>
+          <src>#{base.requestContextPath}/scripts/json2.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/sailpoint/SailPoint.js?#{debug.revision}</src>
+      </sp:script>
+
+      <script type="text/javascript">
+       <!--//--><![CDATA[//><!--
+
+          Ext.USE_NATIVE_JSON = true;
+          Ext.BLANK_IMAGE_URL = '#{base.requestContextPath}/scripts/ext-4.1.0/resources/themes/images/default/tree/s.gif';
+          SailPoint.CONTEXT_PATH = '#{base.requestContextPath}';
+          SailPoint.SESSION_TIMEOUT = #{login.sessionTimeout};
+
+          /**
+          * Overrides for the Date formats used by ext. We have standard formats
+          * we use on the server side. The formats are localized, then converted to use
+          * the js format symbols.
+          */
+          SailPoint.DateFormat = '#{extjsinternationalizer.extjsDateFormat}';
+          SailPoint.TimeFormat = '#{extjsinternationalizer.extjsTimeFormat}';
+          SailPoint.DateTimeFormat = '#{extjsinternationalizer.extjsDateTimeFormat}';
+
+          Ext.util.Cookies.set('CSRF-TOKEN', '#{base.csrfToken}');
+       
+       //--><!]]>
+       </script>
+
+      <ui:fragment rendered="#{base.loggedIn}">
+        <script type="text/javascript">
+
+          // Stored here so it can be easily accessed globally
+          SailPoint.CURR_DISPLAYABLE_USER_NAME = "#{base.loggedInUser.displayableName}";
+          SailPoint.CURR_USER_NAME = "#{base.loggedInUserName}";
+          SailPoint.CURR_USER_LOCALE = "#{base.locale}";
+          SailPoint.SYSTEM_LOCALE = '#{base.defaultLanguage}';
+          SailPoint.SYSTEM_ADMIN = "#{base.systemAdmin}";
+
+        </script>
+      </ui:fragment>
+
+      <sp:script>
+          <src>#{base.requestContextPath}/scripts/stacktrace.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/sailpoint/component/NoHeaderPanel.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridState.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/sailpoint/model/ReusableStoreModels.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/sailpoint/Store.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/sailpoint/utils/Utils.js?#{debug.revision}</src>
+          <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingToolbar.js?#{debug.revision}</src>
+      </sp:script>
+
+  </h:head>
+</html>

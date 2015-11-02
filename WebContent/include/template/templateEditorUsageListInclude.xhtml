@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition> 
+  <div class="width100" style="margin:5px">
+      
+    <a4j:outputPanel id="templatesList">
+      <table class="" style="width:98%"><tr><td>
+        <h:outputFormat value="#{msgs.template_editor_intro}">
+          <f:param value="#{beanType}"/>
+        </h:outputFormat>
+      </td></tr></table>
+      <div class="spacerDiv"/>
+      <table class="spTable" style="width:98%" id="templateUsageListTbl">
+        <tr>
+          <th width="10%">#{msgs.type}</th>
+          <th>#{msgs.name}</th>
+          <th colspan="2">#{msgs.description}</th>
+        </tr>
+        <ui:repeat value="#{templateEditor.usages}" var="usage">
+          <tr>
+            <td>#{sp:localizedUsage(usage)}</td>
+            <ui:fragment rendered="#{!(sp:mapValue(templateEditor.templateUsageMap, usage) eq null)}">
+            
+              <td width="20%">
+                <a href="javascript:editPolicy('#{sp:mapValue(templateEditor.templateUsageMap, usage).id}', '#{usage}');">
+                  #{(sp:mapValue(templateEditor.templateUsageMap, usage)).name}
+                </a>
+              </td>
+              <td width="60%">#{sp:mapValue(templateEditor.templateUsageMap, usage).description}</td>
+              <td width="10%">
+                <a href="javascript:deletePolicy('#{sp:mapValue(templateEditor.templateUsageMap, usage).id}', '#{usage}');" class="deleteLink">#{msgs.delete_policy}</a>
+              </td>
+            
+            </ui:fragment>
+            
+            <ui:fragment rendered="#{sp:mapValue(templateEditor.templateUsageMap, usage) eq null}">
+            <td width="20%"></td>
+            <td width="60%"></td>
+            <td align="left" width="10%">
+              <a href="javascript:addPolicy('#{sp:mapValue(templateEditor.templateUsageMap, usage).id}', '#{usage}');" class="addLink">#{msgs.add_policy}</a>
+            </td>
+            </ui:fragment>
+          </tr>
+        </ui:repeat>
+      </table>
+        
+      <script type="text/javascript">
+      makeTableMulticolored($('templateUsageListTbl'),true,false, "even", "odd");
+      </script>   
+    </a4j:outputPanel>
+    
+    <div class="spacerDiv"></div>
+    
+    <script type="text/javascript">
+      // Template IDs are wiped out on each request.  The role editor keeps
+      // the TemplateEditBean in the session so it can use IDs.  Others don't
+      // do that so they rely on usages instead.  We're not consistent because
+      // Role templates don't have usages.
+      function addPolicy(templateId, usage) {
+          $('editForm:templateId').value = templateId;
+          $('editForm:templateUsage').value = usage;
+          $('editForm:templateAddBtn').click();
+      }
+
+      function editPolicy(templateId, usage) {
+          $('editForm:templateId').value = templateId;                            
+          $('editForm:templateUsage').value = usage;
+          $('editForm:templateLoadBtn').click();
+      }
+
+      function deletePolicy(templateId, usage) {
+          Ext.MessageBox.confirm('#{msgs.delete}?', Ext.String.format('#{msgs.template_editor_delete_policy}', usage), function(btn){
+              if(btn === 'yes') {
+                  $('editForm:templateUsage').value = usage;
+                  $('editForm:templateDeleteBtn').click();
+              }
+          });
+      }
+    </script>
+    
+    <h:inputHidden value="#{templateEditor.usage}" name="templateUsage" id="templateUsage"/>
+    <a4j:commandButton action="#{templateEditor.addTemplate}"
+                       id="templateAddBtn"
+                       render="templateId,templateName,templateApplicationId,templateApplicationName,templateFields,createAttributesPanel"
+                       oncomplete="SailPoint.template.TemplateEditor.ShowEditorWindow('#{beanType}', $('editForm:templateUsage').value);"
+                       value="#{msgs.template_editor_add_template}"
+                       style="display:none"/>
+                             
+    <a4j:commandButton action="#{templateEditor.deleteTemplate}"
+                       id="templateDeleteBtn"
+                       render="templatesList"
+                       value="#{msgs.template_editor_delete_template}"
+                       style="display:none"/>    
+                       
+    <a4j:commandButton action="#{templateEditor.loadTemplate}"
+                       id="templateLoadBtn"
+                       name="templateLoadBtn"
+                       render="templateId,templateName,templateApplicationId,templateApplicationName,templateFields,createAttributesPanel"
+                       oncomplete="SailPoint.template.TemplateEditor.ShowEditorWindow('#{beanType}', $('editForm:templateUsage').value);"
+                       style="display:none"/> 
+  </div>
+</ui:composition>
+
+</body>
+</html>

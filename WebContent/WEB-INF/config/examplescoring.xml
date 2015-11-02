@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<!-- 
+  Below is an example ScoreDefinition to illustrate how to 
+  create a score definition that could trigger a risk score
+  based on a particular identity attribute's value.
+
+  In this example the score will be set to 500 if 
+  the identity attribute named 'manager' has a value 
+  of dhildrebrand.
+
+  In order for a ScoreDefinition to be displayed in the 
+  UI the disabled flag must be set to false.
+
+  See init.xml for the complete default ScoreConfig object.
+
+  There are two main sections to the ScoreDefinition
+  the Signature and the Attributes.
+
+  The signature is used when editing a definition from
+  the Define->Identity Risk Model->Composite Scoring page.
+  When you click on the shortname of a score definition
+  it uses the signature to figure out which configuration
+  parameters should be collected to configure the 
+  definition. In this example we want to collect
+  the name of the attribute, the value of the attribute
+  and the score that should be assigned when the
+  name value pair are found.
+
+  The attributes are the values that are collected when
+  the signature is displayed. These values are 
+  used by the executor to assign compute. In this
+  example we are looking for an identity attribute named
+  manager where the value is equal to dhildebrand and
+  we will assign a score of 500 if its found.
+-->
+<sailpoint>
+
+  <ImportAction name='merge'>
+    <ScoreConfig name='ScoreConfig' maximumNumberOfBands='6' maximumScore='1000
+'>
+      <IdentityScores>
+        <ScoreDefinition name='Example Attribute Score'
+                         disabled='true'
+                         shortName='Manager'
+                         scoreName='example'
+                         scorer='sailpoint.score.IdentityAttributeScorer'
+                         weight='25'
+                         component='true'
+                         configPage='gotoCustomScorePage'>
+          <Description>
+              A example score calculated based on the value of an identity attribute.
+          </Description>
+          <Signature>
+            <Inputs>
+              <Argument name='attribute' type='string' required='true'
+                      helpKey='help_risk_custom_attribute'>
+                      <Prompt>Attribute name:</Prompt>
+              </Argument>
+              <Argument name='value' type='string' 
+                        required='true' helpKey='help_risk_custom_value'>
+                <Prompt>Attribute value:</Prompt>
+              </Argument>
+              <Argument name='score' type='int' helpKey='help_risk_custom_score'>
+                <Prompt>Risk Score:</Prompt>
+              </Argument>
+            </Inputs>
+          </Signature>
+          <Attributes>
+            <Map>
+              <entry key="attribute" value="manager"/>
+              <entry key="value" value="dhildebrand"/>
+              <entry key="score" value="500"/>
+            </Map>
+          </Attributes>
+        </ScoreDefinition>
+      </IdentityScores>
+    </ScoreConfig>
+  </ImportAction>
+</sailpoint>

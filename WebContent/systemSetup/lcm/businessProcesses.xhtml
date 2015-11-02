@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <div id="businessProcesses" class="spBackground">
+      <div class="paddedContainer">
+        <table id="businessProcessesTable" class="spTable width100">
+          <tr>
+            <th colspan="2"><h:outputText value="#{msgs.sys_config_lifecycle_action}"/></th>
+            <th><h:outputText value="#{msgs.sys_config_lifecycle_workflow}"/></th>
+          </tr>
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_request_access}"/></td>
+            <td style="width:30px">
+              <h:graphicImage id="imgHlpRequestAccessWorkflow" width="12px" 
+                              alt="#{help.help_lcm_request_access_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+              <h:selectOneMenu id="requestAccessBusinessProcess" value="#{lcmConfig.workflows['workflowLCMAccessRequest']}">
+                <f:selectItems value="#{lcmConfig.LCMProvisioningWorkflows}" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_manage_accounts}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpManageAccountsWorkflow" width="12px" 
+                              alt="#{help.help_lcm_manage_accounts_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+               <h:selectOneMenu id="manageAccountsBusinessProcess" value="#{lcmConfig.workflows['workflowLCMAccountsRequest']}">
+                 <f:selectItems value="#{lcmConfig.LCMProvisioningWorkflows}" />
+               </h:selectOneMenu>
+            </td>
+          </tr>
+          <!--  begin: unlock account -->
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_unlock_account}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpUnlockAccountWorkflow" width="12px" 
+                              alt="#{help.help_lcm_unlock_account_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+               <h:selectOneMenu id="unlockAccountBusinessProcess" value="#{lcmConfig.workflows['workflowLCMUnlockAccount']}">
+                 <f:selectItems value="#{lcmConfig.LCMProvisioningWorkflows}" />
+               </h:selectOneMenu>
+            </td>
+          </tr>
+          <!--  end: unlock accont -->
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_manage_passwords}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpPasswordsRequestsWorkflow" width="12px" 
+                              alt="#{help.help_lcm_password_requests_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+              <h:selectOneMenu id="managePasswordsBusinessProcess" value="#{lcmConfig.workflows['workflowLCMPasswordsRequest']}">
+                <f:selectItems value="#{lcmConfig.LCMProvisioningWorkflows}" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_edit_identity}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpEditIdentityWorkflow" width="12px" 
+                              alt="#{help.help_lcm_edit_identity_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+              <h:selectOneMenu id="editIdentityBusinessProcess" value="#{lcmConfig.workflows['workflowLCMIdentityEditRequest']}">
+                <f:selectItems value="#{lcmConfig.LCMIdentityWorkflows}" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_create_identity}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpCreateIdentityWorkflow" width="12px" 
+                              alt="#{help.help_lcm_create_identity_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+              <h:selectOneMenu id="createIdentityBusinessProcess" value="#{lcmConfig.workflows['workflowLCMIdentityCreateRequest']}">
+                <f:selectItems value="#{lcmConfig.LCMIdentityWorkflows}" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+              <td><h:outputText value="#{msgs.quicklink_self_service_registration}"/></td>
+              <td style="width:30px">
+                  <h:graphicImage id="imgHlpSelfServiceRegistration" width="12px"
+                                  alt="#{help.help_self_service_registration}"
+                                  height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                                  url="/images/icons/dashboard_help_16.png" />
+              </td>
+              <td>
+                  <h:selectOneMenu id="selfServiceRegistrationBusinessProcess" value="#{lcmConfig.workflows['workflowLCMSelfServiceRegistrationRequest']}">
+                      <f:selectItems value="#{lcmConfig.selfServiceRegistrationWorkflows}" />
+                  </h:selectOneMenu>
+              </td>
+          </tr>
+
+          <!-- batch provisioning request workflow configurations -->
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_batch_request_access}"/></td>
+            <td style="width:30px">
+              <h:graphicImage id="imgHlpBatchRequestAccessWorkflow" width="12px" 
+                              alt="#{help.help_batch_request_access_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+              <h:selectOneMenu id="batchRequestAccessBusinessProcess" value="#{lcmConfig.batchWorkflows['batchRequestAccessRequest']}">
+                <f:selectItems value="#{lcmConfig.batchProvisioningWorkflows}" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_batch_manage_accounts}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpBatchManageAccountsWorkflow" width="12px" 
+                              alt="#{help.help_batch_manage_accounts_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+               <h:selectOneMenu id="batchManageAccountsBusinessProcess" value="#{lcmConfig.batchWorkflows['batchRequestAccountsRequest']}">
+                 <f:selectItems value="#{lcmConfig.batchProvisioningWorkflows}" />
+               </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_batch_manage_passwords}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpBatchPasswordsRequestsWorkflow" width="12px" 
+                              alt="#{help.help_batch_password_requests_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+              <h:selectOneMenu id="batchManagePasswordsBusinessProcess" value="#{lcmConfig.batchWorkflows['batchRequestPasswordsRequest']}">
+                <f:selectItems value="#{lcmConfig.batchProvisioningWorkflows}" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_batch_edit_identity}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpBatchEditIdentityWorkflow" width="12px" 
+                              alt="#{help.help_batch_edit_identity_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+              <h:selectOneMenu id="batchEditIdentityBusinessProcess" value="#{lcmConfig.batchWorkflows['batchRequestIdentityEditRequest']}">
+                <f:selectItems value="#{lcmConfig.batchIdentityWorkflows}" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td><h:outputText value="#{msgs.quicklink_batch_create_identity}"/></td>
+            <td>
+              <h:graphicImage id="imgHlpBatchCreateIdentityWorkflow" width="12px" 
+                              alt="#{help.help_batch_create_identity_workflow}"
+                              height="12px" style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dashboard_help_16.png" />
+            </td>
+            <td>
+              <h:selectOneMenu id="batchCreateIdentityBusinessProcess" value="#{lcmConfig.batchWorkflows['batchRequestIdentityCreateRequest']}">
+                <f:selectItems value="#{lcmConfig.batchIdentityWorkflows}" />
+              </h:selectOneMenu>
+            </td>
+          </tr>
+        </table>
+    </div>
+  </div> 
+</ui:composition>
+
+</body>
+</html>

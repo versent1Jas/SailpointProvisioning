@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    </sp:script>
+    
+    <script type="text/javascript">;
+
+        Ext.onReady(function () {
+            var identitiesMultiSuggest = new SailPoint.IdentitySuggest({
+                id: 'effectiveAcessReportIdentitySuggCmp',
+                renderTo: 'identitySuggest',
+                binding: 'identity',
+                emptyText: '#{sp:escapeJavascript(msgs.select_one)}',
+                suggestType: 'identity',
+                contextPath: CONTEXT_PATH,
+                baseParams: {context: 'Global'}
+            });
+        });   
+    </script>
+
+  <table class="width100">
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <tr>
+        <td colspan="3">
+          <sp:outputText styleClass="spContentTitle" value="#{msgs.app_activity_report_opts}"/>
+        </td>
+      </tr>
+      <tr>
+        <td width="33%" valign="top" >        
+          <div class="spTabledContent">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_ids}"/><h:outputText styleClass="requiredText" value="*"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["identities"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>
+                    <div id="identitySuggest"></div>
+                    <t:inputHidden id="identity" required="true"
+                                   value="#{taskDefinition.argMap['identity'].objectValue}" forceId="true">  
+                       <sp:convertIdentity />
+                    </t:inputHidden>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                    <a4j:outputPanel ajaxRendered="true">
+                        <br/><br/>
+                        <h:message styleClass="formError" for="identity" />
+                    </a4j:outputPanel>
+                 </td>
+             </tr>
+            </table>
+          </div>  
+        </td>
+      </tr>
+    </ui:fragment>
+  </table>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+        Export dialog
+
+        This form is used to export entitlements. It appears as a pop-up 
+        from the Entitlement Catalog.
+
+-->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:a4j="http://richfaces.org/a4j"
+        xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+<h:form id="exportDialogForm" style="text-align:top">
+  <div class="spBackground">
+    <div class="spContent">
+      <div><h:outputText styleClass="sectionHeader" value="#{msgs.managed_attribute_export_select_apps}"/></div>
+      <div>
+        <input id="exportAllApps" name="exportAllApps" type="checkbox" checked="true"
+               onclick="Ext.getCmp('exportAppSelectorCmp').toggleSelectAll(this.checked, '#{msgs.all_applications}', true);"/>
+        <label for="exportAllApps">#{msgs.all_applications}</label>
+      </div>
+      <div id="exportAppSelector"/>
+      <h:inputHidden id="appsToExport" value="#{managedAttributeExport.applicationsToExport}" converter="java.util.List"/>
+      <br/>
+      <div><h:outputText styleClass="sectionHeader" value="#{msgs.managed_attribute_export_type}"/></div>
+      <div id="exportTypeCombo"/>
+      <h:inputHidden id="exportType" value="#{managedAttributeExport.exportType}"/>
+      <br/>
+      <div id="descriptionsOptions" style="visibility:hidden">
+        <div><h:outputText styleClass="sectionHeader" value="#{msgs.managed_attribute_select_description_languages}"/></div>
+        <div id="languageSelector"/>
+        <h:inputHidden id="languagesToExport" value="#{managedAttributeExport.languagesToExport}" converter="java.util.List"/>
+      </div>
+      <h:inputHidden id="exportToken" value="#{managedAttributeExport.exportToken}"/>
+    </div>
+  </div>
+  
+  <h:commandButton id="exportFileBtn" style="display:none" 
+                   onclick="var exportToken = new Date().getTime();
+                            Ext.getCmp('exportWindow').hide();
+                            $('exportDialogForm:exportToken').value = exportToken;
+                            Ext.Msg.wait('#{msgs.managed_attribute_exporting_entitlements}', '#{msgs.managed_attribute_title_export_entitlements}');
+                            SailPoint.Define.Grid.Group.checkDownloadComplete(exportToken);" 
+                   action="#{managedAttributeExport.exportEntitlements}"/>
+</h:form>
+
+</ui:composition>
+
+</body>
+</html>

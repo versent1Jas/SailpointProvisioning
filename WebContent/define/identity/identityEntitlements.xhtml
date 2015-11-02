@@ -1,0 +1,131 @@
+<!-- Used to have "position: relative" here, but this messed up the suggest component. -->
+<html xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+  <f:view>
+
+    <ui:fragment rendered="#{!(identity.activeTab eq 1)}">
+      <div class="spContent">
+        <h:graphicImage url="/images/progress.gif"
+          style="padding:5px;vertical-align:middle"/>
+      </div>
+    </ui:fragment>
+
+    <ui:fragment rendered="#{identity.activeTab eq 1}">
+        
+      <div class="spContent">
+        <c:choose>
+          <c:when test="#{identity.object.lastRefresh == null}">
+              <h:outputFormat styleClass="spContentTitle" value="#{msgs.identity_not_refreshed}">
+                <f:param value="#{identity.object.name}" />
+              </h:outputFormat>
+          </c:when>
+          <c:otherwise>
+              <h:outputFormat styleClass="spContentTitle" value="#{msgs.identity_last_refreshed_on}">
+                <f:param value="#{identity.object.name}" />
+                <f:param value="#{sp:getlocalizeDate(identity.object.lastRefresh, identity.shortDateFormat)}" />
+                <f:param value="#{sp:getlocalizeTime(identity.object.lastRefresh, identity.longDateFormat)}" />
+              </h:outputFormat>
+          </c:otherwise>
+        </c:choose>
+        <c:set var="lastRefreshHelp" value="#{help.help_identity_last_refresh}" />
+        <c:if test="#{sp:hasRight(facesContext, 'FullAccessTask')}">
+          <c:set var="lastRefreshHelp" value="#{help.help_identity_last_refresh_privileged}" />
+        </c:if>
+        <h:graphicImage id="imgHlpIdentityLastRefresh"
+          width="12px" height="12px" alt="#{lastRefreshHelp}"
+          style="cursor:pointer; padding-left: 7px"
+          url="/images/icons/dashboard_help_16.png"/>
+      </div>
+        
+      <!-- 
+           If the config option is not enabled, hide parts of this ui that make
+           role changes editable and just show the identity entitlement grids.
+      -->
+      <ui:fragment rendered="#{sp:getSystemConfigurationValue('enableAdminRoleChanges', false)}">
+           
+        <div class="spAjaxContent"  >
+          <ui:include src="/identity/identityAssignedRoles.xhtml">
+            <ui:param name="ajaxPanel" value="identityPanels"/>
+          </ui:include>
+        </div>
+     
+        <div class="spAjaxContent"  >
+          <ui:include src="/identity/identityRoles.xhtml">
+            <ui:param name="ajaxPanel" value="identityPanels"/>
+          </ui:include>
+        </div>
+        
+      </ui:fragment>
+
+      <ui:fragment rendered="#{not sp:getSystemConfigurationValue('enableAdminRoleChanges', false)}">
+        <div class="spAjaxContent" id="entitlementsRolesContentContainer">
+          <ui:include src="/identity/identityEntitlementRolesGrid.xhtml"/>
+        </div>
+      </ui:fragment>
+  
+      <div class="spAjaxContent" id="entitlementsTableContentContainer">
+       <ui:include src="/identity/identityEntitlementsGrid.xhtml">
+         <ui:param name="showEntitlementDescription" value="#{identity.entitlementsHelper.displayEntitlementDescriptions}"/>
+       </ui:include>
+      </div>
+
+    </ui:fragment>
+     
+     <ui:fragment rendered="#{sp:hasRight(facesContext, 'SetIdentityRole')}">
+      <div class="width100" style="margin:5px"> 
+        
+        <h:inputHidden id="sunriseDate" value="#{identity.assignedRolesHelper.sunriseDate}" converter="sailpoint.object.Date" />
+        <h:inputHidden id="roleId" value="#{identity.assignedRolesHelper.roleId}" />
+        <h:inputHidden id="sunsetDate" value="#{identity.assignedRolesHelper.sunsetDate}" converter="sailpoint.object.Date" />
+
+        <a4j:commandButton  id="roleDeleteButton" 
+                            style="display:none"
+                            action="#{identity.assignedRolesHelper.deleteAssignedRoles}"
+                            oncomplete="refreshRoleAssignmentWin();refreshRoleDetailPanels();" 
+                            render="assigneRolesPanel"/>
+        
+        <a4j:commandButton  id="roleSaveButton" 
+                            style="display:none"
+                            action="#{identity.assignedRolesHelper.saveAssignedRoles}"
+                            oncomplete="refreshRoleAssignmentWin();refreshRoleDetailPanels();"
+                            render="assigneRolesPanel"/>
+        
+        <a4j:commandButton  id="roleEditButton" 
+                            style="display:none"
+                            action="#{identity.assignedRolesHelper.editRoleTimeFrame}"
+                            oncomplete="javascript:updaterolesgrid();"
+                            render="assigneRolesPanel"/>
+               
+      </div>
+      </ui:fragment>
+    
+  </f:view>
+  
+  <script type="text/javascript">
+  function updaterolesgrid() {
+      if(Ext.getCmp('identityentitlementrolesgrid')) {
+          var rec = Ext.getCmp('identityentitlementrolesgrid').getStore().findRecord('roleId', $('editForm:roleId').value);
+          if($('editForm:sunriseDate').value) {
+              rec.set('startDate', $('editForm:sunriseDate').value);
+          } else {
+              rec.set('startDate', null);
+          }
+          
+          if($('editForm:sunsetDate').value) {
+              rec.set('endDate', $('editForm:sunsetDate').value);
+          } else {
+              rec.set('endDate', null);
+          }
+          
+          refreshRoleAssignmentWin();
+      } else {
+          refreshRoleAssignmentWin();
+          refreshRoleDetailPanels();
+      }
+  }
+  </script>
+</html>

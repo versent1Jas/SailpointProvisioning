@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2009 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+  
+  <div id="directedMiningResultsPanelDiv">
+    <h:form id="directedMiningResultsForm">
+      <ui:include src="../modeler/entitlementProfileResultsInclude.xhtml">  
+        <ui:param name="entitlementProfileMiningBean" value="#{directedMining.profileMiningEditor}"/>
+        <ui:param name="formName" value="directedMiningResultsForm"/>
+      </ui:include>
+      <a4j:commandButton id="updateSelectedEntitlementsAndCreateRole" style="display:none" 
+                         action="#{directedMining.prepareForRoleCreation}"
+                         render="entitlementsJSONPanel"
+                         oncomplete="var roleCreationWindow = SailPoint.modeler.getRoleCreationWindow();
+                                     var referenceEl = Ext.get('everything');
+                                     if (!referenceEl)
+                                         referenceEl = Ext.getCmp('roleTabPanel').getEl(); 
+                                     roleCreationWindow.reset();
+                                     roleCreationWindow.alignTo(referenceEl, 't-t');
+                                     roleCreationWindow.show();"/>
+    </h:form>
+  </div>
+  
+  <div id="directedMiningCreatePanelDiv" style="display:none">
+    <h:form id="directedMiningCreateForm">
+      <input type="hidden" id="allowRoleCreation" name="allowRoleCreation" value="#{directedMining.allowRoleCreation}"/>  
+      <div class="spContent width100">
+        <table class="width100 spTable"><tbody>
+          <tr>
+            <td><h:outputText styleClass="sectionHeader" value="#{msgs.name}"/></td>
+            <td><h:inputText id="entitlementsAnalysisNewRoleName" value="#{directedMining.roleToCreate.name}" size="40"/></td>
+          </tr>
+          <tr>
+            <td><h:outputText styleClass="sectionHeader" value="#{msgs.type}"/></td>
+            <td>
+              <h:selectOneMenu id="entitlementsAnalysisNewRoleType" value="#{directedMining.roleToCreate.type}">
+                <f:selectItems value="#{directedMining.typesWithEntitlements}"/>
+              </h:selectOneMenu>
+            </td>
+          </tr>
+          <tr>
+            <td><h:outputText styleClass="sectionHeader" value="#{msgs.description}"/></td>
+            <td><h:inputTextarea id="directedMiningRoleCreateDescription" value="#{directedMining.roleToCreate.description}" cols="40" rows="3" /></td>
+          </tr>
+        </tbody></table>
+      </div>
+      <a4j:outputPanel id="entitlementsJSONPanel">
+        <div id="entitlementsJSON" style="display:none">
+          <h:outputText value="#{directedMining.selectedEntitlementsJSON}"/>
+        </div>
+      </a4j:outputPanel>
+      
+      <div class="spContent">
+        <h:outputText value="#{msgs.create_role_from_entitlements_instructions}"/>
+        <!--  This div will be populated via javascript -->
+        <div id="entitlementsToCreateRoleFrom"/>
+      </div>
+      <a4j:commandButton id="saveCreatedRole" style="display:none" 
+                         action="#{directedMining.saveCreatedRole}"
+                         render="saveRoleResultsPanel"
+                         oncomplete="Ext.getCmp('roleCreationWindow').hide();
+                                     var viewerStateController = Ext.getCmp('roleViewerStateController');
+                                     if (viewerStateController) {
+                                         var tree = Ext.getCmp('roleTreePanel');
+                                         tree.getStore().load({node: tree.getRootNode()});
+                                         var grid = Ext.getCmp('gridPanel');
+                                         grid.getStore().load();
+                                     }
+                                     Ext.MessageBox.alert('#{sp:escapeJavascript(msgs.title_role_creation_results)}', $('saveRoleResultsDiv').innerHTML);"/>
+      <a4j:outputPanel id="saveRoleResultsPanel">
+        <div id="saveRoleResultsDiv" style="display:none">
+          #{directedMining.resultsOfLastSave}
+        </div>
+      </a4j:outputPanel>
+    </h:form>
+  </div>
+    
+  <div id="roleCreateFromMiningDiv"/>
+  
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+  <h:form id="createFromItRoleMiningForm">
+    <div id="itRoleMiningSearchDiv">
+      <div id="roleMiningSearchContents" class="spContent" style="width:97%">
+        <div id="itRoleMiningSearchTable" class="spTabledContent" style="padding:10px">
+          <table class="spTable">
+            <thead><tr><th colspan="2"><h:outputText value="#{msgs.create_role}"/></th></tr></thead>
+            <tbody>
+            <tr>
+              <td style="width:250px"><h:outputText styleClass="titleColumn" value="#{msgs.name}"/></td>
+              <td><h:inputText onkeypress="$('itRoleMiningCreateRoleNameError').style['display'] = 'none';" id="createRoleFromITMiningName" value="#{itRoleMiningCreateRoleBean.name}"/></td>
+            </tr>
+            
+            <tr id="itRoleMiningCreateRoleNameError" style="display:none">
+              <td/>
+              <td><div class="formError">
+                  <h:outputText value="#{msgs.it_role_mining_create_role_name_required}"/>
+              </div></td>
+            </tr>
+            
+            <tr>
+              <td><h:outputText value="#{msgs.role_mining_role_owner}"/></td>
+              <td>
+                <div id="createRoleFromITMiningOwnerSuggest"/>
+                <h:inputHidden id="createRoleFromITMiningOwner" value="#{itRoleMiningCreateRoleBean.owner}"/>
+                <div id="createRoleFromITMiningDefaultOwner" style="display:none">
+                  #{itRoleMiningCreateRoleBean.defaultOwner}
+                </div>
+              </td>
+            </tr>
+    
+            <tr>
+              <td><h:outputText value="#{msgs.label_scope}"/></td>
+              <td>
+                <div id="createRoleFromITMiningScopeSuggest"/>
+                <t:inputHidden id="createRoleFromITMiningScope" value="#{itRoleMiningCreateRoleBean.scope}" forceId="true">
+                  <sp:convertScope />
+                </t:inputHidden>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><h:outputText value="#{msgs.it_role_mining_container_role}"/></td>
+              <td>
+                <div id="createRoleFromITMiningContainerRoleSuggest"/>
+                <h:inputHidden id="createRoleFromITMiningContainerRole" value="#{itRoleMiningCreateRoleBean.containerRole}"/>
+              </td>
+            </tr>
+    
+            <tr>
+              <td><h:outputText value="#{msgs.description}"/></td>
+              <td>
+                <h:inputHidden id="createRoleFromITRoleMiningDescription" value="#{itRoleMiningCreateRoleBean.description}"/>
+                <span id="createRoleFromITRoleMiningDescrDefaultLocale" style="display:none"><h:outputText  value="#{itRoleMiningCreateRoleBean.locale}" /></span>
+                <div id="createRoleFromITRoleMiningDescriptionEditor"/>
+              </td>
+            </tr>
+    
+    
+            <tr>
+              <td><h:outputText value="#{msgs.it_role_mining_direct_entitlements}"/></td>
+              <td>
+                <h:inputHidden id="createRoleFromITRoleMIningDirectEntitlementsJson" value="#{itRoleMiningCreateRoleBean.directEntitlementsJson}"/>
+                <div id="createRoleFromITRoleMiningDirectEntitlements"/>
+              </td>
+            </tr>
+            
+            <tr>
+              <td><h:outputText value="#{msgs.it_role_mining_inherited_roles}"/></td>
+              <td>
+                <h:inputHidden id="createRoleFromITRoleMiningInheritedRolesInput" value="#{itRoleMiningCreateRoleBean.inheritedRoles}" converter="java.util.List"/>
+                <div id="createRoleFromITRoleMiningInheritedRolesSuggest"/>
+              </td>
+            </tr>
+    
+            <tr>
+              <td><h:outputText value="#{msgs.it_role_mining_entitlements_from_inherited_roles}"/></td>
+              <td>
+                <a4j:outputPanel id="entitlementsFromInheritedRolesA4jPanel">
+                  <div style = "display:none" id="createRoleFromITRoleMiningInheritedRolesInfo">#{itRoleMiningCreateRoleBean.inheritedEntitlementsJson}</div>
+                </a4j:outputPanel>
+                <div id="createRoleFromITRoleMiningEntitlementsFromInheritedRoles"/>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <a4j:outputPanel id="ITRoleMiningRoleCreationResultsPanel">
+      <div id="ITRoleMiningRoleCreationResults" style="display:none">
+        #{itRoleMiningCreateRoleBean.createRoleResults}
+      </div>
+    </a4j:outputPanel>
+    
+    <a4j:commandButton id="updateEntitlementsForInheritedRoles" action="#{itRoleMiningCreateRoleBean.updateInheritedRoles}"
+                       render="entitlementsFromInheritedRolesA4jPanel"  style="display:none"
+                       oncomplete="Ext.getCmp('inheritedEntitlementsView').update(Ext.JSON.decode($('createRoleFromITRoleMiningInheritedRolesInfo').innerHTML));"/>
+
+    <a4j:commandButton id="createRoleFromITRoleMining" action="#{itRoleMiningCreateRoleBean.createRole}" 
+                       render="ITRoleMiningRoleCreationResultsPanel" style="display:none"
+                       oncomplete="Ext.getCmp('itRoleMiningCreateRoleDialog').displayCreateResults();"/>
+    
+  </h:form>
+</ui:composition>   
+
+</body>
+</html>  

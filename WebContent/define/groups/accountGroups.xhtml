@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+    <ui:composition template="/extAppPage.xhtml">
+
+        <ui:define name="title">#{msgs.title_account_group_configuration}</ui:define>
+
+        <ui:define name="headerItems">
+            <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css" />
+            <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+                <src>html-editor-counter-plugin.css</src>
+            </sp:style>
+            <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/groups">
+                <src>account-groups.css</src>
+            </sp:style>
+            <sp:script>
+                <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/utils/Utils.js?#{debug.revision}</src>                
+                <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>                
+                <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditor.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiLanguageHtmlEditor.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditorCounterPlugin.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/accountGroupSearchPanel.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/identitySearchPanel.js?#{debug.revision}</src>
+                <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/analyze.js?#{debug.revision}</src>
+            </sp:script>
+            <script type="text/javascript" defer="defer">
+                helpKey = 'ACCOUNT_GROUPS';
+            </script>
+        </ui:define>
+
+        <ui:define name="body">
+            <f:view>
+
+                <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+
+                <h:form styleClass="form" id="editForm">
+
+                    <h:inputHidden id="currentObjectId"/>
+
+                    <ui:include src="/define/groups/accountGroupsInclude.xhtml" />
+                    
+                </h:form>
+
+                <div style="display:none">
+                  <div id="importDialog">
+                      <ui:include src="/define/applications/explanations/importDialog.xhtml"/>
+                  </div>
+                  
+                  <div id="exportDialog">
+                      <ui:include src="/define/applications/explanations/exportDialog.xhtml"/>
+                  </div>
+                </div>
+                
+                <div style="display: none"><input type="button" id="preSearchBtn" onclick="SailPoint.Define.Grid.Group.accountGroupSearch();"/></div>
+
+            </f:view>
+        </ui:define>
+
+    </ui:composition>
+
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+drop table identityiq.sptr_export ;
+drop table identityiq.sptr_identity;
+drop table identityiq.sptr_identity_attr;
+drop table identityiq.sptr_identity_entitlements;
+drop table identityiq.sptr_identity_scorecard;
+drop table identityiq.sptr_account;
+drop table identityiq.sptr_account_attr;
+drop table identityiq.sptr_certification;
+drop table identityiq.sptr_certification_attr;
+drop table identityiq.sptr_cert_item;
+drop table identityiq.sptr_cert_item_attr;
+drop table identityiq.sptr_cert_item_entitlements;
+drop table identityiq.sptr_tag;
+drop table identityiq.sptr_certification_tag;

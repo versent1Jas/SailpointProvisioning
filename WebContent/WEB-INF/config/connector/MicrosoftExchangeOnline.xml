@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.O365ExchangeOnlineConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH" icon="internetIcon" name="Microsoft Exchange Online" type="Microsoft Exchange Online">
+    <Attributes>
+      <Map>
+        <entry key="formPath" value="ExchangeOnline.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="DisplayName" identityAttribute="UserID" nativeObjectType="user" objectType="account">
+        <AttributeDefinition name="Alias" type="string">
+          <Description>Alias (mail nickname) of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="AntispamBypassEnabled" type="boolean">
+          <Description>Whether or not to skip anti-spam processing on this mailbox</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Database" type="string">
+          <Description>The database that contains the mailbox object</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DeliverToMailboxAndForward" type="boolean">
+          <Description>Whether messages sent to this mailbox are forwarded to another address.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DisplayName" type="string">
+          <Description>The user's display name.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DistinguishedName" type="string">
+          <Description>Distinguished Name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="EmailAddresses" type="string">
+          <Description>Email Addresses</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="EmailAddressPolicyEnabled" type="boolean">
+          <Description>Whether or not the e-mail address policy for this mailbox is enabled</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ExchangeGuid" type="string">
+          <Description>Exchange Guid</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ExchangeUserAccountControl" type="string">
+          <Description>Exchange User Account Flags</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="ExchangeVersion" type="string">
+          <Description>Exchange Version</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="HiddenFromAddressListsEnabled" type="boolean">
+          <Description>Whether or not this mailbox is hidden from other address lists</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Identity" type="string">
+          <Description>The Identity parameter specifies the mailbox</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="IsMailboxEnabled" type="boolean">
+          <Description>Whether or not mailbox is enabled</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="LegacyExchangeDN" type="string">
+          <Description>Legacy Exchange DN</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Name" type="string">
+          <Description>Name attribute for the mailbox</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="OrganizationalUnit" type="string">
+          <Description>OrganizationalUnit</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SamAccountName" type="string">
+          <Description>SamAccountName</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SimpleDisplayName" type="string">
+          <Description>Simple Display Name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UMEnabled" type="boolean">
+          <Description>Whether or not Unified Messaging is enabled for the account</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="UserID" type="string">
+          <Description>User ID or E-mail of the user</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" schemaObjectType="group" type="string">
+          <Description>It specifies all the groups to which user belongs to.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="RecipientType" type="string">
+          <Description>Recipient Type</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="AccountSkuId" type="string">
+          <Description>Licensing Plans that are available.</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="DisplayName" featuresString="PROVISIONING" identityAttribute="DisplayName" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="DisplayName" type="string">
+          <Description>The group's display name.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="DistinguishedName" type="string">
+          <Description>Distinguished Name"</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Alias" type="string">
+          <Description>Alias</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="GroupType" type="string">
+          <Description>Group Type</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="EmailAddresses" type="string">
+          <Description>Email Addresses assigned to a distribution group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition correlationKey="1" name="GroupName" type="string">
+          <Description>Group Name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="members" type="string">
+          <Description>Users assigned to a group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MemberDepartRestriction" type="string">
+          <Description>Member Depart Restriction</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="MemberJoinRestriction" type="string">
+          <Description>Member Join Restriction</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="PrimarySmtpAddress" type="string">
+          <Description>E-Mail Address</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="SendModerationNotification" type="string">
+          <Description>Send Moderation Notification</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="Description" type="string">
+          <Description>Description</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Account" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_exol_UserID" helpKey="help_con_prov_policy_exol_UserID" name="UserID" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_exol_DisplayName" helpKey="help_con_prov_policy_exol_DisplayName" name="DisplayName" required="true" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_exol_AccountSkuId" helpKey="help_con_prov_policy_exol_AccountSkuId" name="AccountSkuId" required="true" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>Domain:ENTERPRISEPACK</String>
+            <String>Domain:STANDARDPACK</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_exol_ProhibitSendReceiveQuota" helpKey="help_con_prov_policy_exol_ProhibitSendReceiveQuota" name="ProhibitSendReceiveQuota" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_exol_ProhibitSendQuota" helpKey="help_con_prov_policy_exol_ProhibitSendQuota" name="ProhibitSendQuota" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_exol_MailTip" helpKey="help_con_prov_policy_exol_MailTip" name="MailTip" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_exol_IssueWarningQuota" helpKey="help_con_prov_policy_exol_IssueWarningQuota" name="IssueWarningQuota" reviewRequired="true" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_exol_DisplayName" name="DisplayName" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_exol_GroupType" name="GroupType" required="true" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>DistributionGroup</String>
+            <String>RoleGroup</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_exol_GroupType" name="GroupType" readOnly="true" reviewRequired="true" type="string">
+          <AllowedValues>
+            <String>DistributionGroup</String>
+            <String>RoleGroup</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_exol_Alias" name="Alias" type="string"/>
+        <Field displayName="con_prov_policy_exol_MemberDepartRestriction" helpKey="help_con_prov_policy_exol_MemberDepartRestriction" name="MemberDepartRestriction" type="string">
+          <AllowedValues>
+            <String>Open</String>
+            <String>Closed</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_exol_MemberJoinRestriction" helpKey="help_con_prov_policy_exol_MemberJoinRestriction" name="MemberJoinRestriction" type="string">
+          <AllowedValues>
+            <String>Open</String>
+            <String>Closed</String>
+            <String>ApprovalRequired</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="con_prov_policy_exol_PrimarySmtpAddress" helpKey="help_con_prov_policy_exol_PrimarySmtpAddress" name="PrimarySmtpAddress" type="string"/>
+        <Field displayName="con_prov_policy_exol_Description" helpKey="help_con_prov_policy_exol_Description" name="Description" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

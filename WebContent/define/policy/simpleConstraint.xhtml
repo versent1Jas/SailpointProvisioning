@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Include for editing BaseConstraint fields.
+
+  Expected to be called with these parameters:
+
+    constraint
+      An instanceof BaseConstraint or BaseConstraintDTO
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+    <a4j:outputPanel id='constraintRulesPanel'>
+    <h:panelGrid columns="2" styleClass="width100">
+
+      <h:panelGrid columns="2" styleClass="width100 paddedTbl">
+
+        <h:outputText style="font-weight:bold" value="#{msgs.label_summary}"/>
+        <h:inputTextarea value="#{constraint.name}" cols="40" rows="2"
+                         disabled="#{!sp:hasRight(facesContext, 'ManagePolicy')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManagePolicy')}"/>
+
+        <h:outputText style="font-weight:bold" value="#{msgs.label_description}"/>
+        <h:inputTextarea value="#{constraint.description}" cols="40" rows="4"
+                         disabled="#{!sp:hasRight(facesContext, 'ManagePolicy')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManagePolicy')}"/>
+
+        <h:outputText style="font-weight:bold" value="#{msgs.policy_label_violation_rule}"/>
+        <h:panelGroup>
+	        <h:selectOneMenu id="constraintFormattingRule" value="#{constraint.violationRule}">
+	          <f:selectItems value="#{util.violationRules}" />
+	        </h:selectOneMenu>
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                       onclick="SailPoint.Rule.Editor.edit($('mainForm:constraintFormattingRule').value, 
+                                                           'Violation',
+                                                           $('mainForm:refreshConstraintRulesButton'))" />
+            </ui:fragment>	        
+        </h:panelGroup>
+        <h:outputText style="font-weight:bold" value="#{msgs.policy_label_violation_workflow}"/>
+        <h:selectOneMenu id="constraintWorkflow" value="#{constraint.violationWorkflow}">
+          <f:selectItems value="#{util.workflows}" />
+        </h:selectOneMenu>
+
+        <h:outputText style="font-weight:bold" value="#{msgs.disabled}"/>
+        <h:panelGroup>
+          <h:selectBooleanCheckbox id="constraintDisabled" value="#{constraint.disabled}" disabled="#{!sp:hasRight(facesContext, 'ManagePolicy')}"/>
+        </h:panelGroup>
+      </h:panelGrid>
+
+      <h:panelGrid columns="2" styleClass="width100 paddedTbl">
+        <h:outputText style="font-weight:bold" value="#{msgs.label_compensating_control}"/>
+        <h:inputTextarea value="#{constraint.compensatingControl}" cols="40" rows="4"
+                         disabled="#{!sp:hasRight(facesContext, 'ManagePolicy')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManagePolicy')}"/>
+
+        <h:outputText style="font-weight:bold" value="#{msgs.label_correction_adv}"/>
+        <h:inputTextarea value="#{constraint.remediationAdvice}" cols="40" rows="4"
+                         disabled="#{!sp:hasRight(facesContext, 'ManagePolicy')}"
+                         readonly="#{!sp:hasRight(facesContext, 'ManagePolicy')}"/>
+      </h:panelGrid>
+
+    </h:panelGrid>
+    
+    <a4j:commandButton id="refreshConstraintRulesButton"
+                       style="display:none"
+                       immediate="true"
+                       render="constraintRulesPanel"/>
+    
+    </a4j:outputPanel>
+  </ui:composition>
+</body>
+</html>

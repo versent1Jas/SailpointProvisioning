@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC
+    "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/external/noauthPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_registration}</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+      helpKey = 'REGISTER';
+       //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+
+
+      <h:form id="sessionTimeoutForm">
+        <ui:remove><!--
+          Hidden field into which the ID of the current object being
+          viewed gets copied (if available) when an auto-logout happens.
+          --></ui:remove>
+        <h:inputHidden id="id" />
+
+        <ui:remove><!-- Hidden button used to logout when the session times out. --></ui:remove>
+        <h:commandButton id="checkSessionBtn"
+                         action="#{login.checkSession}"
+                         style="display: none"
+                         immediate="true" />
+
+      </h:form>
+
+
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <sp:sailpointForm styleClass="form" id="editForm" forceEncodedURL="true">
+        <a4j:outputPanel id="workItemIdPanel">
+          <h:inputHidden id="id" value="#{workItemForm.object.id}"/>
+        </a4j:outputPanel>
+        <h:inputHidden id="signatureAuthId" value="#{workItemForm.signatureAuthId}"/>
+        <h:inputHidden id="signaturePass" value="#{workItemForm.signaturePass}"/>
+		
+        <a4j:commandButton id="submitButton" action="#{workItemForm.submit}" style="display: none" 
+            render="workItemIdPanel,formRenderer-" oncomplete="SailPoint.form.Util.updateFormPanel({formId:'#{workItemForm.formBean.id}', meaning:'#{sp:escapeJavascript(workItemForm.signatureMeaning)}', oAuthId:'#{sp:escapeJavascript(workItemForm.originalAuthId)}', nAuthId:'#{sp:escapeJavascript(workItemForm.nativeAuthId)}'});"/>
+
+          <div class="spContent">
+
+            <ui:include src='../include/formRenderer.xhtml'>
+              <ui:param name='form' value='#{workItemForm.formBean}'/>
+              <ui:param name='meaning' value="#{sp:escapeJavascript(workItemForm.signatureMeaning)}"/>
+              <ui:param name='oAuthId' value="#{sp:escapeJavascript(workItemForm.originalAuthId)}"/>
+              <ui:param name='nAuthId' value="#{sp:escapeJavascript(workItemForm.nativeAuthId)}"/>
+              <ui:param name='submitButton' value='editForm:submitButton'/>
+            </ui:include>
+
+          </div>
+
+      </sp:sailpointForm>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

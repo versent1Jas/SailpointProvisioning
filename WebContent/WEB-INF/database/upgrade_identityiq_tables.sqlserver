@@ -1,0 +1,108 @@
+--
+-- This script contains DDL statements to upgrade a database schema to
+-- reflect changes to the model.  This file should only be used to
+-- upgrade from the last formal release version to the current code base.
+--
+
+USE identityiq
+GO
+
+-- Add assigned roles to IdentitySnapshot
+alter table identityiq.spt_identity_snapshot add assigned_roles nvarchar(max) null;
+GO
+
+-- Add attributes map to Schema
+alter table identityiq.spt_application_schema add config nvarchar(max) null;
+GO
+
+-- Add featuresString to Schema
+alter table identityiq.spt_application_schema add features_string nvarchar(512) null;
+GO
+
+-- Set schemaObjectType on groups
+update identityiq.spt_managed_attribute set type = 'group' where is_group=1;
+GO
+
+-- Add aggregated column and transfer data from is_group, is_group will be removed in post upgrade script
+alter table identityiq.spt_managed_attribute add aggregated tinyint null default 0 with values;
+GO
+create index spt_managed_attr_aggregated on identityiq.spt_managed_attribute (aggregated);
+GO
+update identityiq.spt_managed_attribute set aggregated = is_group where is_group is not null;
+GO
+
+-- Add SchemaObjectType to SchemaAttributes
+alter table identityiq.spt_schema_attributes add schema_object_type nvarchar(128) null;
+GO
+
+-- Add pendingDelete to Bundle
+alter table identityiq.spt_bundle add pending_delete tinyint null;
+GO
+update identityiq.spt_bundle set pending_delete = 0;
+GO
+
+-- Create table for persisting role change events
+create table identityiq.spt_role_change_event (
+    id nvarchar(128) not null,
+    created numeric(19,0) null,
+    bundle_id nvarchar(128) null,
+    provisioning_plan nvarchar(max) null,
+    bundle_deleted tinyint null,
+    primary key (id)
+);
+GO
+
+create index spt_role_change_event_created on identityiq.spt_role_change_event (created);
+GO
+
+-- Remove indexes for constraint_name and increase the size
+drop index identityiq.spt_mitigation_expiration.spt_mitigation_const_ci;
+GO
+alter table identityiq.spt_mitigation_expiration alter column constraint_name nvarchar(2000) null;
+GO
+
+drop index identityiq.spt_identity_history_item.spt_id_hist_item_constr_ci;
+GO
+alter table identityiq.spt_identity_history_item alter column constraint_name nvarchar(2000) null;
+GO
+
+-- add schemaObjectType to cert entity
+alter table identityiq.spt_certification_entity add schema_object_type nvarchar(128) null;
+GO
+alter table identityiq.spt_archived_cert_entity add schema_object_type nvarchar(128) null;
+GO
+
+-- Add hidden to Form
+alter table identityiq.spt_form add hidden tinyint null;
+GO
+update identityiq.spt_form set hidden = 0;
+GO
+
+-- Add lock to workitem
+alter table identityiq.spt_work_item add iiqlock nvarchar(128);
+GO
+
+--
+-- WorkflowTestSuite
+--
+
+    create table identityiq.spt_workflow_test_suite (
+        id nvarchar(128) not null,
+        created numeric(19,0) null,
+        modified numeric(19,0) null,
+        name nvarchar(128) not null unique,
+        description nvarchar(4000) null,
+        replicated tinyint null,
+        case_name nvarchar(255) null,
+        tests nvarchar(max) null,
+        responses nvarchar(max) null,
+        attributes nvarchar(max) null,
+        primary key (id)
+    );
+    GO
+
+--
+-- Make sure to change the schema version here. LEAVE THIS HERE
+--
+update identityiq.spt_database_version set schema_version='6.4-15' where name='main';
+GO

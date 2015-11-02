@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+    <div style="padding:10px">
+        <ui:fragment rendered="#{not certification.diffs.changesDetected}">
+          #{msgs.no_changes_since_last_cert}
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certification.diffs.changesDetected}">
+
+          <a class="sectionHeader disclosure" onclick="showHideWithLock($('jfDiffsTbl'), null, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'jfDiffsTbl'}));">
+            #{msgs.role_changes}
+          </a>
+
+          <div id="jfDiffsTbl" class="spTabledAjaxContent">
+            <table class="spTable width100" cellspacing="0">
+              <tr>
+                <th width="40%" >#{msgs.business_role}</th>
+                <th>#{msgs.change_type}</th>
+              </tr>
+
+              <ui:repeat var="diff" value="#{certification.diffs.bundleDifferences.addedValues}">
+                <tr class="dataTableLightRow#{certification.oddOrEven}">
+                  <td><h:outputText value="#{diff}" /></td>
+                  <td>#{msgs.changes_added}</td>
+                </tr>
+              </ui:repeat>
+              <ui:repeat var="diff" value="#{certification.diffs.assignedRoleDifferences.addedValues}">
+                <tr class="dataTableLightRow#{certification.oddOrEven}">
+                  <td><h:outputText value="#{diff}" /></td>
+                  <td>#{msgs.changes_added}</td>
+                </tr>
+              </ui:repeat>
+              <ui:repeat var="diff" value="#{certification.diffs.bundleDifferences.removedValues}">
+                <tr class="dataTableLightRow#{certification.oddOrEven}">
+                  <td><h:outputText value="#{diff}" /></td>
+                  <td>#{msgs.changes_removed}</td>
+                </tr>
+              </ui:repeat>
+
+              <ui:repeat var="diff" value="#{certification.diffs.assignedRoleDifferences.removedValues}">
+                <tr class="dataTableLightRow#{certification.oddOrEven}">
+                  <td><h:outputText value="#{diff}" /></td>
+                  <td>#{msgs.changes_removed}</td>
+                </tr>
+              </ui:repeat>
+              <ui:fragment rendered="#{empty certification.diffs.bundleDifferences and empty certification.diffs.assignedRoleDifferences}">
+                <tr><td colspan="2">#{msgs.no_role_changes_found}</td></tr>
+              </ui:fragment>
+            </table>
+          </div>
+
+          <div style="padding-bottom: 10px"></div>
+
+          <a class="sectionHeader disclosure" onclick="showHideWithLock($('appAttrDiffsTbl'), null, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'appAttrDiffsTbl'}));">
+            #{msgs.app_attr_changes}
+          </a>
+
+          <div id="appAttrDiffsTbl" class="spTabledAjaxContent">
+            <table class="spTable width100" cellspacing="0">
+
+                <tr>
+                  <th width="40%" >#{msgs.application}</th>
+                  <th width="20%" >#{msgs.attribute}</th>
+                  <th width="20%" >#{msgs.value}</th>
+                  <th width="20%" >#{msgs.change_type}</th>
+                </tr>
+                <ui:repeat var="attrDiff" value="#{certification.diffs.linkDifferences}">
+                  <ui:repeat var="diff" value="#{attrDiff.addedValues}">
+                    <tr class="#{certification.oddOrEven}">
+                      <td><h:outputText value="#{attrDiff.context}" /></td>
+                      <td><h:outputText value="#{sp:localizeKey(attrDiff.displayableName)}" /></td>
+                      <td><h:outputText value="#{diff}" /></td>
+                      <td>#{msgs.changes_added}</td>
+                    </tr>
+                  </ui:repeat>
+                  <ui:repeat var="diff" value="#{attrDiff.removedValues}">
+                    <tr class="#{certification.oddOrEven}">
+                      <td><h:outputText value="#{attrDiff.context}" /></td>
+                      <td><h:outputText value="#{sp:localizeKey(attrDiff.displayableName)}" /></td>
+                      <td><h:outputText value="#{diff}" /></td>
+                      <td>#{msgs.changes_removed}</td>
+                    </tr>
+                  </ui:repeat>
+                  <ui:fragment rendered="#{empty attrDiff.addedValues and empty attrDiff.removedValues}">
+                    <tr class="#{certification.oddOrEven}">
+                      <td><h:outputText value="#{attrDiff.context}" /></td>
+                      <td><h:outputText value="#{sp:localizeKey(attrDiff.displayableName)}" /></td>
+                      <td><h:outputText value="#{attrDiff.oldValue} -&gt; #{attrDiff.newValue}" /></td>
+                      <td>#{msgs.changes_modified}</td>
+                    </tr>
+                  </ui:fragment>
+                </ui:repeat>
+
+              <ui:fragment rendered="#{empty certification.diffs.linkDifferences}">
+                <tr><td colspan="4">#{msgs.no_attr_changes_found}</td></tr>
+              </ui:fragment>
+            </table>
+          </div>
+
+          <div style="padding-bottom: 10px"></div>
+
+          <a class="sectionHeader disclosure" onclick="showHideWithLock($('appPermDiffsTbl'), null, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'appPermDiffsTbl'}));">
+            #{msgs.perm_changes}
+          </a>
+
+          <div id="appPermDiffsTbl" class="spTabledAjaxContent">
+            <table class="spTable width100" cellspacing="0">
+
+                <tr>
+                  <th width="40%">#{msgs.application}</th>
+                  <th width="20%" >#{msgs.target}</th>
+                  <th width="20%" >#{msgs.right}</th>
+                  <th width="20%" >#{msgs.change_type}</th>
+                </tr>
+
+                <ui:repeat var="diff" value="#{certification.diffs.permissionDifferences}">
+                  <tr class="#{certification.oddOrEven}">
+                    <td><h:outputText value="#{diff.application}" /></td>
+                    <td><h:outputText value="#{diff.target}" /></td>
+                    <td><h:outputText value="#{diff.rights}" /></td>
+                    <td><h:outputText value="#{(diff.removed) ? msgs.changes_removed : msgs.changes_added}" /></td>
+                  </tr>
+                </ui:repeat>
+
+
+              <ui:fragment rendered="#{empty certification.diffs.permissionDifferences}">
+                <tr><td colspan="4">#{msgs.no_perms_changes_found}</td></tr>
+              </ui:fragment>
+
+            </table>
+          </div>
+
+          <div style="padding-bottom: 10px"></div>
+
+          <a class="sectionHeader disclosure" onclick="showHideWithLock($('idAttrDiffsTbl'), null, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'idAttrDiffsTbl'}));">
+            #{msgs.identity_attrs_changes}
+          </a>
+
+          <div id="idAttrDiffsTbl" class="spTabledAjaxContent">
+            <table class="spTable width100" cellspacing="0">
+
+                <tr>
+                  <th width="40%">#{msgs.attribute}</th>
+                  <th width="40%">#{msgs.value}</th>
+                  <th width="20%">#{msgs.change_type}</th>
+                </tr>
+                <ui:repeat var="attrDiff" value="#{certification.diffs.identityAttributeDifferences}">
+                  <ui:repeat var="diff" value="#{attrDiff.addedValues}">
+                    <tr class="#{certification.oddOrEven}">
+                      <td><h:outputText value="#{sp:localizeKey(attrDiff.displayableName)}" /></td>
+                      <td><h:outputText value="#{diff}" /></td>
+                      <td>#{msgs.changes_added}</td>
+                    </tr>
+                  </ui:repeat>
+                  <ui:repeat var="diff" value="#{attrDiff.removedValues}">
+                    <tr class="#{certification.oddOrEven}">
+                      <td><h:outputText value="#{sp:localizeKey(attrDiff.displayableName)}" /></td>
+                      <td><h:outputText value="#{diff}" /></td>
+                      <td>#{msgs.changes_removed}</td>
+                    </tr>
+                  </ui:repeat>
+                  <ui:fragment rendered="#{empty attrDiff.addedValues and empty attrDiff.removedValues}">
+                    <tr class="#{certification.oddOrEven}">
+                      <td><h:outputText value="#{sp:localizeKey(attrDiff.displayableName)}" /></td>
+                      <td><h:outputText value="#{attrDiff.oldValue} -&gt; #{attrDiff.newValue}" /></td>
+                      <td>#{msgs.changes_modified}</td>
+                    </tr>
+                  </ui:fragment>
+                </ui:repeat>
+
+              <ui:fragment rendered="#{empty certification.diffs.identityAttributeDifferences}">
+                <tr><td colspan="2">#{msgs.no_identity_attrs_changes_found}</td></tr>
+              </ui:fragment>
+
+            </table>
+          </div>
+
+          <div style="padding-bottom: 10px"></div>
+
+          <a class="sectionHeader disclosure" onclick="showHideWithLock($('pvDiffsTbl'), null, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'pvDiffsTbl'}));">
+            #{msgs.policy_violation_changes}
+          </a>
+
+          <div id="pvDiffsTbl" class="spTabledAjaxContent" style="margin:5px">
+            <table class="spTable width100" cellspacing="0">
+
+                <tr>
+                  <th width="40%">#{msgs.policy_violation}</th>
+                  <th >#{msgs.change_type}</th>
+                </tr>
+
+                <ui:repeat var="diff" value="#{certification.diffs.policyViolationDifferences.addedValues}">
+                  <tr class="#{certification.oddOrEven}">
+                    <td><h:outputText value="#{diff}" /></td>
+                    <td>#{msgs.changes_added}</td>
+                  </tr>
+                </ui:repeat>
+                <ui:repeat var="diff" value="#{certification.diffs.policyViolationDifferences.removedValues}">
+                  <tr class="#{certification.oddOrEven}">
+                    <td><h:outputText value="#{diff}" /></td>
+                    <td>#{msgs.changes_removed}</td>
+                  </tr>
+                </ui:repeat>
+
+              <ui:fragment rendered="#{empty certification.diffs.policyViolationDifferences}">
+                <tr><td colspan="2">#{msgs.no_policy_violation_changes_found}</td></tr>
+              </ui:fragment>
+
+            </table>
+          </div>
+
+        </ui:fragment>
+
+    </div>
+
+
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,20 @@
+var pairs =
+{
+"schedule":{"certification":1,"certifications":1}
+,"certification":{"use":1,"schedule":1,"requests":1}
+,"use":{"schedule":1}
+,"certifications":{"listed":1,"sent":1,"replace":1}
+,"listed":{"identities":1}
+,"identities":{"identity":1,"warrant":1}
+,"identity":{"certifications":1}
+,"sent":{"managers":1}
+,"managers":{"identities":1}
+,"warrant":{"special":1}
+,"special":{"attention":1}
+,"attention":{"additional":1}
+,"additional":{"certifications":1}
+,"replace":{"regularly":1}
+,"regularly":{"scheduled":1}
+,"scheduled":{"certification":1}
+}
+;Search.control.loadWordPairs(pairs);

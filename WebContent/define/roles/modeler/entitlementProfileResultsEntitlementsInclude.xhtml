@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <input id="noEntitlementBuckets" name="noEntitlementBuckets" style="display:none" value="#{empty miningBean.appEntitlementBuckets}"/>
+  <!--
+    Hack.. This div makes it easy to find the controls because jsf modifies
+    the id of inputs. Changing this will require a change to the paging on the table below.
+  -->
+  <div id="pager" style="display:none">
+    <ui:fragment rendered="#{miningBean != null}">
+        <h:inputHidden  value="#{miningBean.pagingApp}"/>
+        <h:inputHidden  value="#{miningBean.page}"/>
+        <a4j:commandButton action="#{miningBean.prevPageBucket}" value="prev" render="a4jResultsPanel" oncomplete="SailPoint.modeler.entitlementMining.pagingCallback()" />
+        <a4j:commandButton action="#{miningBean.nextPageBucket}" value="next" render="a4jResultsPanel" oncomplete="SailPoint.modeler.entitlementMining.pagingCallback()"/>
+        <a4j:commandButton action="#{miningBean.updateBucketPage}" value="update" render="a4jResultsPanel" oncomplete="SailPoint.modeler.entitlementMining.pagingCallback()" />
+    </ui:fragment> 
+  </div>
+
+  <div style="padding:4px">
+    <h:panelGrid columns="1" 
+      style="#{(empty miningBean.appEntitlementBuckets) ? 'display:' : 'display:none '}">
+      <h:outputText class="sectionHeader" value="#{msgs.role_entitlements_analysis_no_results}"/>
+      <br/>
+    </h:panelGrid>
+    
+    <ui:repeat value="#{miningBean.appEntitlementBuckets}" var="appBucketMap">
+    
+      <h:outputText class="sectionHeader" value="#{appBucketMap['appName']} - #{msgs.role_entitlement_attributes}"
+                    style="#{(empty appBucketMap['appBuckets']) ? 'display: none' : 'display: '}"/>
+      <h:panelGroup style="#{(empty appBucketMap['appBuckets']) ? 'display: none' : 'display: '}">
+        
+        <div id="#{appBucketMap['appId']}_bucketsContent" class="spTabledContent">
+        <table class="spTable" cellspacing="0" id="#{appBucketMap['appId']}_bucketsTbl">
+          <thead>
+            <tr>
+              <th width="5%"><h:selectBooleanCheckbox onclick='SailPoint.modeler.entitlementMining.selectUnselectAll(this);' styleClass="selectionCheckbox" rendered="#{showSelectOptions=='true'}"/></th>
+              <th width="25%"><h:outputText value="#{msgs.label_name}"/></th>
+              <th width="35%"><h:outputText value="#{msgs.label_value}"/></th>
+              <th width="35%"><h:outputText value="#{msgs.role_entitlement_percent_of_population}"/></th>
+            </tr>
+          </thead>
+          <tbody>
+          
+            <ui:repeat value="#{sp:getPage(appBucketMap['appBuckets'], appBucketMap['page'], 20)}" var="ent">
+              <tr class="#{sp:isOdd(ent.id) ? 'even' : 'odd'}" >
+                <td>
+                    <!--
+                       Hack! See SailPoint.modeler.entitlementMining.pagingCallback
+                    -->
+                  <input type="text" style="display:none" id="ent_#{ent.id}" name="ent_#{ent.id}" class="entValueHolder" value="#{ent.attr.selected}" />
+                  <h:selectBooleanCheckbox styleClass="selectionCheckbox"  value="#{ent.attr.selected}" rendered="#{showSelectOptions=='true'}"/>
+                </td>
+                <td><h:outputText value="#{ent.attr.name}"/></td>
+                <td class="entitlementDescription">
+                  <h:outputLink styleClass="disclosure" onclick="SailPoint.modeler.entitlementMining.toggleIdentitiesGrid('#{appBucketMap['appId']}_#{ent.id}', '#{ent.id}', '#{ent.applicationId}', this); return false;">
+                    <h:outputText value="#{ent.attr.displayValue}"/>
+                  </h:outputLink>
+                  <ui:fragment rendered="#{ent.attr.extraFields['description'] != null}">
+                    <span style="display:none" 
+                      id="description_#{sp:buildValidComponentId(sp:concat(ent.attr.application,ent.attr.value))}">
+                      <h:outputText escape="false" value="#{ent.attr.extraFields['description']}"/>
+                    </span>
+                    <img id="img_#{sp:buildValidComponentId(sp:concat(ent.attr.application,ent.attr.value))}" 
+                         class="helpIcon" src="#{base.requestContextPath}/images/icons/info.png" alt="#{msgs.help}"/>
+                  </ui:fragment>
+                </td>
+                <td>
+                  <sp:progressBar
+                    percentComplete="#{ent.percent}"
+                    completedNum="#{ent.count}"
+                    totalNum="#{ent.total}"
+                    remainingClass="progressBarRemainingDarkGray"
+                    completeClass="#{ent.completeClass}">
+                  </sp:progressBar>
+                </td>
+              </tr>
+              
+  
+              <tr id="sp#{appBucketMap['appId']}_#{ent.id}_tr" style="display:none;" class="#{sp:isOdd(ent.id) ? 'even' : 'odd'}">
+  
+                <td colspan="4" class="eraseTdPadding">
+                    <div id="sp#{appBucketMap['appId']}_#{ent.id}_identity_grid" style="width:100%;"></div>
+                </td>
+              </tr>  
+  
+            </ui:repeat>
+  
+            <ui:fragment rendered="#{appBucketMap['size'] gt 0}">
+  
+  
+             <tr>
+                <!-- using a tbl here b/c IE7 sucks -->
+                <td colspan="2">
+                   <ui:fragment rendered="#{appBucketMap['pages'] gt 1}">
+                     <table>
+                         <tr>
+                             <td onclick="SailPoint.modeler.entitlementMining.handleResultsGridPaging('prev', '#{appBucketMap['appId']}')" style="width:18px;height:18px;display:#{appBucketMap['page'] eq 1 ? 'none' : ''};"><h:graphicImage value="/scripts/ext-4.1.0/resources/themes/images/default/grid/page-prev.gif"/></td>
+                             <td>#{msgs.grid_paging_label_page} <h:inputText maxlength="5" onkeypress="return SailPoint.modeler.entitlementMining.handleResultsGridPagingEvent(event, 'update', '#{appBucketMap['appId']}', this.value);" id="pgInput" style="margin-left:5px" value="#{appBucketMap['page']}" size="3"/> #{msgs.grid_paging_label_of} #{appBucketMap['pages']}</td>
+                             <td valign="middle" style="padding-left:10px;width:18px;height:18px;display:#{appBucketMap['page'] ge appBucketMap['pages'] ? 'none' : ''}" onclick="SailPoint.modeler.entitlementMining.handleResultsGridPaging('next', '#{appBucketMap['appId']}')"><h:graphicImage value="/scripts/ext-4.1.0/resources/themes/images/default/grid/page-next.gif"/></td>
+                         </tr>
+                     </table>
+  
+                  </ui:fragment>
+                </td>
+                <td colspan="2" align="right">
+                    <h:outputFormat value="#{msgs.grid_paging_display_msg}">
+                        <f:param value="#{(appBucketMap['page'] - 1) * 20 + 1}"/>
+                        <f:param value="#{(appBucketMap['page'] - 1) * 20 +  sp:size(sp:getPage(appBucketMap['appBuckets'], appBucketMap['page'], 20))}"/>
+                        <f:param value="#{appBucketMap['size']}"/>
+                    </h:outputFormat>
+                  </td>
+            </tr>
+           </ui:fragment>
+          </tbody>
+        </table> 
+        </div>    
+      </h:panelGroup>
+    </ui:repeat>
+  </div>
+  </ui:composition>
+
+</body>
+</html>

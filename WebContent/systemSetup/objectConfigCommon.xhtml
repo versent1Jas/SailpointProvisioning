@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  Include to manage the ObjectAttribute list of an ObjectConfig.
+
+  Required arguments:
+
+    config
+      an instanceof ObjectConfigBean
+
+    title
+      a section title to put above the grid
+
+-->
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>  
+
+
+    <script type="text/javascript">
+
+    Ext.onReady(function(){
+
+        Ext.QuickTips.init();
+
+        // data store
+        attributesStore = SailPoint.Store.createStore({
+            fields: ['id','name',{name:'category',type:'string'},{name:'description',type:'string'}],
+            autoLoad: false,
+            url: SailPoint.getRelativeUrl('/rest/objectConfig/attributes'),
+            extraParams: { 'configName': $('mainform:configName').value },
+            root : 'attributes',
+            simpleSortMode : true,   
+            sorters: [{property: 'name', direction: 'ASC'}]
+        });
+
+        // display models     
+        var cols = [{
+            header: '#{sp:escapeJavascript(msgs.name)}', 
+            dataIndex: 'name', 
+            flex : 1,
+            sortable: true, 
+            hideable: true
+        },{
+            header: '#{sp:escapeJavascript(msgs.label_category)}', 
+            dataIndex: 'category', 
+            flex : 1,
+            sortable: true, 
+            hideable: true
+        },{
+            header: '#{sp:escapeJavascript(msgs.oconfig_label_description)}', 
+            dataIndex: 'description',
+            flex : 3,
+            sortable: true, 
+            hideable: true
+        }];
+        
+        // grid
+        var attributesGrid = new Ext.grid.Panel({
+            id: 'attributesGrid',
+            renderTo: 'attributes-grid',
+            store: attributesStore,
+            columns: cols,
+            listeners: { 
+                itemclick: clickAttRow,
+                itemcontextmenu: showAttContextMenu,
+                activate: refreshAttPanel
+            },
+            viewConfig: {
+                stripeRows: true
+            },
+            bbar: [{text: '#{sp:escapeJavascript(msgs.oconfig_button_new_attribute)}',
+                    handler: newAttribute}]
+        });
+                    
+        attributesStore.load({params:{start:0, limit:20}});    
+    }); // Ext.onReady
+            
+    function showAttContextMenu(gridView, record, HTMLitem, index, e, eOpts){
+        id = record.getId();
+        name = record.get('name');
+
+        var contextMenu = new Ext.menu.Menu();
+        contextMenu.add(
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_edit)}', 
+                               handler: editAttRow, 
+                               iconCls: 'editBtn'}),
+            new Ext.menu.Item({text: '#{sp:escapeJavascript(msgs.menu_delete)}', 
+                               handler: deleteAttPrompt, 
+                               iconCls: 'deleteBtn'})
+        );          
+          
+        e.stopEvent();
+        contextMenu.showAt(e.xy);
+    }  
+
+    function newAttribute (button, e) {
+        $('mainform:newAttributeButton').click();
+    }
+
+    function clickAttRow (gridView, record, HTMLitem, index, e, eOpts){
+        $('mainform:currentAttributeId').value = record.getId();
+        $('mainform:editAttributeButton').click();
+    }
+    
+    function editAttRow() {
+        // there's no functional difference btwn this and clickApplication
+        $('mainform:currentAttributeId').value = id;
+        $('mainform:editAttributeButton').click();
+    }
+    
+    function deleteAttPrompt() {
+        $('mainform:currentAttributeId').value = id;
+        Ext.MessageBox.confirm('Confirm delete of "' + name + '"?', 
+                               'Are you sure you want to delete "' + name + '"?', 
+                               deleteAttRow);
+    }
+
+    function deleteAttRow(button, text) {
+        if (button == 'yes') {
+            $('mainform:currentAttributeId').value = id;
+            $('mainform:deleteAttributeButton').click();
+        }
+    }
+
+    function refreshAttPanel(component) {
+        component.getStore().load({params:{start:0, limit:20}});
+    }  
+    
+    </script>
+
+  <h:panelGrid id="attributesTbl" rendered="true" 
+    styleClass="width100" columns="1" cellpadding="0" cellspacing="0">
+    
+    <ui:fragment rendered="#{title != null}">
+      <div style="padding:0;margin:15px 0 0 0" class="spContentTitle">
+        <h:outputText value="#{title}" styleClass="spContentTitle"/>
+      </div>
+    </ui:fragment>
+
+    <div id="attributes-grid" style="width:100%"></div>
+
+    <h:inputHidden id="configName" value="#{config.object.name}"/>
+
+    <h:inputHidden id="currentAttributeId"
+      value="#{config.session.attributeId}"/>
+
+    <h:commandButton id="editAttributeButton" style="display:none"
+      action="#{config.editAttributeAction}"/>
+
+    <h:commandButton id="deleteAttributeButton" style="display:none" 
+      action="#{config.deleteAttributeAction}"/>
+
+    <h:commandButton id="newAttributeButton" style="display:none"
+      action="#{config.newAttributeAction}"/>
+
+  </h:panelGrid>
+
+</ui:composition>
+
+</body>
+</html>

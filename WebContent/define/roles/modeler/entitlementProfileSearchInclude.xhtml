@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <div id="entitlementProfileSearchDiv" style="display:none">
+    <div id="runningSearch" 
+      style="margin:5px;padding:5px;border-bottom:1px dashed #ccc;border-top:1px dashed #ccc;display:none">
+      <h:graphicImage alt="progress" url="/images/progress.gif"/>
+      <h:outputText class="sectionHeader" value="#{msgs.role_entitlements_analysis_running_search}"/>
+    </div>
+    <div class="spAjaxContent">
+      <h:outputFormat value="#{help.help_modeler_ent_mine_descr}"/>
+      <br/><br/>
+      
+      <div id="miningMultiSuggestPanel" class="floatLeft padded10 width50">
+        <h:outputText class="sectionHeader" styleClass="margin-right:20px" value="#{msgs.role_entitlements_analysis_application}"/>
+        <h:outputText styleClass="requiredText" value="*"/><br/>
+        <div id="miningAppNameMultiSuggest"></div>
+        <h:inputHidden id="miningAppNameSuggest"
+                       value="#{entitlementProfileMiningBean.searchBean.inputs['miningApplication'].objectListValue}">
+            <sp:convertList />
+        </h:inputHidden>
+        <div id="miningAppNameMultiSuggestData" style="display:none">
+          #{sp:basicJSONDataConverted(
+            entitlementProfileMiningBean.searchBean.inputs['miningApplication'].objectListValue,
+           'ApplicationListConverter')}
+        </div>
+      </div>
+      
+      <div id="miningSearchPropertyTypePanel" class="floatLeft padded10 width50">
+        <h:outputText class="sectionHeader" styleClass="margin-right:20px" value="#{msgs.role_entitlements_analysis_application_operation}:"/><br/>
+        <h:outputText styleClass="font10" value="#{msgs.role_entitlements_analysis_application_operation_descr}"/>
+        <br/>
+        <h:selectOneMenu style="margin:5px 0" id="applicationPropertyType" 
+          value="#{entitlementProfileMiningBean.searchBean.inputs['miningApplication'].listOperation}">
+          <f:selectItem itemLabel="#{msgs.filter_and}" itemValue="AND" />
+          <f:selectItem itemLabel="#{msgs.filter_or}" itemValue="OR" />
+        </h:selectOneMenu>
+      </div>
+      
+      <div class="vis-clear"></div>
+      
+      <br/>
+      <h:panelGroup id="miningRequiredTextMsgPanel">
+        <h:outputText styleClass="requiredText" value="*"/>
+        <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+      </h:panelGroup>
+      <br/><br/>
+      
+      <h:selectOneRadio styleClass="attributeOrIpopSelector" id="attributeOrIpopSelector" value="#{entitlementProfileMiningBean.searchBean.searchBy}"
+        onclick="SailPoint.Role.EntitlementsAnalysis.showSearchAttributesPanel(this.value, '#{formName}');">
+          <f:selectItem itemLabel="#{msgs.role_entitlements_analysis_search_by_attributes}" itemValue="searchByAttributes" />
+          <f:selectItem itemLabel="#{msgs.role_entitlements_analysis_search_by_ipop}" itemValue="searchByIpop" />
+      </h:selectOneRadio>
+      
+      <div id="entitlementAnalysisAttributes" class="spTabledContent">
+        <table id="directedMiningIdentityAttributes" class="spTable" cellspacing="0">
+          <thead><tr>
+            <th><h:outputText value="#{msgs.title_identity_attributes}"/></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td>
+                <ui:include src="/analyze/identity/identityAttributes.xhtml">
+                  <ui:param name="appDisplay" value="none"/>
+                  <ui:param name="bpDisplay" value="none"/>
+                  <ui:param name="jfDisplay" value="none"/>
+                  <ui:param name="searchBean" value="#{entitlementProfileMiningBean.searchBean}"/>
+                </ui:include>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="entitlementAnalysisIpop" class="spTabledContent" style="display:none">
+        <div id="ipopsInfo" style="display:none"/>
+        <table id="directedMiningIpop" class="spTable" cellspacing="0">
+          <thead><tr>
+            <th><h:outputText value="#{msgs.population}"/></th>
+            <th><h:outputText value="#{msgs.description}"/></th>
+            <th><h:outputText value="#{msgs.role_entitlements_analysis_identities_in_ipop}"/></th>
+            <th><h:outputText value="#{msgs.role_entitlements_analysis_apps_in_ipop}"/></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td style="width: 265px">
+                <h:selectOneMenu id="ipopName" style="width:250px"
+                  value="#{entitlementProfileMiningBean.searchBean.inputs['identity.ipop'].value}"
+                  onchange="SailPoint.Role.EntitlementsAnalysis.updateDescription(null, null, null, {ipop: this.value});">
+                  <f:selectItems value="#{groupDefinitionList.myIpopSelectItems}"/>
+                </h:selectOneMenu>
+              </td>
+              <td>
+                <div id="ipopDescription"/>
+              </td>
+              <td style="width: 75px">
+                <div id="ipopSize"/>
+              </td>
+              <td style="width: 260px">
+                <div id="ipopApps"/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <h:panelGroup>
+    <a4j:commandButton id="entitlementMiningSearchBtn" style="display:none" value="Search" 
+                       action="#{entitlementProfileMiningBean.runMiningQueryAction}"
+                       onclick="$('runningSearch').style.display='';"
+                       oncomplete="Ext.getCmp('entitlementMiningPanel').getLayout().setActiveItem('entitlementProfileResultsPanel');
+                                   Ext.getCmp('entitlementProfileResultsPanel').initSlider();
+                                   $('runningSearch').style.display='none';
+                                   Ext.getCmp('entitlementProfileResultsPanel').updateButtons();
+                                   $('#{resultsFormName}:filterEntitlements').click();"
+                       render="entitlementMiningResultsPanel,a4jResultsPanel,a4jBucketPanel"/>
+    </h:panelGroup>
+</ui:composition>   
+
+</body>
+</html>  

@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+
+        Policy violation dialog
+
+        This form is used to execute some kind of certification action against one or more
+        policy violations. It appears as a pop-up from the policy violations list.
+
+        There are a number of booleans on PolicyViolationActionBean which indicate the type of action the
+        user has selected. These boolean flags are used to display or hide individual components.
+
+-->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:a4j="http://richfaces.org/a4j"
+        xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+
+        // Bug 1007 - The JSF-generated clearFormHiddenParams_removeProfilesForm
+        // function does not get loaded with the modal dialog in IE.  To prevent
+        // a javascript error in the command buttons onclick handler, we'll stub
+        // out this method if it is not defined.
+        if ('undefined' == typeof(clearFormHiddenParams)) {
+            clearFormHiddenParams = function() {
+            }
+        }
+
+    </script>
+
+
+<ui:composition>
+
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+<h:form id="violationDialogForm" style="text-align:top">
+
+    <h:inputHidden id="violationIds" value="#{policyViolationAction.violationIds}"
+                   converter="java.util.List"/>
+
+
+    <a4j:commandButton id="executeButton" action="#{policyViolationAction.executeSelectedAction}"
+                       render="actionTable" style="display:none"/>
+
+
+    <div id="certificationActionError" class="formError" style="display:none;margin-bottom:7px"/>
+
+
+
+    <h:messages styleClass="formError" rendered="#{! empty facesContext.maximumSeverity}"
+                style="margin-bottom:5px"/>
+
+
+
+    <!--
+
+        Mitigation expiration
+
+        This field is in a table outside of the main a4j panel because IE doesnt recognize the
+        creation via ajax of the expiration inputDate field.  
+
+    -->
+    <table id="mitigationTable" style="display:#{policyViolationAction.mitigation ? '' : 'none'}">
+
+        <tr>
+            <td class="titleColumn">
+                #{msgs.label_expiration}
+            </td>
+            <td class="leftAlignedColumn">
+
+                <table>
+                    <tr>
+                        <ui:fragment rendered="#{policyViolationAction.allowAcknowledge}">
+                            <td>
+                                <input name="expirationType" type="radio" checked="true" onclick="$('violationDialogForm:expiration.month').disabled = false;$('violationDialogForm:expiration.day').disabled = false;$('violationDialogForm:expiration.year').disabled = false;$('violationDialogForm:expireNextCertification').value = 'false';"/>
+                            </td>
+                        </ui:fragment>
+                        <td>
+                            <sp:inputDate id="expiration" type="date" popupCalendar="true"
+                                 timeZone="#{base.userTimeZoneId}"
+                                 value="#{policyViolationAction.expiration}"
+                                 addResources="false" 
+                                 imageLocation="/scripts/myfacescalendar"
+                                 javascriptLocation="/scripts/myfacescalendar"
+                                 styleLocation="/scripts/myfacescalendar"
+                                 styleClass="tomahawkInputDate"/>
+                        </td>
+                    </tr>
+                    <ui:fragment rendered="#{policyViolationAction.allowAcknowledge}">
+                        <tr><td><input name="expirationType" type="radio" onclick="$('violationDialogForm:expiration.month').disabled = true;$('violationDialogForm:expiration.day').disabled = true;$('violationDialogForm:expiration.year').disabled = true;$('violationDialogForm:expireNextCertification').value = 'true';"/></td>
+                            <td>
+                                <h:inputHidden id="expireNextCertification" value="#{policyViolationAction.expireNextCertification}"/>${msgs.violation_decision_acknowledge}
+                            </td>
+                        </tr>
+                    </ui:fragment>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+
+    <a4j:outputPanel layout="block" id="actionTable">
+  
+
+        <h:inputHidden id="selectedAction" value="#{policyViolationAction.selectedAction}">
+               <f:converter converterId="sailpoint.object.Enum"/>
+        </h:inputHidden>
+
+        <table>
+
+
+        <!--
+
+          Description and recipient suggest box. Shown in delegations
+
+        -->
+
+
+        <tr style="display:#{policyViolationAction.delegation ? '' : 'none'}">
+            <td class="titleColumn">
+                #{msgs.label_select_recipient}
+            </td>
+            <td class="leftAlignedColumn">
+
+            <script type="text/javascript" >
+
+                // ignoring this for the time being. Is it really necessary?
+                var disableQuickAssign =#{policyViolationAction.assignmentSelected};
+
+
+                // get the list of combo options which will populate the rght side (quickAssign) combo
+                var assignmentOptions =  #{policyViolationAction.quickAssignmenOptionsJson};
+
+                var assigneeSelect = Ext.create('SailPoint.AssigneeSelector', {
+                    quickAssignOptions : assignmentOptions['quickAssignmentOptions'],
+                    renderTo: 'ownerNameSuggest',
+                    width: 600,
+                    allowBlank:false,
+                    id:'policyViolationActionOwnerName',
+                    baseParams: {context: 'Owner'}
+                });
+
+            </script>
+
+            <div id="ownerNameSuggest"></div>
+
+            </td>
+        </tr>
+
+        <tr style="display:#{policyViolationAction.delegation ? '' : 'none'}">
+            <td class="titleColumn">
+                #{msgs.label_description}
+            </td>
+            <td class="leftAlignedColumn">
+                <h:inputText id="description" size="52" value="#{policyViolationAction.description}"/>
+            </td>
+        </tr>
+
+
+        <!--
+
+            Comments - this only displays when the user is delegating or mitigating 
+
+        -->
+
+        <tr style="display:#{policyViolationAction.delegation || policyViolationAction.mitigation || policyViolationAction.acknowledgment ? '' : 'none'}">
+            <td class="titleColumn">
+                #{msgs.label_comments}
+            </td>
+            <td class="leftAlignedColumn">
+                <h:inputTextarea id="comments" rows="5" cols="50" value="#{policyViolationAction.comments}"/>
+            </td>
+        </tr>
+
+        </table>
+    </a4j:outputPanel>
+
+</h:form>
+
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+
+        function toggleDomainConnPassword() {
+            var domainConnPwdDiv = $('domainConnPasswordRow_');
+
+            // If the checkbox is enabled show the textbox
+            var domainConnPwdEnabled = $('editForm:domainPassMode_');
+            if ( domainConnPwdEnabled && domainConnPwdEnabled.checked == true) {
+                if ( domainConnPwdDiv ) {
+                domainConnPwdDiv.style.display = "";
+                }
+            } else {
+            domainConnPwdDiv.style.display = "none";
+            }
+         }
+
+        function togglePartitioning() {
+           var pdiv = $('partitionsRow_');
+           
+           // If the checkbox is enabled show the div for partitions
+           var partitioningEnabled = $('editForm:partitionMode_');
+           if ( partitioningEnabled && partitioningEnabled.checked == true) {
+               if ( pdiv ) {                   
+                   pdiv.style.display = "";
+               }               
+           } else {               
+               pdiv.style.display = "none";
+           }
+           
+           //
+           // Must resize the mainpanel because the hidden div
+           // has a big old text area on it
+           //
+           var mainPanel = Ext.getCmp("mainPanel");
+           if ( mainPanel ) {
+               mainPanel.doLayout();
+           }
+	    }
+		
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var accountID = getFieldValue('editForm:host');
+               Validator.validateNonBlankString(accountID, "Host name cannot be Null!");
+			   
+			   var accountID = getFieldValue('editForm:port');
+               Validator.validateNonBlankString(accountID, "Port number cannot be Null!");
+	
+               var emailID = getFieldValue('editForm:user');
+               Validator.validateNonBlankString(emailID, "user cannot be Null!");
+			   
+			   var passwordOfAdmin = getFieldValue('editForm:password');
+			   Validator.validateNonBlankString(passwordOfAdmin, "User Password can not be Null!");
+			   
+			   
+			   var passwordOfAdmin = getFieldValue('editForm:componentInterface');
+			   Validator.validateNonBlankString(passwordOfAdmin, "Parent componentInterface can not be Null!");
+			   
+			   var passwordOfAdmin = getFieldValue('editForm:dependent_componentInterface');
+			   Validator.validateNonBlankString(passwordOfAdmin, "dependent componentInterface can not be Null!");
+			   
+			   // Validate the domain connection password is not null
+               var domainConnPwdEnabled = $('editForm:domainPassMode_');
+               if ( domainConnPwdEnabled && domainConnPwdEnabled.checked == true) {
+                   var domainConnPwd = getFieldValue('editForm:domainConnPassword');  
+                   Validator.validateNonBlankString(domainConnPwd, "Domain Connection password can not be blank if configured or disable Domain Connection Password enabled checkbox."); 
+               }
+
+			   // Validate the partition data is non null and that there aren't any lines 
+			   // in the partition line that evaluate to null.
+			   var partitioningEnabled = $('editForm:partitionMode_');
+ 			   if ( partitioningEnabled && partitioningEnabled.checked == true) {
+ 			     var partitions = getFieldValue('editForm:partitions_'); 			     
+ 			     // Split partitions "string" on new lines so we can look for empty
+                 var lines = partitions.split(/\r\n|\r|\n/g);
+ 			     var partitionsNew = '';
+ 			     if ( lines ) {
+                   for ( var i=0; i<lines.length ; i++ ) {
+                     var line = lines[i];
+                     if ( line && line.length > 0 ) {
+                       partitionsNew += line + '\n';                        
+                     } 
+                   }
+ 			     }                 
+ 			     $('editForm:partitions_').value = partitionsNew;
+                 Validator.validateNonBlankString(partitionsNew, "Partitioning is enabled, but there are no partitions defined. Please define at least one partition or disable partitioning.");
+ 			   }
+			   
+			   
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+        toggleDomainConnPassword();
+        togglePartitioning();});
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <h:outputText styleClass="sectionHeader" value="#{msgs.con_form_PeopleSoft_credentials}"/><br/><br/>
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="#{msgs.con_form_PeopleSoft_host}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpAccountID" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_host}"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="host"
+                           value="#{applicationObject.attributes['host']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_PeopleSoft_port}"/>
+            </td>
+            <td valign="top">
+               <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpRoleID" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_port}"/>
+            </td>
+            
+            <td>
+              <h:inputText id="port"
+                           value="#{applicationObject.attributes['port']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+		  <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_PeopleSoft_user}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpEmail" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_user}"/>
+            </td>
+            <td>
+              <h:inputText id="user"
+                           value="#{applicationObject.attributes['user']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+          
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_PeopleSoft_password}"/>
+            </td>
+            <td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPassword" styleClass="helpIcon" 
+                              url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_password}"/>
+            </td>
+             <td>
+               <sp:inputSecret id="password"
+                               size="50" 
+                               value="#{applicationObject.attributes['password']}" redisplay="true"
+                               disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                               readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/> 
+             </td>
+             
+          </tr>
+
+           <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_Domain_Pass_Mode}"/>
+              </td>
+              <td valign="top">
+                <h:outputText size="1" style="color: red;" />
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpDomainPasswordMode" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_Domain_Conn_Password_Enable}"/>
+              </td>
+              <td width="100%">
+                <h:selectBooleanCheckbox id='domainPassMode_' onclick='toggleDomainConnPassword()'
+                                         value="#{applicationObject.attributes['domainPassMode']}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+              <tr id='domainConnPasswordRow_'>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_Domain_Connection_Password}"/>
+                </td>
+                <td valign="top">
+                   <h:outputText size="1" style="color: red;" value="*"/>
+               </td>
+                <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpDomainPassword" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.help_con_form_Domain_Conn_Password}"/>
+                </td>
+                <td>
+                  <sp:inputSecret id='domainConnPassword'
+                                   size="50"
+                                   value="#{applicationObject.attributes['domainConnPassword']}" redisplay="true"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_PeopleSoft_employee_data_comp_interface}"/>
+            </td>
+			<td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpUserCompInterface" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_employee_data_comp_interface}"/>
+            </td>
+            
+            <td>
+              <h:inputText id="componentInterface"
+                           value="#{applicationObject.attributes['parent_componentInterface']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+		  <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_PeopleSoft_job_data_comp_interface}"/>
+            </td>
+			<td valign="top">
+            <h:outputText size="1" style="color: red;" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpGroupCompInterface" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_group_data_comp_interface}"/>
+            </td>
+            
+            <td>
+              <h:inputText id="dependent_componentInterface"
+                           value="#{applicationObject.attributes['dependent.componentInterface']}"
+                           size="50"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+		   <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="#{msgs.con_form_PeopleSoft_jar_location}"/>
+            </td>
+			<td valign="top">
+            <h:outputText size="1" style="color: white;" value=""/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPeopleSoftJar" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.help_con_form_jar_location}"/>
+            </td>
+            
+            <td>
+              <h:inputText id="jar_locations"
+                           value="#{applicationObject.attributes['jar_locations']}"
+                           size="100"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+
+		  <tr>
+		  </tr>
+
+        </table>
+	  <ui:fragment>
+          <!--  Partitioning Config -->
+          <br/><h:outputText styleClass="sectionHeader" value="#{msgs.con_form_delimited_partitioning}"/><br/>
+          <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+              <td class='titleColumn certScheduleTitleCol'>
+                <h:outputText style='padding:5px' value="#{msgs.con_form_partitioningMode}"/>
+              </td>
+              <td class="certScheduleHelpCol">
+                <h:graphicImage id="imgHlpPartitioningMode_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.help_con_form_jdbc_partitionEnable}"/>
+              </td>
+              <td width="100%">
+                <h:selectBooleanCheckbox id='partitionMode_' onclick='togglePartitioning()'
+                                         value="#{applicationObject.attributes['partitionMode']}"
+                                         disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+              </td>
+            </tr>
+              <tr id='partitionsRow_'>
+                <td class='titleColumn certScheduleTitleCol'>
+                  <h:outputText style='padding:5px' value="#{msgs.con_form_jdbc_partition_statements}"/>
+                </td>
+                <td class="certScheduleHelpCol">
+                  <h:graphicImage id="imgHlpPartitioningStatements_" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                  alt="#{msgs.help_con_form_erp_partitions}"/>
+                </td>
+                <td>
+                  <h:inputTextarea id='partitions_'
+                                   converter="NewLineList"
+                                   value="#{applicationObject.attributes['partitionStatements']}"
+                                   rows="5" cols="10"
+                                   disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                   readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+              </tr>
+            </table>
+        </ui:fragment>
+      </div>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

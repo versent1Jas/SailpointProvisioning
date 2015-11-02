@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, UNLOCK, ENABLE, SEARCH, UNSTRUCTURED_TARGETS, PASSWORD, AUTHENTICATE" icon="internetIcon" name="IBM Tivoli Access Manager" type="IBM Tivoli Access Manager">
+    <Attributes>
+      <Map>
+        <entry key="connectorClass" value="openconnector.connector.TAMConnector"/>
+        <entry key="formPath" value="TAMConnector.xhtml"/>
+        <entry key="encrypted" value="admin_password"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="userid" identityAttribute="userid" nativeObjectType="account" objectType="account">
+        <AttributeDefinition name="userid" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="first_name" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="last_name" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="registryUID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="description" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" schemaObjectType="group" type="string"/>
+        <AttributeDefinition managed="true" name="noPwdPolicy" remediationModificationType="None" type="boolean"/>
+        <AttributeDefinition name="ssoUser" remediationModificationType="None" required="true" type="boolean"/>
+        <AttributeDefinition name="accountValid" remediationModificationType="None" required="true" type="boolean"/>
+        <AttributeDefinition name="passwordvalid" remediationModificationType="None" required="true" type="boolean"/>
+        <AttributeDefinition multi="true" name="gsoWebCreds" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition multi="true" name="gsoGroupCreds" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="importFromregistry" remediationModificationType="None" required="true" type="boolean"/>
+      </Schema>
+      <Schema displayAttribute="name" featuresString="PROVISIONING" identityAttribute="name" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="name" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="registryUID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition name="description" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" schemaObjectType="account" usage="Create">
+        <Field displayName="UserID" name="userid" required="true" reviewRequired="true" section="" type="string"/>
+        <Field displayName="First Name" name="first_name" required="true" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Last Name" name="last_name" required="true" reviewRequired="true" section="" type="string"/>
+        <Field displayName="registryUID" helpKey="e.g. cn=userid, o=ibm, c=us" name="registryUID" required="true" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Description" name="description" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Password" name="password" required="true" reviewRequired="true" section="" type="secret"/>
+        <Field displayName="Password Valid" name="passwordvalid" reviewRequired="true" section="" type="boolean" value="true"/>
+        <Field displayName="Account Valid" name="accountValid" reviewRequired="true" section="" type="boolean" value="true"/>
+        <Field displayName="GSO User" name="ssoUser" reviewRequired="true" section="" type="boolean" value="true"/>
+        <Field displayName="GSO Web Credentials" helpKey="e.g. gso_name:userid:user_password" multi="true" name="gsoWebCreds" reviewRequired="true" section="" type="String"/>
+        <Field displayName="GSO Group Credentials" helpKey="e.g. gso_group_name:userid:user_password" multi="true" name="gsoGroupCreds" reviewRequired="true" section="" type="String"/>
+        <Field displayName="ImportFromRegistry" name="importFromRegistry" reviewRequired="true" section="" type="boolean"/>
+        <Field displayName="No Password Policy" name="noPwdPolicy" reviewRequired="true" section="" type="boolean"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group Name" name="name" required="true" reviewRequired="true" section="" type="string"/>
+        <Field displayName="RegistryUID" helpKey="e.g. cn=groupname, o=ibm, c=us" name="registryUID" required="true" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Description" name="description" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="Group Name" name="name" reviewRequired="true" type="string"/>
+        <Field displayName="RegistryUID" name="registryUID" readOnly="true" reviewRequired="true" type="string"/>
+        <Field displayName="Description" name="description" reviewRequired="true" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

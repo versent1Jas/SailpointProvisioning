@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui"
+      >
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_edit_group}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>      
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/groupGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+    </sp:script>
+    </ui:define>
+    
+ <ui:define name="body">
+    <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+    function renderScore (value, p, record) {
+        str = '<div class=\'riskIndicator ri_{0}\'>{1}</div>';
+        return Ext.String.format(str, value.color, value.score);
+    }
+    //--><!]]>
+    </script>
+    <script type="text/javascript">
+        helpKey = 'EDIT_GROUP';
+        
+        var sp = new SailPoint.state.StateProvider({
+          stateIds: ['#{groupDefinitionList.gridState.name}'],
+          states:   ['#{groupDefinitionList.gridState.state}']
+        });
+        Ext.state.Manager.setProvider(sp);  
+        
+      Ext.onReady(function(){
+        if (#{groupDefinitionList.groupFactory != null and !(empty groupDefinitionList.objects)}) {
+ 
+	        Ext.QuickTips.init();
+	        var gridWidth = $('subgroups-display').clientWidth;
+	        
+	        var gridMetaData = #{groupDefinitionList.subGroupColumnJSON};
+	        // data store
+	        store = SailPoint.Store.createStore({
+	            fields: gridMetaData.fields,
+	            autoLoad: false,
+	            url: CONTEXT_PATH + '/define/groups/groupDefinitionDataSource.json',
+                root: 'subgroups',   
+	            remoteSort: true
+	        });
+	                          
+
+          var groupStateStr = '#{groupDefinitionList.subGroupGridState.JSON}';
+
+	        // display grid
+	        var grid = new SailPoint.grid.PagingGrid({
+	            id: 'grid',
+	            renderTo: 'subgroups-display',
+                stateId: '#{groupDefinitionList.gridState.name}',
+                stateful: true,
+	            store: store,
+                gridStateStr: groupStateStr,
+	            columns: gridMetaData.columns,
+	            viewConfig : {stripeRows: true},
+	            width: gridWidth        
+	        });
+	                    
+          // Make the cells clickable for access to edit subgroup page.
+          grid.addListener('itemclick', SailPoint.Define.Grid.Group.clickRow);
+          grid.addListener('itemcontextmenu', SailPoint.Define.Grid.Group.showContextMenu);
+
+	    store.load({params:{start:0, limit:20}});
+      }
+        
+    if (#{groupFactory.showAssignedScopeControl})
+        {
+        var scopeSuggest = new SailPoint.ScopeSuggest({
+            renderTo: 'assignedScopeSuggest',
+            binding: 'assignedScope',
+            width: 200,
+            listConfig : {width : 300}
+            });
+         
+        scopeSuggest.setRawValue('#{groupFactory.object.assignedScope.displayName}');
+        
+        }                         
+	}); // Ext.onReady        
+    
+	</script>
+
+
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="groupForm">
+        <ui:include src="/define/groups/subgroupsInclude.xhtml" />
+
+        <h:inputHidden id="id" value="#{groupFactory.object.id}"/>
+
+          <div style="margin-top:20px;" class="spContent">
+            <h:outputText value="#{msgs.group}" styleClass="spContentTitle"/>
+
+            <table>
+              <tr>
+                <td class="">
+                  <h:panelGrid columns="3" styleClass="paddedTbl">
+
+                    <h:panelGroup>
+                      <h:outputText style="font-weight:bold"  value="#{msgs.name}"/>
+                      <h:outputText styleClass="requiredText" value="*"/>
+                    </h:panelGroup>
+                    <h:panelGroup>
+                      <h:inputText id="name" value="#{groupFactory.object.name}" size="40"
+                                   disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                                   readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+                    </h:panelGroup>
+                    <h:panelGroup>
+                      <h:message for="name" styleClass="formError"/>
+                    </h:panelGroup>
+
+                    <h:outputText style="font-weight:bold" value="#{msgs.group_attribute}"/>
+                    <h:selectOneMenu id="attribute" value="#{groupFactory.object.factoryAttribute}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}">
+                      <f:selectItems value="#{groupFactory.factoryAttributeOptions}"/>
+                    </h:selectOneMenu>
+                    <h:message for="attribute" styleClass="formError"/>
+
+                    <h:outputText style="font-weight:bold"  value="#{msgs.description}"/>
+                    <h:inputTextarea id="description" value="#{groupFactory.object.description}" cols="60" rows="4"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+                    <h:message for="description" styleClass="formError"/>
+
+                    <h:outputText style="font-weight:bold" value="#{msgs.enabled}"/>
+                    <h:panelGroup>
+                      <h:selectBooleanCheckbox id="status" value="#{groupFactory.object.enabled}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" />
+                    </h:panelGroup>
+                    <h:message for="status" styleClass="formError"/>
+
+                    <h:outputText rendered="#{groupFactory.showAssignedScopeControl}" style="font-weight:bold" value="#{msgs.label_scope}"/>
+                    <h:panelGroup rendered="#{groupFactory.showAssignedScopeControl}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}">
+                        <div id="assignedScopeSuggest"></div>
+	                    <t:inputHidden id="assignedScope"                 
+	                                   value="#{groupFactory.object.assignedScope}"
+	                                   rendered="#{groupFactory.showAssignedScopeControl}"
+                                       forceId="true">
+	                      <sp:convertScope />
+	                    </t:inputHidden>
+                    </h:panelGroup>
+                    <h:message rendered="#{groupFactory.showAssignedScopeControl}" for="assignedScope" styleClass="formError"/>
+
+                    <h:outputText style="font-weight:bold" value="#{msgs.group_owner_rule}"/>
+                    <h:panelGroup>
+                      <a4j:outputPanel id="groupOwnerRulePanel">
+                        <h:selectOneMenu id="groupOwnerRule"
+                            value="#{groupFactory.groupOwnerRule}"
+                            rendered="#{!(empty groupFactory.groupOwnerRules)}"
+                         disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                         readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" >
+                          <f:selectItems value="#{groupFactory.groupOwnerRules}"/>
+                        </h:selectOneMenu>
+
+                        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                          <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                            onclick="SailPoint.Rule.Editor.edit($('groupForm:groupOwnerRule').value, 
+                                                                'GroupOwner', 
+                                                                $('groupForm:groupOwnerRuleButton'));">
+                          </input>
+                        </ui:fragment>
+                      </a4j:outputPanel>
+                    </h:panelGroup>
+                  </h:panelGrid>
+                </td>
+               </tr>
+            </table>
+          </div>
+
+        <ui:fragment rendered="#{groupDefinitionList.groupFactory != null and !(empty groupDefinitionList.objects)}">
+          <div class="spContent">
+            <h:outputText value="#{msgs.sub_groups}" styleClass="spContentTitle"/>
+            <table border="0" cellpadding="5" cellspacing="0" class="width100">
+              <tr>
+                <td>
+                    <div id="subgroups-display" style="width: 100%; padding: 5px"></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </ui:fragment>
+
+        <div class="buttonRow">
+          <h:commandButton id="saveButton" action="#{groupFactory.saveAction}" value="#{msgs.button_save}" styleClass="primaryBtn"                          
+	                   disabled="#{!sp:hasRight(facesContext, 'FullAccessGroup')}"
+                       readonly="#{!sp:hasRight(facesContext, 'FullAccessGroup')}" /> 
+          <h:commandButton id="cancelButton" action="#{groupFactory.cancelAction}" value="#{msgs.button_cancel}" styleClass="secondaryBtn" />
+        </div>
+
+        <a4j:commandButton id="groupOwnerRuleButton"
+                           style="display:none" 
+                           immediate="true" 
+                           render="groupOwnerRulePanel"/>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

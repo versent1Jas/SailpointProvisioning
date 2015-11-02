@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>  
+  <div style="margin:5px;">
+    
+    <p class="pageInfo">
+      <h:outputFormat value="#{msgs.template_editor_intro}">
+          <f:param value="#{beanType}"/>
+      </h:outputFormat>
+    </p>
+  
+    <a4j:outputPanel id="templatesList">
+    
+    <ui:fragment rendered="#{!empty templateEditor.templateDTOs}"> 
+      <table class="spLightBlueTable width100">
+        <tr>
+          <th></th>
+          <th>#{msgs.template_editor_template}</th>
+          <ui:fragment rendered="#{showApplication}">
+            <th>#{msgs.application}</th>
+          </ui:fragment>
+          <th>#{msgs.description}</th>
+        </tr>
+        <ui:repeat value="#{templateEditor.templateDTOs}" var="template">
+          <tr>
+            <td width="50" align="center">
+              <h:selectBooleanCheckbox value="#{templateEditor.templateSelections[template.id]}" />
+            </td>
+            
+            <td>
+              <ui:fragment rendered="#{empty template.formRefDTO}">
+                <h:outputLink class="fakeLink" value="#"
+                            onclick="$('editForm:templateId').value='#{template.id}'; $('editForm:templateLoadBtn').click(); return false;">
+                  <h:outputText value="#{template.name}" />
+                </h:outputLink>
+              </ui:fragment>
+              <ui:fragment rendered="#{!empty template.formRefDTO}">
+                <h:outputLink class="fakeLink" value="#"
+                            onclick="$('editForm:templateId').value='#{template.id}'; $('editForm:templateLoadBtn1').click(); return false;">
+                  <h:outputText value="#{template.name}" />
+                </h:outputLink>
+              </ui:fragment>
+            </td>
+            
+            <ui:fragment rendered="#{showApplication}">
+              <td><h:outputText value="#{sp:getDisplayNameForId('Application', template.purview)}"/></td>
+            </ui:fragment>
+            
+            <td><h:outputText value="#{template.description}"/></td>
+          </tr>
+        </ui:repeat>
+      </table>
+    </ui:fragment>
+    
+    <h:outputText rendered="#{empty templateEditor.templateDTOs}" value="#{msgs.template_editor_no_templates}"/>
+      
+    </a4j:outputPanel>
+    
+    <div class="buttonRow">
+    
+      <h:inputHidden value="#{templateEditor.formRefId}" name="templateFormRefId" id="templateFormRefId"/>
+      <h:inputHidden value="#{templateEditor.formRefName}" name="templateFormRefName" id="templateFormRefName"/>
+    
+      <a4j:commandButton action="#{templateEditor.addTemplate}"
+                         id="templateAddBtn"
+                         render="templateId,templateName,templateApplicationId,templateApplicationName,templateFields"
+                         oncomplete="SailPoint.component.ReferenceFormPopup.showRole(
+                            '#{beanType}',
+                            'Role');"
+                         value="#{msgs.template_editor_add_template}"
+                         styleClass="secondaryBtn"/>
+                             
+      <a4j:commandButton action="#{templateEditor.deleteTemplates}"
+                         id="templateDeleteBtn"
+                         render="templatesList"
+                         value="#{msgs.template_editor_delete_template}" 
+                         styleClass="secondaryBtn"
+                         oncomplete="Page.fireEvent('onTemplateEditorContentChanged');"/>    
+                       
+      <a4j:commandButton action="#{templateEditor.loadTemplate}"
+                         id="templateLoadBtn"
+                         render="templateId,templateName,templateApplicationId,templateApplicationName,templateFields"
+                         oncomplete="SailPoint.template.TemplateEditor.ShowEditorWindow('#{beanType}');"
+                         style="display:none"/>
+
+      <a4j:commandButton action="#{templateEditor.loadTemplate}"
+                         id="templateLoadBtn1"
+                         render="templateId,templateName,templateApplicationId,templateApplicationName,templateFields"
+                         oncomplete="SailPoint.component.ReferenceFormPopup.showRole(
+                            '#{beanType}',
+                            'Role',
+                            'formRefId');"
+                         style="display:none"/>
+
+      <a4j:commandButton action="#{templateEditor.addFormReference}"
+                       id="templateAddFormRefBtn"
+                       name="tempAddFormRefBtn"
+                       render="templatesList,templateId,templateName,templateApplicationId,templateApplicationName,templateDescr"
+                       style="display:none"
+                       oncomplete="Page.fireEvent('onTemplateEditorContentChanged');"/> 
+    </div>
+  </div>
+</ui:composition>
+
+</body>
+</html>

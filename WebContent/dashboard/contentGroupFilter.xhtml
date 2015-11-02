@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <div style="margin-top:10px; margin-bottom:10px">
+    <table border="0" cellpadding="5" class="dashWidth100">
+      <tr>
+        <td style="text-align: center">
+          <a4j:outputPanel id="groupFilterPanel">
+            <h:outputText value="#{msgs.label_group} " styleClass="font10" style="font-weight: bold; text-align:right; margin-left:10px"/>
+            <h:selectOneMenu id="groupSelect" styleClass="font10" value="#{certificationPercentList.groupFactory}">
+              <f:selectItems value="#{groupFactoryList.factoryOptions}" />
+            </h:selectOneMenu>
+          </a4j:outputPanel>
+        </td>
+        <td style="vertical-align: top; text-align: center">
+          <a4j:commandButton  id="refreshGroupCertPanel" 
+                              styleClass="primaryBtn" 
+                              onclick="SailPoint.Dashboard.displayLoadingMessage('Group');" 
+                              action="#{certificationPercentList.refreshGroups}" 
+                              value="#{msgs.dash_comp_content_grp_filter_button_show_certs}" 
+                              render="groupCertCompletionStatusPanel" 
+                              oncomplete="SailPoint.Dashboard.hideLoadingMessage('Group');setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500);"/>
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+</ui:composition>
+
+</body>
+</html>

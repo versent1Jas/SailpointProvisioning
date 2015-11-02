@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+           buildTooltips();
+        });
+    </script>
+    <f:view>
+
+      <h:panelGrid columns="1">
+
+        <div id="siteCollectionConfig" class="submenuContentBox" style="border:0px">
+            <div class="spContent">
+
+              <table width="100%">
+                <tr>
+                  <td>
+            
+              <a4j:outputPanel id="siteCollectionsTable">
+                <table class="width100" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <h:outputText styleClass="sectionHeader" value="${msgs.col_form_sharepoint_title}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <h:outputText styleClass="font10" value="${msgs.col_form_sharepoint_subtitle}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <table class="spTable">
+                        <thead>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <th style="text-align:center">
+                                <h:selectBooleanCheckbox id="selectAllToggleSites" value="false" onclick="CheckboxSelector.toggleAll(this.id, this.checked, 'toggleable');"/>
+                              </th>
+                              <th/>
+                            </ui:fragment>
+                              <th> 
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_sharepoint_siteURL}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpSharePointSiteURL"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{msgs.col_help_sharepoint_siteurl}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+
+                              <th style="text-align:left">
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_sharepoint_user}"/>
+                                    </td>
+                                    <td>
+                                       <h:graphicImage id="imgHlpSharePointUser"
+                                                       styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                       alt="#{msgs.con_help_sharepoint_user}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+
+                              <th style="text-align:left"> 
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_sharepoint_password}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpSharePointPassword"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{msgs.con_help_sharepoint_password}"/>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </th>
+                              <th style="text-align:left">
+
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <h:outputText value="#{msgs.col_form_sharepoint_sitefilter}"/>
+                                    </td>
+                                    <td>
+                                      <h:graphicImage id="imgHlpSharePointSiteFilter"
+                                                      styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                                      alt="#{msgs.col_help_sharepoint_sitefilter}"/>
+                                  </td>
+                                </tr>
+                              </table>
+
+                            </th>
+                          </tr>
+                        </thead>
+                        <tfoot>
+                          <tr>
+                            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                              <td class="spDataTableHeader centeredColumn">
+                                  <a4j:commandButton id='removeSite' value="#{msgs.button_delete}" styleClass="secondaryBtn" action="#{applicationObject.targetSourceBean.removeSites}" render="siteCollectionsTable"/>
+                              </td>
+                              <td class="spDataTableHeader centeredColumn">
+                                  <a4j:commandButton id='addSite' value="#{msgs.button_add}" styleClass="primaryBtn" action="#{applicationObject.targetSourceBean.addSite}" render="siteCollectionsTable"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <h:inputText value="#{applicationObject.targetSourceBean.newSite.object.siteCollectionUrl}" size="40"/> 
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <h:inputText value="#{applicationObject.targetSourceBean.newSite.object.user}"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <sp:inputSecret value="#{applicationObject.targetSourceBean.newSite.object.password}" autocomplete="off" size="15" redisplay="true"/>
+                              </td>
+                              <td class="spDataTableHeader">
+                                  <h:inputText value="#{applicationObject.targetSourceBean.newSite.siteInclusionFilter}" size="45" redisplay="true"/>
+                              </td>
+                            </ui:fragment>
+                          </tr>
+                        </tfoot>
+                        <tbody>
+                          <ui:repeat value="#{applicationObject.targetSourceBean.sites}" var="site">
+                            <tr>
+                              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageApplication')}">
+                                  <td class="centeredColumn">
+                                    <h:selectBooleanCheckbox styleClass="toggleable" id="#{share.id}checkbox" value="#{applicationObject.targetSourceBean.selectedShares[site.id]}"/>
+                                  </td>
+                                  <td/>
+                              </ui:fragment>
+                              <td><h:inputText value="#{site.object.siteCollectionUrl}" size="40"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+
+                              <td><h:inputText value="#{site.object.user}"
+                                                 disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                 readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+
+                              <td><sp:inputSecret value="#{site.object.password}" size="15" redisplay="true"
+                                                    autocomplete="off"
+                                                    disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                    readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+
+                              <td><h:inputText value="#{site.siteInclusionFilter}" size="45" redisplay="true"
+                                                    disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                                    readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/></td>
+                            </tr>
+                          </ui:repeat>
+                        </tbody>
+                      </table>                        
+                    </td>
+                  </tr>
+                </table>
+              </a4j:outputPanel>
+
+                  </td>
+                </tr>
+              </table>
+            
+            </div> <!-- spContent -->
+        </div> <!-- siteCollectionConfig -->
+      </h:panelGrid>
+
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

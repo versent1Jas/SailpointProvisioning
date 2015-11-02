@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition>
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    <f:view>
+    
+      <ui:fragment rendered="#{null == accountGroupBean.object}">
+        <div class="spContent">
+          <h:outputText value="#{msgs.err_could_not_load_account_group}"/>
+        </div>
+      </ui:fragment>
+
+      <ui:fragment rendered="#{null != accountGroupBean.object}">
+        <h:inputHidden value="#{accountGroupBean.object.id}" id="accountGroupId"/>
+        
+        <ui:param name="accountGroupAttributes" value="#{sp:filterAttributesForAppGroupAndEntitlements(accountGroupBean.entitlements.attributes, accountGroupBean.object.application, accountGroupBean.object.type, false)}"/>
+
+        <ui:fragment rendered="#{null != accountGroupBean.description}">
+          <div class="spContent">
+	          <div style="text-align: left; padding-bottom: 10px">
+	            <h:outputText escape="false" value="#{accountGroupBean.description}"/>
+	            <br/>
+	          </div>
+          </div>
+        </ui:fragment>
+        
+        <ui:fragment rendered="#{!empty accountGroupAttributes}">
+          <div class="spContent">
+            <div style="text-align: left">
+              <h:outputText styleClass="sectionHeader" value="#{msgs.attributes}"/>
+            </div>
+            <div class="spTabledContent" style="border:0px">
+              <table style="width: 100%">
+                <ui:repeat value="#{accountGroupAttributes}" var="currentAttrName">
+                  <tr>
+                    <td class="titleColumn"><h:outputText value="#{currentAttrName} "/></td>
+                    <td>
+                      <table style="width: 100%; table-layout: fixed;">
+                        <tr>
+                          <td class="leftAlignedColumn" style="word-wrap: break-word; padding-left: 5px;">
+                            <ui:repeat value="#{sp:asList(accountGroupBean.entitlements.attributes[currentAttrName])}" var="attrValue">
+                              <div style="word-wrap: break-word;"><h:outputText value="#{attrValue}"/></div>
+                            </ui:repeat>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </ui:repeat>
+              </table>
+            </div>
+          </div>
+        </ui:fragment>
+        
+        <ui:param name="entitlements" value="#{sp:filterAttributesForAppGroupAndEntitlements(accountGroupBean.entitlements.attributes, accountGroupBean.object.application, accountGroupBean.object.type, true)}"/>
+
+        <ui:fragment rendered="#{(!empty entitlements)}">
+          <div class="spContent">
+            <div style="text-align: left">
+              <ui:fragment rendered="#{!empty entitlements}">
+                <h:outputText styleClass="sectionHeader" value="#{msgs.entitlements}"/>
+                <div style="padding-left:5px;padding-right:5px">
+                  <ul class="entitlementList noList">
+                    <ui:repeat value="#{entitlements}" var="currentAttrName">
+                      <li>
+                        <ui:include src="/identity/attributesInclude.xhtml">
+                          <ui:param name="attributeName" value="#{currentAttrName}" />
+                          <ui:param name="attributeValues" value="#{sp:asList(accountGroupBean.entitlements.attributes[currentAttrName])}" />
+                          <ui:param name="applicationName" value="#{accountGroupBean.entitlements.applicationName}" />
+                        </ui:include>
+                      </li>
+                    </ui:repeat>
+                  </ul>
+                </div>
+              </ui:fragment>
+            </div>
+
+          </div>
+        </ui:fragment>
+
+      </ui:fragment>
+    </f:view>
+  </ui:composition>
+</html>

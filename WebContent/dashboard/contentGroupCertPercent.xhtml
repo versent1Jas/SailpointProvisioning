@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+  <table class="dashWidth100 paddedTbl"><tr><td>
+    <t:saveState value="#{certificationPercentList.groupOffset}"/>
+  
+    <a4j:outputPanel id="groupCertCompletionStatusPanel">
+    
+      <ui:fragment rendered="#{empty certificationPercentList.groupCertPercentages}">
+        <table style="margin:5px">
+          <tr><td style="text-align:center"><h:outputText class="progressText" value="#{msgs.msg_no_certifications_found}"/></td></tr>
+        </table>
+      </ui:fragment>
+      
+      <a4j:commandButton  id="prevGroupBtn"
+                      style="display:none"
+                      action="#{certificationPercentList.prevGroups}" value="prev"
+                      render="groupCertCompletionStatusPanel"
+                      oncomplete="setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500);"/>
+                                
+      <a4j:commandButton  id="nextGroupBtn"
+                      style="display:none"
+                      action="#{certificationPercentList.nextGroups}"
+                      render="groupCertCompletionStatusPanel"
+                      oncomplete="setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500);"/> 
+
+    <t:div rendered="#{!empty certificationPercentList.groupCertPercentages}" id="groupCerts">
+
+      <!-- Pager -->
+      <ui:include src="dashboardPager.xhtml">
+        <ui:param name="pageSize"   value="#{certificationPercentList.maxGroups}" />
+        <ui:param name="totalRows"  value="#{certificationPercentList.groupDefinitionCount}" />
+        <ui:param name="startIdx"   value="#{certificationPercentList.groupOffset}" />
+        <ui:param name="endIdx"     value="#{certificationPercentList.groupEnd}" />
+        <ui:param name="prevBtn"    value="#{parentFormName}:prevGroupBtn" />
+        <ui:param name="nextBtn"    value="#{parentFormName}:nextGroupBtn" />
+        <ui:param name="objectType" value="#{msgs.groups}" />
+        <ui:param name="statusText" value="#{certificationPercentList.groupStatusText}" />
+      </ui:include>
+
+      <table class="spTable dashWidth100 paddedTbl" id="groupCertStatusTbl" style="margin-top:0px">
+        <thead>
+          <tr>            
+            <th>
+              <h:outputText styleClass="font10" value="#{msgs.name}" />
+            </th>
+            <th colspan="2" width="52%">
+              <h:outputText styleClass="font10" value="#{msgs.percentage_complete}" />
+            </th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          <ui:repeat value="#{certificationPercentList.groupCertPercentages}" var="groupCertPercent">
+            <tr style="#{(groupCertPercent.totalItems gt 0) ? 'cursor:pointer' : ''}" 
+            onmouseover="this.style.backgroundColor='#FFFFCC'" onmouseout="this.style.backgroundColor=''">              
+                            
+              <td width="30%"
+                onclick="SailPoint.Dashboard.toggleCertPercentDisplay('groupDetails#{groupCertPercent.id}', '#{(groupCertPercent.totalItems gt 0)}', $('showGroupDetails_#{groupCertPercent.id}'));">            
+                <h:outputText styleClass="font10" value="#{groupCertPercent.name}" />
+              </td>
+              
+              <td width="70%" colspan="2"
+                onclick="SailPoint.Dashboard.toggleCertPercentDisplay('groupDetails#{groupCertPercent.id}', '#{(groupCertPercent.totalItems gt 0)}', $('showGroupDetails_#{groupCertPercent.id}'));"> 
+                <ui:fragment rendered="#{groupCertPercent.totalItems le 0}">
+                  <h:outputText style="margin-left: 10px" styleClass="font10"
+                    value="#{msgs.msg_no_open_ceritications}"/>
+                </ui:fragment>
+                 
+                 <ui:fragment rendered="#{(groupCertPercent.totalItems gt 0)}">
+                  <sp:progressBar 
+                    rendered="#{groupCertPercent.hasContinuous}"           
+                    totalNum="#{groupCertPercent.totalItems}"
+                    completedNum="#{groupCertPercent.completedItems}"
+                    greenNum="#{groupCertPercent.certifiedItems}"
+                    yellowNum="#{groupCertPercent.certificationRequiredItems}"
+                    redNum="#{groupCertPercent.overdueItems}"
+                    percentComplete="#{sp:round(groupCertPercent.percentComplete)}">
+                  </sp:progressBar> 
+                  
+                  <sp:progressBar   
+                    rendered="#{!(groupCertPercent.hasContinuous)}"          
+                    totalNum="#{groupCertPercent.totalItems}"
+                    completedNum="#{groupCertPercent.completedItems}"
+                    remainingClass="progressBarRemainingDarkGray"
+                    percentComplete="#{sp:round(groupCertPercent.percentComplete)}">
+                  </sp:progressBar>
+                  
+                </ui:fragment>
+              </td>
+            </tr>
+            <tr id="groupDetails#{groupCertPercent.id}" style="#{!(empty groupCertPercent.certifications) ? '' : 'display:none'}" >
+              
+              <td colspan="3" class="spLightGray">
+              
+              <span id="showGroupDetails_#{groupCertPercent.id}" class="#{(groupCertPercent.totalItems gt 0) ? '' : 'empty'}">
+                <a4j:commandButton  style="display:none"
+                                    action="#{groupCertPercent.loadCerts}"
+                                    render="groupCertCompletionStatusPanel"/>
+              </span>
+              
+              <span id="prevGroupDetails_#{groupCertPercent.id}" class="#{(groupCertPercent.totalItems gt 0) ? '' : 'empty'}">
+                <a4j:commandButton  style="display:none"
+                                    action="#{groupCertPercent.prevCerts}" value="prev"
+                                    render="groupCertCompletionStatusPanel"/>
+              </span>
+              
+              <span id="nextGroupDetails_#{groupCertPercent.id}" >
+                <a4j:commandButton  style="display:none"
+                                    action="#{groupCertPercent.nextCerts}"
+                                    render="groupCertCompletionStatusPanel"/>
+              </span>
+              
+              <a4j:outputPanel id="groupCertDetails#{groupCertPercent.id}">
+              
+                <h:inputHidden id="offset_#{groupCertPercent.id}" value="#{groupCertPercent.offset}"/>
+              
+                <ui:fragment rendered="#{empty groupCertPercent.certifications}">
+                  <h:graphicImage url="/images/progress.gif"/> 
+                </ui:fragment>
+                
+                <ui:fragment rendered="#{!empty groupCertPercent.certifications}">
+                  <table cellpadding="0" cellspacing="0" class="width100" >
+                    <tr>
+                      <td align="left" class="spBlue textBold" style="width:16px">
+                        <ui:fragment rendered="#{groupCertPercent.certificationsCount gt groupCertPercent.maxCerts }">                            
+                          <h:graphicImage alt="next" url="/images/icons/left_circle_blue_16.png"
+                            style="vertical-align:bottom;cursor:pointer;" 
+                            rendered="#{groupCertPercent.offset gt 0}"
+                            onclick="SailPoint.Dashboard.loadCerts($('prevGroupDetails_#{groupCertPercent.id}'))"/>
+                        </ui:fragment>                        
+                      </td>
+                      <td class="spBlue textBold">
+                        <!-- todo il8n -->  
+                        <h:outputText styleClass="font10" value="#{msgs.label_details} #{groupCertPercent.certificationsCount} Certification(s)"/>
+                      </td>
+                      <td class="spBlue">
+                        <ui:fragment rendered="#{groupCertPercent.certificationsCount gt groupCertPercent.maxCerts }">                            
+                          <h:outputText value=" [#{msgs.label_showing} #{groupCertPercent.start} - #{groupCertPercent.end}]"/> 
+                        </ui:fragment>
+                      </td>
+                      <td align="right" class="spBlue textBold" style="width:16px">
+                        <ui:fragment rendered="#{groupCertPercent.certificationsCount gt groupCertPercent.maxCerts }">                            
+                          <h:graphicImage alt="next" url="/images/icons/right_circle_blue_16.png"
+                            style="vertical-align:bottom;cursor:pointer;" 
+                            rendered="#{(groupCertPercent.end lt groupCertPercent.certificationsCount)}"
+                            onclick="SailPoint.Dashboard.loadCerts($('nextGroupDetails_#{groupCertPercent.id}'))"/>
+                        </ui:fragment>
+                      </td>
+                    </tr>           
+                    
+                    <ui:repeat value="#{groupCertPercent.certifications}" var="certificationBean">
+                      <tr>
+                        <td colspan="4">
+                          <ui:include src="contentApplicationCertPercentInclude.xhtml">
+                            <ui:param name="certificationBean" value="#{certificationBean}" />
+                          </ui:include>
+                        </td>
+                      </tr>
+                    </ui:repeat>
+                  </table>
+                </ui:fragment>
+              </a4j:outputPanel>
+              </td>
+            </tr>         
+          </ui:repeat>
+        </tbody>
+        
+      </table>
+      <script>
+        makeTableMulticolored($('groupCertStatusTbl'), true, false, 'even', 'odd');
+      </script>
+    </t:div>
+    </a4j:outputPanel>
+  </td></tr></table>  
+</ui:composition>
+
+</body>
+</html>

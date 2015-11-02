@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/risk-scores">
+      <src>risk-scores.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/riskBands.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SliderInputCombo.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/ExtendedPagingToolbar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SliderGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript" defer="defer">
+
+      var currentRepeatId = 0;
+      var isPageDirty = false;
+      helpKey = 'RISK_SCORES';
+      
+      var roleBarTypeStore = 
+      [
+        <c:forEach items="#{bundleList.typeOptions}" var="option" varStatus="vStatus">
+          <h:outputText rendered="#{!vStatus.first}" value=","/>
+          ['#{option.label}', '#{option.label}']
+        </c:forEach>  
+      ];
+
+    </script>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/roleBar.js?#{debug.revision}</src>
+    </sp:script>
+  </ui:define>
+  <ui:define name="title">#{msgs.title_biz_role_baseline_access_risk_conf}</ui:define>
+
+  <ui:define name="body">
+  
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      <h:form id="editForm">
+        <div id='Business Role Baseline Access RiskConfigInstructions' class="instructions">
+          <h:outputText value="#{sp:localizeKey(businessRoleBarConfig.instructions)}"/>
+        </div>
+        
+        <div class="spacerDiv"/>
+        
+        <div id="Business Role Baseline Access RiskConfig">
+          <div id="roleGrid" class="width100"/>
+        </div>
+        
+        <h:commandButton id="saveBtn" style="display:none" action="#{businessRoleBarConfig.saveChanges}"/>
+        <h:commandButton id="cancelBtn" style="display:none" action="#{businessRoleBarConfig.cancelChanges}"/>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

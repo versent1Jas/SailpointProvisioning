@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+
+<body>
+<ui:composition>
+  <!--  Any page that includes this page must also include the compositeScoringConfig.js file! -->
+  
+  <table border="0" cellpadding="0" cellspacing="0" class="width100">
+    <tbody>
+      <tr><td>
+          <div class="paddedContainer">
+            <table class="width100" style="border:0" cellpadding="5">
+              <tr>
+                <td><h:outputText styleClass="spContentTitle" value="#{msgs.title_composite_scoring}" /></td>
+              </tr>
+              <tbody>    
+                <tr>
+                  <td>
+                  <div class="spTabledContent">
+                    <t:dataTable styleClass="spTable"
+                    id="riskScoreConfigTable"
+                    rowClasses="even,odd"
+                    value="#{riskScoreConfig.compensatedWeights}" var="category"
+                    forceIdIndexFormula="#{category.scoreName}">
+          
+                    <h:column>
+                      <f:facet name="header">
+                        <h:outputText value="#{msgs.category}" />
+                      </f:facet>
+                      <a4j:commandLink id="categoryName" onclick="confirmSaveOrCancel('#{category.scoreName}', 'editForm:riskScoreConfigTabl#{category.scoreName}:saveAndConfig', 'editForm:riskScoreConfigTabl#{category.scoreName}:cancelAndConfig');">
+                        <h:outputText value="#{sp:localizeKey(category.type)}" />
+                      </a4j:commandLink>
+                      
+                      <h:commandButton id="saveAndConfig" style="display:none" action="#{riskScoreConfig.saveAndConfig}"/>
+                      <h:commandButton id="cancelAndConfig" style="display:none"  action="#{riskScoreConfig.cancelAndConfig}"/>
+                    </h:column>
+          
+                    <h:column>
+                      <f:facet name="header">
+                        <h:outputText value="#{msgs.composite_score_percent_contribution}" />
+                      </f:facet>
+                      <table>
+                        <tr>
+                          <td class="leftAlignedColumn" style="padding-right: 30px"><img id="weightIndicatorFor#{category.id}" src=""/></td>
+                          <td width="311px" style="padding-right: 30px">
+                            <div id="sliderWrap#{category.id}" class="sliderWrap">
+                              <div id="sliderTrack#{category.id}" class="sliderLeft" />
+                              <div id="slider#{category.id}" class="slider">
+                                <div id="handle#{category.id}" class="sliderHandle">
+                                  <img src="#{base.requestContextPath}/images/sliderHandle.gif" alt=""/>
+                                </div>
+                              </div>
+                            </div>
+                            <script defer="defer">
+                              // <![CDATA[
+                              if (sliderData == null) {
+                                sliderData = [];
+                              }
+                     
+                              sliderData[#{category.id}] = {};
+                              sliderData[#{category.id}].id = #{category.id};
+                              sliderData[#{category.id}].weight = #{category.weight};
+                  
+                              // ]]>
+                            </script>
+                          </td>
+                          <td width="20%">
+                            <div id="weightInput#{category.id}">
+                              <h:inputText
+                                id="categoryWeight" value="#{category.weight}"
+                                size="3"
+                                onchange="updateSlider('#{category.id}', this.value); isPageDirty = true;" 
+                                onkeyup="updateSlider('#{category.id}', this.value, event); isPageDirty = true;"/>
+                              <h:outputText value=" % " />
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </h:column>
+                  </t:dataTable>
+                  </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+      </td></tr>
+    </tbody>
+  </table>
+</ui:composition>
+
+</body>
+</html>

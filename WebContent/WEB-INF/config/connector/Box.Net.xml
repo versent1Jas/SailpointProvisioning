@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, ENABLE, SEARCH" icon="internetIcon" name="Box.Net Template" type="Box.Net">
+    <Attributes>
+      <Map>
+        <entry key="API_KEY" value="6sdipraqp40asxtf6lbkhsz2m98bsoxn"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="BOX_URL" value="https://www.box.net"/>
+        <entry key="connectorClass" value="openconnector.connector.BoxNetConnector"/>
+        <entry key="formPath" value="BoxNetAttributesForm.xhtml"/>
+        <entry key="groupEntitlementAttr" value="memberof"/>
+        <entry key="group_membership_access_level" value="member"/>
+        <entry key="groups_page_size" value="20"/>
+        <entry key="members_page_size" value="20"/>
+        <entry key="encrypted" value="token"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="name" groupAttribute="memberof" identityAttribute="user_id" nativeObjectType="user" objectType="account">
+        <AttributeDefinition name="user_id" type="string">
+          <Description>User ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name" remediationModificationType="None" type="string">
+          <Description>User name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="login" remediationModificationType="None" type="string">
+          <Description>Email id used to login</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="role" remediationModificationType="None" type="string">
+          <Description>User role</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="memberof" remediationModificationType="None" type="string">
+          <Description>Member of</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="space_amount" remediationModificationType="None" type="string">
+          <Description>Space allocated to the user in GB</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="shared_contacts" remediationModificationType="None" type="string">
+          <Description>Whether the user can see other users in the enterprise in their contact lists (Yes/No)</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="sync_enabled" remediationModificationType="None" type="string">
+          <Description>Whether the user can use sync</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="job_title" remediationModificationType="None" type="string">
+          <Description>The user's job title, displayed on their profile page</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="phone" remediationModificationType="None" type="string">
+          <Description>The user's phone number, displayed on their profile page</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="address" remediationModificationType="None" type="string">
+          <Description>Address</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="language" remediationModificationType="None" type="string">
+          <Description>User language</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="group_name" identityAttribute="group_id" nativeObjectType="group" objectType="group">
+        <AttributeDefinition name="group_id" type="string">
+          <Description>Group ID</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="group_name" type="string">
+          <Description>group name</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="folder_count" remediationModificationType="None" type="string">
+          <Description>groups folder count</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="user_count" remediationModificationType="None" type="string">
+          <Description>user membership count</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="Name" helpKey="Enter user display name" name="name" required="true" section="" type="string"/>
+        <Field displayName="Login Id" helpKey="Enter email Id used for login" name="login" required="true" section="" type="string"/>
+        <Field displayName="Space amount" helpKey="Amount of space the user has, in GB" name="space_amount" reviewRequired="true" section="" type="long"/>
+        <Field displayName="Shared contacts" helpKey="Whether the user can see other users in the enterprise in their contact lists" name="shared_contacts" reviewRequired="true" section="" type="boolean"/>
+        <Field displayName="Role" helpKey="Box enterprise role" name="role" reviewRequired="true" section="" type="string">
+          <AllowedValues>
+            <String>admin</String>
+            <String>co-admin</String>
+            <String>user</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Language" helpKey="2 letter code the user&apos;s language" name="language" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Status" helpKey="Status as active/inactive" name="status" reviewRequired="true" section="" type="string">
+          <AllowedValues>
+            <String>active</String>
+            <String>inactive</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="Sync enabled" helpKey="Whether the user can use sync" name="sync_enabled" reviewRequired="true" section="" type="boolean"/>
+        <Field displayName="Tracking code" helpKey="The tracking code value for the nth tracking code" name="tracking_code_(0-4)" reviewRequired="true" section="" type="string"/>
+        <Field displayName="External id" helpKey="Tracking code value for the SSO external ID tracking code" name="external_id" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Job title" helpKey="The user&apos;s job title, displayed on their profile page" name="job_title" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Phone" helpKey="The user&apos;s phone number, displayed on their profile page" name="phone" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Address street" helpKey="The street part of the user&apos;s address" name="address_street" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Address city" helpKey="The city part of the user&apos;s address" name="address_city" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Address state" helpKey="The state part of the user&apos;s address" name="address_state" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Address postal code" helpKey="The postal code part of the user&apos;s address" name="address_postal_code" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

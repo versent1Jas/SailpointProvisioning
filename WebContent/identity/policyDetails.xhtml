@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core">
+<body>
+
+<ui:composition>
+
+  <div id="policy_#{violation.id}" style="display: none;">
+    <div class="spLightBlueTabledContent">
+      <table class="spLightBlueTable">
+        <tr>
+          <th><h:outputFormat value="#{msgs.info_rules_details}">
+				<f:param value="#{violation.constraint}"/>
+			</h:outputFormat>
+          </th>
+          <th align="right">
+            <h:graphicImage
+              alt="Click to close" title="Click to close" styleClass="detailsPanelClose pointer"
+              value="/images/icons/CloseDelete.png" style="float:right"
+              onclick="javascript:showHideWithLock(new Array($('policyRow_#{violation.id}'), $('policy_#{violation.id}')), null, 0.5, SailPoint.identity.setTabPanelHeight);"/>
+          </th>
+        </tr>
+        <tr>
+          <td colspan="2" style="background:#fff">
+
+          <table cellspacing="5"  class="spPaddedTable">
+            <ui:include src="/identity/policyGenericDetails.xhtml">
+              <ui:param name="violationView" value="#{violation}"/>
+              <ui:param name="noPolicy" value="true"/>
+              <ui:param name="noRule" value="true"/>
+              <ui:param name="noSummary" value="true"/>
+            </ui:include>
+            
+            <ui:fragment rendered='#{violation.identityPageRenderer eq "policyAccountDetails.xhtml"}'>
+                <ui:include src="/identity/policyAccountDetails.xhtml">
+                  <ui:param name="violationView" value="#{violation}"/>
+                </ui:include>
+            </ui:fragment>
+            <ui:fragment rendered='#{violation.identityPageRenderer eq "policyActivityDetails.xhtml"}'>
+                <ui:include src="/identity/policyActivityDetails.xhtml">
+                  <ui:param name="violationView" value="#{violation}"/>
+                </ui:include>
+            </ui:fragment>
+            <ui:fragment rendered='#{violation.identityPageRenderer eq "policySODDetails.xhtml"}'>
+                <ui:include src="/identity/policySODDetails.xhtml">
+                  <ui:param name="violationView" value="#{violation}"/>
+                </ui:include>
+            </ui:fragment>
+
+          </table>
+
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</ui:composition>
+</body>
+</html>

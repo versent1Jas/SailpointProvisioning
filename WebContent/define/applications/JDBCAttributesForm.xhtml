@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+        
+        Ext.onReady(function () {
+           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+
+               var extCmp = Ext.getCmp('mainPanel');
+               if (extCmp) {
+                   extCmp.validate();
+               }
+               
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+           var mainPanel = Ext.create('SailPoint.define.applications.MainPanel', {id: 'mainPanel'});
+
+           mainPanel.show();
+           initializeForm();
+           //Used to resize the tab Panel when Config tab is shown
+           Page.on('configSettingsLoaded', function() {
+               // first update application object type panels registered to main panel
+               Ext.getCmp('mainPanel').updatePanelLayout();
+               // next do mainPanel layout which adjusts whitespace in the surrounding border at the bottom
+               // of the panel
+               Ext.getCmp('mainPanel').doComponentLayout();
+           });
+           // remove some scroll bar ghosting when expand/collapsing JDBC attribute panels
+           Ext.getCmp('appTab').queryById('attributesContent').setAutoScroll(false);
+        }); 
+
+       function initializeForm() {
+          var parsingMethod = getSelectedRadioInput("editForm:jDBCparseType_");
+           if ( parsingMethod == null ) {
+              var regularExpression = $('editForm:regularExpression_');           
+               if (( regularExpression != null ) && 
+                  ( regularExpression.value )) {
+                  parsingMethod = "operationRule";
+              } else {
+                  parsingMethod = "globalRule";
+              }
+              ApplicationPage.setRadioInput("editForm:jDBCparseType_", parsingMethod);
+          }
+          ApplicationPage.toggleParsingSections("editForm:jDBCparseType_", parsingMethod, "globalRule", "operationRule");
+       }
+
+       
+
+       
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <div id='formErrorsTop' class="formError" style="display:none"/>
+
+      <a4j:commandButton id="addObjectTypeBtn"
+                         style="display:none;"
+                         action="#{applicationObject.addGroupSchemaAction}"
+                         render="attributesOutputPanel, schemaData, errorPanel, templatesList"
+                         oncomplete="refreshTabPanel();ApplicationPage.scrollToAnchor('jdbcPanelDiv_');">
+        <a4j:param name="schemaObjectType" noEscape="true" value="$('editForm:hiddenSchemaObjectType').value" assignTo="#{applicationObject.schemaObjectType}" />
+      </a4j:commandButton>
+      <h:inputHidden id="hiddenSchemaObjectType"/>
+      
+      <div id='tabedConfigPanelDiv'/>
+      
+      <a4j:outputPanel id="attributesOutputPanel">
+        <div id="jdbcSettingsDiv">
+          <t:dataList value="#{applicationObject.JDBCAttributeDTOs}" var="jdbcItem" rowKey="#{jdbcItem.schemaDTO.objectType}">
+              <div id="#{jdbcItem.schemaDTO.objectType}Settings">
+                <ui:include src="JDBCAttributesInclude.xhtml">
+                  <ui:param name="nameSpace" value="#{jdbcItem.schemaDTO.objectType eq 'account' ? '' : jdbcItem.schemaDTO.objectType}"/>
+                  <ui:param name="schemaType" value="#{jdbcItem.schemaDTO.objectType eq 'account' ? '' : sp:concat(jdbcItem.schemaDTO.objectType, '.')}"/>
+                  <ui:param name="jdbcDTO" value="#{jdbcItem}"/>
+                </ui:include>
+              </div>
+          </t:dataList>
+        </div>
+      </a4j:outputPanel>
+
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

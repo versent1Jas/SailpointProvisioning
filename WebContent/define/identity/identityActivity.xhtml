@@ -1,0 +1,35 @@
+<!-- Used to have "position: relative" here, but this messed up the suggest component. -->
+<html xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+  <f:view>
+
+    <ui:fragment rendered="#{!(identity.activeTab eq 6)}">
+      <div class="spContent">
+        <h:graphicImage url="/images/progress.gif"
+          style="padding:5px;vertical-align:middle"/>
+      </div>
+
+      <!-- TQM: there was some kind of a hack here but removing it seemed fine.
+      I am thinking the new DTO model fixed it. Will remove this comment if no bugs
+      found. -->
+
+    </ui:fragment>
+
+    <ui:fragment rendered="#{identity.activeTab eq 6}">
+      <div class="spAjaxContent"  id="activityContentContainer">
+        <ui:include src="/identity/identityActivitySettings.xhtml">
+        </ui:include>
+      </div>
+
+        <div class="spAjaxContent">
+        <ui:include src="/identity/identityActivity.xhtml">
+        </ui:include>
+      </div>
+    </ui:fragment>
+    
+  </f:view>
+</html>

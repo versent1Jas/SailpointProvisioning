@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<!--
+  NOTE: The name of this file is way too generic.  This is unconditionally
+  included by workflow.xhtml which is the default renderer for work items
+  opened by the workflow engine.  It is designed only for role edit
+  approvals. Need to rework this to be less role-specific.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <br/>
+  <h:panelGroup>
+        
+    <table cellspacing="10">
+      <tr>
+        <td><h:outputText value="#{msgs.name}" styleClass="titleColumn"/> </td>
+        <td align='left'><h:outputText value="#{workItem.newObject.displayableName}"/> </td>
+      </tr>
+      <tr>
+        <td><h:outputText value="#{msgs.owner}" styleClass="titleColumn"/></td>
+        <td><h:outputText value="#{workItem.newObject.owner.displayableName}"/></td>
+      </tr>
+      <tr>
+        <td><h:outputText value="#{msgs.description}" styleClass="titleColumn"/></td>
+        <td><h:outputText value="#{workItem.objectDescription}" escape="false"/></td>
+      </tr>
+    </table>
+
+    <ui:fragment rendered="#{workItem.roleDifferences.attributeDifferences != null}">
+      <br/>
+      <h:outputText styleClass="spContentTitle" value="#{msgs.witem_section_role_changes}"/>
+      <br/><br/>
+
+      <table class="width100">
+        <tr><td><div class="spTabledContent">
+          <table class="spTable" cellspacing="0" id="attributeTbl">
+            <tr>
+              <th>#{msgs.attribute}</th>
+              <th>#{msgs.attr_old_value}</th>
+              <th>#{msgs.attr_new_value}</th>
+            </tr>              
+            <ui:repeat value="#{workItem.roleDifferences.attributeDifferences}" var="diff">
+              <tr>
+                <td><h:outputText value="#{sp:localizeKey(diff.attribute)}"/></td>
+                <td><h:outputText value="#{diff.oldValue}" escape="false"/></td>
+                <td><h:outputText value="#{diff.newValue}" escape="false"/></td>
+              </tr>
+            </ui:repeat>
+          </table>
+        </div></td></tr>
+      </table>
+    </ui:fragment>
+
+    <ui:fragment rendered="#{workItem.roleDifferences.selectorDifference != null}">
+      <br/>
+      <h:outputText styleClass="spContentTitle" value="#{msgs.witem_section_selector_changes}"/>
+      <br/><br/>
+
+      <table class="width100">
+        <tr><td><div class="spTabledContent">
+          <table class="spTable" cellspacing="0" id="attributeTbl">
+            <tr>
+              <th>#{msgs.attr_old_value}</th>
+              <th>#{msgs.attr_new_value}</th>
+            </tr>              
+            <tr>
+              <td><h:outputText value="#{workItem.roleDifferences.selectorDifference.oldValue}" escape="false"/></td>
+              <td><h:outputText value="#{workItem.roleDifferences.selectorDifference.newValue}" escape="false"/></td>
+            </tr>
+          </table>
+        </div></td></tr>
+      </table>
+    </ui:fragment>
+
+    <ui:fragment rendered="#{workItem.roleDifferences.profileDifferences != null}">
+      <br/>
+      <h:outputText styleClass="spContentTitle" value="#{msgs.witem_section_profile_changes}"/>
+      <br/><br/>
+
+      <ui:repeat value="#{workItem.roleDifferences.profileDifferences}" var="profile">
+  
+          <br/>
+          <h:outputFormat styleClass="spContentTitle"  value="#{msgs.profile_for_named_entity}">
+              <f:param value="#{profile.application}"/>
+          </h:outputFormat>
+  
+          <br/><br/>
+
+          <ui:fragment rendered="#{profile.attributeDifferences != null}">
+            <table class="width100">
+              <tr><td><div class="spTabledContent">
+                <table class="spTable" cellspacing="0" id="attributeTbl">
+                  <tr>
+                    <th>#{msgs.attribute}</th>
+                    <th>#{msgs.attr_old_value}</th>
+                    <th>#{msgs.attr_new_value}</th>
+                  </tr>              
+                  <ui:repeat value="#{profile.attributeDifferences}" var="diff">
+                    <tr>
+                      <td><h:outputText value="#{sp:localizeKey(diff.attribute)}"/></td>
+                      <td><h:outputText value="#{diff.oldValue}"/></td>
+                      <td><h:outputText value="#{diff.newValue}"/></td>
+                    </tr>
+                  </ui:repeat>
+                </table>
+              </div></td></tr>
+            </table>
+          </ui:fragment>
+  
+          <ui:fragment rendered="#{profile.filterDifference != null}">
+            <br/>
+            <!-- this looks busy
+            <h:outputText styleClass="spContentTitle" value="#{msgs.filter_changes}"/>
+            <br/><br/>
+            -->
+            <h:panelGrid columns="2" columnClasses="titleColumn,leftAlignedColumn">
+
+              <h:outputText value="#{msgs.old_filter}"/>
+              <h:inputText value="#{profile.filterDifference.oldValue}" size="60" disabled='true'/>
+
+              <h:outputText value="#{msgs.new_filter}"/>
+              <h:inputText value="#{profile.filterDifference.newValue}" size="60" disabled='true'/>
+
+            </h:panelGrid>
+          </ui:fragment>
+
+          <ui:fragment rendered="#{profile.permissionDifferences != null}">
+            <br/>
+            <h:outputText styleClass="spContentTitle" value="#{msgs.permission_changes}"/>
+            <br/><br/>
+            <table class="width100">
+              <tr><td><div class="spTabledContent">
+                <table class="spTable" cellspacing="0" id="attributeTbl">
+                  <tr>
+                    <th>#{msgs.target}</th>
+                    <th>#{msgs.old_rights}</th>
+                    <th>#{msgs.new_rights}</th>
+                  </tr>              
+                  <ui:repeat value="#{profile.permissionDifferences}" var="diff">
+                    <tr>
+                      <td><h:outputText value="#{sp:localizeKey(diff.attribute)}"/></td>
+                      <td><h:outputText value="#{diff.oldValue}"/></td>
+                      <td><h:outputText value="#{diff.newValue}"/></td>
+                    </tr>
+                  </ui:repeat>
+                </table>
+              </div></td></tr>
+            </table>
+          </ui:fragment>
+   
+      </ui:repeat>
+    </ui:fragment>
+
+    <!-- 
+      This is a convention recognized by viewResult
+     -->
+    <h:inputHidden id="TaskResultId" value="#{workItem.taskResultId}"/>
+
+    <table cellspacing="10">
+      <ui:fragment rendered="#{workItem.taskResultId != null}">
+        <tr><td>
+          <h:commandLink id="goToResult" styleClass="spContentTitle" 
+            value="#{msgs.click_to_view_analysis_task_result}"
+            action="#{workItem.viewTaskResultAction}"/>
+        </td></tr>
+      </ui:fragment>
+  
+      <ui:fragment rendered="#{workItem.hasPendingChange}">
+        <tr><td>
+          <h:commandLink id="goToEditor" styleClass="spContentTitle" 
+            value="#{msgs.click_to_view_pending_change}"
+            action="#{workItem.viewPendingChangeAction}"/>
+        </td></tr>
+      </ui:fragment>
+    </table>
+
+  </h:panelGroup>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+    <tr id="#{idName}NotificationHeader" style="display: #{(hide) ? 'none' : ''}">
+      <td class="titleColumnWithWrap certScheduleTitleCol">
+        <h:outputText value="#{enabledText}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpEml#{idName}" styleClass="helpIcon"
+            url="/images/icons/dashboard_help_16.png" alt="#{enabledHelp}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <h:selectBooleanCheckbox
+          id="#{idName}NotificationSelect"
+          value="#{notifInfo.enabled}"
+          onclick="toggleMe();"
+          disabled="#{certificationSchedule.continuousHasLaunched}"
+          readonly="#{certificationSchedule.continuousHasLaunched}" />
+      </td>
+    </tr>
+
+    <tr id="#{idName}NotificationOptions" style="display: #{(hide) ? 'none' : ''}">
+      <td width="25%" colspan="2"></td>
+      <td colspan="6">
+      <div id="#{idName}NotificationConfig" style="display:none;" >
+      <table class="nonPaddedTbl">
+        <thead>
+          <tr><th colspan="5" class="dashContentHeader">
+            <h:outputText value="#{msgs.notification_policy}" />
+          </th></tr>
+        </thead>
+        <tbody><tr><td colspan="5"><div id='#{idName}_notificationsContainer'></div></td></tr>
+        </tbody>
+      </table>
+      
+	      <a4j:outputPanel id="#{idName}_notificationDatesWarning">
+		      <ui:fragment rendered="#{certificationSchedule.tentativeActivationDate}">
+			  	<span style="color: #FABB00"><h:outputText value="#{certificationSchedule.tentativeDateWarning}" /></span>
+			  </ui:fragment>
+		  </a4j:outputPanel>
+      </div>
+      </td>
+    </tr>
+    <h:inputHidden id="#{idName}_notificationsData" value="#{notifInfo.data}"/>
+    
+    <a4j:outputPanel id="#{idName}_notificationDates">
+      <h:inputHidden id="#{idName}_notifStartDate" value="#{notifInfo.startDate}" converter="sailpoint.object.Date"/>
+      <h:inputHidden id="#{idName}_notifEndDate" value="#{notifInfo.endDate}" converter="sailpoint.object.Date"/>
+    </a4j:outputPanel> 
+    
+    <script>
+      var #{idName}_notifications;
+      function toggleMe() {
+         var callback = function() {
+           if ($('#{idName}NotificationConfig').style.display != "none") {
+             #{idName}_notifications.grid.show();
+             #{idName}_notifications.createOrderedConfigs();
+           }
+         };
+        showHideWithLock($('#{idName}NotificationConfig'), null, null, callback);
+      }
+          
+      Ext.onReady(function(){
+
+        #{idName}_notifications = new sailpoint.notification.Notifications({
+          renderDivElement : $("#{idName}_notificationsContainer")
+          ,hiddenDataElement : $("certificationScheduleForm:#{idName}_notificationsData")
+          ,hiddenStartDateElement : $("certificationScheduleForm:#{idName}_notifStartDate")
+          ,hiddenEndDateElement : $("certificationScheduleForm:#{idName}_notifEndDate")
+          ,runNowElement : $("certificationScheduleForm:runNowCheckbox")
+          ,pastStagedPhase : #{pastStagedPhase}
+          });
+
+        if (SailPoint.CertificationScheduleForm) {
+          var panelSelectedHandler = {
+            onPanelSelected : function(selectedIndex) {
+               if ($('certificationScheduleForm:#{idName}NotificationSelect').checked) {
+                 $('#{idName}NotificationConfig').style.display = "";
+                 #{idName}_notifications.grid.show();
+               }
+               #{idName}_notifications.updateStartAndEndDates();
+            }
+          };          
+          SailPoint.CertificationScheduleForm.wizard.addPanelSelectedHandler(panelSelectedHandler);
+        }           
+      });
+    </script>
+</ui:composition>
+
+</body>
+</html>

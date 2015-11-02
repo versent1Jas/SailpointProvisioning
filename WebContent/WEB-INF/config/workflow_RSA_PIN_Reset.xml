@@ -1,0 +1,439 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+<!-- Self service link to drive the RSA PIN reset on the RSA AM server  -->
+
+ <QuickLink name="Update RSA Token PIN" category="Access"
+    messageKey="quicklink_update_rsa_token" action="workflow" ordering="8">
+    <Attributes>
+        <Map>
+            <entry key="displayText" value="true" />
+              <entry key="requestingIdentity">
+                <value>
+                  <Script>
+                    <Source> 
+                       return currentUser.getName(); 
+                     </Source>
+                  </Script>
+                </value>
+              </entry>
+            <entry key="workflowName" value="Update RSA Token PIN"/>
+        </Map>
+    </Attributes>
+    <DynamicScopes>
+        <Reference class="sailpoint.object.DynamicScope" name="Everyone" />
+    </DynamicScopes>
+ </QuickLink>
+
+
+<!--
+  User Update workflow for RSA PIN reset (Self Service) supporting form for the token and PIN input.
+-->
+
+ <Workflow explicitTransitions="true" name='Update RSA Token PIN' libraries='Identity'>
+
+    <Variable name='trace' initializer='false'>
+      <Description>enable this to see stuff spit out to stdout</Description>  
+    </Variable>
+
+  <!--
+    Configuration Variables
+  -->
+
+  <Variable name='foregroundProvisioning' editable='true'>
+    <Description>
+      Normally provisioning is done in a step that uses the "backgroud"
+      option to force the workfow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintanance task to 
+      see the resutls of the request.
+    </Description>
+  </Variable>
+
+  <!--
+    Input Variables
+  -->
+
+  <Variable name='identityName' initializer='ref:requestingIdentity'>
+    <Description>
+      Name of Identity that is being updated.
+    </Description>
+  </Variable>
+
+  <Variable name="identityRequestId" output="true">
+    <Description>
+       The sequence id of the Identity request object which is stored in
+       the name field of the identity request and auto-incremented.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="identityDisplayName"
+            initializer='script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)'>
+    <Description>
+      The displayName of the identity being updated.
+      Query for this using a projection query and fall back to the name.
+    </Description>
+  </Variable>
+
+    <Variable name='owner' initializer='ref:requestingIdentity'> 
+      <Description>Name of the user that will recieve the forms.</Description>
+    </Variable>
+
+  <Variable name='tokenSerialNumber'>
+    <Description>
+      Token Serial Number which will be populated for the identity and shown in the custom form
+      for selection and will be part of the provisioning plan
+    </Description>
+  </Variable>
+
+  <Variable name='tokenPIN'>
+    <Description>
+      Token PIN which needs to be updated will be populated by the user in the custom form
+      and will be part of the provisioning plan
+    </Description>
+  </Variable>
+
+
+  <!--
+    Internal variables
+  -->
+    <Variable name="approvalSet">
+    <Description>
+       This attributes is set during the "Build Approval Set" step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved,
+
+       This variable includes all ApprovalItems that are part of
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+
+  <Variable input="true" name="plan">
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+
+  <Variable name='project'>
+    <Description>
+      Provisioning project containing RSA token information, 
+      compiled from the input plan.
+    </Description>
+  </Variable>
+
+    <Variable name="isRSAAppDefined" input='true'>
+    <Description>
+       Flag to indicate whether any RSA account is linked to the requesting identity
+    </Description>
+  </Variable>
+
+
+  <Step name='start' posX="39" posY="131" icon='Start'>
+      <Description>
+         It will check whether the logged identity has any RSA account
+         associated or not. If not then will show the error message else
+         proceed with presenting the form to enter the PIN for token/s
+      </Description>
+      <Arg name="isRSAAppDefined">
+      <Script>
+        <Source>
+            import java.util.List;
+            import sailpoint.object.Application;
+            import sailpoint.object.Link;
+            import sailpoint.api.SailPointContext;
+            
+            boolean isRSAAppDefined = false;
+
+            SailPointContext spc = wfcontext.getSailPointContext();
+
+            Identity identity = spc.getObjectByName(Identity.class, identityName);
+            List links = identity.getLinks();
+            if ( Util.otob(trace) ) {
+                System.out.println("Start " + identity.getDisplayName());
+            }
+            for(Object objLink : links){
+                Link link = (Link)objLink;
+                if(link != null) {
+                    Application app = link.getApplication();
+                    if(app != null) {
+                        if ( Util.otob(trace) ) {
+                            System.out.println("Application: "+ app.getName() + " Type: " + app.getType());
+                        }
+                        if(app.getType().equalsIgnoreCase("RSA Authentication Manager - Direct")) {
+                            Object obj = link.getAttribute("directPermissions");
+                            if(obj != null) {
+                                if ( Util.otob(trace) ) {
+                                    System.out.println("Tokens are assigned to : " + identity.getDisplayName());
+                                }
+                                isRSAAppDefined = true;
+                            } else {
+                                if ( Util.otob(trace) ) {
+                                    System.out.println("No Tokens are assigned to : " + identity.getDisplayName());
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if ( Util.otob(trace) ) {
+                        System.out.println("No Link for: " + identity.getDisplayName());
+                    }
+                }
+            }
+            return isRSAAppDefined;
+        </Source>
+      </Script>
+    </Arg>
+    <Transition to="Exit on No RSA Account" when="script:(!isTrue(isRSAAppDefined))"/>
+    <Transition to='Collect token PIN'/>
+  </Step>
+
+  <!-- 
+    Present provisioning form
+  -->
+
+  <Step name='Collect token PIN' action='addMessage' posX="402" posY="202" icon='Message'>
+      <Description>
+         Render a form with a single input that collects the token PIN. Other read only field 
+         will polpulate the RSA tokens linked to the identity.
+      </Description>
+      <Approval send='trace, identityName'
+                return='identityName, tokenPIN, tokenSerialNumber'
+                owner='ref:owner' >
+        <Form>
+          <Section label='RSA token PIN reset'>
+              <Field displayName="Token Serial Number" name="tokenSerialNumber" required="true" reviewRequired="true" displayType="combobox" type="string">
+              <AllowedValuesDefinition>
+                <Script>
+                  <Source>
+                        import java.util.List;
+                        import sailpoint.tools.Util;
+                        import sailpoint.object.Application;
+                        import sailpoint.object.Link;
+                        import sailpoint.object.Permission;
+                        
+                        List tokens = new ArrayList();
+                        List links = identity.getLinks();
+                        if ( Util.otob(trace) ) {
+                            System.out.println("Start " + identity.getDisplayName());
+                        }
+                        for(Object objLink : links){
+                            Link link = (Link)objLink;
+                            if(link != null) {
+                                Application app = link.getApplication();
+                                if(app != null) {
+                                    if ( Util.otob(trace) ) {
+                                        System.out.println("Application: "+ app.getName() + " Type: " + app.getType());
+                                    }
+                                    if(app.getType().equalsIgnoreCase("RSA Authentication Manager - Direct")) {
+                                        Object obj = link.getAttribute("directPermissions");
+                                        if (obj != null) {
+                                                if (obj instanceof List) {
+                                                    List permissions = (List)obj;
+                                                    for (Object objPerm : permissions) {
+                                                        if(objPerm instanceof Permission) {
+                                                            Permission perm = (Permission)objPerm;
+                                                            String targetPerm = perm.getTarget();
+                                                            if ( Util.otob(trace) ) {
+                                                                System.out.println("Permission : " + targetPerm);
+                                                            }    
+                                                            String slNo = targetPerm.substring(targetPerm.indexOf('-')+1);
+                                                            if ( Util.otob(trace) ) {
+                                                                System.out.println("Serial No : " + slNo);
+                                                            }
+                                                            tokens.add(slNo);
+                                                        }
+                                                    }
+                                                }
+                                        }
+                                    }
+                                }
+                            } else if ( Util.otob(trace) ) {
+                                System.out.println("No Link for: " + identity.getDisplayName());
+                            }
+                        }
+                        return tokens;
+                  </Source>
+                </Script>
+                </AllowedValuesDefinition>
+              </Field>
+             <Field displayName="New PIN" name="tokenPIN" required="true" type="secret"/>
+          </Section>
+          <Button label='Ok' action='next'/>
+          <Button label='Cancel' action='cancel'/>
+           
+        </Form>
+      </Approval>
+    <Transition to='Create Plan'/>
+  </Step>
+
+  <Step icon="Task" name='Create Plan' resultVariable='plan'>
+    <Description>
+      Create the provisioning plan according to the input provided in the form.
+    </Description>
+    <Script>
+      <Source>
+        import java.util.List;
+        import sailpoint.object.Application;
+        import sailpoint.object.Link;
+        import sailpoint.object.ProvisioningPlan;
+        import sailpoint.object.ProvisioningPlan.AccountRequest;
+        import sailpoint.object.ProvisioningPlan.AttributeRequest;
+        import sailpoint.object.ProvisioningProject;
+        import sailpoint.object.Permission;
+        import sailpoint.api.Provisioner;
+        import sailpoint.api.SailPointContext;
+
+        SailPointContext spc = wfcontext.getSailPointContext();
+
+        Identity ident = spc.getObjectByName(Identity.class, identityName);
+        List links = ident.getLinks();
+        ProvisioningPlan plan = new ProvisioningPlan();
+        plan.setIdentity(ident);
+        AccountRequest req = null;
+
+        for(Object objLink : links){
+            Link link = (Link)objLink;
+            Application app = link.getApplication();
+            if ( Util.otob(trace) ) {
+                System.out.println("Create Account request for: " + app.getName());
+            }
+            if(app != null) {
+                if(app.getType().equalsIgnoreCase("RSA Authentication Manager - Direct")) {
+                    List tokenNoList = new ArrayList();
+                    req = new AccountRequest();
+                    req.setApplication(app.getName());
+                    req.setNativeIdentity(link.getNativeIdentity());
+                    req.setInstance(link.getInstance());
+                    plan.add(req);
+                    
+                    Object obj = link.getAttribute("directPermissions");
+                    if (obj != null) {
+                        if (obj instanceof List) {
+                            List permissions = (List)obj;
+                            for (Object objPerm : permissions) {
+                                if(objPerm instanceof Permission) {
+                                    Permission perm = (Permission)objPerm;
+                                    String targetPerm = perm.getTarget();
+                                    if ( Util.otob(trace) ) {
+                                        System.out.println("Permission : " + targetPerm);
+                                    }
+                                    String slNo = targetPerm.substring(targetPerm.indexOf('-')+1);
+                                    if ( Util.otob(trace) ) {
+                                        System.out.println("Token Serial No : " + slNo);
+                                    }
+                                    if(tokenSerialNumber.contains(slNo)) {
+                                        tokenNoList.add(slNo);
+                                    }
+                                }
+                            }
+                        }
+                    } else if ( Util.otob(trace) ) {
+                        System.out.println("Could not get Permission");
+                    }
+                    if(tokenNoList.size() > 0) {
+                        AttributeRequest areq = new AttributeRequest();
+                        areq.setName("tokenPIN");
+                        areq.setOperation(ProvisioningPlan.Operation.Set);
+                        if(tokenPIN == null){
+                            areq.setValue(tokenPIN);                                                
+                        }
+                        else {
+                            areq.setValue(spc.encrypt(tokenPIN));
+                        }                        
+                        req.add(areq);
+                        
+                        AttributeRequest areq2 = new AttributeRequest();
+                        areq2.setName("tokenSerialNumber");
+                        areq2.setOperation(ProvisioningPlan.Operation.Set);
+                        areq2.setValue(tokenNoList);
+                        req.add(areq2);
+                    }
+                }
+            }
+        }
+        if ( Util.otob(trace) ) {
+            System.out.println("Plan: " + plan.toXml());
+        }
+        return plan;
+      </Source>
+    </Script>
+    <Arg name='identity' value='ref:requestingIdentity'/>
+    <Arg name='tokenPIN' value='ref:tokenPIN'/>
+    <Arg name='tokenSerialNumber' value='ref:tokenSerialNumber'/>
+    <Transition to='Identity Request Initialization'/>
+  </Step>
+
+
+  <Step icon="Task" name="Identity Request Initialization" posX="134" posY="10">
+    <Description>
+      Call the standard subprocess to initialize the request, this includes
+      auditing, building the approvalset, compiling the plan into project.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Identity Request Initialize'/>
+    </WorkflowRef>
+    <Arg name='identityName' value='ref:identityName'/>
+    <Arg name='identityDisplayName' value='ref:identityDisplayName'/>
+    <Arg name='plan' value='ref:plan'/>
+    <Arg name='optimisticProvisioning' value='true'/>
+    <Arg name='trace' value='ref:trace'/>
+    <Return name='project' to='project'/>
+    <Return name='approvalSet' to='approvalSet'/>
+    <Return name='identityRequestId' to='identityRequestId'/>
+    <Transition to="Provision"/>
+  </Step>
+
+  <Step icon="Task" name="Provision" posX="751" posY="6">
+    <Description>
+      Call the standard subprocess that will process the
+      approval decisions and do provisioning.  This
+      includes calling any configured provisioning
+      connectors and building manual actions.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Provision with retries'/>
+    </WorkflowRef>
+
+    <Arg name='identityRequestId' value='ref:identityRequestId'/>
+    <Arg name="project" value="ref:project"/>
+    <Arg name='trace' value='ref:trace'/>
+    <Return name='retries' to='retries'/>
+    <Return name='project' to='project'/>
+    <Transition to="end"/>
+  </Step>
+
+  <Step catches="complete" icon="Catches" name="Finalize" posX="1058" posY="308">
+    <Description>
+      Call the standard subprocess that can audit/finalize the request.
+    </Description>
+    <WorkflowRef>
+      <Reference class='Workflow' name='Identity Request Finalize'/>
+    </WorkflowRef>
+    <Arg name='approvalSet' value='ref:approvalSet'/>
+    <Arg name='identityRequestId' value='ref:identityRequestId'/>
+    <Arg name='project' value='ref:project'/>
+    <Arg name='trace' value='ref:trace'/>
+    <Transition to="end"/>
+  </Step>
+
+  <Step action="call:addMessage" name="Exit on No RSA Account" posX="364" posY="107">
+    <Description>
+      If identity has no RSA links then display the error message.
+    </Description>
+    <Arg name="message" value="worklow_error_no_rsa_app"/>
+    <Arg name="type" value="Error" />
+    <Transition to="end"/>
+  </Step>
+
+  <Step name='end' posX="699" posY="152" icon='Stop'/>
+
+ </Workflow>
+
+</sailpoint>

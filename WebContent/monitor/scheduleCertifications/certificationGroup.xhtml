@@ -1,0 +1,577 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:sp="http://sailpoint.com/ui"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:c="http://java.sun.com/jstl/core"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+<ui:define name="title">
+    #{certificationGroup.name}
+</ui:define>
+
+<ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/monitor/schedule-certifications">
+        <src>schedule-certifications.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/certification">
+        <src>certification.css</src>
+    </sp:style>
+
+    <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/EmailWindow.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/DateField.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/DateRange.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/PercentRangeInput.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src> 
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/certification/CertificationGroupReviewGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/web/certification/ExclusionsGrid.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript"><!--//--><![CDATA[//><!--
+
+        var ENTITY_TYPE = '#{certificationGroup.entityType}';
+        var EXCLUSIONS_ID = '#{certificationGroup.exclusionsId}';
+
+        var sp = new SailPoint.state.StateProvider({
+           stateIds: ['identityExclusions', 'accountGroupExclusions', 'roleExclusions', 'dataOwnerExclusions', "certificationGroupReviewGrid"],
+           states:   [
+               "#{gridConfigBean.gridStateConfig['identityExclusions'].state}",
+               "#{gridConfigBean.gridStateConfig['accountGroupExclusions'].state}",
+               "#{gridConfigBean.gridStateConfig['roleExclusions'].state}",
+               "#{gridConfigBean.gridStateConfig['dataOwnerExclusions'].state}",
+               "#{gridConfigBean.gridStateConfig['certificationGroupReviewGrid'].state}"             
+           ]
+       });
+       Ext.state.Manager.setProvider(sp);
+
+        SailPoint.showExclusions = function(id) {
+
+            var exclusionsConf = #{gridConfigBean.uiConfigJson[certificationGroup.exclusionsGridConfig]};
+
+            var grid = new SailPoint.certification.ExclusionsGrid({
+                certificationGroupId: id,
+                colKey: '#{certificationGroup.exclusionsGridConfig}',
+                entityType: ENTITY_TYPE,
+                stateId: EXCLUSIONS_ID,
+                columns: exclusionsConf.columns,
+                fields: exclusionsConf.fields
+            });
+
+            var exclusionsDialog = new Ext.Window({
+                title: '#{sp:escapeJavascript(msgs.cert_exclusions_title)}',
+                layout: 'fit',
+                width: 768,
+                height: 500,
+                dockedItems: [{
+                    xtype: 'toolbar',
+                    dock: 'bottom',
+                    layout: {pack : 'end'},
+                    ui: 'footer',
+                    items: [
+                        {
+                        	scope: exclusionsDialog, 
+                        	text: '#{sp:escapeJavascript(msgs.button_close)}',
+                          cls : 'secondaryBtn',
+                        	handler: function(){exclusionsDialog.close();}
+                        }
+                    ]
+                }],
+                items: [ grid ]
+            });
+
+            exclusionsDialog.show();
+            grid.load();
+        };
+
+        var reviewGrid = null;
+        var messagesPanel = null;
+        var gridColConf = #{gridConfigBean.uiConfigJson['certificationAccessReviewsTableColumns']};
+        var hasMessages = #{certificationGroup.resultMessages != null};
+
+        Ext.onReady(function() {
+
+            if (hasMessages){
+                messagesPanel = new Ext.Panel({
+                    renderTo:'messagesDiv', 
+                    height:150,
+                    style:'margin-bottom:20px',
+                    collapsible:true,
+                    autoScroll:true,
+                    contentEl:'messagesContent',
+                    title:'#{sp:escapeJavascript(msgs.cert_grp_panel_errors_and_warnings)}'
+                });
+            }
+            var decisionPanel = new Ext.Panel({
+                contentEl:Ext.get('decisionCharts'),
+                renderTo : 'chartsDiv',
+                collapsible:true,
+                bodyStyle:'padding:10px 0 15px 0',
+                title:'#{sp:escapeJavascript(msgs.cert_grp_panel_stats)}'
+            });
+
+            reviewGrid = new SailPoint.certification.CertificationGroupReviewGrid({
+                stateId : 'certificationGroupReviewGrid',
+            	title : '#{sp:escapeJavascript(msgs.cert_grp_reviews_title)}',
+                minHeight : 300,
+                renderTo : 'accessReviewGrid',
+                gridMetaData : gridColConf,
+                stateful: true,
+                certGroupId : '#{certificationGroup.id}',
+                enableForwarding : #{not certificationGroup.complete},
+                listeners : {
+                    itemclick : {
+                        fn : function(gridView, record, HTMLitem, index, e, eOpts){
+                            var certId = record.getId();
+                            Ext.fly('editForm:accessReviewId').dom.value = certId;
+                            Ext.fly('editForm:viewAccessReviewButton').dom.click();
+                        }
+                    }
+                }
+            });
+
+            reviewGrid.load();
+        });
+
+    //--><!]]>
+    </script>
+
+    <script type="text/javascript" defer="defer">
+        helpKey = 'CERTIFICATION_GROUP';
+    </script>
+</ui:define>
+
+<ui:define name="body">
+<f:view>
+
+<a4j:outputPanel ajaxRendered="true">
+    <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError"
+                fatalClass="formError"/><br/>
+</a4j:outputPanel>
+
+<h:form styleClass="form" id="editForm">
+
+    <h:inputHidden id="accessReviewId" value="#{certificationGroup.selectedAccessReview}"/>
+    <h:commandButton style="display:none" id="viewAccessReviewButton" action="#{certificationGroup.viewAccessReview}" />
+    <h:commandButton style="display:none" id="cancelCertificationBtn" action="#{certificationGroup.cancel}" />
+    <h:commandButton style="display:none" id="activateCertificationBtn" action="#{certificationGroup.activate}" />
+
+
+
+<div class="twoColumn">
+
+    <div class="column">
+        <div>
+            <label>#{msgs.cert_grp_owner}</label>
+            <span>#{certificationGroup.ownerDisplayName}</span>
+        </div>
+        <div>
+            <label>#{msgs.cert_grp_created}</label>
+            <span>
+                <h:outputText value="#{certificationGroup.created}">
+                    <f:convertDateTime type="both" dateStyle="short" timeStyle="long"
+                                       timeZone="#{certification.userTimeZone}"/>
+                </h:outputText> 
+            </span>
+        </div>
+        <div>
+            <label><label><h:outputText value="#{msgs.cert_grp_exclusions}"/></label></label>
+            <span>#{certificationGroup.excludedItems}</span>
+            <ui:fragment rendered="#{certificationGroup.excludedEntities != 0}">
+                <a href="javascript:SailPoint.showExclusions('#{certificationGroup.id}')">[#{msgs.cert_grp_view_exclusions}]</a>
+            </ui:fragment>
+        </div>
+        <div>
+        	<h:outputLink value="#{base.requestContextPath}/monitor/scheduleCertifications/editCertificationSchedule.jsf?certGroup=#{certificationGroup.id}&amp;forceLoad=true">[#{msgs.cert_grp_view_schedule}]</h:outputLink>
+        </div>
+    </div>
+    <div class="column">
+        <div class="progressBarContainer">
+            <label>#{msgs.cert_grp_reviews_completed}</label>
+            <ui:fragment rendered="#{!certificationGroup.pending}">
+                <sp:progressBar
+                        percentComplete="#{certificationGroup.certificationPercentComplete}"
+                        completedNum="#{certificationGroup.completedCertifications}"
+                        totalNum="#{certificationGroup.totalCertifications}"
+                        remainingClass="progressBarRemainingDarkGray">
+                </sp:progressBar>
+            </ui:fragment>
+            <h:outputText rendered="#{certificationGroup.pending}" value="#{msgs.cert_grp_stats_pending}"/>
+        </div>
+        <div class="progressBarContainer">
+            <label><h:outputText value="#{certificationGroup.entitiesDescription}"/></label>
+            <ui:fragment rendered="#{!certificationGroup.pending}">
+                <sp:progressBar
+                        percentComplete="#{certificationGroup.statistics.percentComplete}"
+                        completedNum="#{certificationGroup.statistics.completedEntities}"
+                        totalNum="#{certificationGroup.statistics.totalEntities}"
+                        remainingClass="progressBarRemainingDarkGray">
+                </sp:progressBar>
+            </ui:fragment>
+            <h:outputText rendered="#{certificationGroup.pending}" value="#{msgs.cert_grp_stats_pending}"/>
+        </div>
+        <div class="progressBarContainer">
+            <label>#{msgs.cert_grp_items_completed}</label>
+            <ui:fragment rendered="#{!certificationGroup.pending}">
+                <sp:progressBar
+                        percentComplete="#{certificationGroup.statistics.itemPercentComplete}"
+                        completedNum="#{certificationGroup.statistics.completedItems}"
+                        totalNum="#{certificationGroup.statistics.totalItems}"
+                        remainingClass="progressBarRemainingDarkGray">
+                </sp:progressBar>
+            </ui:fragment>
+            <h:outputText rendered="#{certificationGroup.pending}" value="#{msgs.cert_grp_stats_pending}"/>
+        </div>
+
+    </div>
+    <div style="clear:both"></div>
+</div>
+
+<div   style="display:none">
+    <ul id="messagesContent" class="noList">
+
+        <c:forEach items="#{certificationGroup.resultMessages}" var="msg">
+            <li class="#{msg.error ? 'formError' : 'formWarn'}">#{sp:localize(msg)}</li>         
+        </c:forEach>
+
+    </ul>
+</div>
+
+<div id="messagesDiv"></div>
+
+<ui:fragment rendered="#{certificationGroup.staged}">
+  <div id="stagedContainer" style="padding: 10px;">
+      <button class="bigCertificationSignOffButton primaryBtn" style="width: 230px;" onclick="$('editForm:activateCertificationBtn').click(); return false;">
+          <h:outputText value="Activate" />
+      </button>
+      <button class="bigCertificationSignOffButton secondaryBtn" style="width: 230px;" onclick="$('editForm:cancelCertificationBtn').click(); return false;">
+          <h:outputText value="Cancel Certification" />
+      </button>
+  </div>
+</ui:fragment>
+
+<div id="chartsDiv"></div>
+
+<div id="decisionCharts">
+
+
+<div class="chartRow" style="width:100%">
+
+    <ui:fragment rendered="#{!certificationGroup.pending and certificationGroup.totalCertifications == 0}">
+        <div style="text-align:center"><h:outputText value="#{msgs.cert_grp_no_access_reviews_created}"/></div>
+    </ui:fragment>
+
+    <div style="text-align:center">
+        <h:outputText rendered="#{certificationGroup.pending}" value="#{msgs.cert_grp_stats_pending}"/>
+    </div>
+    
+    <ui:fragment rendered="#{!certificationGroup.pending and certificationGroup.totalCertifications > 0}">
+        <ui:fragment rendered="#{certificationGroup.identityCertification || certificationGroup.dataOwnerCertification}">
+            <ui:fragment rendered="#{!certificationGroup.dataOwnerCertification}">
+            <div class="decisionChartCell">
+                <sp:chart id="roleChart"
+                          datasource="#{certificationGroup.rolesDataSource}"
+                          path="certification"
+                          colors="#037da1,#78aa37,#a22f19,#f59135"
+                          title="#{msgs.cert_grp_chart_title_roles}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+            </ui:fragment>
+            <ui:fragment rendered="#{!certificationGroup.roleMembershipCertification}">
+            <div class="decisionChartCell">
+                <sp:chart id="exceptionChart"
+                          datasource="#{certificationGroup.exceptionsDataSource}"
+                          path="certification"
+                          colors="#037da1,#78aa37,#a22f19,#f59135"
+                          title="#{msgs.cert_grp_chart_title_entitlements}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+            </ui:fragment>
+            <ui:fragment rendered="#{certificationGroup.hasAccounts}">
+            <div class="decisionChartCell">
+                <sp:chart id="accountsChart"
+                          datasource="#{certificationGroup.accountsDataSource}"
+                          path="certification"
+                          colors="#037da1,#78aa37,#a22f19,#f59135"
+                          title="#{msgs.cert_grp_chart_title_accounts}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+            </ui:fragment>
+            <ui:fragment rendered="#{!certificationGroup.roleMembershipCertification and !certificationGroup.dataOwnerCertification}">    
+            <div class="decisionChartCell">
+                <sp:chart id="policyViolationChart"
+                          datasource="#{certificationGroup.violationsDataSource}"
+                          path="certification"
+                          colors="#037da1,#f59135,#a22f19,#78aa37"
+                          title="#{msgs.cert_grp_chart_title_violations}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+            </ui:fragment>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certificationGroup.accountGroupMembershipCertification}">
+            <div class="decisionChartCell">
+                <sp:chart id="membershipChart"
+                          datasource="#{certificationGroup.accountGroupMembershipDataSource}"
+                          path="certification"
+                          colors="#037da1,#78aa37,#a22f19"
+                          title="#{msgs.cert_grp_chart_title_acct_grp_memb}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{certificationGroup.accountGroupPermissionCertification}">
+            <div class="decisionChartCell">
+                <sp:chart id="accountGroupPermissionsChart"
+                          datasource="#{certificationGroup.accountGroupPermissionsDataSource}"
+                          path="certification"
+                          colors="#037da1,#78aa37,#a22f19"
+                          title="#{msgs.cert_grp_chart_title_acct_grp_perms}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+        </ui:fragment>
+
+
+        <ui:fragment rendered="#{certificationGroup.roleCompositionCertification}">
+            <div class="decisionChartCell">
+                <sp:chart id="roleHierarchiesChart"
+                          datasource="#{certificationGroup.roleHierarchiesDataSource}"
+                          path="certification"
+                          colors="#037da1,#78aa37,#a22f19"
+                          title="#{msgs.cert_grp_chart_title_inherited_roles}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+            <div class="decisionChartCell">
+                <sp:chart id="permitsChart"
+                          datasource="#{certificationGroup.permitsDataSource}"
+                          path="certification"
+                          colors="#037da1,#78aa37,#a22f19"
+                          title="#{msgs.cert_grp_chart_title_permitted_roles}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+            <div class="decisionChartCell">
+                <sp:chart id="requirementsChart"
+                          datasource="#{certificationGroup.requirementsDataSource}"
+                          path="certification"
+                          colors="#037da1,#78aa37,#a22f19"
+                          title="#{msgs.cert_grp_chart_title_req_roles}"
+                          type="pie"
+                          is3d="false"
+                          orientation="vertical"
+                          alpha="75"
+                          startAngle="0"
+                          antialias="true"
+                          legend="true"
+                          height="200"
+                          storeOnSession="false"
+                          width="350"
+                          labels="true"
+                          outline="false"
+                          size="small"/>
+            </div>
+        </ui:fragment>
+    </ui:fragment>
+    <ui:fragment rendered="#{certificationGroup.roleCompositionCertification}">
+        <div class="decisionChartCell">
+            <sp:chart id="profilesChart"
+                      datasource="#{certificationGroup.profilesDataSource}"
+                      path="certification"
+                      colors="#037da1,#78aa37,#a22f19"
+                      title="#{msgs.cert_grp_chart_title_profiles}"
+                      type="pie"
+                      is3d="false"
+                      orientation="vertical"
+                      alpha="75"
+                      startAngle="0"
+                      antialias="true"
+                      legend="true"
+                      height="200"
+                      storeOnSession="false"
+                      width="350"
+                      labels="true"
+                      outline="false"
+                      size="small"/>
+        </div>
+        <div class="decisionChartCell">
+            <sp:chart id="scopesChart"
+                      datasource="#{certificationGroup.scopesDataSource}"
+                      path="certification"
+                      colors="#037da1,#78aa37,#a22f19"
+                      title="#{msgs.cert_grp_chart_title_scopes}"
+                      type="pie"
+                      is3d="false"
+                      orientation="vertical"
+                      alpha="75"
+                      startAngle="0"
+                      antialias="true"
+                      legend="true"
+                      height="200"
+                      storeOnSession="false"
+                      width="350"
+                      labels="true"
+                      outline="false"
+                      size="small"/>
+        </div>
+        <div class="decisionChartCell">
+            <sp:chart id="capabilitiesChart"
+                      datasource="#{certificationGroup.capabilitiesDataSource}"
+                      path="certification"
+                      colors="#037da1,#78aa37,#a22f19"
+                      title="#{msgs.cert_grp_chart_title_capabilities}"
+                      type="pie"
+                      is3d="false"
+                      orientation="vertical"
+                      alpha="75"
+                      startAngle="0"
+                      antialias="true"
+                      legend="true"
+                      height="200"
+                      storeOnSession="false"
+                      width="350"
+                      labels="true"
+                      outline="false"
+                      size="small"/>
+        </div>
+
+    <div style="clear:both"></div>
+</ui:fragment>
+</div>
+</div>
+
+
+<div style="margin-bottom:30px"></div>
+
+
+<div id="accessReviewGrid"></div>
+
+<div style="margin-top:15px">
+    <h:commandButton action="#{certificationGroup.goBack}" styleClass="secondaryBtn" value="#{msgs.cert_grp_button_back}"/>
+</div>
+
+</h:form>
+</f:view>
+</ui:define>
+</ui:composition>
+
+</body>
+</html>

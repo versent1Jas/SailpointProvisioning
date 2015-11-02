@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+                val = fileName.value;
+            }
+            return val;
+        }
+
+        function changeInManagedSystem() {
+            var managedSysSelected = getFieldValue('editForm:selectMenu1');
+            var elementObj = Ext.get('siteCollectionRow');
+            if( managedSysSelected === 'SharePoint' ) {
+                elementObj.setVisibilityMode(Ext.Element.DISPLAY);
+                elementObj.show();
+            }
+            else {
+                elementObj.setVisibilityMode(Ext.Element.DISPLAY);
+                elementObj.hide();
+            }
+            return changeSelct;
+        }
+
+        Ext.onReady(function () {
+            Ext.QuickTips.init();
+            buildTooltips();
+            changeInManagedSystem();
+            // This is our validation hook
+            Page.on('beforeSave', function() {
+
+                var URL = getFieldValue('editForm:URLs');
+                Validator.validateNonBlankString(URL, "Database URL cannot be null!");
+                var user = getFieldValue('editForm:UserName');
+                Validator.validateNonBlankString(user, "User Name cannot be null!");
+                var errors = Validator.getErrors();
+                if (errors &amp;&amp; errors.length &gt; 0) {
+                    var errorDivTop = $('formErrorsTop');
+                    var errorDivBottom = $('formErrorsBottom');
+                    Validator.displayErrors(errorDivBottom); 
+                    Validator.displayErrors(errorDivTop); 
+                    return false;
+                }
+                //return false will kill cancel the save
+                return true;
+            });
+        });
+
+
+    </script>
+    <f:view>
+
+        <h:outputText styleClass="sectionHeader" value="#{msgs.stealthbit_headmsg}"/><br/><br/>
+        <div id='formErrorsTop' class="formError" style="display:none"/>
+
+        <div id="accountSettings" class='spContent'>
+        <table class="spTable" style="border:0px" cellspacing="0">
+            <tr>
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_managed_sys}"/>
+                    <h:outputText styleClass="requiredText" value=""/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpManagedSys" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_managedsystem}"/>
+                </td>
+                <td valign="center">
+                    <h:selectOneMenu id="selectMenu1" 
+                                     onchange="javascript: changeInManagedSystem();"
+                                     value="#{targetSource.object.configuration['managed_sys']}"
+                                     disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                     readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}">
+                                     <f:selectItem itemValue="Win_File_System" itemLabel="Windows File System"/>
+                                     <f:selectItem itemValue="SharePoint" itemLabel="Microsoft SharePoint"/>
+                                     </h:selectOneMenu>
+                </td>
+            </tr>
+            <tr>
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_url}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpURLs" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_url}"/>
+                </td>
+                <td valign="center">
+                    <h:inputText id="URLs"
+                                value="#{targetSource.object.configuration['URLs']}"
+                                redisplay="true"
+                                size="80"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_username}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpUserName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_username}"/>
+                </td>
+                <td valign="center">
+                    <h:inputText id="UserName"
+                                value="#{targetSource.object.configuration['UserName']}"
+                                redisplay="true"
+                                size="80"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+
+             <tr>
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_password}"/>
+                    <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpPaspsword" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_password}"/>
+                </td>
+                <td valign="center">
+                    <sp:inputSecret id="password"
+                                value="#{targetSource.object.configuration['password']}"
+                                redisplay="true"
+                                size="80"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+            <tr>
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_driver}"/>
+                    <h:outputText styleClass="requiredText" value=""/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpDriver" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_driver}"/>
+                </td>
+                <td valign="center">
+                    <h:inputText id="driver"
+                                value="#{targetSource.object.configuration['driver']}"
+                                redisplay="true"
+                                size="80"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+            <tr>
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_filter}"/>
+                    <h:outputText styleClass="requiredText" value=""/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpFilter" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_filter}"/>
+                </td>
+                <td valign="center">
+                    <h:inputText id="filter"
+                                value="#{targetSource.object.configuration['filter']}"
+                                redisplay="true"
+                                size="80"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+            <tr id="siteCollectionRow" style="display:none" valign="center">
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_siteCollectionURL}"/>
+                    <h:outputText styleClass="requiredText" value=""/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpSCUrl" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_siteCollectionURL}"/>
+                </td>
+                <td valign="center">
+                    <h:inputText id="SiteCollectionUrl"
+                                value="#{targetSource.object.configuration['siteCollectionUrl']}"
+                                redisplay="true"
+                                size="80"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+            <tr>
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_user_query}"/>
+                    <h:outputText styleClass="requiredText" value=""/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpUser_Query" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_userq}"/>
+                </td>
+                <td valign="center">
+                    <h:inputText id="user_query"
+                                value="#{targetSource.object.configuration['user_query']}"
+                                redisplay="true"
+                                size="80"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+            <tr>
+                <td class='titleColumn certScheduleTitleCol' valign="center">
+                    <h:outputText style='padding:5px' value="#{msgs.stealthbit_group_query}"/>
+                    <h:outputText styleClass="requiredText" value=""/>
+                </td>
+                <td class="certScheduleHelpCol" valign="middle">
+                    <h:graphicImage id="imgHlpGrp_Query" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                                alt="#{msgs.con_help_stealthbit_groupq}"/>
+                </td>
+                <td valign="center">
+                    <h:inputText id="group_query"
+                                value="#{targetSource.object.configuration['group_query']}"
+                                redisplay="true"
+                                size="80"
+                                disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                                readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+                </td>
+            </tr>
+        </table>
+        </div>
+        <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

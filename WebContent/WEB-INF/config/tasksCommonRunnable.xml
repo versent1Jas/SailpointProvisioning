@@ -1,0 +1,470 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+    <!--***********************************************************
+
+    TaskDefinition - Runnables
+
+    *************************************************************-->
+
+    <TaskDefinition name="Refresh Identity Cube">
+        <Attributes>
+            <Map>
+                <entry key="refreshManagerStatus" value="true"/>
+                <entry key="correlateEntitlements" value="true"/>
+                <entry key="refreshScorecard" value="true"/>
+                <entry key="checkPolicies" value="true"/>
+                <entry key="promoteAttributes" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>
+            Perform a full refresh of all the identities.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition" name="Identity Refresh"/>
+        </Parent>
+    </TaskDefinition>
+
+  <TaskDefinition name="Refresh Logical Accounts" executor="sailpoint.task.CompositeAccountRefreshExecutor"
+                    type="Identity" template="true">
+        <Attributes>
+            <Map>
+                <entry key="refreshCompositeApplications" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>
+            Perform a full refresh of all the identities.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument inputTemplate="/monitor/tasks/argTemplates/compositeAppSelect.xhtml" name="applications" multi="true" required="true" type="Application">
+                    <Prompt>task_in_refresh_composite_accts_apps</Prompt>
+                </Argument>
+
+                <Argument name="thresholdDate" type="date">
+                    <Prompt>task_in_identity_refresh_threshold</Prompt>
+                </Argument>
+                <!-- this is extremely slow and gets selected often by accident
+                <Argument name="refreshLinks" type="boolean">
+                    <Prompt>task_in_identity_refresh_refresh_links</Prompt>
+                </Argument>
+                -->
+                <Argument name="promoteAttributes" type="boolean">
+                    <Description>
+                        When true, the identity attributes will be recalculated from the
+                        application attributes.
+                    </Description>
+                    <Prompt>task_in_identity_refresh_promote_attributes</Prompt>
+                </Argument>
+                <Argument name="refreshManagerStatus" type="boolean">
+                    <Description>
+                        When true, the manager status for the identities will be refreshed.
+                        The manager status is true for an identity if there is any
+                        other identity that references the first identity as a manager.
+                    </Description>
+                    <Prompt>task_in_identity_refresh_refresh_manager_status</Prompt>
+                </Argument>
+                <Argument name="refreshScorecard" type="boolean">
+                    <Prompt>task_in_identity_refresh_refresh_scorecard</Prompt>
+                </Argument>
+                <Argument name="checkHistory" type="boolean">
+                    <Prompt>task_in_identity_refresh_check_history</Prompt>
+                </Argument>
+                <Argument name="refreshGroups" type="boolean">
+                    <Prompt>task_in_identity_refresh_refresh_groups</Prompt>
+                </Argument>
+                <Argument name="checkPolicies" type="boolean">
+                    <Prompt>task_in_identity_refresh_check_policies</Prompt>
+                </Argument>
+                <Argument name="policies" type="string">
+                    <Prompt>task_in_identity_refresh_policies</Prompt>
+                </Argument>
+                <Argument name="refreshCertifications" type="boolean">
+                    <Prompt>task_in_identity_refresh_refresh_certifications</Prompt>
+                </Argument>
+                <Argument name="refreshThreads" type="int">
+                    <Prompt>task_in_identity_refresh_threads</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_identity_refresh_total</Prompt>
+                </Argument>
+                <Argument name="linksRefreshed" type="int">
+                    <Prompt>task_out_identity_refresh_links_refreshed</Prompt>
+                </Argument>
+                <Argument name="linksRemoved" type="int">
+                    <Prompt>task_out_identity_refresh_links_removed</Prompt>
+                </Argument>
+                <Argument name="linksUnavailable" type="int">
+                    <Prompt>task_out_identity_refresh_links_unavailable</Prompt>
+                </Argument>
+                <Argument name="identitiesPruned" type="int">
+                    <Prompt>task_out_identity_refresh_identities_pruned</Prompt>
+                </Argument>
+                <Argument name="managers" type="int">
+                    <Prompt>task_out_identity_refresh_managers</Prompt>
+                </Argument>
+                <Argument name="detectedRoleChanges" type="int">
+                    <Prompt>task_out_identity_refresh_business_role_changes</Prompt>
+                </Argument>
+                <Argument name="exceptionChanges" type="int">
+                    <Prompt>task_out_identity_refresh_exception_changes</Prompt>
+                </Argument>
+                <Argument name="provisioningRequests" type="int">
+                    <Prompt>task_out_identity_refresh_provisioning_requests</Prompt>
+                </Argument>
+                <Argument name="provisioningErrors" type="int">
+                    <Prompt>task_out_identity_refresh_provisioning_errors</Prompt>
+                </Argument>
+                <Argument name="policies" type="string">
+                    <Prompt>task_out_identity_refresh_policies</Prompt>
+                </Argument>
+                <Argument name="policyViolations" type="int">
+                    <Prompt>task_out_identity_refresh_policy_violations</Prompt>
+                </Argument>
+                <Argument name="policyNotifications" type="int">
+                    <Prompt>task_out_identity_refresh_policy_notifications</Prompt>
+                </Argument>
+                <Argument name="scoresChanged" type="int">
+                    <Prompt>task_out_identity_refresh_scores_changed</Prompt>
+                </Argument>
+                <Argument name="snapshotsCreated" type="int">
+                    <Prompt>task_out_identity_refresh_snapshots_created</Prompt>
+                </Argument>
+                <Argument name="groupDefinitions" type="string">
+                    <Prompt>task_out_identity_refresh_group_definitions</Prompt>
+                </Argument>
+                <Argument name="groupIndexes" type="int">
+                    <Prompt>task_out_identity_refresh_group_indexes</Prompt>
+                </Argument>
+                <Argument name="unscopedIdentities" type="int">
+                    <Prompt>task_out_identity_refresh_unscoped_identities</Prompt>
+                </Argument>
+                <Argument name="certificationsCreated" type="int">
+                    <Prompt>task_out_identity_refresh_certifications_created</Prompt>
+                </Argument>
+                <Argument name="certificationsDeleted" type="int">
+                    <Prompt>task_out_identity_refresh_certifications_deleted</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <TaskDefinition name="Prune Identity Cubes" executor='sailpoint.task.IdentityCleanser'
+        progressInterval="5000" progressMode="String" type="Identity">
+        <Description>
+            Delete identities that have no account links and have no important references.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument name="filter" type="string">
+                    <Prompt>task_in_identity_refresh_filter</Prompt>
+                </Argument>
+                <!-- need this?
+                <Argument name="thresholdDate" type="date">
+                    <Prompt>task_in_identity_refresh_threshold</Prompt>
+                </Argument>
+                -->
+                <Argument name="noDelete" type="boolean">
+                    <Prompt>task_in_cleanser_no_delete</Prompt>
+                </Argument>
+                <Argument name="protectIfCertifying" type="boolean">
+                    <Prompt>task_in_cleanser_if_certifying</Prompt>
+                </Argument>
+                <Argument name="protectIfManuallyCorrelated" type="boolean">
+                    <Prompt>task_in_cleanser_if_manually_correlated</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="total" type="int">
+                    <Prompt>task_out_cleanser_total</Prompt>
+                </Argument>
+                <Argument name="deleted" type="int">
+                    <Prompt>task_out_cleanser_deleted</Prompt>
+                </Argument>
+                <Argument name="protected" type="int">
+                    <Prompt>task_out_cleanser_protected</Prompt>
+                </Argument>
+                <Argument name="certifying" type="int">
+                    <Prompt>task_out_cleanser_certifying</Prompt>
+                </Argument>
+                <Argument name="errors" type="int">
+                    <Prompt>task_out_cleanser_errors</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      Need to change resultAction after bug 1330 is fixed.  This should really be
+      something like "Cancel", but only block execution if the task is still
+      running.  We'll crank back the polling interval on the TaskSchedule to only
+      run every 5 minutes to try to avoid concurrent runs.  We should consider
+      making this run more often once bug 1330 is fixed.
+    -->
+    <TaskDefinition name="Perform Maintenance" >
+        <Attributes>
+            <Map>
+                <entry key="pruneTaskResults" value="true"/>
+                <entry key="denormalizeScopes" value="true"/>
+                <entry key="automaticallyCloseCertifications" value="true"/>
+                <entry key="finishCertifications" value="true"/>
+                <entry key="phaseCertifications" value="true"/>
+                <entry key="scanRemediations" value="true"/>
+                <entry key="transitionContinuousCertifications" value="true"/>
+                <entry key="pruneCertifications" value="true"/>
+                <entry key="pruneHistory" value="true"/>
+                <entry key="forwardInactiveWorkItems" value="true"/>
+                <entry key="pruneRequests" value="true"/>
+                <entry key="pruneSyslogEvents" value="true"/>
+                <entry key="processWorkflowEvents" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>Prune identity snapshots, task results, and certifications. Perform other background maintenance tasks.
+        </Description>
+        <Parent>
+            <Reference class="sailpoint.object.TaskDefinition" name="System Maintenance"/>
+        </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition name="Refresh Application Scores" executor="sailpoint.task.ApplicationScorer"
+                    progressInterval="5000" progressMode="String" type="Scoring">
+        <Description>
+            Refresh application scores.
+        </Description>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" required="false" type="Application">
+                    <Prompt>task_in_refresh_application_scores_applications</Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="applicationScoresRefreshed" type="int">
+                    <Prompt>task_out_refresh_application_scores_application_scores_refreshed</Prompt>
+                </Argument>
+                <Argument name="linksExamined" type="int">
+                    <Prompt>task_out_refresh_application_scores_links_examined</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+
+    <!--
+      Task to calculate and update role statistics.
+    -->
+    <TaskDefinition executor="sailpoint.task.RoleScorer"
+                    name="Refresh Role Scorecard"
+                    progressInterval="5000" progressMode="String" type="Scoring">
+        <Description>
+            Analyzes each role in the system and collects statistics about them.
+        </Description>
+        <Signature>
+            <Returns>
+                <Argument name="totalRoles" type="int">
+                    <Prompt>task_out_role_scorer_total_roles</Prompt>
+                </Argument>
+                <Argument name="rolesScored" type="int">
+                    <Prompt>task_out_role_scorer_roles_scored</Prompt>
+                </Argument>
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+    
+    <!-- 
+        Task to remove requests to activate/deactivate requests for roles that no longer exist.
+     -->
+    <TaskDefinition name="Remove Orphan Role Requests" executor="sailpoint.task.RemoveOrphanRoleRequestsTask" 
+                    type="System" progressMode="String">
+         <Description>Remove orphaned requests for roles that no longer exist</Description>
+         <Signature>
+            <Inputs></Inputs>
+            <Returns>
+                <Argument name="numRequestsRemoved" type="int">
+                    <Prompt>task_out_remove_orphan_role_requests_removed</Prompt>
+                </Argument>
+            </Returns>
+         </Signature>
+    </TaskDefinition>
+
+    <!--
+      Task that handles the verification of the Identity Request
+      provisioning activities.
+     -->
+    <TaskDefinition name="Perform Identity Request Maintenance" >
+        <Attributes>
+          <Map>
+            <entry key="maxAge" value="0"/>
+            <entry key="scanRequests" value="true"/>
+            <entry key="maxVerificationDays" value="7"/>
+          </Map>
+        </Attributes>
+        <Description>
+          Prune old identity request objects and scan unverified access requests to check for provisioning completeness.
+        </Description>
+        <Parent>
+          <Reference class="sailpoint.object.TaskDefinition" name="Identity Request Maintenance"/>
+        </Parent>
+    </TaskDefinition>
+
+    <!--
+      Upgrade ManagedAttributes and AccountGroups
+      Hidden because it is normally run by the upgrader.
+     -->
+    <TaskDefinition name="Upgrade Managed Attributes" hidden='true'
+                    executor="sailpoint.task.ManagedAttributeUpgrader"
+                    type="System" progressMode="String">
+        <Signature>
+          <Inputs>
+            <Argument name="defaultLocale" required="true" type="string">
+              <Prompt>Default locale (example En_US):</Prompt>
+            </Argument>
+            <Argument name="simulate" type="boolean">
+              <Prompt>Simulate execution without persisting changes</Prompt>
+            </Argument>
+            <!--
+            <Argument name="retainGroups" type="boolean">
+              <Prompt>Leave AccountGroup objects behind</Prompt>
+            </Argument>
+            -->
+          </Inputs>
+        </Signature>
+        <Attributes>
+          <Map>
+            <entry key="retainGroups" value="false"/>
+          </Map>
+        </Attributes>
+        <Description>
+          Upgrade ManagedAttributes to the 6.0 model, and convert AccountGroups to ManagedAttributes.
+        </Description>
+    </TaskDefinition>
+
+    <!--
+      Full Text Indexer
+     -->
+    <TaskDefinition name="Full Text Index Refresh" 
+                    executor="sailpoint.task.FullTextIndexer"
+                    type="System" progressMode="String">
+        <Description>
+          Build full-text indexes for roles and managed attributes.
+        </Description>
+        <Attributes>
+          <Map>
+            <!-- optional csv of FullTextIndex names
+            <entry key='indexes' value='Bundle,ManagedAttribute'/>
+            <entry key='trace' value='true'/>
+            -->
+          </Map>
+        </Attributes>
+    </TaskDefinition>
+
+
+<!-- These tasks should not theoretically ever be needed and are therefore commented out.  They should only be uncommented and imported
+     in cases where an application failure caused LocalizedAttributes to fall out of sync with their target objects.
+    <TaskDefinition name="Copy All Descriptions to Localized Attributes" resultAction="Delete" type="SynchronizeDescriptions">
+      <Attributes>
+        <Map>
+          <entry key="syncSource" value="Map"/>
+        </Map>
+      </Attributes>
+      <Description>Copy the contents of the Maps embedded in roles to LocalizedAttributes</Description>
+      <Parent>
+        <Reference class="sailpoint.object.TaskDefinition" name="Synchronize Descriptions"/>
+      </Parent>
+    </TaskDefinition>    
+
+    <TaskDefinition name="Copy All Localized Attributes to Descriptions" resultAction="Delete" type="SynchronizeDescriptions">
+      <Attributes>
+        <Map>
+          <entry key="syncSource" value="Map"/>
+        </Map>
+      </Attributes>
+      <Description>Copy the contents of the Maps embedded in roles to LocalizedAttributes</Description>
+      <Parent>
+        <Reference class="sailpoint.object.TaskDefinition" name="Synchronize Descriptions"/>
+      </Parent>
+    </TaskDefinition>    
+
+    <TaskDefinition name="Copy Role Descriptions to Localized Attributes" resultAction="Delete" type="SynchronizeDescriptions">
+      <Attributes>
+        <Map>
+          <entry key="syncClass" value="Bundle"/>
+          <entry key="syncSource" value="Map"/>
+        </Map>
+      </Attributes>
+      <Description>Copy the contents of the Maps embedded in roles to LocalizedAttributes</Description>
+      <Parent>
+        <Reference class="sailpoint.object.TaskDefinition" name="Synchronize Descriptions"/>
+      </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition name="Copy Localized Attributes to Role Descriptions" resultAction="Delete" type="SynchronizeDescriptions">
+      <Attributes>
+        <Map>
+          <entry key="syncClass" value="Bundle"/>
+          <entry key="syncSource" value="LocalizedAttribute"/>
+        </Map>
+      </Attributes>
+      <Description>Copy the contents of the Maps embedded in roles to LocalizedAttributes</Description>
+      <Parent>
+        <Reference class="sailpoint.object.TaskDefinition" name="Synchronize Descriptions"/>
+      </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition name="Copy Policy Descriptions to Localized Attributes" resultAction="Delete" type="SynchronizeDescriptions">
+      <Attributes>
+        <Map>
+          <entry key="syncClass" value="Policy"/>
+          <entry key="syncSource" value="Map"/>
+        </Map>
+      </Attributes>
+      <Description>Copy the contents of the Maps embedded in roles to LocalizedAttributes</Description>
+      <Parent>
+        <Reference class="sailpoint.object.TaskDefinition" name="Synchronize Descriptions"/>
+      </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition name="Copy Localized Attributes to Policy Descriptions" resultAction="Delete" type="SynchronizeDescriptions">
+      <Attributes>
+        <Map>
+          <entry key="syncClass" value="Policy"/>
+          <entry key="syncSource" value="LocalizedAttribute"/>
+        </Map>
+      </Attributes>
+      <Description>Copy the contents of the Maps embedded in roles to LocalizedAttributes</Description>
+      <Parent>
+        <Reference class="sailpoint.object.TaskDefinition" name="Synchronize Descriptions"/>
+      </Parent>
+    </TaskDefinition>
+
+        <TaskDefinition name="Copy Application Descriptions to Localized Attributes" resultAction="Delete" type="SynchronizeDescriptions">
+      <Attributes>
+        <Map>
+          <entry key="syncClass" value="Application"/>
+          <entry key="syncSource" value="Map"/>
+        </Map>
+      </Attributes>
+      <Description>Copy the contents of the Maps embedded in roles to LocalizedAttributes</Description>
+      <Parent>
+        <Reference class="sailpoint.object.TaskDefinition" name="Synchronize Descriptions"/>
+      </Parent>
+    </TaskDefinition>
+
+    <TaskDefinition name="Copy Localized Attributes to Application Descriptions" resultAction="Delete" type="SynchronizeDescriptions">
+      <Attributes>
+        <Map>
+          <entry key="syncClass" value="Application"/>
+          <entry key="syncSource" value="LocalizedAttribute"/>
+        </Map>
+      </Attributes>
+      <Description>Copy the contents of the Maps embedded in roles to LocalizedAttributes</Description>
+      <Parent>
+        <Reference class="sailpoint.object.TaskDefinition" name="Synchronize Descriptions"/>
+      </Parent>
+    </TaskDefinition>
+-->
+</sailpoint>

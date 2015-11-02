@@ -1,0 +1,699 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_role_editor}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>rule-editor.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+      <src>html-editor-counter-plugin.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/include/template">
+      <src>template-editor.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/roles">
+      <src>roles.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RoleTypeDefinitionStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Store.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ApplicationSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleFilter.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/FormGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/RoleAssignmentRuleTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/editor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/entitlementMining.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/entitlementMiningWizard.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/analysisResultsPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/ExtendedPagingToolbar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleReadOnlyView.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleVersionGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/filtersPage.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/DateTimeInput.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/attributeEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/assignmentRuleSelector.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/EntitlementAnalysisResultsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/model/TemplateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleCombo.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateBooleanValue.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateFieldEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditorWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/EditorTextArea.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/workflow/WorkflowScriptRadio.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ApprovalPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ReferenceFormPopup.js</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RowLayout.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RuleEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiText.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditorCounterPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiLanguageHtmlEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" defer="defer">
+    helpKey = 'ROLE_EDIT';
+    </script>
+
+    <script type="text/javascript">
+    //<![CDATA[
+      Ext.onReady(function(){
+        SailPoint.initAttributeEditor('roleAttributeEditorTable');
+        
+        var ownerSuggest = Ext.getCmp('editedRoleOwnerSuggest');
+        if(ownerSuggest) {
+            ownerSuggest.setRawValue('#{roleEditor.roleOwnerName}');
+        }
+        
+                
+        var isSimpleEntitlement = '#{roleEditor.simpleRole}';        
+        if (isSimpleEntitlement == 'true') {
+            $('entitlementsDisplayContents').hide();
+        } else {
+            $('entitlementsSimpleGrid').hide();
+        }
+                
+      });
+    //]]>
+    </script>    
+    <style>
+      .x-grid-col-descCol { white-space:normal; padding-right:10px }
+    </style>
+    
+  </ui:define>
+  
+  <ui:define name="body">
+    <span id="allowRoleLocalization" style="display:none">#{sp:getSystemConfigurationValue('enableLocalizeRoleDescriptions', false)}</span>
+    <f:view>
+      <h:form id="editForm">
+        
+        <h:inputHidden id="roleToEdit" value="#{roleEditor.objectId}"/>
+        <h:inputHidden id="editMode" value="#{roleEditor.editMode}"/>
+        <div id="initialScope" style="display:none">
+            #{empty roleEditor.object.assignedScope ? '' : roleEditor.object.assignedScope.displayableName}
+        </div>
+        <div style="margin-left:10px; margin-right: 10px">
+          <a4j:outputPanel ajaxRendered="true">
+            <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+          </a4j:outputPanel>        
+        </div>
+          <div class="spContent">
+            <div id="roleEditorCt" class="spContentBody">
+            
+          <h:panelGroup>
+              <h:outputText styleClass="requiredText" value="*"/>
+              <h:outputFormat styleClass="font10" value="#{msgs.msg_required_field}"/>
+          </h:panelGroup>
+
+                        
+              <div id="roleFieldsPanel" class="width100">
+                <table id="roleFieldsPanelTable" >
+                  <ui:fragment rendered="#{roleEditor.cancelWorkflowAllowed}">
+                    <tr>
+                      <td colspan="2" class="businessRoleLeft"><h:outputText styleClass="requiredText" value="#{msgs.approval_or_impact_analysis_pending}"/></td>
+                    </tr>
+                  </ui:fragment>
+                                                                        
+                  <tr>
+                    <td class="businessRoleLeft">
+                        <h:outputText styleClass="titleColumn" value="#{msgs.name}"/>
+                        <h:outputText styleClass="requiredText" value="*"/>
+                    </td>
+                    <td>
+                      <h:inputText id="roleName" value="#{roleEditor.object.name}" size="40"/>                      
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="businessRoleLeft">
+                      <h:outputText styleClass="titleColumn" value="#{msgs.display_name}" />
+                    </td>
+                    <td>
+                      <h:inputText id="roleDisplayName" value="#{roleEditor.object.displayName}" size="40" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="businessRoleLeft">
+                        <h:outputText styleClass="titleColumn" value="#{msgs.type}"/>
+                        <h:outputText styleClass="requiredText" value="*"/>
+                    </td>
+                    <td>
+                      <h:selectOneMenu id="roleType" value="#{roleEditor.roleType}" onchange="SailPoint.modeler.RoleEditor.roleTypeSelectionChanged();">
+                        <f:selectItems value="#{roleEditor.availableRoleTypes}"/>
+                        <f:ajax event="change" render="roleOptionsPanelGroup"/>
+                      </h:selectOneMenu> 
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="businessRoleLeft">
+                      <h:outputText styleClass="titleColumn" value="#{msgs.owner}"/>
+                      <h:outputText styleClass="requiredText" value="*"/>
+                    </td>
+                    <td>
+                      <div id="roleOwnerSuggest"></div>
+                      <h:inputHidden id="roleOwner" value="#{roleEditor.roleOwner}"/>
+                    </td>
+                  </tr>
+                  
+                  <ui:fragment rendered="#{roleEditor.showAssignedScopeControl}">
+                    <tr>
+                      <td class="businessRoleLeft"><h:outputText styleClass="titleColumn" value="#{msgs.label_scope}"/></td>
+                      <td>
+                        <div id="assignedScopeSuggest"></div>
+                        <t:inputHidden id="assignedScope"
+                                       value="#{roleEditor.object.assignedScope}" forceId="true">
+                          <sp:convertScope />
+                        </t:inputHidden>
+                        <a4j:outputPanel ajaxRendered="true">
+                          <h:message styleClass="formError" for="assignedScope"/>
+                        </a4j:outputPanel>
+                       </td>
+                    </tr>
+                  </ui:fragment>
+                  
+                  <tr>
+                    <td valign="top" class="businessRoleLeft"><h:outputText styleClass="titleColumn" value="#{msgs.description}"/></td>
+                    <td>
+                      <div id="roleDescriptionHTML"/>
+                      <h:inputHidden value="#{roleEditor.descriptionsJSON}" id="jfDescriptionsJSON" escape="false"/>  
+                      <span id="descrDefaultLocale" style="display:none"><h:outputText  value="#{roleEditor.locale}" /></span>                     
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      <h:panelGroup id="roleOptionsPanelGroup">
+                        <table id="roleOptionsTable">
+                            <tr>
+                                <td class="businessRoleLeft"><h:outputText styleClass="titleColumn" value="#{msgs.enable_role_activity_monitoring_label}"/></td>
+                                <td><h:selectBooleanCheckbox id="roleEnableActivityMonitoring" value="#{roleEditor.activityEnabled}" /></td>
+                            </tr>
+                            <tr>
+                                <td class="businessRoleLeft"><h:outputText styleClass="titleColumn" value="#{msgs.label_merge_templates}"/></td>
+                                <td><h:selectBooleanCheckbox id="mergeTemplates" value="#{roleEditor.mergeTemplates}" /></td>
+                            </tr>
+                            <ui:fragment id="allowMultiple" rendered="#{roleEditor.allowMultipleApplicationAccountsVisible}">
+                                <tr>
+                                    <td class="businessRoleLeft"><h:outputText styleClass="titleColumn" value="#{msgs.label_allow_multiple_application_accounts}"/></td>
+                                    <td><h:selectBooleanCheckbox id="allowDuplicateAccounts" value="#{roleEditor.allowDuplicateAccounts}" /></td>
+                                </tr>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{roleEditor.allowMultipleAssignmentsVisible}">
+                                <tr>
+                                    <td class="businessRoleLeft"><h:outputText styleClass="titleColumn" value="#{msgs.label_allow_multiple_assignments}"/></td>
+                                    <td><h:selectBooleanCheckbox id="allowMultipleAssignments" value="#{roleEditor.allowMultipleAssignments}"/></td>
+                                </tr>
+                            </ui:fragment>
+                            <tr>
+                                <td class="businessRoleLeft"><h:outputText styleClass="titleColumn" value="#{msgs.label_disabled}"/></td>
+                                <td><h:selectBooleanCheckbox value="#{roleEditor.object.disabled}"/></td>
+                            </tr>
+                        </table>
+                      </h:panelGroup>
+                    </td>
+                  </tr>
+
+                </table>
+                <a4j:outputPanel id="attributesPanel">
+                  <ui:include src="/include/attributeEditor.xhtml">
+                    <ui:param name="tableId" value="roleAttributeEditorTable"/>
+                    <ui:param name="formName" value="editForm"/>
+                    <ui:param name="attributeEditor" value="#{roleEditor.attributeEditor}"/>
+                    <ui:param name="leftColumnClass" value="businessRoleLeft"/>
+                    <ui:param name="errorColumnClass" value="dSmall1 nowrap"/>
+                    <ui:param name="labelClass" value="titleColumn"/>
+                  </ui:include>
+                </a4j:outputPanel>                  
+              </div>
+
+            <!--  This is a hidden input field that gives the editor hints as to whether the permitted roles panel should be displayed or not -->
+            <ui:fragment rendered="#{sp:getSystemConfigurationValue('enableRoleSunActivate', true)}">
+              <input type="hidden" id="roleEventsIsEmpty" name="roleEventsIsEmpty" value="#{empty roleEditor.events}" />
+              
+              <div id="roleEventsDisplay" class="">
+                <div id="roleEventsDisplayContents">
+                  <div class="spBorderlessContentBody">
+                    <div class="invalidFieldWarning spAjaxContent"/>
+                    <a4j:outputPanel id="roleEventsInfo">
+                      <ui:fragment rendered="#{!empty roleEditor.events}">
+                        <table class="spTable">
+                          <tr>
+                            <th></th>
+                            <th>#{msgs.work_item_type_event}</th>
+                            <th>#{msgs.date}</th>
+                            <th>#{msgs.creator}</th>
+                          </tr>
+                          <ui:repeat value="#{roleEditor.events}" var="event">
+                            <tr>
+                              <td width="50" align="center">
+                                <h:selectBooleanCheckbox value="#{roleEditor.eventSelections[event.id]}" />
+                              </td>
+                              <td><h:outputText class="roleAction" value="#{event.name}"/></td>
+                              <td><h:outputText value="#{event.due}"/></td>
+                              <td><h:outputText value="#{event.creator}"/></td>
+                            </tr>
+                          </ui:repeat>
+                        </table>
+                      </ui:fragment>
+                      <ui:fragment rendered="#{empty roleEditor.events}">
+                        <h:outputText class="sectionHeader" value="#{msgs.role_section_no_events}" />
+                      </ui:fragment>
+                    </a4j:outputPanel>
+                  </div>
+                </div>
+              </div>
+              
+              <h:inputHidden id="eventDate" value="#{roleEditor.eventDate}" converter="sailpoint.object.Date" />
+              <h:inputHidden id="eventAction" value="#{roleEditor.eventAction}"/>
+              
+              <a4j:commandButton action="#{roleEditor.addEvent}"
+                                 id="eventAddBtn"
+                                 render="roleEventsInfo"
+                                 style="display:none"
+                                 oncomplete="SailPoint.modeler.RoleEditor.resizeRoleEventsPanel();"/>
+                                 
+              <a4j:commandButton action="#{roleEditor.removeEvent}"
+                                 id="eventDeleteBtn"
+                                 render="roleEventsInfo"
+                                 style="display:none"
+                                 oncomplete="SailPoint.modeler.RoleEditor.resizeRoleEventsPanel();"/>
+
+               <div id="bottomOfRoleEventsDisplay" /> 
+
+            </ui:fragment>
+            
+            <h:selectBooleanCheckbox style="display:none" id="hasArchives" value="#{roleEditor.hasArchives}"/>
+            
+            <div id="editorVersionGrid" />
+            
+            <div id="bottomOfVersionGrid" class="spacerDiv"/>
+
+            <a4j:commandButton id="refreshRulesButton"
+                                   style="display:none"
+                                   immediate="true"
+                                   render="rulesPanel"/>
+
+            <!--  This is a hidden input field that gives the editor hints as to whether the assignment panel should be displayed or not -->
+            <input type="hidden" id="selectorIsEmpty" name="selectorIsEmpty" value="#{roleEditor.assignmentSelector.placeholder}"/>
+            
+            <div id="assignmentRuleDisplay" >
+              <div id="assignmentRuleDisplayContents">
+                <div class="invalidFieldWarning spAjaxContent"/>
+                <table class="spLightBlueTable" cellspacing="0">
+                  <tr>
+                    <td>
+                      <ui:include src="../../../include/selector.xhtml">
+                        <ui:param name="listener" value="#{roleEditor}"/>
+                        <ui:param name="selector" value="#{roleEditor.assignmentSelector}" />
+                      </ui:include>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            
+            <div id="bottomOfAssignmentRuleDisplay" class="spacerDiv"/>
+
+            <!--  This is a hidden input field that gives the editor hints as to whether the required roles panel should be displayed or not -->
+            <input type="hidden" id="requiredRolesIsEmpty" name="requiredRolesIsEmpty" value="#{empty roleEditor.requiredRoles}"/>
+            <div id="requiredRolesDisplay" >
+              <div id="requiredRolesDisplayContents">
+                <div class="spBorderlessContentBody">
+                  <div class="invalidFieldWarning spAjaxContent"/>
+                  <a4j:outputPanel id="requiredRolesInfo">
+                    <ui:fragment rendered="#{!empty roleEditor.requiredRoles}">
+                      <table class="width100">
+                        <ui:repeat value="#{roleEditor.requiredRoles}" var="roleInfo">
+                          <tr>
+                            <td><h:outputText value="#{roleInfo.name}"/></td>
+                            <td style="width:500px"><ui:fragment rendered="#{!empty roleInfo.warningMessage}">
+                              <h:outputText  style="color:red" value="#{roleInfo.warningMessage}"/>
+                            </ui:fragment></td>
+                          </tr>
+                        </ui:repeat>
+                      </table>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{empty roleEditor.requiredRoles}">
+                      <h:outputText class="sectionHeader" value="#{msgs.role_section_no_required_roles}" />
+                    </ui:fragment>
+                  </a4j:outputPanel>
+                </div>
+              </div>
+            </div>
+
+            <div id="bottomOfRequiredRolesDisplay" class="spacerDiv"/>
+            
+            <!--  This is a hidden input field that gives the editor hints as to whether the permitted roles panel should be displayed or not -->
+            <input type="hidden" id="permittedRolesIsEmpty" name="permittedRolesIsEmpty" value="#{empty roleEditor.permittedRoles}" />
+
+            <div id="permittedRolesDisplay" >
+              <div id="permittedRolesDisplayContents">
+                <div class="spBorderlessContentBody">
+                  <div class="invalidFieldWarning spAjaxContent"/>
+                  <a4j:outputPanel id="permittedRolesInfo">
+                    <ui:fragment rendered="#{!empty roleEditor.permittedRoles}">
+                      <table class="width100">
+                        <ui:repeat value="#{roleEditor.permittedRoles}" var="roleInfo">
+                          <tr>
+                            <td><h:outputText value="#{roleInfo.name}"/></td>
+                            <td style="width:500px"><ui:fragment rendered="#{!empty roleInfo.warningMessage}">
+                              <h:outputText style="color:red" value="#{roleInfo.warningMessage}"/>
+                            </ui:fragment></td>
+                          </tr>
+                        </ui:repeat>
+                      </table>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{empty roleEditor.permittedRoles}">
+                      <h:outputText class="sectionHeader" value="#{msgs.role_section_no_permitted_roles}" />
+                    </ui:fragment>
+                  </a4j:outputPanel>
+                </div>
+              </div>
+            </div>
+
+            <div id="bottomOfPermittedRolesDisplay" class="spacerDiv"/>
+
+            <!--  This is a hidden input field that gives the editor hints as to whether the inherited roles panel should be displayed or not -->
+            <input type="hidden" id="memberOfRolesIsEmpty" name="memberOfRolesIsEmpty" value="#{empty roleEditor.memberOfRoles}"/>
+            <div id="memberOfRolesDisplay" >
+              <div id="memberOfRolesDisplayContents">
+                <div class="spBorderlessContentBody">
+                  <div class="invalidFieldWarning"/>
+                  <a4j:outputPanel id="roleMembershipInfo">
+                    <ui:fragment rendered="#{!empty roleEditor.memberOfRoles}">
+                      <table class="width100">
+                        <ui:repeat value="#{roleEditor.memberOfRoles}" var="roleInfo">
+                          <tr>
+                            <td><h:outputText value="#{roleInfo.name}"/></td>
+                            <td style="width:500px"><ui:fragment rendered="#{!empty roleInfo.warningMessage}">
+                              <h:outputText  style="color:red" value="#{roleInfo.warningMessage}"/>
+                            </ui:fragment></td>
+                          </tr>
+                        </ui:repeat>
+                      </table>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{empty roleEditor.memberOfRoles}">
+                      <h:outputText class="sectionHeader" value="#{msgs.not_member_of_roles}" />
+                    </ui:fragment>
+                  </a4j:outputPanel>
+                </div>
+              </div>
+            </div>
+
+            <div id="bottomOfMembershipDisplay" class="spacerDiv"/>
+
+            <div id="entitlementsDisplay" >
+              <div id="entitlementsDisplayField">
+                <div class="invalidFieldWarning spAjaxContent"/>
+                <div id="entitlementsDisplayContents">
+                    <div id="advancedEntitlementsDisplayContents"/>
+                </div>
+                <div id="entitlementsSimpleGrid"/>
+              </div>
+            </div>
+            
+            <div id="bottomOfEntitlementsDisplay" class="spacerDiv"/>
+            
+            <div id="templateDisplay" >
+              <div id="templateDisplayContents">
+                <div class="spBorderlessContentBody">
+                  <ui:include src="/include/template/templateEditor.xhtml">
+                    <ui:param name="templateEditor" value="#{roleEditor.templateEditor}"/>
+                    <ui:param name="beanType" value="role"/>
+                    <ui:param name="hideTitle" value="true"/>
+                    <ui:param name="showApplication" value="true"/>
+                    <ui:param name="showList" value="true"/>
+                  </ui:include>
+                </div>
+              </div>
+            </div>
+
+            <div id="bottomOfTemplateDisplay" />
+
+            <!--  This is a hidden input field that gives the editor hints as to whether the required roles panel should be displayed or not -->
+            <input type="hidden" id="rightsIsEmpty" name="rightsIsEmpty" value="#{empty roleEditor.controlledScopes and empty roleEditor.capabilities}"/>
+            <div id="sailpointRightsDisplay" >
+              <div id="sailpointRightsDisplayContents">
+                <div class="spBorderlessContentBody">
+                  <div class="invalidFieldWarning spAjaxContent"/>
+                  <a4j:outputPanel id="sailpointRightsInfo">
+                    <table class="width100">
+                      <tr>
+                        <h:inputHidden value="#{roleEditor.capabilities}" id="capabilityInput" converter="java.util.List"/>
+                        <td  style="padding:10px" valign="top">
+                          <ui:fragment>
+                            <h:outputText styleClass="sectionHeader" value="${msgs.att_capabilities}"/><br/>
+                            <select multiple="true" id="allrolecapabilities" size="10" onchange="SailPoint.modeler.RoleEditor.updateCapabilities(this)">
+                              <ui:repeat value="#{roleEditor.allCapabilities}" var="item">
+                                <option value="#{item.value}">#{item.label}</option>
+                              </ui:repeat>
+                            </select>
+                          </ui:fragment>
+                        </td>
+                        <td  style="padding:10px" valign="top">
+                          <h:outputText styleClass="sectionHeader" value="#{msgs.authorized_scopes}"/><br/>
+                          <div id="controlledScopesMultiSuggestDiv"></div>
+                          <t:inputHidden id="controlledScopes"                 
+                                             value="#{roleEditor.controlledScopes}" forceId="true">
+                              <sp:convertScopeList />
+                          </t:inputHidden>
+                          <br/>
+                        </td>
+                        <div id="roleControlledScopesMultiSuggestData" style="display:none">
+                            #{sp:basicJSONData(roleEditor.controlledScopes)}
+                        </div>
+                      </tr>
+                    </table>
+                  </a4j:outputPanel>
+                </div>
+              </div>
+            </div>
+
+          <a4j:commandButton id="refreshTargetAccountRules"
+                             style="display:none"
+                             oncomplete="Ext.getCmp('tasPanel').doLayout();"
+                             render="editForm:provisioningTargetAccountSelectorRulePanel"/>
+
+          <!-- Provisioning Target Account Selector Rule Section -->
+            <div class="spacerDiv"/>
+            <div id="provisioningTargetAccountSelectorRuleDisplay">
+                <div id="provisioningTargetAccountSelectorRuleDisplayContents">
+                    <div class="spBorderlessContentBody">
+                        <a4j:outputPanel id="provisioningTargetAccountSelectorRulePanel">
+                            <table>
+                              <ui:repeat value="#{roleEditor.provisioningTargetAccountSelectorRules}" var="selectorRule" varStatus="status">
+                                <tr>
+                                  <td class="businessRoleLeft"><h:outputText styleClass="titleColumn" value="#{selectorRule.applicationName}"/></td>
+                                  <td>
+                                        <div class="targetAccountSelector">
+                                            <h:selectOneMenu id="selectorRule" value="#{selectorRule.ruleName}" >
+                                                <f:selectItems  value="#{roleEditor.accountSelectorRules}"/>
+                                            </h:selectOneMenu>
+                                        </div>
+                                        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+                                            <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                                                   onclick="SailPoint.Rule.Editor.edit($(this).previous('div').down('select').value,
+                                                                       'AccountSelector',
+                                                                       $('editForm:refreshTargetAccountRules'))" />
+                                        </ui:fragment>
+                                  </td>
+                                </tr>
+                              </ui:repeat>
+                            </table>
+                        </a4j:outputPanel>
+                    </div>
+                </div>
+            </div>
+
+            <div id="aboveTheButtonRow"/>
+
+            <div class="buttonRow">
+              <input type="button" id="roleSaveButton" value="#{roleEditor.fromViewer ? msgs.button_submit : msgs.button_update_workflow}" class="primaryBtn"
+                     onclick="SailPoint.modeler.setButtonsDisabled(true); $('editForm:roleSaveAction').click();" /> 
+              <h:commandButton id="roleSaveAction" style="display:none" onclick="saveRoleEditor()" action="#{roleEditor.saveAction}" />
+
+              <input type="button" id="roleCancelButton" value="#{roleEditor.fromViewer ? msgs.button_cancel : msgs.button_back_to_work_item}" class="secondaryBtn"
+                     onclick="SailPoint.modeler.setButtonsDisabled(true); $('editForm:roleCancelAction').click();" /> 
+              <h:commandButton id="roleCancelAction" style="display:none" immediate="true" action="#{roleEditor.cancelAction}"/>
+
+
+              <ui:fragment rendered="#{roleEditor.impactAnalysisEnabled}">
+                <input type="button" id="roleImpactAnalysisButton" value="#{msgs.btn_submit_with_analysis}" class="secondaryBtn"
+                       onclick="SailPoint.modeler.setButtonsDisabled(true); $('editForm:roleImpactAnalysisAction').click();" />
+              </ui:fragment> 
+              <h:commandButton id="roleImpactAnalysisAction" style="display:none" onclick="saveRoleEditor()" action="#{roleEditor.impactAnalysisAction}"/>
+                
+              <a4j:commandButton id="roleQuickImpactAnalysis" value="#{msgs.btn_check_policy_conflicts}" styleClass="secondaryBtn"
+                                 onclick="SailPoint.modeler.setButtonsDisabled(true);" action="#{roleEditor.quickImpactAnalysisAction}" 
+                                 render="analysisResultsPanel" limitRender="true"
+                                 oncomplete="SailPoint.modeler.setButtonsDisabled(false); initAnalysisResultsPanel();"/>
+                
+              <ui:fragment rendered="#{roleEditor.cancelWorkflowAllowed}">
+                <input type="button" id="roleCancelWorkflowsButton" value="#{msgs.btn_cancel_workflow}" class="secondaryBtn"
+                       onclick="SailPoint.modeler.setButtonsDisabled(true); $('editForm:roleCancelWorkflowsAction').click();" /> 
+                <h:commandButton id="roleCancelWorkflowsAction" style="display:none" action="#{roleEditor.cancelPendingWorkflow}"/>
+              </ui:fragment>
+            </div>            
+            
+          </div>
+
+        </div>
+        <h:inputHidden id="editedProfileId" value="#{roleEditor.editedProfileId}"/>
+        <a4j:commandButton style="display:none" id="editProfile" onclick="$('editForm:editMode').value = 'Profile';" action="#{roleEditor.editProfile}" render="profileEditor" oncomplete="Ext.onReady(function() {initProfileEditor();});"/>
+        <a4j:commandButton style="display:none" id="editSimpleEntitlement" onclick="$('editForm:editMode').value = 'SimpleEntitlement';" action="#{roleEditor.editProfile}" render="profileEditor" oncomplete="Ext.onReady(function() {initProfileEditor();});"/>
+        <a4j:commandButton style="display:none" id="deleteProfile" action="#{roleEditor.deleteProfile}"
+                           oncomplete="if (Ext.StoreMgr.lookup('simpleEntitlementDataStore')) {Ext.StoreMgr.lookup('simpleEntitlementDataStore').loadPage(1);}
+                                      Ext.StoreMgr.lookup('entitlementDataStore').load({
+                                           params: {'editForm:id': $('editForm:roleToEdit').value},
+                                           callback: refreshEntitlements
+                                       });
+                                      $('editForm:refreshTargetAccountRules').click();
+                                      "/>
+        <a4j:outputPanel id="profileEditor">
+          <div id="profileEditorCt" style="#{(roleEditor.editMode == 'Profile' || roleEditor.editMode == 'SimpleEntitlement')  ? '' : 'display:none'}">
+            <ui:include src="editProfile.xhtml"/>
+          </div>
+        </a4j:outputPanel>
+
+        <!-- Delete for simple entitlement -->
+        <h:inputHidden id="deleteSimpleEntitlementInput" value="#{roleEditor.simpleEntitlementToDelete}"/>
+        <a4j:commandButton style="display:none" id="deleteSimpleEntitlementButton" action="#{roleEditor.deleteSimpleEntitlement}" 
+                            oncomplete="
+                            Ext.getCmp('entitlementsSimpleGridPanel').loadAfterDelete();
+                            Ext.StoreMgr.lookup('entitlementDataStore').load({
+                                           params: {'editForm:id': $('editForm:roleToEdit').value},
+                                           callback: refreshEntitlements
+                                       });
+                                      $('editForm:refreshTargetAccountRules').click();
+                                       "/>
+        
+        
+        <!--  The membership editor is managed exclusively through javascript -->
+        <div id="membershipEditor">
+          <div id="membershipEditorContents"/>
+        </div>
+        <h:inputHidden id="selectedMembershipIds" value="#{roleEditor.membershipEditor.selectedIds}"/>
+        <h:inputHidden id="membershipIdToAdd" value="#{roleEditor.membershipEditor.idToAdd}"/>
+        <h:inputHidden id="selectAllMemberships" value="#{roleEditor.membershipEditor.selectAll}"/>
+        <a4j:commandButton style="display:none" id="membershipRemove" action="#{roleEditor.membershipEditor.remove}" oncomplete="reloadMembershipStore();"/>
+        <a4j:commandButton style="display:none" id="membershipAdd" action="#{roleEditor.membershipEditor.add}" oncomplete="reloadMembershipStore();"/>
+        <a4j:commandButton style="display:none" id="membershipSave" action="#{roleEditor.membershipEditor.save}" render="roleMembershipInfo" oncomplete="closeMembershipEditor();"/>
+        <a4j:commandButton style="display:none" id="membershipCancel" action="#{roleEditor.membershipEditor.cancel}" oncomplete="reloadMembershipStore(); resetMembershipEditor(); closeMembershipEditor();"/>
+
+        <!--  The permits editor is managed like the membership editor -->
+        <div id="permitsEditor">
+          <div id="permitsEditorContents"/>
+        </div>
+        <h:inputHidden id="selectedPermitsIds" value="#{roleEditor.permitsEditor.selectedIds}"/>
+        <h:inputHidden id="permitsIdToAdd" value="#{roleEditor.permitsEditor.idToAdd}"/>
+        <h:inputHidden id="selectAllPermits" value="#{roleEditor.permitsEditor.selectAll}"/>
+        <a4j:commandButton style="display:none" id="permitsRemove" action="#{roleEditor.permitsEditor.remove}" oncomplete="reloadPermitsStore();"/>
+        <a4j:commandButton style="display:none" id="permitsAdd" action="#{roleEditor.permitsEditor.add}" oncomplete="reloadPermitsStore();"/>
+        <a4j:commandButton style="display:none" id="permitsSave" action="#{roleEditor.permitsEditor.save}" render="permittedRolesInfo" oncomplete="closePermitsEditor();"/>
+        <a4j:commandButton style="display:none" id="permitsCancel" action="#{roleEditor.permitsEditor.cancel}" oncomplete="reloadPermitsStore(); resetPermitsEditor(); closePermitsEditor();"/>
+
+        <!--  The requirements editor is managed like the membership editor -->
+        <div id="requirementsEditor">
+          <div id="requirementsEditorContents"/>
+        </div>
+        <h:inputHidden id="selectedRequirementsIds" value="#{roleEditor.requirementsEditor.selectedIds}"/>
+        <h:inputHidden id="requirementsIdToAdd" value="#{roleEditor.requirementsEditor.idToAdd}"/>
+        <h:inputHidden id="selectAllRequirements" value="#{roleEditor.requirementsEditor.selectAll}"/>
+        <a4j:commandButton style="display:none" id="requirementsRemove" action="#{roleEditor.requirementsEditor.remove}" oncomplete="reloadRequirementsStore();"/>
+        <a4j:commandButton style="display:none" id="requirementsAdd" action="#{roleEditor.requirementsEditor.add}" oncomplete="reloadRequirementsStore();"/>
+        <a4j:commandButton style="display:none" id="requirementsSave" action="#{roleEditor.requirementsEditor.save}" render="requiredRolesInfo" oncomplete="closeRequirementsEditor();"/>
+        <a4j:commandButton style="display:none" id="requirementsCancel" action="#{roleEditor.requirementsEditor.cancel}" oncomplete="reloadRequirementsStore(); resetRequirementsEditor(); closeRequirementsEditor();"/>
+        
+        <a4j:commandButton style="display:none" id="entitlementMining" action="#{roleEditor.beginEntitlementMining}" oncomplete="Ext.onReady(function(){initEntitlementMiner()});"/>
+        <a4j:commandButton style="display:none" id="cancelEntitlementMiningBtn" action="#{roleEditor.cancelEntitlementMining}" 
+                           oncomplete="Ext.onReady(function(){
+                                           var entitlementMiningPanel = Ext.getCmp('entitlementMiningPanel');
+                                           entitlementMiningPanel.hide();
+                                           entitlementMiningPanel.getLayout().setActiveItem('entitlementProfileSearchPanel');
+                                           $('editForm:editMode').value = 'Plain';
+                                       });"/>
+        <a4j:commandButton style="display:none" id="saveMinedProfile" action="#{roleEditor.saveMinedProfile}" 
+                           oncomplete="Ext.onReady(function(){
+                                           var entitlementMiningPanel = Ext.getCmp('entitlementMiningPanel');
+                                           entitlementMiningPanel.hide();
+                                           entitlementMiningPanel.getLayout().setActiveItem('entitlementProfileSearchPanel');
+                                           var entitlementDataStore = Ext.StoreMgr.lookup('entitlementDataStore');
+                                           entitlementDataStore.load({
+                                               params: {'editForm:id': $('editForm:roleToEdit').value},
+                                               callback: refreshEntitlements
+                                           });
+                                           $('editForm:editMode').value = 'Plain';
+                                       });"/>
+        <div id="entitlementMinerCt" class="width100">
+          <ui:include src="entitlementProfileSearchInclude.xhtml">
+            <ui:param name="entitlementProfileMiningBean" value="#{roleEditor.profileMiningEditor}"/>
+            <ui:param name="formName" value="editForm"/>
+            <ui:param name="resultsFormName" value="editForm"/>
+          </ui:include>
+          <ui:include src="entitlementProfileResultsInclude.xhtml">
+            <ui:param name="entitlementProfileMiningBean" value="#{roleEditor.profileMiningEditor}"/>
+            <ui:param name="miningBean" value="#{roleEditor.profileMiningEditor.miningBean}"/>    
+            <ui:param name="formName" value="editForm"/>
+          </ui:include>
+          <ui:include src="entitlementProfile.xhtml">
+            <ui:param name="entitlementProfileMiningBean" value="#{roleEditor.profileMiningEditor}"/>
+          </ui:include>
+        </div>
+        
+        <ui:include src="quickAnalysisResultsPanel.xhtml"/>
+        
+        <div id="hiddenVersionStuff"  style="display:none">
+          <div id="archiveViewDiv">
+            <ui:include src="roleView.xhtml">
+              <ui:param name="prefix" value="archive"/>
+            </ui:include>
+          </div>
+        </div>
+      </h:form>
+      
+      <h:form id="rollbackForm">
+        <h:inputHidden id="roleToEdit" value="#{roleEditor.objectId}"/>
+        <h:inputHidden id="selectedArchive" value="{roleEditor.selectedArchive}"/>
+        <h:commandButton style="display:none" id="applyRollback" action="#{roleEditor.rollbackAction}"/>
+      </h:form>
+    </f:view>
+    
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

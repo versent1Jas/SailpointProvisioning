@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+ <Application connector="sailpoint.connector.MobileIronConnector" featuresString="PROVISIONING, UNLOCK" name="MobileIron MIM" type="MobileIron MIM">
+ <Attributes>
+      <Map>
+        <entry key="formPath" value="MobileIronAttributesForm.xhtml"/>
+        <entry key="WipeSleepInterval" value="5"/>
+        <entry key="retryableErrors">
+          <value>
+            <List>
+              <String>Unrecognized SSL message, plaintext connection</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="encrypted" value="adminPassword"/>
+    </Map>
+  </Attributes>
+   <Schemas>
+     <Schema displayAttribute="model" identityAttribute="uuid" nativeObjectType="Device" objectType="account">
+       <AttributeDefinition name="principal" type="string"/>
+       <AttributeDefinition name="uuid" type="string"/>
+       <AttributeDefinition name="platform" type="string"/>
+       <AttributeDefinition name="emailAddress" type="string"/>
+       <AttributeDefinition name="manufacturer" type="string"/>
+       <AttributeDefinition name="model" type="string"/>
+       <AttributeDefinition name="platformType" type="string"/>
+       <AttributeDefinition name="status" type="string"/>
+       <AttributeDefinition name="userDisplayName" type="string"/>
+       <AttributeDefinition name="userFirstName" type="string"/>
+       <AttributeDefinition name="userLastName" type="string"/>
+       <AttributeDefinition multi="true" name="appName" type="string"/>
+       <AttributeDefinition entitlement="true" managed="true" multi="true" name="label" schemaObjectType="group" type="string"/>    
+     </Schema>
+     <Schema displayAttribute="name" identityAttribute="name" nativeObjectType="Label" objectType="group">
+       <AttributeDefinition name="name" type="string"/>
+       <AttributeDefinition name="description" type="string"/>  
+     </Schema>
+  </Schemas>
+  <Templates>
+    <Template name="Register Device in MobileIron" schemaObjectType="account" usage="Create">
+      <Field displayName="con_prov_policy_mi_rd_pn" name="phoneNumber" reviewRequired="true" type="long"/>
+      <Field displayName="con_prov_policy_mi_rd_uid" name="userId" required="true" type="string"/>
+      <Field displayName="con_prov_policy_mi_rd_dp" name="platform" required="true" type="string">
+        <AllowedValues>
+          <String>M - Windows Mobile</String>
+          <String>B - BlackBerry</String>
+          <String>I - iOS</String>
+          <String>S - Symbian</String>
+          <String>P- Palm webOS</String>
+          <String>A- Android</String>
+          <String>L- Mac OS X</String>
+        </AllowedValues>
+      </Field>
+      <Field displayName="con_prov_policy_mi_rd_ufn" helpKey="help_con_prov_policy_MobileIron_ufn" name="userFirstName" required="true" type="string"/>
+      <Field displayName="con_prov_policy_mi_rd_uln" helpKey="help_con_prov_policy_MobileIron_uln" name="userLastName" required="true" type="string"/>
+      <Field displayName="con_prov_policy_mi_rd_eid" helpKey="help_con_prov_policy_MobileIron_eid" name="userEmailAddress" required="true" type="string"/>
+      <Field displayName="con_prov_policy_mi_rd_cc" helpKey="help_con_prov_policy_MobileIron_cc" name="countrycode" reviewRequired="true" type="int"/>
+      <Field displayName="con_prov_policy_mi_rd_so" helpKey="help_con_prov_policy_MobileIron_so" name="operator" reviewRequired="true" type="string"/>
+      <Field displayName="con_prov_policy_mi_rd_dt" helpKey="help_con_prov_policy_MobileIron_dt" name="deviceType" reviewRequired="true" type="string">
+        <AllowedValues>
+          <String>phone</String>
+          <String>PDA</String>
+        </AllowedValues>
+      </Field>
+      <Field displayName="con_prov_policy_mi_rd_unr" helpKey="help_con_prov_policy_MobileIron_unr" name="notifyUser" required="true" reviewRequired="true" type="boolean" value="true"/>
+      <Field displayName="con_prov_policy_mi_rd_iul" helpKey="help_con_prov_policy_MobileIron_iul" name="importUserFromLdap" reviewRequired="true" type="boolean" value="false"/>
+      <Field displayName="con_prov_policy_mi_rd_do" helpKey="help_con_prov_policy_MobileIron_do" name="isEmployeeOwned" reviewRequired="true" type="boolean" value="false"/>
+      <OwnerDefinition value=""/>
+    </Template>
+    <Template name="MobileIron Device Wipe Provisioning Policy" schemaObjectType="account" usage="Delete">
+      <Field defaultValue="Enterprise Wipe" displayName="con_prov_policy_mi_wipe" name="Wipe" reviewRequired="true" type="string">
+        <AllowedValues>
+          <String>Enterprise Wipe</String>
+          <String>Device Wipe</String>
+        </AllowedValues>
+      </Field>
+      <OwnerDefinition value=""/>
+    </Template>
+  </Templates>
+</Application> 
+</ImportAction>

@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition>
+
+  <h:dataTable styleClass="spTable" columnClasses="attributeTitleColumn, left"
+               rowClasses="#{(disableRowClasses) ? '' : 'even,odd'}"
+               style="border-top:1px #ccc solid; border-bottom:1px #ccc solid;"
+               value="#{identityBean.attributesHelper.attributes}"
+               var="attr"
+               rendered="#{not empty identityBean.attributesHelper.attributes}">
+    <h:column>
+      <h:outputText style="padding:5px" value="#{attr.displayableName}" />
+    </h:column>
+    <h:column>
+      <ui:fragment rendered="#{attr.name != 'manager' and !attr.multi and attr.type == 'sailpoint.object.Identity' }">
+        <ui:fragment rendered="#{identityBean.attributesHelper.canViewIdentities and showIdentityLinks }">
+          <h:commandLink actionListener="#{identityBean.attributesHelper.identityLinkClicked}" action="#{ identityBean.attributesHelper.followIdentityLink }">
+            <f:attribute name="relatedIdentityName" value="#{ identityBean.attributesHelper.proxy[attr.name] }"></f:attribute>
+            <h:outputText style="padding:5px" value="#{ sp:fetchDisplayNameForIdentityName(identityBean.attributesHelper.proxy[attr.name]) }" />
+          </h:commandLink>
+        </ui:fragment>
+        <ui:fragment rendered="#{identityBean.attributesHelper.canViewIdentities and !showIdentityLinks }">
+          <h:outputText style="padding:5px" value="#{ sp:fetchDisplayNameForIdentityName(identityBean.attributesHelper.proxy[attr.name]) }" />
+        </ui:fragment>
+        <ui:fragment rendered="#{!identityBean.attributesHelper.canViewIdentities}">
+          <h:outputText style="padding:5px" value="#{ sp:fetchDisplayNameForIdentityName(identityBean.attributesHelper.proxy[attr.name]) }" />
+        </ui:fragment>
+      </ui:fragment>
+      <ui:fragment rendered="#{attr.name != 'manager' and !attr.multi and attr.type != 'sailpoint.object.Identity' }">
+        <h:outputText style="padding:5px" value="#{identityBean.attributesHelper.proxy[attr.name]}" />
+      </ui:fragment>
+      <ui:fragment rendered="#{attr.name != 'manager' and attr.multi}">
+        <ui:repeat value="#{identityBean.attributesHelper.proxy[attr.name]}" var="multiVal">
+          <div><h:outputText style="padding:5px" value="#{multiVal}"/></div>
+        </ui:repeat>
+      </ui:fragment>
+      <ui:fragment rendered="#{attr.name == 'manager'}">
+        <ui:fragment rendered="#{not managerIsLink or !sp:hasRight(facesContext, 'ViewIdentity')}">
+          <h:outputText style="padding:5px" value="#{identityBean.attributesHelper.proxy['manager']}"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{managerIsLink and sp:hasRight(facesContext, 'ViewIdentity')}">
+          <h:commandLink action="#{identityBean.attributesHelper.followManagerLink}">
+            <h:outputText style="padding:5px" value="#{identityBean.attributesHelper.proxy['manager']}"/>
+          </h:commandLink>
+        </ui:fragment>
+      </ui:fragment>
+    </h:column>
+  </h:dataTable>
+</ui:composition>
+
+</body>
+</html>

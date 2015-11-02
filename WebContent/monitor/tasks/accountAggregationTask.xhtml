@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+  </sp:script>
+
+  <script type="text/javascript">
+        Ext.onReady(function () {
+            var applicationsMultiSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'applicationsMultiSuggest',
+                suggestType: 'application',
+                jsonData: #{sp:basicJSONDataConverted(taskDefinition.argMap['applications'].objectListValue,'ApplicationListConverter')},
+                contextPath: CONTEXT_PATH,
+                inputFieldName: 'editForm:applicationsSuggest',
+                valueField:'displayName',
+                sortable:true,
+                sortOnAdd:false
+            });
+        });    
+    </script>
+  
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <div class="spContent">
+        <table id="accAggOptTable" class="argumentTbl argumentTblWithHelp customWidth paddedTbl" cellspacing="0">
+          <tr>
+            <th>
+              <h:outputText styleClass="spContentTitle" value="#{msgs.account_aggregation_options}"/>
+            </th>
+          </tr>
+          <tr>
+            <td>
+                <sp:outputText value="#{taskDefinition.argMap['applications'].argument.prompt}"/>
+                <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['applications'].argument.name}" 
+                rendered="#{taskDefinition.argMap['applications'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['applications'].argument.helpKey]}"/>
+            </td>                
+            <td>
+          <div id="applicationsMultiSuggest"></div>
+          <t:inputHidden id="applicationsSuggest"
+                         value="#{taskDefinition.argMap['applications'].objectListValue}"
+                         required="true">
+              <sp:convertList />
+          </t:inputHidden>
+          <a4j:outputPanel ajaxRendered="true">
+                <h:message styleClass="formError" for="applicationsSuggest" />
+            </a4j:outputPanel>
+            </td>
+          </tr>
+
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['creationRule'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['creationRule'].argument.name}" 
+                rendered="#{taskDefinition.argMap['creationRule'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['creationRule'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <a4j:outputPanel id="creationRulePanel">
+              <h:selectOneMenu id="creationRule"
+                               value="#{taskDefinition.argMap['creationRule'].value}">
+                <f:selectItem itemLabel="#{msgs.select_rule}"
+                                        itemValue="" />
+                <f:selectItems value="#{taskDefinition.argMap['creationRule'].objectNames}"/>
+              </h:selectOneMenu>
+              </a4j:outputPanel>
+              
+            <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+            <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                   onclick="SailPoint.Rule.Editor.edit($('editForm:creationRule').value, 
+                                                       'IdentityCreation',
+                                                       $('editForm:refreshCreationRulesButton'))" />                                                     
+          <a4j:commandButton id="refreshCreationRulesButton"
+                           style="display:none"
+                                 immediate="true"
+                       render="creationRulePanel"/> 
+            </ui:fragment>                      
+            </td>
+          </tr>
+
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['correlateEntitlements'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['correlateEntitlements'].argument.name}" 
+                rendered="#{taskDefinition.argMap['correlateEntitlements'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['correlateEntitlements'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="correlateEntitlements" value="#{taskDefinition.argMap['correlateEntitlements'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['checkPolicies'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['checkPolicies'].argument.name}" 
+                rendered="#{taskDefinition.argMap['checkPolicies'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['checkPolicies'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="checkPolicies" value="#{taskDefinition.argMap['checkPolicies'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['correlateOnly'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['correlateOnly'].argument.name}" 
+                rendered="#{taskDefinition.argMap['correlateOnly'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['correlateOnly'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="correlateOnly" value="#{taskDefinition.argMap['correlateOnly'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['refreshScorecard'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['refreshScorecard'].argument.name}" 
+                rendered="#{taskDefinition.argMap['refreshScorecard'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['refreshScorecard'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="refreshScorecard" value="#{taskDefinition.argMap['refreshScorecard'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['checkHistory'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['checkHistory'].argument.name}" 
+                rendered="#{taskDefinition.argMap['checkHistory'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['checkHistory'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="checkHistory" value="#{taskDefinition.argMap['checkHistory'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['deltaAggregation'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['deltaAggregation'].argument.name}" 
+                rendered="#{taskDefinition.argMap['deltaAggregation'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['deltaAggregation'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="deltaAggregation" value="#{taskDefinition.argMap['deltaAggregation'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['checkDeleted'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['checkDeleted'].argument.name}" 
+                rendered="#{taskDefinition.argMap['checkDeleted'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['checkDeleted'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="checkDeleted" value="#{taskDefinition.argMap['checkDeleted'].booleanValue}"/>
+              <sp:outputText value="#{taskDefinition.argMap['checkDeletedThreshold'].argument.prompt}" styleClass="task-sub-option" />
+              <h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['checkDeletedThreshold'].argument.name}"
+                              rendered="#{taskDefinition.argMap['checkDeletedThreshold'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                              alt="#{help[taskDefinition.argMap['checkDeletedThreshold'].argument.helpKey]}"/>
+              <h:inputText size="15" value="#{taskDefinition.argMap['checkDeletedThreshold'].value}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['correlateScope'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['correlateScope'].argument.name}" 
+                rendered="#{taskDefinition.argMap['correlateScope'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['correlateScope'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="correlateScope" value="#{taskDefinition.argMap['correlateScope'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['noAutoCreateScopes'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['noAutoCreateScopes'].argument.name}" 
+                rendered="#{taskDefinition.argMap['noAutoCreateScopes'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['noAutoCreateScopes'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="noAutoCreateScopes" value="#{taskDefinition.argMap['noAutoCreateScopes'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['refreshCertifications'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['refreshCertifications'].argument.name}" 
+                rendered="#{taskDefinition.argMap['refreshCertifications'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['refreshCertifications'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="refreshCertifications" value="#{taskDefinition.argMap['refreshCertifications'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['noOptimizeReaggregation'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['noOptimizeReaggregation'].argument.name}" 
+                rendered="#{taskDefinition.argMap['noOptimizeReaggregation'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['noOptimizeReaggregation'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="noOptimizeReaggregation" value="#{taskDefinition.argMap['noOptimizeReaggregation'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['promoteManagedAttributes'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['promoteManagedAttributes'].argument.name}" 
+                rendered="#{taskDefinition.argMap['promoteManagedAttributes'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['promoteManagedAttributes'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectBooleanCheckbox id="promoteManagedAttributes" value="#{taskDefinition.argMap['promoteManagedAttributes'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText value="#{taskDefinition.argMap['noAutoCreateApplications'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['noAutoCreateApplications'].argument.name}" 
+                rendered="#{taskDefinition.argMap['noAutoCreateApplications'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['noAutoCreateApplications'].argument.helpKey]}"/>
+            </td>                
+            <td>
+               <h:selectBooleanCheckbox id="noAutoCreateApplications" value="#{taskDefinition.argMap['noAutoCreateApplications'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText value="#{taskDefinition.argMap['enablePartitioning'].argument.prompt}" /></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['enablePartitioning'].argument.name}"
+              rendered="#{taskDefinition.argMap['enablePartitioning'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+              alt="#{help[taskDefinition.argMap['enablePartitioning'].argument.helpKey]}"/>
+            </td>
+            <td>
+              <h:selectBooleanCheckbox id="enablePartitioning" value="#{taskDefinition.argMap['enablePartitioning'].booleanValue}"/>
+              <sp:outputText value="#{taskDefinition.argMap['objectsPerPartition'].argument.prompt}" escape="false"/>
+              <h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['objectsPerPartition'].argument.name}"
+              rendered="#{taskDefinition.argMap['objectsPerPartition'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+              alt="#{help[taskDefinition.argMap['objectsPerPartition'].argument.helpKey]}"/>
+              <h:inputText size="15" value="#{taskDefinition.argMap['objectsPerPartition'].value}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText value="#{taskDefinition.argMap['sequential'].argument.prompt}" /></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['sequential'].argument.name}"
+              rendered="#{taskDefinition.argMap['sequential'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+              alt="#{help[taskDefinition.argMap['sequential'].argument.helpKey]}"/>
+            </td>
+            <td>
+                <h:selectBooleanCheckbox id="sequential" value="#{taskDefinition.argMap['sequential'].booleanValue}"/>
+            </td>
+          </tr>
+          <tr>
+            <td><sp:outputText  value="#{taskDefinition.argMap['logAllowedActions'].argument.prompt}"/></td>
+            <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['logAllowedActions'].argument.name}" 
+                rendered="#{taskDefinition.argMap['logAllowedActions'].argument.helpKey != null}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                alt="#{help[taskDefinition.argMap['logAllowedActions'].argument.helpKey]}"/>
+            </td>                
+            <td>
+              <h:selectManyListbox size="7" value="#{taskDefinition.argMap['logAllowedActions'].objectListValue}">
+                <f:selectItem itemLabel="#{msgs.aggregation_action_manual}" itemValue="CorrelateManual"/>
+                <f:selectItem itemLabel="#{msgs.aggregation_action_maintain}" itemValue="CorrelateMaintain"/>
+                <f:selectItem itemLabel="#{msgs.aggregation_action_new_acct}" itemValue="CorrelateNewAccount"/>
+                <f:selectItem itemLabel="#{msgs.aggregation_action_reassign}" itemValue="CorrelateReassign"/>
+                <f:selectItem itemLabel="#{msgs.aggregation_action_create_identity}" itemValue="Create"/>
+                <f:selectItem itemLabel="#{msgs.aggregation_action_ignore}" itemValue="Ignore"/>
+                <f:selectItem itemLabel="#{msgs.aggregation_action_remove_acct}" itemValue="Remove"/>
+              </h:selectManyListbox>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <script defer="defer">
+         makeTableMulticolored($('accAggOptTable'),true,false, "even", "odd" );
+      </script>
+    </ui:fragment>
+</ui:composition>
+
+</body>
+</html>

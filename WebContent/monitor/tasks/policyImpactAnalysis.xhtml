@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+<ui:composition>  
+    <div class="baseWindow expandPanel"> 
+        <div id="expandPanelContent" class="baseWindowBody expandPanelBody"  style="padding:10px">
+            <ui:param name='analysis' value="#{taskResult.policyImpactAnalysis}"/>
+            <h:outputFormat styleClass="spContentTitle" value="#{msgs.task_policy_simulation_for}" rendered="#{analysis ne null}">
+                <f:param value="#{not empty analysis.policyName ? analysis.policyName : '' }"/>
+            </h:outputFormat>
+            <br/>
+            <br/>
+            <ui:fragment rendered="#{analysis ne null and analysis.noActiveRules == false and taskResult.object.terminated ne true and not empty analysis.policyType and (!(analysis.policyType == 'Risk' or analysis.policyType == 'Account'))}">
+                <div align="center">
+                    <table class="spTable" id="rulesTbl" border="1" style="width: 50%">
+                    <tr>
+                        <th style="text-align:center"><h:outputText value="#{msgs.task_out_policy_impact_analysis_ruleName}"/></th>
+                        <th style="text-align:center"><h:outputText value="#{msgs.task_out_policy_impact_analysis_vcount}"/></th>
+                    </tr>
+                    <ui:repeat value="#{analysis.violationResults}" var="violation">
+                        <tr>
+                            <td width="5%" align="left" style="border: solid 1px #CCCCCC;"><h:outputText style="font-size:13px" value="#{violation.ruleName}"/></td>
+                            <td width="5%" align="center" style="border: solid 1px #CCCCCC;"><h:outputText style="font-size:13px" value="#{violation.violationCount}"/></td>
+                        </tr>
+                    </ui:repeat>
+                    </table>
+                </div>
+                <br/>
+                <h:outputFormat style="font-size:13px;margin:320px;" rendered="#{sp:getSize(analysis.violationResults) > 1}" value="#{msgs.task_out_policy_impact_analysis_icount}">
+                    <f:param value="#{analysis.violationResults[0].identityCount}"/>
+                </h:outputFormat>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{analysis ne null and analysis.noActiveRules == false and taskResult.object.terminated ne true and not empty analysis.policyType and (analysis.policyType == 'Risk' or analysis.policyType == 'Account')}">
+             <div style="text-align:Left">
+                <h:outputFormat style="font-size:13px;margin:3px;" value="#{msgs.task_out_policy_impact_analysis_icount}">
+                    <f:param value="#{analysis.violationResults[0].identityCount}"/>
+                </h:outputFormat>
+             </div>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{analysis ne null and analysis.noActiveRules == true}">
+                <div style="text-align:center">
+                    <h:outputText styleClass="x-grid-empty"  style="font-size:15px;margin:5px;" width="80%" value="#{msgs.error_simulation_noactive_rules}"/>
+                 </div>
+            </ui:fragment>
+        </div>
+    </div> 
+</ui:composition>
+
+</body>
+</html>

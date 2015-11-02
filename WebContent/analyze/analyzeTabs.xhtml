@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+  <ui:define name="title"><h:outputText value="#{msgs.menu_label_analyze_search}"/></ui:define>
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      helpKey = 'ANALYZE';
+    </script>
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/analyze">
+      <src>search.css</src>    
+    </sp:style>
+    
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ExportMonitor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ManagedAttributeValueCombo.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/baseGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/ExtendedPagingToolbar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/analyze.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/validation.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/searchResultsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/entitlementMining.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/filtersPage.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/identitySearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/certificationSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/roleSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/accountGroupSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/activitySearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/auditSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/processInstrumentationSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/identityRequestSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/syslogSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/linkSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/analyzeTabs.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/EntitlementAnalysisResultsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/entitlementMiningWizard.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StartEndDateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+    </sp:script>
+    <script type="text/javascript">
+        var defaultSelectedFields = {};
+        // defaultSelectedFields.{searchType} = [array of default fields];
+        defaultSelectedFields.identity = #{sp:toJSON(identitySearch.defaultFieldList)};
+        defaultSelectedFields.advancedIdentity = #{sp:toJSON(identitySearch.defaultFieldList)};
+        defaultSelectedFields.activity = #{sp:toJSON(activitySearch.defaultFieldList)};
+        defaultSelectedFields.role = #{sp:toJSON(roleSearch.defaultFieldList)};
+        defaultSelectedFields.accountGroup = #{sp:toJSON(accountGroupSearch.defaultFieldList)};
+        defaultSelectedFields.certification = #{sp:toJSON(certificationSearch.defaultFieldList)};
+        defaultSelectedFields.audit = #{sp:toJSON(auditSearch.defaultFieldList)};
+        defaultSelectedFields.identityRequest = #{sp:toJSON(identityRequestSearch.defaultFieldList)};
+        defaultSelectedFields.syslog = #{sp:toJSON(syslogSearch.defaultFieldList)};
+        defaultSelectedFields.link = #{sp:toJSON(linkSearch.defaultFieldList)};
+    </script>
+  </ui:define>
+  <ui:define name="body">
+    <f:view>
+      <div id="analyzeTabPanelDiv"></div>
+      <div id="identitySearchContentsDiv"></div>
+      <div id="advancedIdentitySearchContentsDiv"></div>
+      <div id="identityResultsContentsDiv"></div>
+      <div id="certificationSearchContentsDiv"></div>
+      <div id="certificationResultsContentsDiv"></div>
+      <div id="roleSearchContentsDiv"></div>
+      <div id="roleResultsContentsDiv"></div>
+      <div id="accountGroupSearchContentsDiv"></div>
+      <div id="accountGroupResultsContentsDiv"></div>
+      <div id="activitySearchContentsDiv"></div>
+      <div id="activityResultsContentsDiv"></div>
+      <div id="auditSearchContentsDiv"></div>
+      <div id="auditResultsContentsDiv"></div>
+      <div id="identityRequestSearchContentsDiv"></div>
+      <div id="identityRequestResultsContentsDiv"></div>
+      <div id="syslogSearchContentsDiv"></div>
+      <div id="syslogResultsContentsDiv"></div>
+      <div id="linkSearchContentsDiv"></div>
+      <div id="linkResultsContentsDiv"></div>
+      <div id="entitlementsWindowDiv"></div>
+      <div id="entitlementsPanelDiv"></div>
+      <div id="processInstrumentationSearchContentsDiv"></div>
+      
+      <div id="accessiblePanels" style="display:none">
+        #{analyzeController.accessiblePanels}
+      </div>
+      
+      <div id="whereAreWe" style="display:none">
+        #{analyzeController.panelAccessState}
+      </div>
+      
+      <div id="transientGridState" style="display:none">#{analyzeController.transientGridState.JSON}</div>
+      
+      <h:form id="stateForm">
+        <h:inputHidden id="searchType" value="#{analyzeController.searchType}"/>
+        <h:inputHidden id="currentSearchPanel" value=""/>
+        <h:inputHidden id="currentCardPanel" value=""/>
+        <a4j:commandButton style="display:none" id="updatePanelStateBtn" 
+                           action="#{analyzeController.updatePanelState}"
+                           oncomplete="Ext.getCmp('spViewport').doLayout();"
+                           immediate="true"/>
+      </h:form>
+      
+      <h:form id="resultsForm">
+        <h:inputHidden id="searchType" value="#{analyzeController.searchType}"/>
+        <h:inputHidden id="currentObjectId" value="#{analyzeController.searchBean.selectedId}"/>
+        <h:commandButton id="editButton" type="button" style="display:none" action="#{analyzeController.searchBean.select}"/>
+      </h:form>
+      
+      <h:form id="searchSaveForm">
+        <h:inputHidden value="#{analyzeController.reportName}"/>
+        <h:inputHidden id="searchItemName" value="#{analyzeController.searchBean.searchItemName}"/>
+        <h:inputHidden id="searchItemDescription" value="#{analyzeController.searchBean.searchItemDescription}"/>
+        <h:inputHidden id="searchType" value="#{analyzeController.searchType}" />
+        <h:outputText value="#{analyzeController.searchBean.filter}" style="display:none" id="searchFilter"/>
+        <!-- For running actions on the search itself -->
+        <a4j:commandButton  style="display:none" 
+                            id="saveQueryAsIpop" 
+                            action="#{analyzeController.searchBean.saveAsIpopAction}"
+                            oncomplete="Ext.getCmp('spViewport').doLayout();
+                                        SailPoint.Analyze.reRenderSearchItems($('searchSaveForm:searchType').value);"/>
+        
+        <a4j:commandButton  style="display:none" 
+                            id="saveQueryAsReport" 
+                            value="Save Query as Report" 
+                            action="#{analyzeController.searchBean.saveAsReportAction}"
+                            oncomplete="Ext.getCmp('spViewport').doLayout();
+                                       SailPoint.Analyze.reRenderSearchItems($('searchSaveForm:searchType').value);"/>
+        
+        <a4j:commandButton  style="display:none" 
+                            id="rememberQuery" 
+                            action="#{analyzeController.searchBean.saveQueryAction}"
+                            oncomplete="Ext.getCmp('spViewport').doLayout();
+                                       SailPoint.Analyze.reRenderSearchItems($('searchSaveForm:searchType').value);"/>
+                            
+        <a4j:commandButton  style="display:none" 
+                            id="rememberQueryAsIdentity" 
+                            action="#{analyzeController.searchBean.saveQueryActionForIdentitySearch}"
+                            oncomplete="Ext.getCmp('spViewport').doLayout();
+                                        SailPoint.Analyze.reRenderSearchItems($('searchSaveForm:searchType').value);"/>
+                            
+        <a4j:commandButton  style="display:none" 
+                            id="entitlementsBtn" 
+                            oncomplete="$('entitlementBreakdownProgress').style.display='none';
+                                        Ext.getCmp('spViewport').doLayout();
+                                        SailPoint.Analyze.reRenderSearchItems($('searchSaveForm:searchType').value);"
+                            action="#{analyzeController.searchBean.showEntitlementBreakdown}" 
+                            render="entitlementBreakdown"/>
+                            
+        <a4j:commandButton action="#{analyzeController.searchBean.preShowEntitlements}"
+                           style="display:none"
+                           id="preShowEntitlements"
+                           render="searchFilter"
+                           oncomplete="SailPoint.Identity.Search.showEntitlements();"/>
+
+        <h:commandButton id="pdf" style="display:none" action="#{analyzeController.searchBean.exportToPDF}"/>
+        
+        <h:commandButton id="csv" style="display:none" action="#{analyzeController.searchBean.exportToCSV}"/>
+
+        <!-- ArcSight Integration - IdentityIQ CEF data feed -->
+        <h:commandButton id="cef" style="display:none" action="#{analyzeController.searchBean.exportToCEF}"/>
+
+        <a4j:commandButton style="display:none" id="terminateExportButton" action="#{analyzeController.searchBean.terminateExport}" limitRender="true"/>        
+      </h:form>
+      
+      <h:form id="identityResultForm">
+        <h:inputHidden id="searchType" value="#{analyzeController.searchType}"/>
+        <h:inputHidden id="currentObjectId" value="#{identitySearch.selectedId}"/>
+        
+        <ui:include src="../include/gridStateInclude.xhtml">
+          <ui:param name="bean" value="#{identitySearch}"/>
+        </ui:include>
+
+        <h:commandButton id="editButton" style="display:none" action="#{identitySearch.select}"/> 
+
+        <h:commandButton  action="#{identitySearch.scheduleCertificationAction}" 
+                          rendered="#{sp:hasRight(facesContext, 'FullAccessCertificationSchedule')}"
+                          style="display:none" 
+                          id="scheduleCertificationBtn"/>
+        <h:inputHidden id="certifyAll" value="#{identitySearch.bulkCertification.certifyAll}"/>
+        <h:inputHidden id="idsToCertify" value="#{identitySearch.bulkCertification.selectedIdentities}" converter="java.util.List" />
+      </h:form>
+
+      <h:form id="advancedIdentityResultForm">
+        <h:inputHidden id="searchType" value="#{analyzeController.searchType}"/>
+        <h:inputHidden id="currentObjectId" value="#{advancedIdentitySearch.selectedId}"/>
+        
+        <ui:include src="../include/gridStateInclude.xhtml">
+          <ui:param name="bean" value="#{advancedIdentitySearch}"/>
+        </ui:include>
+
+        <h:commandButton id="editButton" style="display:none" action="#{advancedIdentitySearch.select}"/> 
+
+        <h:commandButton  action="#{advancedIdentitySearch.scheduleCertificationAction}" 
+                          rendered="#{sp:hasRight(facesContext, 'FullAccessCertificationSchedule')}"
+                          style="display:none" 
+                          id="advancedScheduleCertificationBtn"/>
+        <h:inputHidden id="advancedCertifyAll" value="#{advancedIdentitySearch.bulkCertification.certifyAll}"/>
+        <h:inputHidden id="advancedIdsToCertify" value="#{advancedIdentitySearch.bulkCertification.selectedIdentities}" converter="java.util.List" />
+      </h:form>
+
+      <h:form id="certificationResultForm">
+        <h:inputHidden id="searchType" value="#{analyzeController.searchType}"/>
+        <h:inputHidden id="currentObjectId" value="#{certificationSearch.selectedId}"/>
+
+        <ui:include src="../include/gridStateInclude.xhtml">
+          <ui:param name="bean" value="#{certificationSearch}"/>
+        </ui:include>
+        
+        <h:commandButton id="editButton" style="display:none" action="#{certificationSearch.select}" />
+      </h:form>
+
+      
+      <h:form id="accountGroupResultForm">
+        <h:inputHidden id="searchType" value="#{analyzeController.searchType}"/>
+        <h:inputHidden id="currentObjectId" value="#{accountGroupSearch.selectedId}"/>
+        <h:commandButton id="editButton" style="display:none" action="#{accountGroupSearch.select}"/>
+      </h:form>
+      
+      <h:form id="identityRequestResultForm">
+        <h:inputHidden id="searchType" value="#{analyzeController.searchType}"/>
+        <h:inputHidden id="currentObjectId" value="#{identityRequestSearch.selectedId}"/>
+        
+        <h:commandButton id="editButton" style="display:none" action="#{identityRequestSearch.select}"
+                         onclick="var gridState = Ext.StoreMgr.lookup('gridStateStore').getById('identityRequestSearchGrid');
+                                  if (gridState) {
+                                      gridState.encodeGridState('identityRequestSearchForm');
+                                  }
+                                  $('identityRequestResultForm:searchType').value = 'IdentityRequest';"/>
+      </h:form>
+      
+      <h:form id="processMetricsEditForm">
+        <h:inputHidden id="processToEdit" value="#{processMetricsEdit.processToEdit}"/>
+        <h:commandButton id="editProcess" style="display:none" action="#{processMetricsEdit.editProcess}"/>
+      </h:form>
+
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

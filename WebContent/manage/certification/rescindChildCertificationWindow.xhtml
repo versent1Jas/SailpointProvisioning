@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j">
+  <ui:composition>
+  
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  
+    <f:view>
+    
+    <h:form id="editForm">
+
+      <h:inputHidden id="certId" value="#{worksheetView.rescindCertId}" />
+
+      <div style="margin-bottom: 5px">
+        <h:outputText value="#{msgs.cert_rescind_child_cert_text}" escape="false" />
+      </div>
+
+      <div id="rescindingProgressDiv" style="height: 16px" />
+
+      <a4j:commandButton id="rescindBtn"
+                         action="#{worksheetView.rescindChildCertification}"
+                         style="display:none"
+                         render="rescindErrorsPanel"
+                         onclick="new SailPoint.LoadingSpinner().display($('rescindingProgressDiv'));"
+                         oncomplete="SailPoint.Manage.Certification.afterRescindCheck();" />
+
+      <a4j:outputPanel ajaxRendered="true" id="rescindErrorsPanel">
+        <div id="rescindErrors">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+        </div>
+      </a4j:outputPanel>
+
+    </h:form>
+    </f:view>
+  </ui:composition>
+</html>

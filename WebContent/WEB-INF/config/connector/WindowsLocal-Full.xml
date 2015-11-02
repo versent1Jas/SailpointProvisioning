@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, SEARCH, ENABLE, PASSWORD, UNLOCK" icon="directory2Icon" name="Windows Local Full Template" type="Windows Local - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="WinLocal"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ProvisioningConfig>
+      <PlanInitializerScript>
+        <Source>
+                                import java.util.*;                                                                                
+                                import sailpoint.object.*;                                                                                
+                                import sailpoint.object.ProvisioningPlan.ObjectOperation;
+                                import sailpoint.object.ProvisioningPlan.ObjectRequest;
+                                import sailpoint.object.ProvisioningPlan.AttributeRequest;
+                                import sailpoint.object.ProvisioningPlan.AccountRequest;                                                   
+                                List accounts = plan.getAccountRequests();
+                                if (accounts != null) 
+                                {
+                                    for (AccountRequest req : accounts) 
+                                    {
+                                      AccountRequest.Operation op = req.getOperation();
+                                      
+                                      if (op == AccountRequest.Operation.Create)
+                                      {
+                                          String userId = req.getNativeIdentity();
+                                                                                                                                                                             
+                                          if (userId != null)
+                                          {
+                                            String attname = "USER_OE_PR";
+                                            int nIndex = userId.indexOf('\\');
+                                            String value =userId.substring(0,nIndex);
+                                            AttributeRequest att = new AttributeRequest(attname, value);
+                                            req.add(att);                                                                                   req.setNativeIdentity(userId.toUpperCase());
+                                          }
+                                      }
+                            
+                                    }
+                                }
+                                List groups = plan.getObjectRequests();
+                                if (groups != null) 
+                                {
+                                    for (ObjectRequest req : groups) 
+                                    {
+                                        ObjectOperation op = req.getOp();
+                                        if (op == ObjectOperation.Create)
+                                        {
+                                            String groupId = req.getNativeIdentity();
+                                            if (groupId != null)
+                                            {
+                                            String attname = "GROUP_OE_PR";
+                                            int nIndex = groupId.indexOf('\\');
+                                            String value =groupId.substring(0,nIndex);
+                                            AttributeRequest  att = new AttributeRequest (attname, value);
+                                            req.add(att);                                               
+                                            req.setNativeIdentity(groupId.toUpperCase());
+                                            
+                                            }
+                                        }
+                                     }
+                                }
+
+                            </Source>
+      </PlanInitializerScript>
+    </ProvisioningConfig>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="USER_ID" minable="true" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" minable="true" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Groups" entitlement="true" managed="true" multi="true" name="groups" required="true" type="string"/>
+        <AttributeDefinition displayName="Full Name" minable="true" name="FULL_NAME" type="string"/>
+        <AttributeDefinition displayName="Home Directory" minable="true" name="HOME_DIRECTORY" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" minable="true" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Parent Container" minable="true" name="GROUP_OE_PR" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="Create Account" usage="Create">
+        <Field displayName="User Name" helpKey="User name in MachineName\UserName format" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Full Name" name="FULL_NAME" reviewRequired="true" section="" type="string"/>
+        <Field displayName="Connect to Users group" helpKey="Should the user be added to Users group (Y/N)" name="CNNT_TO_USERS" required="true" reviewRequired="true" section="" type="string" value="Y"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group Name" helpKey="Group Name in MachineName\GroupName format" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="Account Type" helpKey="Required attribute for connector" name="ACCOUNT_TYPE" readOnly="true" type="string" value="LOCAL"/>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="Description" name="DESCRIPTION" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

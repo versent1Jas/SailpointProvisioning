@@ -1,0 +1,40 @@
+<tabset type="tabs" class="bg-light" justified="true" ng-if="dialogCtrl.isRole()">
+    <tab heading="{{ 'ui_access_item_detail_tab_details' | spTranslate }}">
+        <ul class="list-group no-radius">
+            <li class="list-group-item">
+                <strong>{{ 'ui_access_item_detail_role_name' | spTranslate }}:</strong>
+                {{ dialogCtrl.getItem().getDisplayableName() }}
+            </li>
+            <li ng-if="dialogCtrl.getItem().isAssigned()" class="list-group-item">
+                <strong>{{ 'ui_access_item_detail_assignment_notes' | spTranslate }}:</strong>
+                {{ dialogCtrl.getItem().getAssignmentNote() }}
+            </li>
+        </ul>
+    </tab>
+
+    <tab heading="{{ 'ui_access_item_detail_tab_account_details' | spTranslate }}">
+        <sp-target-accounts accounts="dialogCtrl.getItem().getRoleTargets()"
+                            parent="{{dialogCtrl.getItem().getDisplayableName()}}" />
+    </tab>
+
+    <tab select="dialogCtrl.loadRoleEntitlements()" heading="{{ 'ui_access_item_detail_tab_entitlements' | spTranslate }}">
+        <span sp-loading-mask="dialogCtrl.roleEntitlements">
+          <sp-role-entitlements entitlements="dialogCtrl.roleEntitlements"
+                                total-count="dialogCtrl.totalRoleEntitlementsCount"/>
+        </span>
+    </tab>
+</tabset>
+<ul class="list-group no-radius" ng-if="!dialogCtrl.isRole()">
+    <li class="list-group-item">
+        <strong>{{ 'ui_access_item_detail_entitlement_name' | spTranslate }}:</strong>
+        {{ dialogCtrl.getItem().getDisplayableName() }}
+    </li>
+    <li class="list-group-item">
+        <strong>{{ 'ui_access_item_detail_native_identifier' | spTranslate }}:</strong>
+        {{ dialogCtrl.getItem().getNativeIdentity() }}
+    </li>
+    <li class="list-group-item">
+        <strong>{{ 'ui_access_item_detail_account_name' | spTranslate }}:</strong>
+        {{ dialogCtrl.getItem().getAccountName() }}
+    </li>
+</ul>

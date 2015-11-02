@@ -1,0 +1,53 @@
+<tabset type="tabs" class="bg-light" justified="true">
+  <tab heading="{{'ui_my_approvals_violation_details_tab' | spTranslate}}">
+    <div role="presentation" sp-loading-mask="violationDetails">
+      <ul class="list-group no-radius">
+        <li class="list-group-item">
+          <strong>{{'ui_my_approvals_violation_rule_name' | spTranslate}}:</strong>
+          {{violationDetails.ruleName}}
+        </li>
+        <li class="list-group-item">
+          <strong>{{'ui_my_approvals_violation_rule_description' | spTranslate}}:</strong>
+          {{violationDetails.ruleDescription}}
+        </li>
+        <li class="list-group-item" ng-if="isViolationSummaryDisplayable()">
+          <strong>{{'ui_my_approvals_violation_summary' | spTranslate}}:</strong>
+          {{violationDetails.violationSummary}}
+        </li>
+        <li class="list-group-item">
+          <strong>{{'ui_my_approvals_violation_policy_name' | spTranslate}}:</strong>
+          {{violationDetails.policyName}}
+        </li>
+        <li class="list-group-item">
+          <strong>{{'ui_my_approvals_violation_policy_description' | spTranslate}}:</strong>
+          <span ng-bind-html="violationDetails.policyDescription"></span>
+        </li>
+        <li class="list-group-item" ng-if="violationDetails.riskScore.weight > 0">
+          <p>
+            <strong>{{'ui_my_approvals_violation_score_weight' | spTranslate}}:</strong>
+            <span ng-bind-html="violationDetails.riskScore.weight | risk">
+            </span>
+          </p>
+        </li>
+      </ul>
+    </div>
+  </tab>
+
+  <tab heading="{{'ui_my_approvals_violation_compensating_controls_tab' | spTranslate}}">
+    <div role="presentation" sp-loading-mask="violationDetails">
+      <div class="panel panel-body">
+        <strong>{{'ui_my_approvals_violation_compensating_controls_tab' | spTranslate}}</strong>
+        <p>{{violationDetails.compensatingControl}}</p>
+      </div>
+    </div>
+  </tab>
+
+  <tab heading="{{'ui_my_approvals_violation_correction_advice_tab' | spTranslate}}">
+    <div role="presentation" sp-loading-mask="violationDetails">
+      <div class="panel panel-body">
+        <strong>{{'ui_my_approvals_violation_correction_advice_tab' | spTranslate}}</strong>
+        <p>{{violationDetails.correctionAdvice}}</p>
+      </div>
+    </div>
+  </tab>
+</tabset>

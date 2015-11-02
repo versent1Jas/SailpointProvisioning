@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core" 
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">Debug Pages</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'DEBUG_VIEW';
+        // resize the text area based on the size of the browser window
+        Ext.onReady(function() {
+          var winWidth = document.body.clientWidth || innerWidth;
+          var winHeight = document.body.clientHeight || innerHeight;
+          var tacols = winWidth / 8;
+          var tarows = winHeight / 25;
+
+          $('editForm:resultArea').cols = tacols;
+          $('editForm:resultArea').rows = tarows;
+        });
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+
+      <ui:fragment rendered='#{debug.ruleName != null}'>
+        <h2>Rule Result: #{debug.ruleName}</h2>
+      </ui:fragment>
+
+      <ui:fragment rendered='#{debug.ruleName == null}'>
+        <h2>Result</h2>
+      </ui:fragment>
+
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+
+      <h:form styleClass="form" id="editForm">
+
+          <h:panelGrid columns='1'>
+        
+            <c:if test="#{debug.ruleName != null}">
+              <h:inputTextarea id='resultArea' cols='100' rows='30' 
+                 readonly='true' wrap='off' value='#{debug.resultXml}'/>
+            </c:if>
+
+            <c:if test="#{debug.ruleName == null}">
+              <h:inputTextarea id='resultArea' cols='100' rows='30' 
+                  readonly='true' wrap='off' value='#{debug.resultString}'/>
+            </c:if>
+
+            <h:panelGroup>
+              <h:commandButton action="#{debug.cancelAction}" value="Ok" />
+            </h:panelGroup>
+
+          </h:panelGrid>
+
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

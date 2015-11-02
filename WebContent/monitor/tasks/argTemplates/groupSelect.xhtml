@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+  </sp:script>
+
+
+  <script type="text/javascript" defer="defer">
+  <!--//--><![CDATA[//><!--
+  
+    if (!Page.renderSuggests){
+        Page.renderSuggests = true;
+        Ext.onReady(function () {
+            SailPoint.Suggest.renderSuggests();
+        });
+    }
+  
+  //--><!]]>
+  </script>
+
+    <c:choose>
+
+        <c:when test="#{argVal.argument.multi == 'true'}">
+            <div class="suggestInput iPop multi">
+                <span style="display:none" class="suggestRawInput">#{sp:basicJSONDataConverted(argVal.objectListValue,"GroupDefinitionListConverter")}</span>
+                <t:inputHidden value="#{argVal.objectListValue}" forceId="true">
+                    <sp:convertList/>
+                </t:inputHidden>
+            </div>
+        </c:when>
+        
+        <c:when test="#{argVal.argument.multi == 'false'}">
+            <div class="suggestInput iPop">
+                <span class="suggestRawInput" value='#{sp:getDisplayNameForId("GroupDefinition", argVal.objectValue)}'/>
+                <span style="display:none" class="suggestConfig">{'suggestType':'group'}</span>
+                <t:inputHidden value='#{argVal.objectValue}' forceId="true">
+                </t:inputHidden>
+            </div>
+        </c:when>
+
+    </c:choose>
+
+</ui:composition>
+
+</body>
+</html>

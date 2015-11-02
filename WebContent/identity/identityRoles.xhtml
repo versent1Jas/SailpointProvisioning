@@ -1,0 +1,60 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+
+  <ui:fragment rendered="#{!(empty identity.detectedRolesHelper.detectedRoles)}">
+    
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_correlated_roles}"/>
+    <br/><br/>
+    <div class="spTabledAjaxContent">
+      <table class="spTable" cellspacing="0" id="businessRoleTbl" style='table-layout:fixed'>
+        <tr style="white-space:nowrap">
+          <th style="white-space:nowrap" width="30%">#{msgs.name}</th>
+          <th style="white-space:nowrap" width="36%">#{msgs.description}</th>
+          <th style="white-space:nowrap" width="30%">#{msgs.identity_role_col_permittedBy}</th>
+        </tr>
+                                        
+        <ui:repeat value="#{identity.detectedRolesHelper.detectedRoles}" var="bundle">
+          <tr style="vertical-align: top;">
+            <td style="word-wrap:break-word;">
+               <div style="width:100%" class="#{bundle.icon}" >
+                <a onclick="SailPoint.RoleDetailPanel.toggle('#{bundle.id}', '#{identity.identityId}', false,'businessRoleDetails_#{bundle.id}', null, this)" title="#{msgs.info_role_composition}" class="disclosure" style="margin-left:18px">
+                  <h:outputText value="#{bundle.name}" /> 
+                </a>
+               </div>
+            </td>
+            <td><h:outputText escape="false" value="#{bundle.description}" /></td>
+            <td><h:outputText value="#{bundle.permittedBy}" /></td>
+          </tr>
+          <tr class="skip">
+            <td colspan="3">
+              <div id="businessRoleDetails_#{bundle.id}" class="customWidth"></div>
+            </td>
+          </tr>
+        </ui:repeat>
+      </table>
+      <script>
+        makeTableMulticolored($('businessRoleTbl'), true, false, 'even', 'odd', 'skip');
+      </script>
+    </div>
+  </ui:fragment>
+                    
+  <ui:fragment rendered="#{empty identity.detectedRolesHelper.detectedRoles}">
+    <h:outputText styleClass="spContentTitle" value="#{msgs.header_no_correlated_roles}"/>
+    <br/><br/>
+  </ui:fragment>
+</ui:composition>
+
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"  
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+    <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+<body>
+
+<ui:composition>
+
+<!-- 
+  REBBRANDING
+  
+  This is the main outline of the end user pages.  Any of the HTML tags in this
+  file can be modified to change the look and feel of these pages.
+ -->
+<table id="appTable" width="100%" cellspacing="0" cellpadding="0">
+
+  <tr>
+    <td width="5">&nbsp;</td>
+    <td width="20">&nbsp;</td>
+    
+    <td colspan="2" align="left" height="35px" valign="bottom">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="left" valign="baseline"><span class="topLeftLogo"> <img src="#{base.requestContextPath}/images/TopLogo1.png" alt="" />
+          </span></td>
+          <td align="right" valign="top">
+            <div id="headerText">
+              <h:form id="headerForm">
+                <ui:remove>
+                  <!--
+              Hidden field into which the ID of the current object being
+              viewed gets copied (if available).
+              -->
+                </ui:remove>
+                <h:inputHidden id="id" />
+                <ui:fragment rendered="#{base.loggedIn}">
+                  <h:outputFormat value="#{msgs.logged_in_as}" escape="false">
+                    <f:param value="#{ sp:escapeHTML( base.loggedInUser.displayableName, false ) }" />
+                  </h:outputFormat>
+                </ui:fragment>
+
+                <ui:fragment rendered="#{not sp:getSystemConfigurationValue('allowUnauthenticatedEndUserPages', false)}"><span class="pipeMargin">|</span>
+                  <a href="#" onclick="doLogout()">#{msgs.logout}</a>
+                  <h:commandButton style="display:none" id="logoutButton" action="#{login.logout}" immediate="true"/>
+                </ui:fragment>
+              </h:form>
+            </div>
+            <div class="logoholder">
+              <img style="" src="#{base.requestContextPath}/images/LogoHeader.png" alt="Header Logo" />
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+
+    <td width="20">&nbsp;</td>
+    <td width="5">&nbsp;</td>
+  </tr>
+
+  <tr valign="top" height="35px">
+    <td width="5">&nbsp;</td>
+    <td width="20">&nbsp;</td>
+    <td colspan="2" id="bodyTitleTd">
+      <table width="100%" cellspacing="0"><tr>
+        <td align="left">
+          <div id="bodyDivTitle" class="bodyDivTitle">
+            <ui:insert name="title">#{msgs.identity_iq}</ui:insert>
+          </div>
+        </td>
+        <td align="right">
+          <ui:insert name="subtitle"/>
+        </td>
+      </tr></table>
+    </td>
+    <td width="20">&nbsp;</td>
+    <td width="5">&nbsp;</td>
+  </tr>
+
+  <tr valign="top">
+    <td width="5">&nbsp;</td>
+    <td width="20">&nbsp;</td>
+    <td colspan="2" id="bodyContentTd">
+      <div id="bodyDiv" class="bodyDiv">
+        <div id="bodyDivContent" class="bodyDivContent">
+          <div id="SailPointLogDiv" style="display: none"></div>
+          <ui:insert name="body">&nbsp;</ui:insert>
+        </div>
+      </div>
+    </td>
+    <td width="20">&nbsp;</td>
+    <td width="5">&nbsp;</td>
+  </tr>
+
+  <tr valign="bottom">
+    <td width="5">&nbsp;</td>
+    <td width="20">&nbsp;</td>
+    <td colspan="2" id="bodyBottomTd" class="roundedBottom">
+      <div id="bodyBottom">
+        <div id="bodyDivFooter" class="bodyDivFooter">
+            <!-- this div is needed as a holder for rounded styles because we do not want them on the <span> -->
+          <div>  
+            <span>&#169; #{msgs.copy_right}</span>
+            <span id="unsupportedBrowserNotice" class="unsupportedBrowser" style="cursor:help"></span>
+          </div>
+        </div>
+      </div>
+    </td>
+    <td width="20">&nbsp;</td>
+    <td width="5">&nbsp;</td>
+  </tr>
+
+  <tr>
+     <td height="10" colspan="6">&nbsp;</td>
+  </tr>
+</table>
+
+<script type="text/javascript" defer="defer">
+    Ext.onReady( function() {
+        if(#{base.showUnsupportedNotification}) {
+            Ext.defer(SailPoint.Utils.checkUnsupportedBrowser, 500);
+        }
+    });
+</script>
+
+</ui:composition>
+</body>
+</html>

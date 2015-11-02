@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, AUTHENTICATE, SEARCH, UNSTRUCTURED_TARGETS, ENABLE, PASSWORD" icon="enterpriseIcon" name="NIS Template" type="NIS - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="NIS"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="User Name" groupAttribute="Groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User Name" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" type="string"/>
+        <AttributeDefinition displayName="User Status" name="USER_STA" type="string"/>
+        <AttributeDefinition displayName="User ID" name="UID" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" required="true" type="string"/>
+        <AttributeDefinition displayName="Shell" name="SHELL" type="string"/>
+        <AttributeDefinition displayName="Home Directory" name="HOME" type="string"/>
+        <AttributeDefinition displayName="Create Home Directory" name="CREATE_HOME_DIR" type="boolean"/>
+        <AttributeDefinition displayName="Execute Make Command" name="YP_MAKE" type="string"/>
+        <AttributeDefinition displayName="Create Auto Home Directory" name="CREATE_AUTO_HOME" type="boolean"/>
+        <AttributeDefinition displayName="Home Directory Host" name="HOME_DIR_HOST" type="string"/>
+        <AttributeDefinition displayName="Home Directory Path" name="HOME_DIR_PATH" type="string"/>
+        <AttributeDefinition displayName="Maturity" name="MATURITY_HP" type="string"/>
+        <AttributeDefinition displayName="Expiration" name="EXPIRATION_HP" type="string"/>
+        <AttributeDefinition displayName="Password Last Change" name="PW_LASTCHG_HP" type="string"/>
+        <AttributeDefinition displayName="Delete Auto Home Directory" name="DEL_OLD_AUTO_HOME" type="boolean"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="Groups" remediationModificationType="None" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group Name" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group Name" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Group ID" name="GID" required="true" type="string"/>
+        <AttributeDefinition displayName="Triplets" multi="true" name="NG_MEMBERS_TRIPLETS" required="true" type="string"/>
+        <AttributeDefinition displayName="Nested Netgroups" multi="true" name="NG_MEMBERS_NETGROUPS" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" name="UserID" required="true" section="" type="string"/>
+        <Field displayName="Password" name="Password" required="true" section="" type="secret"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group Name" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="GID" helpKey="Group Identifier" name="GID" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="GID" helpKey="Group Identifier" name="GID" reviewRequired="true" section="" type="string"/>
+        <Field displayName="NG_MEMBERS_TRIPLETS" name="Triplets" reviewRequired="true" section="" type="string"/>
+        <Field displayName="NG_MEMBERS_NETGROUPS" multi="true" name="Nested netgroups" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

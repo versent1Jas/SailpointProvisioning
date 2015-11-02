@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+    <src>reminder.css</src>
+    <src>escalation.css</src>
+  </sp:style>
+
+    <script src="#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}"></script>
+    <script src="#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}"></script>        
+    <script type="text/javascript" src="#{base.requestContextPath}/scripts/sailpoint/utils/Day.js"/>
+    <script type="text/javascript" src="#{base.requestContextPath}/scripts/sailpoint/component/Notifications.js"/>
+    <script type="text/javascript" src="#{base.requestContextPath}/scripts/sailpoint/component/Reminder.js"/>
+    <script type="text/javascript" src="#{base.requestContextPath}/scripts/sailpoint/component/Escalation.js"/>
+      
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css"
+          rel="stylesheet" 
+          type="text/css" />
+
+        <tr>
+          <td colspan="4">
+            <h:outputText styleClass="spContentTitle" value="#{msgs.sys_config_initial_notification}"/>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="titleColumn certScheduleTitleCol"> <h:outputText
+            value="#{msgs.label_suppress_initial_notifications}" /></td>
+          <td width="15px">
+            <h:graphicImage id="imgHlpSuppressInitialEmail"
+              width="12px" height="12px" alt="#{help.help_system_config_suppress_initial_notifications}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td class="certScheduleOptionCol" >
+              <h:selectBooleanCheckbox
+                id="suppressInitialEmail"
+                           readonly="#{certificationSchedule.pastStagedPhase or (not certificationSchedule.editable)}"
+                           disabled="#{certificationSchedule.pastStagedPhase or (not certificationSchedule.editable)}"
+                value='#{certificationSchedule.editedCertificationSchedule.suppressInitialNotification}'
+                    onchange="">
+              </h:selectBooleanCheckbox>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="titleColumn certScheduleTitleCol"> 
+            <h:outputText value="#{msgs.label_initial_notification_email_template}" />
+          </td>
+          <td width="15px">
+            <h:graphicImage id="imgHlpInitialCertEmail"
+              width="12px" height="12px" alt="#{help.help_system_config_initial_notification_template}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td class="certScheduleOptionCol"><h:selectOneMenu
+            id="certificationEmailTemplate"
+            readonly="#{certificationSchedule.pastStagedPhase or (not certificationSchedule.editable)}"
+            disabled="#{certificationSchedule.pastStagedPhase or (not certificationSchedule.editable)}"
+            value='#{certificationSchedule.editedCertificationSchedule.certificationEmailTemplate}'
+            onchange="">
+            <f:selectItems value="#{systemConfig.emailTemplates}" />
+          </h:selectOneMenu>
+          </td>
+        </tr>
+
+        <!-- ======================================== -->
+        <!-- Certification Notification Configuration -->
+        <!-- ======================================== -->
+        <tr id="certificationNotification">
+          <td colspan="8" class="spContentTitle">#{msgs.cert_sched_adv_label_cert_reminders_escalation}</td>
+        </tr>
+
+        <ui:include src="scheduleCertificationsNotificationInclude.xhtml">
+          <ui:param name="idName"       value="certification"/>
+          <ui:param name="notifInfo"    value="#{certificationSchedule.editedCertificationSchedule.certificationNotificationInfo}"/>
+          <ui:param name="enabledText"  value="#{msgs.notification_notify}"/>
+          <ui:param name="enabledHelp"  value="#{help.help_sched_cert_notifications}"/>
+          <ui:param name="startHelp"    value="#{help.help_sched_cert_notifications_start}"/>
+          <ui:param name="pastStagedPhase" value="#{certificationSchedule.pastStagedPhase}"/>
+          <ui:param name="hide"         value="#{certificationSchedule.editedCertificationSchedule.continuous}" />
+        </ui:include>
+
+        <!-- Continuous Certification Email Include  -->
+        <ui:include src="scheduleCertificationsEmailInclude.xhtml">
+          <ui:param name="idName"       value="certRequired"/>
+          <ui:param name="notifBean"    value="#{certificationSchedule.editedCertificationSchedule.certificationRequiredNotificationConfig.defaultReminderConfig}"/>
+          <ui:param name="enabledText"  value="#{msgs.text_sched_cert_req_eml}"/>
+          <ui:param name="enabledHelp"  value="#{help.help_sched_cert_req_eml}"/>
+          <ui:param name="freqHelp"     value="#{help.help_sched_cert_req_eml_freq}"/>
+          <ui:param name="templateHelp" value="#{help.help_sched_cert_req_eml_template}" />
+          <ui:param name="hideTrigger"  value="#{true}" />
+          <ui:param name="hide"         value="#{!certificationSchedule.editedCertificationSchedule.continuous}" />
+        </ui:include>
+    
+        <!-- Continuous Certification Escalation Include -->
+        <ui:include src="scheduleCertificationsEscalateInclude.xhtml">
+          <ui:param name="idName"       value="overdue"/>
+          <ui:param name="notifBean"    value="#{certificationSchedule.editedCertificationSchedule.overdueNotificationConfig.defaultEscalationConfig}"/>
+          <ui:param name="enabledText"  value="#{msgs.text_sched_overdue_esc}"/>
+          <ui:param name="enabledHelp"  value="#{help.help_sched_overdue_esc}"/>
+          <ui:param name="ruleHelp"     value="#{help.help_sched_cert_overdue_esc_rule}" />
+          <ui:param name="templateHelp" value="#{help.help_sched_cert_overdue_esc_eml_template}" />
+          <ui:param name="hideTrigger"  value="#{true}" />
+          <ui:param name="hide"         value="#{!certificationSchedule.editedCertificationSchedule.continuous}" />
+          <ui:param name="sendReminders" value="#{certificationSchedule.editedCertificationSchedule.overdueNotificationConfig.defaultReminderConfig.enabled}"/>
+        </ui:include>
+
+
+        <!-- ======================================== -->
+        <!-- Remediation Notification Configuration   -->
+        <!-- ======================================== -->
+  
+        <tr>
+          <td colspan="8" class="spContentTitle">#{msgs.cert_sched_adv_label_revoke_reminders_escalation}</td>
+        </tr>
+  
+        <!--  Email Include  -->
+        <ui:include src="scheduleCertificationsEmailInclude.xhtml">
+          <ui:param name="idName"       value="remed"/>
+          <ui:param name="notifBean"    value="#{certificationSchedule.editedCertificationSchedule.remediationNotificationConfig.defaultReminderConfig}"/>
+          <ui:param name="enabledText"  value="#{msgs.cert_sched_adv_notification_remed_eml}"/>
+          <ui:param name="enabledHelp"  value="#{help.help_sched_cert_remed_eml}"/>
+          <ui:param name="startHelp"    value="#{help.help_sched_cert_remed_eml_start}"/>
+          <ui:param name="freqHelp"     value="#{help.help_sched_cert_remed_eml_freq}"/>
+          <ui:param name="templateHelp" value="#{help.help_sched_cert_remed_eml_template}" />
+        </ui:include>
+  
+        <!--  Escalation Include -->
+        <ui:include src="scheduleCertificationsEscalateInclude.xhtml">
+          <ui:param name="idName"       value="remed"/>
+          <ui:param name="notifBean"    value="#{certificationSchedule.editedCertificationSchedule.remediationNotificationConfig.defaultEscalationConfig}"/>
+          <ui:param name="enabledText"  value="#{msgs.cert_sched_adv_notification_remed_esc}"/>
+          <ui:param name="enabledHelp"  value="#{help.help_sched_cert_remed_esc}"/>
+          <ui:param name="triggerHelp"  value="#{help.help_sched_cert_remed_esc_trigger}"/>
+          <ui:param name="ruleHelp"     value="#{help.help_sched_cert_remed_esc_rule}" />
+          <ui:param name="templateHelp" value="#{help.help_sched_cert_remed_esc_eml_template}" />
+          <ui:param name="sendReminders" value="#{certificationSchedule.editedCertificationSchedule.remediationNotificationConfig.defaultReminderConfig.enabled}"/>
+        </ui:include>
+  
+
+        <!-- Revocation notification. -->
+        <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showNotifyRemediation}">
+          <tr>
+            <td class="titleColumn certScheduleTitleCol">
+              <h:outputText value="#{msgs.cert_sched_adv_label_notify_remediation}"/>
+            </td>
+            <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpNotifyRemeds" styleClass="helpIcon"
+                url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_notify_remediation}"/>
+            </td>
+            <td class="certScheduleOptionCol" colspan="6" align="left">
+              <h:selectBooleanCheckbox value="#{certificationSchedule.editedCertificationSchedule.attributes['notifyRemediation']}"
+                                       disabled="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                                       readonly="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"/>
+            </td>
+          </tr>
+        </ui:fragment>
+
+        
+        <tr>
+          <td colspan="4">
+            <h:outputText styleClass="spContentTitle" value="#{msgs.sys_config_email_templates}"/>
+          </td>
+        </tr>
+        <tr class="titleColumn certScheduleTitleCol">
+          <td >
+            <h:outputText
+              value="#{msgs.email_template_bulk_reassign_modification}" />
+          </td>
+          <td width="15px">
+            <h:graphicImage id="imgHlpBlkReassignEmail"
+              width="12px" height="12px" alt="#{help.help_system_config_blk_reassign_email}"
+              style="cursor:pointer;padding: 0px 7px 0px 7px"
+              url="/images/icons/dashboard_help_16.png"/>
+          </td>
+          <td align="left">
+            <h:selectOneMenu
+              value='#{certificationSchedule.editedCertificationSchedule.bulkReassignmentEmailTemplate}'
+              disabled="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+              readonly="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+              onchange="">
+              <f:selectItems value="#{systemConfig.emailTemplates}" />
+            </h:selectOneMenu> 
+          </td>
+          
+        </tr>
+        
+        <!-- called to refresh the escalation rule lists -->
+        <a4j:commandButton id="refreshCertEscalationRulesButton"
+                   style="display:none"
+                   immediate="true"
+                   render="certEscalationRulesPanel,remedEscalationRulesPanel"/>                
+        
+</ui:composition>
+
+</body>
+</html>
+  

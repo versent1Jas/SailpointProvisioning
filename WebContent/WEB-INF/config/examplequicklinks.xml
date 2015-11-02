@@ -1,0 +1,299 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!-- Initialization file for new SailPoint LCM repositories. -->
+<sailpoint>
+
+    <ImportAction name="merge">
+        <Configuration name="SystemConfiguration">
+            <Attributes>
+                <Map>
+                    <entry key='quickLinkCategories'>
+                        <value>
+                            <List>
+                                <QuickLinkCategory
+                                    name="Custom" messageKey="quicklink_category_custom"
+                                    enabled="true" icon="quickLinkCategoryCustom" />
+                            </List>
+                        </value>
+                    </entry>
+                </Map>
+            </Attributes>
+        </Configuration>
+    </ImportAction>
+
+    <DynamicScope name="Example EditApplication">
+        <Selector>
+            <IdentitySelector>
+                <MatchExpression>
+                    <MatchTerm name='capabilities' value='ApplicationAdministrator' />
+                </MatchExpression>
+            </IdentitySelector>
+        </Selector>
+    </DynamicScope>
+
+    <DynamicScope name="Example Workflow Rights">
+        <Selector>
+            <IdentitySelector>
+                <MatchExpression>
+                    <MatchTerm name='rights' value='FullAccessWorkflows' />
+                </MatchExpression>
+            </IdentitySelector>
+        </Selector>
+    </DynamicScope>
+
+    <DynamicScope name="Example ViewCertification Rights">
+        <Selector>
+            <IdentitySelector>
+                <MatchExpression>
+                    <MatchTerm name='rights' value='ViewCertifications' />
+                </MatchExpression>
+            </IdentitySelector>
+        </Selector>
+    </DynamicScope>
+
+    <DynamicScope name="Example Austin Based Identity">
+        <Selector>
+            <IdentitySelector>
+                <MatchExpression>
+                    <MatchTerm name='location' value='Austin' />
+                </MatchExpression>
+            </IdentitySelector>
+        </Selector>
+    </DynamicScope>
+
+    <DynamicScope name="Example Top Level Americas Managers">
+        <Selector>
+            <IdentitySelector>
+                <MatchExpression and="true">
+                    <MatchTerm name='workgroups' value='Top Level Managers' />
+                    <MatchTerm name='region' value="Americas" />
+                </MatchExpression>
+            </IdentitySelector>
+        </Selector>
+    </DynamicScope>
+
+    <!-- Quicklink that runs a script. Any results returned by scripts are 
+        stored on the session before the page transitions to the next navigation 
+        point (controlled by the action string) -->
+    <QuickLink name="Edit Active Directory" action="editApplication"
+        enabled="true" messageKey="Edit Active Directory" category="Custom">
+        <Attributes>
+            <Map>
+                <entry key="ApplicationId">
+                    <value>
+                        <Script>
+                            <Source>
+                                import sailpoint.object.Application;
+
+                                Map results = new
+                                HashMap();
+
+                                Application
+                                app =
+                                context.getObject(Application.class,
+                                "Active_Directory");
+
+                                return app.getId();
+                            </Source>
+                        </Script>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <DynamicScopes>
+            <Reference class="sailpoint.object.DynamicScope"
+                name="Example EditApplication" />
+        </DynamicScopes>
+    </QuickLink>
+
+    <!-- A quicklink that executes a workflow - the arguments in the map 
+        are stored on the variables in the workflow -->
+    <QuickLink name="Request Role" action="workflow" enabled="true"
+        messageKey="Request 'Accounts Payable Approver'" category="Custom">
+        <Attributes>
+            <Map>
+                <entry key="workflowName" value="LCM Provisioning" />
+                <entry key="workflowSuccess"
+                    value="The request for the 'Accounts Payable Approver' role has been submitted successfully" />
+                <entry key="plan">
+                    <value>
+                        <Script>
+                            <Source>
+                                import
+                                sailpoint.object.ProvisioningPlan;
+                                import
+                                sailpoint.object.ProvisioningPlan.AccountRequest;
+                                import
+                                sailpoint.object.ProvisioningPlan.Operation;
+                                import
+                                sailpoint.object.ProvisioningPlan.AttributeRequest;
+
+                                ProvisioningPlan plan = new
+                                ProvisioningPlan();
+                                plan.setIdentity(currentUser);
+                                AccountRequest request = new
+                                AccountRequest();
+                                request.setApplication("IIQ");
+                                request.setNativeIdentity(currentUser.getName());
+                                request.setOp(ProvisioningPlan.ObjectOperation.Modify);
+                                request.setType("role");
+
+                                AttributeRequest
+                                attr = new
+                                AttributeRequest();
+                                attr.setName("assignedRoles");
+                                attr.setOp(Operation.Add);
+                                attr.setValue("Accounts Payable
+                                Approver");
+                                List attrs = new
+                                ArrayList();
+                                attrs.add(attr);
+
+                                request.setAttributeRequests(attrs);
+                                List
+                                requests = new
+                                ArrayList();
+                                requests.add(request);
+                                plan.setAccountRequests(requests);
+                                return
+                                plan;
+
+                            </Source>
+                        </Script>
+                    </value>
+                </entry>
+                <entry key="identityName">
+                    <value>
+                        <Script>
+                            <Source>
+                                return currentUser.getName();
+                            </Source>
+                        </Script>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <DynamicScopes>
+            <Reference class="sailpoint.object.DynamicScope"
+                name="Example Workflow Rights" />
+        </DynamicScopes>
+    </QuickLink>
+
+    <!-- A quicklink that executes a workflow - the arguments in the map 
+        are stored on the variables in the workflow -->
+    <QuickLink name="Wizard" action="workflow" enabled="true"
+        messageKey="Run Wizard" category="Custom">
+        <Attributes>
+            <Map>
+                <entry key="workflowName" value="Wizard" />
+                <entry key="workflowSuccess" value="Wizard Executed Successfully" />
+                <entry key="owner">
+                    <value>
+                        <Script>
+                            <Source>
+                                return currentUser.getName();
+                            </Source>
+                        </Script>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <DynamicScopes>
+            <Reference class="sailpoint.object.DynamicScope"
+                name="Example Top Level Americas Managers" />
+        </DynamicScopes>
+    </QuickLink>
+
+    <!-- A quicklink that executes a workflow - the arguments in the map 
+        are stored on the variables in the workflow -->
+    <QuickLink name="A Form" action="workflow" enabled="true"
+        messageKey="Run A Form Process" category="Custom">
+        <Attributes>
+            <Map>
+                <entry key="workflowName" value="A Form" />
+                <entry key="workflowSuccess" value="A Form Executed Successfully" />
+            </Map>
+        </Attributes>
+        <DynamicScopes>
+            <Reference class="sailpoint.object.DynamicScope"
+                name="Everyone" />
+        </DynamicScopes>
+    </QuickLink>
+
+    <QuickLink name="Text Example" category="Custom"
+        messageKey="Example Text Quicklink" action="viewCertifications">
+        <Attributes>
+            <Map>
+                <entry key="displayText" value="true" />
+                <entry key="textScript">
+                    <value>
+                        <Script>
+                            <Source>
+                                import sailpoint.object.Certification;
+                                import sailpoint.object.QueryOptions;
+                                import sailpoint.object.Filter;
+
+                                QueryOptions qo = new QueryOptions();
+                                List names = new ArrayList();
+                                names.add(currentUser.getName());
+                                qo.addFilter(Filter.containsAll("certifiers", names));
+                                qo.addFilter(Filter.ne("phase", Certification.Phase.Staged));
+                                qo.addFilter(Filter.isnull("signed"));
+
+                                int count =
+                                context.countObjects(Certification.class,
+                                qo);
+                                if(count>0) {
+                                return "You Have "+count+" New Certs";
+                                }
+
+                                return "You Have No New Certs";
+
+
+                            </Source>
+                        </Script>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <DynamicScopes>
+            <Reference class="sailpoint.object.DynamicScope"
+                name="Example ViewCertification Rights" />
+        </DynamicScopes>
+    </QuickLink>
+
+    <QuickLink name="Austin Temperature (f)" action="external"
+        enabled="true" messageKey="Show Austin Weather" category="Custom">
+        <Attributes>
+            <Map>
+                <entry key="url"
+                    value="http://weather.yahooapis.com/forecastrss" />
+                <entry key="parameters">
+                    <value>
+                        <Map>
+                            <entry key="w" value="12789690" />
+                            <entry key="u" value="f" />
+                            <entry key="v">
+                                <value>
+                                    <Script>
+                                        <Source>
+                                            return "script_parameter";
+                                        </Source>
+                                    </Script>
+                                </value>
+                            </entry>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <DynamicScopes>
+            <Reference class="sailpoint.object.DynamicScope"
+                name="Example Austin Based Identity" />
+        </DynamicScopes>
+    </QuickLink>
+
+</sailpoint>

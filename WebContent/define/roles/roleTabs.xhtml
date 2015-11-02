@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+  <ui:define name="title"><h:outputText value="#{msgs.title_role_tabs}"/></ui:define>
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      helpKey = 'ROLE_MANAGEMENT';
+    </script>
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/component">
+      <src>paging-tree.css</src>
+      <src>menuButton.css</src>
+    </sp:style>       
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/form">
+      <src>html-editor-counter-plugin.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/define/roles">
+      <src>roles.css</src>  
+    </sp:style>
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Extensions.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/json2.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/ExtendedPagingToolbar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/ExtendedStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleFilter.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RoleTypeDefinitionStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/PagingTreeStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleViewerState.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleMetrics.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleReadOnlyView.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>      
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/RoleAssignmentRuleTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/ExportMonitor.js</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TabPanel.js</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleVersionGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleViewer.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/baseGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/Utils.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/analyze.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/searchResultsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/roleSearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/filtersPage.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/entitlementMining.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/riskScores/riskSliders.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/entitlementMiningWizard.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/automatedDirectedMining.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/automatedBFRMining.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/LongRunningTaskButton.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/VariableColumnWidthPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleMiningResults.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleMiningExportCsv.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/roles/roleMining/itRoleMiningSearchEntitlements.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/roles/roleMining/itRoleMiningFilterSummary.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleMiningTemplates.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleMiningPopulation.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/roles/roleMining/roleMiningPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/expandingPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/miningTaskResults.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/roleTabs.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/define/modeler/EntitlementAnalysisResultsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/model/TemplateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateFieldEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/template/TemplateEditorWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiText.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/HtmlEditorCounterPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiLanguageHtmlEditor.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/menuButton.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript">
+        //Recreating this variable from the analyzeTabs.xhtml as the reset button needs it.
+        var defaultSelectedFields = {};
+        defaultSelectedFields.role = #{sp:toJSON(roleSearch.defaultFieldList)};
+    </script>
+       
+    <style type="text/css">
+      .x-grid-col-descCol { white-space:normal; padding-right:10px }
+    </style>
+    
+    <script type="text/javascript">
+    //<![CDATA[
+        SailPoint.Role.Viewer.TREE_VIEW_DISABLED = #{sp:getSystemConfigurationValue('disableRoleModelerTreeView', false)};
+        // JSF doesn't play nicely with AJAX.  The quickest way to fix the issue describe in comment 5 of bug 14707
+        // was to add this hack
+       function clearFormHiddenParams_viewerForm() {
+       };
+       var roleTypeStore = [
+          {value:"role", text:'#{msgs.list_item_role_label_role}'},
+          {value:"entitlementAnalysis", text: '#{msgs.list_item_role_label_entitlements_analysis}'}
+       ];
+       Ext.onReady(function () {
+         var userRights = Ext.JSON.decode($('userRights').innerHTML);
+         // Only enable mining options when mining rights are available
+         if (userRights.FullAccessRoleMining || userRights.SystemAdministrator) {
+             roleTypeStore.push({value:"itRoleMining", text:'#{msgs.list_item_role_label_it_role_mining}'});
+             roleTypeStore.push({value:"businessRoleMining", text:'#{msgs.list_item_role_label_business_role_mining}'});
+         }
+         
+         SailPoint.Component.MenuButton.renderMenuButton('#{msgs.list_item_role_create_new}', roleTypeStore, SailPoint.Role.Tabs.createNew, 'newRoleButton');
+       });
+    //]]>
+    </script> 
+    
+  </ui:define>
+  
+  <ui:define name="subtitle">
+    <div id="subtitle" class="highlight">
+    </div>
+  </ui:define>
+  
+  <ui:define name="body">     
+    <div id="roleTabPanelDiv"></div>
+    <div id="roleViewerInformationDiv" style="display: none;"></div>
+    <div id="roleSearchContentsDiv" class="width100"></div>
+    <div id="roleResultsContentsDiv" class="width100"></div>
+    <div id="taskResultViewerWindowDiv"></div>
+    <div id="roleMetricsIdentitiesWindowDiv"></div>
+    <h:form id="tabState">
+      <h:inputHidden id="activeTab" value="#{tabState.activeTab}"/>
+      <h:inputHidden id="tabPanelId" value="#{tabState.tabPanelId}"/>
+      <input type="hidden" id="miningResultsGridConfig" name="miningResultsGridConfig" value="#{gridConfigBean.uiConfigJson['miningResultsTableColumns']}"/>
+      <input type="hidden" id="miningTemplatesGridConfig" name="miningTemplatesGridConfig" value="#{gridConfigBean.uiConfigJson['miningTemplatesTableColumns']}"/>
+      <input type="hidden" id="miningPopulationGridConfig" name="miningPopulationGridConfig" value="#{gridConfigBean.uiConfigJson['sailpoint.web.mining.ITRoleMiningPopulationBean']}"/>
+      <input type="hidden" id="miningPopulationGridState" name="miningPopulationGridState" value="#{itRoleMiningPopulationList.gridState.JSON}"/>
+      <a4j:commandButton style="display:none" id="updateTabState" action="#{tabState.updateState}" oncomplete="Ext.getCmp('spViewport').doLayout();"/>
+      <div id="roleViewerRight" style="display:none">#{sp:hasRight(facesContext, 'ManageRole') ? 'ManageRole' : (sp:hasRight(facesContext, 'ViewRole') ? 'ViewRole' : 'none')}</div>
+      <h:inputHidden id="miningSelectedId" value="#{taskDefinitions.selectedId}"/>
+      <a4j:commandButton id="miningDeleteBtn" style="display:none" action="#{taskDefinitions.delete}"
+                         oncomplete="SailPoint.roles.AfterMiningTemplateDelete()"/>
+    </h:form>
+    <h:form id="exportForm">
+      <!-- Export CSV Fields These belong somewhere else I believe -->
+      <a4j:commandButton style="display:none" id="exportProgressBtn" action="#{itRoleMiningResultsList.dummy}" render="exportProgressField" oncomplete="SailPoint.roles.ProcessProgress()"/>
+      <h:inputHidden id="exportProgressField" value="#{itRoleMiningResultsList.exportProgress}"/>
+      <h:inputHidden id="exportIdentityAttributesField" value="#{itRoleMiningResultsList.exportIdentityAttributes}"/>
+      <h:inputHidden id="exportTaskId" value="#{itRoleMiningResultsList.exportTaskId}"/>
+      <h:commandButton style="display:none" id="scheduleExportTaskBtn" action="#{itRoleMiningResultsList.scheduleCsvExport}" oncomplete="Ext.MessageBox.hide();"/>
+    </h:form>
+    
+    <h:form id="viewerForm">
+      <div style="display:none">
+        <a4j:outputPanel ajaxRendered="true">
+          <div id="viewerMsgs">
+            <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+          </div>
+        </a4j:outputPanel>
+        <h:inputHidden id="roleToEdit" value="#{roleViewer.roleToEdit}"/>
+        <h:inputHidden id="archiveToEdit" value="#{roleViewer.archiveToEdit}"/>
+        <h:inputHidden id="roleToClone" value="#{roleViewer.roleToClone}"/>
+        <h:inputHidden id="roleToAddTo" value="#{roleViewer.roleToAddTo}"/>
+        <h:commandButton id="editRole" action="#{roleViewer.editRole}"/>
+        <h:commandButton id="editArchive" action="#{roleViewer.editArchive}"/>
+        <h:commandButton id="addToRole" action="#{roleViewer.addToRole}"/>
+        <h:commandButton id="cloneRole" action="#{roleViewer.cloneRole}"/>
+        <a4j:commandButton id="deleteRole" action="#{roleViewer.deleteRole}"
+                           onclick="Ext.MessageBox.wait('#{sp:escapeJavascript(msgs.role_viewer_deleting_role)}', '#{sp:escapeJavascript(msgs.title_deleting_role)}');" 
+                           oncomplete="SailPoint.Role.Viewer.showDeletionResults();"/>
+      </div>
+    </h:form>
+    
+    <h:form id="itRoleMiningDeleteResultForm">
+      <h:inputHidden id="itRoleMiningResultToDelete" value="#{itRoleMiningResultsList.resultToDelete}"/>
+      <a4j:commandButton style="display:none" id="deleteITRoleMiningTaskResult" 
+                         action="#{itRoleMiningResultsList.deleteResult}"
+                         oncomplete="var grid = Ext.getCmp('miningResultsGrid'); grid.getStore().load({ callback: grid.loadAfterDelete });"/>
+    </h:form>
+    
+    <h:form id="businessRoleMiningLaunchFromGridForm">
+      <a4j:outputPanel id="businessRoleLaunchResult">
+        <div id="businessRoleLaunchResultContents" style="display:none">
+          <h:outputText value="#{bfrMining.launchResult}"/>
+        </div>
+      </a4j:outputPanel> 
+      <t:inputHidden id="templateId" forceId="true"/>
+      <a4j:commandButton id="launchBFRMining" style="display:none" action="#{bfrMining.launchMining}"
+                         render="businessRoleLaunchResult"
+                         oncomplete="Ext.getCmp('bfrMiningPanel').displayLaunchStatus();"/>
+    </h:form>
+    
+    <ui:include src="modeler/scheduleCertFromMetrics.xhtml"/>
+    <div id="userRights" style="display:none">
+      #{tabState.rightsJson}
+    </div>
+    
+    <span id="allowRoleLocalization" style="display:none">#{sp:getSystemConfigurationValue('enableLocalizeRoleDescriptions', false)}</span>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

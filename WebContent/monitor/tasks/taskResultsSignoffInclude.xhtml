@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition template="/expandingPanel2.xhtml">
+
+<ui:define name="panelTitle">#{msgs.signoffs}</ui:define>
+
+  <ui:define name="panelBody">
+
+    <div style="margin-top: 5px;">
+        <table class="width100 customWidth paddedTbl" id="signoffTable" style="background:none">
+          <ui:repeat value="#{signoff.signatories}" var="signatory">
+          <tr>
+            <td>
+              <table class="width100 paddedTbl" >
+                <ui:fragment rendered="#{signatory.displayName == null}">
+                  <tr>
+                    <td width="10%" class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_name}"/></td>
+                    <td><h:outputText value="#{signatory.name}"/></td>
+                  </tr>
+                </ui:fragment>
+                <ui:fragment rendered="#{signatory.displayName != null}">
+                  <tr>
+                    <td class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_name}"/></td>
+                    <td><h:outputText value="#{signatory.displayName} (#{signatory.name})"/></td>
+                  </tr>
+                </ui:fragment>
+                <tr>
+                  <td class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_status}"/></td>
+                  <td>
+                    <div class="#{(signatory.rejected ? 'failBox textBold ' : (signatory.pending ? '' : 'successBox textBold '))}">
+                      <h:outputText rendered="#{signatory.approved}" value="#{msgs.approved}"/>
+                      <h:outputText rendered="#{signatory.rejected}" value="#{msgs.rejected}"/>
+                      <h:outputText rendered="#{signatory.pending}" value="#{msgs.pending}"/>
+                    </div>
+                  </td>
+                </tr>
+                <ui:fragment rendered="#{signatory.date != null}">
+                  <tr>
+                    <td class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.date}"/></td>
+                    <td>
+                      <sp:outputXmlText value="#{signatory.date}">
+                        <f:convertDateTime type="both" dateStyle="short" timeStyle="short" timeZone="#{base.userTimeZone}"/>
+                      </sp:outputXmlText>
+                    </td>
+                  </tr>
+                </ui:fragment>
+                <ui:fragment rendered="#{signatory.comments != null}">
+                  <tr>
+                    <td class="spLightGray rBorder"><h:outputText styleClass="textBold" value="#{msgs.label_comments}"/></td>
+                    <td><h:outputText value="#{signatory.comments}"/></td>
+                  </tr>
+                </ui:fragment>
+              </table>
+            </td>
+          </tr>
+          </ui:repeat>
+        </table>
+        <script>
+          makeTableMulticolored($('signoffTable'), false, false, 'even', 'odd');
+        </script>
+    </div>
+
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+    <table class="width100" cellspacing="0" cellpadding="0">
+      <tr valign="top">
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['link.application'].description)}"/>
+        </td>
+        <td >            
+          <ui:include src="../suggestAttribute.xhtml">
+            <ui:param name="key" value="link.application"/>
+            <ui:param name="field" value="linkApplication"/>
+          </ui:include>
+        </td>
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['link.displayname'].description)}"/>
+        </td>
+        <td>                         
+          <h:inputText id="linkDisplayName" styleClass="searchInputText inputWidth"
+                       value="#{searchBean.inputs['link.displayname'].value}" forceId="true"/>
+        </td>
+      </tr>
+      <tr valign="top">
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['link.owner'].description)}"/>
+        </td>
+        <td>                         
+          <ui:include src="../suggestAttribute.xhtml">
+            <ui:param name="key" value="link.owner"/>
+            <ui:param name="field" value="linkOwner"/>
+          </ui:include>
+        </td>
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['link.nativeIdentity'].description)}"/>
+        </td>
+        <td>                       
+          <ui:include src="../suggestAttribute.xhtml">
+            <ui:param name="key" value="link.nativeIdentity"/>
+            <ui:param name="field" value="linkNativeIdentity"/>
+          </ui:include>
+        </td>
+      </tr>
+      <tr valign="top">
+        <td>
+          <h:outputText styleClass="font10" style="font-weight:bold" 
+            value="#{sp:localizeKey(searchBean.inputs['link.instance'].description)}"/>
+        </td>
+        <td colspan="3">                         
+          <ui:include src="../suggestAttribute.xhtml">
+            <ui:param name="key" value="link.instance"/>
+            <ui:param name="field" value="linkInstance"/>
+          </ui:include>
+        </td>
+      </tr>
+    </table>
+  </f:view>
+  <script type="text/javascript" defer="defer">
+    SailPoint.Utils.styleSelects();
+  </script>
+</ui:composition>
+</body>
+</html>

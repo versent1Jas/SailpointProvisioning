@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+<ui:composition>
+  <f:view>
+    <table class="width100" cellspacing="0" >
+    <tr>            
+      <td valign="top">
+        <ui:fragment rendered="#{!empty searchBean.multiValuedIdentityAttributeKeys}">
+          <h:outputText class="sectionHeader" value="#{msgs.identity_search_section_multi_valued_identity}"/>
+          <table cellpadding="5" cellspacing="0" class="width100">
+            <t:dataList value="#{searchBean.multiValuedIdentityAttributeKeys}" var="key">
+              <tr>                  
+                <td>
+                  <h:outputText styleClass="font10" style="font-weight:bold" 
+                                value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectOneMenu value="#{searchBean.inputs[key].listOperation}">
+                    <f:selectItem itemLabel="#{msgs.filter_op_AND} " itemValue="AND"/>
+                    <f:selectItem itemLabel="${msgs.filter_op_OR} " itemValue="OR"/>
+                  </h:selectOneMenu>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <h:inputTextarea value="#{searchBean.inputs[key].value}" cols="35" rows="5" styleClass="inputWidth"/>
+                </td>
+              </tr>
+            </t:dataList>
+          </table>                
+        </ui:fragment>          
+      </td>
+
+      <td valign="top">
+        <ui:fragment rendered="#{!empty searchBean.multiValuedLinkAttributeKeys}">
+          <h:outputText class="sectionHeader" value="#{msgs.identity_search_section_multi_valued_link}"/>
+          <table cellpadding="5" cellspacing="0" class="width100">
+            <t:dataList value="#{searchBean.multiValuedLinkAttributeKeys}" var="key">
+              <tr>                  
+                <td>
+                  <h:outputText styleClass="font10" style="font-weight:bold" 
+                                value="#{sp:localizeKey(searchBean.inputs[key].description)}"/>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <h:selectOneMenu value="#{searchBean.inputs[key].listOperation}">
+                    <f:selectItem itemLabel="#{msgs.filter_op_AND} " itemValue="AND"/>
+                    <f:selectItem itemLabel="${msgs.filter_op_OR} " itemValue="OR"/>
+                  </h:selectOneMenu>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <h:inputTextarea value="#{searchBean.inputs[key].value}" cols="35" rows="5" styleClass="inputWidth"/>
+                </td>
+              </tr>
+            </t:dataList>
+          </table>                
+        </ui:fragment>          
+      </td>
+    </tr>
+    </table>
+  </f:view>
+</ui:composition>
+</body>
+</html>

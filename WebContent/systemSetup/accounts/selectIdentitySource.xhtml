@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+
+<body>
+  <ui:composition>
+ 	<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+	<sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+ 
+ 
+    <h:panelGroup id="selectAppOrRule">
+      <div>
+        <h:selectOneRadio id="sourceOption" value="#{appBean.sourceType}" onclick="displayIdentitySourceSelectOptions();">
+          <f:selectItem itemValue="APPLICATION" itemLabel="#{msgs.selection_application_attribute}"/>
+          <f:selectItem itemValue="APPRULE" itemLabel="#{msgs.selection_application_rule}"/>
+          <f:selectItem itemValue="RULE" itemLabel="#{msgs.selection_global_rule}"/>
+        </h:selectOneRadio>
+      </div>
+      
+      <div class="spacerDiv"/>
+      
+      <div id="appDiv">
+        <table>
+          <tr>
+            <td class="titleColumnFixedWidth"><h:outputText id="sourceAppsTitle" value="#{msgs.label_application}"/></td>
+            <td>
+              <div id="sourceAppsSuggest"></div>
+              <t:inputHidden id="sourceApps" value="#{appBean.application}" forceId="true">
+              </t:inputHidden>
+              <a4j:commandButton id="updateAppBtn" action="#{linkConfigEdit.updateApplication}" style="display:none" render="attributesPanel" 
+                                 oncomplete="displayIdentitySourceSelectOptions();"/>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <a4j:outputPanel id="attributesPanel">
+        <div id="attributesDiv" style="display:none">
+          <table>
+            <tr>
+              <td class="titleColumnFixedWidth"><h:outputText id="sourceAttributesTitle" value="#{msgs.label_attribute}"/></td>
+              <td>
+                <h:selectOneMenu id="sourceAttributes" value="#{appBean.name}">
+                  <f:selectItems id="attributeSelections" value="#{linkConfigEdit.attributesForSelectedApp}"/>
+                </h:selectOneMenu>	    
+              </td>
+            </tr>
+          </table>
+        </div>
+      </a4j:outputPanel>
+      
+      <div id="ruleDiv" style="display:none" >
+        <table>
+          <tr>
+            <td class="titleColumnFixedWidth"><h:outputText value="#{msgs.label_rule}"/></td>
+            <td> 
+              <a4j:outputPanel id="sourceRulesPanel">
+              <h:selectOneMenu id="sourceRules" value="#{appBean.rule}">
+                <f:selectItems value="#{linkConfigEdit.ruleList}"/>
+              </h:selectOneMenu>
+              </a4j:outputPanel>
+              
+              <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >  
+                  <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                         onclick="SailPoint.Rule.Editor.edit($('configForm:sourceRules').value, 
+                                                             'LinkAttribute',
+                                                             $('configForm:refreshRulesButton'))" />  
+              </ui:fragment>     
+              
+              <a4j:commandButton id="refreshRulesButton"
+                                 style="display:none"
+                                 immediate="true"
+                                 render="sourceRulesPanel"/>                               
+            </td>
+          </tr>
+        </table>
+      </div>
+    </h:panelGroup> 
+  </ui:composition>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2012 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+        Import dialog
+
+        This form is used to import entitlements. It appears as a pop-up 
+        from the Entitlement Catalog.
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:t="http://myfaces.apache.org/tomahawk"><body><ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <div id="errors" class="requiredText" style="display: none"></div>
+  <h:form id="importDialogForm" enctype="multipart/form-data">
+    <div class="spBackground">
+      <div class="spContent">
+        <div><h:outputText value="#{msgs.explanation_import_info1}"/></div>
+        <div><h:outputText value="#{msgs.explanation_import_info2}"/></div>
+        <div><ul>
+          <li>application</li>
+          <li>attribute</li>
+          <li>value</li>
+          <li>type</li>
+          <li>displayName</li>
+          <li>requestable</li>
+          <li>owner</li>
+          <li>scope</li>
+        </ul></div>
+        <div><h:outputText value="#{msgs.explanation_import_info_comment_example}"/></div>
+        <div style="padding:5px"><h:outputText value="# value, displayName"/></div>
+        <div><h:outputText value="#{msgs.explanation_import_info3}"/></div>
+        <div><h:outputText value="#{msgs.explanation_import_info_comment_example}"/></div>
+        <div style="padding:5px"><h:outputText value="# application=Active_Directory"/></div>
+        <t:inputFileUpload id="entitlementImport" size="60" accept="text/csv" storage="memory" maxlength="1048576" value="#{managedAttributeImport.importFile}"/>
+      </div>
+    </div>
+    <h:commandButton id="importFileBtn" style="display:none" action="#{managedAttributeImport.importEntitlements}" 
+                       onclick="Ext.getCmp('importWindow').hide();
+                                Ext.Msg.wait('#{msgs.managed_attribute_importing_entitlements}', '#{msgs.managed_attribute_title_import_entitlements}');"/>
+  </h:form>
+</ui:composition></body></html>

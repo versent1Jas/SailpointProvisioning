@@ -1,0 +1,100 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+
+  <table cellpadding="0" cellspacing="0" class="width100">
+    <tr>      
+      <td id="#{role.id}NameCell">
+        <a onclick="toggleRoleDisplay('#{role.id}');" class="disclosure" style="font-weight: bold">
+          <h:outputText value="#{role.name}"/>
+        </a>
+      </td>
+    </tr>
+    <tr id="#{role.id}DetailsRow" style="display:none">
+      <td colspan="2">
+        <div style="display:none" id="#{role.id}Div">
+          <div class="spLightBlueTabledContent">
+            <table class="spLightBlueTable" cellpadding="0" cellspacing="0">
+              <tr>                
+                <th><h:outputText value="Application"/></th>
+                <th><h:outputText value="Attribute"/></th>
+                <th><h:outputText value="Old Value"/></th>
+                <th><h:outputText value="New Value"/></th>
+              </tr>
+              
+              <ui:repeat value="#{role.differences}" var="diff" rendered="#{!(empty role.differences)}">
+                <tr class="#{change.odd ? 'even' : 'odd'}">               
+                  <td><h:outputText value="#{diff.context}"/></td>
+                  <td><h:outputText value="#{diff.attribute}"/></td>
+                  <td><h:outputText value="#{diff.oldValue}"/></td>
+                  <td><h:outputText value="#{diff.newValue}"/></td>
+                </tr>
+              </ui:repeat>
+            </table>
+          </div>
+
+          <a onclick="toggleIdentitiesDisplay('#{role.id}');" class="disclosure">
+            <h:outputText  value="#{role.identityCount} identities affected"/>
+          </a>
+        </div>
+      </td>
+    </tr>
+
+    <tr id="#{role.id}IdentitiesRow" style="display:none">
+      <td align="left" width="50%" valign="top">
+        <div id="#{role.id}IdentitiesDiv" style="display: none; margin-left: 15px">
+          <div class="spAjaxBlueTabledContent">
+  
+            <t:dataTable id="#{role.id}Identities_tbl"
+                         styleClass="spLightBlueTable"
+                         cellspacing="0"
+                         rows="50"
+                         value="#{role.identities}"
+                         var="ident">
+  
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText styleClass="font10" value="Name"/>
+                </f:facet>
+  
+                <h:outputText styleClass="font10" value="#{sp:getDisplayNameForName('Identity', ident)}" />
+              </h:column>
+  
+              <h:column>
+                <f:facet name="header">
+                  <h:outputText styleClass="font10" value="Username"/>
+                </f:facet>
+  
+                <h:outputText styleClass="font10" value="#{ident}" />
+              </h:column>
+  
+            </t:dataTable>
+  
+          </div>
+  
+          <ui:fragment rendered="#{sp:size(role.identities) gt 50}">
+            <h:outputText styleClass="font10" value="Showing first 50" />
+          </ui:fragment>
+        </div>
+
+      </td>
+      <td></td>
+    </tr>                 
+
+  </table>
+
+</ui:composition>
+
+</body>
+
+</html>

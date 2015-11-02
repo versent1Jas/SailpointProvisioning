@@ -1,0 +1,432 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  LCM Reporting tasks
+-->
+<sailpoint>
+
+    <TaskDefinition name="Access Request Status Report"
+                    executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename"
+                    progressMode="Percentage" subType="Lifecycle Manager Reports"
+                    template="true" type="LiveReport">
+        <Description>Displays information about access requests from LCM in detailed format.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessEntitlementRequestStatusReport"/>
+        </RequiredRights>
+        <Attributes>
+         <Map>
+           <entry key="reportTitle" value="rept_lcm_entitlement_request_status_title"/>
+           <entry key="auditEventTypes">
+            <value>
+              <List>
+                <String>AccessRequest</String>
+                <String>EntitlementsRequest</String>
+                <String>RolesRequest</String>
+              </List>
+            </value>
+           </entry>
+           <entry key="report">
+               <value>
+                   <LiveReport title="Access Request Status Report">
+                       <ReportForm>
+                          <Reference class="sailpoint.object.Form" name="Access Request Status Form"/>
+                       </ReportForm>
+                       <Chart title="rept_lcm_access_request_chart_title" type="pie">
+                         <Script>
+                           <Source>
+                             <![CDATA[
+                                import sailpoint.object.*;
+                                import java.util.*;
+
+                                List data = new ArrayList();
+
+                                QueryOptions approvalStateOps = new QueryOptions(baseQueryOptions);
+                                approvalStateOps.addFilter(Filter.notnull("approvalState"));
+                                approvalStateOps.addGroupBy("approvalState");
+
+                                List fields = new ArrayList();
+                                fields.add("count(*)");
+                                fields.add("approvalState");
+
+                                Iterator iter = context.search(IdentityRequestItem.class, approvalStateOps, fields);
+                                while (iter.hasNext()){
+                                    Object[] row = iter.next();
+                                    Map val = new HashMap();
+                                    val.put("category", row[1].toString());
+                                    val.put("value", row[0]);
+                                    data.add(val);
+                                }
+
+                                QueryOptions requestStateOps = new QueryOptions(baseQueryOptions);
+                                requestStateOps.addFilter(Filter.isnull("approvalState"));
+                                requestStateOps.addGroupBy("identityRequest.completionStatus");
+
+                                fields = new ArrayList();
+                                fields.add("count(*)");
+                                fields.add("identityRequest.completionStatus");
+
+                                iter = context.search(IdentityRequestItem.class, requestStateOps, fields);
+                                while (iter.hasNext()){
+                                    Object[] row = iter.next();
+                                    Map val = new HashMap();
+                                    if( IdentityRequest.CompletionStatus.Success.equals(row[1])) {
+                                        val.put("category", "rept_lcm_request_status_col_status_pending_provision");
+                                    } else {
+                                        val.put("category", "rept_lcm_request_status_col_status_pending_completion");
+                                    }
+
+                                    val.put("value", row[0]);
+                                    data.add(val);
+                                }
+
+                                return data;
+                              ]]>
+                           </Source>
+                         </Script>
+                       </Chart>
+                       <DataSource dataSourceClass="sailpoint.reporting.datasource.LcmIdentityRequestStatusJavaDataSource" objectType="sailpoint.object.IdentityRequestItem" type="Java">
+                       </DataSource>
+                       <Columns>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_request_id" field="requestId" valueClass="java.lang.String" property="requestId" sortable="true"/>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_requester" field="requester" valueClass="java.lang.String" property="requester" sortable="true"/>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_requested_for" field="requestedFor" valueClass="java.lang.String" property="requestedFor" sortable="true"/>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_owner" field="owner" valueClass="java.lang.String" property="owner" sortable="true"/>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_request_date" field="created" valueClass="java.lang.String" property="created" sortable="true"/>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_operation" field="operation" valueClass="java.lang.String" property="operation" sortable="true"/>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_app" field="application" valueClass="java.lang.String" property="application" sortable="true" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_account" field="account" valueClass="java.lang.String" property="account" sortable="true" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_entitlement" field="attribute" valueClass="java.lang.String" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_entitlement_value" field="attributeValue" valueClass="java.lang.String" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_entitlement_description" field="description" valueClass="java.lang.String" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_approver" field="approvers" valueClass="java.lang.String" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_rejecter" field="rejecters" valueClass="java.lang.String" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_status" field="status" valueClass="java.lang.String" property="status" sortable="true"/>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_completion_date" field="completionDateString" valueClass="java.lang.String" property="completionDateString" sortable="true" dateFormat="short"/>
+                           <ReportColumnConfig header="rept_lcm_request_status_col_requester_comments" field="requestorComments" valueClass="java.lang.String" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_work_item_comments" field="workItemComments" valueClass="java.lang.String" />
+                           <ReportColumnConfig header="rept_lcm_request_status_col_completion_comments" field="completionComments" valueClass="java.lang.String" />
+                       </Columns>
+                   </LiveReport>
+               </value>
+           </entry>
+         </Map>
+       </Attributes>
+       <Signature>
+           <Inputs>
+               <Argument multi="true" name="applications" type="Application">
+                   <Description>rept_input_lcm_request_status_report_apps</Description>
+               </Argument>
+               <Argument multi="true" name="approvers" type="Identity">
+                   <Description>rept_input_lcm_request_status_report_approver</Description>
+               </Argument>
+               <Argument multi="true" name="requestors" type="Identity">
+                   <Description>rept_input_lcm_request_status_report_requester</Description>
+               </Argument>
+               <Argument multi="true" name="entitlements" type="sailpoint.object.IdentityItem">
+                   <Description>rept_input_lcm_request_status_report_entitlements</Description>
+               </Argument>
+                <Argument multi="true" name="roles" type="Role">
+                    <Description>rept_input_lcm_request_status_report_roles</Description>
+                </Argument>
+               <Argument multi="true" name="targetIdentities" type="Identity">
+                   <Description>rept_input_lcm_request_status_report_target_identity</Description>
+               </Argument>
+               <Argument name="status" type="string">
+                   <Description>rept_input_lcm_request_status_report_status</Description>
+               </Argument>
+                <Argument name="requestDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="completionDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+           </Inputs>
+       </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name="Identity Requests Status Report"
+                    executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename"
+                    progressMode="Percentage" subType="Lifecycle Manager Reports"
+                    template="true" type="LiveReport">
+        <Description>Displays information about identity requests from LCM in detailed format.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessAttributeRequestStatusReport"/>
+        </RequiredRights>
+        <Attributes>
+         <Map>
+           <entry key="reportTitle" value="rept_lcm_attribute_request_status_title"/>
+           <entry key="auditEventTypes">
+            <value>
+              <List>
+                <String>IdentityEditRequest</String>
+                <String>IdentityCreateRequest</String>
+              </List>
+            </value>
+           </entry>
+           <entry key="report">
+              <value>
+                <LiveReport title="rept_lcm_attribute_request_status_title">
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Identity Request Report Form"/>
+                  </ReportForm>
+                  <DataSource dataSourceClass="sailpoint.reporting.datasource.LcmIdentityRequestStatusJavaDataSource" type="Java">
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_request_id" field="requestId" valueClass="java.lang.String" property="requestId" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requester" field="requester" valueClass="java.lang.String" property="requester" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requested_for" field="requestedFor" valueClass="java.lang.String" property="requestedFor" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_owner" field="owner" valueClass="java.lang.String" property="owner" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_request_date" field="created" valueClass="java.lang.String" property="created" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_operation" field="operation" valueClass="java.lang.String" property="opertation" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_attr" field="attribute" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_attr_summary" field="attributeValue" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_approver" field="approvers" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_rejecter" field="rejecters" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_status" field="status" valueClass="java.lang.String" property="status" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_completion_date" field="completionDateString" valueClass="java.lang.String" property="completionDateString" sortable="true" dateFormat="short"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requester_comments" field="requestorComments" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_work_item_comments" field="workItemComments" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_completion_comments" field="completionComments" valueClass="java.lang.String" />
+                  </Columns>
+                </LiveReport>
+              </value>
+           </entry>
+         </Map>
+       </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_lcm_request_status_report_apps</Description>
+                </Argument>
+                <Argument multi="true" name="approvers" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_approver</Description>
+                </Argument>
+                <Argument multi="true" name="requestors" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_requester</Description>
+                </Argument>
+                <Argument multi="true" name="targetIdentities" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_target_identity</Description>
+                </Argument>
+                <Argument name="status" type="string">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="requestDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="completionDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+   <TaskDefinition name="Account Requests Status Report" executor="sailpoint.reporting.LiveReportExecutor"
+                   resultAction="Rename"
+                   progressMode="Percentage" subType="Lifecycle Manager Reports"
+                   template="true" type="LiveReport">
+
+        <Description>Displays information about account requests from LCM in detailed format.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessAccountRequestStatusReport"/>
+        </RequiredRights>
+        <Attributes>
+          <Map>
+            <entry key="auditEventTypes" value="AccountsRequest"/>
+            <entry key="report">
+              <value>
+                <LiveReport title="Account Request Status Report Test">
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Account Request Status Custom Fields"/>
+                  </ReportForm>
+                  <DataSource dataSourceClass="sailpoint.reporting.datasource.LcmIdentityRequestStatusJavaDataSource" type="Java">
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_request_id" field="requestId" property="requestId" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requester" field="requester" property="requester" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requested_for" field="requestedFor" property="requestedFor" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_owner" field="owner" property="owner" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_request_date" field="created" property="created" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_app" field="application" property="application" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_account" field="account" property="account" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_operation" field="operation" property="operation" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_approver" field="approvers" property="approvers" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_rejecter" field="rejecters" property="rejecters" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_status" field="status" property="status" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_completion_date" field="completionDateString" property="completionDateString" sortable="true" dateFormat="short"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requester_comments" field="requestorComments" property="requestorComments" sortable="false" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_work_item_comments" field="workItemComments" property="workItemComments" sortable="false" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_completion_comments" field="completionComments" property="completionComments" sortable="false" />
+                  </Columns>
+              </LiveReport>
+            </value>
+          </entry>
+          </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="approvers" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_approver</Description>
+                </Argument>
+                <Argument multi="true" name="requestors" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_requester</Description>
+                </Argument>
+                <Argument multi="true" name="targetIdentities" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_target_identity</Description>
+                </Argument>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_lcm_request_status_report_apps</Description>
+                </Argument>
+                <Argument name="requestDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="completionDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="status" type="string">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+    <TaskDefinition name="Password Management Requests Report"
+                    executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename"
+                    progressMode="Percentage" subType="Lifecycle Manager Reports"
+                    template="true" type="LiveReport">
+        <Description>Displays information about password managements requests</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessPasswordManagementReport"/>
+        </RequiredRights>
+        <Attributes>
+         <Map>
+           <entry key="reportTitle" value="rept_password_management_title"/>
+           <entry key="report">
+              <value>
+                <LiveReport title="rept_password_management_title">
+                  <ReportForm>
+                      <Reference class="sailpoint.object.Form" name="Password Management Requests Fields"/>
+                  </ReportForm>
+                  <DataSource dataSourceClass="sailpoint.reporting.datasource.LcmIdentityRequestStatusJavaDataSource" type="Java">
+                  </DataSource>
+                  <Columns>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_request_id" field="requestId" valueClass="java.lang.String" property="requestId" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requester" field="requester" valueClass="java.lang.String" property="requester" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requested_for" field="requestedFor" valueClass="java.lang.String" property="requestedFor" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_owner" field="owner" valueClass="java.lang.String" property="owner" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_request_date" field="created" valueClass="java.lang.String" property="created" sortable="true"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_app" field="application" valueClass="java.lang.String" property="application" sortable="true" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_account" field="account" valueClass="java.lang.String" property="account" sortable="true" />
+                    <ReportColumnConfig header="rept_password_management_col_cause" field="cause" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_completion_date" field="completionDateString" valueClass="java.lang.String" property="completionDateString" sortable="true" dateFormat="short"/>
+                    <ReportColumnConfig header="rept_lcm_request_status_col_requester_comments" field="requestorComments" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_work_item_comments" field="workItemComments" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_completion_comments" field="completionComments" valueClass="java.lang.String" />
+                    <ReportColumnConfig header="rept_lcm_request_status_col_provisioning_status" field="provisioningState" valueClass="java.lang.String" />
+                  </Columns>
+                </LiveReport>
+              </value>
+           </entry>
+         </Map>
+       </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="applications" type="Application">
+                    <Description>rept_input_lcm_request_status_report_apps</Description>
+                </Argument>
+                <Argument multi="true" name="roles" type="Role">
+                    <Description>rept_input_lcm_request_status_report_roles</Description>
+                </Argument>
+                <Argument multi="true" name="requestors" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_requester</Description>
+                </Argument>
+                <Argument multi="true" name="targetIdentities" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_target_identity</Description>
+                </Argument>
+                <Argument multi="true" name="cause" type="string">
+                    <Description>rept_input_password_management_cause</Description>
+                </Argument>
+                <Argument name="status" type="string">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="requestDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="completionDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    <TaskDefinition name="Registration Requests Status Report"
+                    executor="sailpoint.reporting.LiveReportExecutor"
+                    resultAction="Rename"
+                    progressMode="Percentage" subType="Lifecycle Manager Reports"
+                    template="true" type="LiveReport">
+        <Description>Displays information about registration requests from LCM in detailed format.</Description>
+        <RequiredRights>
+            <Reference class="sailpoint.object.SPRight" name="FullAccessAttributeRequestStatusReport"/>
+        </RequiredRights>
+        <Attributes>
+            <Map>
+                <entry key="reportTitle" value="rept_lcm_registration_request_status_title"/>
+                <entry key="auditEventTypes">
+                    <value>
+                        <List>
+                            <String>Registration</String>
+                        </List>
+                    </value>
+                </entry>
+                <entry key="report">
+                    <value>
+                        <LiveReport title="rept_lcm_registration_request_status_title">
+                            <ReportForm>
+                                <Reference class="sailpoint.object.Form" name="Registration Request Report Form"/>
+                            </ReportForm>
+                            <DataSource dataSourceClass="sailpoint.reporting.datasource.LcmIdentityRequestStatusJavaDataSource" type="Java">
+                            </DataSource>
+                            <Columns>
+                                <ReportColumnConfig header="rept_lcm_request_status_col_request_id" field="requestId" valueClass="java.lang.String" property="requestId" sortable="true"/>
+                                <ReportColumnConfig header="rept_lcm_request_status_col_requested_for" field="requestedFor" valueClass="java.lang.String" property="requestedFor" sortable="true"/>
+                                <ReportColumnConfig header="rept_lcm_request_status_col_request_date" field="created" valueClass="java.lang.String" property="created" sortable="true"/>
+                                <ReportColumnConfig header="rept_lcm_request_status_col_operation" field="operation" valueClass="java.lang.String" property="opertation" sortable="true"/>
+                                <ReportColumnConfig header="rept_lcm_request_status_col_approver" field="approvers" valueClass="java.lang.String" />
+                                <ReportColumnConfig header="rept_lcm_request_status_col_rejecter" field="rejecters" valueClass="java.lang.String" />
+                                <ReportColumnConfig header="rept_lcm_request_status_col_status" field="status" valueClass="java.lang.String" property="status" sortable="true" />
+                                <ReportColumnConfig header="rept_lcm_request_status_col_completion_date" field="completionDateString" valueClass="java.lang.String" property="completionDateString" sortable="true" dateFormat="short"/>
+                                <ReportColumnConfig header="rept_lcm_request_status_col_requester_comments" field="requestorComments" valueClass="java.lang.String" />
+                                <ReportColumnConfig header="rept_lcm_request_status_col_work_item_comments" field="workItemComments" valueClass="java.lang.String" />
+                                <ReportColumnConfig header="rept_lcm_request_status_col_completion_comments" field="completionComments" valueClass="java.lang.String" />
+                            </Columns>
+                        </LiveReport>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Signature>
+            <Inputs>
+                <Argument multi="true" name="approvers" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_approver</Description>
+                </Argument>
+                <Argument multi="true" name="targetIdentities" type="Identity">
+                    <Description>rept_input_lcm_request_status_report_target_identity</Description>
+                </Argument>
+                <Argument name="status" type="string">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="requestDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+                <Argument name="completionDateRange" type="daterange">
+                    <Description>rept_input_lcm_request_status_report_status</Description>
+                </Argument>
+            </Inputs>
+        </Signature>
+    </TaskDefinition>
+    
+</sailpoint>

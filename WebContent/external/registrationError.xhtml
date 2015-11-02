@@ -1,0 +1,39 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core">
+<body>
+
+<ui:composition template="/external/noauthPage.xhtml">
+
+  <ui:define name="body">
+    <f:view >
+      <h:form id="sessionTimeoutForm">
+        <ui:remove><!--
+          Hidden field into which the ID of the current object being
+          viewed gets copied (if available) when an auto-logout happens.
+          --></ui:remove>
+        <h:inputHidden id="id" />
+
+        <ui:remove><!-- Hidden button used to logout when the session times out. --></ui:remove>
+        <h:commandButton id="checkSessionBtn"
+                         action="#{login.checkSession}"
+                         style="display: none"
+                         immediate="true" />
+
+      </h:form>
+
+      <h:form id="registrationErrorForm">
+
+            <h:outputText value="#{msgs.registration_not_enabled}" styleClass="formError" />
+                	
+      </h:form>
+    </f:view>
+  </ui:define>
+  
+</ui:composition>
+
+</body>
+
+</html>

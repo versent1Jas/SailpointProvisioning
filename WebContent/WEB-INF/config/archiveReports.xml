@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+<!-- Report definitions for archive reports -->
+<!-- These reports that highlight end of period/tasks and are 
+     formatted for easy dissemination of key audit information.  PDF 
+     is the key export format, since the data will be verbose and the 
+     format will "free flowing".  Excel output is not available.  -->
+
+<sailpoint>
+
+  <TaskDefinition  name="Configured Applications Archive Report" template="true"
+                   formPath="/analyze/reports/applicationreportargs.xhtml" resultAction="Rename"
+                   progressMode="Percentage" subType="Configured Resource Reports" 
+                   executor="sailpoint.reporting.ApplicationReport"
+                   type="Report">
+    <RequiredRights>
+      <Reference class="sailpoint.object.SPRight" name="FullAccessApplicationReport"/>
+    </RequiredRights>
+    <Signature>
+      <Inputs>
+        <Argument multi="true" name="applications" type="Application">
+          <Description>rept_input_app_report_apps</Description>
+        </Argument>
+        <Argument filterString="capabilitiesString != &quot;null&quot;" multi="true" name="owners"
+                          type="Identity">
+          <Description>rept_input_app_report_owners</Description>
+        </Argument>
+        <Argument name="resultScope" type="Scope">
+          <Description>rept_input_result_scope</Description>
+        </Argument>
+        <Argument name="emailIdentities" type="Identity" multi="true">
+          <Description>rept_input_email_recips</Description>
+        </Argument>
+        <Argument name="REPORT_MAX_COUNT" type="int">
+          <Description>rept_input_max_rows</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Attributes>
+      <Map>
+        <entry key="jasperTemplate" value="ApplicationMainReport"/>
+      </Map>
+    </Attributes>
+    <Description> 
+      Displays configured applications in archive format.
+    </Description>
+  </TaskDefinition>
+
+  <TaskDefinition name="Role Archive Report" executor="sailpoint.reporting.BusinessRoleReport"
+                  formPath="/analyze/reports/businessrolereportargs.xhtml" subType="Role Management Reports" 
+                  resultAction="Rename" progressMode="Percentage" template="true" type="Report">
+    <RequiredRights>
+      <Reference class="sailpoint.object.SPRight" name="FullAccessBusinessRoleReport"/>
+    </RequiredRights>
+    <Signature>
+      <Inputs>
+        <Argument multi="true" name="applications" type="Application">
+          <Description>rept_input_biz_role_report_apps</Description>
+        </Argument>
+        <Argument multi="true" name="type" type="string">
+            <Description>rept_input_biz_role_report_type</Description>
+        </Argument>
+        <Argument filterString="capabilitiesString != &quot;null&quot;" multi="true" name="owners"
+                          type="Identity">
+          <Description>rept_input_biz_role_report_owners</Description>
+        </Argument>
+        <Argument multi="false" name="status" type="string">
+            <Description>rept_input_biz_role_report_status</Description>
+        </Argument>
+        <Argument name="resultScope" type="Scope">
+          <Description>rept_input_result_scope</Description>
+        </Argument>
+        <Argument name="emailIdentities" type="Identity" multi="true">
+          <Description>rept_input_email_recips</Description>
+        </Argument>
+        <Argument name="REPORT_MAX_COUNT" type="int">
+          <Description>rept_input_max_rows</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Attributes>
+      <Map>
+        <entry key="jasperTemplate" value="BusinessRoleMainReport"/>
+      </Map>
+    </Attributes>
+    <Description> 
+      Displays role information in archive format.
+    </Description>
+  </TaskDefinition>
+
+</sailpoint>

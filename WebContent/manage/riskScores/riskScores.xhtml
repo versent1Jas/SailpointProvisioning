@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui"
+      >
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.identity_risk_scores}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/risk-scores">
+      <src>risk-scores.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/certification.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/expandingPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/riskScores/riskScoresGrid.js?#{debug.revision}</src>
+    </sp:script>
+    
+    <script type="text/javascript">
+    helpKey = 'IDENTITY_RISK ';
+    
+    Ext.onReady(function(){
+    
+      var sp = new SailPoint.state.StateProvider({
+        stateIds: ['#{scoreCategoryList.gridState.name}'],
+        states:   ['#{scoreCategoryList.gridState.state}']
+      });
+      Ext.state.Manager.setProvider(sp);  
+    
+      var stateId = '#{scoreCategoryList.gridState.name}';
+      var identityCount = #{scoreCategoryList.identityCount};
+      var activeTab = '#{scoreCategoryList.selectedCategoryName}';
+      var tabs = 
+      [<c:forEach items="#{scoreCategoryList.categories}" var="category" varStatus="catStatus">        
+      {
+        id: '#{category.categoryName}',
+        title: '#{sp:localizeKey(category.categoryName)}',
+        iconCls: 'riskIndicator ri_#{sp:substringToEnd(category.color, 1)}',
+        listeners: {
+          activate: SailPoint.Manage.Grid.RiskScores.refreshPanel
+        }
+      }
+      <c:if test="#{not catStatus.last}">,</c:if>
+      </c:forEach>];
+      
+      var gridWidth = $('riskScores-display').clientWidth;
+      var columnConfig = #{scoreCategoryList.columnJSON};
+      SailPoint.Manage.Grid.RiskScores.initialize(columnConfig, stateId, tabs, identityCount, activeTab);
+    });
+    </script>
+
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:form styleClass="form" id="editForm">
+
+      <a4j:outputPanel ajaxRendered="true">
+        <h:messages tooltip="true" infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+      </a4j:outputPanel>
+      <div id="identitiesErrorDiv" style="display:none" class="formError"/>
+
+      <div id="scoreDetails" style="margin-top: 15px; #{(base.errorMessage) ? 'display:none' : ''}">
+      <ui:include src="riskScoresFilters.xhtml"/>
+      
+        <br/>
+
+        <div id="riskScores-display" style="width100"></div>
+        
+        <br/>
+
+        <ui:fragment rendered="#{scoreCategoryList.allowScheduleCertifications}">
+            <table class="width100">
+                <tr>
+                    <td style="width: 20%">
+                        <h:commandButton id="scheduleCertificationBtn"
+                                         action="#{scoreCategoryList.scheduleBulkCertificationAction}"
+                                         onclick="return SailPoint.Manage.Grid.RiskScores.verifySelections();"
+                                         value="#{msgs.button_schedule_certs}" 
+                                         styleClass="primaryBtn"/>
+                    </td>
+                    <td style="width: 80%">
+                        <div id="selectedCount" class="formWarn" style="display:none;margin:3px" />
+                    </td>
+                </tr>
+            </table>
+	    </ui:fragment>
+
+      </div>
+
+        <!-- Schedule Details -->
+        <h:inputHidden id="certifyAll" 
+                       value="#{scoreCategoryList.bulkCertification.certifyAll}"/>
+                       
+        <h:inputHidden id="idsToCertify" 
+                       value="#{scoreCategoryList.bulkCertification.selectedIdentities}" 
+                       converter="java.util.List" />
+
+
+        <!-- For selecting an individual identity from the list - redirects to identities page -->
+        <h:inputHidden id="currentObjectId" 
+                       value="#{scoreCategoryList.selectedId}"/>
+                       
+        <h:commandButton id="editButton"
+                         style="display:none"
+                         action="#{scoreCategoryList.select}"/>
+        
+        <!-- Switch categories on the page --> 
+        <h:inputHidden id="currentCategoryName" 
+                       value="#{scoreCategoryList.selectedCategoryName}"/>
+
+        <h:commandButton id="showCategoryBtn"
+                         style="display:none"
+                         action="#{scoreCategoryList.showScores}"/>        
+                                                  
+        <a4j:commandButton  id="showCountBtn"
+                            action="#{scoreCategoryList.showCategoryCount}" 
+                            style="display:none"
+                            render="scoreCountPanel"
+                            oncomplete="initCount()"/>                                         
+                         
+          
+      </h:form>
+
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+
+</html>

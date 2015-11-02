@@ -1,0 +1,67 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+    <h:outputFormat styleClass="spContentTitle" value="#{msgs.prov_section_roles_modified}">
+        <f:param value="#{provisioning.roleCount} "/>
+    </h:outputFormat>
+    <div style='padding-bottom:20px'/>
+    <div>
+      <table class="spTable" id="roleTbl">
+        <tr>
+          <th><h:outputText value="#{msgs.prov_label_role_name}"/></th>
+        </tr>
+
+        <ui:fragment rendered="#{!(empty provisioning.roles)}">
+          <ui:repeat value="#{provisioning.roles}" var="role">
+            <tr>
+              <td id="#{role.id}Cell">              
+                <table class="width100" cellpadding="0" cellspacing="0"><tr>
+
+                  <td width="16">
+                    <div id="#{role.id}SuccessImg" style="display:none" >
+                      <h:graphicImage alt="success" url="/images/icons/dialogue_success_16.png"/>
+                    </div>
+                    
+                    <div id="#{role.id}ProgressImg" style="display:none" >
+                      <h:graphicImage alt="progress" url="/images/progress.gif"/>
+                    </div>
+                  </td>
+
+                  <td align="left" id="#{role.id}ClickCell">
+                    <ui:include src="roleDetailsInclude.xhtml">
+                      <ui:param name="role" value="#{role}"/>
+                    </ui:include>
+                  </td>
+
+                </tr></table>                
+              </td>
+            </tr>
+          </ui:repeat>
+        </ui:fragment>
+      </table>
+    </div>
+
+    <script defer="defer">
+
+      var identitiesTbls = getElementsByClassAndSuffix('spLightBlueTable', 'Identities_tbl');
+      identitiesTbls.each(function(tbl) {
+        makeTableMulticolored(tbl, true, false, 'even', 'odd');
+      });
+
+      makeTableMulticolored($('roleTbl'), true, false, 'even', 'odd');
+    </script>
+
+</ui:composition>
+
+</body>
+
+</html>

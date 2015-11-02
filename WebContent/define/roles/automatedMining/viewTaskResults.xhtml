@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2009 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+  
+  <div style="padding:10px; width:595px;" id="resultViewerContentDiv">
+    <h:form id="resultsViewingForm">
+      <t:inputHidden id="TaskResultId" forceId="true">
+      </t:inputHidden>
+    
+      <ui:include src="/monitor/tasks/renderInclude.xhtml">
+        <ui:param name="returnPage" value="roleTabs.jsf"/>
+        <ui:param name="objects" value="#{msgs.tasks}"/>
+      </ui:include>
+      
+      <a4j:commandButton id="refreshTaskResults" render="resultPanel"
+        style="display:none"
+        oncomplete="SailPoint.Role.Mining.getTaskResultWindow().finishShowTaskResults();
+                    Ext.MessageBox.hide();"/>
+      
+    </h:form>
+  </div>  
+</ui:composition>
+
+</body>
+</html>

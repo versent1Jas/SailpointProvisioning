@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <f:view>
+      <!-- The Ext window gets rendered here. -->
+      <div id="addTargetDiv"/>
+      
+      <!-- This contains the HTML contents that get inserted into the Ext window. -->
+      <a4j:outputPanel id="editTargetPanel">
+        <div id="addTargetContentsDiv" class="spAjaxContent" style="display:none">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+          <div id="targetErrorMessages" class="formError" style="display:none"/>
+  
+          <h:panelGrid styleClass="width100" columns="1" id="addTargetPanel" columnClasses="leftAlignedColumn">
+            <h:panelGroup>
+              <table class="paddedTbl">
+                <tr>
+                  <td class="titleColumn">
+                    <h:outputText value="#{msgs.label_application}"/>
+                    <h:graphicImage id="imgHlpApp" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_attr_target_app}"/>
+                  </td>
+                  <td>
+                    <div id="targetAppSuggest"></div>
+                    <t:inputHidden id="targetApp" value="#{identityConfigEdit.editedAttribute.selectedTarget.application}" forceId="true">
+                    </t:inputHidden>
+                    <a4j:commandButton id="updateTargetAppBtn"
+                                       action="#{identityConfigEdit.updateApplication}"
+                                       style="display:none"
+                                       render="targetAttributesPanel" />
+                  </td>
+                </tr>
+  
+                <tr>
+                  <td class="titleColumn">
+                    <h:outputText value="#{msgs.label_attribute}"/>
+                    <h:graphicImage id="imgHlpAttr" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_attr_target_attr}"/>
+                  </td>
+                  <td>
+                    <a4j:outputPanel id="targetAttributesPanel">
+                      <h:selectOneMenu id="targetAttribute" value="#{identityConfigEdit.editedAttribute.selectedTarget.name}">
+                        <f:selectItems id="targetAttributeSelections" value="#{identityConfigEdit.attributesForSelectedTargetApp}"/>
+                      </h:selectOneMenu>      
+                    </a4j:outputPanel>
+                  </td>
+                </tr>
+              
+                <tr>
+                  <td class="titleColumn">
+                    <h:outputText value="#{msgs.target_rule}"/>
+                    <h:graphicImage id="imgHlpRule" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_attr_target_rule}"/>
+                  </td>
+                  <td> 
+                    <a4j:outputPanel id="targetRulesPanel">
+                      <h:selectOneMenu id="targetRule" value="#{identityConfigEdit.editedAttribute.selectedTarget.rule}">
+                        <f:selectItems value="#{identityConfigEdit.targetRuleList}"/>
+                      </h:selectOneMenu>
+                    </a4j:outputPanel>
+                    
+                    <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >  
+                        <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                               onclick="SailPoint.Rule.Editor.edit($('configForm:targetRule').value, 
+                                                                   'IdentityAttributeTarget',
+                                                                   $('configForm:refreshTargetRulesButton'))" />  
+                    </ui:fragment>     
+                    
+                    <a4j:commandButton id="refreshTargetRulesButton"
+                                       style="display:none"
+                                       immediate="true"
+                                       render="targetRulesPanel"/>             
+                  </td>
+                </tr>
+  
+                <tr>
+                  <td class="titleColumn">
+                    <h:outputText value="#{msgs.label_provision_all_accounts}"/>
+                    <h:graphicImage id="imgHlpProvisionAll" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_identity_attr_target_provision_all}"/>
+                  </td>
+                  <td>
+                    <h:selectBooleanCheckbox id="provisionAllAccounts" value="#{identityConfigEdit.editedAttribute.selectedTarget.provisionAllAccounts}" />
+                  </td>
+                </tr>
+              </table>
+            </h:panelGroup>
+          </h:panelGrid>
+        </div>
+      </a4j:outputPanel>
+
+      <a4j:commandButton id="stealthAddTargetButton"
+                         style="display: none"
+                         action="#{identityConfigEdit.addTargetToAttributeAction}"
+                         render="targetMappings"
+                         oncomplete="closeTargetWindow();"/> 
+      <a4j:commandButton id="stealthEditTargetButton"
+                         style="display: none"
+                         action="#{identityConfigEdit.saveEditedTargetAction}"
+                         render="targetMappings"
+                         oncomplete="closeTargetWindow();"/>
+  </f:view>
+</ui:composition>
+
+</body>
+</html>

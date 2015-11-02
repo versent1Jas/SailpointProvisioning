@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, GROUP_PROVISIONING, PASSWORD, SEARCH, UNSTRUCTURED_TARGETS, ENABLE" icon="enterpriseIcon" name="Solaris Template" type="Solaris - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="Solaris26"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="Account Name" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Default Group" name="UG_DEF" required="true" type="string"/>
+        <AttributeDefinition displayName="Container" name="USER_OE_PR" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="DESCRIPTION" type="string"/>
+        <AttributeDefinition displayName="Home Directory" name="HOME" type="string"/>
+        <AttributeDefinition displayName="Shell" name="SHELL" type="string"/>
+        <AttributeDefinition displayName="Last Login" name="LAST_LOGIN" type="string"/>
+        <AttributeDefinition displayName="Locked" name="RU_LOCKED" type="boolean"/>
+        <AttributeDefinition displayName="Suspended" name="RU_SUSPENDED" type="boolean"/>
+        <AttributeDefinition displayName="Max. Password Inactivity" name="INACTIVE" type="int"/>
+        <AttributeDefinition displayName="Password Expiration" name="EXPIRATION" type="int"/>
+        <AttributeDefinition displayName="Password Last Change" name="PWD_LASTCHG" type="string"/>
+        <AttributeDefinition displayName="Password Absolute Expiration date" name="PWD_ABS_EXPIRE" type="date"/>
+        <AttributeDefinition displayName="Create Home Directory" name="CREATE_HOME_DIR" type="boolean"/>
+        <AttributeDefinition displayName="Delete Home Directory" name="DELETE_HOME_DIR" type="boolean"/>
+        <AttributeDefinition displayName="New Name" name="77SANewName" type="string"/>
+        <AttributeDefinition displayName="groups" entitlement="true" managed="true" multi="true" name="groups" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group Name" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Type" name="GROUP_TYPE" type="string"/>
+        <AttributeDefinition displayName="GID" name="GID" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="con_prov_policy_solaris_full_user_id" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_solaris_full_password" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="con_prov_policy_solaris_full_container" name="USER_OE_PR" section="" type="string"/>
+        <Field displayName="con_prov_policy_solaris_full_default_group" name="UG_DEF" type="string"/>
+      </Template>
+      <Template name="create group" schemaObjectType="group" usage="Create">
+        <Field displayName="con_prov_policy_solaris_full_group_name" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field displayName="con_prov_policy_solaris_full_group_id" helpKey="help_con_prov_policy_solaris_full_group" name="GID" reviewRequired="true" section="" type="string"/>
+      </Template>
+      <Template name="update group" schemaObjectType="group" usage="Update">
+        <Field displayName="con_prov_policy_solaris_full_group_id" helpKey="help_con_prov_policy_solaris_full_group" name="GID" required="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

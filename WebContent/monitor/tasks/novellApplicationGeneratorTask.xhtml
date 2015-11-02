@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/tasks/novellApplicationGeneratorTask.js?#{debug.revision}</src>
+  </sp:script>
+
+  <ui:param name="appNameArgVal" value="#{taskDefinition.argMap['novellAppName']}"/>
+  <ui:param name="toGenerateListArgVal" value="#{taskDefinition.argMap['toGenerateList']}"/>
+  
+  <table id="argumentTbl" class="customWidth paddedTbl" cellspacing="0">
+    <tr>
+        <td colspan="3">
+          <h:outputText styleClass="spContentTitle" value="#{taskDefinition.signatureName} #{msgs.options}"/>
+        </td>
+    </tr>
+    <tr>
+      <td width="40%">
+        <sp:outputText  value="#{appNameArgVal.argument.displayLabel}"/>
+      </td>
+      <td>
+        <div id="appSuggest"></div>
+        <t:inputHidden id="applicationName" 
+                       value='#{appNameArgVal.objectValue}' forceId="true">
+        </t:inputHidden>
+      </td>
+      <td>
+        <div id='fetchAppsButtonDiv'></div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <sp:outputText  value="#{toGenerateListArgVal.argument.displayLabel}"/>
+      </td>
+      <td colspan="2">
+        <div id="novellAppSuggest"></div>
+        <t:inputHidden id="novellAppSuggestVal"
+                       value="#{toGenerateListArgVal.objectValue}" forceId="true">
+        </t:inputHidden>
+      </td>
+    </tr>
+  </table>
+  <script defer="defer">
+    makeTableMulticolored($('argumentTbl'),true,false, "even", "odd" );
+  </script>
+</ui:composition>
+</body>
+</html>

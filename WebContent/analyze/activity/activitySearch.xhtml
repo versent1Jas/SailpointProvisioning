@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.activity_search_title}</ui:define>
+
+
+  <ui:define name="headerItems">
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css" rel="stylesheet" type="text/css"/>
+	<sp:script>
+		<src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/analyze/analyze.js?#{debug.revision}</src>
+	</sp:script>
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'ACTIVITY_SEARCH';
+        Ext.onReady(function () {
+          SailPoint.Analyze.SearchDisplayFields.initDisplayFields();
+          SailPoint.Analyze.Activity.initializeAttributes();
+        });
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" errorClass="formError"/>
+      
+      <h:form id="editForm">
+      
+      <div class="pageInfo">
+        <div class="instructions">
+          <h:outputText value="#{msgs.activity_search_inst}"/>
+        </div>
+      </div>
+      <div style="display:none" class="width100" id="selectedCountTop"></div>
+          <ui:fragment rendered="#{(activitySearch.mySearchItemsByType!=null) and (!empty activitySearch.mySearchItemsByType)}">
+          <div class="spContent" >
+            <table class="width100" style="margin:5px"><tr><td>
+              <ui:include src="../searchUserItems.xhtml">
+                <ui:param name="searchBean" value="#{activitySearch}"/>
+              </ui:include>
+            </td></tr>           
+            </table>
+          </div>
+          </ui:fragment>
+            
+          <div class="spContent" >
+            <table class="width100" cellpadding="4" cellspacing="0">
+              <tr>
+                <td width="75%">
+                  <div>
+                    <h:outputText value="#{msgs.activity_search_criteria}" styleClass="spContentTitle"/>
+                  </div>
+                </td>
+                <td width="25%">
+                  <div>
+                    <h:outputText value="#{msgs.activity_search_fields_to_display}" styleClass="spContentTitle"/>
+                  </div>
+                </td>
+              </tr>
+              <tr valign="top">
+                <td>
+                  <div class="spTabledContent">               
+                    <table id="actAttrbTbl" class="spTable" cellspacing="0">
+                      <tr>
+                        <th>
+                          <h:outputText value="#{msgs.activity_search_attributes}"/>
+                        </th>
+                        <th align="right">
+                          
+                        </th>
+                      </tr>
+                      <tr>
+                        <td colspan="2">
+                          <div id="activityAttributes">
+                            <ui:include src="activityAttributes.xhtml">
+                              <ui:param name="searchBean" value="#{activitySearch}"/>
+                            </ui:include>                                    
+                          </div>                                    
+                        </td>
+                      </tr>
+                    </table>
+                  </div>                  
+                </td>
+                <td>
+                    <ui:include src="../searchDisplayFields.xhtml">
+                      <ui:param name="searchType" value="activity" />
+                      <ui:param name="searchBean" value="#{activitySearch}" />
+                    </ui:include>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <table>
+                    <tr>
+                      <td>
+                        <div class="buttonRow">
+                          <input type="button" id="preSearchBtn" value="#{msgs.activity_search_button_run_search}" onclick="SailPoint.Analyze.validateSearch('activity')" class="primaryBtn"/>
+                          <h:commandButton id="searchBtn" style="display:none" action="#{activitySearch.runQueryAction}"/>
+                          <input type="button" id="clearBtn" value="#{msgs.activity_search_button_clear_search}" onclick="$('editForm:resetBtn').click()" class="secondaryBtn"/>
+                          <h:commandButton style="display:none" immediate="true" id="resetBtn" action="#{activitySearch.clearSearchItem}"/>
+                        </div>
+                      </td>
+                      <td align="left">
+                        <div style="display:none" class="width100" id="selectedCountBottom"></div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <h:commandButton style="display:none" id="clearSearchBtn" 
+          action="#{activitySearch.clearSearchItem}"/>
+      </h:form>
+      
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

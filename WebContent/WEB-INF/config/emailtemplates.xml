@@ -1,0 +1,1366 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008-2010 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  EmailTemplate for IIQ
+-->
+<sailpoint>
+
+  <!--***********************************************************
+
+  EmailTemplate
+
+  *************************************************************-->
+
+  <EmailTemplate name="Certification">
+    <Description>
+      Email Template for notifying work item owners of new certifications.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property (also the name property) of the certification WorkItem.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object for the certification.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the certification.</Description>
+        </Argument>
+        <Argument name='ownerName' type='string'>
+          <Description>The display name of the Identity that owns the certification.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>A new access certification report has been assigned to you: $workItemName.
+
+Login and view your work item inbox to complete this access certification report.
+    </Body>
+    <Subject>New access certification: $workItemName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Bulk Reassignment">
+    <Description>
+      Email Template for notifying a user when they have been reassigned identities
+      from an existing certification.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the Certification containing the items to reassign.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object containing the items to reassign.</Description>
+        </Argument>
+        <Argument name='owner' type='Identity'>
+          <Description>The Identity object receiving the reassignment request.</Description>
+        </Argument>
+        <Argument name='comments' type='string'>
+          <Description>Comments from the reassigner.</Description>
+        </Argument>
+        <Argument name='description' type='string'>
+          <Description>Description of the reassignment.</Description>
+        </Argument>
+        <Argument name='numNewIdentities' type='string'>
+          <Description>Number of identities reassigned, passed as a string.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the reassignment.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>$!requesterName has assigned $numNewIdentities users to you for access certification.  These have been added to $certificationName.
+
+Description: $!description
+
+Comments from $!requesterName:
+--------------------------------------------------------------------------------
+$!comments
+--------------------------------------------------------------------------------
+
+Login and view your work item inbox to complete this access certification report.
+    </Body>
+    <Subject>New certification reassignment request: $certificationName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Delegation">
+    <Description>
+      Email Template for notifying work item owners of new delegations.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property (also the name property) of the delegation WorkItem.</Description>
+        </Argument>
+        <Argument name='comments' type='string'>
+          <Description>Comments from the delegator.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object containing the delegated item.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the delegation.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>$!requesterName has delegated the following work item to you: $!workItemName.
+
+Comments from $!requesterName:
+--------------------------------------------------------------------------------
+$!comments
+--------------------------------------------------------------------------------
+
+Login and view your work item inbox to complete this request.
+    </Body>
+    <Subject>New delegation request: $!workItemName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Delegation Revocation">
+    <Description>
+      Email Template for notifying work item owners that their delegation
+      work item has been revoked.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property of the delegation WorkItem.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object containing the delegated item.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the delegation.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>$requesterName has revoked the following work item from you: $workItemName.  This work item will no longer appear in your queue.
+    </Body>
+    <Subject>Work item revoked: $workItemName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Delegation Finished">
+    <Description>
+      Email Template for notifying the original owner that the delegated item has been completed.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property of the delegation WorkItem.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object containing the delegated item.</Description>
+        </Argument>
+        <Argument name='delegateeName' type='string'>
+          <Description>The display name of the Identity that finished the delegation.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>$delegateeName has finished the delegated item '$workItemName'.
+Please review the items. 
+    </Body>
+    <Subject>Delegation Completed by $delegateeName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Remediation Notification" cc="$!identity.manager.email">
+    <Description>
+      Email Template for notifying users that an item has been remediated.
+      Notice that this is setup to CC the user's manager (see CC attribute above).
+
+      Arguments
+      ---------
+      item:                The CertificationItem being remediated.
+      remediationDetails:  The ProvisioningPlan with the entitlements being removed.
+                           (Convenience accessor for item.action.remediationDetails)
+      identity:            The Identity that is having their item remediated.
+      comments:            Comments from the remediator about the remediation.
+      requester:           The Identity that remediated the item.
+      requesterName:       Full name of the Identity that remediated the item.
+                           (Convenience accessor for requestor.fullName)
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='item' type='CertificationItem'>
+          <Description>The CertificationItem being remediated.</Description>
+        </Argument>
+        <Argument name='remediationDetails' type='ProvisioningPlan'>
+          <Description>The ProvisioningPlan with the entitlements being removed (Convenience accessor for item.action.remediationDetails).</Description>
+        </Argument>
+        <Argument name='identity' type='Identity'>
+          <Description>The Identity that owns the item being remediated.</Description>
+        </Argument>
+        <Argument name='comments' type='string'>
+          <Description>Comments from the remediator about the reason for remediation.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name (usually full name) of the identity that requested the remediation.</Description>
+        </Argument>
+        <Argument name='requester' type='Identity'>
+          <Description>The Identity object of the requester.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body><![CDATA[$requesterName has revoked one or more entitlements from you.
+
+Comments from $requesterName:
+--------------------------------------------------------------------------------
+$!comments
+--------------------------------------------------------------------------------
+
+#if ($remediationDetails.nonModifyAccountRequests &&
+     $remediationDetails.getNonModifyAccountRequests().size() > 0)
+
+Account Requests:
+-----------------
+#foreach ($acctReq in $remediationDetails.nonModifyAccountRequests)
+Application: $acctReq.applicationName
+  Operation: $acctReq.operation
+ Account ID: $acctReq.nativeIdentity
+
+#end
+#end
+#if ($remediationDetails.modifyAccountRequests &&
+     $remediationDetails.getModifyAccountRequests().size() > 0)
+
+Modification Requests:
+----------------------
+#foreach ($acctReq in $remediationDetails.modifyAccountRequests)
+Application: $acctReq.applicationName
+#if ($acctReq.nativeIdentity) ## Role modification requests in IIQ won't have a nativeIdentity
+ Account ID: $acctReq.nativeIdentity
+#end
+
+#foreach ($attrReq in $acctReq.attributeRequests)
+  Operation: $attrReq.operation
+  Attribute: $attrReq.name
+   Value(s): $attrReq.value
+
+#end
+#foreach ($permReq in $acctReq.permissionRequests)
+  Operation: $permReq.operation
+ Permission: $permReq.target
+   Right(s): $permReq.rightsList
+
+#end
+
+#end
+#end
+]]></Body>
+    <Subject>Access is being revoked by $requesterName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Remediation Work Item">
+    <Description>
+      Email Template for notifying work item owners of new remediation requests.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItemName' type='string'>
+          <Description>The name (also the description) of the remediation work item.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object representing the remediation.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the remediation.</Description>
+        </Argument>
+        <Argument name='comments' type='string'>
+          <Description>The Identity object that is the owner of the work item.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>$!requesterName has assigned a new remediation work item to you: $!workItemName.
+
+Comments from $!requesterName:
+--------------------------------------------------------------------------------
+$!comments
+--------------------------------------------------------------------------------
+
+Login and view your work item inbox to complete this request.
+    </Body>
+    <Subject>New remediation request: $!workItemName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Certification Sign Off Approval">
+    <Description>
+      Email Template for notifying users when a certification is signed and sent to them
+      for approval.
+
+      This supports the following parameters:
+       - certification: The sailpoint.object.Certification object that was signed.
+       - certifier:     The sailpoint.object.Identity that signed the certification.
+       - approver:      The sailpoint.object.Identity that needs to approve the
+                        certification.  This is the recipient of this email.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object containing the delegated item.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object for the certification approval.</Description>
+        </Argument>
+        <Argument name='certifier' type='Identity'>
+          <Description>The Identity object for the user that finished the certification.</Description>
+        </Argument>
+        <Argument name='approver' type='Identity'>
+          <Description>The Identity object that is the owner of the work item.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>$certification.name was signed by $certifier.displayableName and requires your approval.
+
+Login and view your work item inbox to complete this request.
+    </Body>
+    <Subject>$certification.name requires approval</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Certification Reminder">
+    <Description>
+      Email Template for reminding a certification owner that they have a
+      certification waiting for them to complete.
+      This is an "instant" email sent on demand from the certification dashboard components.
+      See EmailBean and Emailer.compileOpenCertEmail for context.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object we are reminding someone about.</Description>
+        </Argument>
+        <Argument name='recipient' type='Identity'>
+          <Description>The Identity object of the user being reminded.</Description>
+        </Argument>
+        <Argument name='sender' type='Identity'>
+          <Description>The Identity object of the user doing the reminding.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>$recipient.displayableName,
+
+The certification "$certification.name" is still open and needs to be completed.#if ($certification.expiration)  This certification must be finished by $spTools.formatDate($certification.expiration,3,1).#{end}  Please login to IdentityIQ to complete your work.
+
+Sincerely,
+$sender.displayableName</Body>
+    <Subject>Reminder: Certification needs your attention</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Continuous Certification Reminder">
+    <Description>
+      Email Template for the "certification required" state for continuous certifications.
+      Note that the "This is a reminder" text is not displayed on the first notification.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='item' type='CertificationItem'>
+          <Description>The CertificationItem object.</Description>
+        </Argument>
+        <Argument name='itemName' type='string'>
+          <Description>The name of the CertificationItem.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the Certification.</Description>
+        </Argument>
+        <Argument name='ownerName' type='string'>
+          <Description>The name of the Identity that owns the item.</Description>
+        </Argument>
+        <Argument name='requester' type='Identity'>
+          <Description>The identity object that was the scheduler of the certification.</Description>
+        </Argument>
+        <Argument name='ordinalNumReminders' type='string'>
+          <Description>The number of this reminder, starting from 1.  Passed as a String.</Description>
+        </Argument>
+        <Argument name='remindersRemaining' type='string'>
+          <Description>The number of reminders remaining after this one.  Passed as a String.</Description>
+        </Argument>
+        <Argument name='oldDueDate' type='date'>
+          <Description>The former due date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='newDueDate' type='date'>
+          <Description>The new due date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='nowDate' type='date'>
+          <Description>The current date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='created' type='date'>
+          <Description>The date the item was created, passed as a java.util.Date.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>#if ($item.remindersSent > 0)This is a reminder that #{end}"$itemName" in "$item.certification.name" is due for certification.  It must be completed by $spTools.formatDate($item.overdueDate,3,1).
+
+Please login to IdentityIQ and view your work item inbox to resolve this at your earliest convenience.
+    </Body>
+    <Subject>Certification due for item: $itemName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Continuous Certification Escalation">
+    <Description>
+      Email Template for alerting new continuous cert item owners when an item has
+      escalated to them.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='item' type='CertificationItem'>
+          <Description>The CertificationItem object.</Description>
+        </Argument>
+        <Argument name='itemName' type='string'>
+          <Description>The name of the CertificationItem.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the Certification.</Description>
+        </Argument>
+        <Argument name='ownerName' type='string'>
+          <Description>The name of the Identity that owns the item.</Description>
+        </Argument>
+        <Argument name='requester' type='Identity'>
+          <Description>The identity object that was the scheduler of the certification.</Description>
+        </Argument>
+        <Argument name='ordinalNumReminders' type='string'>
+          <Description>The number of this reminder, starting from 1.  Passed as a String.</Description>
+        </Argument>
+        <Argument name='remindersRemaining' type='string'>
+          <Description>The number of reminders remaining after this one.  Passed as a String.</Description>
+        </Argument>
+        <Argument name='oldDueDate' type='date'>
+          <Description>The former due date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='newDueDate' type='date'>
+          <Description>The new due date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='nowDate' type='date'>
+          <Description>The current date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='created' type='date'>
+          <Description>The date the item was created, passed as a java.util.Date.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>"$ItemName" in "$item.certification.name" has been escalated to you.  It previously belonged to $oldOwner.#if ($newDueDate)  If this is not completed by $spTools.formatDate($newDueDate,3,1) it will escalate again.#end
+
+
+Please login to IdentityIQ and view your work item inbox to resolve this at your earliest convenience.
+    </Body>
+    <Subject>Escalated certification item: $itemName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Work Item Reminder">
+    <Description>
+      Email Template for reminding work item owners that their work
+      items are overdue.
+      NOTE: In addition to the declared arguments, all entries 
+      from the work item attributes map are also available by name in the template.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object.</Description>
+        </Argument>
+        <Argument name='workItemName' type='string'>
+          <Description>The name of the WorkItem.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the Certification.</Description>
+        </Argument>
+        <Argument name='ownerName' type='string'>
+          <Description>The name of the Identity that owns the work item.</Description>
+        </Argument>
+        <Argument name='requester' type='Identity'>
+          <Description>The identity object that represents the creator of the work item.</Description>
+        </Argument>
+        <Argument name='ordinalNumReminders' type='string'>
+          <Description>The number of this reminder, starting from 1.  Passed as a String.</Description>
+        </Argument>
+        <Argument name='remindersRemaining' type='string'>
+          <Description>The number of reminders remaining after this one.  Passed as a String.</Description>
+        </Argument>
+        <Argument name='oldDueDate' type='date'>
+          <Description>The former due date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='newDueDate' type='date'>
+          <Description>The new due date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='nowDate' type='date'>
+          <Description>The current date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='created' type='date'>
+          <Description>The date the work item was created, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='expiration' type='date'>
+          <Description>The optional date the work item completely expires, passed as a java.util.Date.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>This is your $ordinalNumReminders reminder that the work item $workItemName #if($requester)requested by $requester.displayableName, and #{end}created on $spTools.formatDate($created,3,1), #if($expiration)#if($expiration.getTime() > $nowDate.getTime())is due on $spTools.formatDate($expiration,3,1).#{else}was due on $spTools.formatDate($expiration,3,1).#{end}#{else}was due on $spTools.formatDate($oldDueDate,3,1).#{end}
+
+#if ($newDueDate > $expiration)
+The due date has been extended to $spTools.formatDate($newDueDate,3,1).
+
+#end
+#if ($remindersRemaining > 0)
+This work item will escalate after $remindersRemaining more reminder(s).
+
+#end
+Please login to IdentityIQ and view your work item inbox to resolve this at your earliest convenience.
+    </Body>
+    <Subject>Work Item Reminder</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Work Item Escalation">
+    <Description>
+      Email Template for alerting new work item owners when an item has
+      escalated into their queue
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object.</Description>
+        </Argument>
+        <Argument name='workItemName' type='string'>
+          <Description>The name of the WorkItem.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the Certification.</Description>
+        </Argument>
+        <Argument name='ownerName' type='string'>
+          <Description>The name of the Identity that owns the work item.</Description>
+        </Argument>
+        <Argument name='requester' type='Identity'>
+          <Description>The identity object that represents the creator of the work item.</Description>
+        </Argument>
+        <Argument name='ordinalNumReminders' type='string'>
+          <Description>The number of this reminder, starting from 1.  Passed as a String.</Description>
+        </Argument>
+        <Argument name='remindersRemaining' type='string'>
+          <Description>The number of reminders remaining after this one.  Passed as a String.</Description>
+        </Argument>
+        <Argument name='oldDueDate' type='date'>
+          <Description>The former due date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='newDueDate' type='date'>
+          <Description>The new due date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='nowDate' type='date'>
+          <Description>The current date, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='created' type='date'>
+          <Description>The date the work item was created, passed as a java.util.Date.</Description>
+        </Argument>
+        <Argument name='expiration' type='date'>
+          <Description>The optional date the work item completely expires, passed as a java.util.Date.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>The work item "$workItemName" escalated.  It previously belonged to $oldOwner and was due on $spTools.formatDate($oldDueDate,3,1).
+
+It has now been assigned to you#if ($newDueDate), and its due date has been extended to $spTools.formatDate($newDueDate,3,1)#end.
+
+Please login to IdentityIQ and view your work item inbox to resolve this at your earliest convenience.
+    </Body>
+    <Subject>Escalated Work Item</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Work Item Comment">
+    <Description>
+      Email Template for notifying the requester/owner of a work item
+      that a new comment has been added.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object on which the comment was added.</Description>
+        </Argument>
+        <Argument name='workItemName' type='string'>
+          <Description>The name (also the description) of the WorkItem.</Description>
+         </Argument>
+        <Argument name='comment' type='Comment'>
+          <Description>The Comment object with information about the comment.</Description>
+        </Argument>
+        <Argument name='commentAuthor' type='string'>
+          <Description>The name of the Identity that made the comment.</Description>
+        </Argument>
+        <Argument name='commentDate' type='date'>
+          <Description>The date the comment was made, represented as a java.util.Date object.</Description>
+        </Argument>
+        <Argument name='commentText' type='string'>
+          <Description>The text of the comment.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body><![CDATA[Comment added to work item "$workItemName" by $commentAuthor on $spTools.formatDate($commentDate,3,1)
+
+--------------------------------------------------------------------------------
+$!commentText]]></Body>
+    <Subject>New comments added to work item "$workItemName"</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Work Item Forward">
+    <Description>
+      Email Template for notifying the requester/new owner of a work item
+      that it has been forwarded.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object being forwarded.</Description>
+        </Argument>
+        <Argument name='workItemName' type='string'>
+          <Description>The name (also the description) of the WorkItem on which a comment was added.</Description>
+        </Argument>
+        <Argument name='previousOwner' type='string'>
+          <Description>The display name of the Identity that was the previous owner of the work item.</Description>
+        </Argument>
+        <Argument name='newOwner' type='string'>
+          <Description>The display name of the Identity that is the new owner of the work item.</Description>
+        </Argument>
+        <Argument name='requester' type='string'>
+          <Description>The display name of the Identity that requested the forwarding.</Description>
+        </Argument>
+        <Argument name='forwardDate' type='date'>
+          <Description>The date the forwarding was requested, represented as a java.util.Date object.</Description>
+        </Argument>
+        <Argument name='commentText' type='string'>
+          <Description>Comments about the forwarding.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body><![CDATA[$requester forwarded work item "$workItemName" from $previousOwner to $newOwner on $spTools.formatDate($forwardDate,3,1)
+
+--------------------------------------------------------------------------------
+$!commentText]]></Body>
+    <Subject>Work item "$workItemName" forwarded</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Mitigation Expiration">
+    <Description>
+      Email Template for notifying certifiers that a mitigation they requested
+      has expired.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='identityName' type='string'>
+          <Description>The full name (first and last) of the Identity object that has the mitigation.</Description>
+        </Argument>
+        <Argument name='itemDescription' type='string'>
+          <Description>A short description of the item that was mitigated.</Description>
+        </Argument>
+        <Argument name='mitigationExpiration' type='MitigationExpiration'>
+          <Description>The sailpoint.object.MitigationExpiration that is sending this notification.</Description>
+        </Argument>
+        <Argument name='mitigator' type='string'>
+          <Description>The full name (first and last) of the Identity that created the mitigation.</Description>
+        </Argument>
+        <Argument name='comments' type='string'>
+          <Description>Comments from the expired mitigation.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body><![CDATA[The exception allowed for $!itemDescription on $identityName has expired.
+
+Comments from $mitigator:
+--------------------------------------------------------------------------------
+$!comments
+--------------------------------------------------------------------------------]]></Body>
+    <Subject>Allowed exception has expired for $!identityName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Policy Violation">
+    <Description>
+      Email Template for notifying policy owners of violations.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='identity' type='Identity'>
+          <Description>The Identity object that has the violation.</Description>
+        </Argument>
+        <Argument name='policy' type='Policy'>
+          <Description>The Policy object containing the constraint that was violated.</Description>
+        </Argument>
+        <Argument name='constraint' type='BaseConstraint'>
+          <Description>A subclass of BaseConstraint representing the policy rule that was violated.</Description>
+        </Argument>
+        <Argument name='violation' type='PolicyViolation'>
+          <Description>The PolicyViolation object created to represent the violation.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity object that has the violation.</Description>
+        </Argument>
+        <Argument name='policyName' type='string'>
+          <Description>The name of the Policy object.</Description>
+        </Argument>
+        <Argument name='constraintName' type='string'>
+          <Description>The name of the constraint (aka rule) within the policy.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>A violation of policy '$policyName' rule '$constraintName' was detected on user '$identityName'.
+    </Body>
+    <Subject>Policy violation by $identityName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Policy Violation Delegation">
+    <Description>
+      Email Template for notifying users of the delegation of a policy violation.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object representing the delegation.</Description>
+        </Argument>
+        <Argument name='violation' type='PolicyViolation'>
+          <Description>The PolicyViolation object being delegated.</Description>
+        </Argument>
+        <Argument name='actor' type='Identity'>
+          <Description>The Identity object performing the delegation.</Description>
+        </Argument>
+        <Argument name='description' type='string'>
+          <Description>A short description of the violation.</Description>
+        </Argument>
+        <Argument name='comments' type='string'>
+          <Description>Comments from the actor about the delegation.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>A violation of policy '$violation.policyName' rule '$violation.constraintName' for user '$violation.identity.name' has been delegated to you for action.
+    </Body>
+    <Subject>Policy violation on $violation.identity.name</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Challenge Period Start">
+    <Description>
+      Email Template for notifying certification owners that the challenge period has started.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the Certification beginning the challenge period.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>The challenge period has started for '$certificationName'.  You will be notified
+if any certification decisions are challenged by the affected user.
+    </Body>
+    <Subject>Challenge period started for '$certificationName'</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Challenge Period End">
+    <Description>
+      Email Template for notifying certification owners that the challenge period has ended.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the Certification beginning the challenge period.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>The challenge period has ended for '$certificationName'.  Login to IdentityIQ to
+complete and sign off on the certification.
+    </Body>
+    <Subject>Challenge period ended for '$certificationName'</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Challenge Creation Notification">
+    <Description>
+      Email Template for notifying a challenger that they can challenge a certification decision.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object containing the item being challenged.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the certification.</Description>
+        </Argument>
+        <Argument name='entityName' type='string'>
+          <Description>The name of the item being challenged.</Description>
+        </Argument>
+        <Argument name='challengeItem' type='string'>
+          <Description>A short description of the item being challenged.</Description>
+        </Argument>
+        <Argument name='timeRemaining' type='string'>
+          <Description>The time remaining in the challenge period, formatted as a string.</Description>
+        </Argument>
+        <Argument name='challengeId' type='string'>
+          <Description>The database id of the WorkItem representing the challenge.</Description>
+        </Argument>
+        <Argument name='certificationItem' type='CertificationItem'>
+          <Description>The CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem for the challenge</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>It has been determined that your access to '$challengeItem' will be limited or removed
+completely.  You have $timeRemaining to challenge this decision.
+
+Click on this link to challenge the decision: http://localhost:8080/identityiq/user/challenge.jsf?id=$challengeId
+    </Body>
+    <Subject>Access being removed or limited for '$challengeItem'</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Account Group Challenge Creation Notification">
+    <Description>
+      Email Template for notifying a challenger that they can challenge a certification decision.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object containing the item being challenged.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the certification.</Description>
+        </Argument>
+        <Argument name='entityName' type='string'>
+          <Description>The name of the item being challenged.</Description>
+        </Argument>
+        <Argument name='challengeItem' type='string'>
+          <Description>A short description of the item being challenged.</Description>
+        </Argument>
+        <Argument name='timeRemaining' type='string'>
+          <Description>The time remaining in the challenge period, formatted as a string.</Description>
+        </Argument>
+        <Argument name='challengeId' type='string'>
+          <Description>The database id of the WorkItem representing the challenge.</Description>
+        </Argument>
+        <Argument name='certificationItem' type='CertificationItem'>
+          <Description>The CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem for the challenge</Description>
+        </Argument>
+        
+      </Inputs>
+    </Signature>
+    <Body>It has been determined that permissions on account group '$entityName' will be limited or removed
+completely.  You have $timeRemaining to challenge this decision.
+
+Click on this link to challenge the decision: http://localhost:8080/identityiq/user/challenge.jsf?id=$challengeId
+    </Body>
+    <Subject>Access being removed or limited for '$entityName'</Subject>
+  </EmailTemplate>
+
+
+  <EmailTemplate name="Certification Decision Challenged Notification">
+    <Description>
+      Email Template for notifying a certifier that a decision has been challenged.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='challengeItem' type='string'>
+          <Description>The shortDescription property of the CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the Certification object containing the item being challenged.</Description>
+        </Argument>
+        <Argument name='challengerName' type='string'>
+          <Description>The full name (first and last) of the Identity that made the challenge.</Description>
+        </Argument>
+        <Argument name='challengeComments' type='string'>
+          <Description>Comments from the challenger.</Description>
+        </Argument>
+        <Argument name='certificationItem' type='CertificationItem'>
+          <Description>The CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem for the challenge</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body><![CDATA[$challengerName has challenged the decision for '$challengeItem' in $certificationName.
+
+Comments from $challengerName:
+--------------------------------------------------------------------------------
+$!challengeComments
+--------------------------------------------------------------------------------
+
+Please login to IdentityIQ to accept or reject this challenge.
+]]></Body>
+    <Subject>Certification decision for '$challengeItem' challenged</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Challenge Accepted">
+    <Description>
+      Email Template for notifying a challenger that their challenge was accepted.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='challengeItem' type='string'>
+          <Description>The shortDescription property of the CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='decisionComments' type='string'>
+          <Description>Comments to the challenger.</Description>
+        </Argument>
+        <Argument name='certifierName' type='string'>
+          <Description>The full name (first and last) of the Identity that accepted the challenge.</Description>
+        </Argument>
+        <Argument name='certificationItem' type='CertificationItem'>
+          <Description>The CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem for the challenge</Description>
+        </Argument>
+        
+      </Inputs>
+    </Signature>
+    <Body><![CDATA[$certifierName has accepted the challenge for '$challengeItem' and will change the decision.
+
+Comments from $certifierName:
+--------------------------------------------------------------------------------
+$!decisionComments
+--------------------------------------------------------------------------------
+]]></Body>
+    <Subject>Challenge accepted for '$challengeItem'</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Challenge Rejected">
+    <Description>
+      Email Template for notifying a challenger that their challenge was rejected.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='challengeItem' type='string'>
+          <Description>The shortDescription property of the CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='rejectionComments' type='string'>
+          <Description>Comments to the challenger.</Description>
+        </Argument>
+        <Argument name='certifierName' type='string'>
+          <Description>The full name (first and last) of the Identity that rejected the challenge.</Description>
+        </Argument>
+        <Argument name='certificationItem' type='CertificationItem'>
+          <Description>The CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem for the challenge</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body><![CDATA[$certifierName has rejected the challenge for '$challengeItem'.  The decision will remain.
+
+Comments from $certifierName:
+--------------------------------------------------------------------------------
+$!rejectionComments
+--------------------------------------------------------------------------------
+]]></Body>
+    <Subject>Challenge rejected for '$challengeItem'</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Challenge Expiration">
+    <Description>
+      Email Template for notifying a challenger that they can no longer challenge a certification decision.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='challengeItem' type='string'>
+          <Description>The short description of the CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the certification containing the item being challenged.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+        <Argument name='certificationItem' type='CertificationItem'>
+          <Description>The CertificationItem being challenged.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>The challenge period for '$challengeItem' has expired.  This certification decision can
+no longer be contested.
+    </Body>
+    <Subject>Challenge expired for '$challengeItem'</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Challenge Decision Expiration">
+    <Description>
+      Email Template for notifying a challenger and certifier that an item that was challenged was not
+      acted upon (accepted or rejected) by the time the challenge period expired, so the decision will
+      stay.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='challengeItem' type='string'>
+          <Description>The short description of the CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name='certificationName' type='string'>
+          <Description>The name of the certification containing the item being challenged.</Description>
+        </Argument>
+        <Argument name='certification' type='Certification'>
+          <Description>The Certification object.</Description>
+        </Argument>
+        <Argument name="certificationItem" type="CertificationItem">
+          <Description>The CertificationItem being challenged.</Description>
+        </Argument>
+        <Argument name="workItem" type="WorkItem">
+          <Description>The WorkItem for the challenge</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>The challenge period for the challenged item '$challengeItem' has expired without the
+certifier accepting or rejecting the challenge.  The original decision will stay.
+    </Body>
+    <Subject>Challenge decision expired for '$challengeItem'</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Open Certifications">
+    <Description>
+      Email Template for notifying a manager/app owner that they have open certifications outstanding.
+      This is an "instant" email sent on demand from the certification dashboard components.
+      See EmailBean and Emailer.compileOpenCertEmail for context.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='certifierName' type='string'>
+          <Description>The full name (first and last) of the Identity that owns certifications.</Description>
+        </Argument>
+        <Argument name='certificationCount' type='string'>
+          <Description>The number of certifications the identity owns, passed as a String.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>Dear $certifier,
+
+You have $certification_count certification(s) outstanding.  Please login to
+IdentityIQ to complete your certifications.
+
+Sincerely,
+The Recertification Admin Team
+    </Body>
+    <Subject>$certification_count Certification(s) Outstanding</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Task Result Signoff">
+    <Description>
+      Email Template for notifying a signer of a task or report result.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='ownerName' type='string'>
+          <Description>The display name of the Identity that owns the task result and is expected to sign off.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that launched the task.</Description>
+        </Argument>
+        <Argument name='objectName' type='string'>
+          <Description>The name of the TaskResult object.</Description>
+        </Argument>
+        <Argument name='objectType' type='string'>
+          <Description>Set to "report" if this is a report result or "task" if this is a general task result.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>Dear $owner,
+
+You have been requested to signoff on a $objectType result named: $objectName.
+Please login to IdentityIQ to perform the signoff.
+
+    </Body>
+    <Subject>Signoff for $objectType $objectName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Default Report Template">
+    <Description>
+      Default email template for sending report results.
+      NOTE: There are no input arguments for this template, the report
+      is sent as a PDF and/or csv attachment.
+    </Description>
+    <Signature>
+      <!-- 
+          No inputs, see sailpoint.reporting.JasperExecutor
+          Might want something about who sent it and some comments
+          about what they're supposed to do with it?
+      -->
+    </Signature>
+    <Body>Please find the requested report file(s) attached to this email.</Body>
+    <Subject>IdentityIQ Report</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Provisioning Form Notification">
+    <Description>
+      Email Template for notifying users when they have provisioning forms to complete.
+      This is used by the Do Provisioning Forms workflow subprocess.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem representing the review.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name (usually full name) of the Identity that is the target of the provisioning.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Provisioning Form for $identityDisplayName pending completion</Subject>
+    <Body>
+      <![CDATA[
+A provisioning form for user $identityDisplayName needs to be completed before the provisioning request can be completed.
+
+Please login to IdentityIQ and view your work item inbox to complete this form at your earliest convenience.
+      ]]>
+     </Body>
+  </EmailTemplate>
+
+  <EmailTemplate name="Account Selection Notification">
+    <Description>
+      Email Template for notifying users when they need to select which accounts
+      a provisioning request should apply to when a user has multiple accounts on
+      an application.
+
+      This is used by the Do Provisioning Forms workflow subprocess.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem representing the account selection.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name (usually full name) of the Identity that is the target of the provisioning.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity that is the target of the provisioning.</Description>
+        </Argument>
+        <Argument name='accounts' multi='true' type='AccountSelection'>
+          <Description>A list of AccountSelection objects for the accounts that need to be selected.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Account selection required for $identityDisplayName</Subject>
+    <Body><![CDATA[The accounts that are being targeted for changes must be selected for $identityDisplayName before the provisioning request can be completed.
+
+Please login to IdentityIQ and view your work item inbox to complete this form at your earliest convenience.]]></Body>
+  </EmailTemplate>
+
+  <EmailTemplate name="Work Item Assignment">
+    <Description>
+      Email Template for notifying work item assignee that they have
+      been assigned a work item.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem that is being reassigned.</Description>
+        </Argument>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property of the WorkItem.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the assignment.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>#if ($requesterName) $requesterName #{else} The system #{end} has assigned the following work item to you: $workItemName.
+    </Body>
+    <Subject>Work item assigned: $workItemName</Subject>
+  </EmailTemplate>
+
+<EmailTemplate name="Work Item Assignment Removal">
+    <Description>
+      Email Template for notifying work item assignee that a workitem has been removed
+      from their queue.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem that is being reassigned.</Description>
+        </Argument>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property of the WorkItem.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the assignment.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>#if ($requesterName) $requesterName #{else} The system #{end} has removed the following work item from your queue: $workItemName.
+    </Body>
+    <Subject>Work item assignment removed: $workItemName</Subject>
+ </EmailTemplate>
+
+<EmailTemplate name="Remediation Item Assignment">
+    <Description>
+      Email Template for notifying remediation item assignee that they have
+      been assigned a remediation item.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='remediationItem' type='RemediationItem'>
+          <Description>The RemediationItem that is being reassigned.</Description>
+        </Argument>
+        <Argument name='remediationItemName' type='string'>
+          <Description>The description property of the remediationItem.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The parent WorkItem of the RemediationItem being reassigned.</Description>
+        </Argument>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property of the WorkItem.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the assignment.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>#if ($requesterName) $requesterName #{else} The system #{end} has assigned the following remediation item to you: $remediationItemName. This item is contained within the work item $workItemName.
+    </Body>
+    <Subject>Remediation item assigned: $workItemName</Subject>
+  </EmailTemplate>
+
+<EmailTemplate name="Remediation Item Assignment Removal">
+    <Description>
+      Email Template for notifying remediation item assignee that a remediation item has been removed
+      from their queue.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='remediationItem' type='RemediationItem'>
+          <Description>The RemediationItem that is being reassigned.</Description>
+        </Argument>
+        <Argument name='remediationItemName' type='string'>
+          <Description>The description property of the remediationItem.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The parent WorkItem of the RemediationItem being reassigned.</Description>
+        </Argument>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property of the WorkItem.</Description>
+        </Argument>
+        <Argument name='requesterName' type='string'>
+          <Description>The display name of the Identity that requested the assignment.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>#if ($requesterName) $requesterName #{else} The system #{end} has removed the following remediation item from your queue: remediationItemName. This item is contained within the work item $workItemName.
+    </Body>
+    <Subject>Remediation item assignment removed: $workItemName</Subject>
+ </EmailTemplate>
+
+ <EmailTemplate name="Access Request Reminder">
+    <Description>
+      Email template used to notify work item owner of pending work item for access request.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workItemName' type='string'>
+          <Description>The description property (also the name property) of the request WorkItem.</Description>
+        </Argument>
+        <Argument name='workItemDescription' type='string'>
+          <Description>The WorkItem description.</Description>
+        </Argument>
+        <Argument name='workItem' type='WorkItem'>
+          <Description>The WorkItem object for the request.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>You have a pending work item that requires attention. Work Item: $workItemDescription</Body>
+    <Subject>Access Request requires completion of Work Item ID : $workItemName</Subject>
+ </EmailTemplate>
+
+<EmailTemplate name="Task Status">
+  <Description>
+    Email Template for notifying result of Task.
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name='taskResult' type='TaskResult'>
+        <Description>Task Result</Description>
+      </Argument>
+      <Argument name='taskName' type='string'>
+        <Description>Task Name</Description>
+      </Argument>
+      <Argument name='taskDesc' type='string'>
+        <Description>Task Description</Description>
+      </Argument>
+      <Argument name='taskStartTime' type='date'>
+        <Description>Time when task is started</Description>
+      </Argument>
+      <Argument name='taskEndTime' type='date'>
+        <Description>Time when task is completed.</Description>
+      </Argument>
+      <Argument name='status' type='string'>
+        <Description>Task Status</Description>
+      </Argument>
+      <Argument name='message' type='string' multi='true'>
+        <Description>List of Messages</Description>
+      </Argument>
+      <Argument name='resultId' type='string'>
+        <Description>Task Result Id</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Body>
+The '$taskName' task#if ($status == "Success" ) ended successfully.#{end}#if ($status == "Warning" ) ended with warning.#{end}#if ($status == "Terminated" ) terminated.#{end}#if ($status == "Error" ) ended with error.#{end}
+
+     
+       Started : $spTools.formatDate($taskStartTime,3,1)
+Completed : $spTools.formatDate($taskEndTime,3,1)
+
+#foreach ($msg in $message)
+$msg
+#end
+
+For more details, please check - http://localhost:8080/identityiq/monitor/tasks/renderResults.jsf?TaskResultId=$resultId
+
+  </Body>
+  <Subject>Task $taskName Status - $status </Subject>
+</EmailTemplate>
+
+<EmailTemplate name="Report Completion">
+    <Description>
+      Email Template for notifying report scheduler that the report execution is complete.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='reportName' type='string'>
+          <Description>Name of the report that was completed</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Body>Your report '$reportName' has completed. You may retrieve your report by clicking on the Report Results tab under Analyze -> Reports.
+    </Body>
+    <Subject>Report execution complete</Subject>
+ </EmailTemplate>
+
+
+
+</sailpoint>

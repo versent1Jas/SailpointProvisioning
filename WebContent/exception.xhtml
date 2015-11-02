@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.sys_exception}</ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <div class="formError">
+          <h:outputFormat rendered="#{!syslogEvent.enabled}" value="#{msgs.err_fatal_system}" />
+          <h:outputFormat rendered="#{syslogEvent.enabled and (param['qk'] == null)}" value="#{msgs.err_fatal_system}" />
+          <h:outputFormat rendered="#{syslogEvent.enabled and (param['qk'] != null)}" value="#{msgs.err_fatal_system_qk}">
+              <f:param value="#{param['qk']}"/>
+          </h:outputFormat>
+      </div>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>  
+        
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+</body>
+</html>

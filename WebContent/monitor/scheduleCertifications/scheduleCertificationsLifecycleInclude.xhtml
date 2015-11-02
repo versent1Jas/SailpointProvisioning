@@ -1,0 +1,819 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/popcalendar.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/myfacescalendar/date.js?#{debug.revision}</src>
+    </sp:script>
+
+  <script type="text/javascript">
+
+    <!--//--><![CDATA[//><!--
+
+    var readOnly = #{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}; 
+    var continuousReadOnly = readOnly || #{certificationSchedule.continuousHasLaunched};
+    
+    function resizeCommentBox() {
+        var cb = Ext.get('certificationScheduleForm:resizableCommentBox');
+        var aco = Ext.get('automaticClosingOptions');
+        if(cb && aco) {
+            var dw = aco.getWidth();
+            var cw = Math.floor((dw / 3.6) / 7); // width / 1/3 ish for textarea / ave cols width in px
+            cb.set( {cols:cw} );
+        }
+    }
+
+    //--><!]]>
+    </script>
+
+
+    <link href="#{base.requestContextPath}/scripts/myfacescalendar/theme.css"
+          rel="stylesheet"
+          type="text/css" />
+
+  
+    <tr id="enableStagingHeader" style="display: #{certificationSchedule.identityTrigger ? 'none' : ''}">
+	    <td class="titleColumn certScheduleTitleCol">
+	      <h:outputText value="#{msgs.label_enable_staging}" />
+	    </td>
+	    <td class="certScheduleHelpCol">
+	      <h:graphicImage id="imgHlpEnableStaging" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_enable_staging}"/>
+	    </td>
+	    <td class="certScheduleOptionCol" colspan="6" align="left">
+	      <h:selectBooleanCheckbox
+	        id="certifyEnableStagingSelect"
+	        value="#{certificationSchedule.editedCertificationSchedule.stagingEnabled}"
+	        disabled="#{(not certificationSchedule.editable) or certificationSchedule.existingCertGroup}">
+	        
+	        <a4j:ajax event="change"
+                         oncomplete="SailPoint.CertificationScheduleForm.postSubmit();"
+                         render="activeDates, challengeDates, remediationDates, certification_notificationDates, certification_notificationDatesWarning" />
+	        
+	      </h:selectBooleanCheckbox>
+	    </td>
+	  </tr>
+
+    <tr id="activePeriodEnterRule">
+      <td class="titleColumnWithWrap certScheduleTitleCol">
+        <h:outputText value="#{msgs.cert_sched_active_phase_enter_rule}"/>
+      </td>
+      <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpActivePhaseEnterRule" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_active_phase_enter_rule}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <a4j:outputPanel id="activePhaseEnterRulePanel">
+        <h:selectOneMenu id="activePhaseEnterRule"
+                         disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastStagedPhase}"
+                         readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastStagedPhase}"
+                         value="#{certificationSchedule.editedCertificationSchedule.activePhaseEnterRuleName}"
+                         rendered="#{!(empty certificationSchedule.phaseChangeRules)}">
+                         
+          <f:selectItems value="${certificationSchedule.phaseChangeRules}"/>
+        </h:selectOneMenu>
+
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}" >
+        <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                         style="display: #{(not certificationSchedule.editable) or certificationSchedule.pastStagedPhase ? 'none' : ''}"
+               onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:activePhaseEnterRule').value,
+                                                   'CertificationPhaseChange',
+                                                   $('certificationScheduleForm:refreshPhaseChangeRuleButton'));">
+          <f:attribute name="disabled" value="disabled" rendered="#{certificationSchedule.pastStagedPhase}"/>
+        </input>
+        </ui:fragment>
+        </a4j:outputPanel>
+        <h:outputText value="#{msgs.cert_sched_adv_no_exclusion_rules_defined}" rendered="#{(empty certificationSchedule.exclusionRules)}"/>
+      </td>
+    </tr>
+
+    <tr id="activeOptions" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.label_active_period_duration}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpDur" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_freq_dur}" />
+      </td>
+      <td class="certScheduleOptionCol" colspan="2" align="left">
+        <h:inputText id="activeDuration" value="#{certificationSchedule.editedCertificationSchedule.activePeriodDurationAmount}" size="3"
+                     disabled="#{not (certificationSchedule.activePeriodDurationEditable and certificationSchedule.editable)}"
+                     readonly="#{not (certificationSchedule.activePeriodDurationEditable and certificationSchedule.editable)}">
+          <a4j:ajax event="change" oncomplete="SailPoint.CertificationScheduleForm.postSubmit();" render="activeDates, challengeDates, remediationDates, automaticClosingDate, certification_notificationDates" />
+        </h:inputText>
+        <h:selectOneListbox
+          id="activeDurationDurationScale"
+          size="1"
+          converter="sailpoint.object.Enum"
+          value="#{certificationSchedule.editedCertificationSchedule.activePeriodDurationScale}"
+          disabled="#{not (certificationSchedule.activePeriodDurationEditable and certificationSchedule.editable)}"
+          readonly="#{not (certificationSchedule.activePeriodDurationEditable and certificationSchedule.editable)}">
+          <a4j:ajax event="change" oncomplete="SailPoint.CertificationScheduleForm.postSubmit();" render="activeDates, challengeDates, remediationDates, automaticClosingDate, certification_notificationDates" />
+          <f:selectItems value="#{certificationSchedule.durationScales}" />
+        </h:selectOneListbox>
+
+        <a4j:outputPanel id="activeDates">
+          <ui:fragment rendered="#{!certificationSchedule.identityTrigger}">
+            <f:verbatim>&amp;nbsp;</f:verbatim>
+            <h:outputText value="#{certificationSchedule.editedCertificationSchedule.activeStartDate}">
+              <f:convertDateTime pattern="#{certificationSchedule.phaseDatePattern}" timeZone="#{base.userTimeZone}" />
+              
+            </h:outputText>
+            <f:verbatim>&amp;nbsp;-&amp;nbsp;</f:verbatim>
+            <h:outputText value="#{certificationSchedule.editedCertificationSchedule.activeEndDate}">
+              <f:convertDateTime pattern="#{certificationSchedule.phaseDatePattern}" timeZone="#{base.userTimeZone}" />
+            </h:outputText>
+            
+            <ui:fragment rendered="#{certificationSchedule.tentativeActivationDate}">
+            	<h:graphicImage id="imgHlpActiveDates" styleClass="helpIcon" url="/images/icons/diamond_warning_yellow_16.gif" alt="#{certificationSchedule.tentativeDateWarning}" />
+            </ui:fragment>
+          </ui:fragment>
+        </a4j:outputPanel>
+
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message styleClass="formErrorNoWrap" for="activeDuration" />
+        </a4j:outputPanel>
+      </td>
+    </tr>
+
+
+    <!-- CONTINUOUS OPTIONS -->
+    <tr id="certifiedDuration" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? '' : 'none'}">
+      <td class="titleColumn certScheduleTitleCol">
+        <!-- This is set when the Frequency is changed. -->
+        <h:inputHidden id="continuous" value="#{certificationSchedule.editedCertificationSchedule.continuous}" />
+
+        <h:outputText value="#{msgs.label_certified_duration}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpCertifiedDur" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_certified_duration}" />
+      </td>
+      <td class="certScheduleOptionCol" colspan="2" align="left">
+        <h:inputText id="certifiedDuration" value="#{certificationSchedule.editedCertificationSchedule.certifiedDurationAmount}" size="3"
+                     disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                     readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+        <h:selectOneListbox
+          id="certifiedDurationScale"
+          size="1"
+          converter="sailpoint.object.Enum"
+          value="#{certificationSchedule.editedCertificationSchedule.certifiedDurationScale}"
+          disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+          readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+          <f:selectItems value="#{certificationSchedule.durationScales}" />
+        </h:selectOneListbox>
+
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message styleClass="formErrorNoWrap" for="certifiedDuration" />
+        </a4j:outputPanel>
+      </td>
+    </tr>
+
+    <tr id="certificationRequiredDuration" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? '' : 'none'}">
+      <td class="titleColumn certScheduleTitleCol">
+        <h:outputText value="#{msgs.label_certification_req_duration}" />
+      </td>
+      <td class="certScheduleHelpCol">
+        <h:graphicImage id="imgHlpCertReqDur" styleClass="helpIcon"
+        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_certification_req_duration}" />
+      </td>
+      <td class="certScheduleOptionCol" colspan="2" align="left">
+        <h:inputText id="certificationRequiredDuration" value="#{certificationSchedule.editedCertificationSchedule.certificationRequiredDurationAmount}" size="3"
+                     disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+                     readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}" />
+        <h:selectOneListbox
+          id="certificationRequiredDurationScale"
+          size="1"
+          converter="sailpoint.object.Enum"
+          value="#{certificationSchedule.editedCertificationSchedule.certificationRequiredDurationScale}"
+          disabled="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}"
+          readonly="#{certificationSchedule.existingCertGroup or (not certificationSchedule.editable)}">
+          <f:selectItems value="#{certificationSchedule.durationScales}" />
+        </h:selectOneListbox>
+
+        <a4j:outputPanel ajaxRendered="true">
+          <h:message styleClass="formErrorNoWrap" for="certificationRequiredDuration" />
+        </a4j:outputPanel>
+      </td>
+    </tr>
+
+    <!-- Challenge period configuration -->
+    <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showChallengePeriod}">
+        <tr>
+          <td class="titleColumn certScheduleTitleCol"><h:outputText
+            value="#{msgs.label_enable_challenge_period}" />
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpClg" styleClass="helpIcon"
+            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_chlg}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+
+            <h:selectBooleanCheckbox
+              id="certifyChallengeSelect"
+              value="#{certificationSchedule.editedCertificationSchedule.challengePeriodEnabled}"
+              disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastActivePhase}"
+              readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastActivePhase}">
+              <a4j:ajax event="click"
+                            onbeforesubmit="SailPoint.CertificationScheduleForm.toggleCertificationPhaseOptions(this, $('challengePeriodConfig'));"
+                            oncomplete="SailPoint.CertificationScheduleForm.postSubmit();"
+                           render="challengeDates, remediationDates, automaticClosingDate, certification_notificationDates" />
+            </h:selectBooleanCheckbox>
+          </td>
+        </tr>
+
+        <tr>
+          <td width="25%" colspan="2"></td>
+          <td colspan="6">
+            <div id="challengePeriodConfig" style="display: #{certificationSchedule.editedCertificationSchedule.challengePeriodEnabled ? '' : 'none'}">
+              <table class="width100">
+                <thead>
+                  <tr><th colspan="5" class="dashContentHeader">
+                    <h:outputText value="#{msgs.label_challenge_period_config}" />
+                  </th></tr>
+                </thead>
+                <tbody>
+
+                  <tr>
+                    <td class="certScheduleTitleColNotifications">
+                      <h:outputText value="#{msgs.cert_sched_challenge_phase_enter_rule}"/>
+                    </td>
+                    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpChallengePhaseEnterRule" styleClass="helpIcon"
+                        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_challenge_phase_enter_rule}"/>
+                    </td>
+                    <td class="certScheduleOptionColNotifications" colspan="6" align="left">
+                      <a4j:outputPanel id="challengePhaseEnterRulePanel">
+                      <h:selectOneMenu id="challengePhaseEnterRule"
+                                       disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastActivePhase}"
+                                       readonly="#{(not certificationSchedule.editable) or ertificationSchedule.pastActivePhase}"
+                                       value="#{certificationSchedule.editedCertificationSchedule.challengePhaseEnterRuleName}"
+                                       rendered="#{!(empty certificationSchedule.phaseChangeRules)}">
+                        <f:selectItems value="${certificationSchedule.phaseChangeRules}"/>
+                      </h:selectOneMenu>
+
+                      <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}">
+                        <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                           style="display: #{((not certificationSchedule.editable) or certificationSchedule.pastActivePhase) ? 'none' : ''}"
+                          onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:challengePhaseEnterRule').value,
+                                                                       'CertificationPhaseChange',
+                                                                       $('certificationScheduleForm:refreshPhaseChangeRuleButton'))">
+                        <f:attribute name="disabled" value="disabled" rendered="#{(not certificationSchedule.editable) or certificationSchedule.pastActivePhase}" />
+                        </input>
+                      </ui:fragment>
+                      </a4j:outputPanel>
+                      <h:outputText value="#{msgs.cert_sched_adv_no_exclusion_rules_defined}" rendered="#{(empty certificationSchedule.exclusionRules)}"/>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td class="certScheduleTitleColNotifications"><h:outputText value="#{msgs.label_challenge_period_duration}" /></td>
+                    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpClgDuration" styleClass="helpIcon"
+                      url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_chlg_duration}"/>
+                    </td>
+                    <td class="certScheduleOptionCol">
+                      <h:inputText id="challengeDuration" value="#{certificationSchedule.editedCertificationSchedule.challengePeriodDurationAmount}" size="3"
+                                   disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                                   readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}">
+                        <a4j:ajax event="change" oncomplete="SailPoint.CertificationScheduleForm.postSubmit();" render="challengeDates, remediationDates, automaticClosingDate, certification_notificationDates" />
+                      </h:inputText>
+                      <h:selectOneListbox
+                        id="challengeDurationDurationScale"
+                        size="1"
+                        converter="sailpoint.object.Enum"
+                        value="#{certificationSchedule.editedCertificationSchedule.challengePeriodDurationScale}"
+                        disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                        readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}">
+                        <a4j:ajax event="change" oncomplete="SailPoint.CertificationScheduleForm.postSubmit();" render="challengeDates, remediationDates, automaticClosingDate, certification_notificationDates" />
+                        <f:selectItems value="#{certificationSchedule.durationScales}" />
+                      </h:selectOneListbox>
+
+                      <a4j:outputPanel id="challengeDates" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous or certificationSchedule.editedCertificationSchedule.processRevokesImmediately) ? 'none' :''}">
+                        <ui:fragment rendered="#{null != certificationSchedule.editedCertificationSchedule.challengeEndDate}">
+                          <f:verbatim>&amp;nbsp;</f:verbatim>
+                          <h:outputText value="#{certificationSchedule.editedCertificationSchedule.activeEndDate}">
+                            <f:convertDateTime pattern="#{certificationSchedule.phaseDatePattern}" timeZone="#{base.userTimeZone}" />
+                          </h:outputText>
+                          <f:verbatim>&amp;nbsp;-&amp;nbsp;</f:verbatim>
+                          <h:outputText value="#{certificationSchedule.editedCertificationSchedule.challengeEndDate}">
+                            <f:convertDateTime pattern="#{certificationSchedule.phaseDatePattern}" timeZone="#{base.userTimeZone}" />
+                          </h:outputText>
+                          
+                          <ui:fragment rendered="#{certificationSchedule.tentativeActivationDate}">
+                          	<h:graphicImage id="imgHlpChallengeDates" styleClass="helpIcon" url="/images/icons/diamond_warning_yellow_16.gif" alt="#{certificationSchedule.tentativeDateWarning}" />
+                          </ui:fragment>
+                          
+                        </ui:fragment>
+                      </a4j:outputPanel>
+
+                      <a4j:outputPanel ajaxRendered="true">
+                        <h:message for="challengeDuration" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                      </a4j:outputPanel>
+                    </td>
+                  </tr>
+                  <tr><th colspan="5" class="dashContentHeader">
+                    <h:outputText value="#{msgs.label_challenge_email_templates_config}" />
+                  </th></tr>
+                  <tr id="challengePeriodStartRow" class="certScheduleTitleColNotifications">
+                      <td >
+                        <h:outputText
+                          value="#{msgs.cert_sched_email_template_challenge_period_start_certifier}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgStartEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_start_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastActivePhase}"
+                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastActivePhase}"
+                          value='#{certificationSchedule.editedCertificationSchedule.challengePeriodStartEmailTemplate}'
+                          onchange="">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+                    </tr>
+                    <tr id="challengePeriodEndRow" class="certScheduleTitleColNotifications" >
+                      <td >
+                        <h:outputText
+                          value="#{msgs.cert_sched_email_template_challenge_period_end_certifier}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgEndEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_end}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                          value='#{certificationSchedule.editedCertificationSchedule.challengePeriodEndEmailTemplate}'
+                          onchange="">
+                          <f:selectItems value="#{systemConfig.emailTemplates}" />
+                        </h:selectOneMenu>
+                      </td>
+                    </tr>
+                    <tr id="challengePeriodGenerationRow" class="certScheduleTitleColNotifications" >
+                      <td >
+                        <h:outputText
+                          value="#{msgs.cert_sched_email_template_challenge_generation_challenger}" />
+                      </td>
+                      <td width="15px">
+                        <h:graphicImage id="imgHlpChlgGenEmail"
+                          width="12px" height="12px" alt="#{help.help_system_config_chlg_generation_email}"
+                          style="cursor:pointer;padding: 0px 7px 0px 7px"
+                          url="/images/icons/dashboard_help_16.png"/>
+                      </td>
+                      <td align="left">
+                        <h:selectOneMenu
+                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                          value='#{certificationSchedule.editedCertificationSchedule.challengeGenerationEmailTemplate}'
+                      onchange="">
+                      <f:selectItems value="#{systemConfig.emailTemplates}" />
+                    </h:selectOneMenu>
+                  </td>
+                </tr>
+                <tr id="challengeDecisionNoticesRow" class="certScheduleTitleColNotifications" >
+                  <td >
+                    <h:outputText
+                      value="#{msgs.cert_sched_email_template_challenge_decisions_certifier}" />
+                  </td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpChlgChallengedEmail"
+                      width="12px" height="12px" alt="#{help.help_system_config_chlg_challenged_email}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td align="left">
+                    <h:selectOneMenu
+                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                      value='#{certificationSchedule.editedCertificationSchedule.certificationDecisionChallengedEmailTemplate}'
+                      onchange="">
+                      <f:selectItems value="#{systemConfig.emailTemplates}" />
+                    </h:selectOneMenu>
+                  </td>
+                </tr>
+                <tr id="challengeExpiredRow" class="certScheduleTitleColNotifications" >
+                  <td >
+                    <h:outputText
+                      value="#{msgs.cert_sched_email_template_challenge_expiration_challenger}" />
+                  </td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpChlgExpEmail"
+                      width="12px" height="12px" alt="#{help.help_system_config_chlg_expired_email}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td align="left">
+                    <h:selectOneMenu
+                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                      value='#{certificationSchedule.editedCertificationSchedule.challengeExpirationEmailTemplate}'
+                      onchange="">
+                      <f:selectItems value="#{systemConfig.emailTemplates}" />
+                    </h:selectOneMenu>
+                  </td>
+
+                </tr>
+                <tr id="challengeDecisionExpirationRow" class="certScheduleTitleColNotifications" >
+                  <td >
+                    <h:outputText
+                      value="#{msgs.cert_sched_email_template_challenge_decision_expiration}" />
+                  </td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpChlgDecExpEmail"
+                      width="12px" height="12px" alt="#{help.help_system_config_chlg_decision_expired_email}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td align="left">
+                    <h:selectOneMenu
+                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                      value='#{certificationSchedule.editedCertificationSchedule.challengeDecisionExpirationEmailTemplate}'
+                      onchange="">
+                      <f:selectItems value="#{systemConfig.emailTemplates}" />
+                    </h:selectOneMenu>
+                  </td>
+
+                </tr>
+                <tr id="challengeAcceptedRow" class="certScheduleTitleColNotifications" >
+                  <td >
+                    <h:outputText
+                      value="#{msgs.cert_sched_email_template_challenge_accepted}" />
+                  </td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpChlgAcceptedEmail"
+                      width="12px" height="12px" alt="#{help.help_system_config_chlg_accepted_email}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td align="left">
+                    <h:selectOneMenu
+                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                      value='#{certificationSchedule.editedCertificationSchedule.challengeAcceptedEmailTemplate}'
+                      onchange="">
+                      <f:selectItems value="#{systemConfig.emailTemplates}" />
+                    </h:selectOneMenu>
+                  </td>
+
+                </tr>
+                <tr id="challengeRejectedRow" class="certScheduleTitleColNotifications" >
+                  <td >
+                    <h:outputText
+                      value="#{msgs.cert_sched_email_template_challenge_rejected}" />
+                  </td>
+                  <td width="15px">
+                    <h:graphicImage id="imgHlpChlgRejectedEmail"
+                      width="12px" height="12px" alt="#{help.help_system_config_chlg_rejected_email}"
+                      style="cursor:pointer;padding: 0px 7px 0px 7px"
+                      url="/images/icons/dashboard_help_16.png"/>
+                  </td>
+                  <td align="left">
+                    <h:selectOneMenu
+                           disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                           readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                      value='#{certificationSchedule.editedCertificationSchedule.challengeRejectedEmailTemplate}'
+                      onchange="">
+                      <f:selectItems value="#{systemConfig.emailTemplates}" />
+                    </h:selectOneMenu>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+    </ui:fragment>
+
+    <!-- Remediation period configuration -->
+    <ui:fragment rendered="#{certificationSchedule.editedCertificationSchedule.showRemediationPeriod}">
+        <tr>
+          <td class="titleColumn certScheduleTitleCol"><h:outputText
+            value="#{msgs.label_enable_remediation_period}" />
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpRemed" styleClass="helpIcon"
+            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_remed}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+
+            <h:selectBooleanCheckbox
+              id="certifyRemediationSelect"
+              value="#{certificationSchedule.editedCertificationSchedule.remediationPeriodEnabled}"
+              disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+              readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}">
+              <a4j:ajax event="click"
+                           onbeforesubmit="SailPoint.CertificationScheduleForm.toggleCertificationPhaseOptions(this, $('remediationPeriodConfig'));
+                                     $('certificationRemediationSelectWarning').style.display = ( $('certificationScheduleForm:certifyRemediationSelect').checked ? 'none' : '' );"
+                           oncomplete="SailPoint.CertificationScheduleForm.postSubmit();"
+                           render="challengeDates, remediationDates, certificationRemediationSelectWarning" />
+            </h:selectBooleanCheckbox>
+            <div id="certificationRemediationSelectWarning" class='formWarn' style="display: #{certificationSchedule.editedCertificationSchedule.remediationPeriodEnabled ? 'none' : ''}">
+                <h:outputText value="#{msgs.cert_sched_remediation_scanner_warning}" />
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td width="25%" colspan="2"></td>
+          <td colspan="6">
+            <div id="remediationPeriodConfig" style="display: #{certificationSchedule.editedCertificationSchedule.remediationPeriodEnabled ? '' : 'none'}">
+              <table class="width100">
+                <thead>
+                  <tr><th colspan="5" class="dashContentHeader">
+                    <h:outputText value="#{msgs.label_remediation_period_config}" />
+                  </th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="titleColumn certScheduleTitleCol">
+                      <h:outputText value="#{msgs.cert_sched_remediation_phase_enter_rule}"/>
+                    </td>
+                    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpRemediationPhaseEnterRule" styleClass="helpIcon"
+                        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_remediation_phase_enter_rule}"/>
+                    </td>
+                    <td class="certScheduleOptionCol" colspan="6" align="left">
+                      <a4j:outputPanel id="remediationPhaseEnterRulePanel">
+                      <h:selectOneMenu id="remediationPhaseEnterRule"
+                                       disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                                       readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}"
+                                       value="#{certificationSchedule.editedCertificationSchedule.remediationPhaseEnterRuleName}"
+                                       rendered="#{!(empty certificationSchedule.phaseChangeRules)}">
+                        <f:selectItems value="${certificationSchedule.phaseChangeRules}"/>
+                      </h:selectOneMenu>
+
+                      <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}">
+                        <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                           style="display: #{((not certificationSchedule.editable) or certificationSchedule.pastChallengePhase) ? 'none' : ''}"
+                          onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:remediationPhaseEnterRule').value,
+                                                                       'CertificationPhaseChange',
+                                                                       $('certificationScheduleForm:refreshPhaseChangeRuleButton'))">
+                          <f:attribute name="disabled" value="disabled" rendered="#{(not certificationSchedule.editable) or certificationSchedule.pastChallengePhase}" />
+                        </input>
+                      </ui:fragment>
+                      </a4j:outputPanel>
+                      <h:outputText value="#{msgs.cert_sched_adv_no_exclusion_rules_defined}" rendered="#{(empty certificationSchedule.exclusionRules)}"/>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.label_remediation_period_duration}" /></td>
+                    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpRemedDuration" styleClass="helpIcon"
+                      url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_remed_duration}"/>
+                    </td>
+                    <td class="certScheduleOptionCol">
+                      <h:inputText id="remediationDuration" value="#{certificationSchedule.editedCertificationSchedule.remediationPeriodDurationAmount}" size="3"
+                                   disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastRemediationPhase}"
+                                   readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastRemediationPhase}">
+                        <a4j:ajax event="change" oncomplete="SailPoint.CertificationScheduleForm.postSubmit();" render="challengeDates, remediationDates" />
+                      </h:inputText>
+                      <h:selectOneListbox
+                        id="remediationDurationDurationScale"
+                        size="1"
+                        converter="sailpoint.object.Enum"
+                        value="#{certificationSchedule.editedCertificationSchedule.remediationPeriodDurationScale}"
+                        disabled="#{(not certificationSchedule.editable) or certificationSchedule.pastRemediationPhase}"
+                        readonly="#{(not certificationSchedule.editable) or certificationSchedule.pastRemediationPhase}">
+                        <a4j:ajax event="change" oncomplete="SailPoint.CertificationScheduleForm.postSubmit();" render="challengeDates, remediationDates" />
+                        <f:selectItems value="#{certificationSchedule.durationScales}" />
+                      </h:selectOneListbox>
+
+                      <a4j:outputPanel id="remediationDates" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous or certificationSchedule.editedCertificationSchedule.processRevokesImmediately) ? 'none' :''}">
+                        <ui:fragment rendered="#{null != certificationSchedule.editedCertificationSchedule.remediationStartDate}">
+                          <f:verbatim>&amp;nbsp;</f:verbatim>
+                          <h:outputText value="#{certificationSchedule.editedCertificationSchedule.remediationStartDate}">
+                            <f:convertDateTime pattern="#{certificationSchedule.phaseDatePattern}" timeZone="#{base.userTimeZone}" />
+                          </h:outputText>
+                          <f:verbatim>&amp;nbsp;-&amp;nbsp;</f:verbatim>
+                          <h:outputText value="#{certificationSchedule.editedCertificationSchedule.remediationEndDate}">
+                            <f:convertDateTime pattern="#{certificationSchedule.phaseDatePattern}" timeZone="#{base.userTimeZone}" />
+                          </h:outputText>
+                          
+                          <ui:fragment rendered="#{certificationSchedule.tentativeActivationDate}">
+                          	<h:graphicImage id="imgHlpRemediationDates" styleClass="helpIcon" url="/images/icons/diamond_warning_yellow_16.gif" alt="#{certificationSchedule.tentativeDateWarning}" />
+                          </ui:fragment>
+                        </ui:fragment>
+                      </a4j:outputPanel>
+
+                      <a4j:outputPanel ajaxRendered="true">
+                        <h:message for="remediationDuration" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                      </a4j:outputPanel>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+    </ui:fragment>
+
+    <tr id='endPhaseRule'>
+      <td class="titleColumnWithWrap certScheduleTitleCol">
+        <h:outputText value="#{msgs.cert_sched_end_phase_enter_rule}"/>
+      </td>
+      <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpEndPhaseEnterRule" styleClass="helpIcon"
+          url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_end_phase_enter_rule}"/>
+      </td>
+      <td class="certScheduleOptionCol" colspan="6" align="left">
+        <a4j:outputPanel id="endPhaseEnterRulePanel">
+        <h:selectOneMenu id="endPhaseEnterRule"
+                         disabled="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                         readonly="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                         value="#{certificationSchedule.editedCertificationSchedule.endPhaseEnterRuleName}"
+                         rendered="#{!(empty certificationSchedule.phaseChangeRules)}">
+          <f:selectItems value="${certificationSchedule.phaseChangeRules}"/>
+        </h:selectOneMenu>
+
+        <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}">
+          <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                           style="display: #{(not certificationSchedule.editable) ? 'none' : ''}"
+            onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:endPhaseEnterRule').value,
+                                                   'CertificationPhaseChange',
+                                                   $('certificationScheduleForm:refreshPhaseChangeRuleButton'))">
+            <f:attribute name="disabled" value="disabled" rendered="#{certificationSchedule.pastRemediationPhase}" />
+          </input>
+        </ui:fragment>
+        </a4j:outputPanel>
+        <h:outputText value="#{msgs.cert_sched_adv_no_exclusion_rules_defined}" rendered="#{(empty certificationSchedule.exclusionRules)}"/>
+      </td>
+    </tr>
+
+        <tr id="processRevokesImmediately" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+          <td class="titleColumn certScheduleTitleCol">
+            <h:outputText value="#{msgs.cert_sched_freq_process_revokes_immediately}" />
+          </td>
+          <td class="certScheduleHelpCol">
+            <h:graphicImage id="imgHlpProcessRevokesImmediately" styleClass="helpIcon"
+            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_process_revokes_immediately}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+            <h:selectBooleanCheckbox id="processRevokesImmediately"
+                                     value="#{certificationSchedule.editedCertificationSchedule.processRevokesImmediately}"
+                                     onclick="SailPoint.CertificationScheduleForm.processRevokesImmediatelyToggled(this);"
+                                     disabled="#{certificationSchedule.existingCertGroup}"
+                                     readonly="#{certificationSchedule.existingCertGroup}" />
+          </td>
+        </tr>
+
+        <!-- Auto close configuration -->
+        <tr id="automaticClosingHeader" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+          <td class="titleColumn certScheduleTitleCol"><h:outputText
+            value="#{msgs.label_enable_automatic_closing}" />
+          </td>
+          <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpAutoClose" styleClass="helpIcon"
+            url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_automatic_closing}"/>
+          </td>
+          <td class="certScheduleOptionCol" colspan="6" align="left">
+
+            <h:selectBooleanCheckbox
+              id="certifyAutomaticClosingSelect"
+              value="#{certificationSchedule.editedCertificationSchedule.automaticClosingEnabled}"
+              disabled="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+              readonly="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+              onclick="showHideWithLock($('automaticClosingConfig'), this); resizeCommentBox();">
+              <a4j:ajax event="change"
+                        limitRender="true"
+                        oncomplete="SailPoint.CertificationScheduleForm.postSubmit();"
+                        render="automaticClosingDate" />
+            </h:selectBooleanCheckbox>
+          </td>
+        </tr>
+
+        <tr id="automaticClosingOptions" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous) ? 'none' : ''}">
+          <td width="25%" colspan="2"></td>
+          <td colspan="6">
+            <div id="automaticClosingConfig" style="display: #{certificationSchedule.editedCertificationSchedule.automaticClosingEnabled ? '' : 'none'}">
+              <table class="width100">
+                <thead>
+                  <tr><th colspan="5" class="dashContentHeader">
+                    <h:outputText value="#{msgs.label_automatic_closing_config}" />
+                  </th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="titleColumn certScheduleTitleCol"><h:outputText value="#{msgs.label_automatic_closing_duration}" /></td>
+                    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpAutoCloseDuration" styleClass="helpIcon"
+                      url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_automatic_closing_duration}"/>
+                    </td>
+                    <td class="certScheduleOptionCol">
+                      <h:inputText id="automaticClosingInterval" value="#{certificationSchedule.editedCertificationSchedule.automaticClosingInterval}" size="3"
+                                   disabled="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                                   readonly="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}">
+                        <a4j:ajax event="change" oncomplete="SailPoint.CertificationScheduleForm.postSubmit();" render="automaticClosingDate" />
+                      </h:inputText>
+                      <h:selectOneListbox
+                        id="automaticClosingIntervalScale"
+                        size="1"
+                        converter="sailpoint.object.Enum"
+                        value="#{certificationSchedule.editedCertificationSchedule.automaticClosingIntervalScale}"
+                        disabled="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                        readonly="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}">
+                        <a4j:ajax event="change" oncomplete="SailPoint.CertificationScheduleForm.postSubmit();" render="automaticClosingDate" />
+                        <f:selectItems value="#{certificationSchedule.durationScales}" />
+                      </h:selectOneListbox>
+
+                      <a4j:outputPanel id="automaticClosingDate" style="display: #{(certificationSchedule.editedCertificationSchedule.continuous or certificationSchedule.editedCertificationSchedule.processRevokesImmediately) ? 'none' :''}">
+                        <ui:fragment rendered="#{null != certificationSchedule.editedCertificationSchedule.automaticClosingDate}">
+                          <f:verbatim>&amp;nbsp;</f:verbatim>
+                          <h:outputText value="#{certificationSchedule.editedCertificationSchedule.automaticClosingDate}">
+                            <f:convertDateTime dateStyle="short" timeZone="#{base.userTimeZone}" />
+                          </h:outputText>
+                        </ui:fragment>
+                      </a4j:outputPanel>
+
+                      <a4j:outputPanel ajaxRendered="true">
+                        <h:message for="automaticClosingInterval" infoClass="formInfo" warnClass="formWarn" errorClass="formErrorNoWrap" fatalClass="formErrorNoWrap"/>
+                      </a4j:outputPanel>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="titleColumn certScheduleTitleCol">
+                      <h:outputText value="#{msgs.cert_sched_automatic_closing_rule}"/>
+                    </td>
+                    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpAutomaticClosingRule" styleClass="helpIcon"
+                        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_automatic_closing_rule}"/>
+                    </td>
+                    <td class="certScheduleOptionCol" colspan="6" align="left">
+                      <a4j:outputPanel id="automaticClosingRulePanel">
+                      <h:selectOneMenu id="automaticClosingRule"
+                                       disabled="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                                       readonly="#{certificationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                                       value="#{certificationSchedule.editedCertificationSchedule.automaticClosingRuleName}"
+                                       rendered="#{!(empty certificationSchedule.automaticClosingRules)}">
+                        <f:selectItems value="${certificationSchedule.automaticClosingRules}"/>
+                      </h:selectOneMenu>
+
+                      <ui:fragment rendered="#{sp:hasRight(facesContext, 'ManageRules')}">
+                        <input type="button" value="#{msgs.button_ellipsis}" class="ruleEditorBtn"
+                           style="display: #{(not certificationSchedule.editable) ? 'none' : ''}"
+                          onclick="SailPoint.Rule.Editor.edit($('certificationScheduleForm:automaticClosingRule').value,
+                                                                       'CertificationAutomaticClosing',
+                                                                       $('certificationScheduleForm:refreshAutomaticClosingRuleButton'))">
+                          <f:attribute name="disabled" value="disabled" rendered="#{certificationSchedule.pastRemediationPhase}" />
+                        </input>
+                      </ui:fragment>
+                      </a4j:outputPanel>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="titleColumn certScheduleTitleCol">
+                      <h:outputText value="#{msgs.label_automatic_closing_action}"/>
+                    </td>
+                    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpAutomaticClosingAction" styleClass="helpIcon"
+                        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_automatic_closing_action}"/>
+                    </td>
+                    <td align="left">
+                      <h:selectOneMenu value='#{certificationSchedule.editedCertificationSchedule.automaticClosingAction}'
+                                       disabled="#{certifcationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                                       converter="sailpoint.object.Enum">
+                        <f:selectItems value="#{certificationSchedule.automaticClosingActions}" />
+                      </h:selectOneMenu>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="titleColumn certScheduleTitleCol">
+                      <h:outputText value="#{msgs.label_automatic_closing_comments}"/>
+                    </td>
+                    <td class="certScheduleHelpCol"><h:graphicImage id="imgHlpAutomaticClosingComments" styleClass="helpIcon"
+                        url="/images/icons/dashboard_help_16.png" alt="#{help.help_sched_cert_automatic_closing_comments}"/>
+                    </td>
+                    <td align="left">
+                      <h:inputTextarea rows="4" cols="50" id="resizableCommentBox" disabled="#{certifcationSchedule.pastRemediationPhase or (not certificationSchedule.editable)}"
+                                       value="#{certificationSchedule.editedCertificationSchedule.automaticClosingComments}" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+
+    <a4j:commandButton id="refreshPhaseChangeRuleButton"
+                       style="display:none"
+                       immediate="true"
+                       render="activePhaseEnterRulePanel,challengePhaseEnterRulePanel,remediationPhaseEnterRulePanel,endPhaseEnterRulePanel"/>
+
+    <a4j:commandButton id="refreshAutomaticClosingRuleButton"
+                       style="display:none"
+                       immediate="true"
+                       render="automaticClosingRulePanel"/>
+
+</ui:composition>
+
+</body>
+</html>

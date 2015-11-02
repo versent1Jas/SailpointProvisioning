@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2014 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+<f:view>
+    <script type="text/javascript">
+      function getSchemaObjectType() {
+        if (typeof g_schemaObjectType == "undefined") {
+          return "";
+        } else {
+          return g_schemaObjectType;
+        }
+      }
+    </script>
+    <div id="applicationConfigTabs" class="submenuContentBox x-hidden" style="border:0px">
+        <div id="attributesContent" class="submenuContentBox x-hidden" style="border:0px">
+
+            <a4j:outputPanel id="attributePanel">
+                <a4j:outputPanel rendered="#{sp:hasRight(facesContext, 'ManageApplication') and applicationObject.hasUndefinedSchemas}" ajaxRendered="true">
+                <div>
+                    <button type="button" onclick="ApplicationPage.showAddSchemaWindow(#{applicationObject.undefinedScheamsJSON})"
+                            class="secondaryBtn" style="margin-bottom:10px">#{msgs.app_button_add_object_type}</button>
+                    <a4j:commandButton value="#{msgs.add_group_schema}"
+                                       id="addSchemaBtn"
+                                       style="display: none"
+                                       action="#{applicationObject.addGroupSchemaAction}"
+                                       render="schemaData, errorPanel, templatesList"
+                                       oncomplete="enterKeyCheck($('appSchemasContent')); refreshTabPanel();">
+                        <a4j:param name="schemaObjectType" noEscape="true" value="getSchemaObjectType()" assignTo="#{applicationObject.schemaObjectType}" />
+                    </a4j:commandButton>
+                </div>
+                </a4j:outputPanel>
+                    <ui:include src="#{applicationObject.attributesForm}"/>
+
+                    <h:panelGrid columns="2" columnClasses=",padded width100" styleClass="marUp width100">
+                        <a4j:commandButton id="testButton"
+                                           value="#{msgs.button_test_connection}"
+                                           styleClass="secondaryBtn"
+                                           action="#{applicationObject.testConnectorAction}"
+                                           onclick="startTest(this)"
+                                           oncomplete="endTest()"
+                                           render="testResultsPanel, errorPanel"/>
+                        <a4j:outputPanel id="testResultsPanel">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="testResultsDiv" class="#{applicationObject.testSuccess ? 'successText' : 'failText'}">
+                                            <h:outputText value="#{applicationObject.testResult}"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </a4j:outputPanel>
+                        <a4j:commandButton value="#{msgs.discover_schemas}"
+                                           styleClass="secondaryBtn"
+                                           style="5px 0px"
+                                           action="#{applicationObject.discoverSchemasAction}"
+                                           render="schemaData, errorPanel"
+                                           rendered="#{not applicationObject.accountSchemaDefined
+                                                    and applicationObject.supportsSchemaDiscovery
+                                                    and sp:hasRight(facesContext, 'ManageApplication')}"
+                                           oncomplete="enterKeyCheck($('appSchemasContent')); refreshTabPanel();"/>
+                    </h:panelGrid>
+            </a4j:outputPanel>
+        </div>  <!-- attributesContent -->
+
+        <div id="schemaContent" class="x-hidden">
+            <div id="loadingSchemaDiv" class="waitingForDataDiv" style="position:absolute;z-index:1;display: none">
+                <h:graphicImage url="/images/progress.gif" style="padding:5px;vertical-align:middle"/>
+                #{msgs.loading_data}
+            </div>
+            <a4j:outputPanel id="schemaPanel">
+                  
+                    <a4j:outputPanel id="schemaData" rendered="#{ (applicationObject.currentTab eq 'schemaContent'
+                                                                         or applicationObject.schemaLoaded )
+                                                                       and ( applicationObject.appReconfMode == false
+                                                                         or applicationObject.schemaMappingSaved == true)}">
+                        <div id="appSchemasContent">
+                            <ui:include src="applicationSchemas.xhtml"/>
+                        </div>
+                    </a4j:outputPanel>
+                    <a4j:outputPanel id="reconfigchemaData" rendered="#{applicationObject.appReconfMode == true
+                                                                               and applicationObject.schemaMappingSaved == false}">
+                        <div id="appSchemasContent">
+                            <ui:include src="reconfigApplicationSchemas.xhtml"/>
+                        </div>
+                    </a4j:outputPanel>
+
+            </a4j:outputPanel>
+        </div>  <!-- schemaContent -->
+
+        <div id="templateContent" class="submenuContentBox x-hidden" >
+          <div class="spContentTitle">
+            <h:outputText value="#{msgs.templates}"/>
+          </div>
+
+          <ui:fragment rendered="#{applicationObject.appReconfMode == true and applicationObject.provPolicyUpdated == false}">
+          <div>
+              <h:panelGrid columns="2" columnClasses="nowrap vertical-align, none" styleClass="paddedTbl topAlignTbl appInfoTable">
+                  <h:selectOneRadio id="radioBtnProvPolicies" layout="pageDirection" value="#{applicationObject.templateChoice}">
+                      <f:selectItem itemLabel = "#{msgs.app_reconf_old_prov_policies}" itemValue="old"/>
+                      <f:selectItem itemLabel = "#{msgs.app_reconf_new_prov_policies}" itemValue="new"/>
+                  </h:selectOneRadio>
+             </h:panelGrid>
+             <h:commandButton styleClass="secondaryBtn" value = "#{msgs.app_reconf_provision_pol_confirm_btn_value}" id="Confirm" onclick="modifyProvPolicies();return false;"/>
+
+          </div>
+          </ui:fragment>
+          
+          <ui:fragment rendered="#{applicationObject.appReconfMode == false or (applicationObject.appReconfMode == true and applicationObject.provPolicyUpdated == true)}">
+          <div>
+            <ui:include src="/include/template/templateEditor.xhtml">
+              <ui:param name="templateEditor" value="#{applicationObject.templateEditor}"/>
+              <ui:param name="showApplication" value="false"/>
+              <ui:param name="hideTitle" value="false"/>
+              <ui:param name="showUsageListByObjectType" value="true"/>
+              <ui:param name="beanType" value="application"/>
+            </ui:include>
+          </div>
+          </ui:fragment>
+        </div> <!-- templateContent -->
+
+
+    </div> <!-- ApplicationObjectTabs -->
+</f:view>
+</ui:composition>
+</body>
+</html>

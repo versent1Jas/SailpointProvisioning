@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+  <div id="entitlementProfileResultsDiv" style="display:none;" class="spBackground">
+    <script type="text/javascript" defer="defer">
+    <!--//--><![CDATA[//><!--
+      var vCheckbox = new SailPoint.VirtualCheckbox('entitlementTbl','selectedEntitlement');
+    //--><!]]>
+    </script>
+          
+    <a4j:outputPanel ajaxRendered="true">
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+    </a4j:outputPanel>
+    
+    <div class="spContent" style="width:98%">
+      <table class="spTable width100" style="border:none">
+        <tbody><tr><td style="text-align: right">
+          <a href="javascript: $('#{formName}:exportEntitlementsAnalysisResultsToCSV').click();">
+            <h:graphicImage url="/images/icons/export_csv.png" style="vertical-align:middle"/>
+            <h:outputText value=" #{msgs.export_to_csv}" />
+          </a>
+          <h:commandButton id="exportEntitlementsAnalysisResultsToCSV"
+                           style="display:none"
+                           action="#{entitlementProfileMiningBean.exportBucketsToCSV}"/>
+        </td></tr></tbody>
+      </table>
+    
+      <a4j:outputPanel id="entitlementMiningResultsPanel">
+        <ui:fragment rendered="#{!empty entitlementProfileMiningBean.miningBean.displayableFilters}">
+        <div class="spContent" style="width:98%">
+          <h:outputText class="sectionHeader" value="#{msgs.role_entitlements_analysis_search_parameters}"/><br/>
+          <div id="entitlementsAnalysisResultsFilters" class="spBlueTabledContent">
+            <table class="spBlueTable" cellspacing="0" id="parameterTbl">
+              <thead>
+                <tr>
+                  <th width="25%"><h:outputText value="#{msgs.label_attribute}"/></th>
+                  <th width="15%"><h:outputText value="#{msgs.role_entitlements_analysis_filter_type}"/></th>
+                  <th><h:outputText value="#{msgs.label_value_or_values}"/></th>
+                </tr>
+              </thead>
+              <ui:repeat value="#{entitlementProfileMiningBean.miningBean.displayableFilters}" var="filterMap">
+                <tr>
+                  <td><h:outputText value="#{sp:localizeKey(filterMap['key'])}"/></td>
+                  <td><h:outputText value="#{filterMap['type']}"/></td>
+                  <td><h:outputText value="#{filterMap['value']}"/></td>
+                </tr>
+              </ui:repeat>
+            </table>
+          </div>
+          <script>
+            makeTableMulticolored($('parameterTbl'), true, false, 'even', 'odd');
+          </script>
+        </div>
+    
+        </ui:fragment>
+      </a4j:outputPanel>
+    
+      <div id="entitlementsAnalysisResultsThreshold" style="padding:4px">
+        <h:outputText class="sectionHeader" value="#{msgs.entitlement_mining_enter_threshold}"/>
+        
+        <div>
+          <div id="sliderWrapEntitlementThreshold" class="sliderWrap">
+            <div id="sliderTrackEntitlementThreshold" class="sliderLeft" />
+            <div id="sliderPermEntitlementThreshold" class="slider">
+              <div id="handlePermEntitlementThreshold" class="sliderHandle">
+                <img src="#{base.requestContextPath}/images/sliderHandle.gif" alt=""/>
+              </div>
+            </div>
+          </div>
+          
+          <h:inputText id="threshold" value="#{entitlementProfileMiningBean.threshold}" size="3"/>
+        </div>
+              
+        <a4j:commandButton id="filterEntitlements" style="display: none" 
+                           onclick="Ext.MessageBox.wait('#{sp:escapeJavascript(msgs.loading_data)}');" 
+                           action="#{entitlementProfileMiningBean.filterEntitlements}"
+                           oncomplete="SailPoint.Role.EntitlementsAnalysis.styleResults();
+                                       SailPoint.Role.EntitlementsAnalysis.addDescriptionTooltips();
+                                       SailPoint.Role.EntitlementsAnalysis.updateButtons();
+                                       SailPoint.resetTimeout();
+                                       Ext.MessageBox.hide();
+                                       if (!window.clearFormHiddenParams_directedMiningResultsForm) {
+                                           window.clearFormHiddenParams_directedMiningResultsForm = Ext.emptyFn;
+                                       }" 
+                           render="entitlementMiningResultsPanel,a4jResultsPanel,a4jBucketPanel"/>
+      </div>
+    </div>
+    
+    <a4j:outputPanel id="a4jResultsPanel">
+      <div class="spContent" style="width:98%">
+        <ui:include src="entitlementProfileResultsEntitlementsInclude.xhtml">
+          <ui:param name="miningBean" value="#{entitlementProfileMiningBean.miningBean}"/>
+          <ui:param name="showSelectOptions" value="true"/>
+        </ui:include>
+      </div>
+    </a4j:outputPanel>
+    
+    <!-- Show Bucket Groupings for analysis  -->
+    <a4j:outputPanel id="a4jBucketPanel" styleClass="width100">
+    <div class="spContent" style="width:98%; #{(empty entitlementProfileMiningBean.miningBean.bucketGroups) ? 'display: none' : ''}">
+    <div style="padding-left:8px; padding-bottom:8px">
+    <h:panelGroup style="#{(empty entitlementProfileMiningBean.miningBean.bucketGroups) ? 'display: none' : ''}">        
+      <h:outputText class="sectionHeader" value="#{msgs.role_entitlements_analysis_attribute_groupings}"/>   
+               
+      <div id="entitlementAnalysisBucketsContent" class="spAjaxTabledContent" style="width:98%">
+      <table class="spTable width100" cellspacing="0" id="groupBucketsTbl">
+        <thead>
+          <tr>
+            <th width="28px"/>
+            <th width="15%"><h:outputText value="#{msgs.label_name}"/></th>
+            <th><h:outputText value="#{msgs.role_entitlement_percent_of_population}"/></th>
+            <th/>
+          </tr>
+        </thead>
+        <tbody>
+          <ui:repeat value="#{entitlementProfileMiningBean.miningBean.bucketGroups}" var="group">
+            <tr class="#{sp:isOdd(group.id) ? 'even' : 'odd'}" >
+              <td>
+                <h:selectBooleanCheckbox value="#{group.attr.selected}"/>
+              </td>
+              <td>
+                <h:outputLink onclick="showGroupedBuckets(#{group.id}, this); return false;" styleClass="disclosure">
+                  <h:outputText value="#{group.name}"/>
+                </h:outputLink>
+              </td>
+              <td>
+                <sp:progressBar
+                  percentComplete="#{group.percent}"
+                  completedNum="#{group.count}"
+                  totalNum="#{group.total}"
+                  remainingClass="progressBarRemainingDarkGray"
+                  completeClass="#{group.completeClass}">
+                </sp:progressBar>               
+              </td>
+              <td>
+                <h:outputLink onclick="showGroupedIdentities(#{group.id}, this); return false;"
+                  rendered="#{(group.count gt 0)}">
+                  <h:outputText  value="#{msgs.role_entitlements_analysis_show_identities}"/>
+                  <h:graphicImage alt="progress" url="/images/icons/general_disclosure_arrow_10.png"/>
+                </h:outputLink>
+              </td>                
+            </tr>
+            <tr id="#{group.id}_groupTr" style="display:none" class="#{sp:isOdd(group.id) ? 'even' : 'odd'}">
+              <td></td>
+              <td colspan="3">
+                <div style="padding-right:20px;" id="#{group.id}_groupedTbl">
+                  <table class="width100">
+                    <ui:repeat value="#{group.childBuckets}" var="child">
+                      <tr>
+                        <td><h:outputText styleClass="font10" value="#{child.attr.application} - #{child.attr.name}"/></td>
+                        <td class="entitlementDescription">
+                          <h:outputText styleClass="font10" value="#{child.attr.displayValue}"/>
+                          <ui:fragment rendered="#{child.attr.extraFields['description'] != null}">
+                            <span style="display:none" 
+                              id="description_#{sp:buildValidComponentId(sp:concat(child.attr.application,child.attr.value))}#{group.id}">
+                              <h:outputText escape="false" value="#{child.attr.extraFields['description']}"/>
+                            </span>
+                            <img id="img_#{sp:buildValidComponentId(sp:concat(child.attr.application,child.attr.value))}#{group.id}"
+                                 class="helpIcon" src="#{base.requestContextPath}/images/icons/info.png" alt="#{msgs.help}"/>
+                          </ui:fragment>
+                        </td>
+                        <td>
+                          <h:outputText styleClass="font10" value="#{child.count}/#{child.total} "/>
+                        </td>
+                        <td>  
+                          <sp:progressBar
+                            percentComplete="#{child.percent}"
+                            completedNum="#{child.count}"
+                            totalNum="#{child.total}"
+                            remainingClass="progressBarRemainingDarkGray"
+                            completeClass="#{child.completeClass}">
+                          </sp:progressBar>               
+                        </td>
+                      </tr>
+                    </ui:repeat>
+                  </table>
+                </div>
+              </td>                  
+            </tr>
+            <tr id="sp#{group.id}_groupIdent_tr" style="display:none" class="#{sp:isOdd(group.id) ? 'even' : 'odd'}">
+              <td colspan="2" valign="top" align="right">
+                <div id="#{group.id}_groupIdent_descr" >
+                  <h:outputText value="#{msgs.identities}:" styleClass="sectionHeader"/>
+                </div>
+              </td>
+              <td colspan="2" class="eraseTdPadding">
+                  <div id="sp#{group.id}_groupIdent_divIdentities"></div>
+              </td>
+            </tr>                 
+          </ui:repeat>
+        </tbody>
+      </table>
+      </div>
+      
+    </h:panelGroup> 
+
+    </div>
+    </div>
+    </a4j:outputPanel>  
+    <div id="errorDiv" style="display:none;"/>
+    <h:inputHidden id="searchComplete" value="#{entitlementProfileMiningBean.searchBean.searchComplete}"/>
+  
+    <a4j:commandButton id="groupBucketBtn" action="#{entitlementProfileMiningBean.miningBean.groupBuckets}"
+      render="a4jBucketPanel" style="display: none" 
+      oncomplete="SailPoint.Role.EntitlementsAnalysis.addDescriptionTooltips();
+                  SailPoint.resetTimeout(); 
+                  var panel = Ext.getCmp('entitlementProfileResultsPanel').body.dom;
+                  panel.scrollTop = panel.scrollHeight - panel.offsetHeight;
+                  Ext.getCmp('entitlementProfileResultsPanel').clearSelections();"/>
+          
+    <a4j:commandButton style="display:none" id="saveBtn" value="#{msgs.button_save}" action="#{modeler.saveAction}" render="entitlementMiningProfileEditPanel"/>
+    <!-- 
+      The onclick and oncomplete do ugly things because ExtJS efficiently caches the panel contents.  
+      Unfortunately, this means that it's not picking up the stuff that a4j rerendered.
+      To work around this we have to remove/destroy the search panel and recreate/replace it when we're done.  
+      Yuck. == Bernie
+      -->
+    <a4j:commandButton id="searchAgain" style="display:none" action="#{entitlementProfileMiningBean.showMiningSearchFields}" immediate="true" 
+                       oncomplete="Ext.getCmp('entitlementMiningPanel').getLayout().setActiveItem('entitlementProfileSearchPanel');
+                                   SailPoint.resetTimeout();SailPoint.modeler.entitlementMining.resetCheckboxes();"
+                       render="entitlementMiningSearchPanel"/>
+  </div>
+</ui:composition>
+
+</body>
+</html>

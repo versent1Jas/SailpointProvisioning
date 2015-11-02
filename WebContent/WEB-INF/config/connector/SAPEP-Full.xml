@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+  <Application connector="sailpoint.connector.sm.SMConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH, UNSTRUCTURED_TARGETS, UNLOCK, ENABLE, PASSWORD, GROUP_PROVISIONING" icon="enterpriseIcon" name="SAP EP Template" type="SAP EP - Full">
+    <Attributes>
+      <Map>
+        <entry key="MscsType" value="SAPEP"/>
+        <entry key="DeprecatedConnector" value="true"/>
+        <entry key="formPath" value="SMWithoutContainerAttributesForm.xhtml"/>
+        <entry key="splAccountAttributes">
+          <value>
+            <Map>
+              <entry key="RU_LOCKED" value="false"/>
+              <entry key="RU_SUSPENDED" value="false"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="User ID" groupAttribute="groups" identityAttribute="USER_ID" nativeObjectType="account" objectType="account">
+        <AttributeDefinition displayName="User ID" name="USER_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" remediationModificationType="None" type="string"/>
+        <AttributeDefinition displayName="Unique Id" name="SAPEP_USER_UNIQUEID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="First Name" name="SAPEP_FIRST_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Last Name" name="SAPEP_LAST_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="City" name="SAPEP_CITY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Display Name" name="SAPEP_DISPLAY_NAME" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Title" name="SAPEP_TITLE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Street" name="SAPEP_STREET" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="State" name="SAPEP_STATE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Country" name="SAPEP_COUNTRY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Postal Code" name="SAPEP_POSTAL_CODE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Email Address" name="SAPEP_EMAIL_ADDRESS" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Fax" name="SAPEP_FAX" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Phone" name="SAPEP_PHONE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Mobile" name="SAPEP_MOBILE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Company" name="SAPEP_COMPANY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Department" name="SAPEP_DEPARTMENT" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Job Title" name="SAPEP_JOB_TITLE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Salutation" name="SAPEP_SALUTATION" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Time Zone" name="SAPEP_TIME_ZONE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Currency" name="SAPEP_CURRENCY" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Language" name="SAPEP_LANGUAGE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Valid From (MM/DD/YYYY)" name="SAPEP_VALID_FROM" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Valid To (MM/DD/YYYY)" name="SAPEP_VALID_TO" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+      <Schema displayAttribute="Group ID" identityAttribute="GROUP_ID" nativeObjectType="group" objectType="group">
+        <AttributeDefinition displayName="Group ID" name="GROUP_ID" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Group Type" name="SAPEP_GROUP_TYPE" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Description" name="SAPEP_DESCRIPTION" remediationModificationType="None" required="true" type="string"/>
+        <AttributeDefinition displayName="Unique Id" name="SAPEP_GROUP_UNIQUEID" remediationModificationType="None" required="true" type="string"/>
+      </Schema>
+    </Schemas>
+    <Templates>
+      <Template name="account" usage="Create">
+        <Field displayName="User ID" helpKey="User Name" name="USER_ID" required="true" section="" type="string"/>
+        <Field displayName="Password" helpKey="Password for the user" name="USER_PWD" required="true" section="" type="secret"/>
+        <Field displayName="Last Name" helpKey="Last name of the user" name="SAPEP_LAST_NAME" required="true" section="" type="string"/>
+      </Template>
+      <Template name="Create Group" schemaObjectType="group" usage="Create">
+        <Field displayName="Group or Role Name" helpKey="The name of group or role to create" name="GROUP_ID" required="true" section="" type="string"/>
+        <Field defaultValue="Group" displayName="TYPE" name="SAPEP_GROUP_TYPE" required="true" section="" type="string">
+          <AllowedValues>
+            <String>Role</String>
+            <String>Group</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+      <Template name="Update Group" schemaObjectType="group" usage="Update">
+        <Field displayName="SAPEP group unique ID" helpKey="The name of group or role to create" name="SAPEP_GROUP_UNIQUEID" readOnly="true" section="" type="string"/>
+        <Field displayName="TYPE" name="SAPEP_GROUP_TYPE" readOnly="true" section="" type="string">
+          <AllowedValues>
+            <String>Role</String>
+            <String>Group</String>
+          </AllowedValues>
+        </Field>
+        <Field displayName="SAPEP group description" helpKey="The description of the group or role created" name="SAPEP_DESCRIPTION" reviewRequired="true" section="" type="string"/>
+      </Template>
+    </Templates>
+  </Application>
+</ImportAction>

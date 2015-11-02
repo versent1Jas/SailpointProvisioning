@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"  
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+
+  <ui:composition>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+    <f:view>
+      <h:form id="editForm">
+      
+        <h:inputHidden id="id" value="#{remediationItem.object.id}" />
+        <h:inputHidden id="workItemPriority" value="#{remediationItem.workItemPriority}" />        
+        <div id="remediationItemScrollDiv" style="overflow-y: scroll; height: 320px; margin-top: 10px; text-align: left">
+          <ui:fragment rendered="#{null == remediationItem.object}">
+            #{msgs.could_not_load_work_item}
+          </ui:fragment>
+
+          <ui:fragment rendered="#{null != remediationItem.object}">
+
+            <div style="margin-top: 10px">
+              #{msgs.please_perform_changes} <f:verbatim>&amp;nbsp;</f:verbatim>
+              <ui:fragment rendered="#{remediationItem.object.remediationEntityType eq 'Identity'}">
+                  <c:choose>
+                      <c:when test="#{sp:getDisplayNameForName('Identity', remediationItem.object.remediationIdentity) != ''}" >
+                          <h:outputText value="#{sp:getDisplayNameForName('Identity', remediationItem.object.remediationIdentity)}" />
+                      </c:when>
+                      <c:otherwise>
+                          <h:outputText value="#{sp:getDisplayNameForName('AccountGroup', remediationItem.object.remediationIdentity)}" />
+                      </c:otherwise>
+                  </c:choose>
+              </ui:fragment>
+              <ui:fragment rendered="#{remediationItem.object.remediationEntityType eq 'BusinessRole' || remediationItem.object.remediationEntityType eq 'Profile'}">#{msgs.biz_role} '#{remediationItem.object.remediationIdentity}'
+              </ui:fragment>
+            </div>
+  
+            <div style="margin-top: 10px">
+              <ui:include src="provisioningPlan.xhtml">
+                <ui:param name="provisioningPlan" value="#{remediationItem.object.remediationDetails}" />
+                <ui:param name="identity" value="#{remediationItem.object.remediationIdentity}" />
+                <ui:param name="remediationEntityType" value="#{remediationItem.object.remediationEntityType}" />
+                <c:choose>
+	                <c:when test="#{sp:getDisplayNameForName('Identity', remediationItem.object.remediationIdentity) != ''}" >
+	                    <ui:param name="certType" value="identity" />
+	                </c:when>
+	                <c:otherwise>
+	                    <ui:param name="certType" value="accountGroupPermissions" />
+	                </c:otherwise>
+                </c:choose>
+                <!-- Subtract the scroll bar width from the popup width to avoid horizontal scroll. -->
+                <ui:param name="tableWidth" value="583px" />
+              </ui:include>
+            </div>
+  
+            <div style="margin-top: 10px">
+              <a class="sectionHeader disclosure" onclick="showHideWithLock($('commentsDiv'), this, null, SailPoint.Utils.toggleDisclosureDiv({link:this, div:'commentsDiv'}));">
+                #{msgs.label_comments}
+              </a>
+              <div id="commentsDiv">
+                <ui:include src="/workitem/commentsList.xhtml">
+                  <ui:param name="commentsList" value="#{remediationItem.object.comments}" />
+                </ui:include>
+
+              </div>
+            </div>
+
+            <ui:fragment rendered="#{null != remediationItem.object.completionComments}">
+              <div style="margin-top: 10px" class="sectionHeader">
+                  #{msgs.completion_comment}
+              </div>
+              <div class="commentHeader">
+                  <h:outputText value="From #{remediationItem.object.owner.displayName} On #{remediationItem.object.completionDate}" />
+              </div>
+              <div class="commentBody">
+                  <pre><h:outputText escape="false" value="#{sp:escapeHTML(sp:wrapText(remediationItem.object.completionComments, 80), true)}" /></pre>
+              </div>
+            </ui:fragment>
+
+            <div style="margin-top: 10px" >
+
+                <ui:fragment rendered="#{remediationItem.editable}">
+                  <h:commandButton id="addRemediationCommentBtn" style="display: none" action="#{remediationItem.addComment}" />
+                  <h:commandButton onclick="addRemediationItemComment('#{remediationItem.object.id}', 'editForm:addRemediationItemCommentBtn', '#{sp:escapeJavascript(msgs.dialog_add_comment)}', '#{sp:escapeJavascript(msgs.dialog_add_comment)}'); return false;" 
+                                   value="#{msgs.dialog_add_comment}" 
+                                   styleClass="secondaryBtn"/>
+                </ui:fragment>
+            </div>
+          </ui:fragment>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:composition>
+</html>

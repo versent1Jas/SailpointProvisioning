@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  <sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+  <sp:loadBundle basename="sailpoint.web.messages.iiqHelp" var="help"/>
+
+  <ui:define name="title">
+    <ui:fragment rendered="#{!(attributesRequest.identityId == null)}">
+      <h:outputFormat value="#{msgs.lcm_manage_attributes_title}">
+        <f:param value="#{attributesRequest.identityName}" />
+      </h:outputFormat>
+    </ui:fragment>
+    
+    <ui:fragment rendered="#{(attributesRequest.identityId == null)}">
+      <h:outputText value="#{msgs.lcm_create_identity_title}"/>
+    </ui:fragment>
+  </ui:define>
+
+  <ui:define name="headerItems">
+  <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+    <src>lcm.css</src>
+  </sp:style>
+  <sp:script>
+    <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/AccountRequest.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/manageAttributes.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/lcmRenderers.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/summaryOfChanges.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/grid/PropertyGrid.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/component/IdentityDetailPopup.js?#{debug.revision}</src>
+    <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/RequestAccessCartItemsWindow.js?#{debug.revision}</src>
+  </sp:script>
+  
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'LCM_CREATE_IDENTITY';
+      //--><!]]>
+    </script>
+  </ui:define>
+  
+  <ui:define name="subtitle">
+    <ui:include src="requestHeaderInclude.xhtml">
+      <ui:param name="bean" value="#{attributesRequest}"/>
+    </ui:include>
+  </ui:define>
+  
+  <ui:define name="body">
+    <f:view>
+      <sp:sailpointForm id="editForm" forceEncodedURL="true">
+
+        <a4j:outputPanel ajaxRendered="true">
+          <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" />
+        </a4j:outputPanel>
+
+        <div class="pageInfo">
+          <h:outputText value="#{msgs.lcm_manage_attributes_info}" rendered="#{attributesRequest.identityId != null}"/>
+          <h:outputText value="#{msgs.lcm_manage_attributes_create_identity_info}" rendered="#{attributesRequest.identityId == null}"/>
+        </div>
+        
+        <div class="spacerDiv"></div>
+        
+        <input id="attributesFormId" name="attributesFormId" value="#{attributesRequest.formBean.id}" type="hidden"/>
+
+        <ui:include src='../include/formRenderer.xhtml'>
+          <ui:param name='form' value='#{attributesRequest.formBean}'/>
+          <ui:param name='formStyle' value='width: 768px'/>
+          <ui:param name='submitButton' value='editForm:attributesSubmitBtn'/>
+          <ui:param name="hideMessages" value="true"/>
+        </ui:include>
+        
+        <div class="buttonRow">
+          <button name="submit" value="submit" onclick="SailPoint.LCM.ManageAttributes.submit('next', null); return false;" class="primaryBtn">#{msgs.button_submit}</button>
+
+          <a4j:commandButton id="attributesSubmitBtn"
+                           action="#{attributesRequest.submitRequest}"
+                           style="display: none"
+                           render="formRenderer-" oncomplete="SailPoint.form.Util.updateFormPanel({formId:'#{attributesRequest.formBean.id}'});"/>
+                           
+          <button name="cancel" value="cancel" onclick="$('editForm:cancelButton').click(); return false;" class="secondaryBtn">#{msgs.button_cancel}</button>
+
+          <h:commandButton id="cancelButton"
+                           action="#{attributesRequest.back}"
+                           style="display: none"
+                           immediate="true"/>
+        </div>
+        
+      </sp:sailpointForm>
+    </f:view>
+  </ui:define>
+
+</ui:composition>
+</body>
+</html>

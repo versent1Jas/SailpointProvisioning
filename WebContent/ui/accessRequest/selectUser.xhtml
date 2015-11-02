@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:sp="http://sailpoint.com/ui">
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+
+  <h:body>
+    <section class="container-fluid" ng-hide="identitiesCtrl.selectedDisplayed">
+      <div class="row b-b bg-light lt mobile-input">
+        <div class="col-xs-12 m-b">
+          <div class="input-group">
+            <label for="userSearchText" class="sr-only">#{msgs.ui_access_search_users}</label>
+            <input id="userSearchText" type="text" class="form-control" ng-model="identitiesCtrl.searchScratchPad.searchTerm" ng-keypress="identitiesCtrl.search($event)" placeholder="#{msgs.ui_access_search_users}" tabindex="50"></input>
+            <span class="input-group-btn">
+              <button id="userSearchBtn" ng-click="identitiesCtrl.search()" role="button" type="button" class="btn btn-info" tabindex="50">
+                <i class="fa fa-search text-white" role="presentation"></i>
+                <span class="sr-only">{{'ui_access_search_button_sr' | spTranslate}}</span>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+      <!-- /SEARCH BAR ROW -->
+    </section>
+    <!-- /OPTIONS CONTAINER-FLUID -->
+    <section class="container-fluid m-t-sm">
+      <div class="row m-b-sm">
+        <div class="col-xs-6" ng-class="{ 'col-sm-4' : identitiesCtrl.showCurrentPageInfo() }">
+          <sp-selected-identities-button sp-id="selectedIdentitiesTopBtn"
+                                         sp-identities="identitiesCtrl.getSelectedIdentities()"
+                                         sp-selected-displayed="identitiesCtrl.isSelectedDisplayed()"
+                                         sp-on-click="identitiesCtrl.toggleShowSelected()"/>
+        </div>
+
+        <sp-current-page-info class="hidden-xs col-sm-4" ng-if="identitiesCtrl.showCurrentPageInfo()" ng-model="identitiesCtrl.getPageState().pagingData"/>
+
+        <div class="col-xs-6 text-right" ng-class="{ 'col-sm-4' : identitiesCtrl.showCurrentPageInfo() }">
+          <button id="userSelectAllBtn" class="btn btn-sm btn-rounded m-r-xs" role="button" type="button" tabindex="50"
+                  ng-click="identitiesCtrl.toggleSelectAllIdentities()"
+                  ng-class="{ 'btn-success' : identitiesCtrl.allSelected, 'btn-white' : !identitiesCtrl.allSelected }"
+                  aria-pressed="{{identitiesCtrl.allSelected}}"
+                  aria-label="{{'ui_access_select_all_users_sr' | spTranslate}}">
+            <i class="fa fa-check" role="presentation"></i>
+            <span aria-hidden="true">{{'ui_access_all' | spTranslate}}</span>
+          </button>
+
+          <button id="userFilterBtn" class="btn btn-sm" role="button" type="button" tabindex="50"
+             ng-click="identitiesCtrl.toggleFiltersDisplayed()" ng-hide="identitiesCtrl.selectedDisplayed"
+             ng-class="{ 'btn-success': identitiesCtrl.hasAppliedFilters(), 'btn-white': !identitiesCtrl.hasAppliedFilters() }">
+            <span aria-hidden="true" class="hidden-xs">{{'ui_access_filters' | spTranslate}}</span>
+            <i class="fa fa-chevron-down hidden-xs" role="presentation"
+               ng-class="{'rotate': identitiesCtrl.filtersDisplayed, 'unrotate': !identitiesCtrl.filtersDisplayed}"></i>
+            <span class="sr-only">
+              {{ identitiesCtrl.hasAppliedFilters() ?
+                     ( identitiesCtrl.filtersDisplayed ? 'ui_access_filters_applied_and_displayed' : 'ui_access_filters_applied_and_not_displayed' ) :
+                     ( identitiesCtrl.filtersDisplayed ? 'ui_access_filters_not_applied_and_displayed' : 'ui_access_filters_not_applied_and_not_displayed' )
+                   | spTranslate }}
+            </span>
+            <span class="visible-xs">
+              <i class="fa fa-filter" role="presentation"></i>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <sp-filter-panel id="identitiesFilterPanel" ng-hide="identitiesCtrl.selectedDisplayed"
+                           sp-title="'ui_access_identity_filter_panel_title' | spTranslate"
+                           sp-search-data="identitiesCtrl.searchScratchPad"
+                           sp-filters="identitiesCtrl.filters"
+                           sp-displayed="identitiesCtrl.filtersDisplayed"
+                           sp-apply-func="identitiesCtrl.search()"/>
+        </div>
+      </div>
+      <!-- /FILTER PANEL ROW -->
+
+      <!-- CARDS-->
+      <div class="list-result-container" tabindex="50" sp-loading-mask="identitiesCtrl.isPageReady()" sp-focus-snatcher="identitiesCtrl.focusResults">
+        <div ng-if="identitiesCtrl.getPageState().pagingData.getTotal() === 0" class="row">
+          <div class="col-xs-12 text-center">
+            <h3 class="text-muted">{{'ui_no_search_results' | spTranslate}} <i class="fa fa-search" role="presentation"></i></h3>
+          </div>
+          <!-- /COL-XS-12 -->
+        </div>
+
+        <div ng-if="identitiesCtrl.getPageState().pagingData.getTotal()"
+             class="row"
+             ng-swipe-right="identitiesCtrl.previousPage()"
+             ng-swipe-left="identitiesCtrl.nextPage()">
+          <div class="col-lg-3 col-sm-4" sp-fit-rows="" ng-repeat="identity in identitiesCtrl.items">
+            <!-- IDEAL CARD STRUCTURE -->
+            <div class="panel">
+              <div class="panel-heading bg-light lter">
+                <div class="header-cell">
+                  <sp-access-request-select-button
+                    sp-selected="{{identitiesCtrl.isIdentitySelected(identity)}}"
+                    sp-on-select="identitiesCtrl.selectIdentity(identity)"
+                    sp-on-deselect="identitiesCtrl.deselectIdentity(identity)"
+                    sp-label="{{identity.getDisplayableName()}}" />
+                </div>
+                <div class="v-middle h5 header-cell">
+                  <b>{{identity.getDisplayableName()}}</b>
+                </div>
+              </div>
+              <!-- /PANEL-HEADING -->
+              <div class="panel-body vColCfgLayout">
+                <p>
+                  <div sp-card-data="true" sp-data="identity" sp-col-configs="identitiesCtrl.columnConfigs" class="spCardData"/>
+                </p>
+                <button class="fixBottomLeft btn btn-xs btn-white" ng-click="identitiesCtrl.showIdentityDetails(identity)"
+                        role="button" type="button" tabindex="50">
+                  <span class="text-info"><i class="fa fa-user" role="presentation"></i></span>
+                  <span class="sr-only">{{ 'ui_access_identity_detail_btn_sr' | spTranslate : identity.getDisplayableName() }}</span>
+                </button>
+              </div>
+              <!-- /PANEL-BODY -->
+            </div>
+            <!-- /IDEAL CARD -->
+          </div>
+        </div>
+      </div>
+      <!-- /CARDS -->
+
+      <div class="row m-b">
+        <div class="hidden-xs col-sm-4">
+          <sp-selected-identities-button sp-id="selectedIdentitiesBottomBtn"
+                                         sp-identities="identitiesCtrl.getSelectedIdentities()"
+                                         sp-selected-displayed="identitiesCtrl.isSelectedDisplayed()"
+                                         sp-on-click="identitiesCtrl.toggleShowSelected()"/>
+        </div>
+        <sp-current-page-info class="col-sm-4 col-xs-12" ng-model="identitiesCtrl.getPageState().pagingData" ng-if="identitiesCtrl.showCurrentPageInfo()" />
+      </div>
+      <div class="row m-b">
+        <div class="text-center col-xs-12" ng-if="identitiesCtrl.getPageState().pagingData.hasMultiplePages()">
+          <pagination total-items="identitiesCtrl.getPageState().pagingData.getTotal()"
+                      items-per-page="12"
+                      ng-model="identitiesCtrl.getPageState().pagingData.currentPage"
+                      ng-change="identitiesCtrl.fetchItems()"
+                      max-size="4"
+                      rotate="true">
+          </pagination>
+        </div>
+      </div>
+      <!-- /PAGINATION -->
+    </section>
+    <script>
+      SailPoint.configData.ACCESS_REQUEST_MAX_IDENTITY_SELECT = parseInt('#{sp:getSystemConfigurationValue('lcmMobileMaxSelectableUsers', 100)}');
+    </script>
+    <!-- /CONTENT CONTAINER-FLUID -->
+  </h:body>
+</html>

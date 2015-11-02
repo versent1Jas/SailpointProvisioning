@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2013 SailPoint Technologies, Inc., All Rights Reserved. -->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+
+<ui:remove><!--
+   Editable field-value pairs for attributes that are defined in an ObjectConfig
+   Required arguments:
+       attributeEditor - AttributeEditBean instance that was constructed with the 
+                         ObjectConfig/Attributes pair that is being edited
+   
+   Other items to note:
+   This file assumes that the edited attributes are being embedded in an existing table
+   
+   Any files that are including this one should also include the following:
+     sailpoint/Date.js provides date utilities
+     sailpoint/DateTimeInput.js supports date fields
+     sailpoint/Suggest.js supports identity fields
+     sailpoint/attributeEditor.js generates the date and identity components
+   
+   The class for the AttributeEditBean instance referred to above is in the sailpoint.web package
+--></ui:remove>
+
+<body>
+<ui:composition>
+    <tr>
+        <td colspan="2">
+        <fieldset style='background-color:#FFFFFF'><ui:fragment rendered="#{categoryName != ''}"><legend class="#{sectionHeader}">#{categoryName}</legend></ui:fragment>
+        <table width="100%" style="border-collapse:collapse">
+          <ui:repeat id="attributes" value="#{attributeDefinitions}" var="attributeDefinition">
+          <tr class="#{sp:isLastExtendedAttribute(attributeDefinition, attributeDefinitions) ? 'lastExtended' : ''}">
+              <td class="#{leftColumnClass}">
+                <ui:remove>
+                  <!-- This hidden "attributeName" span helps pages like the role editor hide or show attributes as needed  -->
+                </ui:remove>
+                <span class="attributeName" style="display:none">#{sp:escapeHTML(attributeDefinition.name, false)}</span>
+                <h:outputText styleClass="#{labelClass}" style="#{labelStyle}" value="#{attributeDefinition.displayableName}"/>
+                <h:outputText styleClass="requiredText" value="#{attributeDefinition.required ? '*' : ''}"/>
+                <h:outputText styleClass="#{labelClass}" style="#{labelStyle}" value="#{withColon ? ':' : ''}"/>
+            <ui:fragment rendered="#{attributeEditor.missingAttributesInfo[attributeDefinition.name] != null}">
+              <h:graphicImage id="imgHlpWarn_#{sp:escapeHTMLElementId(tableId)}_#{sp:escapeHTMLElementId(attributeDefinition.name)}" 
+                              width="12px" height="12px" alt="#{help.help_attr_does_not_apply}"
+                              style="cursor:pointer;padding: 0px 7px 0px 7px"
+                              url="/images/icons/dialogue_warning_16.png"/>
+            </ui:fragment>
+              </td>
+              <td class="#{rightColumnClass}">
+                <ui:fragment rendered="#{(attributeDefinition.type == null or attributeDefinition.type == 'string') and attributeDefinition.editable and (empty attributeDefinition.allowedValues)}">
+                  <h:inputText style="width:275px" value="#{attributeEditor.attributes[attributeDefinition.name]}"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{(attributeDefinition.type == null or attributeDefinition.type == 'string') and attributeDefinition.editable and !(empty attributeDefinition.allowedValues)}">
+                    <h:selectOneMenu value="#{attributeEditor.attributes[attributeDefinition.name]}">
+                        <f:selectItems value="#{attributeDefinition.allowedValuesSelectItems}"/>
+                    </h:selectOneMenu>
+                </ui:fragment>
+                <ui:fragment rendered="#{(attributeDefinition.type == null or attributeDefinition.type == 'string') and !attributeDefinition.editable}">
+                  <h:outputText value="#{attributeEditor.attributes[attributeDefinition.name]}"/>
+                  
+                  <ui:fragment rendered="#{!empty attributeDefinition.defaultValue}">
+                  	<h:outputText value="#{attributeDefinition.defaultValue}" />
+                  </ui:fragment>
+                  
+                </ui:fragment>
+            
+                <ui:fragment rendered="#{attributeDefinition.type == 'sailpoint.object.Identity' and attributeDefinition.editable}">
+                  <div class="identitySuggest">
+                      <input type="text" name="suggest" class="suggestName" style="display:none" value="#{attributeDefinition.name}"/>
+                      <span class="suggestRawInput">#{attributeEditor.identities[attributeDefinition.name].displayableName}</span>
+                  </div>
+                  <h:inputHidden id="identityValue" value="#{attributeEditor.identities[attributeDefinition.name].id}"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{attributeDefinition.type == 'sailpoint.object.Identity' and !attributeDefinition.editable}">
+                  <h:outputText value="#{attributeEditor.identities[attributeDefinition.name].displayableName}"/>
+                </ui:fragment>    
+            
+                <ui:fragment rendered="#{attributeDefinition.type == 'secret' and attributeDefinition.editable}">
+                  <sp:inputSecret value="#{attributeEditor.attributes[attributeDefinition.name]}" size="40" redisplay="true" encrypt="false" autocomplete="off" styleClass="loginFormText"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{attributeDefinition.type == 'secret' and !attributeDefinition.editable}">
+                  <h:outputText value="**********" styleClass="loginFormText"/>
+                </ui:fragment>
+            
+                <ui:fragment rendered="#{attributeDefinition.type == 'long' and attributeDefinition.editable}">
+                  <h:inputText id="longvalue" value="#{attributeEditor.attributes[attributeDefinition.name]}">
+                    <f:validateLongRange/>
+                  </h:inputText>
+                </ui:fragment>
+                <ui:fragment rendered="#{attributeDefinition.type == 'long' and !attributeDefinition.editable}">
+                  <h:outputText value="#{attributeEditor.attributes[attributeDefinition.name]}"/>
+                </ui:fragment>
+            
+                <ui:fragment rendered="#{attributeDefinition.type == 'int' and attributeDefinition.editable}">
+                  <h:inputText id="intvalue" value="#{attributeEditor.attributes[attributeDefinition.name]}">
+                    <f:validateLongRange minimum="-2147483648" maximum="21474836487"/>
+                  </h:inputText>
+                </ui:fragment>
+                <ui:fragment rendered="#{attributeDefinition.type == 'int' and !attributeDefinition.editable}">
+                  <h:outputText value="#{attributeEditor.attributes[attributeDefinition.name]}"/>
+                </ui:fragment>
+            
+                <ui:fragment rendered="#{attributeDefinition.type == 'boolean' and attributeDefinition.editable}">
+                  <h:selectBooleanCheckbox value="#{attributeEditor.boolValues[attributeDefinition.name]}"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{attributeDefinition.type == 'boolean' and !attributeDefinition.editable}">
+                  <h:selectBooleanCheckbox disabled="true" value="#{attributeEditor.boolValues[attributeDefinition.name]}"/>
+                </ui:fragment>
+            
+                <ui:fragment rendered="#{attributeDefinition.type == 'date' and attributeDefinition.editable}">
+                  <!-- Ext.form.DateFields will be applied to these by the javascript in attributeEditor.js -->
+                  <div id="#{sp:escapeHTMLElementId(tableId)}_#{sp:escapeHTMLElementId(attributeDefinition.name)}DateDiv" class="dateField">
+                    <h:inputHidden value="#{attributeEditor.dateValues[attributeDefinition.name]}"/>
+                  </div>
+                </ui:fragment>
+                <ui:fragment rendered="#{attributeDefinition.type == 'date' and !attributeDefinition.editable}">
+                  <!-- Ext.form.DateFields will be applied to these by the javascript in attributeEditor.js -->
+                  <div class="readOnlyDateField">
+                    <div class="readOnlyDateDisplay"/>
+                    <div class="readOnlyDateInput" style="display:none">
+                      #{attributeEditor.dateValues[attributeDefinition.name]}
+                    </div>
+                  </div>
+                </ui:fragment>
+                <ui:fragment rendered="#{attributeDefinition.type == 'sailpoint.object.Rule' and attributeDefinition.editable}">
+                    <h:selectOneMenu value="#{attributeEditor.attributes[attributeDefinition.name]}">
+                        <f:selectItems value="#{util.allRules}"/>
+                    </h:selectOneMenu>
+                </ui:fragment> 
+                <ui:fragment rendered="#{attributeDefinition.type == 'sailpoint.object.Rule' and !attributeDefinition.editable}">
+                    <h:selectOneMenu value="#{attributeEditor.attributes[attributeDefinition.name]}" disabled="true">
+                        <f:selectItems value="#{util.allRules}"/>
+                    </h:selectOneMenu>
+                </ui:fragment>		        
+              </td>
+              <!--  This column is for error messages -->
+              <td class="#{errorColumnClass}">
+                <ui:fragment rendered="#{attributeDefinition.type == 'long' and attributeDefinition.editable}">
+                  <h:message styleClass="formError" for="longvalue" />
+                </ui:fragment>
+              
+                <ui:fragment rendered="#{attributeDefinition.type == 'int'}">
+                  <h:message styleClass="formError" for="intvalue" />
+                </ui:fragment>
+        
+                <ui:fragment rendered="#{attributeDefinition.type == 'date' and attributeDefinition.editable}">
+                  <div class="formError" style="display:none"><h:outputText value="#{msgs.err_date_invalid}"/></div>
+                </ui:fragment>
+              </td>
+            </tr>
+          </ui:repeat>
+        </table>
+        </fieldset>
+        </td>
+    </tr>
+</ui:composition>
+
+</body>
+</html>

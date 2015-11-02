@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ImportAction PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<ImportAction name="connectorRegistryUpdateAction">
+    <Application connector="sailpoint.connector.DB2WindowsServerConnector" featuresString="DIRECT_PERMISSIONS, DISCOVER_SCHEMA, PROVISIONING, SYNC_PROVISIONING, SEARCH" icon="databaseIcon" name="DB2 Windows Server Template" type="DB2 Windows - Direct">
+        <Attributes>
+            <Map>
+                <entry key="formPath" value="DB2AttributesForm.xhtml"/>
+                <entry key="retryableErrors">
+                    <value>
+                        <List>
+                            <String>Server is not operational</String>
+                        </List>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+<Schemas>
+      <Schema displayAttribute="GRANTEE" identityAttribute="GRANTEE" includePermissions="true" nativeObjectType="syscat.dbauth" objectType="account">
+      <AttributeDefinition name="GRANTEE" type="string">
+      <Description>Grantee name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRANTEETYPE" type="string">
+      <Description>Grantee type</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRANTOR" type="string">
+      <Description>Grantor name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRANTORTYPE" type="string">
+      <Description>Grantor type</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="BINDADDAUTH" type="string">
+      <Description>Authority to create packages</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATETABAUTH" type="string">
+      <Description>Authority to create tables</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CONNECTAUTH" type="string">
+      <Description>Authority to connect to the database</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DBADMAUTH" type="string">
+      <Description>DBADM authority</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EXTERNALROUTINEAUTH" type="string">
+      <Description>Authority to create external routines</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="IMPLSCHEMAAUTH" type="string">
+      <Description>Authority to implicitly create schemas</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LOADAUTH" type="string">
+      <Description>Authority to use the DB2(R) load utility</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NOFENCEAUTH" type="string">
+      <Description>Authority to create non-fenced user-defined functions</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="QUIESCECONNECTAUTH" type="string">
+      <Description>Authority to access the database when it is quiesced</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SECURITYADMAUTH" type="string">
+      <Description>Security Administrator authority</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="roles" schemaObjectType="group" type="string">
+      <Description>Entitlement attribute</Description>
+      </AttributeDefinition>
+</Schema>
+<Schema displayAttribute="ROLENAME" featuresString="PROVISIONING"  identityAttribute="ROLENAME" includePermissions="true" nativeObjectType="syscat.roles" objectType="group">
+      <AttributeDefinition name="ROLENAME" type="string">
+      <Description>Name of the role</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ROLEID" type="string">
+      <Description>Identifier for the role</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATE_TIME" type="string">
+      <Description>Time when the role was created</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="AUDITPOLICYID" type="string">
+      <Description>Identifier for the audit policy</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="AUDITPOLICYNAME" type="string">
+      <Description>Identifier for the audit policy</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="REMARKS" type="string">
+      <Description>User-provided comments</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" multi="true" name="HierarchicalRoles" type="string">
+      <Description>Child roles</Description>
+      </AttributeDefinition>
+</Schema>
+       </Schemas>
+       <Templates>
+      <Template name="Create User" schemaObjectType="account" usage="Create">
+        <Field displayName="con_prov_policy_user_create_usernamedb" helpKey="help_con_prov_policy_user_create_usernamedb" name="GRANTEE" required="true" type="string"/>
+        <Field defaultValue="Y" displayName="con_prov_policy_user_create_conntodb" helpKey="help_con_prov_policy_user_create_conntodb" name="CONNECTAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_crepkg" helpKey="help_con_prov_policy_user_create_crepkg" name="BINDADDAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_cretab" helpKey="help_con_prov_policy_user_create_cretab" name="CREATETABAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_regroutine" helpKey="help_con_prov_policy_user_create_regroutine" name="NOFENCEAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_dbadmauth" helpKey="help_con_prov_policy_user_create_dbadmauth" name="DBADMAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_creschema" helpKey="help_con_prov_policy_user_create_creschema" name="IMPLSCHEMAAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_acctoload" helpKey="help_con_prov_policy_user_create_acctoload" name="LOADAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_creextroutine" helpKey="help_con_prov_policy_user_create_creextroutine" name="EXTERNALROUTINEAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_conntoquiesdb" helpKey="help_con_prov_policy_user_create_conntoquiesdb" name="QUIESCECONNECTAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+        <Field defaultValue="N" displayName="con_prov_policy_user_create_secadm" helpKey="help_con_prov_policy_user_create_secadm" name="SECURITYADMAUTH" reviewRequired="true" type="string">
+        <AllowedValues>
+            <String>Y</String>
+            <String>N</String>
+          </AllowedValues>
+        </Field>
+      </Template>
+     </Templates>
+    </Application>
+</ImportAction>

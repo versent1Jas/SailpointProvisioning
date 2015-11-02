@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:c="http://java.sun.com/jstl/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition template="/appPage.xhtml">
+
+  <ui:define name="title">#{msgs.title_impact_analysis}</ui:define>
+
+  <ui:define name="headerItems">
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/workItem.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'WORK_ITEM';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError" />
+      <h:form styleClass="form" id="editForm">
+  
+          <h:inputHidden id="id" value="#{workItem.object.id}"/>
+
+          <ui:include src="summaryFieldset.xhtml"/>
+          <ui:include src="commentsFieldset.xhtml"/>
+
+          <fieldset>
+            <legend>#{msgs.legend_details}</legend>
+            <ui:include src="impactAnalysisDetails.xhtml"/>
+          </fieldset>
+
+          <br/>
+        <div class="buttonRow">
+          <ui:fragment rendered="#{workItem.editable}">
+
+            <h:commandButton action="#{workItem.complete}" 
+                             immediate="true" 
+                             value="#{msgs.button_apply}"
+                             title="#{msgs.info_apply_button}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton action="#{workItem.reject}" 
+                             immediate="true" 
+                             value="#{msgs.button_discard}"
+                             title="#{msgs.info_discard_button}"
+                             styleClass="primaryBtn"/>
+
+            <h:commandButton onclick="forwardWorkItem('#{workItem.object.id}', null, 'viewDashboard', false, SailPoint.getWorkItemPriority()); return false;"
+                             value="#{msgs.button_forward}" 
+                             title="#{msgs.info_forward_button}" 
+                             styleClass="primaryBtn"/>
+
+          </ui:fragment>
+
+          <h:commandButton action="#{workItem.save}"
+                           value="#{msgs.button_save}"
+                           title="#{msgs.button_title_click_to_save_work_item}"
+                           styleClass="primaryBtn"/>
+
+          <h:commandButton action="#{workItem.cancel}" 
+                           immediate="true" 
+                           value="#{msgs.button_cancel}" 
+                           styleClass="secondaryBtn"/>
+        </div>
+      </h:form>
+    </f:view>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

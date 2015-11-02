@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition template="chartPage.xhtml">
+
+  <ui:define name="chartButton">
+  
+    <a4j:commandButton 
+      styleClass="font10" 
+      value="#{msgs.button_refresh}" 
+      action="#{dashboard.updateReference}"
+      render="dashboardForm:myCertificationStatus" 
+      oncomplete="$('dashboardForm:loadMyCertificationStatusChart').click()"/>
+      
+  </ui:define>
+
+  <ui:define name="chartBody">
+  
+    <a4j:outputPanel id="myCertificationStatus">
+    
+      <ui:fragment rendered="#{!(chart.renderChart)}">
+        <div class="alert_message" id="runningText" style="padding-top:50px">
+          <span> #{msgs.msg_loading_chart}</span>
+        </div> 
+        <div id="modal_dialog_progress" class="alert_progress"></div>
+      </ui:fragment>
+    
+      <ui:fragment rendered="#{chart.renderChart}">
+        
+        <sp:chart id="myCertificationStatusChart" 
+                  datasource="#{chart.myCertificationStatusDataSource}"
+                  colors="#66FF00,#FFFF00,#CC0000"
+                  title="#{msgs.chart_my_certs_title}"
+                  type="#{reference.arguments['chartType']}" 
+                  is3d="#{reference.arguments['chartIs3d']}"
+                  orientation="#{sp:getChartOrientation(reference.region)}"
+                  alpha="75"
+                  startAngle="0" 
+                  antialias="true"
+                  legend="true" 
+                  height="#{sp:getChartHeight(reference.region)}"
+                  storeOnSession="false" 
+                  width="#{sp:getChartWidth(reference.region)}"
+                  labels="true"
+                  outline="false"
+                  size="small"/>
+          
+      </ui:fragment>
+    </a4j:outputPanel>
+    
+    <a4j:commandButton  id="loadMyCertificationStatusChart" 
+                        style="display:none"
+                        action="#{chart.viewChart}" 
+                        render="dashboardForm:myCertificationStatus"/>
+                        
+    <ui:fragment rendered="#{!(chart.renderChart)}">
+      <script defer="defer">
+        setTimeout('$(\'dashboardForm:loadMyCertificationStatusChart\').click()',500);
+      </script>
+    </ui:fragment>
+    
+  </ui:define>
+  
+</ui:composition>
+</body>
+</html>

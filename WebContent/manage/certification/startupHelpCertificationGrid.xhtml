@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+   Start up help for certification grid view ui. It is typically used for complex screens
+   doing several things on the same screen for example.
+-->
+<html 
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:h="http://java.sun.com/jsf/html">
+<body>
+<ui:composition>
+  
+  <script type="text/javascript">
+    <!--//--><![CDATA[//><!--
+    
+   var StartUpHelpCertificationGrid = {         
+     init: function() { 
+        var startUpHelp  = new SailPoint.StartUpHelp({              
+            startupHelpContent: "#{sp:escapeJavascript(msgs.startup_help_certification_grid_view_content)}",                 
+            startupHelpTitle: "#{sp:escapeJavascript(msgs.startup_help_certification_grid_view_title)}",   
+            actionButton: "startupHelpCertificationGridBtn",
+            stateField: "currentState"   
+        });  
+        startUpHelp.show();       
+     }
+   };
+   
+   Ext.onReady(function() {
+     StartUpHelpCertificationGrid.init();      
+   }); 
+   
+   //--><!]]>  
+  </script>
+  
+  <h:inputHidden id="currentState" value="#{certification.displayStartUpHelpCertificationGridView}" />
+  
+  <a4j:commandButton id="startupHelpCertificationGridBtn" 
+                   actionListener="#{certification.updateDisplayStartUpHelpCertificationGridView}" 
+                   style="display:none"/>
+  
+</ui:composition>
+
+</body>
+</html>

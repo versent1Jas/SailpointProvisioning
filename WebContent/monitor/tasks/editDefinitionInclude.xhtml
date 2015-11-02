@@ -1,0 +1,326 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:sp="http://sailpoint.com/ui"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+    <ui:composition>
+    
+      <a4j:outputPanel ajaxRendered="true">
+          <h:outputText style="margin: 8px" styleClass="formError" rendered="#{! empty facesContext.maximumSeverity}" value="#{msgs.err_plz_correct}"/>
+      </a4j:outputPanel>
+
+      <a4j:outputPanel ajaxRendered="true">
+          <h:messages globalOnly="true" infoClass="formInfo"
+              warnClass="formWarn" errorClass="formError" />
+      </a4j:outputPanel>
+
+      <script type="text/javascript">
+      
+        Ext.onReady(function () {
+
+            if (#{taskDefinition.taskDefinition}) {
+                var idSuggest = new SailPoint.MultiSuggest({
+                    renderTo: 'emailRecipientMultiSuggest',
+                    suggestType: 'identity',
+                    jsonData: #{sp:basicJSONDataCustomFieldsConverted(taskDefinition.recipients, null, 'IdentityNameListConverter')},
+                    border: true,
+                    baseParams: {context: 'Owner'},
+                    inputFieldName : 'identitySuggest',
+                    valueField:'name',
+                    contextPath: CONTEXT_PATH
+                    });
+                    onEmailNotifyChange("#{taskDefinition.emailNotify}");
+            }
+
+            if (#{taskDefinition.reportTask}) {
+                var emailSuggest = new SailPoint.MultiSuggest({
+                    id: 'definitionEmailRecipient',
+                    renderTo: 'emailRecipientSuggest',
+                    suggestType: 'identity',
+                    jsonData: Ext.decode($('emailSuggestInfo').innerHTML),
+                    baseParams: {context: 'Owner'},
+                    inputFieldName : 'emailRecipient',
+                    contextPath: CONTEXT_PATH,
+                    width: 200,
+                    listConfig : {width : 300}
+                });
+
+                if (#{taskDefinition.showAssignedScopeControl}) {
+                    var scopeSuggest = new SailPoint.ScopeSuggest({
+                        renderTo: 'assignedScopeSuggest', 
+                        binding: 'assignedScope', 
+                        width: 200,
+                        listConfig : {width : 300}
+                    });
+                    scopeSuggest.setRawValue("#{sp:getDisplayNameForId('Scope', taskDefinition.argMap['resultScope'].objectValue)}");
+                }
+            }
+        });   
+
+        function getCancelButtonName() {
+          return 'editForm:cancelViewResultToListButton';
+        }
+        
+        
+        
+        function toggleSignoffDisplay() {
+          var elements = [];
+          elements.push($('SignoffDiv'));
+          showHideWithLock(elements, null, null, function() {
+              Ext.getCmp('workItemOwners').show();
+          });
+        }
+        
+        function scrollToError() {
+            var e = document.getElementsByClassName('formError');
+            if(e.length > 0) {
+                e[0].scrollIntoView();
+            }
+        }
+
+        function onEmailNotifyChange(arg){
+            var emailTemplate = $('emailTemplate');
+            var emailRecipient = $('emailID');
+            if(arg === "Disabled"){
+               emailTemplate.style.display="none";
+               emailRecipient.style.display="none";
+            }
+            else{ 
+               emailTemplate.style.display="";
+               emailRecipient.style.display="";
+            }
+        }
+      </script>
+      <div class="spContent">
+          <table class="customWidth paddedTbl" cellspacing="0">
+              <tr>
+                  <td colspan="3"><h:outputText styleClass="spContentTitle"
+                          value="#{msgs.label_standard_properties}" /></td>
+              </tr>
+              <tr>
+                  <td colspan="3"><h:outputText styleClass="requiredText"
+                          value="*" /> <h:outputFormat styleClass="font10"
+                          value="#{msgs.msg_required_field}" /></td>
+              </tr>
+              <tr>
+                  <td><h:outputText styleClass="textBold"
+                          value="#{msgs.label_name}" /> <h:outputText
+                          styleClass="requiredText" value="*" /></td>
+                  <td><h:inputText id="name"
+                          validator="sailpoint.web.validators.ObjectNameValidator"
+                          size="40" value="#{taskDefinition.object.name}" required="true">
+                          <f:validateLength maximum="128" />
+                      </h:inputText> <a4j:outputPanel ajaxRendered="true">
+                          <br />
+                          <h:message styleClass="formError" for="name" />
+                      </a4j:outputPanel></td>
+                  <td><h:outputText styleClass="textBold"
+                          value="#{msgs.label_previous_result_action}" /></td>
+                  <td><h:selectOneMenu id="resultActions"
+                          value="#{taskDefinition.resultAction}">
+                          <f:selectItems value="#{taskDefinition.resultActionItems}" />
+                      </h:selectOneMenu></td>
+              </tr>
+
+              <tr>
+                  <td valign="top"><h:outputText styleClass="textBold"
+                          value="#{msgs.label_description}" /></td>
+                  <td valign="top"><h:inputTextarea id="description"
+                          cols="40" rows="3" value="#{taskDefinition.object.description}"></h:inputTextarea>
+                      <a4j:outputPanel ajaxRendered="true">
+                          <h:message styleClass="formError" for="description" />
+                      </a4j:outputPanel></td>
+                  <td valign="top" rowspan="5"><h:outputText
+                          rendered="#{taskDefinition.reportTask}" styleClass="textBold"
+                          value='#{sp:escapeJavascript(msgs.label_email_recipients)}' />
+                  </td>
+                  <td valign="top" rowspan="5">
+                      <div id="emailRecipientSuggest"></div> <t:inputHidden
+                          id="emailRecipient" rendered="#{taskDefinition.reportTask}"
+                          value="#{taskDefinition.argMap['emailIdentities'].objectListValue}" forceId="true">
+                          <sp:convertList />
+                      </t:inputHidden>
+                      <div id="emailSuggestInfo" style="display: none">
+                          #{sp:basicJSONDataConverted(taskDefinition.argMap['emailIdentities'].objectListValue,'IdentityListConverter')}
+                      </div> <a4j:outputPanel ajaxRendered="true">
+                          <h:message styleClass="formError" for="emailRecipient" />
+                      </a4j:outputPanel>
+                  </td>
+              </tr>
+
+              <tr>
+                  <td valign="top"><h:outputText styleClass="textBold"
+                          value="#{msgs.label_allow_concurrency}" /></td>
+                  <td valign="top"><h:selectBooleanCheckbox
+                          id="allowConcurrency"
+                          value="#{taskDefinition.object.concurrent}" /></td>
+              </tr>
+
+              <tr>
+                  <td><h:outputText styleClass="textBold"
+                          value="#{msgs.label_require_signoff}" /></td>
+                  <td><h:selectBooleanCheckbox id="signoffRequired"
+                          value="#{taskDefinition.signoff.enabled}"
+                          onclick="javascript:toggleSignoffDisplay();" /></td>
+              </tr>
+
+              <tr>
+                <td colspan="4">
+                  <div id="SignoffDiv" style="#{(taskDefinition.signoff.enabled eq 'true') ? '' : 'display: none;'}">
+                    <div class="spContent">
+                      <ui:include src="../../include/workItemConfig.xhtml">
+                        <ui:param name="mainForm" value="editForm" />
+                        <ui:param name="config" value="#{taskDefinition.signoff}" />
+                        <ui:param name="title" value="#{msgs.label_signoff_properties}" />
+                        <ui:param name="ownerTitle" value="#{msgs.label_signers}" />
+                        <ui:param name="ownerHelp" value="#{help.task_signoff_owner}" />
+                      </ui:include>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                  <td colspan="3"><h:outputText styleClass="spContentTitle"
+                          rendered="#{taskDefinition.taskDefinition}"
+                          value="#{msgs.label_email_task_alert}" /></td>
+              </tr>
+              <tr>
+                  <td valign="top"><h:outputText styleClass="textBold"
+                        rendered="#{taskDefinition.taskDefinition}"
+                          value="#{msgs.label_email_notification}" /></td>
+                  <td valign="top"><h:selectOneMenu id="emailNotify" onchange="onEmailNotifyChange(this.value);"
+                        rendered="#{taskDefinition.taskDefinition}"
+                          value="#{taskDefinition.emailNotify}">
+                          <f:selectItems value="#{taskDefinition.emailNotifyOptions}" /> </h:selectOneMenu></td>
+                  
+              </tr>
+              <tr id="emailTemplate" rendered="#{taskDefinition.taskDefinition}">
+                  <td valign="top"><h:outputText styleClass="textBold"
+                          rendered="#{taskDefinition.taskDefinition}"
+                          value="#{msgs.label_task_email_template}" /></td>
+                  <td valign="top"><h:selectOneMenu id="emailNotifyTemplate" rendered="#{taskDefinition.taskDefinition}"
+                          value="#{taskDefinition.emailTemplate}">
+                          <f:selectItems  value="#{systemConfig.emailTemplates}" /> </h:selectOneMenu></td>
+              </tr>
+              <tr id="emailID" rendered="#{taskDefinition.taskDefinition}">
+                  <td valign="top" rowspan="5"><h:outputText styleClass="textBold" rendered="#{taskDefinition.taskDefinition}"
+                          value='#{sp:escapeJavascript(msgs.label_email_recipients)}' />
+                  </td>
+                  <td valign="top" rowspan="5">
+                      <div id="emailRecipientMultiSuggest"></div> 
+                              <t:inputHidden id="identitySuggest" rendered="#{taskDefinition.taskDefinition}"
+                       value="#{taskDefinition.recipients}" forceId="true">
+                       <sp:convertList />
+                       </t:inputHidden>
+                      <a4j:outputPanel ajaxRendered="true">
+                          <h:message styleClass="formError" for="identitySuggest" />
+                      </a4j:outputPanel>
+                  </td>
+              </tr>
+              <tr>
+                  <td valign="top"><h:outputText styleClass="textBold"
+                          rendered="#{taskDefinition.reportTask}"
+                          value='#{sp:escapeJavascript(msgs.label_max_items)}' /></td>
+                  <td valign="top"><h:inputText id="maxCount"
+                          value='#{taskDefinition.argMap["REPORT_MAX_COUNT"].value}'
+                          size='3' rendered="#{taskDefinition.reportTask}">
+                          <f:validateLongRange minimum="1" maximum="999" />
+                      </h:inputText> <a4j:outputPanel ajaxRendered="true">
+                          <h:message styleClass="formError" for="maxCount" />
+                      </a4j:outputPanel></td>
+              </tr>
+
+              <tr>
+                  <td valign="top"><h:outputText styleClass="textBold"
+                          value="#{msgs.label_scope}"
+                          rendered="#{taskDefinition.reportTask and taskDefinition.showAssignedScopeControl}" /></td>
+                  <td valign="top">
+                      <div id="assignedScopeSuggest"></div> <t:inputHidden
+                          id="assignedScope" rendered="#{taskDefinition.reportTask and taskDefinition.showAssignedScopeControl}"
+                          value="#{taskDefinition.argMap['resultScope'].objectListValue}" forceId="true">
+                          <sp:convertList />
+                      </t:inputHidden> <a4j:outputPanel ajaxRendered="true">
+                          <br />
+                          <h:message styleClass="formError" for="assignedScope" />
+                      </a4j:outputPanel>
+                  </td>
+              </tr>
+
+              <tr>
+                  <td colspan="4"><a4j:outputPanel id="taskSavedPanel"
+                          ajaxRendered="true">
+                          <h:inputHidden id="taskValidated"
+                              value="#{taskDefinition.taskValidated}" />
+                      </a4j:outputPanel></td>
+              </tr>
+          </table>
+      </div>
+
+      <ui:fragment rendered="#{taskDefinition.argumentForm != null}">
+          <div class="spContent">
+              <ui:include src="#{taskDefinition.argumentForm}" />
+          </div>
+          <script>
+              Ext.onReady(function() {
+                  if (#{taskDefinition.signoff.enabled eq 'true'}) {
+                      Ext.getCmp('workItemOwners').show();
+                  }
+              });
+          </script>
+      </ui:fragment>
+
+      <div class="spacerDiv" />
+      <h:inputHidden id="id" value="#{taskDefinition.object.id}" />
+
+      <div class="buttonRow">
+        <!-- 
+         This button only applies to the reports, but can't be included in the
+         reports editDefinition and still line up properly.
+         -->
+        <a4j:commandButton id="ExecuteSyncButton"
+            action="#{taskDefinition.validateName}"
+            value="#{msgs.button_execute}"
+            styleClass="primaryBtn"
+            rendered="#{taskDefinition.reportTask and taskDefinitions.executeInForegroundOption}"
+            render="id" onclick="$('editForm:taskValidated').value = false;"
+            oncomplete="runSync($('editForm:id').value,$('editForm:name').value, '#{taskDefinition.progressMode}' )" />
+  
+        <a4j:commandButton id="saveButton" value="#{msgs.button_save}"
+            styleClass="primaryBtn"
+            onclick="$('editForm:transition').value = 'true';$('editForm:tabId').value = '';"
+            action="#{taskDefinition.validateAndSave}" oncomplete="scrollToError();" />
+  
+        <h:inputHidden value="#{taskDefinition.transition}" id="transition" />
+  
+        <a4j:commandButton id="validateBeforeExecuteButton"
+            styleClass="primaryBtn"
+            value="#{msgs.button_save_and_exec}"
+            action="#{taskDefinition.validateAndSave}" render="id"
+            onclick="$('editForm:transition').value = false; $('editForm:taskValidated').value = false; $('editForm:tabId').value = '';"
+            oncomplete="validatedRun($('editForm:id').value,$('editForm:name').value, '#{taskDefinition.progressMode}', #{taskDefinitions.executeInForegroundOption} ); scrollToError();" />
+  
+        <h:commandButton id="cancelButton" immediate="true"
+            styleClass="secondaryBtn"
+            value="#{msgs.button_cancel}" action="#{taskDefinition.cancel}" />
+  
+        <h:commandButton id="refreshButton" value="#{msgs.button_refresh}"
+            styleClass="secondaryBtn"
+            action="#{taskDefinition.refreshAction}" />
+      </div>
+
+    </ui:composition>
+
+</body>
+</html>

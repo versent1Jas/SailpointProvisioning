@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui"
+  xmlns:a4j="http://richfaces.org/a4j"
+  xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+
+<ui:composition>
+  <table class="dashWidth100"><tr><td>
+  
+    <t:saveState value="#{certificationPercentList.ownerGroupOffset}"/>
+    
+    <a4j:outputPanel id="contentOwnerGroupCerts">
+      
+      <ui:param name="ownerGroupCertPercentages" value="#{certificationPercentList.ownerGroupCertPercentages}"/>
+      
+      <t:div id="emptyCertGroupContents" rendered="#{empty ownerGroupCertPercentages}">
+        <table style="margin:5px">
+          <tr><td style="text-align:center"><h:outputText class="progressText" value="#{msgs.cet_status_grp_no_access_reviews}"/></td></tr>
+        </table>
+      </t:div>
+      
+      <a4j:commandButton  id="prevOwnerGroupBtn"
+                      style="display:none"
+                      action="#{certificationPercentList.prevOwnerGroups}" value="prev"
+                      oncomplete="$('dashboardForm:postOwnerGroupBtn').click()"/>
+                                                
+      <a4j:commandButton  id="nextOwnerGroupBtn"
+                      style="display:none"
+                      action="#{certificationPercentList.nextOwnerGroups}"
+                      oncomplete="$('dashboardForm:postOwnerGroupBtn').click()"/>
+                      
+      <a4j:commandButton id="postOwnerGroupBtn"
+                      style="display:none"
+                      render="contentOwnerGroupCerts"
+                      oncomplete="setTimeout('SailPoint.Dashboard.clearHeights(\'dashContentPanel\')', 500);"/>
+    
+      <t:div id="populatedGroupCertContents" rendered="#{!empty ownerGroupCertPercentages}">
+      
+        <!-- Pager -->
+        <ui:include src="dashboardPager.xhtml">
+          <ui:param name="pageSize"   value="#{certificationPercentList.maxGroups}" />
+          <ui:param name="totalRows"  value="#{certificationPercentList.ownerGroupCount}" />
+          <ui:param name="startIdx"   value="#{certificationPercentList.ownerGroupOffset}" />
+          <ui:param name="endIdx"     value="#{certificationPercentList.ownerGroupEnd}" />
+          <ui:param name="prevBtn"    value="#{parentFormName}:prevOwnerGroupBtn" />
+          <ui:param name="nextBtn"    value="#{parentFormName}:nextOwnerGroupBtn" />
+          <ui:param name="objectType" value="#{msgs.identities}" />
+          <ui:param name="statusText" value="#{certificationPercentList.ownerGroupStatusText}" />
+        </ui:include>
+
+        <table class="spTable dashWidth100" id="certOwnerGroupStatusTbl" style="margin: 0; border:1px #ccc solid">
+          <thead>
+            <tr>
+              <th></th>
+              <th width="30%" >
+                <h:outputText styleClass="font10" value="#{msgs.name}" />
+              </th>
+              <th colspan="2" width="70%">
+                <h:outputText styleClass="font10" value="#{msgs.percentage_complete}" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <ui:include src="certPercentageRows.xhtml">
+              <ui:param name="certPercentageRows" value="#{certificationPercentList.ownerGroupCertPercentages}"/>
+              <ui:param name="showCertPercentageRows" value="true"/>
+              <ui:param name="certsPanel" value="contentOwnerGroupCerts"/>
+            </ui:include>
+          </tbody>
+        </table>
+        <script>
+          makeTableMulticolored($('certOwnerGroupStatusTbl'), true, false, 'even', 'odd');
+        </script>
+      </t:div>
+      
+      <h:inputHidden id="certPercentToLoad" value="#{certificationPercentList.certPercentToLoad}"/>
+      
+    </a4j:outputPanel>
+  </td></tr></table>
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+	<sp:script>
+		<src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+		<src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+	</sp:script>
+    
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            var appNameMultiSuggest = new SailPoint.MultiSuggest({
+                renderTo: 'appNameMultiSuggest',
+                suggestType: 'application',
+                jsonData: #{sp:basicJSONDataConverted(
+                    taskDefinition.argMap['applications'].objectListValue,
+                    'ApplicationListConverter')},
+                inputFieldName: 'applications',
+                contextPath: CONTEXT_PATH
+            });
+            
+            var managersMultiSuggest = new SailPoint.MultiSuggest({
+                id: 'privilegedAccountManager',
+                renderTo: 'managersMultiSuggest',
+                suggestType: 'manager',
+                jsonData: #{sp:basicJSONDataConverted(
+                    taskDefinition.argMap['managers'].objectListValue,
+                    'IdentityListConverter')},
+                inputFieldName: 'managers',
+                baseParams: {'type': 'manager', context: 'Manager'}
+            });    
+        });    
+    </script>
+
+  <table class="width100" cellspacing="0" cellpadding="3">
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+      <tr>
+        <td colspan="2">
+          <sp:outputText styleClass="spContentTitle" value="#{msgs.accounts_report_options}"/>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText  value="#{msgs.report_filter_usr_attrs}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{msgs.inst_usr_attr_filter}'/></td>
+              </tr>
+              <tr>
+                <td id="emailTd">
+                  <table >
+                    <c:forEach items="#{taskDefinition.searchableIdentityAttributes}" var="attr">
+                      <ui:fragment rendered="#{attr.name != 'manager'}">
+                        <tr><td>
+                          <sp:outputText style="font-weight:bold" value="#{attr.displayableName}"/><br/>
+                          <h:inputText id="searchable#{sp:buildValidComponentId(attr.name)}" size='40' value='#{taskDefinition.customArgMap[attr.name]}'>
+                            <f:validateLength maximum="40"/>
+                          </h:inputText>
+                        </td></tr>
+                        <tr><td>
+                          <a4j:outputPanel ajaxRendered="true">
+                            <h:message styleClass="formError" for="searchable#{sp:buildValidComponentId(attr.name)}"/>
+                          </a4j:outputPanel>
+                        </td></tr>
+                      </ui:fragment>
+                    </c:forEach>
+                    
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+        
+        <td valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText  value="#{msgs.report_filter_privilege_attr}"/><h:outputText styleClass="requiredText" value="*"/></th>
+              </tr>
+              <tr>
+                <td>
+                  <sp:outputText style="font-size:11px" value='#{msgs.inst_privilege_account_attr_filter}'/>
+                  <h:outputText styleClass="requiredText" value="*"/>
+                </td>
+              </tr>
+              <tr>
+               <td id="accountAttributes">
+                  <table >
+                    <c:forEach items="#{taskDefinition.accountAttributes}" var="attr">
+                      <tr><td>
+                        <sp:outputText style="font-weight:bold" value="#{attr.displayableName}"/><br/>
+                        <ui:fragment rendered='#{attr.type eq "boolean" and attr.multi eq "false"}'>
+                          <h:selectBooleanCheckbox value='#{taskDefinition.customArgMap[attr.name]}'/>
+                        </ui:fragment>
+                        
+                        <ui:fragment rendered='#{(attr.multi eq "false") and (attr.type eq "string" or attr.type eq null)}'>
+                          <h:inputText id='searchable#{sp:buildValidComponentId(attr.name)}' size='40' value='#{taskDefinition.customArgMap[attr.name]}'> 
+                            <f:validateLength maximum="40"/>
+                          </h:inputText>
+                        </ui:fragment>
+
+                        <ui:fragment rendered='#{attr.type eq "date" and attr.multi eq "false"}'>
+                          <h:selectOneMenu value='#{taskDefinition.customArgMap[sp:concat("operator.",attr.name)]}'>
+                            <f:selectItem itemLabel="#{msgs.report_filter_select}" itemValue="" />
+                            <f:selectItems value="#{taskDefinition.logicalOpSelectItems}" />
+                          </h:selectOneMenu>
+                          <sp:inputDate popupCalendar="true"  id="date_#{attr.name}" addResources="false" imageLocation="/scripts/myfacescalendar"
+                                       javascriptLocation="/scripts/myfacescalendar" styleLocation="/scripts/myfacescalendar"
+                                       value="#{taskDefinition.customArgMap[attr.name]}" 
+                                       timezone="#{taskDefinition.userTimeZoneId}" ampm="true" styleClass="tomahawkInputDate"/>
+ 
+                          <a4j:outputPanel ajaxRendered="true">
+                            <br/><h:message styleClass="formError" for="date_#{attr.name}"/>
+                          </a4j:outputPanel>
+                        </ui:fragment>
+
+                        <ui:fragment rendered='#{attr.multi eq "true"}'>
+                          <table>
+                            <tr>
+                              <td>
+                                <sp:outputText value="#{msgs.accounts_report_multi_attribute}"/>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <h:selectOneMenu value='#{taskDefinition.customArgMap[sp:concat("operator.",attr.name)]}'>
+                                  <f:selectItem itemLabel="#{msgs.filter_op_AND} " itemValue="AND"/>
+                                  <f:selectItem itemLabel="${msgs.filter_op_OR} " itemValue="OR"/>
+                                </h:selectOneMenu>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <h:inputTextarea value="#{taskDefinition.customArgMap[attr.name]}" cols="45" rows="10"/>
+                              </td>
+                            </tr>
+                          </table>
+                        </ui:fragment>
+
+                      </td></tr>
+                      <tr><td>
+                        <a4j:outputPanel ajaxRendered="true">
+                          <h:message styleClass="formError" for="searchable#{sp:buildValidComponentId(attr.name)}"/>
+                        </a4j:outputPanel>
+                      </td></tr>
+                    </c:forEach>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" valign="top">
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th><sp:outputText value="#{msgs.report_filter_mgrs}"/></th>
+              </tr>
+              <tr>
+                <td><sp:outputText style="font-size:11px" value='#{taskDefinition.argMap["managers"].argument.description}'/></td>
+              </tr>
+              <tr>
+                <td>         
+                  <div id="managersMultiSuggest"></div>
+                  <t:inputHidden id="managers"
+                                 value="#{taskDefinition.argMap['managers'].objectListValue}" forceId="true">
+                      <sp:convertList />
+                  </t:inputHidden>                  
+                </td>
+              </tr>
+            </table>
+          </div>          
+        </td>
+        <td width="50%"  valign="top">        
+          <div class="spTabledContent" style="margin:15px">
+            <table class="spTable" cellspacing="0">
+              <tr>
+                <th colspan="2"><sp:outputText value="#{msgs.report_filter_apps}"/></th>
+              </tr>
+              <tr>
+                <td>
+              <div id="appNameMultiSuggest"></div>
+              <t:inputHidden id="applications"
+                             value="#{taskDefinition.argMap['applications'].objectListValue}" forceId="true">
+                  <sp:convertList />
+              </t:inputHidden>
+                </td>
+              </tr>
+            </table>
+          </div>        
+        </td>
+      </tr>
+    </ui:fragment>
+  </table>
+</ui:composition>
+</body>
+</html>

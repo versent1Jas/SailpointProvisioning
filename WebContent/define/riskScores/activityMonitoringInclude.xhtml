@@ -1,0 +1,113 @@
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core" 
+  xmlns:c="http://java.sun.com/jstl/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:a4j="http://richfaces.org/a4j">
+<body>
+
+<ui:composition>
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      // <![CDATA[        
+      function initActivityMonitoringScoreSample(sampleSpanId, factorId, indicatorId) {
+          var updatedSampleValue;
+          $(factorId).isReducer = true;
+          updatedSampleValue = Math.round((1.0 - $(factorId).value / 100.0) * 1000);
+            
+          if (updatedSampleValue > 1000) {
+              updatedSampleValue = 1000;
+          }
+       
+          var color = getColorForScore(updatedSampleValue);
+          $(indicatorId).src = imageBase + color.substring(1) + imageFormat;       
+      }
+      // ]]>
+    </script>  
+  </ui:define>
+  <ui:define name="body">
+    <table cellpadding="0" cellspacing="0" class="width100">
+      <tbody>
+        <tr><td>
+          <table class="sysConfigTable">
+            <thead><tr>
+              <th class="dashContentHeader">
+                <h:outputText value="#{msgs.title_activity_monitoring}" />
+              </th>
+            </tr></thead>
+            <tbody>      
+              <tr><td>
+                <t:dataTable styleClass="spTable"
+                  rowClasses="even,odd"
+                  id="activityMonitoringConfigTable"
+                  value="#{activityMonitoringScoreConfig.applicationConfigs}" 
+                  var="appConfig"
+                  forceIdIndexFormula="#{appConfig.application.id}">
+                  <h:column>
+                    <f:facet name="header">
+                      <h:outputText value="#{msgs.application}"/>
+                    </f:facet>
+                    
+                    <h:outputText value="#{appConfig.application.name}"/>
+                    
+                  </h:column>
+                  <h:column>
+                    <f:facet name="header">
+                      <h:outputText value="#{msgs.enabling_activity_monitoring_decreases_risk_by}" />
+                    </f:facet>
+        
+                    <table class="width100"><tbody><tr>
+                      <td><img id="compensatedAMScoreIndicatorFor#{appConfig.application.id}" class="dynamicRiskIndicator" src=""/></td>
+                      <td>
+                        <div id="sliderWrapAM#{appConfig.application.id}" class="sliderWrap">
+                          <div id="sliderTrackAM#{appConfig.application.id}" class="sliderLeft" />
+                          <div id="sliderAM#{appConfig.application.id}" class="slider">
+                            <div id="handleAM#{appConfig.application.id}" class="sliderHandle">
+                              <img src="#{base.requestContextPath}/images/sliderHandle.gif" alt=""/>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <h:inputText id="factor" value="#{appConfig.uiActivityMonitoringFactor}" size="3"/>
+                        <h:outputText value="%"/>            
+                        <span style="display:none" id="compensatedAMScoreFor#{appConfig.application.id}"/>
+                      </td>
+                    </tr></tbody></table>
+                    
+                    <script type="text/javascript" defer="defer">
+                      // <![CDATA[
+                      addFactorSliderData('activityMonitoringPanel',
+                                          'handleAM#{appConfig.application.id}', 
+                                          'sliderAM#{appConfig.application.id}',
+                                          'compensatedAMScoreFor#{appConfig.application.id}', 
+                                          'compensatedAMScoreIndicatorFor#{appConfig.application.id}', 
+                                          '#{appConfig.uiActivityMonitoringFactor}',
+                                          '0', 
+                                          '100', 
+                                          '1', 
+                                          $('editForm:activityMonitoringConfigTabl#{appConfig.application.id}:factor'));                  
+                      initActivityMonitoringScoreSample('compensatedAMScoreFor#{appConfig.application.id}', 'editForm:activityMonitoringConfigTabl#{appConfig.application.id}:factor', 'compensatedAMScoreIndicatorFor#{appConfig.application.id}');
+                      // ]]>
+                    </script>
+                  
+                  </h:column>
+                </t:dataTable>
+              </td></tr>
+            </tbody>
+          </table>
+          <script type="text/javascript" defer="defer">
+            // <![CDATA[
+            initRiskSlidersOnLoad('activityMonitoringPanel');
+            // ]]>
+          </script>
+        </td></tr>
+      </tbody>
+    </table>
+  </ui:define>
+</ui:composition>
+</body>
+</html>

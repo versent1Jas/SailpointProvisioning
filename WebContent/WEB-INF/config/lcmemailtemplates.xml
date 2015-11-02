@@ -1,0 +1,1226 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  EmailTemplates for Life Cycle Manager
+-->
+
+<sailpoint>
+
+  <!--
+    -  Template used by default when notifying the user when changes are made.
+    -->
+  <EmailTemplate name="LCM User Notification">
+    <Description>
+      Email Template for notifying users when accounts have been changed through Life Cycle Manager.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the workflow.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is being changed.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Changes to your Identity were processed</Subject>
+    <Body>
+      <![CDATA[
+#if ( $approvalSet )
+#if ( $approvalSet.hasApproved() ) 
+$launcher requested the following account changes to your identity '$identityDisplayName' and they were APPROVED.
+
+#foreach ($item in $approvalSet.approved)
+#if ( $item.owner && $item.owner != $launcher ) 
+        Approved By: $item.owner
+#end
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+#if ( $approvalSet.hasRejected() ) 
+$launcher requested the following account changes to your identity '$identityDisplayName' and they were REJECTED.
+
+#foreach ($item in $approvalSet.rejected)
+        Rejected By: $item.rejecters
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+## 
+## Handle case where the items are not approved or rejected when the
+## approvalScheme is none.
+##
+#if ( $approvalScheme == "none" )
+$launcher requested the following account changes to your identity '$identityDisplayName' and the request required no approval because approvals are disabled.
+
+#foreach ($item in $approvalSet.items)
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+#end
+#end
+#end
+]]>
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    -  Template used by default when notifying the requester when changes occur.
+    -->
+  <EmailTemplate name="LCM Requester Notification">
+    <Description>
+      Email Template for notifying requesters when their employee's account(s) are modified.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the workflow.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is being changed.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Account changes you requested for $identityDisplayName were processed</Subject>
+    <Body>
+      <![CDATA[
+#if ( $approvalSet )
+#if ( $approvalSet.hasApproved() ) 
+The following changes you requested for identity '$identityDisplayName' were APPROVED.
+
+#foreach ($item in $approvalSet.approved)
+#if ( $item.owner && $item.owner != $launcher ) 
+        Approved By: $item.owner
+#end
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+#if ( $approvalSet.hasRejected() ) 
+The following changes you requested for identity '$identityDisplayName' were REJECTED.
+
+#foreach ($item in $approvalSet.rejected)
+        Rejected By: $item.rejecters
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+## 
+## Handle case where the items are not approved or rejected when the
+## approvalScheme is none.
+##
+#if ( $approvalScheme == "none" )
+The following are the changes you requested for identity '$identityDisplayName' and the request required no approval because approvals are disabled.
+
+#foreach ($item in $approvalSet.items)
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+#end
+#end
+#end
+      ]]>
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    -  Template used by default when notifying the user's manager when changes occur.
+    -->
+  <EmailTemplate name="LCM Manager Notification">
+    <Description>
+      Email Template for notifying managers when an employee's account(s) are modified.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the workflow.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is being changed.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Account changes for $identityDisplayName were processed</Subject>
+    <Body>
+      <![CDATA[
+#if ( $approvalSet )
+#if ( $approvalSet.hasApproved() ) 
+$launcher requested the following account changes for employee '$identityDisplayName' and they were APPROVED.
+
+#foreach ($item in $approvalSet.approved)
+#if ( $item.owner && $item.owner != $launcher ) 
+        Approved By: $item.owner
+#end
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+#if ( $approvalSet.hasRejected() ) 
+$launcher requested the following account changes for employee '$identityDisplayName' and they were REJECTED.
+
+#foreach ($item in $approvalSet.rejected)
+        Rejected By: $item.rejecters
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+## 
+## Handle case where the items are not approved or rejected when the
+## approvalScheme is none.
+##
+#if ( $approvalScheme == "none" )
+$launcher requested the followin changes for employee '$identityDisplayName' and the request required no approval because approvals are disabled.
+
+#foreach ($item in $approvalSet.items)
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+#end
+#end
+#end
+      ]]>
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    -  Template used for notifying batch approver of batch request
+    -->
+  <EmailTemplate name="Batch Approval">
+    <Description>
+      Email Template for notifying approvers when they need to approve a request made through LCM.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem representing the review.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the work item.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Changes requested to $identityDisplayName need approval </Subject>
+    <Body>
+      <![CDATA[
+$launcher is requesting approval to run in a batch request file.
+
+#if ( $approvalSet.items )
+#foreach ($item in $approvalSet.items)
+    Content Preview: $item.displayValue
+#end
+#end
+      ]]> 
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    -  Template used by default when notifying an approver of the changes that 
+    -  are awaiting for them to approve.
+    -->
+  <EmailTemplate name="LCM Identity Update Approval">
+    <Description>
+      Email Template for notifying approvers when they need to approve a request made through LCM.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem representing the review.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the work item.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity that is being changed.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is being changed.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Changes requested to $identityDisplayName need approval </Subject>
+    <Body>
+      <![CDATA[
+$launcher is requesting the following changes for '$identityDisplayName'
+
+#if ( $approvalSet.items )
+#foreach ($approvalItem in $approvalSet.items)
+        Application: $approvalItem.applicationName
+#if ( $approvalItem.nativeIdentity )       
+           Account : $approvalItem.nativeIdentity
+#end           
+#if ( $approvalItem.instance ) 
+          Instance : $approvalItem.instance
+#end
+          Operation: $approvalItem.operation
+#if ( $approvalItem.displayName )          
+          Attribute: $approvalItem.displayName
+#elseif ( $approvalItem.name ) 
+          Attribute: $approvalItem.name
+#end          
+#if ( $approvalItem.displayValue )
+           Value(s): $approvalItem.displayValue
+#elseif ( $approvalItem.csv ) 
+           Value(s): $approvalItem.csv
+#end
+#if ( $item.level )
+           Priority: $item.level
+#else
+           Priority: Normal
+#end 
+#if ( $approvalItem.requesterComments )
+ Requester Comments: $approvalItem.requesterComments
+#end
+#end
+#end
+      ]]> 
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    - Template used by default when notifying a registering user when changes are made.
+    -->
+  <EmailTemplate name="LCM Registration User Notification">
+    <Description>
+      Email Template for notifying users when registration requests are completed.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the workflow.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity that is registering.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is registering.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Your registration request has been processed</Subject>
+    <Body>
+      <![CDATA[
+#if ( $approvalSet )
+#if ( $approvalSet.hasApproved() ) 
+The following registration request for your identity '$identityDisplayName' was APPROVED.
+
+#foreach ($item in $approvalSet.approved)
+#if ( $item.owner && $item.owner != $launcher ) 
+        Approved By: $item.owner
+#end
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+#if ( $approvalSet.hasRejected() ) 
+The following registration request for your identity '$identityDisplayName' was REJECTED.
+
+#foreach ($item in $approvalSet.rejected)
+        Rejected By: $item.owner
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+## 
+## Handle case where the items are not approved or rejected when the
+## approvalScheme is none.
+##
+#if ( $approvalScheme == "none" )
+The following is the registration request for your identity '$identityDisplayName' and the request required no approval because approvals are disabled.
+
+#foreach ($item in $approvalSet.items)
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+#end
+#end
+#end
+]]>
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    - Template used by default when notifying a registering user's manager when changes are made.
+    -->
+  <EmailTemplate name="LCM Registration Manager Notification">
+    <Description>
+      Email Template for notifying managers when an employee's registration request is completed.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the workflow.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity that is registering.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is registering.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Registration request for $identityDisplayName has been processed</Subject>
+    <Body>
+      <![CDATA[
+#if ( $approvalSet )
+#if ( $approvalSet.hasApproved() ) 
+The following registration request for employee '$identityDisplayName' was APPROVED.
+
+#foreach ($item in $approvalSet.approved)
+#if ( $item.owner && $item.owner != $launcher ) 
+        Approved By: $item.owner
+#end
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+#if ( $approvalSet.hasRejected() ) 
+The following registration request for employee '$identityDisplayName' was REJECTED.
+
+#foreach ($item in $approvalSet.rejected)
+        Rejected By: $item.owner
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+## 
+## Handle case where the items are not approved or rejected when the
+## approvalScheme is none.
+##
+#if ( $approvalScheme == "none" )
+The following is the registration request for employee '$identityDisplayName' and the request required no approval because approvals are disabled.
+ 
+#foreach ($item in $approvalSet.items)
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+#end
+#end
+#end
+      ]]>
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    -  Template used by default when notifying the security officer when changes are made for
+    -  a registering user.
+    -->
+  <EmailTemplate name="LCM Registration Security Officer Notification">
+    <Description>
+      Email Template for notifying security officers when a registration request is completed.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the workflow.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity that is registering.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is registering.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Registration request for $identityDisplayName has been processed</Subject>
+    <Body>
+      <![CDATA[
+#if ( $approvalSet )
+#if ( $approvalSet.hasApproved() ) 
+The following registration request for identity '$identityDisplayName' was APPROVED.
+
+#foreach ($item in $approvalSet.approved)
+#if ( $item.owner && $item.owner != $launcher ) 
+        Approved By: $item.owner
+#end
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+#if ( $approvalSet.hasRejected() ) 
+The registration request for identity '$identityDisplayName' was REJECTED.
+
+#foreach ($item in $approvalSet.rejected)
+        Rejected By: $item.owner
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+
+#end
+#end
+## 
+## Handle case where the items are not approved or rejected when the
+## approvalScheme is none.
+##
+#if ( $approvalScheme == "none" )
+The following are the changes requested for identity '$identityDisplayName' and the request required no approval because approvals are disabled.
+
+#foreach ($item in $approvalSet.items)
+#if ( $item.comments)
+#foreach ($comment in $item.comments)
+Completion Comments: $comment
+#end
+#end
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+#end
+#end
+#end
+      ]]>
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    -  Template used by default when notifying an approver that a registration
+    -  request requires approval.
+    -->
+  <EmailTemplate name="LCM Registration Approval">
+    <Description>
+      Email Template for notifying approvers when they need to approve a registration request.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem representing the review.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the work item.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity that is registering.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is registering.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Registration request for $identityDisplayName needs approval</Subject>
+    <Body>
+      <![CDATA[
+A user is attempting to register a new identity for '$identityDisplayName'.
+
+#if ( $approvalSet.items )
+#foreach ($approvalItem in $approvalSet.items)
+        Application: $approvalItem.applicationName
+#if ( $approvalItem.nativeIdentity )       
+           Account : $approvalItem.nativeIdentity
+#end           
+#if ( $approvalItem.instance ) 
+          Instance : $approvalItem.instance
+#end
+          Operation: $approvalItem.operation
+#if ( $approvalItem.displayName )          
+          Attribute: $approvalItem.displayName
+#elseif ( $approvalItem.name ) 
+          Attribute: $approvalItem.name
+#end          
+#if ( $approvalItem.displayValue )
+           Value(s): $approvalItem.displayValue
+#elseif ( $approvalItem.csv ) 
+           Value(s): $approvalItem.csv
+#end
+#if ( $item.level )
+           Priority: $item.level
+#else
+           Priority: Normal
+#end 
+#if ( $approvalItem.requesterComments )
+ Requester Comments: $approvalItem.requesterComments
+#end
+#end
+#end
+      ]]> 
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    -  Template used by default when notifying an approver of the changes that 
+    -  are awaiting for them to approve.
+    -->
+  <EmailTemplate name="Pending Manual Changes">
+    <Description>
+      Email Template for notifying approvers when they need to do perform an account action manually
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='item' type='Workitem'>
+          <Description>The WorkItem representing the review.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the work item.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity that is being changed.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is being changed.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Changes requested to $identityDisplayName need manual interaction</Subject>
+    <Body>
+      <![CDATA[
+$launcher is requesting the following changes for '$identityDisplayName' be manually made by you.
+
+#if ( $approvalSet.items )
+#foreach ($item in $approvalSet.items)
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue )
+           Value(s): $item.displayValue
+#elseif ( $item.csv ) 
+           Value(s): $item.csv
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+#end
+#end
+      ]]> 
+    </Body>
+  </EmailTemplate>
+
+  <!--
+    -  Template used by default when notifying an end user when 
+    -  passwords are changed on an Identity's account.
+    -->
+  <EmailTemplate name="LCM Password Change Notification">
+    <Description>
+      Email Template for notifying user's when their password has been changed.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='approvalSet' type='ApprovalSet'>
+          <Description>The ApprovalSet object contained in the workflow.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='identityName' type='string'>
+          <Description>The name of the Identity that is being changed.</Description>
+        </Argument>
+        <Argument name='identityDisplayName' type='string'>
+          <Description>The display name of the Identity that is being changed.</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>Password Changes to $identityDisplayName</Subject>
+    <Body>
+      <![CDATA[
+
+#if ( $launcher != $identityName && $launcher != "SailPointContextRequestFilter" )
+$launcher requested the following password changes be made to your account(s).
+#else
+The following password changes were made to your account(s) at your request.
+#end
+
+#if ( $approvalSet.items )
+#foreach ($item in $approvalSet.items)
+        Application: $item.applicationName
+#if ( $item.nativeIdentity )       
+           Account : $item.nativeIdentity
+#end           
+#if ( $item.instance ) 
+          Instance : $item.instance
+#end
+          Operation: $item.operation
+#if ( $item.displayName )          
+          Attribute: $item.displayName
+#elseif ( $item.name ) 
+          Attribute: $item.name
+#end
+#if ( $item.displayValue)
+           Value(s): $item.displayValue
+#end
+#if ( $item.requesterComments )
+ Requester Comments: $item.requesterComments
+#end
+#end
+#end
+      ]]> 
+    </Body>
+  </EmailTemplate>
+    
+  <EmailTemplate name="Native Account Change Manager Notification">
+    <Description>
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='event' type='Workflow'>
+          <Description>Identity Change Event, which will have a list of 
+            NativeChangeDetections on it. 
+          </Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>IdentityIQ detected native changes on $identityName</Subject>
+    <Body>
+      <![CDATA[      
+IdentityIQ detected the following native changes on your accounts:
+
+#if ( $event.nativeChanges)
+#foreach ($change in $event.nativeChanges)
+
+       Operation  : $change.operation
+       Application: $change.applicationName
+#if ( $change.nativeIdentity )       
+           Account : $change.nativeIdentity
+#end 
+#if ( $change.instance ) 
+          Instance : $change.instance
+#end               
+#if ( $change.differences )
+#foreach ($difference in $change.differences)
+            Attribute      : $difference.attribute
+#if ( not $difference.multi)
+#if ( $difference.newValue )
+            New Value(s) : $difference.newValue
+#end
+#end
+#if ( $difference.multi)
+#if ( $difference.addedValues ) 
+            Added Value(s) : $difference.addedValues
+#end
+#if ( $difference.removedValues )
+            Removed Value(s) : $difference.removedValues
+#end
+#end
+#end 
+#end 
+#end 
+#end  
+]]>
+    </Body>
+</EmailTemplate>
+
+</sailpoint>

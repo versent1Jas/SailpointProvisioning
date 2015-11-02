@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:sp="http://sailpoint.com/ui">
+
+
+<body>
+
+<ui:composition template="/appPage.xhtml">
+  <ui:define name="title">#{msgs.import_title}</ui:define>
+
+  <ui:define name="headerItems">
+    <script type="text/javascript" defer="defer">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'IMPORT';
+      //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError" fatalClass="formError"/>
+    <h:form styleClass="form" enctype="multipart/form-data" >
+    <div class="spContent"> 
+      <div class="spContentTitle">
+        <h:outputText value="#{msgs.import_localized_objects_title}"/>
+      </div>
+
+      <p><h:outputText value="#{msgs.import_subtitle}"/></p>
+
+      <p>
+        <h:panelGrid columns="2" styleClass="spPaddedTable nowidth">
+          <h:outputText styleClass="textBold" value="#{msgs.label_import_file}" />
+          <t:inputFileUpload id="fileupload" size="60" accept="text/xml"
+                             value="#{importBean.uploadFile}"
+                             storage="memory" maxlength="1048576" />
+        </h:panelGrid>
+      </p>
+      
+      <div class="spContentTitle">
+        <h:outputText value="#{msgs.import_localized_attributes_title}"/>
+      </div>
+
+      <p><h:outputText value="#{msgs.import_localized_attributes_subtitle}"/></p>
+      <p><em><h:outputText value="#{msgs.import_localized_attributes_format}"/></em></p>
+
+      <p>
+        <h:panelGrid columns="2" styleClass="spPaddedTable nowidth">
+          <h:outputText styleClass="textBold" value="#{msgs.import_localized_attributes_type}" />
+          <h:selectOneMenu id="localizableObjectType" value="#{importBean.uploadLocalizationObjectType}">
+            <f:selectItem id="item1" itemLabel="#{msgs.application}" itemValue="Application" />
+            <f:selectItem id="item2" itemLabel="#{msgs.role}" itemValue="Bundle" />
+            <f:selectItem id="item3" itemLabel="#{msgs.policy}" itemValue="Policy" />
+          </h:selectOneMenu>
+          
+          <h:outputText styleClass="textBold" value="#{msgs.language}"/>
+          
+          <h:selectOneMenu id="subscriptions" value="#{importBean.uploadLocalizationObjectLocale}">
+            <f:selectItems value="#{importBean.locales}"/>
+          </h:selectOneMenu>
+
+          <h:outputText styleClass="textBold" value="#{msgs.label_import_file}" />
+          
+                   
+          <t:inputFileUpload id="localizationFileupload" size="60" accept="text/xml"
+                             value="#{importBean.uploadLocalizedAttributesFile}"
+                             storage="memory" maxlength="1048576" />
+        </h:panelGrid>
+      </p>
+    </div>
+
+      <div class="buttonRow">
+        <h:commandButton styleClass="primaryBtn" action="#{importBean.importAction}" value="#{msgs.button_import}" />
+        <h:commandButton styleClass="secondaryBtn" value="#{msgs.button_cancel}" action="#{importBean.cancelAction}" immediate="true" />
+      </div>
+    </h:form>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>

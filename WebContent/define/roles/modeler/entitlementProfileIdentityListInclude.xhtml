@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:sp="http://sailpoint.com/ui">
+  
+  
+<body>
+
+<ui:composition>
+<sp:loadBundle basename="sailpoint.web.messages.iiqMessages" var="msgs"/>
+<ui:fragment rendered="#{!entitlementMining.showNonMatchingIdentities}">
+  <div class="spLightBlueTabledContent" id="#{entitlementMining.chosenBucket.id}_matched_div" style=" border-bottom:1px #ccc bottom;">
+    <table class="spLightBlueTable" id="#{entitlementMining.chosenBucket.id}_tbl" 
+      cellspacing="0" style="border-top:1px #ccc solid;">
+      <tr>
+        <th><h:outputText styleClass="font10" value="#{msgs.displayable_name}"/></th>
+        <th><h:outputText styleClass="font10" value="#{msgs.user_name}"/></th>
+        <th style="text-align:right">
+          <h:graphicImage style="vertical-align:middle; margin:0 5px" url="/images/icons/group_add.png"/>
+        </th>
+      </tr>
+      <ui:repeat value="#{entitlementMining.chosenBucket.identities}" var="miningIdentity">
+        <tr>
+          <td><h:outputText styleClass="font10" 
+            value="#{miningIdentity.displayName}"/></td>
+          <td colspan="2"><h:outputText styleClass="font10" 
+            value="#{miningIdentity.name}"/></td>
+        </tr>
+      </ui:repeat>
+    </table>      
+  </div>
+</ui:fragment>
+
+<ui:fragment rendered="#{entitlementMining.showNonMatchingIdentities}">
+  <div class="spLightBlueTabledContent" id="#{entitlementMining.chosenBucket.id}_unmatched_div" style=" border-bottom:1px #ccc bottom;">
+    <table class="spLightBlueTable" id="#{entitlementMining.chosenBucket.id}_tbl" 
+      cellspacing="0" style="border-top:1px #ccc solid;">
+      <tr>
+        <th><h:outputText styleClass="font10" value="#{msgs.displayable_name}"/></th>
+        <th><h:outputText styleClass="font10" value="#{msgs.user_name}"/></th>
+        <th style="text-align:right">
+          <h:graphicImage style="vertical-align:middle; margin:0 5px" url="/images/icons/group_delete.png"/>
+        </th>
+      </tr>    
+      <ui:repeat value="#{entitlementMining.nonMatchingIdentities}" var="miningIdentity">
+        <tr>
+          <td><h:outputText styleClass="font10" 
+            value="#{miningIdentity.displayName}"/></td>
+          <td colspan="2"><h:outputText styleClass="font10" 
+            value="#{miningIdentity.name}"/></td>
+        </tr>
+      </ui:repeat>
+    </table>      
+  </div>
+</ui:fragment>
+
+</ui:composition>
+</body>
+</html>

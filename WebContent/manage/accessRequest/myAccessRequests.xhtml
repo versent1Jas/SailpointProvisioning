@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sp="http://sailpoint.com/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+<ui:composition template="/extAppPage.xhtml">
+
+  <ui:define name="title">#{msgs.my_access_req_title}</ui:define>
+
+  <ui:define name="headerItems">
+
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/lcm">
+      <src>lcm.css</src>      
+      <src>request-access.css</src>
+    </sp:style>
+    <sp:style serveOffset="#{base.requestContextPath}/css/sailpoint/web/manage/accessRequest">
+      <src>accessrequest.css</src>
+    </sp:style>
+    <sp:script>
+      <src>#{base.requestContextPath}/scripts/sailpoint/misc.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/viewport.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/NameWithTooltip.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/EmailWindow.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/RowExpander.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/StateProvider.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Date.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PageSizePlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/SearchField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SelectionCollection.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/CheckboxSelectionModel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/PagingCheckboxGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/dashboard/AccessRequestStatusGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/SortableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/ComboBox.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/MultiSelect.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/manage/accessRequests/AccessRequestsGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/GroupFactorySelector.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/data/RestJsonStore.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateField.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/form/DateRange.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/TableGrid.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/grid/GridExpandoPlugin.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/web/lcm/CancelWorkflowDialog.js?#{debug.revision}</src>  
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/TemplateWithTooltips.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/templates/EntitlementsTemplate.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/RoleDetailPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/component/SearchPanel.js?#{debug.revision}</src>
+      <src>#{base.requestContextPath}/scripts/sailpoint/accountGroup.js?#{debug.revision}</src>
+    </sp:script>
+
+    <script type="text/javascript" >
+
+        <!--//--><![CDATA[//><!--
+
+    helpKey = 'MY_ACCESS_REQUESTS';
+
+    var debug = {};
+
+    var sp = new SailPoint.state.StateProvider({
+        stateIds: ['myAccessRequestGrid2'],
+        states:   ["#{gridConfigBean.gridStateConfig['myAccessRequestGrid2'].state}"]
+    });
+    Ext.state.Manager.setProvider(sp);
+
+    //pass these to advanced search fields defined in AccessRequestStatusGrid.js
+    //to restore the suggustion value from back button.
+    var jsonFilterRequesterIdentity = [#{sp:buildJSONFromIdentity(identityRequestList.arSearchSettings.requester.id)}];
+    var jsonFilterRequesteeIdentity = [#{sp:buildJSONFromIdentity(identityRequestList.arSearchSettings.requestee.id)}];
+
+    Ext.onReady(function(){
+
+        // ---------------------------------------------------------
+        //  Configuration stuff for grid
+        // ---------------------------------------------------------
+
+        var accessRequestGridColConf = #{gridConfigBean.uiConfigJson['myAccessRequestGridColumns']}.columns;
+        if(#{not lcmConfig.showExternalTicketId}) {
+          for(var i=0; i<accessRequestGridColConf.length; i++) {
+              if(accessRequestGridColConf[i].dataIndex == "externalTicketId") {
+                  accessRequestGridColConf.splice(i, 1);
+                  break;
+              }
+          }
+        }
+        
+        // ---------------------------------------------------------
+        //  Build the viewport
+        // ---------------------------------------------------------
+
+        var viewport = SailPoint.getViewport({
+          bodyContent: {
+              xtype : 'spaccessrequeststatusgrid',
+              id : 'myAccessRequestGrid',
+              stateId : 'myAccessRequestGrid2',
+              stateful : true,
+              columns : accessRequestGridColConf,
+              requester : SailPoint.CURR_USER_NAME,
+              listeners : {
+                  afterToggleExpando : {
+                      fn : function(isExpanding) {
+                          var grid = Ext.getCmp('myAccessRequestGrid');
+                          var curHeight = grid.getSize().height;
+                          grid.setHeight(isExpanding ? curHeight + 220 : curHeight - 220);
+                          this.doLayout();
+                      },
+                      scope : viewport
+                  }
+              },
+              showExternalTicketSearch: #{lcmConfig.showExternalTicketId}
+          },
+          title: "#{msgs.title_define_apps}"
+        });
+
+        var loadAdvancedSearchParms = '#{null != identityRequestList.arSearchSettings}';
+
+        var grid = Ext.getCmp('myAccessRequestGrid');
+        if (loadAdvancedSearchParms == 'true') {
+          // expand section
+          if(grid) {
+              grid.advSearchButton.execute();
+              var settings = {};
+              settings.requestStatus = '#{identityRequestList.arSearchSettings.requestStatus}';
+              settings.requestType = '#{identityRequestList.arSearchSettings.requestType}';
+              settings.requestId = '#{identityRequestList.arSearchSettings.requestId}';
+              settings.priority = '#{identityRequestList.arSearchSettings.requestPriority}';
+              settings.startDate = #{(empty identityRequestList.arSearchSettings.startDate) ? 0 : identityRequestList.arSearchSettings.startDate};
+              settings.endDate = #{(empty identityRequestList.arSearchSettings.endDate) ? 0 : identityRequestList.arSearchSettings.endDate};
+              settings.requesterId = '#{identityRequestList.arSearchSettings.requester.id}';
+              settings.requesterName = '#{identityRequestList.arSearchSettings.requester.name}';
+              settings.requesteeId = '#{identityRequestList.arSearchSettings.requestee.id}';
+              settings.requesteeName = '#{identityRequestList.arSearchSettings.requestee.name}';
+              settings.extTicketId = '#{identityRequestList.arSearchSettings.externalTicketId}';
+              
+              grid.loadSettings(grid.getId(), settings);
+          }
+        }
+        else {
+            if(grid) {
+                grid.load();
+            }
+        }
+    }); // Ext.onReady
+
+        //--><!]]>
+    </script>
+  </ui:define>
+
+  <ui:define name="body">
+    <f:view>
+      <h:messages infoClass="formInfo" warnClass="formWarn" errorClass="formError"/>
+    </f:view>
+    <h:form id="mainForm">
+      <h:inputHidden id="workItemId" />
+      <h:inputHidden id="requestId" />
+      <h:commandButton id="viewWorkItem" style="display:none" action="#{requestDetails.viewWorkItem}">
+      </h:commandButton>
+      <h:commandButton id="viewRequestDetails" style="display:none" action="#{identityRequestList.viewIdentityRequestDetail}">
+      </h:commandButton>
+    </h:form>
+  </ui:define>
+</ui:composition>
+
+</body>
+</html>
